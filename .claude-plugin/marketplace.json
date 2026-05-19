@@ -10,7 +10,8 @@
       "name": "workflow",
       "description": "Plan, execute, and review workflow skills for Claude Code",
       "author": {
-        "name": "William Hamilton"
+        "name": "William Hamilton",
+        "email": "codyh@ctzns.net"
       },
       "category": "development",
       "source": {
