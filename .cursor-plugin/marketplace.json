@@ -1,0 +1,18 @@
+{
+  "name": "workflow-plugin",
+  "description": "Private workflow plugin marketplace",
+  "owner": {
+    "name": "William Hamilton"
+  },
+  "plugins": [
+    {
+      "name": "workflow",
+      "description": "Plan, execute, and review workflow skills for Cursor",
+      "author": {
+        "name": "William Hamilton"
+      },
+      "category": "development",
+      "source": "./plugins/workflow"
+    }
+  ]
+}
