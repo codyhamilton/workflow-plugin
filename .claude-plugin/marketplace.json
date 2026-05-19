@@ -13,7 +13,10 @@
         "name": "William Hamilton"
       },
       "category": "development",
-      "source": "./plugins/workflow"
+      "source": {
+        "source": "github",
+        "repo": "codyhamilton/workflow-plugin"
+      }
     }
   ]
 }

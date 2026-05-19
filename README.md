@@ -28,7 +28,7 @@ The installer detects Claude Code and Cursor and asks before installing into eac
 Copy skills directly to your user skills directory:
 
 ```sh
-cp -r plugins/workflow/skills/* ~/.claude/skills/
+cp -r skills/* ~/.claude/skills/
 ```
 
 Skills are available immediately. For marketplace-style install (so colleagues can `/plugin install workflow@workflow-plugin`), register this repo in `~/.claude/plugins/known_marketplaces.json`:
@@ -55,20 +55,22 @@ Skills become available as `workflow:planning`, `workflow:plan-execution`, etc.
 
 ### Cursor
 
-Copy the plugin to Cursor's local plugins directory, then restart Cursor:
+Clone the repo into Cursor's local plugins directory, then restart Cursor:
 
 ```sh
-cp -r plugins/workflow ~/.cursor/plugins/local/workflow
+git clone git@github.com:codyhamilton/workflow-plugin.git ~/.cursor/plugins/local/workflow
 ```
 
-For Team Marketplace distribution (requires Cursor Teams/Enterprise), point your team to the `.cursor-plugin/marketplace.json` at the repo root.
+Or run `./install.sh` and accept the Cursor prompt.
 
 ## Structure
 
 ```
-plugins/workflow/
-├── .claude-plugin/plugin.json    # Claude Code plugin manifest
-├── .cursor-plugin/plugin.json    # Cursor plugin manifest
+workflow-plugin/
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
+├── .cursor-plugin/plugin.json
 └── skills/
     ├── planning/
     ├── plan-execution/
