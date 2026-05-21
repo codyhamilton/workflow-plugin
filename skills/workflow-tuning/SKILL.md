@@ -55,6 +55,40 @@ Only add plan-scoped `DESIGN.md` when at least one of these is true:
 - Keep planning lean and accurate.
 - Treat executed plan folders as an eval corpus for workflow quality.
 
+## Eval Capability
+
+Use evals to validate that a proposed workflow change produces meaningfully better outcomes before committing to it. An eval is a full end-to-end run — plan then execute — on a fixture scenario, compared against a baseline (the current workflow's output on the same scenario) and a known reference implementation.
+
+See `evals/README.md` for scenario format, results format, and full instructions.
+
+### When to Run an Eval
+
+- Before merging a change to a skill prompt that affects planning, execution, or review behavior
+- When a qualitative observation suggests a workflow change might help, but you want signal before committing
+- When comparing two candidate approaches (variant testing)
+
+### Running an Eval
+
+1. Choose or create a scenario in `evals/scenarios/` — a real repo at a tagged commit with a known task and reference implementation.
+2. Clone the scenario repo at the specified commit into a temporary working directory.
+3. Run the full workflow on the task (plan + execute) using the candidate skill changes.
+4. Capture cost metrics: agents spawned and model sizes, tool use turns per agent (and total), context estimate (or note if unavailable), wall time.
+5. Write results to `evals/results/<scenario>/<YYYYMMDD-HHMMSS>/` following the format in evals/README.md.
+6. If `evals/scenarios/<name>/baseline/` is empty, copy the candidate artifacts there — this establishes the baseline. Do not overwrite an existing baseline; it is fixed once set.
+
+### Interpreting Results
+
+Two questions:
+
+1. **Significant cost regression?** — If the change costs meaningfully more (more agents, more turns, more context) without quality gain, it is not worth it.
+2. **Quality in the same ballpark as the reference?** — If the candidate is clearly worse than the reference, the change needs work. If clearly better, that is strong signal.
+
+Do not chase small differences within normal run variance. Baseline outputs themselves vary — only clear, significant deltas should drive decisions.
+
+### Variant Testing
+
+To compare two candidate approaches, run each against the same scenario and compare both to the baseline and reference. Record each candidate's cost data in its own `cost-comparison.md` and quality data in its own `quality-comparison.md` under separate timestamped result folders.
+
 ## Additional Resources
 
 - [reference.md](reference.md)

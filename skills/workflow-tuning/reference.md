@@ -273,3 +273,11 @@ Update this file when executed plans reveal something new about:
 - where workflow rigor materially improves outcomes
 
 Do not update it just to restate the current workflow in different words.
+
+## Eval Patterns
+
+*This section grows as actual eval runs produce lessons. Initially empty.*
+
+Record patterns here when eval runs produce non-obvious lessons — e.g., "scenario X consistently shows higher tool turn counts with model Y," or "quality comparison is unreliable when the reference implementation is more than 6 months old."
+
+Do not record obvious or generic lessons. Only record findings that would surprise a future evaluator or change how they interpret results.
