@@ -200,6 +200,44 @@ Failure mode to avoid:
 
 The orchestrator's context should hold control state, not duplicate implementation detail from the workers.
 
+### 16. Orchestrators delegating must not edit deliverable files themselves
+
+When delegating, the parent's edit calls should be limited to orchestration artifacts: `IMPLEMENTATION.md`, `REVIEW.md`, `ROADMAP.md`, and commit operations. Zero edits to the actual deliverable files (skills, code, config being changed).
+
+The failure mode from lesson 11 has a measurable signature: parent edit count exceeds subagent edit count despite delegation being present.
+
+Observed in `01-workflow-improvements`: parent made 26 edits; subagent implementors combined made 8. The excess was almost entirely post-review remediation — the parent re-read each file and applied fixes the review agent had identified but not fixed. The review agent had full context at the point of finding; the parent had to reconstruct it.
+
+Rule: if the parent is making deliverable-file edits, either the task was not delegated correctly, or the review agents are not applying their own fixes (see lesson 19).
+
+### 17. Task granularity threshold: small tasks often do not justify individual agent spawns
+
+Signs that a task is below the delegation threshold:
+
+- implementation agent is expected to use fewer than ~10 tool turns
+- task touches 1-3 files with clear, non-ambiguous changes
+- the work briefing would be longer than the work itself
+
+At this scale, the parent's coordination overhead (reading the plan, writing the prompt, waiting, reading results back) likely exceeds the cost of inline execution.
+
+Observed in `01-workflow-improvements`: implementation agents used 4-8 turns each (child 01: 6, child 02: 4, child 03: 8), touching 1-3 files per task. Total subagent turns: 42 vs parent turns: 74. Delegation did not move enough of the actual work out of the parent to justify six spawns.
+
+Alternative: implement inline in the parent for tasks expected under ~10 turns, or batch multiple small tasks into one agent with a compound brief.
+
+### 18. Explicit model class must be specified in delegation prompts
+
+Without explicit assignment, all spawned agents default to the system default (currently `general-purpose` / `sonnet-4-6`), regardless of task complexity.
+
+Observed in `01-workflow-improvements`: all 6 subagents ran on `sonnet-4-6`, including implementation agents doing 4-8 turn scoped edits (reading 1-3 files, making focused changes). `haiku` would have been appropriate and meaningfully cheaper.
+
+Required practice: the plan-execution skill must specify model class per delegation type. Suggested defaults:
+
+- scoped implementation (file edits with clear acceptance criteria): haiku
+- focused review of bounded change: haiku or sonnet depending on change complexity
+- planning, synthesis, cross-cutting design review, high-ambiguity judgment: sonnet or opus
+
+Omitting this specification gives up a significant portion of delegation's cost benefit — the task is cheaper in isolation but runs at a cost not matched to its complexity.
+
 ### 12. Phased execution is a feature
 
 Implementing one child plan at a time has proven strong for:
@@ -247,13 +285,36 @@ After one external review loop:
 
 Do not keep paying for repeated external review loops unless the change is unusually risky.
 
+### 19. Review agents should apply the fixes they find, not just report them
+
+In the `01-workflow-improvements` run, review agents returned defect lists and applied no fixes. The parent then made 17+ edits applying those fixes across three child reviews. This double-pays: the review agent has full read context at the moment of finding; the parent must reconstruct it.
+
+Rule: review agents should apply all in-scope fixes and fully report all findings — separately. Fixes go into the files; the report goes to the orchestrator. The report should include what was found, what was fixed, and what was not fixed and why.
+
+Exceptions where the review agent should report but not fix:
+
+- the fix requires a design decision beyond what was delegated
+- the fix is large enough to warrant its own implementation cycle (flag as a follow-on task)
+- the fix touches files outside the delegated scope
+
+For small-to-medium changes, the review agent applying its own fixes should be the default, not the exception. This is also what caps the review loop (lesson 15) at the agent level rather than pushing remediation back to the orchestrator.
+
 ## What To Improve Next
 
 ### Priority 1
 
-Tighten the rule for when `DESIGN.md` is required versus optional.
+Update `plan-execution` skill with explicit delegation rules derived from lessons 16-19:
+
+- orchestrator must not edit deliverable files — only orchestration artifacts
+- review agents must apply fixes, not just report (except the three escalation exceptions in lesson 19)
+- require explicit model class per delegation type in the briefing template
+- document the task granularity threshold and when to inline instead of spawn
 
 ### Priority 2
+
+Tighten the rule for when `DESIGN.md` is required versus optional.
+
+### Priority 3
 
 Use existing plan folders as a workflow eval corpus:
 

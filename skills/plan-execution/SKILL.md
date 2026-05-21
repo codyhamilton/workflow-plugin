@@ -79,6 +79,16 @@ Hints for subagent selection:
 ## Workflow
 
 1. Identify the target parent program and child plan to execute.
+1a. Capture the current session ID and write the Session section to IMPLEMENTATION.md before implementation begins. This lets the `transcript-parser` skill locate this session reliably after execution completes.
+   - Claude Code: find the most recently-modified `.jsonl` in `~/.claude/projects/{project-hash}/` and read `sessionId` from any line. Project hash = working directory path with `/` replaced by `-`, prefixed with `-`.
+   - Cursor: find the most recently-modified directory under `~/.cursor/projects/{project-name}/agent-transcripts/` and use its name as the session ID.
+   - Write to IMPLEMENTATION.md at the top before filling in other content:
+     ```
+     ## Session
+     - Tool: <Claude Code | Cursor | GitHub Copilot>
+     - Session ID: <uuid>
+     - Started: <ISO 8601 UTC timestamp>
+     ```
 2. Read the parent `PLAN.md`, `ROADMAP.md`, and any relevant `DESIGN.md`, plus the child `PLAN.md` and any child `DESIGN.md`.
 3. Confirm that prerequisites are satisfied and that this is the correct next slice according to the roadmap.
 4. If the plan needs architectural revision, unclear contract changes, or roadmap reshaping, stop and return to planning rather than improvising execution.
@@ -104,7 +114,7 @@ Hints for subagent selection:
 Each executed child plan should gain:
 
 - `IMPLEMENTATION.md`
-  What was built, what changed, files or modules touched, important tradeoffs, validation notes, and any intentional deviations from plan wording.
+  Session section (tool name, session ID, start timestamp) at the top; then: what was built, what changed, files or modules touched, important tradeoffs, validation notes, and any intentional deviations from plan wording.
 - `REVIEW.md`
   The independent review outcome, findings by severity, fixes applied, residual risks, and final assessment against the plan or contract.
 

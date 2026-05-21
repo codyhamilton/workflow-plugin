@@ -91,4 +91,18 @@ To compare two candidate approaches, run each against the same scenario and comp
 
 ## Additional Resources
 
-- [reference.md](reference.md)
+- [reference.md](reference.md) — numbered lessons from real execution traces
+- [retros/](retros/) — staging area for per-execution retros; consumed and removed after consolidation
+
+## Retro Lifecycle
+
+After a plan execution, write a retro in `retros/<plan-name>.md` capturing: execution stats, what worked, what didn't, and any candidate lessons not yet in `reference.md`.
+
+Retros are a holding area, not an archive. When consolidating:
+
+1. Read all files in `retros/`.
+2. For each retro, extract lessons or observations not yet reflected in `reference.md` or the relevant skill files.
+3. Update `reference.md` and any skills that need changing.
+4. Delete the consumed retro files.
+
+A retro that has been fully absorbed into `reference.md` updates has no further value and should be removed. The lessons are the record; the retro is the raw input.
