@@ -72,17 +72,20 @@ Plan structure should help later execution:
 
 ## Workflow
 
-1. Capture the user's request verbatim in the plan. Prefer the full prompt, not a softened paraphrase.
+1. Capture the user's request verbatim in context. Prefer the full prompt, not a softened paraphrase. Do not write PLAN.md yet — that happens in step 11, after questions are resolved.
+1a. Immediately after capturing the verbatim request — before reading stable docs or asking any questions — create the plan directory and write PROVENANCE.md using `templates/PROVENANCE.md`. Fill in Session (label + timestamp + CWD) and the Initial Request section verbatim. This is the first write to disk. PLAN.md is not written until step 11.
 2. Read the stable docs first: `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and relevant files in `docs/design/`.
 3. Check whether the requested change implies architectural drift, a roadmap shift, or broader contract changes.
 4. If it does, widen scope and surface that implication in the conversation before finalizing the plan.
 5. Identify the few decisions that would materially sharpen intent or refine scope shape. Ask those questions before finalizing the plan.
+5a. After each Q&A turn: as soon as the user responds, append the turn to the Planning Conversation section of PROVENANCE.md immediately — before continuing. Record the substance of what the user said in their words. Strip tone, filler, and conversational asides. Preserve exact phrasing only when it carries intent that a paraphrase would lose.
 6. If stable architecture or design-intent docs appear stale, missing, or misaligned, do not silently assume them updated. Make the shift explicit, then create or update those stable docs as part of the planning output when appropriate.
 7. Decide whether the work belongs in an existing `[NEW]-*` parent program, needs a new `[NEW]-*` parent program, or is truly standalone.
 8. Before creating a new parent program, check whether the work should instead become a child plan under an existing open parent program.
 9. Treat numbered parent programs as implemented provenance. If new work conflicts with or supersedes them, surface that explicitly in the conversation and update docs deliberately rather than silently reshaping history.
 10. Update the nearest relevant `ROADMAP.md` when adding or reordering linked plans.
 11. Write `PLAN.md` using `templates/PLAN.md`.
+11a. Before finalizing the plan: append the Agent Decisions section to PROVENANCE.md. Record each significant decision and the rationale behind it. Focus on decisions that are not obvious from the plan text itself.
 12. Add a plan-scoped `DESIGN.md` only when the target shape or cross-implementor contracts need to be made explicit.
 13. Run one adversarial planning review pass using a clean subagent when possible. The review should challenge value, alignment, widened scope, missing contracts, internal inconsistency, ordering mistakes, unnecessary documentation, and weak acceptance criteria.
 14. Apply review findings where they improve the plan and align with user intent, but always report the review findings to the user.
@@ -113,3 +116,6 @@ Plan structure should help later execution:
 - Phase schedule exists to support execution and delegation. Contracts come first; schedule comes after.
 - When phase schedule is used, make dependencies and parallelizable work clear enough for later execution.
 - Do not let structural compliance replace architectural clarity. If the problem demands a slightly different shape, preserve the purpose of the artifacts rather than forcing a template mechanically.
+- Write PROVENANCE.md progressively: create it immediately on receipt of the initial request (before reading stable docs), append each Q&A turn as soon as the user responds, append agent decisions before finalizing. Do not batch or defer.
+- Provenance records intent, not a transcript. Extract the substance — the decision, preference, or direction — in the user's words. Strip tone and filler. Omit conversational asides and anything not intended for persistence. Preserve exact phrasing only when it carries meaning a paraphrase would lose. If in doubt, omit.
+- Do not copy credentials, API keys, tokens, or large file dumps into PROVENANCE.md.
