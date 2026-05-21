@@ -74,7 +74,7 @@ Plan structure should help later execution:
 
 1. Capture the user's request verbatim in context. Prefer the full prompt, not a softened paraphrase. Do not write PLAN.md yet — that happens in step 11, after questions are resolved.
 1a. Immediately after capturing the verbatim request — before reading stable docs or asking any questions — create the plan directory and write PROVENANCE.md using `templates/PROVENANCE.md`. Fill in Session (label + timestamp + CWD) and the Initial Request section verbatim. This is the first write to disk. PLAN.md is not written until step 11.
-2. Read the stable docs first: `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and relevant files in `docs/design/`.
+2. Read the stable docs first: `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and relevant files in `docs/design/`. If these docs are absent or contain only stubs, suggest that the user run `/workflow:setup` before continuing — setup creates the stable docs that planning reads, and planning on a repo with no stable docs produces degraded plans.
 3. Check whether the requested change implies architectural drift, a roadmap shift, or broader contract changes.
 4. If it does, widen scope and surface that implication in the conversation before finalizing the plan.
 5. Identify the few decisions that would materially sharpen intent or refine scope shape. Ask those questions before finalizing the plan.

@@ -1,0 +1,116 @@
+---
+name: setup
+description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting planning on a new repo or when planning reports that stable docs are absent or thin.
+---
+
+# Setup
+
+Use this skill to create `docs/ARCHITECTURE.md` and `docs/ROADMAP.md` from scratch, or to consolidate thin or partial existing docs into compliant stable docs.
+
+This skill exists because the planning skill reads `docs/ARCHITECTURE.md` and `docs/OVERVIEW.md` at the start of every planning session. When these docs are absent or contain only stubs, planning must guess context repeatedly. Running setup once eliminates this degradation for all future planning sessions.
+
+## When to Use
+
+- Before the first planning session on a new repo
+- When the planning skill reports that stable docs are missing or thin
+- When existing docs are partial, scattered, or inconsistent and need consolidation
+
+## Six Phases
+
+### Phase 1: Reconnaissance
+
+Read everything available before saying a word:
+
+- `docs/ARCHITECTURE.md` if it exists
+- `docs/OVERVIEW.md` if it exists
+- `docs/ROADMAP.md` if it exists
+- Any files in `docs/design/`
+- `README.md` and top-level config files (package.json, Cargo.toml, go.mod, pyproject.toml, etc.)
+- Source tree structure (`ls` the top level, `ls src/` or equivalent)
+
+Goal: arrive at the permission gate with a concrete summary of what exists and what is missing.
+
+### Phase 2: Assessment and Permission Gate
+
+Present findings to the user:
+
+- What docs exist and what they contain (one sentence each)
+- What is missing or thin
+- What setup will create or consolidate
+
+Then ask: **"Shall I proceed?"**
+
+Do not begin writing docs or asking architecture questions until the user confirms. Do not proceed to Phase 3 (consolidation analysis) until the user confirms. If the user says no or asks to narrow scope, respect that.
+
+### Phase 3: Consolidation (if partial docs exist)
+
+If any partial docs exist, read them fully and extract any useful content before the guided conversation. Identify:
+
+- Sections that are accurate and can be kept
+- Sections that contradict observed code or are stale
+- Gaps to fill through the guided conversation
+
+If any sections contradict what was observed in reconnaissance, flag those contradictions in the Phase 2 findings summary before the permission gate fires (or note them before starting Phase 4 if discovered during Phase 3).
+
+Do not create new docs alongside existing ones. Merge content into the final docs written in phase 5.
+
+### Phase 4: Guided Conversation
+
+Ask one question per round. Wait for the user's response before asking the next question. Do not front-load all questions.
+
+**Round 1 — Purpose and intent:**
+> "What problem does this project solve, and who uses it? What does success look like?"
+
+Wait for response.
+
+**Round 2 — Components and structure:**
+> "Walk me through the main components or subsystems — what are they, and how do they connect?"
+
+Wait for response.
+
+**Round 3 — Current state and constraints:**
+> "What is the current state of the project — what's working, what's in progress, what's not started? Are there significant constraints, known technical debt, or things that are intentionally out of scope?"
+
+Wait for response.
+
+Record user responses. You do not need to ask follow-up questions unless a response is ambiguous enough to produce incorrect docs.
+
+### Phase 5: Write Docs
+
+Write `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` using the content from reconnaissance and the guided conversation.
+
+**`docs/OVERVIEW.md`** must be a single paragraph (3–5 sentences) covering: what the project does, who uses it, and what success looks like. This is the first file the planning skill reads — keep it concise and concrete.
+
+**`docs/ARCHITECTURE.md`** must have these sections:
+
+- **Purpose/Intent**: What the system does and why it exists. Who uses it and what success looks like.
+- **Stack**: Languages, frameworks, runtime, key dependencies.
+- **Component Map**: Main subsystems, what each does, how they connect. Can be prose or a simple table.
+- **Invariants**: Constraints that must hold across changes — things that should never break.
+- **Key Data Flows**: The two or three most important end-to-end flows through the system.
+- **Stable References**: Links or paths to other docs that planners should consult.
+
+**`docs/ROADMAP.md`** must have these sections:
+
+- **Current State**: What is shipped and working.
+- **Active Work**: What is in progress right now.
+- **Planned**: What is clearly next but not yet started.
+- **Not In Scope**: What is explicitly out of scope. Prevents scope creep in planning.
+
+If partial content from existing docs was found in phase 3, merge it into the appropriate sections rather than duplicating it.
+
+### Phase 6: Planning Hook
+
+After writing the docs, tell the user:
+
+> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`). You can now run `/workflow:planning` to start a planning session — it will read these docs automatically."
+
+## Rules
+
+- Do not write docs before the permission gate. Phase 2 must complete before phase 4 starts.
+- Ask one question per round. Do not bundle all three rounds into one message.
+- If partial docs exist, consolidate — do not create alongside. One authoritative source per doc.
+- Prefer the user's words when writing stable docs. Accurate paraphrase is fine; do not invent technical detail that was not provided.
+- If the user's answers are thin, write what you know and leave clear placeholders (`<!-- TODO: add X -->`) rather than padding with generic filler.
+- Do not ask more than three rounds of questions unless a response is genuinely ambiguous. Three rounds is enough to produce usable stable docs.
+- If a PROVENANCE.md already exists in a plan directory for the current session, append the guided conversation turns to it. If running standalone (no existing PROVENANCE.md), no provenance record is required.
