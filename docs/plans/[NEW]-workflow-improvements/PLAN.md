@@ -32,7 +32,7 @@ This is a parent program. Work is sequenced into three separately executable chi
 ## Architectural Implications
 
 - **Stable docs expansion**: docs/OVERVIEW.md and docs/ARCHITECTURE.md are created for the workflow-plugin itself (not just target repos)
-- **Provenance model change**: PLAN.md `## Intent` remains; PROVENANCE.md added alongside for transcript-based capture and conversation record
+- **Provenance model change**: PLAN.md `## Intent` remains; PROVENANCE.md added alongside as a progressive conversation record written incrementally during planning (not extracted after the fact)
 - **Setup skill addition**: New skill added to the plugin, expanding the four-skill set to five
 - **Eval capability addition**: workflow-tuning gains eval modes (behavior validation, reliability, variant testing)
 - **Directory structure**: New `evals/` directory at repo root; new `docs/plans/` directory for dogfooding the workflow

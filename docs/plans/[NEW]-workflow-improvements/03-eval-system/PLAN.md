@@ -12,30 +12,36 @@ Without evals, improving skill prompts is guesswork. Changes that seem promising
 
 ## Scope
 
-Extend `workflow-tuning` with eval capability. The skill will support three modes:
-1. **Behavior validation** — Does the skill produce correct output against a known plan?
-2. **Reliability testing** — Are results consistent across multiple runs?
-3. **Variant testing** — Which model or prompt version performs better?
+Extend `workflow-tuning` with eval capability. An eval is a full end-to-end run of the workflow — plan then execute — on a fixture scenario, compared against a baseline (the current workflow's output on the same scenario) and a reference implementation (a known-good solution).
 
-The eval system uses existing plan folders (PLAN.md + IMPLEMENTATION.md + REVIEW.md) as ground truth fixtures. Results are written to `evals/results/`.
+Evals are not unit tests. There is no absolute pass/fail. The question is: **does a proposed change to the workflow produce meaningfully better outcomes than the baseline, and are those outcomes in the same ballpark as the known reference?**
 
-This is user-invoked, not automatic. The user runs `/workflow:workflow-tuning` and asks for an eval.
+Two lenses:
+1. **Cost** — objective metrics: agents spawned and their sizes, tool use turns per agent, estimated context, wall time. Used to detect regressions (a change that costs significantly more without quality gain) and improvements (same or better quality at lower cost).
+2. **Quality** — relative comparison: how close are the candidate's artifacts to the reference implementation? Are there significant regressions or improvements versus baseline? No exact rubrics — judgment is "significant delta?" and "same ballpark as reference?"
+
+Scenarios are real repos cloned at a specific tagged commit, paired with a task and a reference implementation. The reference is a known problem that has already been solved — the expected output shape is understood even if exact output varies. Scenarios are collected over time; the initial corpus can be empty. The pattern must be in place before fixtures are added.
+
+This is user-invoked via `/workflow:workflow-tuning`, run when a workflow change is being proposed and needs validation.
 
 ## Architectural Implications
 
-- **workflow-tuning expansion**: Gains eval modes (behavior validation, reliability, variant testing)
-- **New directory**: `evals/` directory at repo root with `scenarios/` and `results/` subdirectories
-- **Fixture format**: Existing plan folders serve as fixtures; documented in evals/README.md
-- **No change to core workflow**: Evals are meta-layer only; planning/execution/review loop unchanged
-- **Dependency on provenance**: Evals use PROVENANCE.md to get verbatim user request (from 01-provenance-capture)
+- **workflow-tuning expansion**: Gains eval mode as a sub-workflow
+- **New directory**: `evals/` at repo root with `scenarios/` and `results/` subdirectories
+- **Scenario format**: each scenario is a folder containing source definition (repo, tag, task) and reference artifacts
+- **Results format**: per-run folders with candidate artifacts, cost comparison, and quality comparison against baseline and reference
+- **No change to core workflow**: evals are meta-layer only; plan/execute/review loop unchanged
+- **Evals are expensive by design**: a full plan+execute cycle per variant; not run continuously, run when validating a proposed change
 
 ## Intent Validation
 
-**Key decisions:**
-- Evals are part of workflow-tuning (not a separate skill) because workflow-tuning is already the meta-layer
-- workflow-tuning retains `disable-model-invocation: true` (user-invoked, not auto-triggered)
-- Eval fixtures are existing plan folders from target repos that used the workflow
-- Eval scenarios can be bootstrapped from real completed plans (no synthetic fixtures needed initially)
+**Key decisions confirmed:**
+- Eval unit is plan+execute end-to-end, not planning output alone. Static analysis of plans is disconnected from what the workflow actually does when run.
+- Evals measure relative outcomes (candidate vs baseline), not absolute quality against a rubric.
+- Scenarios use real repos at tagged commits with known reference implementations, not synthetic fixtures.
+- Cost is a first-class lens — agent count, model sizes, tool turns, and context are all captured.
+- Quality comparison is intentionally loose: "significant improvement or regression?" and "in the same ballpark as the reference?" No finer-grained rubric needed to start.
+- Fixture corpus is built up over time; the eval system ships with the pattern, not the fixtures.
 
 ## Open Questions
 
@@ -44,35 +50,41 @@ None.
 ## Execution Phases
 
 1. Create `evals/` directory structure:
-   - `evals/README.md` — documents scenario and result folder format
-   - `evals/scenarios/` — fixture library (initially empty; populated from real plans)
-   - `evals/results/` — eval run results
+   - `evals/README.md` — scenario format, how to run an eval, how to interpret results
+   - `evals/scenarios/` — initially empty; pattern documented in README
+   - `evals/results/` — initially empty
 
-2. Modify `skills/workflow-tuning/SKILL.md`:
-   - Add `## Eval Capability` section describing three eval modes
-   - Document the rubric for behavior validation (intent verbatim, scope coverage, architectural implications, acceptance criteria observable, questions discipline, documentation economy)
-   - Document reliability mode (run same scenario 3x, check consistency)
-   - Document variant mode (side-by-side comparison table)
-   - Explain how the agent injects skill prompts into subagents
+2. Document scenario format in `evals/README.md`:
+   - `scenarios/<name>/source.md` — repo URL, tagged commit, task description, notes on what the reference implementation achieves
+   - `scenarios/<name>/reference/` — artifacts or description of the known-good solution (git diff, prose summary, or IMPLEMENTATION.md from the original solve)
+   - `scenarios/<name>/baseline/` — populated on first eval run using the current workflow; becomes the comparison point for future candidate runs
 
-3. Modify `skills/workflow-tuning/reference.md`:
-   - Add `## Eval Patterns` section for recording observed lessons from actual eval runs
+3. Document result format in `evals/README.md`:
+   - `results/<scenario>/<timestamp>/candidate/` — all artifacts produced by the candidate workflow run (PLAN.md, IMPLEMENTATION.md, file changes)
+   - `results/<scenario>/<timestamp>/cost-comparison.md` — agents spawned + model sizes, tool use turns per agent, context estimates, wall time (baseline vs candidate)
+   - `results/<scenario>/<timestamp>/quality-comparison.md` — narrative comparison: candidate vs baseline, candidate vs reference; notes on significant deltas
 
-4. Test: Create an eval scenario from an existing plan, run behavior validation, verify rubric application and result output
+4. Modify `skills/workflow-tuning/SKILL.md`:
+   - Add `## Eval Capability` section explaining the eval model (e2e, relative, two lenses)
+   - Document how to set up a scenario (clone repo at tag, write source.md, capture or describe reference)
+   - Document how to run an eval: run full plan+execute on the scenario using the candidate skills, capture cost metrics, compare artifacts
+   - Document how to populate baseline on first run
+   - Document how to interpret results: look for significant cost or quality delta; no fine-grained rubric
+
+5. Modify `skills/workflow-tuning/reference.md`:
+   - Add `## Eval Patterns` section for observed lessons from actual eval runs
 
 ## Acceptance Criteria
 
-- **Eval modes documented**: Three modes (behavior validation, reliability, variant testing) are clearly described in workflow-tuning SKILL.md
-- **Fixture format documented**: evals/README.md describes scenario structure (input.md, context.md, ground-truth/) and results structure
-- **Rubric defined**: Behavior validation rubric covers intent capture, scope, architectural implications, acceptance criteria quality, questions discipline, documentation economy
-- **Injection mechanism**: Skill documents how agents spawn subagents with skill prompts and scenario input
-- **Results written**: Eval runs produce comparison tables in evals/results/<scenario>/<timestamp>-<variant>.md
-- **Patterns recorded**: evals/reference.md grows with observed lessons from actual eval runs
+- **Scenario format documented**: source.md schema (repo, tag, task, reference notes), reference/ and baseline/ structure all defined in evals/README.md
+- **Cost metrics specified**: agents + sizes, tool use turns, context estimate, wall time — all defined and consistently captured in cost-comparison.md
+- **Quality comparison approach specified**: narrative, relative, no exact rubrics — "significant delta vs baseline?" and "same ballpark as reference?" documented as the evaluation frame
+- **Eval mode in workflow-tuning**: SKILL.md describes how to set up a scenario, run an eval, populate baseline, and interpret results
+- **Results structure**: a completed eval produces cost-comparison.md and quality-comparison.md under results/<scenario>/<timestamp>/
+- **Pattern ships without fixtures**: evals/ directory and README are present and complete; scenarios/ and results/ are empty but documented
 
 ## Provenance Notes
 
-This is the most complex of the three child plans and depends on both 01 (provenance capture) and 02 (setup skill) being complete. It uses real plan folders from those completed child plans as eval fixtures, demonstrating the end-to-end workflow in action.
+Evals are the mechanism for safe workflow improvement. Without them, prompt changes are guesswork — even what an LLM predicts about a prompt is disconnected from what it would actually do with it. Running the full plan+execute cycle on known scenarios with reference implementations is the only way to get signal that a change is genuinely better.
 
-Evals are the gateway to reliable workflow improvement. Without them, tuning the workflow is unsafe. With them, every prompt change can be validated against known-good fixtures before deployment.
-
-Initial eval corpus comes from real plan artifacts from the workflow-plugin's own child plans (this parent program), plus any existing plans in target repos using the workflow.
+The initial fixture corpus will be built from repos where the workflow has already been used and the outcomes are known. Scenarios are reusable: the same fixture can be run against future candidates as the workflow evolves.
