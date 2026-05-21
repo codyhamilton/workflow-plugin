@@ -9,17 +9,17 @@ Three linked child plans to improve the workflow-plugin by adding:
 
 These are foundational improvements that enable reliable iteration on the workflow itself.
 
-## Status: Open
+## Status: In Progress
 
-Planned, not yet executing.
+Child 01 complete. Child 02 next.
 
 ## Child Plans
 
 | Order | Plan | Purpose | Status | Dependencies |
 |-------|------|---------|--------|--------------|
-| 1 | 01-provenance-capture | Add PROVENANCE.md template and transcript extraction to planning skill | pending | none |
+| 1 | 01-provenance-capture | Add PROVENANCE.md template and progressive writing guidance to planning skill | complete | none |
 | 2 | 02-setup-skill | Create setup skill for bootstrapping docs/ARCHITECTURE.md + docs/ROADMAP.md | pending | 01 (provenance) |
-| 3 | 03-eval-system | Extend workflow-tuning with eval modes: behavior validation, reliability, variant testing | pending | 01 + 02 (provenance + setup for fixtures) |
+| 3 | 03-eval-system | Extend workflow-tuning with e2e eval capability: scenarios, cost+quality lenses, results format | pending | 01 + 02 (provenance + setup for fixtures) |
 
 ## Sequencing Rationale
 
