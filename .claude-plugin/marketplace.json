@@ -14,10 +14,7 @@
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": {
-        "source": "github",
-        "repo": "codyhamilton/workflow-plugin"
-      }
+      "source": "./"
     }
   ]
 }
