@@ -2,7 +2,7 @@
 
 ## Session
 
-- Session: <descriptive label, e.g. "Initial planning (Month DD, YYYY)">
+- Session: <descriptive label, e.g. "Initial plan (Month DD, YYYY)">
 - Timestamp: <ISO 8601 UTC>
 - CWD: <absolute path of repo>
 

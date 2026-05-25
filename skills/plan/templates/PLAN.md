@@ -43,6 +43,6 @@ User request, verbatim:
 
 ## Provenance Notes
 
-See `PROVENANCE.md` in this plan folder for the planning conversation record — verbatim initial request, Q&A turns, and agent decisions written progressively during the planning session.
+See `PROVENANCE.md` in this plan folder for the plan conversation record — verbatim initial request, Q&A turns, and agent decisions written progressively during the plan session.
 
 - <important rationale, tradeoff, or decision future agents should understand>

@@ -33,7 +33,7 @@ scenarios/<name>/
 
 ## Task
 
-<description of the task to perform on this repo — what a planning session would receive as its request>
+<description of the task to perform on this repo — what a plan session would receive as its request>
 
 ## Reference Notes
 

@@ -4,7 +4,7 @@ This file records observed lessons from real plan artifacts and execution traces
 
 Use it when:
 
-- improving `planning`, `plan-execution`, or `comprehensive-review`
+- improving `plan`, `execute`, or `comprehensive-review`
 - designing workflow evals
 - deciding whether a new process rule is worth its token and maintenance cost
 
@@ -183,7 +183,7 @@ Observed operating heuristics worth preserving:
 
 - keep orchestrator context bounded
 - avoid long-lived high-context agents unless there is clear value
-- use frontier models for planning, synthesis, ambiguous architecture, and high-value review
+- use frontier models for plan, synthesis, ambiguous architecture, and high-value review
 - use cheaper, faster, more obedient models for bounded implementation slices
 - escalate model class only when the problem demands more capability
 
@@ -230,80 +230,11 @@ Without explicit assignment, all spawned agents default to the system default (c
 
 Observed in `01-workflow-improvements`: all 6 subagents ran on `sonnet-4-6`, including implementation agents doing 4-8 turn scoped edits (reading 1-3 files, making focused changes). `haiku` would have been appropriate and meaningfully cheaper.
 
-Required practice: the plan-execution skill must specify model class per delegation type. Suggested defaults:
+Required practice: the execute skill must specify model class per delegation type. Suggested defaults:
 
-- scoped implementation (file edits with clear acceptance criteria): haiku
-- focused review of bounded change: haiku or sonnet depending on change complexity
-- planning, synthesis, cross-cutting design review, high-ambiguity judgment: sonnet or opus
+- plan, synthesis, cross-cutting design review, high-ambiguity judgment: sonnet or opus
 
-Omitting this specification gives up a significant portion of delegation's cost benefit — the task is cheaper in isolation but runs at a cost not matched to its complexity.
-
-### 12. Phased execution is a feature
-
-Implementing one child plan at a time has proven strong for:
-
-- cost control
-- focus
-- recoverability
-- reviewability
-
-Use end-to-end execution only when the coupling between phases is so tight that slice boundaries would cost more than they save.
-
-When end-to-end execution is chosen, state that explicitly in the implementation plan as a deliberate trade.
-
-## Review Lessons
-
-### 13. The current review pattern works, but it is expensive
-
-The existing three-lens review has found real issues in practice. Examples:
-
-- `free-frontier/docs/plans/[NEW]-game-systems/03-fleets-pathfinding/REVIEW.md`
-- `lemmings/docs/plans/04-runtime-entry-surface/02-unified-startup-and-readiness-path/REVIEW.md`
-- `lemmings/docs/plans/04-runtime-entry-surface/03-command-surface-and-compatibility-cleanup/REVIEW.md`
-
-So the current approach is not failing outright. The issue is efficiency and focus.
-
-### 14. Generalized review tends to grab the easiest findings
-
-Broad "review against everything" behavior often surfaces the most measurable local issues while missing the more important underlying problem.
-
-Focused review intent is usually better than generic comprehensiveness.
-
-Preferred direction:
-
-- small local change: one focused review pass
-- medium change: one reviewer with 1-2 explicit focus areas
-- large cross-cutting change: parallel focused reviewers or a deliberate multi-lens review
-
-### 15. Cap the review loop
-
-After one external review loop:
-
-- fix the issues that fit scope
-- self-review the fixes
-- return remaining issues or residual risks
-
-Do not keep paying for repeated external review loops unless the change is unusually risky.
-
-### 19. Review agents should apply the fixes they find, not just report them
-
-In the `01-workflow-improvements` run, review agents returned defect lists and applied no fixes. The parent then made 17+ edits applying those fixes across three child reviews. This double-pays: the review agent has full read context at the moment of finding; the parent must reconstruct it.
-
-Rule: review agents should apply all in-scope fixes and fully report all findings — separately. Fixes go into the files; the report goes to the orchestrator. The report should include what was found, what was fixed, and what was not fixed and why.
-
-Exceptions where the review agent should report but not fix:
-
-- the fix requires a design decision beyond what was delegated
-- the fix is large enough to warrant its own implementation cycle (flag as a follow-on task)
-- the fix touches files outside the delegated scope
-
-For small-to-medium changes, the review agent applying its own fixes should be the default, not the exception. This is also what caps the review loop (lesson 15) at the agent level rather than pushing remediation back to the orchestrator.
-
-## What To Improve Next
-
-### Priority 1
-
-Update `plan-execution` skill with explicit delegation rules derived from lessons 16-19:
+Update `execute` skill with explicit delegation rules derived from lessons 16-19:
 
 - orchestrator must not edit deliverable files — only orchestration artifacts
 - review agents must apply fixes, not just report (except the three escalation exceptions in lesson 19)

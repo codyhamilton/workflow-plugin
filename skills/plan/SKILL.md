@@ -1,13 +1,13 @@
 ---
-name: planning
-description: Create or revise implementation plans for this repo. Use when a user asks for a plan, to restructure planning docs, or to define a self-contained work package with clear contracts and acceptance criteria.
+name: plan
+description: Create or revise implementation plans for this repo. Use when a user asks for a plan, to restructure plan docs, or to define a self-contained work package with clear contracts and acceptance criteria.
 ---
 
 # Planning
 
-Use this skill to produce plan docs under `docs/plans/` and to tighten the stable docs that planning depends on.
+Use this skill to produce plan docs under `docs/plans/` and to tighten the stable docs that plan depends on.
 
-This skill exists to prevent common planning failures:
+This skill exists to prevent common plan failures:
 
 - A local "next step" problem quietly turns into an architectural pivot without widening scope.
 - New plans drift from stable architecture docs, design-intent docs, or roadmap intent without surfacing and reconciling the disagreement.
@@ -23,7 +23,7 @@ The documents are important, but they are not the goal. The goal is to make arch
 
 ## Working Model
 
-The user has already chosen to enter a plan workflow. Do not waste time deciding whether planning is necessary. Instead, use that choice as evidence that the work is substantial enough to deserve thoughtful planning, execution, and review.
+The user has already chosen to enter a plan workflow. Do not waste time deciding whether plan is necessary. Instead, use that choice as evidence that the work is substantial enough to deserve thoughtful plan, execution, and review.
 
 Start from the real user request, then test whether it implies any of the following:
 
@@ -32,14 +32,14 @@ Start from the real user request, then test whether it implies any of the follow
 - roadmap consequences for later plans or sequencing
 - new or changed contracts that downstream implementation must obey
 
-If the answer is yes, widen the scope of the planning work. Do not keep treating the task as a narrow local change.
+If the answer is yes, widen the scope of the plan work. Do not keep treating the task as a narrow local change.
 
 When a request appears to imply an architectural pivot:
 
 - surface the pivot explicitly to the user
 - explain what broader context must now be considered
 - identify what stable docs and roadmap entries are affected
-- turn the task into an architectural planning conversation, not just a local implementation breakdown
+- turn the task into an architectural plan conversation, not just a local implementation breakdown
 
 If intent or direction is still unclear after reading the relevant docs, ask the user the missing question rather than silently inventing alignment.
 
@@ -74,12 +74,12 @@ Plan structure should help later execution:
 
 1. Capture the user's request verbatim in context. Prefer the full prompt, not a softened paraphrase. Do not write PLAN.md yet — that happens in step 11, after questions are resolved.
 1a. Immediately after capturing the verbatim request — before reading stable docs or asking any questions — create the plan directory and write PROVENANCE.md using `templates/PROVENANCE.md`. Fill in Session (label + timestamp + CWD) and the Initial Request section verbatim. This is the first write to disk. PLAN.md is not written until step 11.
-2. Read the stable docs first: `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and relevant files in `docs/design/`. If these docs are absent or contain only stubs, suggest that the user run `/workflow:setup` before continuing — setup creates the stable docs that planning reads, and planning on a repo with no stable docs produces degraded plans.
+2. Read the stable docs first: `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and relevant files in `docs/design/`. If these docs are absent or contain only stubs, suggest that the user run `/workflow:setup` before continuing — setup creates the stable docs that plan reads, and plan on a repo with no stable docs produces degraded plans.
 3. Check whether the requested change implies architectural drift, a roadmap shift, or broader contract changes.
 4. If it does, widen scope and surface that implication in the conversation before finalizing the plan.
 5. Identify the few decisions that would materially sharpen intent or refine scope shape. Ask those questions before finalizing the plan.
 5a. After each Q&A turn: as soon as the user responds, append the turn to the Planning Conversation section of PROVENANCE.md immediately — before continuing. Record the substance of what the user said in their words. Strip tone, filler, and conversational asides. Preserve exact phrasing only when it carries intent that a paraphrase would lose.
-6. If stable architecture or design-intent docs appear stale, missing, or misaligned, do not silently assume them updated. Make the shift explicit, then create or update those stable docs as part of the planning output when appropriate.
+6. If stable architecture or design-intent docs appear stale, missing, or misaligned, do not silently assume them updated. Make the shift explicit, then create or update those stable docs as part of the plan output when appropriate.
 7. Decide whether the work belongs in an existing `[NEW]-*` parent program, needs a new `[NEW]-*` parent program, or is truly standalone.
 8. Before creating a new parent program, check whether the work should instead become a child plan under an existing open parent program.
 9. Treat numbered parent programs as implemented provenance. If new work conflicts with or supersedes them, surface that explicitly in the conversation and update docs deliberately rather than silently reshaping history.
@@ -87,7 +87,7 @@ Plan structure should help later execution:
 11. Write `PLAN.md` using `templates/PLAN.md`.
 11a. Before finalizing the plan: append the Agent Decisions section to PROVENANCE.md. Record each significant decision and the rationale behind it. Focus on decisions that are not obvious from the plan text itself.
 12. Add a plan-scoped `DESIGN.md` only when the target shape or cross-implementor contracts need to be made explicit.
-13. Run one adversarial planning review pass using a clean subagent when possible. The review should challenge value, alignment, widened scope, missing contracts, internal inconsistency, ordering mistakes, unnecessary documentation, and weak acceptance criteria.
+13. Run one adversarial plan review pass using a clean subagent when possible. The review should challenge value, alignment, widened scope, missing contracts, internal inconsistency, ordering mistakes, unnecessary documentation, and weak acceptance criteria.
 14. Apply review findings where they improve the plan and align with user intent, but always report the review findings to the user.
 
 ## Rules
@@ -101,7 +101,7 @@ Plan structure should help later execution:
 - Design should describe the intended outcome and contracts, not implementation detail unless the contract itself requires it.
 - Acceptance criteria must be observable. State how success is known, not just what should feel true.
 - Keep open questions visible. If the plan depends on unresolved choices, say so plainly.
-- Stable architecture docs and stable design-intent docs are part of planning. If the plan needs them and they are missing or stale, fix that deliberately.
+- Stable architecture docs and stable design-intent docs are part of plan. If the plan needs them and they are missing or stale, fix that deliberately.
 - If the work is one multi-session program, prefer a parent program folder with ordered child plans over many flat sibling plans.
 - Parent programs should own program-level `PLAN.md`, `ROADMAP.md`, and `DESIGN.md` when a program-level design contract is actually needed.
 - Open parent programs should use a `[NEW]-` prefix.
@@ -109,7 +109,7 @@ Plan structure should help later execution:
 - Child plan folders should use numeric prefixes that match roadmap order.
 - Ordering should be visible from both the folder tree and the nearest roadmap, not hidden in one place only.
 - Existing `[NEW]-` parent programs are the first place to look when deciding whether new work should be folded into an open schedule.
-- Treat numbered parent programs as historical implementation provenance. Do not silently mutate them to absorb new planning work.
+- Treat numbered parent programs as historical implementation provenance. Do not silently mutate them to absorb new plan work.
 - Do not use folder moves as the primary completion signal. Future execution should leave completion evidence in the child plan folder.
 - `ROADMAP.md` is the canonical schedule and status view for linked work.
 - When a `[NEW]-` parent is later renumbered, update titles and headings as well as the folder name. Do not leave stale `[NEW]` labels in the body text.

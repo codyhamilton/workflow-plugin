@@ -1,18 +1,13 @@
 ---
 name: setup
-description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting planning on a new repo or when planning reports that stable docs are absent or thin.
----
+description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting plan on a new repo or when plan reports that stable docs are absent or thin.
 
-# Setup
-
-Use this skill to create `docs/ARCHITECTURE.md` and `docs/ROADMAP.md` from scratch, or to consolidate thin or partial existing docs into compliant stable docs.
-
-This skill exists because the planning skill reads `docs/ARCHITECTURE.md` and `docs/OVERVIEW.md` at the start of every planning session. When these docs are absent or contain only stubs, planning must guess context repeatedly. Running setup once eliminates this degradation for all future planning sessions.
+This skill exists because the plan skill reads `docs/ARCHITECTURE.md` and `docs/OVERVIEW.md` at the start of every plan session. When these docs are absent or contain only stubs, plan must guess context repeatedly. Running setup once eliminates this degradation for all future plan sessions.
 
 ## When to Use
 
-- Before the first planning session on a new repo
-- When the planning skill reports that stable docs are missing or thin
+- Before the first plan session on a new repo
+- When the plan skill reports that stable docs are missing or thin
 - When existing docs are partial, scattered, or inconsistent and need consolidation
 
 ## Six Phases
@@ -79,7 +74,7 @@ Record user responses. You do not need to ask follow-up questions unless a respo
 
 Write `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` using the content from reconnaissance and the guided conversation.
 
-**`docs/OVERVIEW.md`** must be a single paragraph (3–5 sentences) covering: what the project does, who uses it, and what success looks like. This is the first file the planning skill reads — keep it concise and concrete.
+**`docs/OVERVIEW.md`** must be a single paragraph (3–5 sentences) covering: what the project does, who uses it, and what success looks like. This is the first file the plan skill reads — keep it concise and concrete.
 
 **`docs/ARCHITECTURE.md`** must have these sections:
 
@@ -95,15 +90,15 @@ Write `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` using th
 - **Current State**: What is shipped and working.
 - **Active Work**: What is in progress right now.
 - **Planned**: What is clearly next but not yet started.
-- **Not In Scope**: What is explicitly out of scope. Prevents scope creep in planning.
+- **Not In Scope**: What is explicitly out of scope. Prevents scope creep in plan.
 
 If partial content from existing docs was found in phase 3, merge it into the appropriate sections rather than duplicating it.
 
-### Phase 6: Planning Hook
+### Phase 6: Plan Hook
 
 After writing the docs, tell the user:
 
-> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`). You can now run `/workflow:planning` to start a planning session — it will read these docs automatically."
+> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`). You can now run `/workflow:plan` to start a plan session — it will read these docs automatically."
 
 ## Rules
 

@@ -1,5 +1,5 @@
 ---
-name: plan-execution
+name: execute
 description: Execute an existing plan program or child plan from `docs/plans/`. Use when the user wants to implement a planned work package with delegation, progress tracking, completion artifacts, and mandatory review.
 ---
 
@@ -28,11 +28,11 @@ Start from the requested plan program or child plan and answer these questions b
 - Are the contracts explicit enough in `DESIGN.md`, stable docs, or `PLAN.md` for delegated workers to implement against?
 - Does the requested execution still align with current architecture docs and user intent?
 
-If the plan no longer aligns with the architecture, roadmap, or user intent, stop execution and surface that mismatch. Planning problems should return to a planning conversation before implementation continues.
+If the plan no longer aligns with the architecture, roadmap, or user intent, stop execution and surface that mismatch. Plan problems should return to a plan conversation before implementation continues.
 
 The user has already chosen a plan/execute workflow. Treat that as evidence that the work is substantial enough to deserve:
 
-- main-thread planning and orchestration
+- main-thread plan and orchestration
 - delegated implementation work
 - independent review
 
@@ -92,7 +92,7 @@ Hints for subagent selection:
      ```
 2. Read the parent `PLAN.md`, `ROADMAP.md`, and any relevant `DESIGN.md`, plus the child `PLAN.md` and any child `DESIGN.md`.
 3. Confirm that prerequisites are satisfied and that this is the correct next slice according to the roadmap.
-4. If the plan needs architectural revision, unclear contract changes, or roadmap reshaping, stop and return to planning rather than improvising execution.
+4. If the plan needs architectural revision, unclear contract changes, or roadmap reshaping, stop and return to plan rather than improvising execution.
 5. Do a short recon pass over the likely code surface, then create a lightweight implementation plan for the slice:
    - goal
    - ordered activities
@@ -131,7 +131,7 @@ If the parent program is completed as a whole, add analogous parent-level comple
 - Execute only from an existing plan. Do not invent major scope during implementation.
 - The parent roadmap is the authority for sequencing and dependency checks.
 - `[NEW]-` parents are the live execution backlog. Numbered parents are implemented provenance and should not be reopened casually.
-- Contracts may come from `DESIGN.md`, stable docs, or `PLAN.md`. If they are too weak for delegated implementation, stop and fix planning first.
+- Contracts may come from `DESIGN.md`, stable docs, or `PLAN.md`. If they are too weak for delegated implementation, stop and fix plan first.
 - Use delegated implementation by default for plan/execute work, but rightsize the number and capability of workers after a small recon pass.
 - Prefer one clearly bounded worker over several weakly justified workers.
 - Prefer phased execution unless the user asks for end-to-end work or the plan makes the coupling unusually strong.

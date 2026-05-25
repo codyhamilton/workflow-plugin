@@ -7,16 +7,16 @@ A workflow plugin for opencode / Claude Code that provides four interdependent s
 ## Who Uses It
 
 Teams and individual developers who want:
-- Explicit, durable planning with intent capture and scope validation
+- Explicit, durable plan with intent capture and scope validation
 - Delegated implementation with orchestration and cost discipline
 - Mandatory independent review after implementation
 - Observable lessons from real plan artifacts to improve the workflow itself
 
 ## The Skills
 
-1. **planning** — Create PLAN.md and DESIGN.md artifacts. Capture verbatim user intent, validate scope, detect architectural implications, ask only decisions that matter.
+1. **plan** — Create PLAN.md and DESIGN.md artifacts. Capture verbatim user intent, validate scope, detect architectural implications, ask only decisions that matter.
 
-2. **plan-execution** — Execute existing plans. Rightsize subagents, maintain orchestration clarity, run mandatory review, write completion artifacts (IMPLEMENTATION.md, REVIEW.md).
+2. **execute** — Execute existing plans. Rightsize subagents, maintain orchestration clarity, run mandatory review, write completion artifacts (IMPLEMENTATION.md, REVIEW.md).
 
 3. **comprehensive-review** — Independent review of completed work. Four lenses: contracts/correctness, failure modes, real usefulness, domain-specific concerns. Capped at one external loop before self-review.
 

@@ -1,6 +1,6 @@
 ---
 name: workflow-tuning
-description: Captures observed lessons about plan/execute/review workflows, documentation economy, execution cost, phasing, and review posture. Use when refining planning, plan-execution, or review skills; designing workflow evals; or comparing real plan artifacts to decide what workflow improvements are worth making.
+description: Captures observed lessons about plan/execute/review workflows, documentation economy, execution cost, phasing, and review posture. Use when refining plan, execute, or review skills; designing workflow evals; or comparing real plan artifacts to decide what workflow improvements are worth making.
 ---
 
 # Workflow Tuning
@@ -32,7 +32,7 @@ It is for improving the workflow itself, not for executing a single implementati
    - cost or latency
 3. If it mainly adds structure without improving one of those, avoid it.
 4. Prefer lightweight implementation plans over strict handoff contracts unless the work is clearly parallel, high-risk, or long-running.
-5. Prefer cheap, obedient workers for bounded local tasks. Use frontier models for planning, synthesis, ambiguous design judgment, and high-value review.
+5. Prefer cheap, obedient workers for bounded local tasks. Use frontier models for plan, synthesis, ambiguous design judgment, and high-value review.
 6. If a worker result is required, the orchestrator should wait rather than absorb the implementation and bloat its own context.
 
 ## Documentation Economy
@@ -52,7 +52,7 @@ Only add plan-scoped `DESIGN.md` when at least one of these is true:
 
 ## Improvement Priorities
 
-- Keep planning lean and accurate.
+- Keep plan lean and accurate.
 - Treat executed plan folders as an eval corpus for workflow quality.
 
 ## Eval Capability
@@ -63,7 +63,7 @@ See `evals/README.md` for scenario format, results format, and full instructions
 
 ### When to Run an Eval
 
-- Before merging a change to a skill prompt that affects planning, execution, or review behavior
+- Before merging a change to a skill prompt that affects plan, execution, or review behavior
 - When a qualitative observation suggests a workflow change might help, but you want signal before committing
 - When comparing two candidate approaches (variant testing)
 

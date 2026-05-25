@@ -1,13 +1,13 @@
 # workflow-plugin
 
-Private plugin marketplace containing workflow skills for planning, execution, and review.
+Private plugin marketplace containing workflow skills for plan, execute, and review.
 
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| `planning` | Create and revise implementation plans |
-| `plan-execution` | Execute planned work packages with delegation and review |
+| `plan` | Create and revise implementation plans |
+| `execute` | Execute planned work packages with delegation and review |
 | `comprehensive-review` | Independent review of significant changes |
 | `workflow-tuning` | Improve the plan/execute/review workflow itself |
 
@@ -51,7 +51,7 @@ Then install with:
 /plugin install workflow@workflow-plugin
 ```
 
-Skills become available as `workflow:planning`, `workflow:plan-execution`, etc.
+Skills become available as `workflow:plan`, `workflow:execute`, etc.
 
 ### Cursor
 
@@ -72,8 +72,8 @@ workflow-plugin/
 │   └── marketplace.json
 ├── .cursor-plugin/plugin.json
 └── skills/
-    ├── planning/
-    ├── plan-execution/
+    ├── plan/
+    ├── execute/
     ├── comprehensive-review/
     └── workflow-tuning/
 ```
