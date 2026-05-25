@@ -80,12 +80,13 @@ Hints for subagent selection:
 
 1. Identify the target parent program and child plan to execute.
 1a. Capture the current session ID and write the Session section to IMPLEMENTATION.md before implementation begins. This lets the `transcript-parser` skill locate this session reliably after execution completes.
+   - opencode: read `OPENCODE_RUN_ID` from the environment. If `OPENCODE` is set, use this as the session ID directly.
    - Claude Code: find the most recently-modified `.jsonl` in `~/.claude/projects/{project-hash}/` and read `sessionId` from any line. Project hash = working directory path with `/` replaced by `-`, prefixed with `-`.
    - Cursor: find the most recently-modified directory under `~/.cursor/projects/{project-name}/agent-transcripts/` and use its name as the session ID.
    - Write to IMPLEMENTATION.md at the top before filling in other content:
      ```
      ## Session
-     - Tool: <Claude Code | Cursor | GitHub Copilot>
+     - Tool: <opencode | Claude Code | Cursor | GitHub Copilot>
      - Session ID: <uuid>
      - Started: <ISO 8601 UTC timestamp>
      ```

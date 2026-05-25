@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A Claude Code plugin that provides four interdependent skills for structured plan/execute/review workflows across repositories.
+A workflow plugin for opencode / Claude Code that provides four interdependent skills for structured plan/execute/review workflows across repositories.
 
 ## Who Uses It
 

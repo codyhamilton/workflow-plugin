@@ -7,7 +7,7 @@ description: Parse an AI tool session transcript to extract cost metrics (agents
 
 Use this skill to extract objective cost metrics from a session transcript and produce a section ready to paste into `cost-comparison.md` in the eval schema.
 
-This skill covers Claude Code (primary), Cursor, and GitHub Copilot transcript formats.
+This skill covers opencode and Claude Code (primary), Cursor, and GitHub Copilot transcript formats. opencode and Claude Code share the same storage location and JSONL format.
 
 ## Session Location
 
@@ -18,7 +18,9 @@ Prefer in this order:
 2. `## Session` section in `IMPLEMENTATION.md` for the relevant plan
 3. Most recently-modified session for the current project (auto-detect)
 
-### Claude Code — finding the JSONL
+### opencode / Claude Code — finding the JSONL
+
+Both opencode and Claude Code store sessions in the same location and format. Auto-detect by checking the `OPENCODE` environment variable first.
 
 Project hash = working directory path with every `/` replaced by `-`. The leading `/` naturally produces a leading `-` — no additional prefix needed.
 
@@ -29,7 +31,7 @@ Example: `/home/codyh/workspace/workflow-plugin` → `-home-codyh-workspace-work
 ~/.claude/projects/{project-hash}/{session-id}/
   subagents/
     agent-{id}.meta.json    — {agentType, description, toolUseId}
-    agent-{id}.jsonl        — full subagent transcript
+    agent-{id}.jsonl        — full subagent transcript (opencode adds `slug` and `agentId` fields)
   tool-results/             — persisted large tool outputs (ignore for cost metrics)
 ```
 
@@ -37,22 +39,30 @@ To auto-detect the most recent session for the current project:
 ```bash
 python3 -c "
 import os, json
-cwd = os.getcwd()
-proj_hash = cwd.replace('/', '-')
-proj_dir = os.path.expanduser(f'~/.claude/projects/{proj_hash}')
-files = sorted(
-    [f for f in os.listdir(proj_dir) if f.endswith('.jsonl')],
-    key=lambda x: os.path.getmtime(os.path.join(proj_dir, x)),
-    reverse=True
-)
-if files:
-    with open(os.path.join(proj_dir, files[0])) as f:
-        for line in f:
-            obj = json.loads(line)
-            if 'sessionId' in obj:
-                print('session-id:', obj['sessionId'])
-                print('slug:', obj.get('slug'))
-                break
+
+# Prefer opencode env var
+run_id = os.environ.get('OPENCODE_RUN_ID')
+if run_id:
+    print('tool: opencode')
+    print('session-id:', run_id)
+else:
+    cwd = os.getcwd()
+    proj_hash = cwd.replace('/', '-')
+    proj_dir = os.path.expanduser(f'~/.claude/projects/{proj_hash}')
+    files = sorted(
+        [f for f in os.listdir(proj_dir) if f.endswith('.jsonl')],
+        key=lambda x: os.path.getmtime(os.path.join(proj_dir, x)),
+        reverse=True
+    )
+    if files:
+        with open(os.path.join(proj_dir, files[0])) as f:
+            for line in f:
+                obj = json.loads(line)
+                if 'sessionId' in obj:
+                    print('tool: claude-code')
+                    print('session-id:', obj['sessionId'])
+                    print('slug:', obj.get('slug'))
+                    break
 "
 ```
 
@@ -77,9 +87,9 @@ ls -lt ~/.cursor/projects/$(pwd | sed 's|^/||;s|/|-|g')/agent-transcripts/ 2>/de
 
 Use event types `tool.execution_start` / `tool.execution_end` to reconstruct tool loops.
 
-## Parsing — Claude Code
+## Parsing — opencode / Claude Code
 
-Use a single Python script to extract all metrics at once. This avoids repeated file reads.
+Both tools use the same JSONL format. Use a single Python script to extract all metrics at once. This avoids repeated file reads.
 
 ```python
 import json, os, glob
@@ -197,7 +207,7 @@ Produce a completed section matching the `cost-comparison.md` schema from `evals
   - agent-1 [<type>, <model>]: <N> turns (Bash: N, Read: N, ...)
   - agent-2 [<type>, <model>]: <N> turns (...)
 - Tool use turns (total): <sum>
-- Context estimate: <N> tokens (approximate — first response only, Claude Code)
+- Context estimate: <N> tokens (approximate — first response only, opencode / Claude Code)
 - Wall time: <M:SS>
 ```
 
@@ -206,9 +216,9 @@ If context is unavailable (Cursor, Copilot): write `not available (source: <reas
 ## Workflow
 
 1. **Identify the session** — read IMPLEMENTATION.md Session section, accept user input, or auto-detect most recent session for current project.
-2. **Locate the transcript** — determine the tool (Claude Code, Cursor, Copilot) and resolve the full path(s) using the formulas above.
+2. **Locate the transcript** — determine the tool (opencode, Claude Code, Cursor, Copilot) and resolve the full path(s) using the formulas above.
 3. **Parse the parent transcript** — run the extraction script; collect tool loop counts, wall time, context estimate.
-4. **Parse each subagent** (Claude Code) — read `subagents/*.meta.json` and corresponding `.jsonl`; extract type, model, tool counts.
+4. **Parse each subagent** (opencode / Claude Code) — read `subagents/*.meta.json` and corresponding `.jsonl`; extract type, model, tool counts.
 5. **Format and output** — write the completed `## Candidate` or `## Baseline` section in eval schema format. Note any fields that are unavailable and why.
 
 ## Rules

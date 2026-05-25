@@ -3,7 +3,7 @@
 ## Component Map
 
 ```
-Claude Code Plugin (workflow)
+Workflow Plugin (opencode / Claude Code)
 ├── skills/
 │   ├── planning/          → Creates PLAN.md, DESIGN.md, owns provenance capture
 │   ├── plan-execution/    → Executes plans, writes IMPLEMENTATION.md + REVIEW.md
@@ -24,7 +24,7 @@ Claude Code Plugin (workflow)
 **planning**: Single responsibility is capturing intent and producing durable plan artifacts.
 - Reads target repo's stable docs (docs/OVERVIEW.md, docs/ARCHITECTURE.md, docs/design/)
 - Captures user intent verbatim in PLAN.md
-- Extracts conversation transcript into PROVENANCE.md
+- Extracts conversation transcript into PROVENANCE.md (via plan-execution session capture, or user-provided session ID)
 - Asks only scope-shaping questions
 - Optionally writes plan-scoped DESIGN.md for cross-implementor contracts
 - Does NOT implement; stops and returns to planning if architectural misalignment detected
@@ -92,7 +92,7 @@ Claude Code Plugin (workflow)
 
 **Planning session**:
 1. User → planning skill: "I want to <request>"
-2. planning reads stable docs, captures request, extracts transcript → PLAN.md + PROVENANCE.md
+2. planning reads stable docs, captures request verbatim, records Q&A turns → PLAN.md + PROVENANCE.md
 3. planning → user: "Here is the plan; shall I proceed?"
 
 **Execution session**:

@@ -19,13 +19,13 @@ cd workflow-plugin
 ./install.sh
 ```
 
-The installer detects Claude Code and Cursor and asks before installing into each. No flags, no config required.
+The installer detects opencode, Claude Code, and Cursor and asks before installing into each. No flags, no config required.
 
 ## Manual installation
 
-### Claude Code
+### Claude Code / opencode
 
-Copy skills directly to your user skills directory:
+Both Claude Code and opencode use the same skills directory. Copy skills directly:
 
 ```sh
 cp -r skills/* ~/.claude/skills/
