@@ -9,6 +9,7 @@ Private plugin marketplace containing workflow skills for plan, execute, and rev
 | `plan` | Create and revise implementation plans |
 | `execute` | Execute planned work packages with delegation and review |
 | `comprehensive-review` | Independent review of significant changes |
+| `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
 | `workflow-tuning` | Improve the plan/execute/review workflow itself |
 
 ## Quick install
