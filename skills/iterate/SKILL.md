@@ -5,117 +5,171 @@ description: Drive long-horizon work whose success criteria are not knowable up 
 
 # Iterate
 
-Use this skill for long-horizon work where you do not have perfect future knowledge: you know roughly what you need, but you cannot write the success checklist ahead of time. The criteria that matter are discovered by building, looking, and assessing — not specified in advance.
+## Purpose
 
-This is a layered, sequential variant of best-of-n. It is not parallel sampling. Each candidate is built *after* the previous one and uses the previous builds as a functional spec, with a remit to find a materially different solution. It exploits a property of LLMs that pure looping ignores: existing code is the cheapest, most precise technical spec available, and a divergent rebuild against that spec is easier and better than blind incremental refinement of a single line.
+Use this skill for long-horizon work where the success criteria cannot be written up front. You
+know roughly what you need, but the criteria that actually matter are discovered by building,
+looking, and assessing — not specified in advance.
 
-## Why This Exists
+The mechanism is a layered, **sequential** variant of best-of-n — not parallel sampling. Each
+candidate is built *after* the previous one and uses the previous builds as its functional spec,
+with a remit to find a materially different approach. Existing code is the cheapest, most precise
+spec available, so a divergent rebuild against it beats blind refinement of a single line.
 
-The default approach to open-ended work is a loop: keep trying until you meet a measurable outcome X. This fails precisely when the spec is not known ahead of time. The analogy: you know you need a car, but you do not know all the criteria up front. You only have a broad sense of what matters. You have to get in a car and drive it before you can assess the things that actually count.
+This skill prevents the failures that pure looping and naive best-of-n produce:
 
-This skill exists to prevent the failures that pure looping and naive best-of-n produce:
+- Optimizing hard against a target X that turns out to be wrong, because the real criteria only
+  became visible after something was built.
+- Treating the first working build as the answer, when it was only the first reification of a
+  still-forming model.
+- Challengers that differ cosmetically rather than in approach — cost without information.
+- Judging against a checklist invented up front instead of the criteria the builds surfaced.
+- Looping forever, or discarding the losing branches that are the exercise's richest provenance.
 
-- Optimizing hard against a measurable target X that turns out to be the wrong target, because the real criteria only became visible after something was built.
-- Treating the first working implementation as the answer, when it was really just the first reification of a still-forming cognitive model.
-- Incrementally refining a single implementation — which is hard — instead of using it as a spec to shape a cleaner alternative — which is easier.
-- Best-of-n parallelism producing N near-identical samples that explore no real design space, because none of them could see the others.
-- Building challengers that differ cosmetically rather than in approach, adding cost without adding information.
-- Judging candidates against a checklist invented up front, missing the criteria the builds themselves surfaced.
-- Throwing away the losing branches, destroying the reified alternatives that are the most valuable provenance of the whole exercise.
-- Running the loop forever instead of stopping when enough has been learned to commit.
-
-## Working Model
-
-This mirrors how developers actually build large things. For any work too big to hold in your head, you do not design it perfectly in your head and then type it. You put a first version on paper — or in code — to reify your cognitive model, and then you challenge it *there*, against something concrete, not against your imagination. The initial build is not the deliverable; it is the instrument that makes the real requirements visible.
-
-So the unit of work here is not "an implementation." It is a **cycle**: build a naive solution, build one or two challengers that diverge from it on purpose, judge the set against the criteria that emerged, reconcile a winner while keeping the challengers, then extrapolate what to build next. Each stage composes the existing skills in this plugin — `plan`, `execute`, `comprehensive-review` — rather than reinventing them.
-
-Two ideas carry the whole skill:
-
-- **Prior builds are the functional spec.** A challenger is not told "do something different" in the abstract. It is given the previous build(s) as a working contract and told to find a genuinely different approach to the same goal, using the lessons those builds made legible. If it cannot articulate a distinct design thesis, it is not built — a cosmetic variant adds cost and no information.
-- **The criteria are discovered, not declared.** Judgement does not score candidates against a checklist written before anything existed. It reads the built candidates and surfaces the criteria *they* revealed to matter, then selects against those. This is the "get in the car and assess" step made concrete.
-
-### The divergence bar
-
-This is the load-bearing gate of the whole skill, and it works against the grain of how agents behave. Asked to "find a materially different approach," an agent will *always* return one and rationalize it, because it treats the request as a thing to satisfy rather than a hypothesis to test. A gate phrased as "build a challenger unless you can't think of one" therefore never stops. Two moves give it teeth: invert the default, and split generation from acceptance.
-
-- **The default is no further candidate.** The burden of proof is on building a challenger, not on stopping.
-
-- **The proposer gets breadth; the gate holds the tests.** These two needs are in tension, and that is exactly why they go to different agents. The proposer needs wide license — otherwise challenge collapses into local tweaks — so tell it plainly that it may challenge the entire conception: the structure, the outward surface, even the problem statement itself. But do **not** hand the proposer the acceptance tests below as a target. If the generator holds the tests, it games them — reframing a problem that was fine just to clear a bar. Criteria given to a generator become a target; criteria given to a filter stay a filter. Breadth to the proposer; the tests live with the approver (the orchestrator or a clean, separate check), never the agent that wants to build.
-
-- **What counts as real divergence.** The gate accepts a thesis only if it clears at least one of these — not all need hold:
-  1. *It is not a safe union with the base.* If the thesis is merely a subset or improvement that could be folded into the base by reconciliation, it is not a fork. Do not build it — queue the idea for the reconcile step and move on. Changing the wheels is not a different car.
-  2. *It changes the outer surface.* It presents a different solution outward — a different theory of how the thing is used — not just a different internal mechanism behind the same surface. A ute is a meaningfully different vehicle from a car.
-  3. *It reframes the problem.* It challenges the problem statement itself, not only the solution. Deciding the user actually needed a boat is a legitimate and novel thesis.
-
-  These tests are necessary, not sufficient: clearing the bar only earns a candidate the right to be *built*. It still has to win judgement. An illegitimate wide swing — a boat no one needed — passes divergence but loses at step 4, so the two gates catch two different failures.
-
-- **Convergence is success, not failure.** "I cannot find a thesis that clears the bar" is the expected, valid, and frequently correct answer — and is itself the signal that this layer of exploration is exhausted. You have iterated successfully *when you can no longer produce a genuine fork*. Never manufacture one to satisfy the request.
-
-### What judgement is — and is not
-
-Judgement is not code review. Each candidate already received code-level review inside its `execute` pass (correctness, contracts, failure modes). Re-running that misses the point. Cross-candidate judgement is a higher-altitude, different activity:
-
-- **The question is which approach is the better foundation to keep building on** — not which implementation is most polished. A rough implementation of a superior approach should beat a polished implementation of a dead-end one, because the reconcile step fixes roughness but cannot fix a bad foundation.
-- **Operate at design altitude.** Compare the shape of the core abstractions, the boundaries, the one-way doors and lock-in, the long-term cost, and the headroom each approach leaves for the extrapolated next steps. Ignore incidental defects — they belong to `execute`, not here — *unless* a defect is intrinsic to the approach and reveals it cannot work.
-- **Judge against the emergent criteria**, the spec the builds revealed, not a checklist invented up front.
-- **The null result is valid and common.** The naive candidate winning, or the candidates being effectively equivalent (then pick the simplest), are legitimate outcomes. Do not invent a winner's superiority because a selection was requested.
-- **Emit a harvest list.** Judgement's output is not just a winner. It names the best ideas from the *non-winning* candidates that are worth pulling into the reconciliation. That list is the direct input to the reconcile step.
-
-### Branch isolation
-
-Each candidate is built on its own git branch off a shared base commit, so the candidates are directly comparable. Builds are sequential, so separate branches are sufficient — no worktrees are needed; just check out the base commit and branch for each candidate. Do not build challengers by mutating the previous build in place — that destroys the spec. Keep every candidate branch intact through judgement and reconciliation. Losing branches are not deleted; they are the reified alternatives and the most valuable provenance the cycle produces.
-
-## Loop Control
-
-The user defines depth and gating when they invoke the skill. Honor what they ask for. In the absence of explicit instruction:
-
-- **Default to gated.** Pause for the user at the two judgement points — the selection gate (which candidate wins) and the next-step gate (which extrapolated step to pursue). These are exactly the points where human judgement supplies what the missing spec cannot.
-- **If asked to run autonomously, cap at 2 cycles by default** — the current scope, plus one round of its extrapolated next step. Do not run open-ended autonomous loops unless the user explicitly sets a larger depth or a stop condition. Surface the state and stop.
+**The orchestrator coordinates; it does not decide.** It delegates research, planning, execution,
+challenger proposal, divergence gating, and judgement to subagents. It never plans, implements,
+gates, or judges in its own context. Its own actions are limited to: routing work between
+subagents, synthesizing their outputs into lean pointers, managing branches and loop control, and
+surfacing decisions to the user at the gates. Each stage composes the existing skills in this
+plugin — `plan`, `execute`, `comprehensive-review` — rather than reinventing them.
 
 ## Workflow
 
-A cycle is steps 2–6. Step 7 starts the next cycle.
+A **cycle** is steps 2–6; step 7 starts the next cycle. Actors: the *orchestrator* (coordinator,
+above), *research subagents*, a *planning subagent* (via `plan`), an *approver subagent* (clean,
+applies the divergence bar), a *builder* (via `execute`), and a *judge subagent*. The orchestrator
+delegates every substantive step below.
 
-1. **Capture scope and broad goal.** Take the user's broad goal verbatim. Do not pressure them for a success checklist — the absence of one is the reason this skill exists. Establish a parent program folder under `docs/plans/[NEW]-<goal>/` (see the `plan` skill for the program/child-plan convention) and record the goal and the loop-control choice (gated vs autonomous, depth) there. Capture the base commit the cycle branches from.
+0. **Capture scope and base.** Record the user's broad goal verbatim — do not pressure them for a
+   success checklist; its absence is the reason for this skill. Establish the parent program folder
+   under `docs/plans/[NEW]-<goal>/` (see `plan` for the program/child-plan convention) and record
+   the goal, the loop-control choice (gated vs. autonomous, depth), and the base commit.
 
-2. **Build the naive implementation (candidate 1).** Run a normal `plan` → `execute` pass for a straightforward, honest first solution to the goal. This is candidate 1. It is allowed to be naive; its job is to reify the cognitive model and become the spec for what follows. It carries the internal review that `execute` already mandates.
+1. **Initial research (delegated).** Dispatch 1–3 research subagents to map the problem space, the
+   existing code surface, and the constraints. They report findings; the orchestrator synthesizes
+   pointers only and draws no conclusions of its own. This grounds candidate 1's plan.
 
-3. **Build 1–2 divergent challengers, sequentially.** For each challenger:
-   - Check out the same base commit and create a fresh branch off it.
-   - Give the challenger the prior candidate(s) as a functional spec — the actual code, not a prose summary — and a remit with deliberately wide license: *solve the same goal with a materially different approach, and you may challenge the whole conception — structure, outward surface, even the problem statement.* Do not give the proposer the divergence tests; that license is generative, the tests are not (see "The divergence bar").
-   - Apply the **divergence bar** as the approver — the orchestrator, not the proposer. Accept the thesis only if it clears at least one test (changes outer surface, or reframes the problem) and is not a safe union with the base. If it is a safe union, do not build — queue the idea for reconciliation (step 5) and move on. "No thesis clears the bar" is a valid, expected stop: record it and move to judgement.
-   - If the thesis clears the bar, build it via `plan` → `execute` on its branch. Candidate 3, if built, sees both candidate 1 and candidate 2.
+2. **Build candidate 1 — the naive build (delegated).** Run a `plan` → `execute` pass for a
+   straightforward, honest first solution on its own branch off the base. It is allowed to be
+   naive; its job is to reify the model and become the spec for what follows. It carries the
+   review `execute` already mandates.
 
-4. **Judge across candidates.** Run a cross-candidate judgement with a clean agent that authored none of the candidates, reading every branch. This is design-altitude judgement, not code review (see "What judgement is — and is not"): surface the **emergent criteria** the builds revealed, then select the approach that is the better *foundation to keep building on*, not the most polished implementation. The null result — the naive build winning, or an equivalence resolved to the simplest — is valid; do not invent superiority. Record the selection, its design rationale, and the **harvest list** of best ideas from the non-winning candidates for step 5.
+3. **Propose and gate challengers (delegated).** For each challenger (up to 1–2), the divergence
+   check sits **between `plan` and `execute`** — the plan *is* the proposal, and only a plan that
+   clears the bar is built:
+   - **Plan = proposal.** Run `plan` against the prior build(s) given as *real code, not a prose
+     summary*, with deliberately wide license: *solve the same goal with a materially different
+     approach; you may challenge the whole conception — structure, outward surface, even the
+     problem statement.* Do not give the planning subagent the divergence tests — that license is
+     generative; the tests are not (see Reasoning → The divergence bar).
+   - **Evaluate divergence.** A clean approver subagent that did not author the plan applies the
+     divergence bar and returns a verdict.
+   - **On pass:** run `execute` of that plan on a fresh branch off the base. A third challenger, if
+     reached, sees both prior builds.
+   - **On fail (safe union or no genuine fork):** do **not** build it. The same approver performs
+     the **harvest analysis** — extracting the worthwhile ideas from the rejected plan into the
+     reconciliation queue for step 5 — and the cycle moves on. "No plan clears the bar" is a valid,
+     expected stop; record it and go to judgement.
 
-5. **Reconcile the winner, keep the challengers.** Run a `plan` → `execute` pass that reconciles the selected candidate onto the main line — working through judgement's harvest list, plus any safe-union ideas queued at step 3 that were never built, pulling in what strengthens the winner. This is where detail and polish happen; judgement picked the direction, reconciliation does the engineering. Do **not** delete or overwrite the challenger branches; they remain as provenance and as the spec for any future divergence. The reconciled state on the main line is the new base.
+4. **Judge across candidates (delegated).** A clean judge subagent that authored no candidate reads
+   every branch and runs design-altitude judgement (see Reasoning → Judgement): it surfaces the
+   **emergent criteria** the builds revealed, selects the approach that is the better *foundation to
+   keep building on*, and emits a **harvest list** of the best ideas from non-winning candidates.
+   A null result (the naive build winning, or an equivalence resolved to the simplest) is valid.
+   **Selection gate:** surface the selection and rationale to the user (gated by default).
 
-6. **Extrapolate the next steps.** From the reconciled, built state — not from the original goal — define the **top 3 next steps**: the most valuable things to build next given what now exists. These are derived from current reality, which is why they could not have been written at step 1.
+5. **Reconcile the winner (delegated).** Run a `plan` → `execute` pass that folds the judge's
+   harvest list — plus any safe-union ideas harvested at step 3 — onto the main line, pulling in
+   what strengthens the winner. This is where detail and polish happen. Keep every challenger
+   branch intact. The reconciled commit becomes the new base.
 
-7. **Loop, under the loop-control policy.** At the next-step gate, select one step (user-gated, or auto-selected under an autonomous run within the cap) and re-enter at step 2 with that step as the new scope and the reconciled commit as the new base. Stop when the user's depth or stop condition is reached, when the gates say stop, or when extrapolation produces no step worth building.
+6. **Extrapolate next steps (delegated).** From the reconciled, built state — not the original goal
+   — define the **top 3 next steps**: the most valuable things to build next given what now exists.
+   These could not have been written at step 0 because they derive from current reality.
 
-## Required Artifacts
+7. **Loop control.** **Next-step gate:** surface the top 3 to the user. Select one step (user-gated,
+   or auto-selected within the cap on an autonomous run) and re-enter at step 1 with that step as
+   the new scope and the reconciled commit as the new base. The user owns depth and gating: default
+   to **gated** at the selection and next-step decisions; on an autonomous run, **cap at 2 cycles**
+   unless the user sets a larger depth or stop condition. Stop when the depth/stop condition is
+   reached, the gates say stop, or extrapolation produces no step worth building.
 
-Per parent program: the goal, the loop-control policy, and the base commit lineage across cycles.
+## Reasoning
 
-Per cycle (under `docs/plans/[NEW]-<goal>/iteration-NN/`):
+The whole skill mirrors how developers build things too big to hold in their heads: you put a first
+version in code to reify your model, then challenge it *there*, against something concrete, not
+against your imagination. Four ideas carry it.
 
-- `CANDIDATES.md` — the candidate registry: each candidate's branch, its divergence thesis (which test it cleared), and a pointer to its plan and execution artifacts. Record the disposition of every pitched thesis: built, rejected for lack of divergence, or queued for reconciliation as a safe union (not built but carried to step 5).
-- `JUDGEMENT.md` — the emergent criteria the builds revealed, the per-candidate comparison *at the level of approach*, the selection and its design rationale (or the null result), and the harvest list of ideas from non-winning candidates to carry into reconciliation.
+- **Prior builds are the functional spec.** A challenger is never told to "do something different"
+  in the abstract; it is handed the previous build(s) as a working contract and told to find a
+  genuinely different approach using the lessons those builds made legible. This is why candidates
+  are sequential, never parallel, and why they receive real code rather than a paraphrase — that
+  sequencing is what makes this more than best-of-n.
+
+- **The divergence bar** is the load-bearing gate, and it works against the grain of how agents
+  behave: asked to "find a materially different approach," an agent will always return one and
+  rationalize it. Two moves give the gate teeth. First, **invert the default** — the burden of
+  proof is on building a challenger, not on stopping; "I cannot find a genuine fork" is the
+  expected, valid, and frequently correct answer, and is itself the signal that this layer of
+  exploration is exhausted. Second, **split generation from acceptance** across two agents: the
+  planner gets wide license (criteria given to a generator become a target it games — reframing a
+  fine problem just to clear a bar), while the clean approver holds the tests (criteria given to a
+  filter stay a filter). The approver accepts a plan only if it clears at least one test, and none
+  of these alone is sufficient — clearing the bar only earns the right to be built; the candidate
+  must still win judgement:
+  1. *It is not a safe union with the base* — not merely a subset or improvement that
+     reconciliation could fold in. Changing the wheels is not a different car.
+  2. *It changes the outer surface* — a different theory of how the thing is used, not just a
+     different internal mechanism behind the same surface. A ute is a different vehicle from a car.
+  3. *It reframes the problem* — challenges the problem statement itself. Deciding the user
+     actually needed a boat is a legitimate, novel thesis (an illegitimate one — a boat no one
+     needed — passes divergence but loses judgement; the two gates catch different failures).
+
+- **The criteria are discovered, not declared.** Judgement does not score candidates against a
+  checklist written before anything existed. It reads the built candidates and surfaces the
+  criteria *they* revealed to matter, then selects against those — the "get in the car and drive it
+  before you can assess what counts" step, made concrete.
+
+- **Judgement is design-altitude, not code review.** Each candidate already received code-level
+  review inside its `execute` pass; re-running that misses the point. The question is which approach
+  is the better *foundation to keep building on*, not which implementation is most polished — a
+  rough build of a superior approach beats a polished build of a dead end, because reconciliation
+  fixes roughness but cannot fix a bad foundation. Compare the shape of the core abstractions, the
+  one-way doors and lock-in, the long-term cost, and the headroom for the extrapolated next steps;
+  ignore incidental defects unless one is intrinsic to the approach. A null result is valid and
+  common — do not invent a winner's superiority because a selection was requested.
+
+**Branch isolation and provenance.** Each candidate lives on its own branch off the shared base, so
+the candidates are directly comparable; sequential builds mean separate branches suffice — no
+worktrees. Never build a challenger by mutating a prior build in place — that destroys the spec.
+Losing branches are never deleted: they are the reified alternatives and the richest provenance the
+cycle produces, and the spec for any future divergence.
+
+## Artifacts
+
+Per parent program: the goal, the loop-control policy, and the base-commit lineage across cycles.
+
+Per cycle, under `docs/plans/[NEW]-<goal>/iteration-NN/`:
+
+- `CANDIDATES.md` — the candidate registry: each candidate's branch, its divergence thesis (which
+  test it cleared), and pointers to its plan and execution artifacts. Record the disposition the
+  approver assigned to every proposed plan: built, or rejected and harvested (the ideas carried to
+  step 5).
+- `JUDGEMENT.md` — the emergent criteria, the per-candidate comparison *at the level of approach*,
+  the selection and its design rationale (or the null result), and the harvest list for step 5.
 - `NEXT.md` — the top-3 extrapolated next steps and which was chosen (or why the loop stopped).
 
-Each candidate keeps its own `plan` and `execute` artifacts (`PLAN.md`, `IMPLEMENTATION.md`, `REVIEW.md`) on its branch, as those skills already require.
+Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTATION.md`,
+`REVIEW.md`) on its branch, as those skills already require.
 
-## Rules
+## Invariants
 
-- The skill composes `plan`, `execute`, and `comprehensive-review`. Do not reimplement planning, delegation, or review inside it.
-- Candidates are sequential, never parallel. Each challenger must see the prior build(s) as a functional spec. That sequencing is the point; it is what makes this more than best-of-n.
-- Give challengers real code as the spec, not a paraphrase. Existing code is the most precise technical spec available — that is the property this skill exploits.
-- The default is not to build a challenger. Build only when a thesis clears the divergence bar — it changes the outer surface, or reframes the problem, and is not a safe union with the base — and have the approver, not the proposer, decide that. Give the proposer wide license to challenge the whole conception, but never the tests themselves, or it games them. A safe-union idea is queued for reconciliation, not built. "No thesis clears the bar" is a successful, expected outcome and the signal the exploration is exhausted; never manufacture one to comply.
-- Build each candidate on its own branch off a shared base commit. Never produce a challenger by mutating a prior candidate in place.
-- Never delete losing branches. Reconcile the winner but keep the challengers as provenance and as future spec.
-- Judgement is design-altitude comparison of approaches, not code review — pick the better foundation to build on, not the most polished build. A clean agent that authored no candidate runs it. Naming the emergent criteria and emitting the harvest list are required outputs. A null result (naive wins, or a tie to the simplest) is valid.
-- Extrapolate next steps from the built state, not from the original goal. The whole reason to loop is that current reality teaches you what the goal could not.
-- The user owns loop depth and gating. Default to gated at the selection and next-step decisions. Cap autonomous runs at 2 cycles unless the user sets otherwise.
-- Stop when enough has been learned to commit. This skill exists to discover a spec by building, not to loop indefinitely.
+- Composes `plan`, `execute`, and `comprehensive-review`; does not reimplement them.
+- The orchestrator decides nothing of substance — research, planning, execution, divergence gating,
+  and judgement are all delegated.
+- Candidates are sequential, never parallel, and each sees the prior build(s) as real code.
+- A challenger is built only when its plan clears the divergence bar, judged by a clean approver,
+  not the planner. A rejected plan is harvested, not built.
+- Each candidate is built on its own branch off a shared base; losing branches are never deleted.
+- Stop when enough has been learned to commit. This skill exists to discover a spec by building,
+  not to loop indefinitely.
