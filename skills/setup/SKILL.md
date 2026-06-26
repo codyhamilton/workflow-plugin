@@ -1,6 +1,8 @@
 ---
 name: setup
 description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting plan on a new repo or when plan reports that stable docs are absent or thin.
+disable-model-invocation: true
+---
 
 This skill exists because the plan skill reads `docs/ARCHITECTURE.md` and `docs/OVERVIEW.md` at the start of every plan session. When these docs are absent or contain only stubs, plan must guess context repeatedly. Running setup once eliminates this degradation for all future plan sessions.
 

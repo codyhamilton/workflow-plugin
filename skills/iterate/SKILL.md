@@ -1,6 +1,7 @@
 ---
 name: iterate
-description: Drive long-horizon work whose success criteria are not knowable up front, by building divergent candidate solutions on separate branches, judging them against criteria the builds reveal, consolidating a winner, then extrapolating the next step. Use when the user has a broad goal but no fixed spec, when a naive loop ("keep trying until X") is failing because X is not yet known, or when they ask to explore alternative implementations before committing.
+description: Drive long-horizon work whose success criteria are not knowable up front, by building divergent candidate solutions, synthesising, consolidating and hardening, then extrapolating next steps.
+disable-model-invocation: true
 ---
 
 # Iterate
@@ -35,11 +36,16 @@ plugin — `plan`, `execute`, `comprehensive-review` — rather than reinventing
 
 ## Workflow
 
-A **cycle** is steps 2–6; step 7 starts the next cycle. Actors: the *orchestrator* (coordinator,
+A **cycle** is steps 2–7; step 8 starts the next cycle. Actors: the *orchestrator* (coordinator,
 above), *research subagents*, a *planning subagent* (via `plan`), an *approver subagent* (clean,
-applies the divergence bar), a *builder* (via `execute`), and a *synthesis subagent* (clean, reads
-every candidate and reconceives priorities). The orchestrator delegates every substantive step
-below, and passes drift-sensitive briefs (`briefs/`) verbatim rather than paraphrasing them.
+applies the divergence bar), a *builder* (via `execute`), a *synthesis subagent* (clean, reads
+every candidate and reconceives priorities), and a *hardening reviewer relay* (clean, sequential
+passes that verify the consolidated base end-to-end). The orchestrator delegates every substantive
+step below, and passes drift-sensitive briefs (`briefs/`) verbatim rather than paraphrasing them.
+
+**Steps 1–4 are divergent — they open options; steps 5–6 are convergent — they close them and bank
+the gain into the base the next cycle forks from. The sprint sprints; the consolidation rests and
+repairs.**
 
 0. **Capture scope and base.** Record the user's broad goal verbatim — do not pressure them for a
    success checklist; its absence is the reason for this skill. Establish the parent program folder
@@ -85,22 +91,55 @@ below, and passes drift-sensitive briefs (`briefs/`) verbatim rather than paraph
    **Selection gate:** surface the revised outcomes and the selection rationale to the user (gated
    by default) — this is the moment to confirm or correct the reconceived priorities.
 
-5. **Consolidate onto the winner (delegated).** A `plan` subagent receives a **defined scope** —
-   the winner branch, the harvest list with its code pointers (plus any safe-union ideas harvested
-   at step 3), and `OUTCOMES.md` as acceptance criteria — and produces a consolidation plan; it
-   does not re-research across candidates. Then an `execute` subagent builds it, folding in what
-   strengthens the winner. This is where detail and polish happen. Keep every challenger branch
-   intact. The consolidated commit becomes the new base.
+5. **Consolidate onto the winner — capture (delegated).** A `plan` subagent receives a **defined
+   scope** — the winner branch, the harvest list with its code pointers (plus any safe-union ideas
+   harvested at step 3), and `OUTCOMES.md` as the design-altitude reference — and produces a
+   consolidation plan; it does not re-research across candidates. Then an `execute` subagent builds
+   it, grafting the harvested ideas onto the winner. This movement is **additive**: it captures the
+   value the cycle discovered. It does **not** yet lock the base — making the integrated artifact
+   actually work is step 6. Keep every challenger branch intact.
 
-6. **Extrapolate next steps (delegated).** A subagent examines the **gap between the consolidated,
-   built state and `OUTCOMES.md`** — not the original goal — and identifies the **top 3 next
-   steps**: the most valuable things to build next given what now exists and where it is headed.
-   These could not have been written at step 0 because they derive from current reality measured
-   against the outcomes the cycle discovered.
+6. **Harden — verify and lock the base (delegated).** The consolidated artifact is a new thing no
+   one has reviewed end-to-end: the multi-branch graft seam is where integration breakage and
+   duplication concentrate, and the per-candidate reviews never saw it. Harden is a **bounded relay
+   of sequential reviewer passes**, not one review and not parallel reviews — each pass is a clean
+   agent that did not build the consolidation, handed the prior passes' findings and the accumulating
+   refine plan, and told to push *past* what is already covered. Sequential-with-prior-as-spec is the
+   same mechanism that makes candidates more than best-of-n: parallel reviewers mode-collapse onto the
+   same obvious subset; a relay diverges by construction. Each pass is dispatched with
+   `briefs/hardening-review.md` passed verbatim (parameterised by its focus), running
+   `comprehensive-review` against a **deliverable bar**. Within a pass: diagnose its focus to
+   completion, then remediate — **denoise trivial fixes inline** (committed, so the next pass reviews
+   corrected state) and **append structural items to the shared refine plan** as executable plan work,
+   not dot points (the reviewer holds the hottest context, so it authors the fix; a separate `execute`
+   still builds it, preserving plan/execute separation). A pass **diagnoses, it does not redesign**,
+   and does not relitigate the selection (step 4 owns that); it sorts findings into *must-fix* (blocks
+   a sound base) and *next-worth* (valuable but non-blocking). The relay order follows the goal
+   dependency:
+   - **e2e validation** — actually exercise the built behaviour at the highest fidelity the harness
+     supports (drive the app → automated e2e → manual walkthrough → static); record the rung reached.
+   - **failure-mode analysis** — edges, resilience, where it breaks (only probeable once it runs).
+   - **refine `execute`** — build the accumulated structural must-fix plan. Conditional: if no
+     structural item accrued, there is nothing to build, which is a valid outcome.
+   - **simplify & consolidate (KISS/DRY)** — collapse the duplication the graft introduced, within
+     the chosen approach, without over-abstracting. Runs *after* the structural build, because DRY
+     targets the final shape and a structural fix often dissolves the duplication it would hand-collapse.
+   - **smoke re-check** — confirm the e2e path still runs after all changes.
 
-7. **Loop control.** **Next-step gate:** surface the top 3 to the user. Select one step (user-gated,
+   The relay is **finite by design** — a fixed focus-differentiated sequence, never "review until
+   clean" (that reintroduces the looping this skill exists to prevent). The hardened commit becomes
+   the new base.
+
+7. **Extrapolate next steps (delegated).** A subagent examines the **gap between the hardened,
+   locked base and `OUTCOMES.md`** — not the original goal — and identifies the **top 3 next
+   steps**. Its primary input is the **next-worth findings from step 6**: because the harden review
+   actually used the thing, the next steps are read off empirical behaviour, not guessed from a
+   design doc. These could not have been written at step 0 because they derive from current reality
+   measured against the outcomes the cycle discovered.
+
+8. **Loop control.** **Next-step gate:** surface the top 3 to the user. Select one step (user-gated,
    or auto-selected within the cap on an autonomous run) and re-enter at step 1 with that step as
-   the new scope and the consolidated commit as the new base. The user owns depth and gating: default
+   the new scope and the hardened commit as the new base. The user owns depth and gating: default
    to **gated** at the selection and next-step decisions; on an autonomous run, **cap at 2 cycles**
    unless the user sets a larger depth or stop condition. Stop when the depth/stop condition is
    reached, the gates say stop, or extrapolation produces no step worth building.
@@ -145,11 +184,67 @@ against your imagination. Four ideas carry it.
   favorite) live in `briefs/synthesis.md`. A null result is valid and common — do not invent a
   winner's superiority because a selection was requested.
 
+- **Consolidation is the only convergent phase, so it must verify, not just capture.** Everything
+  before it opens options; this is where they close and the gain is banked into the base the next
+  cycle forks from. Capture (step 5) is additive — it grafts the winner and the harvest — but the
+  grafted whole is a new thing no per-candidate review ever saw, and the multi-branch seam is
+  exactly where integration breakage and duplication live. So harden (step 6) is the skill's own
+  build→clean-review→repair pattern promoted from the candidate level to the integration level: a
+  clean reviewer applies a **deliverable** bar — does it work end-to-end, is it resilient, is it
+  free of the graft's duplication — that `OUTCOMES.md`, deliberately design-altitude, does not. The
+  bar self-limits: KISS/DRY can only collapse duplication *within* the chosen approach, never
+  rearchitect, so the reviewer cannot relitigate selection. A soft base compounds — every later
+  sprint builds on it — and the review's findings are also the empirical fuel for extrapolation,
+  which is why harden precedes step 7.
+
+- **Harden is a sequential relay, for the same reason candidates are.** Parallel reviewers with
+  separate focuses are best-of-n sampling with no divergence pressure: they mode-collapse onto the
+  same obvious subset and miss the long tail. Hand each pass the prior passes' findings and tell it
+  to push past them, and the reviewers diverge by construction — the *building* thesis (prior as
+  spec, find what's different) pointed at *verifying*. Sequential committed passes also buy what
+  parallel cannot: no write contention, a refine plan that accumulates safely, and each pass
+  reviewing the *corrected* state its predecessors left. The cost is reloading the artifact per pass
+  (volume × N) — the same speed-for-coverage trade the skill already accepts for candidates, and
+  worth it: N restatements of the obvious is the failure being bought out of. The relay is finite by
+  design; "review until clean" is the looping this skill exists to prevent. (The one ordering subtlety:
+  DRY runs *after* the structural refine build, because it targets the final shape.)
+
 **Branch isolation and provenance.** Each candidate lives on its own branch off the shared base, so
 the candidates are directly comparable; sequential builds mean separate branches suffice — no
 worktrees. Never build a challenger by mutating a prior build in place — that destroys the spec.
 Losing branches are never deleted: they are the reified alternatives and the richest provenance the
 cycle produces, and the spec for any future divergence.
+
+## Model allocation
+
+The goal is **economy**: spend the quality premium only where cognition pays and starve it where the
+work is rote. `cache_read` price dominates the bill, so the cheapest cache-read model that still
+holds long context goes to the highest-volume role (the orchestrator), and the premium is spent at
+the one taste seam (synthesis). The orchestrator sets each Task's `model` from the table below.
+
+This is a **starting allocation, not a settled one.** Giving each class a distinct model is a
+near-term convenience — the usage export reports cost per model, not per agent, so distinct models
+let us *see* roughly where the cost is landing. Once that's visible we settle on the choices the
+numbers actually justify, and classes can collapse onto the same model. The two harnesses differ in
+granularity: Cursor has enough model families to give nearly every class its own; Claude Code has
+three tiers, so it puts **haiku** at the cheap end (research), **opus** at the taste seam
+(synthesis), and everything else on **sonnet**.
+
+| Agent class (step) | Cursor | Claude Code |
+| --- | --- | --- |
+| Orchestrator | Kimi | sonnet |
+| Research (1) | composer-2.5 | haiku |
+| Candidate plan/execute (2–3, 5) | composer-2.5 | sonnet |
+| Synthesis (4) | sonnet | opus |
+| Harden review relay (6) | GLM 5.2 | sonnet |
+| Refine `execute` (6) | composer-2.5 | sonnet |
+| Extrapolate (7) | GPT5.4 xhigh | sonnet |
+
+`composer-2.5` is the Cursor default and `sonnet` the Claude Code default — any class not named runs
+on it. The orchestrator pick is deliberately *not* the absolute cheapest: it wants cheap `cache_read`
+**with** strong long-context fidelity (Kimi, not the floor; sonnet, not haiku), because orchestrator
+long-context accuracy makes or breaks the run. Synthesis gets the highest-agency model (taste at a
+one-way door); extrapolate gets a high-reasoning model (it reads next steps off empirical behaviour).
 
 ## Artifacts
 
@@ -178,8 +273,17 @@ Per cycle, under `docs/plans/[NEW]-<goal>/iteration-NN/`:
   the **winner branch** and the **harvest list with code pointers**. Everything else — the emergent
   criteria, the per-candidate comparison at the level of approach, the design rationale (or the
   null result) — is prose, not a scoring matrix.
-- `NEXT.md` — the top-3 extrapolated next steps (separable, so one can be chosen) and which was
-  chosen (or why the loop stopped). Consumed by loop control and the next-step gate.
+- `HARDENING.md` — the **shared, accumulating** record of the harden relay (step 6): each pass
+  appends to it and reads its predecessors' entries (the mechanism that stops the relay re-reporting
+  the obvious). Three seams it must make findable: the **structural refine plan** (executable
+  must-fix work for the refine `execute` to build — plan-shaped, not dot points), a note of the
+  **trivial fixes already applied inline**, and the **next-worth list** (non-blocking — the primary
+  input to extrapolation). Records which **fidelity rung** the e2e pass reached and one binary — does
+  the end-to-end path run (re-confirmed by the smoke pass). Everything else (failure modes,
+  simplifications) is prose; no score, no quality rating (the same Goodhart reason as everywhere else).
+- `NEXT.md` — the top-3 extrapolated next steps (separable, so one can be chosen), drawn primarily
+  from `HARDENING.md`'s next-worth findings, and which was chosen (or why the loop stopped).
+  Consumed by loop control and the next-step gate.
 
 Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTATION.md`,
 `REVIEW.md`) on its branch, as those skills already require.
@@ -196,6 +300,14 @@ Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTAT
 - The synthesis agent reconceives priorities, selects, and harvests in one cross-candidate read,
   then stops — it does not plan or build. The consolidation planner gets a defined scope from it,
   not a remit to re-research the candidates.
+- Consolidation captures (step 5, additive: graft winner + harvest), then **harden** (step 6)
+  verifies the integrated base and locks it. Harden is a **bounded, sequential reviewer relay** —
+  never parallel, never "review until clean" — each pass clean (not the consolidation builder),
+  handed the prior passes' findings, pushing past them; order follows the goal dependency (e2e →
+  failure-mode → structural refine `execute` → KISS/DRY → smoke). A pass diagnoses then remediates:
+  trivial inline, structural appended to the refine plan as executable work the separate refine
+  `execute` builds. The refine build is conditional on structural findings; a pass diagnoses, it does
+  not rearchitect or relitigate the selection.
 - Each candidate is built on its own branch off a shared base; losing branches are never deleted.
 - Stop when enough has been learned to commit. This skill exists to discover a spec by building,
   not to loop indefinitely.

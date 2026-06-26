@@ -1,6 +1,6 @@
 ---
 name: comprehensive-review
-description: Conduct an independent review of a significant change. Use when requested to conduct a review or 3way review, or after implementation of a planned work package.
+description: Conduct an independent review of a significant change. Use when requested to conduct a review, or after implementation of a significant planned work package.
 ---
 
 # Comprehensive Review
