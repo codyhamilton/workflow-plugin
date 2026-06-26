@@ -66,15 +66,13 @@ Optimize for outcome quality per token, not for maximal autonomy or maximal para
 - Keep the orchestrator context lean. It should hold control state, not duplicate implementation detail.
 - Prefer phased execution by default: one child plan or one executable slice at a time.
 - Use the cheapest likely-successful worker available in the current environment for bounded implementation work.
-- Let the environment determine the exact worker type or model choice. Choose based on task shape, not on a hardcoded provider rule.
-- Escalate worker capability when the slice is genuinely ambiguous, cross-cutting, or has already failed for capability reasons.
 - If the next meaningful step depends on worker output, wait for the worker. Do not let the orchestrator drift into doing the implementation itself while waiting.
 
 Hints for subagent selection:
- - For typical small bounded work, a low cost, fast model like GPT mini or Haiku or Composer 2/Kimi (e.g if running in Cursor) with high effort where possible, is more cost effective than a larger model.
- - Several small models with clear bounded scope are cheaper and faster than one larger agent with union scope
- - However, decomposition into those smaller agents depends on the work being able to be cleanly sliced. If it can't, then keep it together and use a larger agent.
- - Review agents require cross-cutting context, requiring larger models with greater effort budgets.
+ - Within Cursor, always use Composer-2.5 except where specifically told to use another model.
+ - Within Claude Code, always use Haiku for research and small changes. Sonnet for large changes. Do not use Opus except where directed.
+ - Within Codex, Use GPT5.4 high for most work, using mini for exploration and xhigh for review. Do not use 5.5.
+ - Several small models with clear bounded scope are cheaper and faster than one larger agent. If a task is too large, look to peel off pieces into small agents, then the main worker consolidates and completes.
 
 ## Workflow
 
