@@ -1,7 +1,6 @@
 ---
 name: iterate
 description: Drive long-horizon work whose success criteria are not knowable up front, by building divergent candidate solutions, synthesising, consolidating and hardening, then extrapolating next steps.
-disable-model-invocation: true
 ---
 
 # Iterate
