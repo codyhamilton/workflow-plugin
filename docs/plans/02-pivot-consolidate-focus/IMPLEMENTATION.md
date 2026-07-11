@@ -17,15 +17,17 @@ Written progressively during execution, per the model this plan defines.
 
 ## Progress log
 
-- [ ] Briefs authored and committed (`briefs/phase-1..4`)
+- [x] Briefs authored and committed (`briefs/phase-1..4`)
 - [ ] Phase 1: plan skill revision
 - [ ] Phase 2: execute skill revision
-- [ ] Phase 3: comprehensive-review revision
+- [x] Phase 3: comprehensive-review revision
 - [ ] Phase 4: partition and re-composition
 
 ## What was built
 
-(Filled in as phases complete.)
+### Phase 3 — comprehensive-review (worker report, condensed)
+
+SKILL.md revised (71 → 114 lines): explicit Inputs section (marker-located plan folder, diff, verbatim intent + assumption ledger; local-run variant); output placement (REVIEW.md in the plan folder keyed to acceptance criteria; structural findings become self-contained `briefs/remediation-<NN>.md`, trivial findings stay inline); new "Intent and assumptions" lens ordered second; plan-sufficiency judgment with the one-way workflow-tuning flow stated; RECOVERED-INTENT.md fallback for artifact-less PRs. Right-sizing rules, lens structure, and one-external-loop posture retained. No reference.md created — the worker judged the original had no persuading-why prose to relocate (brief permitted this). No contradictions with DESIGN.md found; QA.md correctly left to the pipeline's QA stage.
 
 ## Tradeoffs and deviations
 
