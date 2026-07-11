@@ -47,40 +47,47 @@ the gain into the base the next cycle forks from. The sprint sprints; the consol
 repairs.**
 
 0. **Capture scope and base.** Record the user's broad goal verbatim — do not pressure them for a
-   success checklist; its absence is the reason for this skill. Establish the parent program folder
-   under `docs/plans/[NEW]-<goal>/` (see `plan` for the program/child-plan convention) and record
-   the goal, the loop-control choice (gated vs. autonomous, depth), and the base commit.
+   success checklist; its absence is the reason for this skill. Establish iterate's own plan folder
+   at `docs/plans/<NN>-<slug>/` — the same plain convention `plan` and `execute` use elsewhere (no
+   `[NEW]-` prefix; the slug is the unique key, `NN` is best-effort ordering only) — and record the
+   goal, the loop-control choice (gated vs. autonomous, depth), and the base commit. This folder
+   holds iterate's own cross-cycle artifacts (`OUTCOMES.md`, `iteration-NN/`, below); each
+   candidate's own `plan`/`execute` artifacts live on its own branch, not here.
 
 1. **Initial research (delegated).** Dispatch 1–3 research subagents to map the problem space, the
    existing code surface, and the constraints. They report raw findings; the orchestrator forwards
    their output verbatim — no synthesis, filtering, or conclusions of its own. Research is not
    planning; step 2 runs a separate planning subagent.
 
-2. **Plan and build candidate 1 (delegated).** A `plan` subagent receives the research output and
-   produces the plan; then an `execute` subagent builds it on its own branch off the base. The
-   planning and execution are separate subagents — the orchestrator dispatches each but does not
-   absorb either role. The candidate is allowed to be naive; its job is to reify the model and
-   become the spec for what follows. It carries the review `execute` already mandates.
+2. **Plan and build candidate 1 (delegated).** A `plan` subagent — dispatched with headless posture
+   declared explicitly in its brief, since iterate's own gates (not plan's checkpoint) own user
+   interaction — receives the research output and produces the plan; then an `execute` subagent —
+   dispatched with terminal review posture declared explicitly — builds it on its own branch off
+   the base. The planning and execution are separate subagents — the orchestrator dispatches each
+   but does not absorb either role. The candidate is allowed to be naive; its job is to reify the
+   model and become the spec for what follows. It carries the independent review terminal posture
+   mandates.
 
 3. **Propose and gate challengers (delegated).** For each challenger (up to 1–2), the divergence
    check sits **between `plan` and `execute`** — the plan *is* the proposal, and only a plan that
    clears the bar is built:
-   - **Plan = proposal.** Run `plan` against the prior build(s) given as *real code, not a prose
-     summary*, dispatched with `briefs/challenger-license.md` (the generative license, passed
-     verbatim). The planner is not given the divergence tests — that license is generative; the
-     tests are not (see Reasoning → The divergence bar).
+   - **Plan = proposal.** Run `plan`, headless posture declared explicitly, against the prior
+     build(s) given as *real code, not a prose summary*, dispatched with
+     `briefs/challenger-license.md` (the generative license, passed verbatim). The planner is not
+     given the divergence tests — that license is generative; the tests are not (see `reference.md`
+     → The divergence bar).
    - **Evaluate divergence.** A clean approver subagent that did not author the plan applies the
      divergence bar and returns a verdict. Dispatch it with `briefs/divergence-approver.md`,
      passed verbatim.
-   - **On pass:** run `execute` of that plan on a fresh branch off the base. A third challenger, if
-     reached, sees both prior builds.
+   - **On pass:** run `execute`, terminal review posture declared explicitly, on that plan on a
+     fresh branch off the base. A third challenger, if reached, sees both prior builds.
    - **On fail (safe union or no genuine fork):** do **not** build it. The same approver performs
      the **harvest analysis** — extracting the worthwhile ideas from the rejected plan into the
      consolidation queue for step 5 — and the cycle moves on. "No plan clears the bar" is a valid,
      expected stop; record it and go to synthesis.
 
 4. **Synthesize across candidates (delegated).** A clean synthesis subagent that authored no
-   candidate does a single deep cross-candidate read and, in this order (see Reasoning →
+   candidate does a single deep cross-candidate read and, in this order (see `reference.md` →
    Synthesis), dispatched with `briefs/synthesis.md` passed verbatim: first revises the
    long-horizon **outcome statement** the builds revealed — the yardstick that did not exist at
    step 0 — into `OUTCOMES.md`; then selects the approach that is the better *foundation to keep
@@ -90,13 +97,16 @@ repairs.**
    **Selection gate:** surface the revised outcomes and the selection rationale to the user (gated
    by default) — this is the moment to confirm or correct the reconceived priorities.
 
-5. **Consolidate onto the winner — capture (delegated).** A `plan` subagent receives a **defined
-   scope** — the winner branch, the harvest list with its code pointers (plus any safe-union ideas
-   harvested at step 3), and `OUTCOMES.md` as the design-altitude reference — and produces a
-   consolidation plan; it does not re-research across candidates. Then an `execute` subagent builds
-   it, grafting the harvested ideas onto the winner. This movement is **additive**: it captures the
-   value the cycle discovered. It does **not** yet lock the base — making the integrated artifact
-   actually work is step 6. Keep every challenger branch intact.
+5. **Consolidate onto the winner — capture (delegated).** A `plan` subagent, headless posture
+   declared explicitly, receives a **defined scope** — the winner branch, the harvest list with its
+   code pointers (plus any safe-union ideas harvested at step 3), and `OUTCOMES.md` as the
+   design-altitude reference — and produces a consolidation plan; it does not re-research across
+   candidates. Then an `execute` subagent, dispatched with **pipeline** review posture declared
+   explicitly (step 6, harden, is the downstream review stage for the consolidated artifact — the
+   capture build does not get its own terminal review), builds it, grafting the harvested ideas
+   onto the winner. This movement is **additive**: it captures the value the cycle discovered. It
+   does **not** yet lock the base — making the integrated artifact actually work is step 6. Keep
+   every challenger branch intact.
 
 6. **Harden — verify and lock the base (delegated).** The consolidated artifact is a new thing no
    one has reviewed end-to-end: the multi-branch graft seam is where integration breakage and
@@ -118,8 +128,10 @@ repairs.**
    - **e2e validation** — actually exercise the built behaviour at the highest fidelity the harness
      supports (drive the app → automated e2e → manual walkthrough → static); record the rung reached.
    - **failure-mode analysis** — edges, resilience, where it breaks (only probeable once it runs).
-   - **refine `execute`** — build the accumulated structural must-fix plan. Conditional: if no
-     structural item accrued, there is nothing to build, which is a valid outcome.
+   - **refine `execute`** — dispatched with **pipeline** review posture declared explicitly (the
+     remaining relay passes are the downstream review) — build the accumulated structural must-fix
+     plan. Conditional: if no structural item accrued, there is nothing to build, which is a valid
+     outcome.
    - **simplify & consolidate (KISS/DRY)** — collapse the duplication the graft introduced, within
      the chosen approach, without over-abstracting. Runs *after* the structural build, because DRY
      targets the final shape and a structural fix often dissolves the duplication it would hand-collapse.
@@ -142,77 +154,6 @@ repairs.**
    to **gated** at the selection and next-step decisions; on an autonomous run, **cap at 2 cycles**
    unless the user sets a larger depth or stop condition. Stop when the depth/stop condition is
    reached, the gates say stop, or extrapolation produces no step worth building.
-
-## Reasoning
-
-The whole skill mirrors how developers build things too big to hold in their heads: you put a first
-version in code to reify your model, then challenge it *there*, against something concrete, not
-against your imagination. Four ideas carry it.
-
-- **Prior builds are the functional spec.** A challenger is never told to "do something different"
-  in the abstract; it is handed the previous build(s) as a working contract and told to find a
-  genuinely different approach using the lessons those builds made legible. This is why candidates
-  are sequential, never parallel, and why they receive real code rather than a paraphrase — that
-  sequencing is what makes this more than best-of-n.
-
-- **The divergence bar** is the load-bearing gate, and it works against the grain of how agents
-  behave: asked to "find a materially different approach," an agent will always return one and
-  rationalize it. Two moves give the gate teeth. First, **invert the default** — the burden of
-  proof is on building a challenger, not on stopping; "I cannot find a genuine fork" is the
-  expected, valid, and frequently correct answer, and is itself the signal that this layer of
-  exploration is exhausted. Second, **split generation from acceptance** across two agents: the
-  planner gets wide license (criteria given to a generator become a target it games — reframing a
-  fine problem just to clear a bar), while the clean approver holds the tests (criteria given to a
-  filter stay a filter). Clearing the bar only earns the right to be built; the candidate must
-  still win synthesis. The three tests and the approver's contract live in
-  `briefs/divergence-approver.md`; the generative license in `briefs/challenger-license.md` — the
-  split between those two files *is* the split between acceptance and generation.
-
-- **The criteria are discovered, not declared.** Synthesis does not score candidates against a
-  checklist written before anything existed. It reads the built candidates and surfaces the
-  criteria *they* revealed to matter — refining the long-horizon `OUTCOMES.md` — then selects
-  against those. This is the "get in the car and drive it before you can assess what counts" step,
-  made concrete; the outcomes are a moving target the cycle sharpens, not a spec fixed at step 0.
-
-- **Synthesis is design-altitude, not code review.** Each candidate already received code-level
-  review inside its `execute` pass; re-running that misses the point. The question is which approach
-  is the better *foundation to keep building on*, not which implementation is most polished — a
-  rough build of a superior approach beats a polished build of a dead end, because consolidation
-  fixes roughness but cannot fix a bad foundation. The synthesis agent's full remit and its
-  load-bearing output ordering (yardstick before selection, so selection cannot be bent to fit a
-  favorite) live in `briefs/synthesis.md`. A null result is valid and common — do not invent a
-  winner's superiority because a selection was requested.
-
-- **Consolidation is the only convergent phase, so it must verify, not just capture.** Everything
-  before it opens options; this is where they close and the gain is banked into the base the next
-  cycle forks from. Capture (step 5) is additive — it grafts the winner and the harvest — but the
-  grafted whole is a new thing no per-candidate review ever saw, and the multi-branch seam is
-  exactly where integration breakage and duplication live. So harden (step 6) is the skill's own
-  build→clean-review→repair pattern promoted from the candidate level to the integration level: a
-  clean reviewer applies a **deliverable** bar — does it work end-to-end, is it resilient, is it
-  free of the graft's duplication — that `OUTCOMES.md`, deliberately design-altitude, does not. The
-  bar self-limits: KISS/DRY can only collapse duplication *within* the chosen approach, never
-  rearchitect, so the reviewer cannot relitigate selection. A soft base compounds — every later
-  sprint builds on it — and the review's findings are also the empirical fuel for extrapolation,
-  which is why harden precedes step 7.
-
-- **Harden is a sequential relay, for the same reason candidates are.** Parallel reviewers with
-  separate focuses are best-of-n sampling with no divergence pressure: they mode-collapse onto the
-  same obvious subset and miss the long tail. Hand each pass the prior passes' findings and tell it
-  to push past them, and the reviewers diverge by construction — the *building* thesis (prior as
-  spec, find what's different) pointed at *verifying*. Sequential committed passes also buy what
-  parallel cannot: no write contention, a refine plan that accumulates safely, and each pass
-  reviewing the *corrected* state its predecessors left. The cost is reloading the artifact per pass
-  (volume × N) — the same speed-for-coverage trade the skill already accepts for candidates, and
-  worth it: N restatements of the obvious is the failure being bought out of. The relay is finite by
-  design; "review until clean" is the looping this skill exists to prevent. (The one ordering subtlety:
-  DRY runs *after* the structural refine build, because it targets the final shape.)
-
-**Branch isolation and provenance.** Each candidate lives on its own branch off the shared base, so
-the candidates are directly comparable; sequential builds mean separate branches suffice — no
-worktrees. Never build a challenger by mutating a prior build in place — that destroys the spec.
-Losing branches are never deleted: they are the reified alternatives and the richest provenance the
-cycle produces, and the spec for any future divergence.
 
 ## Model allocation
 
@@ -255,14 +196,14 @@ invites Goodhart gaming (the same reason `plan` warns against forcing a template
 Every artifact below names a consumer or a gate; one that has neither is ceremony. `briefs/` holds
 the verbatim subagent context (see Workflow); it is the input counterpart to these outputs.
 
-Per parent program:
+Per iterate plan folder (`docs/plans/<NN>-<slug>/`):
 
 - the goal, the loop-control policy, and the base-commit lineage across cycles.
 - `OUTCOMES.md` — the **living** outcome statement: what success looks like for the long horizon,
   in qualitative prose, revised by the synthesis agent each cycle (step 4). Consumed by selection
   (step 4), extrapolation (step 6), and the next cycle's synthesis. No metrics tables.
 
-Per cycle, under `docs/plans/[NEW]-<goal>/iteration-NN/`:
+Per cycle, under `docs/plans/<NN>-<slug>/iteration-NN/`:
 
 - `CANDIDATES.md` — the candidate registry: each candidate's branch, its divergence thesis (which
   test it cleared), and pointers to its plan and execution artifacts. Record the disposition the
@@ -295,13 +236,20 @@ Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTAT
   `briefs/`, not paraphrased.
 - Candidates are sequential, never parallel, and each sees the prior build(s) as real code.
 - A challenger is built only when its plan clears the divergence bar, judged by a clean approver,
-  not the planner. A rejected plan is harvested, not built.
+  not the planner (the burden of proof is on building a challenger, not on stopping — "no genuine
+  fork" is a valid, expected answer). A rejected plan is harvested, not built.
+- Posture is always declared explicitly when dispatching `plan` or `execute`, never left to default
+  inference: `plan` subagents run headless (iterate's gates, not plan's checkpoint, own user
+  interaction); `execute` subagents run terminal review posture for candidate builds (steps 2–3) and
+  pipeline review posture for the consolidation capture and refine builds (steps 5–6), where harden
+  is the downstream review stage.
 - The synthesis agent reconceives priorities, selects, and harvests in one cross-candidate read,
   then stops — it does not plan or build. The consolidation planner gets a defined scope from it,
   not a remit to re-research the candidates.
 - Consolidation captures (step 5, additive: graft winner + harvest), then **harden** (step 6)
   verifies the integrated base and locks it. Harden is a **bounded, sequential reviewer relay** —
-  never parallel, never "review until clean" — each pass clean (not the consolidation builder),
+  never parallel (parallel reviewers mode-collapse onto the same obvious subset; sequential passes
+  diverge by construction), never "review until clean" — each pass clean (not the consolidation builder),
   handed the prior passes' findings, pushing past them; order follows the goal dependency (e2e →
   failure-mode → structural refine `execute` → KISS/DRY → smoke). A pass diagnoses then remediates:
   trivial inline, structural appended to the refine plan as executable work the separate refine
@@ -310,3 +258,9 @@ Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTAT
 - Each candidate is built on its own branch off a shared base; losing branches are never deleted.
 - Stop when enough has been learned to commit. This skill exists to discover a spec by building,
   not to loop indefinitely.
+
+## Reference
+
+`reference.md`, beside this file, holds the design rationale behind this skill's mechanisms — why
+sequential beats parallel, why the divergence bar is split across two agents, why harden is a relay
+— for whoever revises this skill later. It is not loaded during normal execution.

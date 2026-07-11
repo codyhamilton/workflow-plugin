@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting plan on a new repo or when plan reports that stable docs are absent or thin.
+description: Bootstrap stable docs (docs/OVERVIEW.md and docs/ARCHITECTURE.md) for a repo that does not have them yet. Use when starting plan on a new repo or when plan reports that stable docs are absent or thin.
 disable-model-invocation: true
 ---
 
@@ -20,7 +20,7 @@ Read everything available before saying a word:
 
 - `docs/ARCHITECTURE.md` if it exists
 - `docs/OVERVIEW.md` if it exists
-- `docs/ROADMAP.md` if it exists
+- `docs/ROADMAP.md` if it exists (legacy — setup no longer creates or maintains this file; if found, its content is salvage material for phase 3, not something to recreate)
 - Any files in `docs/design/`
 - `README.md` and top-level config files (package.json, Cargo.toml, go.mod, pyproject.toml, etc.)
 - Source tree structure (`ls` the top level, `ls src/` or equivalent)
@@ -65,8 +65,8 @@ Wait for response.
 
 Wait for response.
 
-**Round 3 — Current state and constraints:**
-> "What is the current state of the project — what's working, what's in progress, what's not started? Are there significant constraints, known technical debt, or things that are intentionally out of scope?"
+**Round 3 — Constraints and non-goals:**
+> "Are there significant constraints or known technical debt? Is there anything intentionally out of scope for this system's architecture — things plan should not treat as fair game?"
 
 Wait for response.
 
@@ -74,7 +74,7 @@ Record user responses. You do not need to ask follow-up questions unless a respo
 
 ### Phase 5: Write Docs
 
-Write `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` using the content from reconnaissance and the guided conversation.
+Write `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` using the content from reconnaissance and the guided conversation. Setup does not create a canonical schedule doc — the backlog is dead; PRs and the issue tracker carry status, not a repo file.
 
 **`docs/OVERVIEW.md`** must be a single paragraph (3–5 sentences) covering: what the project does, who uses it, and what success looks like. This is the first file the plan skill reads — keep it concise and concrete.
 
@@ -85,22 +85,16 @@ Write `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` using th
 - **Component Map**: Main subsystems, what each does, how they connect. Can be prose or a simple table.
 - **Invariants**: Constraints that must hold across changes — things that should never break.
 - **Key Data Flows**: The two or three most important end-to-end flows through the system.
+- **Non-Goals** (optional): What is explicitly out of scope for the system's architecture, drawn from Round 3. Prevents scope creep in plan. Include only when the conversation actually surfaced real constraints — omit rather than pad with generic filler.
 - **Stable References**: Links or paths to other docs that planners should consult.
 
-**`docs/ROADMAP.md`** must have these sections:
-
-- **Current State**: What is shipped and working.
-- **Active Work**: What is in progress right now.
-- **Planned**: What is clearly next but not yet started.
-- **Not In Scope**: What is explicitly out of scope. Prevents scope creep in plan.
-
-If partial content from existing docs was found in phase 3, merge it into the appropriate sections rather than duplicating it.
+If partial content from existing docs was found in phase 3, merge it into the appropriate sections rather than duplicating it. If an existing `docs/ROADMAP.md` is found during reconnaissance, do not recreate or update it as a schedule — its "Not In Scope" content, if any, is exactly the material Round 3 gathers; fold it into `docs/ARCHITECTURE.md`'s Non-Goals section instead.
 
 ### Phase 6: Plan Hook
 
 After writing the docs, tell the user:
 
-> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`). You can now run `/workflow:plan` to start a plan session — it will read these docs automatically."
+> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`). You can now run `/workflow:plan` to start a plan session — it will read these docs automatically."
 
 ## Rules
 

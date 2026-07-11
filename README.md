@@ -1,6 +1,21 @@
 # workflow-plugin
 
-Private plugin marketplace containing workflow skills for plan, execute, and review.
+Private plugin marketplace containing workflow skills for plan, execute, and review, split across
+a cloud-safe core plugin and a local lab plugin.
+
+## Breaking change: the folder-status taxonomy is removed
+
+Earlier versions of this plugin used the repo itself as a backlog: `[NEW]-` prefixes on plan
+folders, numeric renumbering as work progressed, a parent-program folder hierarchy, and
+`docs/ROADMAP.md` as a canonical schedule. **All of that is gone.** A plan folder now means exactly
+one thing — the work is being built or was built — and status lives in the PR and the issue
+tracker, never in a folder name or a schedule doc. `setup` no longer creates `docs/ROADMAP.md`.
+
+**There is no automated migration.** If a repo adopted the old convention via this plugin,
+upgrading gets you the new behavior going forward; it does not rename, renumber, or touch existing
+folders. Old numbered folders (including `[NEW]-` prefixed ones) remain valid as historical
+provenance — leave them as they are. New plan folders from this version on follow the plain
+`docs/plans/<NN>-<slug>/` convention with no status encoded in the name.
 
 ## Operating hypotheses
 
@@ -26,13 +41,19 @@ Beyond validating the hypotheses head-to-head, candidate variations to try when 
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
-| `plan` | Create and revise implementation plans |
-| `execute` | Execute planned work packages with delegation and review |
-| `comprehensive-review` | Independent review of significant changes |
-| `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
-| `workflow-tuning` | Improve the plan/execute/review workflow itself |
+Two plugins. **Core** (`workflow`) is cloud-safe — no interactive gates that dead-end headless, no
+local-filesystem dependencies — and is what a build/pipeline environment installs. **Lab**
+(`workflow-lab`) is local and/or interactive; the pipeline never requires it.
+
+| Plugin | Skill | Description |
+|--------|-------|-------------|
+| `workflow` (core) | `plan` | Create and revise implementation plans; interactive or headless posture |
+| `workflow` (core) | `execute` | Execute planned work packages with brief-based delegation; review sized to terminal or pipeline posture |
+| `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria |
+| `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
+| `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
+| `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
+| `workflow-lab` | `workflow-tuning` | Improve the plan/execute/review workflow itself, from retros and merged-PR outcomes |
 
 ## Quick install
 
@@ -42,19 +63,29 @@ cd workflow-plugin
 ./install.sh
 ```
 
-The installer detects opencode, Claude Code, and Cursor and asks before installing into each. No flags, no config required.
+The installer detects opencode, Claude Code, and Cursor and asks before installing into each — core
+and lab are separate prompts, so a cloud build image can accept core only. No flags, no config
+required.
 
 ## Manual installation
 
 ### Claude Code / opencode
 
-Both Claude Code and opencode use the same skills directory. Copy skills directly:
+Both Claude Code and opencode use the same skills directory. Copy core skills directly:
 
 ```sh
 cp -r skills/* ~/.claude/skills/
 ```
 
-Skills are available immediately. For marketplace-style install (so colleagues can `/plugin install workflow@workflow-plugin`), register this repo in `~/.claude/plugins/known_marketplaces.json`:
+Add the lab skills too, for local/interactive use:
+
+```sh
+cp -r plugins/workflow-lab/skills/* ~/.claude/skills/
+```
+
+Skills are available immediately. For marketplace-style install (so colleagues can
+`/plugin install workflow@workflow-plugin`), register this repo in
+`~/.claude/plugins/known_marketplaces.json`:
 
 ```json
 {
@@ -68,35 +99,49 @@ Skills are available immediately. For marketplace-style install (so colleagues c
 }
 ```
 
-Then install with:
+Then install either or both plugins:
 
 ```
 /plugin install workflow@workflow-plugin
+/plugin install workflow-lab@workflow-plugin
 ```
 
-Skills become available as `workflow:plan`, `workflow:execute`, etc.
+Skills become available as `workflow:plan`, `workflow:execute`, `workflow-lab:iterate`, etc.
 
 ### Cursor
 
-Clone the repo into Cursor's local plugins directory, then restart Cursor:
+Clone the repo into Cursor's local plugins directory for the core plugin, then restart Cursor:
 
 ```sh
 git clone git@github.com:codyhamilton/workflow-plugin.git ~/.cursor/plugins/local/workflow
 ```
 
-Or run `./install.sh` and accept the Cursor prompt.
+For the lab plugin too, copy its subtree into a second local plugin directory:
+
+```sh
+cp -rL ~/.cursor/plugins/local/workflow/plugins/workflow-lab ~/.cursor/plugins/local/workflow-lab
+```
+
+Or run `./install.sh` and accept the Cursor prompts (core, then optionally lab).
 
 ## Structure
 
 ```
-workflow-plugin/
+workflow-plugin/                    (repo root — the `workflow` core plugin)
 ├── .claude-plugin/
 │   ├── plugin.json
-│   └── marketplace.json
+│   └── marketplace.json            (lists both plugins)
 ├── .cursor-plugin/plugin.json
-└── skills/
-    ├── plan/
-    ├── execute/
-    ├── comprehensive-review/
-    └── workflow-tuning/
+├── skills/                         (core: plan, execute, comprehensive-review)
+│   ├── plan/
+│   ├── execute/
+│   └── comprehensive-review/
+└── plugins/workflow-lab/           (lab plugin, its own manifests + skills/)
+    ├── .claude-plugin/plugin.json
+    ├── .cursor-plugin/plugin.json
+    └── skills/
+        ├── setup/
+        ├── iterate/
+        ├── transcript-parser/
+        └── workflow-tuning/
 ```

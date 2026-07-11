@@ -30,7 +30,14 @@ These plans steer work without overcommitting to low-accuracy implementation det
 
 ### 2. Parent program plus child plans is a good default
 
-The parent-program model has proven useful in practice:
+*(Superseded mechanism, kept as historical observation: the parent-program/`ROADMAP.md` folder
+taxonomy this lesson describes was removed in the pivot-consolidate-focus revision — status now
+lives in the PR and the tracker, not a folder hierarchy, and `plan` no longer has a program/child-plan
+convention. The value this lesson points at — defaulting work to one slice at a time — now comes
+from a stable design-intent doc in `docs/design/` plus a sequence of self-contained plan-execute
+runs, not a `ROADMAP.md`. Do not cite this lesson as license to recreate the old taxonomy.)*
+
+The parent-program model proved useful in practice at the time:
 
 - parent plan explains why the program exists
 - roadmap shows ordering and dependency truth
@@ -43,7 +50,7 @@ Examples:
 - `garcia-music/docs/plans/02-player-design-system/ROADMAP.md`
 - `lemmings/docs/plans/[NEW]-operator-surface-redesign/ROADMAP.md`
 
-This supports cost control and focus by defaulting work to one slice at a time.
+This supported cost control and focus by defaulting work to one slice at a time.
 
 ### 3. Implementation and review artifacts are valuable
 
@@ -202,7 +209,7 @@ The orchestrator's context should hold control state, not duplicate implementati
 
 ### 16. Orchestrators delegating must not edit deliverable files themselves
 
-When delegating, the parent's edit calls should be limited to orchestration artifacts: `IMPLEMENTATION.md`, `REVIEW.md`, `ROADMAP.md`, and commit operations. Zero edits to the actual deliverable files (skills, code, config being changed).
+When delegating, the parent's edit calls should be limited to orchestration artifacts: `IMPLEMENTATION.md`, `REVIEW.md`, and commit operations. Zero edits to the actual deliverable files (skills, code, config being changed).
 
 The failure mode from lesson 11 has a measurable signature: parent edit count exceeds subagent edit count despite delegation being present.
 

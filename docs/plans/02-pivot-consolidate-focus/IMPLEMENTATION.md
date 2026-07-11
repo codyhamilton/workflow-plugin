@@ -21,7 +21,9 @@ Written progressively during execution, per the model this plan defines.
 - [x] Phase 1: plan skill revision
 - [x] Phase 2: execute skill revision
 - [x] Phase 3: comprehensive-review revision
-- [ ] Phase 4: partition and re-composition
+- [x] Phase 4: partition and re-composition
+
+Execution complete. Comprehensive review deliberately not run — the user (invoker) declared execution-only for this session; the downstream pipeline stage owns the deep review of this PR.
 
 ## What was built
 
@@ -37,6 +39,13 @@ SKILL.md revised; new `skills/execute/reference.md`. Removed: ROADMAP sync, `[NE
 
 SKILL.md restructured from the numbered-with-insertions checklist into six named phases (Capture → Ground → Resolve → Write → Challenge → Checkpoint; Resolve and Checkpoint branch by posture). Backlog taxonomy fully removed. Added: Postures section (interactive default / headless declared, never inferred), plan-folder convention section (slug unique, `NN` best-effort, folder-on-branch = being/was built, multi-PR programs as design-intent doc + runs, `Workflow-Plan:` marker), QA-drivable acceptance criteria. New `skills/plan/reference.md` holds the relocated persuading-why with a consumer note. Templates: PLAN.md gained the Assumption Ledger and split user-facing/non-user-facing criteria; PROVENANCE.md marked interactive-posture-only. Question discipline, pivot detection, stable-docs grounding, and the anti-mechanical-template rule carried forward. No contradictions with DESIGN.md reported.
 
+### Phase 4 — partition and re-composition (worker report, condensed)
+
+Partition layout: core skills stay at repo root `skills/` (already the marketplace's `source: "./"`); lab skills moved to `plugins/workflow-lab/skills/` with their own `.claude-plugin` and `.cursor-plugin` manifests; `marketplace.json` lists both plugins; `workflow` bumped to 2.0.0 (breaking), `workflow-lab` at 1.0.0. iterate: `[NEW]-<goal>` convention replaced with plain `<NN>-<slug>` (keeping `iteration-NN/`), every plan/execute dispatch now declares posture (headless plans; terminal candidate builds; pipeline consolidation/refine builds with harden as the downstream review), Reasoning section moved verbatim to `reference.md` with one-line orienting hooks kept on the two invariants that leaned on it. setup: no longer creates `docs/ROADMAP.md`; legacy ROADMAPs are salvage material; Non-Goals folded into the ARCHITECTURE template. transcript-parser: both Python snippets extracted to `scripts/parse_session.py`; fixed a pre-existing `OPENCODE` → `OPENCODE_RUN_ID` bug. workflow-tuning: gained the pipeline-outcomes harvest (merged-PR REVIEW.md/QA.md/remediation briefs as eval corpus); stale ROADMAP rule fixed; old parent-program lesson kept with a superseded-mechanism caveat. `install.sh` asks separately for core vs lab; invalid trailing comma in `.cursor-plugin/plugin.json` fixed. `docs/OVERVIEW.md`/`docs/ARCHITECTURE.md` rewritten for the seven-skill/two-plugin model — ARCHITECTURE is now the durable home of the seam/taxonomy/postures contract (DESIGN.md becomes historical after merge). README: skills table split by plugin, breaking-change callout, updated installs; hypotheses/variants sections untouched.
+
 ## Tradeoffs and deviations
 
 - **Pipeline posture and REVIEW.md** (Phase 2 worker judgment, endorsed by orchestrator): under pipeline posture execute does not write REVIEW.md — DESIGN.md assigns REVIEW.md ownership to the pipeline stage; execute's pre-flight self-verification results land in IMPLEMENTATION.md instead. The Phase 2 brief hadn't specified where pre-flight results land; this resolution follows the seam ownership contract.
+- **Posture on all iterate dispatches** (Phase 4 worker judgment, endorsed by orchestrator): DESIGN.md only explicitly requires iterate's plan dispatches to declare posture; the worker extended declared-not-inferred to iterate's execute dispatches too (terminal for candidates, pipeline for consolidation/refine where harden is the downstream review). Consistent application of the same invariant; terminal was already the de facto default.
+- **Durable contract home** (Phase 4 worker judgment, endorsed by orchestrator): the seam/taxonomy/postures contract now lives durably in `docs/ARCHITECTURE.md`, since plan-scoped DESIGN.md becomes historical provenance after merge; workflow-tuning's citation points there.
+- **Single PR, phases as commits**: the plan's "each phase produces its own PR" was overridden by the user's direction to complete execution in this session; phases landed as sequential commits on this branch (phase 3 → 2 → 1 → 4, in completion order).

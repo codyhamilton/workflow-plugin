@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "workflow-lab",
+  "description": "Local/interactive workflow skills: setup, iterate, transcript-parser, workflow-tuning. Never required by the cloud pipeline.",
+  "version": "1.0.0",
+  "author": {
+    "name": "William Hamilton",
+    "email": "codyh@ctzns.net"
+  }
+}

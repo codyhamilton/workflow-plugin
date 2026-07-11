@@ -2,51 +2,59 @@
 
 ## What It Is
 
-A workflow plugin for opencode / Claude Code that provides four interdependent skills for structured plan/execute/review workflows across repositories.
+A workflow plugin for Claude Code, opencode, and Cursor providing seven skills, split across two plugins, for structured plan/execute/review workflows — usable identically by a human at the keyboard and by a staged cloud pipeline (build agent → automated review/QA → merge).
 
 ## Who Uses It
 
 Teams and individual developers who want:
-- Explicit, durable plan with intent capture and scope validation
-- Delegated implementation with orchestration and cost discipline
-- Mandatory independent review after implementation
-- Observable lessons from real plan artifacts to improve the workflow itself
+- Explicit, durable plans with verbatim intent capture and scope validation
+- Delegated implementation via authored briefs, not orchestrator paraphrase
+- Independent review keyed to the plan's acceptance criteria, right-sized to whether a downstream pipeline stage exists
+- A local lab for bootstrapping repo docs, running divergent-candidate exploration, and tuning the workflow itself from real outcomes
 
 ## The Skills
 
-1. **plan** — Create PLAN.md and DESIGN.md artifacts. Capture verbatim user intent, validate scope, detect architectural implications, ask only decisions that matter.
+**Core plugin (`workflow`)** — cloud-safe, no interactive dead-ends, installable in build and pipeline environments:
 
-2. **execute** — Execute existing plans. Rightsize subagents, maintain orchestration clarity, run mandatory review, write completion artifacts (IMPLEMENTATION.md, REVIEW.md).
+1. **plan** — Produces `PLAN.md` (and `DESIGN.md` when contracts need reification). Captures verbatim user intent, validates scope, detects architectural drift, asks only decisions that matter. Runs interactive (checkpoint held) or headless (assumption ledger instead of questions), by explicit declaration.
+2. **execute** — Executes an existing plan. Dispatches rightsized workers with authored briefs, writes `IMPLEMENTATION.md` progressively, runs review sized to the declared posture (terminal: mandatory independent review; pipeline: pre-flight self-verification only), lands a PR carrying the `Workflow-Plan:` marker.
+3. **comprehensive-review** — Independent review keyed to `PLAN.md`'s acceptance criteria. Writes `REVIEW.md` and per-finding remediation briefs into the plan folder; includes an intent-and-assumptions lens and a plan-sufficiency judgment. Falls back to a recovered-intent note when a PR arrives with no plan folder.
 
-3. **comprehensive-review** — Independent review of completed work. Four lenses: contracts/correctness, failure modes, real usefulness, domain-specific concerns. Capped at one external loop before self-review.
+**Lab plugin (`workflow-lab`)** — local and/or interactive; never required by the pipeline:
 
-4. **workflow-tuning** — Meta-skill for improving the workflow itself. Holds real-world lessons from executed plans. Includes eval capability for validating skill prompt changes against fixtures.
+4. **setup** — Bootstraps `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for repos that lack them, via a permission-gated, one-question-per-round conversation.
+5. **iterate** — Long-horizon exploration for goals whose success criteria aren't knowable up front: sequential divergent candidates (built via `plan` + `execute`), a divergence gate, cross-candidate synthesis, additive consolidation, then a hardening review relay that locks the base.
+6. **transcript-parser** — Extracts objective cost metrics (agents spawned, tool turns, context estimate, wall time) from a session transcript into eval cost-comparison format.
+7. **workflow-tuning** — Holds real-world lessons from plan/execute/review workflows and runs evals comparing candidate skill changes against a baseline and reference implementation; harvests both retros and merged PRs' pipeline outcomes (`REVIEW.md`, `QA.md`, remediation briefs).
 
 ## Core Intent
 
 Optimize for outcome quality per token. Prevent common failures:
 - Silent architectural pivots
-- Lost user intent through paraphrasing
-- Implementation without contracts
+- Lost user intent through paraphrasing — orchestrators route context verbatim, they do not translate it
+- Implementation without explicit contracts
 - Review that finds easy nits instead of underlying problems
 - Documentation cascades that mostly restate the code
+- A repo-as-backlog mental model — status lives in the PR and the tracker, never in a folder name or a canonical schedule doc
 
 ## Key Design Decisions
 
-- Plans are concise and decision-oriented, not implementation specs
-- Stable docs are concept maps and intent anchors, not code paraphrases
-- DESIGN.md is optional — only when it reifies target shape or cross-implementor contracts
-- Phased execution is the default, with explicit cost/quality tradeoffs
-- Review is focused and capped; one external loop + self-review model, not repeated loops
+- Plan and execute stay separate skills, composed at the run level (never fused into one context), because a dedicated planning context produces more accurate plans and preserves gating, plan validation, and the option to plan without building.
+- Nothing in the repo carries status. A plan folder existing on a branch means the work is being built or was built — nothing else. Deferred work becomes a design-intent doc or a tracker issue.
+- Coordination between agents travels as authored briefs, routed verbatim — never as an orchestrator's paraphrase of the plan or the review.
+- Posture (interactive/headless for plan; terminal/pipeline for execute's review) is declared explicitly by the invoker, never inferred from environment or TTY.
+- `DESIGN.md` is optional — only when it reifies target shape or cross-implementor contracts.
+- Orienting-why (what changes agent behavior in an unspecified situation) stays in each skill body; persuading-why (design-justification prose) lives in a per-skill `reference.md`, not loaded during normal execution.
 
 ## Stability Boundaries
 
-**Stable** (should not change):
-- The four-skill structure and their core purposes
-- The plan/execute/review workflow loop
-- The provenance capture model (verbatim user intent in PLAN.md)
+**Stable** (should not change casually):
+- The seven-skill structure across the core/lab partition, and each skill's core purpose
+- The plan → execute → review workflow loop and the PR artifact seam that lets the pipeline locate a plan folder mechanically
+- The artifact taxonomy: durable artifacts carry intent and outcome, briefs carry run-scoped coordination, nothing carries status
+- Verbatim intent capture in `PLAN.md`'s Intent section
 
 **Under improvement** (actively evolving):
-- Provenance capture — moving from agent convention to transcript extraction
-- Setup process — bootstrapping missing stable docs
-- Eval infrastructure — testing skill prompt variations against fixtures
+- The operating hypotheses in `README.md` — falsifiable lenses awaiting a dedicated eval effort
+- Eval infrastructure and workflow-tuning's harvest of pipeline outcomes
+- Per-harness mechanics (model allocation, session-ID capture) kept in reference/config files precisely because they rot faster than the skill bodies
