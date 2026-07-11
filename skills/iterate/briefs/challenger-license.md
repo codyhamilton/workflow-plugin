@@ -19,7 +19,7 @@ license: you may challenge the whole conception — the internal structure, the 
 spec to depart from, not a template to refine. A challenger that differs only cosmetically is
 worthless; a challenger that rethinks what the thing should be is the point.
 
-Produce a full plan for that approach (per the `plan` skill).
+Produce a full plan for that approach (per the `workflow-plan` skill).
 
 > Note: you are intentionally **not** given the divergence tests the approver will apply.
 > Your job is to generate the best genuinely-different approach, not to engineer a plan that

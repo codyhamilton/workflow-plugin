@@ -1,6 +1,6 @@
 ---
 name: workflow-tuning
-description: Captures observed lessons about plan/execute/review workflows, documentation economy, execution cost, phasing, and review posture. Use when refining plan, execute, or review skills; designing workflow evals; or comparing real plan artifacts to decide what workflow improvements are worth making.
+description: Captures observed lessons about plan/execute/review workflows, documentation economy, execution cost, phasing, and review posture. Use when refining workflow-plan, workflow-execute, or review skills; designing workflow evals; or comparing real plan artifacts to decide what workflow improvements are worth making.
 disable-model-invocation: true
 ---
 
@@ -33,7 +33,7 @@ It is for improving the workflow itself, not for executing a single implementati
    - cost or latency
 3. If it mainly adds structure without improving one of those, avoid it.
 4. Prefer lightweight implementation plans over strict handoff contracts unless the work is clearly parallel, high-risk, or long-running.
-5. Prefer cheap, obedient workers for bounded local tasks. Use frontier models for plan, synthesis, ambiguous design judgment, and high-value review.
+5. Prefer cheap, obedient workers for bounded local tasks. Use frontier models for plan, synthesis, ambiguous design judgment, and high-value review. Concrete model IDs live in `protocol/models.yaml`, not in artifact rules.
 6. If a worker result is required, the orchestrator should wait rather than absorb the implementation and bloat its own context.
 
 ## Documentation Economy

@@ -1,0 +1,55 @@
+# Environment-specific model recommendations.
+# Skills should reference this file (or summarize it) rather than hard-coding model IDs
+# into artifact/workflow rules. Swap or override per harness without editing skill prompts.
+#
+# These are starting allocations, not settled policy. Prefer the cheapest model that
+# still succeeds for bounded work; spend premium models on plan, synthesis, ambiguous
+# design judgment, and high-value review.
+
+version: 1
+
+defaults:
+  cursor: composer-2.5
+  claude: sonnet
+  codex: gpt-5.4-high
+
+execute:
+  cursor:
+    default: composer-2.5
+  claude:
+    research_and_small: haiku
+    large_changes: sonnet
+    # Do not use Opus unless directed
+    avoid: [opus]
+  codex:
+    default: gpt-5.4-high
+    exploration: gpt-5.4-mini
+    review: gpt-5.4-xhigh
+    # Do not use 5.5 unless directed
+    avoid: [gpt-5.5]
+
+iterate:
+  # Distinct models per class are a near-term cost-attribution convenience.
+  # Classes may collapse onto the same model once usage data justifies it.
+  cursor:
+    orchestrator: kimi
+    research: composer-2.5
+    candidate_plan_execute: composer-2.5
+    synthesis: sonnet
+    harden_review: glm-5.2
+    refine_execute: composer-2.5
+    extrapolate: gpt-5.4-xhigh
+  claude:
+    orchestrator: sonnet
+    research: haiku
+    candidate_plan_execute: sonnet
+    synthesis: opus
+    harden_review: sonnet
+    refine_execute: sonnet
+    extrapolate: sonnet
+
+notes:
+  - Optimize for outcome quality per token, not maximal autonomy or parallelism.
+  - Several small models with clear bounded scope beat one oversized agent.
+  - Orchestrator should hold control state, not duplicate implementation detail.
+  - cache_read price often dominates; prefer strong long-context fidelity for the orchestrator.

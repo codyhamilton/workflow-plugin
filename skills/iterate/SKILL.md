@@ -31,13 +31,13 @@ challenger proposal, divergence gating, and synthesis to subagents. It never pla
 gates, or synthesizes priorities in its own context. Its own actions are limited to: routing work
 between subagents, collating their outputs into lean pointers, managing branches and loop control, and
 surfacing decisions to the user at the gates. Each stage composes the existing skills in this
-plugin — `plan`, `execute`, `comprehensive-review` — rather than reinventing them.
+plugin — `workflow-plan`, `workflow-execute`, `comprehensive-review` — rather than reinventing them.
 
 ## Workflow
 
 A **cycle** is steps 2–7; step 8 starts the next cycle. Actors: the *orchestrator* (coordinator,
-above), *research subagents*, a *planning subagent* (via `plan`), an *approver subagent* (clean,
-applies the divergence bar), a *builder* (via `execute`), a *synthesis subagent* (clean, reads
+above), *research subagents*, a *planning subagent* (via `workflow-plan`), an *approver subagent* (clean,
+applies the divergence bar), a *builder* (via `workflow-execute`), a *synthesis subagent* (clean, reads
 every candidate and reconceives priorities), and a *hardening reviewer relay* (clean, sequential
 passes that verify the consolidated base end-to-end). The orchestrator delegates every substantive
 step below, and passes drift-sensitive briefs (`briefs/`) verbatim rather than paraphrasing them.
@@ -48,7 +48,7 @@ repairs.**
 
 0. **Capture scope and base.** Record the user's broad goal verbatim — do not pressure them for a
    success checklist; its absence is the reason for this skill. Establish the parent program folder
-   under `docs/plans/[NEW]-<goal>/` (see `plan` for the program/child-plan convention) and record
+   under `docs/plans/[NEW]-<goal>/` (see `workflow-plan` for the program/child-plan convention) and record
    the goal, the loop-control choice (gated vs. autonomous, depth), and the base commit.
 
 1. **Initial research (delegated).** Dispatch 1–3 research subagents to map the problem space, the
@@ -56,23 +56,23 @@ repairs.**
    their output verbatim — no synthesis, filtering, or conclusions of its own. Research is not
    planning; step 2 runs a separate planning subagent.
 
-2. **Plan and build candidate 1 (delegated).** A `plan` subagent receives the research output and
-   produces the plan; then an `execute` subagent builds it on its own branch off the base. The
+2. **Plan and build candidate 1 (delegated).** A `workflow-plan` subagent receives the research output and
+   produces the plan; then a `workflow-execute` subagent builds it on its own branch off the base. The
    planning and execution are separate subagents — the orchestrator dispatches each but does not
    absorb either role. The candidate is allowed to be naive; its job is to reify the model and
-   become the spec for what follows. It carries the review `execute` already mandates.
+   become the spec for what follows. It carries the review `workflow-execute` already mandates.
 
 3. **Propose and gate challengers (delegated).** For each challenger (up to 1–2), the divergence
-   check sits **between `plan` and `execute`** — the plan *is* the proposal, and only a plan that
+   check sits **between `workflow-plan` and `workflow-execute`** — the plan *is* the proposal, and only a plan that
    clears the bar is built:
-   - **Plan = proposal.** Run `plan` against the prior build(s) given as *real code, not a prose
+   - **Plan = proposal.** Run `workflow-plan` against the prior build(s) given as *real code, not a prose
      summary*, dispatched with `briefs/challenger-license.md` (the generative license, passed
      verbatim). The planner is not given the divergence tests — that license is generative; the
      tests are not (see Reasoning → The divergence bar).
    - **Evaluate divergence.** A clean approver subagent that did not author the plan applies the
      divergence bar and returns a verdict. Dispatch it with `briefs/divergence-approver.md`,
      passed verbatim.
-   - **On pass:** run `execute` of that plan on a fresh branch off the base. A third challenger, if
+   - **On pass:** run `workflow-execute` of that plan on a fresh branch off the base. A third challenger, if
      reached, sees both prior builds.
    - **On fail (safe union or no genuine fork):** do **not** build it. The same approver performs
      the **harvest analysis** — extracting the worthwhile ideas from the rejected plan into the
@@ -90,10 +90,10 @@ repairs.**
    **Selection gate:** surface the revised outcomes and the selection rationale to the user (gated
    by default) — this is the moment to confirm or correct the reconceived priorities.
 
-5. **Consolidate onto the winner — capture (delegated).** A `plan` subagent receives a **defined
+5. **Consolidate onto the winner — capture (delegated).** A `workflow-plan` subagent receives a **defined
    scope** — the winner branch, the harvest list with its code pointers (plus any safe-union ideas
    harvested at step 3), and `OUTCOMES.md` as the design-altitude reference — and produces a
-   consolidation plan; it does not re-research across candidates. Then an `execute` subagent builds
+   consolidation plan; it does not re-research across candidates. Then a `workflow-execute` subagent builds
    it, grafting the harvested ideas onto the winner. This movement is **additive**: it captures the
    value the cycle discovered. It does **not** yet lock the base — making the integrated artifact
    actually work is step 6. Keep every challenger branch intact.
@@ -110,7 +110,7 @@ repairs.**
    `comprehensive-review` against a **deliverable bar**. Within a pass: diagnose its focus to
    completion, then remediate — **denoise trivial fixes inline** (committed, so the next pass reviews
    corrected state) and **append structural items to the shared refine plan** as executable plan work,
-   not dot points (the reviewer holds the hottest context, so it authors the fix; a separate `execute`
+   not dot points (the reviewer holds the hottest context, so it authors the fix; a separate `workflow-execute`
    still builds it, preserving plan/execute separation). A pass **diagnoses, it does not redesign**,
    and does not relitigate the selection (step 4 owns that); it sorts findings into *must-fix* (blocks
    a sound base) and *next-worth* (valuable but non-blocking). The relay order follows the goal
@@ -118,7 +118,7 @@ repairs.**
    - **e2e validation** — actually exercise the built behaviour at the highest fidelity the harness
      supports (drive the app → automated e2e → manual walkthrough → static); record the rung reached.
    - **failure-mode analysis** — edges, resilience, where it breaks (only probeable once it runs).
-   - **refine `execute`** — build the accumulated structural must-fix plan. Conditional: if no
+   - **refine `workflow-execute`** — build the accumulated structural must-fix plan. Conditional: if no
      structural item accrued, there is nothing to build, which is a valid outcome.
    - **simplify & consolidate (KISS/DRY)** — collapse the duplication the graft introduced, within
      the chosen approach, without over-abstracting. Runs *after* the structural build, because DRY
@@ -175,7 +175,7 @@ against your imagination. Four ideas carry it.
   made concrete; the outcomes are a moving target the cycle sharpens, not a spec fixed at step 0.
 
 - **Synthesis is design-altitude, not code review.** Each candidate already received code-level
-  review inside its `execute` pass; re-running that misses the point. The question is which approach
+  review inside its `workflow-execute` pass; re-running that misses the point. The question is which approach
   is the better *foundation to keep building on*, not which implementation is most polished — a
   rough build of a superior approach beats a polished build of a dead end, because consolidation
   fixes roughness but cannot fix a bad foundation. The synthesis agent's full remit and its
@@ -219,31 +219,27 @@ cycle produces, and the spec for any future divergence.
 The goal is **economy**: spend the quality premium only where cognition pays and starve it where the
 work is rote. `cache_read` price dominates the bill, so the cheapest cache-read model that still
 holds long context goes to the highest-volume role (the orchestrator), and the premium is spent at
-the one taste seam (synthesis). The orchestrator sets each Task's `model` from the table below.
+the one taste seam (synthesis). The orchestrator sets each Task's `model` from the current harness
+table in `protocol/models.yaml` (key `iterate`) — not from hard-coded IDs in this skill.
+Resolve that file via `$WORKFLOW_PLUGIN_ROOT/protocol/`, `~/.cursor/plugins/local/workflow/protocol/`,
+or `~/{.cursor|.claude|.codex}/skills/_workflow-protocol/`.
+
+That file is the single source of truth for environment-specific model picks. This skill owns the
+*roles* (orchestrator, research, synthesis, harden, …); `protocol/models.yaml` owns which model
+fills each role in Cursor vs Claude Code vs Codex. Update models there when pricing or quality
+shifts; do not edit artifact rules to chase model churn.
 
 This is a **starting allocation, not a settled one.** Giving each class a distinct model is a
 near-term convenience — the usage export reports cost per model, not per agent, so distinct models
 let us *see* roughly where the cost is landing. Once that's visible we settle on the choices the
-numbers actually justify, and classes can collapse onto the same model. The two harnesses differ in
-granularity: Cursor has enough model families to give nearly every class its own; Claude Code has
-three tiers, so it puts **haiku** at the cheap end (research), **opus** at the taste seam
-(synthesis), and everything else on **sonnet**.
+numbers actually justify, and classes can collapse onto the same model.
 
-| Agent class (step) | Cursor | Claude Code |
-| --- | --- | --- |
-| Orchestrator | Kimi | sonnet |
-| Research (1) | composer-2.5 | haiku |
-| Candidate plan/execute (2–3, 5) | composer-2.5 | sonnet |
-| Synthesis (4) | sonnet | opus |
-| Harden review relay (6) | GLM 5.2 | sonnet |
-| Refine `execute` (6) | composer-2.5 | sonnet |
-| Extrapolate (7) | GPT5.4 xhigh | sonnet |
+Principles (portable; not model-specific):
 
-`composer-2.5` is the Cursor default and `sonnet` the Claude Code default — any class not named runs
-on it. The orchestrator pick is deliberately *not* the absolute cheapest: it wants cheap `cache_read`
-**with** strong long-context fidelity (Kimi, not the floor; sonnet, not haiku), because orchestrator
-long-context accuracy makes or breaks the run. Synthesis gets the highest-agency model (taste at a
-one-way door); extrapolate gets a high-reasoning model (it reads next steps off empirical behaviour).
+- Default each harness to its `defaults:` entry in `protocol/models.yaml` unless a role overrides it.
+- Orchestrator wants cheap `cache_read` **with** strong long-context fidelity.
+- Synthesis gets the highest-agency model available (taste at a one-way door).
+- Extrapolate gets a high-reasoning model (it reads next steps off empirical behaviour).
 
 ## Artifacts
 
@@ -251,8 +247,9 @@ An artifact's first job is to be a **forcing function**: requiring it guarantees
 happened. The handoff payload is secondary. So **specify the seam, not the substance** — require
 only what the consumer must mechanically locate (a branch name, code pointers, N separable
 options), mandate qualitative prose elsewhere, and **never** add status/score metadata, which
-invites Goodhart gaming (the same reason `plan` warns against forcing a template mechanically).
-Every artifact below names a consumer or a gate; one that has neither is ceremony. `briefs/` holds
+invites Goodhart gaming (the same reason `workflow-plan` warns against forcing a template mechanically).
+Shared plan/execute artifact layout is defined in `protocol/artifacts.md`. Every artifact below names
+a consumer or a gate; one that has neither is ceremony. `briefs/` holds
 the verbatim subagent context (see Workflow); it is the input counterpart to these outputs.
 
 Per parent program:
@@ -275,7 +272,7 @@ Per cycle, under `docs/plans/[NEW]-<goal>/iteration-NN/`:
 - `HARDENING.md` — the **shared, accumulating** record of the harden relay (step 6): each pass
   appends to it and reads its predecessors' entries (the mechanism that stops the relay re-reporting
   the obvious). Three seams it must make findable: the **structural refine plan** (executable
-  must-fix work for the refine `execute` to build — plan-shaped, not dot points), a note of the
+  must-fix work for the refine `workflow-execute` to build — plan-shaped, not dot points), a note of the
   **trivial fixes already applied inline**, and the **next-worth list** (non-blocking — the primary
   input to extrapolation). Records which **fidelity rung** the e2e pass reached and one binary — does
   the end-to-end path run (re-confirmed by the smoke pass). Everything else (failure modes,
@@ -284,12 +281,12 @@ Per cycle, under `docs/plans/[NEW]-<goal>/iteration-NN/`:
   from `HARDENING.md`'s next-worth findings, and which was chosen (or why the loop stopped).
   Consumed by loop control and the next-step gate.
 
-Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTATION.md`,
+Each candidate keeps its own `workflow-plan`/`workflow-execute` artifacts (`PLAN.md`, `IMPLEMENTATION.md`,
 `REVIEW.md`) on its branch, as those skills already require.
 
 ## Invariants
 
-- Composes `plan`, `execute`, and `comprehensive-review`; does not reimplement them.
+- Composes `workflow-plan`, `workflow-execute`, and `comprehensive-review`; does not reimplement them.
 - The orchestrator decides nothing of substance — research, planning, execution, divergence gating,
   and synthesis are all delegated. Drift-sensitive subagent context is passed verbatim from
   `briefs/`, not paraphrased.
@@ -303,9 +300,9 @@ Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTAT
   verifies the integrated base and locks it. Harden is a **bounded, sequential reviewer relay** —
   never parallel, never "review until clean" — each pass clean (not the consolidation builder),
   handed the prior passes' findings, pushing past them; order follows the goal dependency (e2e →
-  failure-mode → structural refine `execute` → KISS/DRY → smoke). A pass diagnoses then remediates:
+  failure-mode → structural refine `workflow-execute` → KISS/DRY → smoke). A pass diagnoses then remediates:
   trivial inline, structural appended to the refine plan as executable work the separate refine
-  `execute` builds. The refine build is conditional on structural findings; a pass diagnoses, it does
+  `workflow-execute` builds. The refine build is conditional on structural findings; a pass diagnoses, it does
   not rearchitect or relitigate the selection.
 - Each candidate is built on its own branch off a shared base; losing branches are never deleted.
 - Stop when enough has been learned to commit. This skill exists to discover a spec by building,

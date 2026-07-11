@@ -51,7 +51,7 @@ anything, so your sweep is not chasing a moving target.
 - **Structural** (needs a design decision or touches the structure broadly): **do not build it here.**
   Append it to the **refine plan** in `HARDENING.md` as *executable plan work* — the approach, the
   files, the seam — not a dot point. You hold the hottest context, so you author the fix; a separate
-  refine `execute` builds it. The deciding question is only: does this block locking off a **sound**
+  refine `workflow-execute` builds it. The deciding question is only: does this block locking off a **sound**
   base? If yes it is must-fix (inline or refine-plan); if it is valuable but non-blocking it is
   **next-worth** — defer it, do not inflate the refine.
 

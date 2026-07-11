@@ -1,6 +1,6 @@
 ---
-name: execute
-description: Execute an existing plan program or child plan from `docs/plans/`. Use when the user wants to implement a planned work package with delegation, progress tracking, completion artifacts, and mandatory review.
+name: workflow-execute
+description: Execute an existing plan program or child plan from `docs/plans/`. Use when the user wants to implement a planned work package with delegation, progress tracking, completion artifacts, and mandatory review. Part of the workflow-plugin skill pack (workflow-protocol).
 ---
 
 # Plan Execution
@@ -67,12 +67,9 @@ Optimize for outcome quality per token, not for maximal autonomy or maximal para
 - Prefer phased execution by default: one child plan or one executable slice at a time.
 - Use the cheapest likely-successful worker available in the current environment for bounded implementation work.
 - If the next meaningful step depends on worker output, wait for the worker. Do not let the orchestrator drift into doing the implementation itself while waiting.
+- Several small models with clear bounded scope are cheaper and faster than one larger agent. If a task is too large, peel off pieces into small agents, then consolidate.
 
-Hints for subagent selection:
- - Within Cursor, always use Composer-2.5 except where specifically told to use another model.
- - Within Claude Code, always use Haiku for research and small changes. Sonnet for large changes. Do not use Opus except where directed.
- - Within Codex, Use GPT5.4 high for most work, using mini for exploration and xhigh for review. Do not use 5.5.
- - Several small models with clear bounded scope are cheaper and faster than one larger agent. If a task is too large, look to peel off pieces into small agents, then the main worker consolidates and completes.
+**Model selection** is environment-specific and must not be mixed into artifact rules. Read `protocol/models.yaml` from the workflow-plugin install (key `execute`) for the current harness recommendations. Discovery order: `$WORKFLOW_PLUGIN_ROOT/protocol/models.yaml`, then `~/.cursor/plugins/local/workflow/protocol/models.yaml`, then `~/{.cursor|.claude|.codex}/skills/_workflow-protocol/models.yaml`. Do not hard-code model IDs into completion artifacts.
 
 ## Workflow
 
@@ -102,7 +99,7 @@ Hints for subagent selection:
 7. Delegate implementation. Workers should own explicit files, modules, or bounded responsibilities and implement against explicit contracts rather than vague prose summaries.
 8. While workers run, keep orchestration state lean. If blocked on worker output, wait instead of absorbing their implementation work into the main thread.
 9. Synthesize worker outputs, complete any remaining orchestration or integration work, and verify the slice against the plan.
-10. Do not self-review as the only review. Run a mandatory comprehensive review after implementation using the `comprehensive-review` skill.
+10. Do not self-review as the only review. Run a mandatory comprehensive review after implementation using the `comprehensive-review` skill. Required completion artifacts follow `protocol/artifacts.md`.
 11. If review finds high or critical issues that fit within scope and do not require architectural replanning, have a clean subagent resolve and self-review. Do not default to repeated external review loops unless the change is unusually risky or the user asks for it.
 12. Write completion artifacts into the executed child plan folder.
 13. Update the relevant `ROADMAP.md` status to reflect reality.

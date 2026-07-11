@@ -1,0 +1,15 @@
+{
+  "workflow-protocol": 1,
+  "description": "Machine-readable contract for the workflow-plugin skill pack. Automations and installers should read this file before loading skills.",
+  "skills": {
+    "plan": "workflow-plan",
+    "execute": "workflow-execute",
+    "setup": "workflow-setup",
+    "review": "comprehensive-review",
+    "iterate": "iterate",
+    "tuning": "workflow-tuning",
+    "transcript-parser": "transcript-parser"
+  },
+  "artifacts": "protocol/artifacts.md",
+  "models": "protocol/models.yaml"
+}

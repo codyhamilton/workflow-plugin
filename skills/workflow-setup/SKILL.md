@@ -1,10 +1,10 @@
 ---
-name: setup
-description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting plan on a new repo or when plan reports that stable docs are absent or thin.
+name: workflow-setup
+description: Bootstrap stable docs (docs/ARCHITECTURE.md and docs/ROADMAP.md) for a repo that does not have them yet. Use when starting workflow-plan on a new repo or when workflow-plan reports that stable docs are absent or thin. Part of the workflow-plugin skill pack (workflow-protocol).
 disable-model-invocation: true
 ---
 
-This skill exists because the plan skill reads `docs/ARCHITECTURE.md` and `docs/OVERVIEW.md` at the start of every plan session. When these docs are absent or contain only stubs, plan must guess context repeatedly. Running setup once eliminates this degradation for all future plan sessions.
+This skill exists because `workflow-plan` reads `docs/ARCHITECTURE.md` and `docs/OVERVIEW.md` at the start of every plan session. When these docs are absent or contain only stubs, plan must guess context repeatedly. Running setup once eliminates this degradation for all future plan sessions. Doc shape follows `protocol/artifacts.md` in the workflow-plugin install.
 
 ## When to Use
 
@@ -100,7 +100,7 @@ If partial content from existing docs was found in phase 3, merge it into the ap
 
 After writing the docs, tell the user:
 
-> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`). You can now run `/workflow:plan` to start a plan session — it will read these docs automatically."
+> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`). You can now run `/workflow-plan` (or `/workflow:workflow-plan`) to start a plan session — it will read these docs automatically."
 
 ## Rules
 

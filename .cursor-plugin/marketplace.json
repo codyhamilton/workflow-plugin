@@ -1,0 +1,29 @@
+{
+  "name": "workflow-plugin",
+  "owner": {
+    "name": "William Hamilton",
+    "email": "codyh@ctzns.net"
+  },
+  "metadata": {
+    "description": "Private workflow plugin marketplace for plan, execute, and review skills"
+  },
+  "plugins": [
+    {
+      "name": "workflow",
+      "source": "./",
+      "description": "Plan, execute, and review workflow skills for Cursor",
+      "version": "1.1.0",
+      "author": {
+        "name": "William Hamilton",
+        "email": "codyh@ctzns.net"
+      },
+      "category": "developer-tools",
+      "keywords": [
+        "workflow",
+        "plan",
+        "execute",
+        "review"
+      ]
+    }
+  ]
+}
