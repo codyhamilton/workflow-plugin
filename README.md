@@ -4,7 +4,7 @@ Private plugin marketplace containing workflow skills for plan, execute, and rev
 
 ## Operating hypotheses
 
-The workflow design rests on these assumptions. Some are informally validated (noted where), none are proven in the cloud-pipeline context. Each is falsifiable, and each names its validation route: **eval** (harness scenario runs, see `evals/`) or **observational** (harvested from real pipeline outcomes via workflow-tuning).
+The workflow design rests on these assumptions. Some are informally validated (noted where), none are proven in the cloud-pipeline context. We build to them now and evaluate later — a dedicated eval effort, out of scope for the current revisions, will test them. Each is falsifiable and names its validation route: **eval** (harness scenario runs, see `evals/`) or **observational** (harvested from real pipeline outcomes via workflow-tuning).
 
 1. **Verbatim intent survives; paraphrase decays.** Capturing the human's actual words (request, issue, task) lets downstream agents match what was done to why — anchoring review placement, QA derivation, and gap-filling. Paraphrase loses the intent that matters. *(Informally validated in human workflows. Observational.)*
 2. **Briefs beat messengers.** Context authored once by its owner and routed verbatim to its consumer outperforms orchestrator paraphrase — in subagent prompt quality (especially long-context jobs) and in review-remediation accuracy. *(Observed in iterate; untested as a plugin-wide invariant. Eval.)*
@@ -12,6 +12,17 @@ The workflow design rests on these assumptions. Some are informally validated (n
 4. **Status belongs to the tracker, not the repo.** Removing the repo backlog (folder-status taxonomy, roadmap sync) sheds structural-compliance load without losing recoverability, because durable artifacts carry intent and outcome while PRs carry status. *(Untested. Observational.)*
 5. **Orienting-why beats persuading-why.** Skills that state the failures they prevent help agents fill unspecified gaps; prose that argues the design's correctness costs context without changing behavior. *(Untested. Eval.)*
 6. **A cold reader keeps plans honest.** Plan quality holds only when a separate context must work from the artifacts alone — the executor locally, the downstream review stage in a pipeline. *(Untested. Observational.)*
+
+### Variants worth testing
+
+Beyond validating the hypotheses head-to-head, candidate variations to try when the eval effort runs:
+
+- **Brief density**: minimal briefs (contract + code pointers) vs full-context briefs (inlined excerpts) — where does long-context reliability actually come from?
+- **Handoff purity**: execute dispatched with the plan folder alone vs plan folder plus a planner-written summary — does extra warm context help the executor or contaminate the cold read?
+- **Plan review shape**: single clean adversarial reviewer (current) vs a short sequential relay (iterate's harden pattern applied at plan stage) for ordinary plans.
+- **Remediation split**: reviewer authors briefs for everything vs iterate's split (trivial fixes applied inline, briefs only for structural findings).
+- **QA authorship**: QA plan derived by the review stage from acceptance criteria (current design) vs authored by the plan stage upfront and merely executed downstream.
+- **Assumption-ledger salience**: ledger inline in PLAN.md vs a separate surfaced artifact at the checkpoint — does presentation change how often humans intervene, and to what benefit?
 
 ## Skills
 

@@ -56,6 +56,16 @@
 - This session produces the plan artifacts plus the README hypotheses section; skill revisions are executed in later slices.
 - Evals targeting the hypotheses are sequenced as the first execution phase, before skill revisions, per the user's "very next step" direction.
 
+### Turn 4
+
+**User responded:** Partly miscommunication — the hypotheses will be evaluated, but not as part of this plan-execute. "It's going to be a harder job than we have space for here. We are making some reasonable assumptions and will build to them, then run evaluations." The point of documenting assumptions is "so we have lenses to test against later." Could also think of other variants to try to find improvements.
+
+**Agent decisions:**
+
+- Removed the hypothesis-evals execution phase; phases renumbered (plan, execute, comprehensive-review, partition). Evals declared explicitly out of scope in PLAN.md.
+- Rewrote The Model preamble: decisions are reasonable working assumptions built to now, tested by a later dedicated eval effort; the halt-on-falsification mechanics tied to the removed phase were dropped.
+- Added a "Variants worth testing" list to the README (brief density, handoff purity, plan-review shape, remediation split, QA authorship, assumption-ledger salience) as standing input to the future eval effort.
+
 ## Agent Decisions
 
 - **Single plan folder, new convention**: This plan deliberately adopts the convention it defines — no `[NEW]-` prefix, no folder renumbering ceremony, status carried by the PR and branch rather than the folder name. Rationale: dogfooding the pivot; the folder exists on a branch that is being built, which is the new invariant.

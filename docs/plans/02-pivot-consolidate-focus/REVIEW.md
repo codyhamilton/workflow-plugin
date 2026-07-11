@@ -1,5 +1,7 @@
 # Review: Pivot, Consolidate, Focus (plan-stage adversarial review)
 
+> **Addendum (post-review re-scope):** After this review was applied, the user clarified that hypothesis evals are a later, separate effort — not an execution phase of this plan (PROVENANCE.md Turn 4). The eval phase was removed and phases renumbered. Findings 1 and 3 below were applied against the eval-phase version; their dispositions are superseded by the re-scope, which resolves the same tension more simply (the evals this plan no longer contains cannot contradict its settled decisions). The remaining dispositions stand.
+
 Independent adversarial review of the plan artifacts by a clean subagent (Sonnet), per the plan skill's mandated review pass. Findings below with dispositions; all accepted findings are applied in this folder and the README.
 
 ## Outcome
