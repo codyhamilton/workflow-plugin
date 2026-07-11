@@ -15,10 +15,11 @@ Ownership:
 
 Contracts:
 
-- Plan folder path: `docs/plans/<NN>-<slug>/` on the PR branch. One folder per change/PR.
-- The PR body contains a marker line pointing at the plan folder: `Workflow-Plan: docs/plans/<NN>-<slug>/`.
+- Plan folder path: `docs/plans/<NN>-<slug>/` on the PR branch. One folder per change/PR. Uniqueness comes from the slug; `NN` is best-effort ordering only. Concurrent build agents branching from the same base may assign the same `NN` — this is acceptable and requires no resolution, because nothing may locate a plan folder by number.
+- The PR body contains a marker line pointing at the plan folder: `Workflow-Plan: docs/plans/<NN>-<slug>/`. The marker is the **only** mechanical location mechanism — the pipeline never scans or sorts folders by `NN`.
 - Build-stage contents: `PLAN.md` (required), `DESIGN.md` (only when contracts need reification), `IMPLEMENTATION.md` (required, written progressively during execution), `briefs/` (committed dispatch briefs).
-- Pipeline-stage contents: `REVIEW.md` (findings keyed to PLAN.md acceptance criteria), `QA.md` (QA plan derived from intent + scope, and its results), `briefs/remediation-<NN>.md` (per-finding fix briefs).
+- Pipeline-stage contents: `REVIEW.md` (findings keyed to PLAN.md acceptance criteria), `QA.md`, `briefs/remediation-<NN>.md` (per-finding fix briefs).
+- `QA.md` shape: one QA step per user-facing acceptance criterion, each recording the criterion, the entry point → action → observed result actually driven, and pass/fail; plus a free-prose section for findings outside the criteria. Criteria the QA stage could not drive are listed with the reason, not silently dropped.
 
 Required behavior:
 
@@ -48,6 +49,7 @@ Contracts:
 
 - **Durable — intent and outcome**: PLAN.md, DESIGN.md, IMPLEMENTATION.md, REVIEW.md, QA.md. These survive the merge and are the provenance record.
 - **Run-scoped — coordination**: briefs. Committed to `briefs/` in the plan folder for provenance and debugging, but no future agent is required to read them to understand the change.
+- **Skill-scoped — design record**: `reference.md` beside a SKILL.md. Holds the persuading-why relocated out of the skill body. Named consumers: workflow-tuning and anyone revising the skill; explicitly *not* loaded during normal skill execution. This is the artifact class Model decision 6 creates, held to the same consumer-or-ceremony standard as everything else.
 - **Status**: carried by nothing in the repo. PRs, branches, and the tracker carry status. Deferred work becomes a design-intent doc (`docs/design/`) or a tracker issue. Multi-PR programs become a stable design-intent doc that each PR's PLAN.md references, plus a sequence of self-contained plan-execute runs.
 
 Required behavior:
@@ -104,7 +106,9 @@ Contracts:
 Required behavior:
 
 - Core skills carry both postures (interactive checkpoint held / headless waved through) in one skill body — posture is a runtime condition, not a plugin split.
-- Lab skills may compose core skills (iterate does); core skills never depend on lab skills.
+- **Posture is declared, never inferred.** The invoker states headless posture explicitly in the invocation (skill argument or an explicit statement in the dispatching prompt — the cursor automation and cloud triggers set it; iterate sets it when dispatching plan subagents). Absent a declaration, the skill assumes a human is reachable and holds the checkpoint. Skills do not guess from TTYs or environment heuristics.
+- **One-shot composition is dispatch, not inlining.** When a single cloud run does plan then execute, each skill runs as a separately dispatched context (the pattern iterate already uses), and the handoff between them is the plan folder's artifacts — not the orchestrator's memory. Inlining both into one continuous context would silently destroy the cold-read pressure H3's rationale depends on.
+- Lab skills may compose core skills (iterate does); core skills never depend on lab skills. Data may flow the other way as artifacts: workflow-tuning harvests REVIEW.md's plan-sufficiency judgments after the fact; comprehensive-review never invokes workflow-tuning.
 
 Acceptance criteria:
 
