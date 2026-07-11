@@ -18,7 +18,7 @@ Written progressively during execution, per the model this plan defines.
 ## Progress log
 
 - [x] Briefs authored and committed (`briefs/phase-1..4`)
-- [ ] Phase 1: plan skill revision
+- [x] Phase 1: plan skill revision
 - [x] Phase 2: execute skill revision
 - [x] Phase 3: comprehensive-review revision
 - [ ] Phase 4: partition and re-composition
@@ -32,6 +32,10 @@ SKILL.md revised (71 → 114 lines): explicit Inputs section (marker-located pla
 ### Phase 2 — execute (worker report, condensed)
 
 SKILL.md revised; new `skills/execute/reference.md`. Removed: ROADMAP sync, `[NEW]-` checks, parent-renaming ceremony, STATUS.md (progressive IMPLEMENTATION.md is the recovery mechanism), the mandatory-subagent rule, and the per-harness model tables + session-ID formulas (→ reference.md, with consumer note). Added: Brief-Based Dispatch section (invariant stated once + mechanics + ceremony guard), delegation-as-judgment, Review Posture section (terminal vs pipeline, declared not inferred), One-Shot Composition note (cold read is load-bearing), progressive IMPLEMENTATION.md with run identity, PR completion with the `Workflow-Plan:` marker. Sizing ladder and lean-orchestrator rules carried over near-verbatim. Grep for dead conventions returns only the permitted explanatory line in reference.md.
+
+### Phase 1 — plan (worker report, condensed)
+
+SKILL.md restructured from the numbered-with-insertions checklist into six named phases (Capture → Ground → Resolve → Write → Challenge → Checkpoint; Resolve and Checkpoint branch by posture). Backlog taxonomy fully removed. Added: Postures section (interactive default / headless declared, never inferred), plan-folder convention section (slug unique, `NN` best-effort, folder-on-branch = being/was built, multi-PR programs as design-intent doc + runs, `Workflow-Plan:` marker), QA-drivable acceptance criteria. New `skills/plan/reference.md` holds the relocated persuading-why with a consumer note. Templates: PLAN.md gained the Assumption Ledger and split user-facing/non-user-facing criteria; PROVENANCE.md marked interactive-posture-only. Question discipline, pivot detection, stable-docs grounding, and the anti-mechanical-template rule carried forward. No contradictions with DESIGN.md reported.
 
 ## Tradeoffs and deviations
 
