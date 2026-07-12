@@ -6,6 +6,14 @@ CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
 CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
 INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
 
+is_cursor_cloud_agent() {
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]] || [[ "${CURSOR_AGENT:-}" == "1" ]]
+}
+
+is_interactive_install() {
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]]
+}
+
 ask() {
   local prompt="$1"
   local reply=""
@@ -121,6 +129,18 @@ install_skills() {
 
 echo "workflow-plugin installer"
 echo "========================="
+
+if is_cursor_cloud_agent && ! is_interactive_install; then
+  echo "Cursor Cloud Agent detected (CURSOR_AGENT=${CURSOR_AGENT:-0}) — installing core workflow plugin only."
+  echo ""
+  ensure_cursor_core_plugin
+  echo "  Done. Core skills available at: $CURSOR_CORE_PLUGIN"
+  echo "  Skills: plan, execute, comprehensive-review, post-build"
+  echo "  (workflow-lab is not installed in cloud agent environments.)"
+  echo ""
+  echo "Installation complete."
+  exit 0
+fi
 
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then
