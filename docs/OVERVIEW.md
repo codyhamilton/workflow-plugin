@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A workflow plugin for Claude Code, opencode, and Cursor providing seven skills, split across two plugins, for structured plan/execute/review workflows — usable identically by a human at the keyboard and by a staged cloud pipeline (build agent → automated review/QA → merge).
+A workflow plugin for Claude Code, opencode, and Cursor providing eight skills, split across two plugins, for structured plan/execute/review workflows — usable identically by a human at the keyboard and by a staged cloud pipeline (build agent → automated review/QA → merge).
 
 ## Who Uses It
 
@@ -18,14 +18,15 @@ Teams and individual developers who want:
 
 1. **plan** — Produces `PLAN.md` (and `DESIGN.md` when contracts need reification). Captures verbatim user intent, validates scope, detects architectural drift, asks only decisions that matter. Runs interactive (checkpoint held) or headless (assumption ledger instead of questions), by explicit declaration.
 2. **execute** — Executes an existing plan. Dispatches rightsized workers with authored briefs, writes `IMPLEMENTATION.md` progressively, runs review sized to the declared posture (terminal: mandatory independent review; pipeline: pre-flight self-verification only), lands a PR carrying the `Workflow-Plan:` marker.
-3. **comprehensive-review** — Independent review keyed to `PLAN.md`'s acceptance criteria. Writes `REVIEW.md` and per-finding remediation briefs into the plan folder; includes an intent-and-assumptions lens and a plan-sufficiency judgment. Falls back to a recovered-intent note when a PR arrives with no plan folder.
+3. **comprehensive-review** — Independent review keyed to `PLAN.md`'s acceptance criteria. Writes `REVIEW.md` (with a machine-actionable verdict) and per-finding remediation briefs into the plan folder; includes an intent-and-assumptions lens and a plan-sufficiency judgment. Falls back to a recovered-intent note when a PR arrives with no plan folder.
+4. **post-build** — The pipeline stage that picks a PR up where the build leaves off: independent review via `comprehensive-review`, bounded finding-scoped remediation with a fresh re-review, `QA.md` matrix planning, exact-SHA deploy verification, deployed browser QA, and an uncommitted merge-readiness report. Repo mechanics come from a per-repo adapter skill.
 
 **Lab plugin (`workflow-lab`)** — local and/or interactive; never required by the pipeline:
 
-4. **setup** — Bootstraps `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for repos that lack them, via a permission-gated, one-question-per-round conversation.
-5. **iterate** — Long-horizon exploration for goals whose success criteria aren't knowable up front: sequential divergent candidates (built via `plan` + `execute`), a divergence gate, cross-candidate synthesis, additive consolidation, then a hardening review relay that locks the base.
-6. **transcript-parser** — Extracts objective cost metrics (agents spawned, tool turns, context estimate, wall time) from a session transcript into eval cost-comparison format.
-7. **workflow-tuning** — Holds real-world lessons from plan/execute/review workflows and runs evals comparing candidate skill changes against a baseline and reference implementation; harvests both retros and merged PRs' pipeline outcomes (`REVIEW.md`, `QA.md`, remediation briefs).
+5. **setup** — Bootstraps `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for repos that lack them, via a permission-gated, one-question-per-round conversation.
+6. **iterate** — Long-horizon exploration for goals whose success criteria aren't knowable up front: sequential divergent candidates (built via `plan` + `execute`), a divergence gate, cross-candidate synthesis, additive consolidation, then a hardening review relay that locks the base.
+7. **transcript-parser** — Extracts objective cost metrics (agents spawned, tool turns, context estimate, wall time) from a session transcript into eval cost-comparison format.
+8. **workflow-tuning** — Holds real-world lessons from plan/execute/review workflows and runs evals comparing candidate skill changes against a baseline and reference implementation; harvests both retros and merged PRs' pipeline outcomes (`REVIEW.md`, `QA.md`, remediation briefs).
 
 ## Core Intent
 
@@ -49,7 +50,7 @@ Optimize for outcome quality per token. Prevent common failures:
 ## Stability Boundaries
 
 **Stable** (should not change casually):
-- The seven-skill structure across the core/lab partition, and each skill's core purpose
+- The eight-skill structure across the core/lab partition, and each skill's core purpose
 - The plan → execute → review workflow loop and the PR artifact seam that lets the pipeline locate a plan folder mechanically
 - The artifact taxonomy: durable artifacts carry intent and outcome, briefs carry run-scoped coordination, nothing carries status
 - Verbatim intent capture in `PLAN.md`'s Intent section

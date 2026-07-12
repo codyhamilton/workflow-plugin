@@ -11,7 +11,8 @@ workflow-plugin/ (repo root — the `workflow` core plugin)
 ├── skills/                    → core: cloud-safe, no interactive dead-ends
 │   ├── plan/              → PLAN.md (+ DESIGN.md when warranted); owns intent + provenance capture
 │   ├── execute/            → executes a plan; brief-based dispatch; progressive IMPLEMENTATION.md
-│   └── comprehensive-review/  → independent review keyed to PLAN.md's acceptance criteria
+│   ├── comprehensive-review/  → independent review keyed to PLAN.md's acceptance criteria
+│   └── post-build/         → the pipeline stage: review, remediation, QA plan, deploy proof, deployed QA
 ├── plugins/workflow-lab/      → lab: local and/or interactive; never required by the pipeline
 │   ├── .claude-plugin/plugin.json
 │   ├── .cursor-plugin/plugin.json
@@ -56,6 +57,14 @@ Each plugin's source directory contains only its own skills: `skills/` at the re
 - Writes `REVIEW.md` (findings by severity, plan-sufficiency judgment) and a remediation brief per structural finding, into the plan folder.
 - Never invokes or depends on `workflow-tuning` (lab) — the plan-sufficiency judgment is a one-way artifact `workflow-tuning` harvests later, not a call.
 
+**post-build** (core): orchestrates the pipeline stage against a PR — the stage execute's pipeline posture declares.
+- Resolves exactly one active plan folder: `Workflow-Plan:` marker first, then a bounded diff-based fallback (never tie-broken by number or recency), then `comprehensive-review`'s no-artifact fallback.
+- Dispatches `comprehensive-review`, then bounded finding-scoped remediation (briefs routed verbatim) and one fresh re-review; stops while any `blocker`/`high` finding stands.
+- Derives `QA.md` (matrix only, committed before the candidate SHA) from `PLAN.md`'s acceptance criteria and `REVIEW.md`'s risks.
+- Proves a non-production deployment of the exact candidate SHA before browser QA; one QA remediation cycle; final SHA-specific results go to PR/automation output, never a trailing commit.
+- Reports merge-readiness and stops — it never merges.
+- Repo-specific mechanics (production boundaries, deploy-proof commands, QA credentials/environment, worker routing) come from a per-repo **adapter skill**; garcia-music's `post-build-automation` is the reference adapter.
+
 **setup** (lab): bootstraps missing stable docs.
 - Reconnaissance → permission gate → optional consolidation of partial/legacy docs → one-question-per-round guided conversation (capped at 3 rounds) → writes docs.
 - Writes `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` only. Does not create `docs/ROADMAP.md` — no canonical schedule doc; folds an optional Non-Goals note into `docs/ARCHITECTURE.md` instead.
@@ -86,7 +95,11 @@ Each plugin's source directory contains only its own skills: `skills/` at the re
 
 **execute → comprehensive-review**: mandatory when execute runs in **terminal** posture (the default, absent a declaration); dropped to pre-flight self-verification in **pipeline** posture, where a downstream orchestrated review stage is declared to exist. Posture is always declared by the invoker, never inferred.
 
-**comprehensive-review ↔ the pipeline stage (external)**: review locates the plan folder via the PR body's `Workflow-Plan:` marker — the only mechanical location mechanism — and writes `REVIEW.md` plus remediation briefs back into that folder on the PR branch. See PR Artifact Seam below.
+**execute → post-build**: `execute`'s pipeline posture exists because `post-build` (or an equivalent automation) picks the PR up. The handoff is the PR itself: branch, commits, and the `Workflow-Plan:` marker. No live call in either direction.
+
+**post-build → comprehensive-review**: `post-build` dispatches `comprehensive-review` as its review phase and branches on `REVIEW.md`'s verdict (`PASS` / `PASS_WITH_FOLLOWUPS` / `REMEDIATE`), routing its remediation briefs verbatim to fixers. Review locates the plan folder via the PR body's `Workflow-Plan:` marker and writes `REVIEW.md` plus remediation briefs back into that folder on the PR branch. See PR Artifact Seam below.
+
+**post-build ↔ repo adapter (external)**: the adapter supplies production boundaries, deploy-proof mechanics, QA environment, and worker routing; `post-build` supplies the portable stage semantics. Authority on conflict: repo hard limits → adapter → `post-build` → triggering prompt.
 
 **setup → plan**: `setup` creates `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md`; `plan` reads those docs at its Ground phase. No code coupling — the dependency is filesystem presence, and `plan` never hard-blocks on their absence.
 
@@ -100,7 +113,8 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 
 - **Location**: `docs/plans/<NN>-<slug>/` on the PR branch. `NN` is best-effort ordering only; the slug is the unique key. The PR body's first line, `Workflow-Plan: docs/plans/<NN>-<slug>/`, is the only mechanical location mechanism — nothing scans or sorts folders by number.
 - **Build-stage contents** (owned by plan + execute, written before PR creation): `PLAN.md` (required), `DESIGN.md` (when contracts need reification), `IMPLEMENTATION.md` (required, written progressively), `briefs/` (committed dispatch briefs).
-- **Pipeline-stage contents** (owned by the orchestrated review/QA stage, committed back to the PR branch): `REVIEW.md` (findings keyed to `PLAN.md`'s acceptance criteria), `QA.md` (one step per user-facing criterion: criterion, entry point → action → observed result, pass/fail; undriveable criteria listed with reason), `briefs/remediation-<NN>.md`.
+- **Pipeline-stage contents** (owned by `post-build`, committed back to the PR branch **before the candidate SHA**): `REVIEW.md` (verdict + findings keyed to `PLAN.md`'s acceptance criteria, accumulating across remediation), `QA.md` (matrix only — one case per user-facing criterion with stable ID, entry point → action → expected result, evidence requirements; undriveable criteria listed with reason; no pre-execution pass/fail), `briefs/remediation-<NN>.md`.
+- **External-only outputs**: final SHA-specific QA results and media go to the PR conversation or automation output, never a trailing commit — a commit added after testing changes the SHA, and the merged commit must be the tested commit.
 - **Fallback**: a PR with no plan folder does not break the pipeline — `comprehensive-review` reconstructs intent from the PR description, linked issue, and commits into a new plan folder's `RECOVERED-INTENT.md`, then proceeds uniformly.
 
 ## Artifact Taxonomy
@@ -125,6 +139,7 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 6. `DESIGN.md` is optional, only when it reifies contracts or target shape not cheaply inferable from code and stable docs.
 7. Core skills (`plan`, `execute`, `comprehensive-review`) never depend on lab skills. Lab skills may compose core skills. Data may flow lab-ward only as artifacts already written for another consumer (e.g. `workflow-tuning` harvesting `REVIEW.md`), never as a live call.
 8. `workflow-tuning` never auto-runs; user-invoked meta-skill only (`disable-model-invocation: true`).
+9. Deployed QA runs only against a deployment proven to match the exact candidate SHA on a non-production target, and its results are never committed after testing. `post-build` reports merge-readiness; nothing in this plugin merges.
 
 ## Data Flows
 
@@ -139,10 +154,11 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 3. `execute` runs review per posture: terminal → `comprehensive-review` → `REVIEW.md` in the plan folder; pipeline → pre-flight self-verification recorded in `IMPLEMENTATION.md`.
 4. `execute` pushes commits and opens/updates the PR with the `Workflow-Plan:` marker as the first body line.
 
-**Pipeline review session** (external automation, against a PR):
-1. Automation → `comprehensive-review`, locating the plan folder via the PR's `Workflow-Plan:` marker (or the no-artifact fallback).
-2. `comprehensive-review` assesses acceptance criteria, applies its lenses (always including intent-and-assumptions), writes `REVIEW.md` and remediation briefs, records the plan-sufficiency judgment.
-3. Automation consumes remediation briefs untranslated to drive fixes, then QA and merge-babysitting proceed from `REVIEW.md` as a checklist (outside this plugin's scope).
+**Post-build session** (against a PR; triggered by an automation, an operator, or the user):
+1. Trigger → `post-build`, alongside the repo's adapter skill. Preflight + plan discovery (marker → diff fallback → no-artifact fallback).
+2. `post-build` dispatches `comprehensive-review`: acceptance-criteria assessment, lenses (always including intent-and-assumptions), `REVIEW.md` with verdict, remediation briefs, plan-sufficiency judgment.
+3. On `REMEDIATE`: finding-scoped fixers consume the remediation briefs untranslated; one fresh re-review updates the verdict.
+4. `post-build` commits `QA.md` (matrix), proves the exact-SHA deployment via adapter mechanics, runs deployed browser QA, and emits the merge-readiness report externally. Merging stays with the human or a separate automation.
 
 **Setup session**:
 1. User → `setup` skill.
@@ -164,7 +180,8 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 
 - [OVERVIEW.md](OVERVIEW.md) — what the plugin is and why
 - [../README.md](../README.md) — install instructions, skills table, operating hypotheses
-- [../skills/plan/SKILL.md](../skills/plan/SKILL.md), [../skills/execute/SKILL.md](../skills/execute/SKILL.md), [../skills/comprehensive-review/SKILL.md](../skills/comprehensive-review/SKILL.md) — core skill prompts
+- [../skills/plan/SKILL.md](../skills/plan/SKILL.md), [../skills/execute/SKILL.md](../skills/execute/SKILL.md), [../skills/comprehensive-review/SKILL.md](../skills/comprehensive-review/SKILL.md), [../skills/post-build/SKILL.md](../skills/post-build/SKILL.md) — core skill prompts
+- [../skills/post-build/automation.md](../skills/post-build/automation.md) — wiring the post-build stage into an automation trigger
 - [../plugins/workflow-lab/skills/iterate/SKILL.md](../plugins/workflow-lab/skills/iterate/SKILL.md) — the composition pattern in practice
 - [../plugins/workflow-lab/skills/workflow-tuning/reference.md](../plugins/workflow-lab/skills/workflow-tuning/reference.md) — observed lessons corpus
 - [../docs/plans/02-pivot-consolidate-focus/DESIGN.md](../docs/plans/02-pivot-consolidate-focus/DESIGN.md) — the full binding-contract record this architecture summarizes (plan-scoped; this file is the durable summary going forward)

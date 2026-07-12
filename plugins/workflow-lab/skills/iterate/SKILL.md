@@ -74,21 +74,23 @@ repairs.**
    - **Plan = proposal.** Run `plan`, headless posture declared explicitly, against the prior
      build(s) given as *real code, not a prose summary*, dispatched with
      `briefs/challenger-license.md` (the generative license, passed verbatim). The planner is not
-     given the divergence tests — that license is generative; the tests are not (see `reference.md`
-     → The divergence bar).
+     given the divergence tests — criteria given to a generator become a gaming target; criteria
+     given to a filter stay a filter.
    - **Evaluate divergence.** A clean approver subagent that did not author the plan applies the
      divergence bar and returns a verdict. Dispatch it with `briefs/divergence-approver.md`,
      passed verbatim.
    - **On pass:** run `execute`, terminal review posture declared explicitly, on that plan on a
-     fresh branch off the base. A third challenger, if reached, sees both prior builds.
+     fresh branch off the base. Clearing the bar only earns a build; synthesis still decides. A
+     third challenger, if reached, sees both prior builds.
    - **On fail (safe union or no genuine fork):** do **not** build it. The same approver performs
      the **harvest analysis** — extracting the worthwhile ideas from the rejected plan into the
      consolidation queue for step 5 — and the cycle moves on. "No plan clears the bar" is a valid,
      expected stop; record it and go to synthesis.
 
 4. **Synthesize across candidates (delegated).** A clean synthesis subagent that authored no
-   candidate does a single deep cross-candidate read and, in this order (see `reference.md` →
-   Synthesis), dispatched with `briefs/synthesis.md` passed verbatim: first revises the
+   candidate does a single deep cross-candidate read and, in this order — yardstick before
+   selection, so selection cannot bend the yardstick — dispatched with `briefs/synthesis.md`
+   passed verbatim: first revises the
    long-horizon **outcome statement** the builds revealed — the yardstick that did not exist at
    step 0 — into `OUTCOMES.md`; then selects the approach that is the better *foundation to keep
    building on* toward those outcomes; then emits a **harvest list** of the best ideas from

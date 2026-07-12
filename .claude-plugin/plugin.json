@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "workflow",
-  "description": "Cloud-safe core workflow skills for Claude Code: plan, execute, comprehensive-review",
-  "version": "2.0.0",
+  "description": "Cloud-safe core workflow skills for Claude Code: plan, execute, comprehensive-review, post-build",
+  "version": "2.1.0",
   "author": {
     "name": "William Hamilton",
     "email": "codyh@ctzns.net"
