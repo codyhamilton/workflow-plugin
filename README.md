@@ -72,6 +72,49 @@ The installer detects opencode, Claude Code, and Cursor and asks before installi
 and lab are separate prompts, so a cloud build image can accept core only. No flags, no config
 required.
 
+When run non-interactively (piped via `curl | bash`, or invoked by an agent's Bash tool, which
+never has a TTY), the installer skips the prompts and auto-installs core only:
+
+- **Claude Code** (`CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, or `CLAUDE_CODE_REMOTE` detected — true
+  for local Claude Code sessions and Claude Code on the web alike) → `~/.claude/skills/`. Personal
+  scope: nothing is written into the repo working tree, so there's nothing to `.gitignore`.
+- **Cursor cloud agent** (`CURSOR_AGENT`, `HOSTNAME=cursor`, or the cloud plugin manifest detected)
+  → `<workspace>/.cursor/skills/workflow/`, since Cursor cloud only scans project-local skills.
+  Add that path to `.gitignore`.
+
+### Auto-install on Claude Code on the web
+
+Claude Code on the web provisions a fresh container per session, so nothing installed in a previous
+session's `~/.claude/skills/` carries over. To get core skills into every session automatically,
+add a `SessionStart` hook to the *consuming* repo (not this one) that runs the installer:
+
+```sh
+mkdir -p .claude/hooks
+cat > .claude/hooks/session-start.sh <<'EOF'
+#!/bin/bash
+set -euo pipefail
+[[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]] || exit 0
+curl -fsSL https://raw.githubusercontent.com/codyhamilton/workflow-plugin/master/install.sh | bash
+EOF
+chmod +x .claude/hooks/session-start.sh
+```
+
+Register it in the consuming repo's `.claude/settings.json` (merge if the file already has hooks):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh" } ] }
+    ]
+  }
+}
+```
+
+The installer detects `CLAUDE_CODE_REMOTE`/`CLAUDECODE` itself and installs to `~/.claude/skills/`
+non-interactively — the `[[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]` guard above just keeps the hook
+a no-op on local clones of the consuming repo, where you'd rather run `install.sh` yourself.
+
 ## Manual installation
 
 ### Claude Code / opencode
