@@ -1,25 +1,76 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_REPO_HTTPS_URL="https://github.com/codyhamilton/workflow-plugin.git"
 CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
 CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
-DEFAULT_REPO_URL="git@github.com:codyhamilton/workflow-plugin.git"
+INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
+
+is_cursor_cloud_agent() {
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]] || [[ "${CURSOR_AGENT:-}" == "1" ]]
+}
+
+is_interactive_install() {
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]]
+}
 
 ask() {
   local prompt="$1"
-  local reply
-  read -r -p "$prompt [y/N] " reply
+  local reply=""
+  if [[ -t 0 ]]; then
+    read -r -p "$prompt [y/N] " reply || true
+  elif ( exec 3</dev/tty ) 2>/dev/null; then
+    read -r -p "$prompt [y/N] " reply </dev/tty || return 1
+  else
+    return 1
+  fi
   [[ "${reply,,}" == "y" ]]
 }
 
 repo_url() {
+  if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
+    echo "$WORKFLOW_REPO_URL"
+    return
+  fi
   if git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree &>/dev/null; then
-    git -C "$SCRIPT_DIR" config --get remote.origin.url || echo "$DEFAULT_REPO_URL"
+    git -C "$SCRIPT_DIR" config --get remote.origin.url || echo "$DEFAULT_REPO_HTTPS_URL"
   else
-    echo "$DEFAULT_REPO_URL"
+    echo "$DEFAULT_REPO_HTTPS_URL"
   fi
 }
+
+# When run as `curl … | bash`, the script is not on disk next to skills/. Clone
+# (or refresh) a shallow checkout so the rest of the installer can copy files.
+ensure_script_dir() {
+  local candidate=""
+  if [[ -n "${BASH_SOURCE[0]:-}" && "${BASH_SOURCE[0]}" != "-" ]]; then
+    candidate="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [[ -d "$candidate/skills" ]]; then
+      echo "$candidate"
+      return
+    fi
+  fi
+
+  local url="$DEFAULT_REPO_HTTPS_URL"
+  if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
+    url="$WORKFLOW_REPO_URL"
+  fi
+
+  mkdir -p "$(dirname "$INSTALL_SRC_CACHE")"
+  if [[ -d "$INSTALL_SRC_CACHE/.git" ]]; then
+    echo "  Refreshing installer checkout at $INSTALL_SRC_CACHE"
+    git -C "$INSTALL_SRC_CACHE" pull --ff-only
+  else
+    if [[ -e "$INSTALL_SRC_CACHE" ]]; then
+      rm -rf "$INSTALL_SRC_CACHE"
+    fi
+    echo "  Cloning installer checkout to $INSTALL_SRC_CACHE"
+    git clone --depth 1 "$url" "$INSTALL_SRC_CACHE"
+  fi
+  echo "$INSTALL_SRC_CACHE"
+}
+
+SCRIPT_DIR="$(ensure_script_dir)"
 
 # Cursor does not follow symlinks — clone a real checkout into ~/.cursor/plugins/local/.
 # This checkout carries the whole repo, including plugins/workflow-lab/ — the
@@ -78,6 +129,18 @@ install_skills() {
 
 echo "workflow-plugin installer"
 echo "========================="
+
+if is_cursor_cloud_agent && ! is_interactive_install; then
+  echo "Cursor Cloud Agent detected (CURSOR_AGENT=${CURSOR_AGENT:-0}) — installing core workflow plugin only."
+  echo ""
+  ensure_cursor_core_plugin
+  echo "  Done. Core skills available at: $CURSOR_CORE_PLUGIN"
+  echo "  Skills: plan, execute, comprehensive-review, post-build"
+  echo "  (workflow-lab is not installed in cloud agent environments.)"
+  echo ""
+  echo "Installation complete."
+  exit 0
+fi
 
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then
