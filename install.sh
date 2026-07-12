@@ -26,8 +26,41 @@ is_interactive_install() {
   [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]] && can_prompt_interactively
 }
 
+# curl | bash delivers the script on stdin — BASH_SOURCE is "-" or unset, not a file path.
+is_piped_installer() {
+  local src="${_INSTALLER_SOURCE:-}"
+  [[ -z "$src" || "$src" == "-" || ! -f "$src" ]]
+}
+
 should_auto_install_cursor_core() {
-  is_cursor_cloud_agent && ! is_interactive_install
+  is_interactive_install && return 1
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]] && return 1
+
+  # Runtime cloud agent signals (may be unset during environment setup).
+  is_cursor_cloud_agent && return 0
+
+  # curl | bash in environment setup: no TTY, no prompts possible — install core.
+  if is_piped_installer || ! can_prompt_interactively; then
+    return 0
+  fi
+
+  return 1
+}
+
+auto_install_reason() {
+  if [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]]; then
+    echo "WORKFLOW_INSTALL_MODE=cloud"
+  elif [[ "${CURSOR_AGENT:-}" == "1" ]]; then
+    echo "CURSOR_AGENT=1"
+  elif [[ "${HOSTNAME:-}" == "cursor" ]]; then
+    echo "HOSTNAME=cursor"
+  elif [[ -f "$HOME/.cursor/plugins/cache/.cloud-plugin-manifest.json" ]]; then
+    echo "cloud plugin manifest present"
+  elif is_piped_installer; then
+    echo "piped installer (curl | bash)"
+  else
+    echo "non-interactive shell"
+  fi
 }
 
 ask() {
@@ -238,7 +271,7 @@ echo "workflow-plugin installer"
 echo "========================="
 
 if should_auto_install_cursor_core; then
-  echo "Cursor Cloud Agent detected (CURSOR_AGENT=${CURSOR_AGENT:-0}) — installing core workflow plugin only."
+  echo "Non-interactive install ($(auto_install_reason)) — installing core workflow plugin to Cursor."
   echo ""
   ensure_cursor_core_plugin
   echo "  Done. Core skills available at: $CURSOR_CORE_PLUGIN"
