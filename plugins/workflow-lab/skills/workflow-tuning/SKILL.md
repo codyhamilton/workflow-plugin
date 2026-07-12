@@ -107,3 +107,7 @@ Retros are a holding area, not an archive. When consolidating:
 4. Delete the consumed retro files.
 
 A retro that has been fully absorbed into `reference.md` updates has no further value and should be removed. The lessons are the record; the retro is the raw input.
+
+## Pipeline-Outcomes Harvest
+
+Merged PRs built through this workflow leave a second corpus behind, in each plan folder (see `docs/ARCHITECTURE.md`'s PR Artifact Seam contract): `REVIEW.md` (including its plan-sufficiency judgment), `QA.md`, and remediation briefs, all written by the pipeline stage — never by this skill invoking anything, this is a one-way read. Alongside retros, these are real outcomes to mine: a plan-sufficiency judgment across many merged PRs shows where `plan` systematically under- or over-specifies; `QA.md` pass/fail and undriveable-criteria patterns show where acceptance criteria failed to be QA-drivable; remediation-brief volume and content show where `execute` or `comprehensive-review` recur on the same defect class. Read them the same way retros are read — extract lessons not yet reflected in `reference.md`, fold them in — and do not restructure the skill files being tuned on the strength of a single occurrence.

@@ -1,8 +1,8 @@
 {
   "name": "workflow",
-  "description": "Plan, execute, and review workflow skills for Cursor",
-  "version": "1.0.0",
+  "description": "Cloud-safe core workflow skills for Cursor: plan, execute, comprehensive-review",
+  "version": "2.0.0",
   "author": {
     "name": "William Hamilton"
-  },
+  }
 }

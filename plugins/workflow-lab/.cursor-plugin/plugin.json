@@ -1,0 +1,8 @@
+{
+  "name": "workflow-lab",
+  "description": "Local/interactive workflow skills for Cursor: setup, iterate, transcript-parser, workflow-tuning",
+  "version": "1.0.0",
+  "author": {
+    "name": "William Hamilton"
+  }
+}

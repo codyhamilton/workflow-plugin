@@ -8,13 +8,23 @@
   "plugins": [
     {
       "name": "workflow",
-      "description": "Plan, execute, and review workflow skills for Claude Code",
+      "description": "Cloud-safe core: plan, execute, comprehensive-review. No interactive gates that dead-end headless; installable in cloud build and pipeline environments.",
       "author": {
         "name": "William Hamilton",
         "email": "codyh@ctzns.net"
       },
       "category": "development",
       "source": "./"
+    },
+    {
+      "name": "workflow-lab",
+      "description": "Local lab: setup, iterate, transcript-parser, workflow-tuning. Interactive and/or local-filesystem-bound; never required by the pipeline.",
+      "author": {
+        "name": "William Hamilton",
+        "email": "codyh@ctzns.net"
+      },
+      "category": "development",
+      "source": "./plugins/workflow-lab"
     }
   ]
 }

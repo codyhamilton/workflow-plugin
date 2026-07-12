@@ -1,5 +1,7 @@
 # Provenance: <Plan Title>
 
+Interactive-posture only. Headless one-shot runs skip this file — intent, the assumption ledger, and agent decisions live in `PLAN.md` alone.
+
 ## Session
 
 - Session: <descriptive label, e.g. "Initial plan (Month DD, YYYY)">

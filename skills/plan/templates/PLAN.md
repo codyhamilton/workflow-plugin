@@ -17,13 +17,24 @@ User request, verbatim:
 ## Architectural Implications
 
 - <stable doc or architectural assumption affected>
-- <roadmap or downstream implication>
+- <sequencing or downstream-plan implication>
 - <boundary or ownership implication>
 
 ## Intent Validation
 
 - <decision or clarification that materially shapes scope, sequencing, boundaries, non-goals, or acceptance criteria>
 - <question asked and answer received, or state "None">
+
+## Assumption Ledger
+
+<Headless posture only — one entry per question the skill would otherwise have asked a human. For interactive sessions, state "None — interactive session; see PROVENANCE.md.">
+
+### Assumption N
+
+- **Question:** <what would have been asked>
+- **Answer chosen:** <the decision made>
+- **Rationale:** <why this answer, not another>
+- **If wrong:** <what changes about the plan or its execution if this assumption doesn't hold>
 
 ## Open Questions
 
@@ -37,12 +48,16 @@ User request, verbatim:
 
 ## Acceptance Criteria
 
-- <observable success condition>
-- <observable success condition>
+User-facing (entry point → action → observable result):
+
+- <entry point> → <action taken> → <observable result>
+
+Non-user-facing (observable statement):
+
 - <observable success condition>
 
 ## Provenance Notes
 
-See `PROVENANCE.md` in this plan folder for the plan conversation record — verbatim initial request, Q&A turns, and agent decisions written progressively during the plan session.
+See `PROVENANCE.md` in this plan folder, when present, for the plan conversation record — verbatim initial request, Q&A turns, and agent decisions written progressively during interactive sessions. Headless one-shot runs have no `PROVENANCE.md`; the Assumption Ledger above and this section together carry the full record.
 
 - <important rationale, tradeoff, or decision future agents should understand>
