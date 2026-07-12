@@ -1,6 +1,6 @@
 ---
 name: comprehensive-review
-description: Conduct an independent review of a significant change, keyed to the plan's acceptance criteria. Use when reviewing a PR (locate the plan folder via its `Workflow-Plan:` marker) or after local plan execution.
+description: Conduct an independent review of a significant change, keyed to the plan's acceptance criteria. Use when reviewing a PR (locate the plan folder via its `Workflow-Plan:` marker) or after local plan execution. For functional no-plan PRs, reconstruct intent; trivial non-functional work may skip ceremony when the invoker classifies it as absorbable.
 ---
 
 # Comprehensive Review
@@ -27,12 +27,10 @@ If the PR body has no `Workflow-Plan:` marker (no plan folder), use the **No-Art
 
 ## No-Artifact Fallback
 
-A PR arriving with no plan folder (a human or agent that skipped the workflow) does not break the review:
+A PR arriving with no plan folder (a human or agent that skipped the workflow) does not break the review. Right-size to the change:
 
-1. Create a plan folder using the normal path convention (`docs/plans/<NN>-<slug>/`, slug derived from the PR).
-2. Reconstruct intent from the PR description, linked issue, and commit messages, and write it to `RECOVERED-INTENT.md` in that folder.
-3. Note plainly that the intent is reconstructed, not authored, and therefore lower-confidence.
-4. Proceed uniformly from here — `REVIEW.md` and remediation briefs land in this folder exactly as they would with an authored `PLAN.md`, but acceptance-criteria keying falls back to whatever `RECOVERED-INTENT.md` was able to establish.
+- **Functional or mixed / material changes:** create a plan folder using the normal path convention (`docs/plans/<NN>-<slug>/`, slug derived from the PR); reconstruct intent from the PR description, linked issue, and commit messages into `RECOVERED-INTENT.md`; note plainly that the intent is reconstructed, not authored, and therefore lower-confidence; then proceed — `REVIEW.md` and remediation briefs land in this folder exactly as they would with an authored `PLAN.md`, but acceptance-criteria keying falls back to whatever `RECOVERED-INTENT.md` was able to establish. Functional no-plan work still gets a real review, not a rubber stamp of behavior.
+- **Trivial or small non-functional changes:** when the invoker (typically `post-build`) has already classified the change as absorbable non-functional work, do not invent a plan folder or recovered-intent ceremony — a light review note is enough, or the invoker may skip dispatching this skill entirely.
 
 ## Default Review Shape
 
@@ -113,5 +111,5 @@ This is cold-reader pressure on plan quality. The judgment is a one-way artifact
 - Small or local changes should usually get one reviewer, not three.
 - Large cross-cutting changes may justify parallel focused reviewers. A simple starting point is no more than half as many agents as were used for the implementation.
 - The review should challenge the intent and plan approach, not just naive implementation alignment — this is what the intent-and-assumptions lens is for.
-- A PR with no plan folder still gets a full review via the no-artifact fallback; it must not be skipped or downgraded to a rubber stamp.
+- A PR with no plan folder still gets a real review of functional or material risk via the no-artifact fallback; trivial non-functional work may be lightweight or skipped by the invoker without inventing plan ceremony.
 - Every structural finding gets a self-contained remediation brief; a fixing agent should never need the review conversation to act on it.

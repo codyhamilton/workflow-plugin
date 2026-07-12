@@ -50,7 +50,7 @@ local-filesystem dependencies — and is what a build/pipeline environment insta
 | `workflow` (core) | `plan` | Create and revise implementation plans; interactive or headless posture |
 | `workflow` (core) | `execute` | Execute planned work packages with brief-based delegation; review sized to terminal or pipeline posture |
 | `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria |
-| `workflow` (core) | `post-build` | Pipeline stage against a PR: review, bounded remediation, QA planning, exact-SHA deploy proof, deployed QA, merge-readiness report (repo mechanics via a per-repo adapter skill) |
+| `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation, wait for required checks, conditional QA + exact-SHA deploy proof, merge-readiness report (repo mechanics via a per-repo adapter skill) |
 | `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
 | `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
