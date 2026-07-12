@@ -19,6 +19,18 @@ is_cursor_cloud_agent() {
   return 1
 }
 
+# Claude Code (CLI and web) sets these for every session, local or remote —
+# including Bash-tool subprocesses, which have no TTY either way. Check this
+# before falling through to the generic non-interactive/Cursor branch so a
+# Claude Code session never gets routed into .cursor/skills/.
+is_claude_code_agent() {
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "claude-code" ]] && return 0
+  [[ "${CLAUDECODE:-}" == "1" ]] && return 0
+  [[ -n "${CLAUDE_CODE_ENTRYPOINT:-}" ]] && return 0
+  [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]] && return 0
+  return 1
+}
+
 can_prompt_interactively() {
   [[ -t 0 ]] || ( exec 3</dev/tty ) 2>/dev/null
 }
@@ -49,7 +61,15 @@ should_auto_install_cursor_core() {
 }
 
 auto_install_reason() {
-  if [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]]; then
+  if [[ "${WORKFLOW_INSTALL_MODE:-}" == "claude-code" ]]; then
+    echo "WORKFLOW_INSTALL_MODE=claude-code"
+  elif [[ "${CLAUDECODE:-}" == "1" ]]; then
+    echo "CLAUDECODE=1"
+  elif [[ -n "${CLAUDE_CODE_ENTRYPOINT:-}" ]]; then
+    echo "CLAUDE_CODE_ENTRYPOINT=${CLAUDE_CODE_ENTRYPOINT}"
+  elif [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
+    echo "CLAUDE_CODE_REMOTE=true"
+  elif [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]]; then
     echo "WORKFLOW_INSTALL_MODE=cloud"
   elif [[ "${CURSOR_AGENT:-}" == "1" ]]; then
     echo "CURSOR_AGENT=1"
@@ -299,6 +319,26 @@ ensure_cursor_workspace_skills() {
   verify_workspace_skills "$dest"
 }
 
+# Claude Code (local and web/remote) discovers personal skills from
+# ~/.claude/skills/ in every project — no workspace files, no trust gate,
+# no interactive /plugin install step required.
+ensure_claude_user_skills() {
+  local dest="$HOME/.claude/skills"
+  local src=""
+
+  if is_valid_plugin_source "$SCRIPT_DIR"; then
+    src="$SCRIPT_DIR/skills"
+  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
+    src="$INSTALL_SRC_CACHE/skills"
+  else
+    echo "  ERROR: no workflow skills source found." >&2
+    return 1
+  fi
+
+  install_skills "$src" "$dest"
+  verify_workspace_skills "$dest"
+}
+
 verify_workspace_skills() {
   local dest="$1"
   local errors=0
@@ -350,6 +390,19 @@ install_skills() {
 
 echo "workflow-plugin installer"
 echo "========================="
+
+if is_claude_code_agent && ! is_interactive_install; then
+  echo "Claude Code detected ($(auto_install_reason)) — installing core workflow skills to ~/.claude/skills/."
+  echo "  (Personal-scope skills — nothing written to the repo workspace.)"
+  echo ""
+  ensure_claude_user_skills
+  echo "  Done. Core skills available at: $HOME/.claude/skills/"
+  echo "  Skills: plan, execute, comprehensive-review, post-build"
+  echo "  (workflow-lab is not installed automatically; install it interactively if needed.)"
+  echo ""
+  echo "Installation complete."
+  exit 0
+fi
 
 if should_auto_install_cursor_core; then
   echo "Non-interactive install ($(auto_install_reason)) — installing core workflow skills to workspace .cursor/skills/."
