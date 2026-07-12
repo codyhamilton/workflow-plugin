@@ -9,7 +9,7 @@ Review is mandatory after plan execution, but the review shape should be right-s
 
 Generalized "review everything in parallel" tends to find the easiest measurable issues while missing the underlying problem. Prefer focused review intent.
 
-This review is a pipeline stage: a later merge-babysitting automation reads `REVIEW.md` as a checklist against `PLAN.md`'s acceptance criteria and consumes remediation briefs untranslated. Write for that reader, not just for the current conversation.
+This review is a pipeline stage: the `post-build` stage (or an equivalent automation) reads `REVIEW.md` as a checklist against `PLAN.md`'s acceptance criteria, branches on its verdict, and consumes remediation briefs untranslated. Write for that reader, not just for the current conversation.
 
 ## Inputs
 
@@ -21,7 +21,7 @@ If the PR body has no `Workflow-Plan:` marker (no plan folder), use the **No-Art
 
 ## Output Placement
 
-- Findings land in `REVIEW.md` **in the plan folder**, committed to the PR branch when reviewing a PR. Key findings to `PLAN.md`'s acceptance criteria: assess each criterion explicitly, then list findings outside the criteria by severity. This keying is what lets the downstream merge-babysitting stage treat `REVIEW.md` as a checklist.
+- Findings land in `REVIEW.md` **in the plan folder**, committed to the PR branch when reviewing a PR. Key findings to `PLAN.md`'s acceptance criteria: assess each criterion explicitly, then list findings outside the criteria by severity. This keying is what lets the downstream post-build stage treat `REVIEW.md` as a checklist.
 - Each **structural** finding additionally becomes a remediation brief at `briefs/remediation-<NN>.md` in the plan folder. You hold the hottest context on the defect, so you author the fix instruction: complete enough that a clean agent can execute it without reading the review conversation. Include the defect, where it lives, why it matters, the fix approach, and done evidence.
 - Trivial findings do not get briefs — list them in `REVIEW.md` for inline fixing.
 
@@ -94,14 +94,17 @@ This is cold-reader pressure on plan quality. The judgment is a one-way artifact
 
 `REVIEW.md` should contain:
 
-- Outcome
+- Verdict: `PASS`, `PASS_WITH_FOLLOWUPS`, or `REMEDIATE` — machine-actionable, so a pipeline stage can branch on it without interpretation
+- Reviewed SHA (when reviewing a PR)
 - Acceptance criteria assessment (each `PLAN.md` criterion, met/partial/not met, evidence)
-- Findings by severity (outside the acceptance criteria)
+- Findings by severity (outside the acceptance criteria): `blocker`, `high`, `medium`, or `low`
 - Intent and assumption-ledger assessment
 - Plan-sufficiency judgment
 - Fixes applied
 - Residual risks
 - Final assessment against the plan or contract
+
+`REVIEW.md` accumulates across remediation: resolutions and re-review verdicts are appended against the new SHA; original findings are never erased or rewritten.
 
 ## Rules
 

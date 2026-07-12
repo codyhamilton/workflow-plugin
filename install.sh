@@ -81,7 +81,7 @@ echo "========================="
 
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then
-  if ask "Install workflow core skills (plan, execute, comprehensive-review) into Claude Code (~/.claude/skills/)?"; then
+  if ask "Install workflow core skills (plan, execute, comprehensive-review, post-build) into Claude Code (~/.claude/skills/)?"; then
     install_skills "$SCRIPT_DIR/skills" "$HOME/.claude/skills"
     echo "  Done. Core skills available immediately in Claude Code."
   fi
