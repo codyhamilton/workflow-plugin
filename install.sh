@@ -5,6 +5,7 @@ DEFAULT_REPO_HTTPS_URL="https://github.com/codyhamilton/workflow-plugin.git"
 CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
 CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
 INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
+WORKFLOW_WORKSPACE_SKILLS_NAME="${WORKFLOW_WORKSPACE_SKILLS_NAME:-workflow}"
 
 # Capture before any function runs — inside functions BASH_SOURCE[0] is the
 # function name (e.g. "main" for piped scripts), not the installer path.
@@ -61,6 +62,27 @@ auto_install_reason() {
   else
     echo "non-interactive shell"
   fi
+}
+
+find_workspace_root() {
+  if [[ -n "${WORKFLOW_WORKSPACE:-}" ]]; then
+    echo "$(cd "$WORKFLOW_WORKSPACE" && pwd)"
+    return 0
+  fi
+  if git rev-parse --show-toplevel &>/dev/null; then
+    git rev-parse --show-toplevel
+    return 0
+  fi
+  if [[ -d /workspace/.git ]]; then
+    echo /workspace
+    return 0
+  fi
+  return 1
+}
+
+workspace_skills_dest() {
+  local workspace="$1"
+  echo "$workspace/.cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME"
 }
 
 ask() {
@@ -250,9 +272,68 @@ verify_cursor_core_plugin() {
   echo "  Verified plugin at $plugin ($skill_count skills)"
 }
 
+# Cloud agents discover project skills from .cursor/skills/, not plugins/local/.
+ensure_cursor_workspace_skills() {
+  local workspace=""
+  local dest=""
+  local src=""
+
+  if ! workspace="$(find_workspace_root)"; then
+    echo "  ERROR: cannot find workspace root for skill install." >&2
+    echo "  Set WORKFLOW_WORKSPACE to your repository root and re-run." >&2
+    return 1
+  fi
+
+  dest="$(workspace_skills_dest "$workspace")"
+  if is_valid_plugin_source "$SCRIPT_DIR"; then
+    src="$SCRIPT_DIR/skills"
+  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
+    src="$INSTALL_SRC_CACHE/skills"
+  else
+    echo "  ERROR: no workflow skills source found." >&2
+    return 1
+  fi
+
+  echo "  Workspace: $workspace"
+  install_skills "$src" "$dest"
+  verify_workspace_skills "$dest"
+}
+
+verify_workspace_skills() {
+  local dest="$1"
+  local errors=0
+  local skill_count=0
+  local skill_dir
+
+  if [[ -L "$dest" ]]; then
+    echo "  ERROR: $dest is a symlink; use a real directory." >&2
+    errors=$((errors + 1))
+  fi
+  if [[ ! -d "$dest" ]]; then
+    echo "  ERROR: missing $dest" >&2
+    errors=$((errors + 1))
+  fi
+
+  for skill_dir in "$dest"/*/; do
+    [[ -f "${skill_dir}SKILL.md" ]] && skill_count=$((skill_count + 1))
+  done
+  if [[ "$skill_count" -eq 0 ]]; then
+    echo "  ERROR: no skills with SKILL.md found under $dest" >&2
+    errors=$((errors + 1))
+  fi
+
+  if [[ "$errors" -gt 0 ]]; then
+    echo "  Workspace skill verification failed for $dest" >&2
+    return 1
+  fi
+
+  echo "  Verified workspace skills at $dest ($skill_count skills)"
+}
+
 install_skills() {
   local src="$1"
   local dest_root="$2"
+  local skill_dir skill_name dest
   mkdir -p "$dest_root"
   for skill_dir in "$src"/*/; do
     skill_name="$(basename "$skill_dir")"
@@ -271,11 +352,15 @@ echo "workflow-plugin installer"
 echo "========================="
 
 if should_auto_install_cursor_core; then
-  echo "Non-interactive install ($(auto_install_reason)) — installing core workflow plugin to Cursor."
+  echo "Non-interactive install ($(auto_install_reason)) — installing core workflow skills to workspace .cursor/skills/."
+  echo "  (Cloud agents load project skills from .cursor/skills/, not plugins/local/.)"
   echo ""
-  ensure_cursor_core_plugin
-  echo "  Done. Core skills available at: $CURSOR_CORE_PLUGIN"
+  ensure_cursor_workspace_skills
+  workspace="$(find_workspace_root)"
+  dest="$(workspace_skills_dest "$workspace")"
+  echo "  Done. Core skills available at: $dest"
   echo "  Skills: plan, execute, comprehensive-review, post-build"
+  echo "  Add .cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
   echo "  (workflow-lab is not installed in cloud agent environments.)"
   echo ""
   echo "Installation complete."
