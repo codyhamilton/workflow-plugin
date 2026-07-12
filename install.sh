@@ -6,12 +6,20 @@ CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
 CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
 INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
 
+# Capture before any function runs — inside functions BASH_SOURCE[0] is the
+# function name (e.g. "main" for piped scripts), not the installer path.
+_INSTALLER_SOURCE="${BASH_SOURCE[0]:-}"
+
 is_cursor_cloud_agent() {
   [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]] || [[ "${CURSOR_AGENT:-}" == "1" ]]
 }
 
+can_prompt_interactively() {
+  [[ -t 0 ]] || ( exec 3</dev/tty ) 2>/dev/null
+}
+
 is_interactive_install() {
-  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]]
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]] && can_prompt_interactively
 }
 
 ask() {
@@ -43,8 +51,9 @@ repo_url() {
 # (or refresh) a shallow checkout so the rest of the installer can copy files.
 ensure_script_dir() {
   local candidate=""
-  if [[ -n "${BASH_SOURCE[0]:-}" && "${BASH_SOURCE[0]}" != "-" ]]; then
-    candidate="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local src="${_INSTALLER_SOURCE:-}"
+  if [[ -n "$src" && "$src" != "-" && -f "$src" ]]; then
+    candidate="$(cd "$(dirname "$src")" && pwd)"
     if [[ -d "$candidate/skills" ]]; then
       echo "$candidate"
       return
@@ -58,13 +67,13 @@ ensure_script_dir() {
 
   mkdir -p "$(dirname "$INSTALL_SRC_CACHE")"
   if [[ -d "$INSTALL_SRC_CACHE/.git" ]]; then
-    echo "  Refreshing installer checkout at $INSTALL_SRC_CACHE"
+    echo "  Refreshing installer checkout at $INSTALL_SRC_CACHE" >&2
     git -C "$INSTALL_SRC_CACHE" pull --ff-only
   else
     if [[ -e "$INSTALL_SRC_CACHE" ]]; then
       rm -rf "$INSTALL_SRC_CACHE"
     fi
-    echo "  Cloning installer checkout to $INSTALL_SRC_CACHE"
+    echo "  Cloning installer checkout to $INSTALL_SRC_CACHE" >&2
     git clone --depth 1 "$url" "$INSTALL_SRC_CACHE"
   fi
   echo "$INSTALL_SRC_CACHE"
