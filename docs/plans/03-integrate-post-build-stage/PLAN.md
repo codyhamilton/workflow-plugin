@@ -55,6 +55,13 @@ Add a `post-build` core skill owning the portable post-build stage: plan discove
 - **Rationale:** garcia's adapter hard-stops on merge/merge-state changes; merging is the one irreversible act in the pipeline and no input suggests automating it.
 - **If wrong:** Add a declared opt-in (same pattern as postures) rather than a default.
 
+### Assumption 5 (added when scope grew to automation wiring)
+
+- **Question:** Is the stage wired as one orchestrated automation, or as chained per-phase automations?
+- **Answer chosen:** One orchestrated automation per stage; chaining happens only at stage seams, through the PR.
+- **Rationale:** The stage's cross-phase state (candidate SHA, exact URL, cycle counts, results) is exactly the state that must never be committed, and commits are the only durable handoff a chain has; bounded loops need one remembering authority; the stage commits to the branch it watches, so push-triggered chains refire on their own commits; per-phase independence already exists as fresh subagent contexts inside the run. A resumability rule (artifacts bound to the current SHA count as done) covers single-run's retry weakness.
+- **If wrong:** `automation.md`'s Shape section is the seam to revise; the skill's phases are already artifact-delimited, so a chain could be layered on without changing `SKILL.md` beyond the resumability rule.
+
 ## Open Questions
 
 - None.
@@ -64,6 +71,7 @@ Add a `post-build` core skill owning the portable post-build stage: plan discove
 1. Write `skills/post-build/SKILL.md` and `skills/post-build/reference.md`.
 2. Reconcile `comprehensive-review` (verdict/severity enums, resolution rules, stage naming).
 3. Update stable docs (`docs/ARCHITECTURE.md`, `docs/OVERVIEW.md`, `README.md`) and plugin manifests.
+4. (Scope extension, same PR) Write the automation wiring guide `skills/post-build/automation.md` and add the re-run resumability rule to the skill.
 
 ## Acceptance Criteria
 

@@ -51,7 +51,7 @@ Preflight alongside discovery: clean worktree, a non-default feature branch, and
 
 ## Workflow
 
-1. **Preflight and discovery** (above). Stop before any delegation on a failed precondition; do not create missing plan artifacts to keep going.
+1. **Preflight and discovery** (above). Stop before any delegation on a failed precondition; do not create missing plan artifacts to keep going. On a re-triggered run, resume rather than repeat: committed artifacts already bound to the current candidate SHA count as done (a passing `REVIEW.md` for this SHA skips review; an existing `QA.md` matrix skips planning; recorded cycles count against the bounded loops).
 2. **Independent review.** Dispatch `comprehensive-review` against the PR. It writes `REVIEW.md` keyed to `PLAN.md`'s acceptance criteria, challenges the assumption ledger, and authors a remediation brief per structural finding. Its verdict is `PASS`, `PASS_WITH_FOLLOWUPS`, or `REMEDIATE`.
 3. **Remediation** (only on `REMEDIATE`). Dispatch a clean fixer per accepted finding, its prompt the reviewer's remediation brief routed verbatim plus mechanical pointers. The fixer touches only the accepted findings, runs focused tests, updates `IMPLEMENTATION.md`, and records resolutions in `REVIEW.md` without erasing the original findings.
 4. **Fresh re-review.** A clean reviewer — not the original — verifies the remediation delta plus the stable artifacts, and updates `REVIEW.md`'s verdict for the new SHA. One remediation cycle, one re-review: if a `blocker` or `high` finding still stands, stop and hand off.
@@ -93,4 +93,4 @@ Never report `PASS` while exact-SHA proof or an applicable QA case is missing �
 
 ## Reference
 
-`reference.md`, beside this file, holds the design rationale behind these rules — why the SHA gate is absolute, why results are never committed, why loops are bounded — for whoever revises this skill later. It is not loaded during normal execution.
+`automation.md`, beside this file, is the operator guide for wiring this stage into an external automation trigger — automation shape, trigger discipline, canonical prompt, and canary. `reference.md` holds the design rationale behind these rules — why the SHA gate is absolute, why results are never committed, why loops are bounded — for whoever revises this skill later. It is not loaded during normal execution.

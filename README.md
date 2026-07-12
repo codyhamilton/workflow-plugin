@@ -56,6 +56,10 @@ local-filesystem dependencies — and is what a build/pipeline environment insta
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
 | `workflow-lab` | `workflow-tuning` | Improve the plan/execute/review workflow itself, from retros and merged-PR outcomes |
 
+To trigger `post-build` from an external automation (e.g. a Cursor Automation), see
+[`skills/post-build/automation.md`](skills/post-build/automation.md): one orchestrated automation
+per stage, triggered once per build handoff, with repo mechanics supplied by a per-repo adapter skill.
+
 ## Quick install
 
 ```sh

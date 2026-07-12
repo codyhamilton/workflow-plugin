@@ -181,6 +181,7 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 - [OVERVIEW.md](OVERVIEW.md) — what the plugin is and why
 - [../README.md](../README.md) — install instructions, skills table, operating hypotheses
 - [../skills/plan/SKILL.md](../skills/plan/SKILL.md), [../skills/execute/SKILL.md](../skills/execute/SKILL.md), [../skills/comprehensive-review/SKILL.md](../skills/comprehensive-review/SKILL.md), [../skills/post-build/SKILL.md](../skills/post-build/SKILL.md) — core skill prompts
+- [../skills/post-build/automation.md](../skills/post-build/automation.md) — wiring the post-build stage into an automation trigger
 - [../plugins/workflow-lab/skills/iterate/SKILL.md](../plugins/workflow-lab/skills/iterate/SKILL.md) — the composition pattern in practice
 - [../plugins/workflow-lab/skills/workflow-tuning/reference.md](../plugins/workflow-lab/skills/workflow-tuning/reference.md) — observed lessons corpus
 - [../docs/plans/02-pivot-consolidate-focus/DESIGN.md](../docs/plans/02-pivot-consolidate-focus/DESIGN.md) — the full binding-contract record this architecture summarizes (plan-scoped; this file is the durable summary going forward)
