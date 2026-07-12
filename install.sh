@@ -2,6 +2,7 @@
 set -euo pipefail
 
 DEFAULT_REPO_HTTPS_URL="https://github.com/codyhamilton/workflow-plugin.git"
+INSTALL_BRANCH="${WORKFLOW_INSTALL_BRANCH:-master}"
 CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
 CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
 INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
@@ -118,6 +119,24 @@ ask() {
   [[ "${reply,,}" == "y" ]]
 }
 
+refresh_git_checkout() {
+  local dir="$1"
+  [[ -d "$dir/.git" ]] || return 0
+  git -C "$dir" remote get-url origin &>/dev/null || return 0
+
+  echo "  Updating checkout at $dir (origin/$INSTALL_BRANCH)" >&2
+  if ! git -C "$dir" fetch --depth 1 origin "$INSTALL_BRANCH" &>/dev/null; then
+    git -C "$dir" fetch origin "$INSTALL_BRANCH" >&2
+  fi
+
+  if git -C "$dir" show-ref --verify --quiet "refs/heads/$INSTALL_BRANCH"; then
+    git -C "$dir" checkout "$INSTALL_BRANCH" >&2
+    git -C "$dir" merge --ff-only "origin/$INSTALL_BRANCH" >&2
+  else
+    git -C "$dir" checkout -B "$INSTALL_BRANCH" "origin/$INSTALL_BRANCH" >&2
+  fi
+}
+
 https_repo_url() {
   local url=""
   if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
@@ -149,6 +168,7 @@ ensure_script_dir() {
   if [[ -n "$src" && "$src" != "-" && -f "$src" ]]; then
     candidate="$(cd "$(dirname "$src")" && pwd)"
     if [[ -d "$candidate/skills" ]]; then
+      refresh_git_checkout "$candidate"
       echo "$candidate"
       return
     fi
@@ -165,14 +185,13 @@ ensure_script_dir() {
 
   mkdir -p "$(dirname "$INSTALL_SRC_CACHE")"
   if [[ -d "$INSTALL_SRC_CACHE/.git" ]]; then
-    echo "  Refreshing installer checkout at $INSTALL_SRC_CACHE" >&2
-    git -C "$INSTALL_SRC_CACHE" pull --ff-only
+    refresh_git_checkout "$INSTALL_SRC_CACHE"
   else
     if [[ -e "$INSTALL_SRC_CACHE" ]]; then
       rm -rf "$INSTALL_SRC_CACHE"
     fi
     echo "  Cloning installer checkout to $INSTALL_SRC_CACHE" >&2
-    git clone --depth 1 "$url" "$INSTALL_SRC_CACHE"
+    git clone --depth 1 --branch "$INSTALL_BRANCH" "$url" "$INSTALL_SRC_CACHE"
   fi
   echo "$INSTALL_SRC_CACHE"
 }
@@ -213,6 +232,7 @@ ensure_cursor_core_plugin() {
   fi
 
   if [[ -n "$src" ]]; then
+    refresh_git_checkout "$src"
     local src_real dest_real
     src_real="$(readlink -f "$src")"
     dest_real="$(readlink -f "$CURSOR_CORE_PLUGIN" 2>/dev/null || echo "$CURSOR_CORE_PLUGIN")"
@@ -226,15 +246,14 @@ ensure_cursor_core_plugin() {
   local url
   url="$(https_repo_url)"
   if [[ -d "$CURSOR_CORE_PLUGIN/.git" ]]; then
-    echo "  Updating plugin at $CURSOR_CORE_PLUGIN"
-    git -C "$CURSOR_CORE_PLUGIN" pull --ff-only
+    refresh_git_checkout "$CURSOR_CORE_PLUGIN"
   else
     if [[ -e "$CURSOR_CORE_PLUGIN" ]]; then
       echo "  Replacing existing install at $CURSOR_CORE_PLUGIN"
       rm -rf "$CURSOR_CORE_PLUGIN"
     fi
     echo "  Cloning plugin to $CURSOR_CORE_PLUGIN"
-    git clone --depth 1 "$url" "$CURSOR_CORE_PLUGIN"
+    git clone --depth 1 --branch "$INSTALL_BRANCH" "$url" "$CURSOR_CORE_PLUGIN"
   fi
   verify_cursor_core_plugin "$CURSOR_CORE_PLUGIN"
 }
