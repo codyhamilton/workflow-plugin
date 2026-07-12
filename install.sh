@@ -11,7 +11,11 @@ INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-
 _INSTALLER_SOURCE="${BASH_SOURCE[0]:-}"
 
 is_cursor_cloud_agent() {
-  [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]] || [[ "${CURSOR_AGENT:-}" == "1" ]]
+  [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]] && return 0
+  [[ "${CURSOR_AGENT:-}" == "1" ]] && return 0
+  [[ "${HOSTNAME:-}" == "cursor" ]] && return 0
+  [[ -f "$HOME/.cursor/plugins/cache/.cloud-plugin-manifest.json" ]] && return 0
+  return 1
 }
 
 can_prompt_interactively() {
@@ -20,6 +24,10 @@ can_prompt_interactively() {
 
 is_interactive_install() {
   [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]] && can_prompt_interactively
+}
+
+should_auto_install_cursor_core() {
+  is_cursor_cloud_agent && ! is_interactive_install
 }
 
 ask() {
@@ -35,16 +43,27 @@ ask() {
   [[ "${reply,,}" == "y" ]]
 }
 
-repo_url() {
+https_repo_url() {
+  local url=""
   if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
-    echo "$WORKFLOW_REPO_URL"
-    return
-  fi
-  if git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree &>/dev/null; then
-    git -C "$SCRIPT_DIR" config --get remote.origin.url || echo "$DEFAULT_REPO_HTTPS_URL"
+    url="$WORKFLOW_REPO_URL"
+  elif [[ -n "${SCRIPT_DIR:-}" ]] && git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree &>/dev/null; then
+    url="$(git -C "$SCRIPT_DIR" config --get remote.origin.url || echo "$DEFAULT_REPO_HTTPS_URL")"
   else
-    echo "$DEFAULT_REPO_HTTPS_URL"
+    url="$DEFAULT_REPO_HTTPS_URL"
   fi
+
+  case "$url" in
+    git@github.com:*)
+      echo "https://github.com/${url#git@github.com:}"
+      ;;
+    git@github.com:/*)
+      echo "https://github.com/${url#git@github.com:/}"
+      ;;
+    *)
+      echo "$url"
+      ;;
+  esac
 }
 
 # When run as `curl … | bash`, the script is not on disk next to skills/. Clone
@@ -64,6 +83,10 @@ ensure_script_dir() {
   if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
     url="$WORKFLOW_REPO_URL"
   fi
+  case "$url" in
+    git@github.com:*) url="https://github.com/${url#git@github.com:}" ;;
+    git@github.com:/*) url="https://github.com/${url#git@github.com:/}" ;;
+  esac
 
   mkdir -p "$(dirname "$INSTALL_SRC_CACHE")"
   if [[ -d "$INSTALL_SRC_CACHE/.git" ]]; then
@@ -81,13 +104,52 @@ ensure_script_dir() {
 
 SCRIPT_DIR="$(ensure_script_dir)"
 
-# Cursor does not follow symlinks — clone a real checkout into ~/.cursor/plugins/local/.
-# This checkout carries the whole repo, including plugins/workflow-lab/ — the
-# core plugin's own manifest and skills/ live at the checkout root, unaffected.
+is_valid_plugin_source() {
+  local src="$1"
+  [[ -d "$src/skills" && -f "$src/.cursor-plugin/plugin.json" ]]
+}
+
+# Cursor rejects symlinks that point outside ~/.cursor/plugins/local/. Always
+# materialize a real directory tree under the local plugins folder.
+copy_plugin_tree() {
+  local src="$1"
+  local dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [[ -e "$dest" ]]; then
+    echo "  Replacing existing install at $dest"
+    rm -rf "$dest"
+  fi
+  mkdir -p "$dest"
+  echo "  Copying plugin files to $dest"
+  cp -a "$src"/. "$dest"/
+}
+
+# Cursor does not follow symlinks — materialize a real checkout into
+# ~/.cursor/plugins/local/. Prefer copying from an already-fetched source tree
+# (SCRIPT_DIR or INSTALL_SRC_CACHE) so we never symlink out of the plugin folder.
 ensure_cursor_core_plugin() {
   mkdir -p "$(dirname "$CURSOR_CORE_PLUGIN")"
+
+  local src=""
+  if is_valid_plugin_source "$SCRIPT_DIR"; then
+    src="$SCRIPT_DIR"
+  elif is_valid_plugin_source "$INSTALL_SRC_CACHE"; then
+    src="$INSTALL_SRC_CACHE"
+  fi
+
+  if [[ -n "$src" ]]; then
+    local src_real dest_real
+    src_real="$(readlink -f "$src")"
+    dest_real="$(readlink -f "$CURSOR_CORE_PLUGIN" 2>/dev/null || echo "$CURSOR_CORE_PLUGIN")"
+    if [[ "$src_real" != "$dest_real" ]]; then
+      copy_plugin_tree "$src" "$CURSOR_CORE_PLUGIN"
+      verify_cursor_core_plugin "$CURSOR_CORE_PLUGIN"
+      return
+    fi
+  fi
+
   local url
-  url="$(repo_url)"
+  url="$(https_repo_url)"
   if [[ -d "$CURSOR_CORE_PLUGIN/.git" ]]; then
     echo "  Updating plugin at $CURSOR_CORE_PLUGIN"
     git -C "$CURSOR_CORE_PLUGIN" pull --ff-only
@@ -99,6 +161,7 @@ ensure_cursor_core_plugin() {
     echo "  Cloning plugin to $CURSOR_CORE_PLUGIN"
     git clone --depth 1 "$url" "$CURSOR_CORE_PLUGIN"
   fi
+  verify_cursor_core_plugin "$CURSOR_CORE_PLUGIN"
 }
 
 # The lab plugin is a subtree of the same repo (plugins/workflow-lab/), not a
@@ -116,7 +179,42 @@ ensure_cursor_lab_plugin() {
   fi
   mkdir -p "$(dirname "$CURSOR_LAB_PLUGIN")"
   echo "  Copying lab plugin to $CURSOR_LAB_PLUGIN"
-  cp -rL "$src" "$CURSOR_LAB_PLUGIN"
+  cp -a "$src"/. "$CURSOR_LAB_PLUGIN"/
+}
+
+verify_cursor_core_plugin() {
+  local plugin="$1"
+  local errors=0
+
+  if [[ -L "$plugin" ]]; then
+    echo "  ERROR: $plugin is a symlink; Cursor requires a real directory." >&2
+    errors=$((errors + 1))
+  fi
+  if [[ ! -f "$plugin/.cursor-plugin/plugin.json" ]]; then
+    echo "  ERROR: missing $plugin/.cursor-plugin/plugin.json" >&2
+    errors=$((errors + 1))
+  fi
+  if [[ ! -d "$plugin/skills" ]]; then
+    echo "  ERROR: missing $plugin/skills/" >&2
+    errors=$((errors + 1))
+  fi
+
+  local skill_count=0
+  local skill_dir
+  for skill_dir in "$plugin"/skills/*/; do
+    [[ -f "${skill_dir}SKILL.md" ]] && skill_count=$((skill_count + 1))
+  done
+  if [[ "$skill_count" -eq 0 ]]; then
+    echo "  ERROR: no skills with SKILL.md found under $plugin/skills/" >&2
+    errors=$((errors + 1))
+  fi
+
+  if [[ "$errors" -gt 0 ]]; then
+    echo "  Plugin verification failed for $plugin" >&2
+    return 1
+  fi
+
+  echo "  Verified plugin at $plugin ($skill_count skills)"
 }
 
 install_skills() {
@@ -132,14 +230,14 @@ install_skills() {
     else
       echo "  Installing skill: $skill_name"
     fi
-    cp -rL "$skill_dir" "$dest"
+    cp -a "$skill_dir" "$dest"
   done
 }
 
 echo "workflow-plugin installer"
 echo "========================="
 
-if is_cursor_cloud_agent && ! is_interactive_install; then
+if should_auto_install_cursor_core; then
   echo "Cursor Cloud Agent detected (CURSOR_AGENT=${CURSOR_AGENT:-0}) — installing core workflow plugin only."
   echo ""
   ensure_cursor_core_plugin
@@ -168,13 +266,13 @@ fi
 
 echo ""
 
-# Cursor — clone repo into ~/.cursor/plugins/local/workflow (core), then
+# Cursor — materialize repo into ~/.cursor/plugins/local/workflow (core), then
 # optionally copy the lab subtree into ~/.cursor/plugins/local/workflow-lab
 if [[ -d "$HOME/.cursor" ]]; then
   if ask "Install workflow core plugin into Cursor (~/.cursor/plugins/local/)?"; then
     ensure_cursor_core_plugin
     echo "  Done. Restart Cursor to pick up the plugin."
-    echo "  Plugin path: $CURSOR_CORE_PLUGIN (git pull + re-run install.sh to update)"
+    echo "  Plugin path: $CURSOR_CORE_PLUGIN (re-run install.sh to update)"
     echo ""
     if ask "Also install workflow-lab plugin into Cursor?"; then
       ensure_cursor_lab_plugin
