@@ -20,7 +20,7 @@ Read everything available before saying a word:
 
 - `docs/ARCHITECTURE.md` if it exists
 - `docs/OVERVIEW.md` if it exists
-- `docs/ROADMAP.md` if it exists (legacy — setup no longer creates or maintains this file; if found, its content is salvage material for phase 3, not something to recreate)
+- `docs/ROADMAP.md` if it exists (legacy artifact — do not create or maintain it; if found, its content is salvage material for phase 3, not something to recreate)
 - Any files in `docs/design/`
 - `README.md` and top-level config files (package.json, Cargo.toml, go.mod, pyproject.toml, etc.)
 - Source tree structure (`ls` the top level, `ls src/` or equivalent)

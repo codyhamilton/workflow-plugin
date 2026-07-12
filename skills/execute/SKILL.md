@@ -28,7 +28,7 @@ Start from the requested plan folder and answer these questions before implement
 - Are the contracts explicit enough in `DESIGN.md`, stable docs, or `PLAN.md` for delegated workers to implement against?
 - Does the requested execution still align with current architecture docs and user intent?
 
-If the plan no longer aligns with the architecture or user intent, stop execution and surface that mismatch. Plan problems return to a plan conversation before implementation continues. The plan folder and its PR are the authorities for sequencing now — there is no parent roadmap to consult.
+If the plan no longer aligns with the architecture or user intent, stop execution and surface that mismatch. Plan problems return to a plan conversation before implementation continues. The plan folder and its PR are the authorities for sequencing.
 
 The user has already chosen a plan/execute workflow. Treat that as evidence that the work is substantial enough to deserve main-thread orchestration and review sized to the posture below.
 
@@ -76,20 +76,20 @@ Optimize for outcome quality per token, not for maximal autonomy or maximal para
 - If the next meaningful step depends on worker output, wait for the worker. Do not let the orchestrator drift into doing the implementation itself while waiting.
 - When a task is too large for one worker, prefer several small, clearly bounded workers over one larger agent, then consolidate their output yourself.
 
-Per-harness model-selection hints and session-ID capture formulas live in `reference.md` — they rot fast and are environment configuration, not orchestration doctrine. Not loaded during normal cloud execution; consult it for local runs or when tuning worker allocation.
+Per-harness model-selection hints and session-ID capture formulas live in `reference.md`. Not loaded during normal cloud execution; consult it for local runs or when tuning worker allocation.
 
 ## Review Posture
 
 Review posture is **declared by the invoker, never inferred** from context, harness, or change size. Absent a declaration, assume terminal.
 
-- **Terminal** (default; no downstream review stage declared): run mandatory independent review via the `comprehensive-review` skill, as today, and write `REVIEW.md` into the plan folder.
+- **Terminal** (default; no downstream review stage declared): run mandatory independent review via the `comprehensive-review` skill and write `REVIEW.md` into the plan folder.
 - **Pipeline** (the invoker declares a downstream orchestrated review stage exists — e.g. a cursor automation that reviews the PR): the in-run review drops to a pre-flight self-verification instead — does it build/run, do the acceptance criteria pass locally, is the plan folder complete (`PLAN.md`, progressive `IMPLEMENTATION.md`, `briefs/`). The deep review happens downstream against the PR; do not write `REVIEW.md` from this skill in pipeline posture — that artifact belongs to the pipeline stage.
 
 The user saying "skip review" is an invoker declaration of pipeline (or no-review) posture, not license to silently skip verification — pre-flight self-verification still runs.
 
 ## One-Shot Composition
 
-When a single run does plan then execute back to back, each skill still runs as a separately dispatched context, and the handoff between them is the plan folder's committed artifacts, not the orchestrator's memory of the planning conversation. Execute reads the plan cold, exactly as it would on a fresh session days later — that cold read is load-bearing (see `DESIGN.md`'s Plugin Partition contract).
+When a single run does plan then execute back to back, each skill still runs as a separately dispatched context, and the handoff between them is the plan folder's committed artifacts, not the orchestrator's memory of the planning conversation. Execute reads the plan cold, exactly as it would on a fresh session days later — a fused context destroys cold-read pressure on the plan.
 
 ## Workflow
 
@@ -102,7 +102,7 @@ When a single run does plan then execute back to back, each skill still runs as 
    - Started: <ISO 8601 UTC timestamp>
    ```
    In a cloud/PR flow, record the session URL or run ID; there is no local transcript to point to. For local runs where the `transcript-parser` skill needs a session ID, see `reference.md` for best-effort per-harness capture formulas.
-3. Confirm this is the correct next slice: contracts are explicit enough for delegated workers, the execution still aligns with architecture and intent, and any prerequisite phases are satisfied per the plan's own ordering notes and the branch/PR state — not a roadmap. If misaligned, stop and return to plan.
+3. Confirm this is the correct next slice: contracts are explicit enough for delegated workers, the execution still aligns with architecture and intent, and any prerequisite phases are satisfied per the plan's own ordering notes and the branch/PR state. If misaligned, stop and return to plan.
 4. Do a short recon pass over the likely code surface, then create a lightweight implementation plan for the slice: goal, ordered activities, likely dependencies, decision points, done evidence, likely delegation points.
 5. Decide execution shape using the Sizing Method and the delegation judgment call above. Do not create more workers than the slice names clearly support.
 6. If delegating, dispatch each worker with a brief per Brief-Based Dispatch: derive it from the plan's contracts, commit it to `briefs/`, and route it verbatim plus mechanical pointers.
@@ -111,7 +111,7 @@ When a single run does plan then execute back to back, each skill still runs as 
 9. Verify the full slice against the plan.
 10. Run review per the declared posture (Review Posture, above).
 11. If terminal review finds high or critical issues that fit within scope and do not require architectural replanning, have a clean subagent resolve and self-review. Do not default to repeated external review loops unless the change is unusually risky or the user asks for it.
-12. Push commits and open or update the PR with `Workflow-Plan: docs/plans/<NN>-<slug>/` as the first line of the PR body. Completion is the commits plus that marker — no folder renaming, no roadmap edits.
+12. Push commits and open or update the PR with `Workflow-Plan: docs/plans/<NN>-<slug>/` as the first line of the PR body. Completion is the commits plus that marker.
 
 ## Required Completion Artifacts
 
@@ -122,7 +122,7 @@ When a single run does plan then execute back to back, each skill still runs as 
 - `briefs/` (whenever workers were dispatched)
   Every brief a worker was actually given, committed for provenance.
 
-There is no separate status file. Partial or paused state must be recoverable from progressive `IMPLEMENTATION.md` alone — a status artifact violates "nothing carries status" (see `DESIGN.md`'s Artifact Taxonomy).
+There is no separate status file. Partial or paused state must be recoverable from progressive `IMPLEMENTATION.md` alone — PRs and the tracker carry status; artifacts carry intent and outcome.
 
 ## Rules
 
@@ -136,4 +136,4 @@ There is no separate status file. Partial or paused state must be recoverable fr
 - Review posture is declared by the invoker, never inferred; terminal posture runs mandatory independent review, pipeline posture runs pre-flight self-verification only.
 - Write `IMPLEMENTATION.md` progressively as each slice completes, not at the end.
 - Record what actually happened in completion artifacts so future agents can recover both intent and implementation history from the plan folder alone.
-- Completion is commits pushed plus a PR body whose first line is `Workflow-Plan: docs/plans/<NN>-<slug>/`. No folder renaming, no roadmap edits — none exist to update.
+- Completion is commits pushed plus a PR body whose first line is `Workflow-Plan: docs/plans/<NN>-<slug>/`. Do not rename plan folders or maintain schedule docs.
