@@ -1,6 +1,6 @@
 ---
 name: post-build
-description: Orchestrate the post-build pipeline stage against a PR produced by execute — independent review, bounded remediation, QA planning, exact-SHA deploy verification, deployed browser QA, and a merge-readiness report. Right-sizes the stage to change classification (plan presence, functional surface, size). Use when picking up a PR after the build stage, or when an automation triggers the post-build workflow.
+description: Orchestrate the post-build pipeline stage against a PR produced by execute — independent review with in-place fixes, remediation only for briefed structural findings, conditional QA with exact-SHA deploy proof, a single end-of-work required-checks gate, and a merge-readiness report. Right-sizes the stage to change classification (plan presence, functional surface, size). Use when picking up a PR after the build stage, or when an automation triggers the post-build workflow.
 ---
 
 # Post-Build Pipeline Stage
@@ -10,17 +10,17 @@ Use this skill to take a PR from "build finished" to "provably ready to merge". 
 This skill exists to prevent common post-build failures:
 
 - Review runs against the diff alone, unanchored from the plan's intent and acceptance criteria.
-- Findings reach the fixing agent as an orchestrator's paraphrase instead of the reviewer's own brief.
-- Remediation quietly widens beyond the accepted findings.
-- The reviewer who raised the findings verifies its own fixes and rubber-stamps them.
-- QA drives a deployment that was never proven to be the candidate commit.
+- Findings a reviewer could fix in place ride a full dispatch loop — separate fixer, then re-review — multiplying agents for one-line defects.
+- Findings reach a fixing agent as an orchestrator's paraphrase instead of the reviewer's own brief, and worker prompts are re-derived long-hand each run instead of routed from versioned briefs.
+- Remediation quietly widens beyond the accepted findings, or the reviewer who raised a finding rubber-stamps the delegated fix for it.
+- QA runs before review has settled the code, drives a deployment never proven to be the candidate commit, or runs against changes it cannot actually test.
 - QA results are committed after testing, so the merged commit is not the tested commit.
+- Required checks are polled and babysat throughout the run, and failing checks on trivial or non-functional changes burn fix cycles that belong to a human.
 - Fix loops run unbounded, or a stuck run guesses instead of stopping with a specific handoff.
 - Plan discovery is ambiguous and the stage picks a folder by number, recency, or vibes.
 - A one-size-fits-all full stage burns budget on trivial or non-functional changes, or invents plan ceremony where none is needed.
-- Deploy babysitting runs proactively instead of waiting for required checks to conclude.
 
-The orchestrator running this stage **coordinates by default**: it discovers, classifies, delegates, checks handoffs between phases, and emits the final report. It does not edit functional code, perform independent review of functional changes, drive a browser, or prove a deploy itself — those substantive phases are dispatched workers carrying a verbatim-routed brief. **Exception:** for trivial or small non-functional changes, the orchestrator may absorb the entire stage (see Change Classification).
+The orchestrator running this stage **coordinates by default**: it discovers, classifies, delegates, checks handoffs between phases, and emits the final report. It does not edit functional code, perform independent review of functional changes, drive a browser, or prove a deploy itself — those phases are dispatched workers. **Exception:** for trivial or small non-functional changes, the orchestrator may absorb the entire stage (see Change Classification).
 
 ## Portable vs. Adapter
 
@@ -28,11 +28,25 @@ This skill owns the portable stage semantics. Everything repo-specific comes fro
 
 - **Production boundaries**: which branches, deploy targets, and data surfaces are production and must never be touched.
 - **Deploy-proof mechanics**: the commands that push, wait for a deployment, prove a deployment corresponds to an exact commit SHA, and health-check the deployed URL.
-- **Required checks**: which CI / required status checks must pass on the candidate SHA before merge-readiness (and before any deploy proof needed for QA). Absent an explicit set, use the platform's required checks for the PR; if none are knowable, say so in the report and do not invent green.
+- **Required checks**: which CI / required status checks must pass on the candidate SHA before merge-readiness. Absent an explicit set, use the platform's required checks for the PR; if none are knowable, say so in the report and do not invent green.
 - **QA environment**: how the deployed URL is derived, seeded/committed test identities and their sign-in routes, required environment setup, and environment caveats QA prompts must state.
 - **Worker routing**: which agent types or models run each phase in the local harness.
 
 Authority order when they conflict: the repo's own hard limits, then the adapter, then this skill, then the triggering prompt's run context. If a required adapter capability is missing (for example there is no way to prove a deployment's SHA), skip the dependent phase explicitly and say so in the report — never fake the proof.
+
+## Dispatching Workers
+
+Worker prompts are **standing briefs shipped beside this skill** in `briefs/`, not prose the orchestrator composes per run. A dispatch is: point the worker at its brief file, then supply the short parameter block the brief names (paths, branch, SHA, URL, adapter specifics). This keeps the orchestrator's context lean and the workers' instructions complete and versioned.
+
+| Phase | Brief |
+|-------|-------|
+| Independent review | the `comprehensive-review` skill is the reviewer's brief — dispatch with that skill loaded plus the parameter pointers (PR, plan folder or no-plan note) |
+| Remediation fix | `briefs/remediation-fixer.md`, plus the reviewer's per-finding brief routed verbatim |
+| Remediation verification | `briefs/verifier.md` |
+| QA planning | `briefs/qa-planner.md` |
+| Deployed QA | `briefs/qa-driver.md` |
+
+Never paraphrase a brief into a prompt; route the file and fill its parameters. The adapter's worker routing picks the agent or model.
 
 ## Discovery
 
@@ -40,9 +54,9 @@ Resolve plan context before classifying or delegating:
 
 1. **Marker first.** The PR body's `Workflow-Plan: docs/plans/<NN>-<slug>/` line is the primary and only preferred locator.
 2. **Diff fallback** (markerless PR that still carries a plan folder): compute the merge base against the PR's base branch, list changed files under `docs/plans/`, and form candidates from the unique parent directories of changed `IMPLEMENTATION.md` files — or, if none, of changed `PLAN.md` files. Require exactly one candidate. Never tie-break by folder number, modification time, or lexical order — on zero or several candidates, stop and report them, requesting an explicit plan path.
-3. **No plan folder at all**: do **not** invent ceremony yet. Classification decides the path:
+3. **No plan folder at all**: classification decides the path:
    - Trivial / small **non-functional** changes: proceed without a plan folder; record `Intent source: ad-hoc` in the report.
-   - **Functional** (or mixed / large ambiguous) changes: use `comprehensive-review`'s no-artifact fallback — reconstruct intent into `RECOVERED-INTENT.md` and proceed at reduced confidence. A PR that skipped the workflow still gets a real review of functional risk, not a rubber stamp of behavior.
+   - **Functional** (or mixed / large ambiguous) changes: dispatch `comprehensive-review` as usual — it reconstructs intent into `RECOVERED-INTENT.md` and reviews at reduced confidence. A PR that skipped the workflow still gets a real review of functional risk.
    - Create a plan folder only when review or QA artifacts need a home.
 
 Preflight alongside discovery: clean worktree, a non-default feature branch, and — when a plan folder is resolved — a diff plausibly covered by that plan. Unexplained material changes outside the plan's scope are a stop, not something to fold in.
@@ -63,12 +77,12 @@ Three dimensions:
 
 | Classification | Process |
 |----------------|---------|
-| `trivial` or `small` + `non-functional` | **Absorb:** orchestrator may run the whole stage inline — light diff skim, wait for required checks, emit report. No plan folder, no delegated review, no QA, no deploy proof. Execution mode: `absorbed`. |
-| `normal`/`large` + `non-functional` | Light delegated or absorbed review as appropriate; wait for required checks; skip QA and deploy proof. |
-| `functional` or `mixed` (any size), with or without a plan | Independent review (delegate; recover intent if needed). Wait for required checks. **QA planning + deploy proof + deployed QA only if** there is at least one user-facing / driveable criterion or residual risk that requires a live UI. Internal-only functional changes still get review + green checks; skip browser QA unless the adapter defines a non-browser substitute. |
+| `trivial` or `small` + `non-functional` | **Absorb:** orchestrator runs the whole stage inline — light diff skim, end-of-work checks read, report. No plan folder, no delegated review, no QA, no deploy proof, and **no fixing of failing checks** — report them and leave them. Execution mode: `absorbed`. |
+| `normal`/`large` + `non-functional` | Light delegated or absorbed review as appropriate; end-of-work checks read; skip QA and deploy proof; failing checks are reported, not fixed. |
+| `functional` or `mixed` (any size), with or without a plan | Independent review (delegate; intent recovered if needed). End-of-work checks gate with one bounded fix cycle available on failure (non-trivial sizes only). **QA + deploy proof only if** there is at least one user-facing / driveable criterion or residual risk that requires a live UI. Internal-only functional changes still get review + the checks gate; skip browser QA unless the adapter defines a non-browser substitute. |
 | Ambiguous recovered / large functional | Full stage at reduced confidence — today's thorough path. |
 
-**Absorption limits.** Never absorb: independent review of functional or mixed changes; remediation verification after a delegated review; browser QA; exact-SHA deploy proof. Those stay dispatched workers when they run. Absorption is for cheap confidence on non-functional risk, not for proving contested fixes.
+**Absorption limits.** Never absorb: independent review of functional or mixed changes; verification of delegated remediation; browser QA; exact-SHA deploy proof. Those stay dispatched workers when they run. Absorption is for cheap confidence on non-functional risk, not for proving contested fixes.
 
 ## Safety Invariants
 
@@ -80,14 +94,20 @@ Three dimensions:
 
 ## Workflow
 
-1. **Preflight, discovery, and classification** (above). Stop before any delegation on a failed precondition; do not create missing plan artifacts just to keep going. On a re-triggered run, resume rather than repeat: committed artifacts already bound to the current candidate SHA count as done (a passing `REVIEW.md` for this SHA skips review; an existing `QA.md` matrix skips planning; recorded cycles count against the bounded loops). If classification selects the absorb path, jump to required checks (step 6) after the light skim, then report.
-2. **Independent review** (skip when absorb path already covered review). Dispatch `comprehensive-review` against the PR. It writes `REVIEW.md` keyed to `PLAN.md`'s acceptance criteria (or `RECOVERED-INTENT.md`), challenges the assumption ledger, and authors a remediation brief per structural finding. Its verdict is `PASS`, `PASS_WITH_FOLLOWUPS`, or `REMEDIATE`.
-3. **Remediation** (only on `REMEDIATE`). Dispatch a clean fixer per accepted finding, its prompt the reviewer's remediation brief routed verbatim plus mechanical pointers. The fixer touches only the accepted findings, runs focused tests, updates `IMPLEMENTATION.md`, and records resolutions in `REVIEW.md` without erasing the original findings.
-4. **Fresh re-review.** A clean reviewer — not the original — verifies the remediation delta plus the stable artifacts, and updates `REVIEW.md`'s verdict for the new SHA. One remediation cycle, one re-review: if a `blocker` or `high` finding still stands, stop and hand off.
-5. **QA planning** (only when QA is applicable — functional/mixed surface with at least one driveable user-facing criterion or review residual that needs a live UI). A worker derives `QA.md` from `PLAN.md`/`RECOVERED-INTENT.md` acceptance criteria and `REVIEW.md`'s residual risks: one case per user-facing criterion with a stable ID, role, entry point → action → expected result, and required evidence; criteria the stage cannot drive are listed with the reason, not dropped. `QA.md` is a matrix only — no pre-execution pass/fail claims — and states that final results are external output. Commit it now, before the candidate SHA exists. When QA is not applicable, skip this step and record `QA: SKIPPED (<reason>)` — do not invent a matrix for undriveable-only or non-functional work.
-6. **Required checks (wait).** With every pre-deploy artifact and fix committed (or immediately if none), capture the candidate SHA and **wait** for the adapter's required checks on that SHA to conclude. Do not proactively babysit deploys or poke the pipeline for progress while checks are pending — this phase is reactive. On failure: stop with `HUMAN_ACTION_REQUIRED` (or one bounded in-scope fix cycle if the failure is clearly caused by this PR). On pass: continue. If no checks are knowable, say so explicitly and do not claim they passed.
-7. **Deploy verification** (only when QA will run and needs a live URL). Using the adapter's mechanics, prove a non-production deployment of **exactly that SHA** is live, resolve its exact URL, and health-check that same URL. Branch-level "ready" signals are not SHA proof; a zero exit code is not SHA proof. Retry only inside this phase; if the SHA cannot be proven, stop before QA. When QA is skipped, skip deploy proof and record `Deploy proof: SKIPPED (<reason>)`.
-8. **Deployed QA** (only when QA is applicable and deploy proof succeeded). Dispatch the QA worker against the exact proven URL with the adapter's identities and setup, executing every applicable `QA.md` case through real UI interaction, returning pass/fail per case ID with evidence paths and console/network errors. One QA remediation cycle: fix only evidenced failures, re-review the delta, recommit, wait for checks again, redeploy, re-prove the SHA, rerun affected and risk-adjacent cases. Stop if failures remain.
+Order is load-bearing: review settles the code first; QA tests only settled, reviewed code; required checks are read **once**, after the last code-changing phase — never polled between phases.
+
+1. **Preflight, discovery, and classification** (above). Stop before any delegation on a failed precondition; do not create missing plan artifacts just to keep going. On a re-triggered run, resume rather than repeat: committed artifacts already bound to the current candidate SHA count as done (a passing `REVIEW.md` for this SHA skips review; an existing `QA.md` matrix skips planning; recorded cycles count against the bounded loops). On the absorb path, skim the diff, then jump to step 6.
+2. **Independent review.** Dispatch `comprehensive-review` against the PR. The reviewer assesses against `PLAN.md`'s acceptance criteria (or recovered intent), challenges the assumption ledger, **fixes straightforward findings in place**, and authors a remediation brief per structural finding it cannot safely fix. Its verdict (`PASS`, `PASS_WITH_FOLLOWUPS`, `REMEDIATE`) reflects the post-fix state — findings the reviewer resolved and verified are closed and need nothing further from this stage.
+3. **Remediation** (only on `REMEDIATE`). Dispatch a fixer per accepted briefed finding: `briefs/remediation-fixer.md` plus the reviewer's remediation brief routed verbatim plus the parameter block. The fixer touches only its finding, runs the brief's done evidence, and records the resolution in `REVIEW.md` without erasing the original finding.
+4. **Verification** (only when step 3 ran). Dispatch a fresh verifier — not the reviewer, not a fixer — with `briefs/verifier.md` to verify the remediation delta and update `REVIEW.md`'s verdict for the new SHA. One remediation cycle, one verification: if a `blocker` or `high` finding still stands, stop and hand off. Fixes the reviewer applied in place during step 2 do not trigger this step.
+5. **QA planning** (only when QA is applicable — functional/mixed surface with at least one driveable user-facing criterion or review residual that needs a live UI). Dispatch `briefs/qa-planner.md`: it derives `QA.md` from acceptance criteria and `REVIEW.md`'s residual risks and commits it now, before the candidate SHA exists. When QA is not applicable, record `QA: SKIPPED (<reason>)` — do not invent a matrix for undriveable-only or non-functional work.
+6. **Required checks (single end-of-work gate).** With every artifact and fix committed, capture the candidate SHA and read the adapter's required checks on that SHA **once**; if still running, wait for them to conclude without poking, redeploying, or "helping". Then:
+   - **Pass** → continue.
+   - **Fail on a `functional`/`mixed`, non-trivial change, clearly caused by this PR** → one bounded fix cycle: diagnose, fix in scope, recommit, re-read checks on the new SHA. Still failing → stop with `HUMAN_ACTION_REQUIRED`.
+   - **Fail on anything else** (trivial, non-functional, or not caused by this PR) → leave the checks failing; report them and downgrade the status. Do not babysit.
+   - If no checks are knowable, say so explicitly and do not claim they passed.
+7. **Deploy verification** (only when QA will run). Using the adapter's mechanics, prove a non-production deployment of **exactly the candidate SHA** is live, resolve its exact URL, and health-check that same URL. Branch-level "ready" signals are not SHA proof; a zero exit code is not SHA proof. Retry only inside this phase; if the SHA cannot be proven, stop before QA. When QA is skipped, record `Deploy proof: SKIPPED (<reason>)`.
+8. **Deployed QA** (only when deploy proof succeeded). Dispatch `briefs/qa-driver.md` against the exact proven URL with the adapter's identities and setup. One QA remediation cycle: fix only evidenced failures (a fixer per step 3's mechanics), recommit, re-read checks on the new SHA, re-prove the deployment, rerun affected and risk-adjacent cases. A failure needing a structural fix, or failures remaining after the cycle → stop and hand off.
 9. **Report.** Emit the final output (schema below) to the PR or automation channel. Do not commit it.
 
 A worker that returns nothing usable is relaunched once with its partial output; after a second failure, stop for human action — the orchestrator does not absorb a failed delegated phase.
@@ -102,8 +122,8 @@ Execution mode: orchestrated | absorbed
 Branch / base / merge base: <values>
 Tested SHA: <sha or NOT_TESTED>
 Tested URL: <url or NOT_TESTED or N/A>
-Review verdict: <verdict|ABSORBED_LIGHT|SKIPPED>; remediation cycles: <0|1>
-Automated checks: <waited|not-configured>; <check>: PASS|FAIL|PENDING (<evidence>) per line
+Review verdict: <verdict|ABSORBED_LIGHT|SKIPPED>; in-place fixes: <n>; remediation cycles: <0|1>
+Required checks: <check>: PASS|FAIL|PENDING (<evidence>) per line; fix cycle: <0|1|N/A>
 Deploy proof: RUN | SKIPPED (<reason>)
 QA: RUN | SKIPPED (<reason>)
 QA cases: <case ID>: PASS|FAIL|NOT_RUN — <evidence> per line; QA remediation cycles: <0|1>
@@ -116,16 +136,18 @@ Never report `PASS` while required checks are failing or still pending. Never re
 ## Rules
 
 - Coordinate by default; absorb only for trivial/small non-functional work within the absorption limits.
+- Dispatch from the standing briefs in `briefs/` plus parameters; never hand-compose or paraphrase worker prompts.
 - Exactly one active plan folder when one is needed, resolved marker-first; ambiguity stops the stage rather than being tie-broken. Ad-hoc non-functional work may have no plan folder.
 - Review and QA are keyed to `PLAN.md` (or recovered intent) acceptance criteria when those artifacts exist, never derived from the diff alone.
-- QA and deploy proof run only for applicable functional/user-facing need; required checks are waited for reactively before merge-readiness and before any QA-driven deploy proof.
-- Remediation is finding-scoped; verification is a fresh context. One remediation cycle per review, one per QA, then stop.
+- Findings the reviewer fixed and verified in place are closed — no remediation dispatch, no follow-up review. Delegated remediation always gets fresh verification.
+- Remediation is finding-scoped. One remediation cycle per review, one per QA, one checks fix cycle, then stop.
+- QA runs after review has settled the code, and only for applicable functional/user-facing need.
+- Required checks are read once at the end of the work; failing checks are fixed only for non-trivial functional/mixed changes whose failure this PR caused — otherwise they are reported and left failing.
 - `REVIEW.md` accumulates — resolutions are appended, original findings never erased.
-- When QA runs, `QA.md` is committed before the candidate SHA and carries the matrix only; executed results stay external.
-- QA targets the exact proven-SHA URL or does not run.
+- When QA runs, `QA.md` is committed before the candidate SHA and carries the matrix only; executed results stay external. QA targets the exact proven-SHA URL or does not run.
 - `medium`/`low` findings may ride along as explicit non-blocking follow-ups; `blocker`/`high` stop the stage.
 - The stage reports merge-readiness; it never merges.
 
 ## Reference
 
-`automation.md`, beside this file, is the operator guide for wiring this stage into an external automation trigger — automation shape, trigger discipline, canonical prompt, and canary. `reference.md` holds the design rationale behind these rules — why the SHA gate is absolute, why results are never committed, why loops are bounded, why the stage right-sizes and waits for checks — for whoever revises this skill later. It is not loaded during normal execution.
+`automation.md`, beside this file, is the operator guide for wiring this stage into an external automation trigger — automation shape, trigger discipline, canonical prompt, and canary. `reference.md` holds the design rationale behind these rules — why the SHA gate is absolute, why results are never committed, why loops are bounded, why checks are read once at the end — for whoever revises this skill later. Neither is loaded during normal execution.

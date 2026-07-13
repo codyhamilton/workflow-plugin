@@ -35,7 +35,7 @@ Beyond validating the hypotheses head-to-head, candidate variations to try when 
 - **Brief density**: minimal briefs (contract + code pointers) vs full-context briefs (inlined excerpts) — where does long-context reliability actually come from?
 - **Handoff purity**: execute dispatched with the plan folder alone vs plan folder plus a planner-written summary — does extra warm context help the executor or contaminate the cold read?
 - **Plan review shape**: single clean adversarial reviewer (current) vs a short sequential relay (iterate's harden pattern applied at plan stage) for ordinary plans.
-- **Remediation split**: reviewer authors briefs for everything vs iterate's split (trivial fixes applied inline, briefs only for structural findings).
+- **Remediation split**: iterate's split (straightforward fixes applied inline during review, briefs only for structural findings — now the core design) vs the all-briefs baseline (reviewer briefs everything, fixers and a fresh re-review handle all findings).
 - **QA authorship**: QA plan derived by the review stage from acceptance criteria (current design) vs authored by the plan stage upfront and merely executed downstream.
 - **Assumption-ledger salience**: ledger inline in PLAN.md vs a separate surfaced artifact at the checkpoint — does presentation change how often humans intervene, and to what benefit?
 
@@ -49,8 +49,8 @@ local-filesystem dependencies — and is what a build/pipeline environment insta
 |--------|-------|-------------|
 | `workflow` (core) | `plan` | Create and revise implementation plans; interactive or headless posture |
 | `workflow` (core) | `execute` | Execute planned work packages with brief-based delegation; review sized to terminal or pipeline posture |
-| `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria |
-| `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation, wait for required checks, conditional QA + exact-SHA deploy proof, merge-readiness report (repo mechanics via a per-repo adapter skill) |
+| `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria; fixes straightforward findings in place, briefs structural ones |
+| `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (workers dispatched from standing briefs; repo mechanics via a per-repo adapter skill) |
 | `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
 | `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
