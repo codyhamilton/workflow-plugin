@@ -11,7 +11,7 @@ This skill exists to prevent common post-build failures:
 
 - Review runs against the diff alone, unanchored from the plan's intent and acceptance criteria.
 - Findings a reviewer could fix in place ride a full dispatch loop — separate fixer, then re-review — multiplying agents for one-line defects.
-- Findings reach a fixing agent as an orchestrator's paraphrase instead of the reviewer's own brief, and worker prompts are re-derived long-hand each run instead of routed from versioned briefs.
+- Findings reach a fixing agent as an orchestrator's paraphrase instead of the reviewer's own brief, and worker prompts are re-derived long-hand each run instead of naming the versioned worker skills.
 - Remediation quietly widens beyond the accepted findings, or the reviewer who raised a finding rubber-stamps the delegated fix for it.
 - QA runs before review has settled the code, drives a deployment never proven to be the candidate commit, or runs against changes it cannot actually test.
 - QA results are committed after testing, so the merged commit is not the tested commit.
@@ -38,18 +38,18 @@ Authority order when they conflict: the repo's own hard limits, then the adapter
 
 A worker's prompt has two parts, kept strictly separate:
 
-- **Static direction** — a reference to the worker's standing brief, shipped beside this skill in `briefs/` (for review, the `comprehensive-review` skill itself). The worker reads it; you never do. Do not read, inline, template, or paraphrase a brief into a prompt — the point of the split is that the instruction text never enters your context at all.
+- **Static direction** — the worker's own skill, named in the dispatch. Each phase has a registered worker skill whose description marks it as dispatch-only; the worker loads it, you never do. Do not load, inline, or paraphrase a worker skill into a prompt — the point of the split is that the instruction text never enters your context at all.
 - **Dynamic context** — the few situational lines only this run knows: repository and branch, plan folder, SHAs, proven URL, finding IDs and brief paths, adapter specifics. You write exactly this part, and nothing more.
 
-A dispatch therefore reads: "Read `<brief path>` — it is your task discipline. Situational context: …".
+A dispatch therefore reads: "Load the `<worker skill>` skill — it is your task discipline. Situational context: …".
 
-| Phase | Static direction | Dynamic context |
-|-------|------------------|-----------------|
-| Independent review | the `comprehensive-review` skill | PR, plan folder or no-plan note |
-| Remediation fix | `briefs/remediation-fixer.md` | branch, plan folder, path to the reviewer's per-finding remediation brief (routed by path, never restated) |
-| Remediation verification | `briefs/verifier.md` | branch, plan folder, reviewed SHA, new candidate SHA, findings claimed resolved |
-| QA planning | `briefs/qa-planner.md` | branch, plan folder, adapter QA environment notes |
-| Deployed QA | `briefs/qa-driver.md` | proven URL, candidate SHA, `QA.md` path, adapter identities/setup |
+| Phase | Worker skill | Dynamic context |
+|-------|--------------|-----------------|
+| Independent review | `comprehensive-review` | PR, plan folder or no-plan note |
+| Remediation fix | `post-build-fixer` | branch, plan folder, path to the reviewer's per-finding remediation brief (routed by path, never restated) |
+| Remediation verification | `post-build-verifier` | branch, plan folder, reviewed SHA, new candidate SHA, findings claimed resolved |
+| QA planning | `post-build-qa-planner` | branch, plan folder, adapter QA environment notes |
+| Deployed QA | `post-build-qa-driver` | proven URL, candidate SHA, `QA.md` path, adapter identities/setup |
 
 The adapter's worker routing picks the agent or model.
 
@@ -103,16 +103,16 @@ Order is load-bearing: review settles the code first; QA tests only settled, rev
 
 1. **Preflight, discovery, and classification** (above). Stop before any delegation on a failed precondition; do not create missing plan artifacts just to keep going. On a re-triggered run, resume rather than repeat: committed artifacts already bound to the current candidate SHA count as done (a passing `REVIEW.md` for this SHA skips review; an existing `QA.md` matrix skips planning; recorded cycles count against the bounded loops). On the absorb path, skim the diff, then jump to step 6.
 2. **Independent review.** Dispatch `comprehensive-review` against the PR. The reviewer assesses against `PLAN.md`'s acceptance criteria (or recovered intent), challenges the assumption ledger, **fixes straightforward findings in place**, and authors a remediation brief per structural finding it cannot safely fix. Its verdict (`PASS`, `PASS_WITH_FOLLOWUPS`, `REMEDIATE`) reflects the post-fix state — findings the reviewer resolved and verified are closed and need nothing further from this stage.
-3. **Remediation** (only on `REMEDIATE`). Dispatch a fixer per accepted briefed finding: `briefs/remediation-fixer.md` as static direction, with dynamic context naming the branch, plan folder, and the path to the reviewer's remediation brief (routed by path, never restated). The fixer touches only its finding, runs the brief's done evidence, and records the resolution in `REVIEW.md` without erasing the original finding.
-4. **Verification** (only when step 3 ran). Dispatch a fresh verifier — not the reviewer, not a fixer — with `briefs/verifier.md` to verify the remediation delta and update `REVIEW.md`'s verdict for the new SHA. One remediation cycle, one verification: if a `blocker` or `high` finding still stands, stop and hand off. Fixes the reviewer applied in place during step 2 do not trigger this step.
-5. **QA planning** (only when QA is applicable — functional/mixed surface with at least one driveable user-facing criterion or review residual that needs a live UI). Dispatch `briefs/qa-planner.md`: it derives `QA.md` from acceptance criteria and `REVIEW.md`'s residual risks and commits it now, before the candidate SHA exists. When QA is not applicable, record `QA: SKIPPED (<reason>)` — do not invent a matrix for undriveable-only or non-functional work.
+3. **Remediation** (only on `REMEDIATE`). Dispatch a `post-build-fixer` per accepted briefed finding, with dynamic context naming the branch, plan folder, and the path to the reviewer's remediation brief (routed by path, never restated). The fixer touches only its finding, runs the brief's done evidence, and records the resolution in `REVIEW.md` without erasing the original finding.
+4. **Verification** (only when step 3 ran). Dispatch a fresh `post-build-verifier` — not the reviewer, not a fixer — to verify the remediation delta and update `REVIEW.md`'s verdict for the new SHA. One remediation cycle, one verification: if a `blocker` or `high` finding still stands, stop and hand off. Fixes the reviewer applied in place during step 2 do not trigger this step.
+5. **QA planning** (only when QA is applicable — functional/mixed surface with at least one driveable user-facing criterion or review residual that needs a live UI). Dispatch a `post-build-qa-planner`: it derives `QA.md` from acceptance criteria and `REVIEW.md`'s residual risks and commits it now, before the candidate SHA exists. When QA is not applicable, record `QA: SKIPPED (<reason>)` — do not invent a matrix for undriveable-only or non-functional work.
 6. **Required checks (single end-of-work gate).** With every artifact and fix committed, capture the candidate SHA and read the adapter's required checks on that SHA **once**; if still running, wait for them to conclude without poking, redeploying, or "helping". Then:
    - **Pass** → continue.
    - **Fail on a `functional`/`mixed`, non-trivial change, clearly caused by this PR** → one bounded fix cycle: diagnose, fix in scope, recommit, re-read checks on the new SHA. Still failing → stop with `HUMAN_ACTION_REQUIRED`.
    - **Fail on anything else** (trivial, non-functional, or not caused by this PR) → leave the checks failing; report them and downgrade the status. Do not babysit.
    - If no checks are knowable, say so explicitly and do not claim they passed.
 7. **Deploy verification** (only when QA will run). Using the adapter's mechanics, prove a non-production deployment of **exactly the candidate SHA** is live, resolve its exact URL, and health-check that same URL. Branch-level "ready" signals are not SHA proof; a zero exit code is not SHA proof. Retry only inside this phase; if the SHA cannot be proven, stop before QA. When QA is skipped, record `Deploy proof: SKIPPED (<reason>)`.
-8. **Deployed QA** (only when deploy proof succeeded). Dispatch `briefs/qa-driver.md` against the exact proven URL with the adapter's identities and setup. One QA remediation cycle: fix only evidenced failures (a fixer per step 3's mechanics), recommit, re-read checks on the new SHA, re-prove the deployment, rerun affected and risk-adjacent cases. A failure needing a structural fix, or failures remaining after the cycle → stop and hand off.
+8. **Deployed QA** (only when deploy proof succeeded). Dispatch a `post-build-qa-driver` against the exact proven URL with the adapter's identities and setup. One QA remediation cycle: fix only evidenced failures (a fixer per step 3's mechanics), recommit, re-read checks on the new SHA, re-prove the deployment, rerun affected and risk-adjacent cases. A failure needing a structural fix, or failures remaining after the cycle → stop and hand off.
 9. **Report.** Emit the final output (schema below) to the PR or automation channel. Do not commit it.
 
 A worker that returns nothing usable is relaunched once with its partial output; after a second failure, stop for human action — the orchestrator does not absorb a failed delegated phase.
@@ -141,7 +141,7 @@ Never report `PASS` while required checks are failing or still pending. Never re
 ## Rules
 
 - Coordinate by default; absorb only for trivial/small non-functional work within the absorption limits.
-- Worker prompts are a standing-brief reference plus orchestrator-written dynamic context; never read, template, or restate a brief.
+- Worker prompts name the worker's skill plus orchestrator-written dynamic context; never load, template, or restate a worker skill's instructions.
 - Exactly one active plan folder when one is needed, resolved marker-first; ambiguity stops the stage rather than being tie-broken. Ad-hoc non-functional work may have no plan folder.
 - Review and QA are keyed to `PLAN.md` (or recovered intent) acceptance criteria when those artifacts exist, never derived from the diff alone.
 - Findings the reviewer fixed and verified in place are closed — no remediation dispatch, no follow-up review. Delegated remediation always gets fresh verification.

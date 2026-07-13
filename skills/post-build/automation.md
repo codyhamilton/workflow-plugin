@@ -45,9 +45,9 @@ Run the post-build workflow for <PR / current non-production branch>. Load the
 workflow plugin's post-build skill for portable stage semantics and
 <adapter skill path> for repository routing, safety, checks, deploy, and QA.
 You are the parent: coordinate by default; absorb only trivial/small
-non-functional changes per the skill. Dispatch each worker with a reference
-to its standing brief plus the run's situational context only — never read
-or restate the briefs yourself.
+non-functional changes per the skill. Dispatch each worker by naming its
+worker skill plus the run's situational context only — never load or
+restate a worker skill's instructions yourself.
 Resolve plan context from the PR's Workflow-Plan marker (or classify as
 ad-hoc when none is needed); stop and report ambiguity instead of guessing.
 Classify the change (intent source, surface, size), then right-size:

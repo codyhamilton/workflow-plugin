@@ -1,6 +1,6 @@
 {
   "name": "workflow",
-  "description": "Cloud-safe core workflow skills for Cursor: plan, execute, comprehensive-review, post-build",
+  "description": "Cloud-safe core workflow skills for Cursor: plan, execute, comprehensive-review, post-build and its dispatch-only worker skills",
   "version": "2.2.0",
   "author": {
     "name": "William Hamilton"

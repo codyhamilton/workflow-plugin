@@ -12,7 +12,8 @@ workflow-plugin/ (repo root — the `workflow` core plugin)
 │   ├── plan/              → PLAN.md (+ DESIGN.md when warranted); owns intent + provenance capture
 │   ├── execute/            → executes a plan; brief-based dispatch; progressive IMPLEMENTATION.md
 │   ├── comprehensive-review/  → independent review keyed to PLAN.md's acceptance criteria
-│   └── post-build/         → the pipeline stage: classify/right-size, review, remediation, conditional QA/deploy proof, end-of-work checks gate; standing worker briefs in briefs/
+│   ├── post-build/         → the pipeline stage: classify/right-size, review, remediation, conditional QA/deploy proof, end-of-work checks gate
+│   └── post-build-{fixer,verifier,qa-planner,qa-driver}/ → dispatch-only worker skills for post-build's delegated phases
 ├── plugins/workflow-lab/      → lab: local and/or interactive; never required by the pipeline
 │   ├── .claude-plugin/plugin.json
 │   ├── .cursor-plugin/plugin.json
@@ -60,7 +61,7 @@ Each plugin's source directory contains only its own skills: `skills/` at the re
 **post-build** (core): orchestrates the pipeline stage against a PR — the stage execute's pipeline posture declares.
 - Resolves plan context: `Workflow-Plan:` marker first, then a bounded diff-based fallback (never tie-broken by number or recency), then tiered no-plan handling (ad-hoc for trivial non-functional; `RECOVERED-INTENT.md` for functional/material).
 - Classifies the change (intent source × surface × size) and right-sizes: orchestrator may absorb trivial/small non-functional work; functional work gets independent review.
-- Dispatches each worker with a reference to its standing brief (shipped in `skills/post-build/briefs/`; `comprehensive-review` is the reviewer's) plus orchestrator-written situational context. Static direction is read only by the worker — the brief text never enters the orchestrator's context.
+- Dispatches each worker by naming its registered worker skill (`post-build-fixer`, `post-build-verifier`, `post-build-qa-planner`, `post-build-qa-driver`; `comprehensive-review` serves as the reviewer's) plus orchestrator-written situational context. Static direction is loaded only by the worker — the instruction text never enters the orchestrator's context, and the dispatch-only descriptions keep the orchestrator from loading them.
 - Dispatches `comprehensive-review` when review is needed; the reviewer fixes straightforward findings in place, so bounded finding-scoped remediation (briefs routed verbatim) and one fresh verification run only for briefed structural findings. Stops while any `blocker`/`high` finding stands.
 - Reads adapter-named required checks on the candidate SHA once, after the last code-changing phase; fixes a failure (one bounded cycle) only for non-trivial functional/mixed changes this PR broke, otherwise reports it and leaves it failing.
 - Derives `QA.md` (matrix only, committed before the candidate SHA) and runs exact-SHA deploy proof + deployed browser QA **only when** the surface is functional/mixed with driveable user-facing need; otherwise records an explicit skip.
@@ -159,8 +160,8 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 **Post-build session** (against a PR; triggered by an automation, an operator, or the user):
 1. Trigger → `post-build`, alongside the repo's adapter skill. Preflight + plan discovery (marker → diff fallback → tiered no-plan) + change classification (intent source × surface × size).
 2. Absorb path (trivial/small non-functional): light skim, end-of-work checks read (failures reported, never fixed), report. Otherwise dispatch `comprehensive-review`: acceptance-criteria assessment, lenses (always including intent-and-assumptions), straightforward findings fixed in place, remediation briefs for structural findings, `REVIEW.md` with post-fix verdict, plan-sufficiency judgment.
-3. On `REMEDIATE`: finding-scoped fixers consume the remediation briefs untranslated (dispatched via the standing `remediation-fixer.md` brief); one fresh verification updates the verdict. Skipped entirely when the reviewer resolved everything in place.
-4. When QA applies: commit `QA.md` (matrix, via the `qa-planner.md` brief). Read required checks once on the candidate SHA — one bounded fix cycle only for non-trivial functional failures this PR caused, otherwise report and leave failing. Then, when QA applies: prove the exact-SHA deployment via adapter mechanics and run deployed browser QA (`qa-driver.md` brief); otherwise record the skip. Emit the merge-readiness report externally. Merging stays with the human or a separate automation.
+3. On `REMEDIATE`: finding-scoped `post-build-fixer` workers consume the remediation briefs untranslated; one fresh `post-build-verifier` updates the verdict. Skipped entirely when the reviewer resolved everything in place.
+4. When QA applies: commit `QA.md` (matrix, via `post-build-qa-planner`). Read required checks once on the candidate SHA — one bounded fix cycle only for non-trivial functional failures this PR caused, otherwise report and leave failing. Then, when QA applies: prove the exact-SHA deployment via adapter mechanics and run deployed browser QA (`post-build-qa-driver`); otherwise record the skip. Emit the merge-readiness report externally. Merging stays with the human or a separate automation.
 
 **Setup session**:
 1. User → `setup` skill.
