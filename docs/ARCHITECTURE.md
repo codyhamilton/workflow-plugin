@@ -12,7 +12,7 @@ workflow-plugin/ (repo root — the `workflow` core plugin)
 │   ├── plan/              → PLAN.md (+ DESIGN.md when warranted); owns intent + provenance capture
 │   ├── execute/            → executes a plan; brief-based dispatch; progressive IMPLEMENTATION.md
 │   ├── comprehensive-review/  → independent review keyed to PLAN.md's acceptance criteria
-│   └── post-build/         → the pipeline stage: classify/right-size, review, remediation, checks wait, conditional QA/deploy proof
+│   └── post-build/         → the pipeline stage: classify/right-size, review, remediation, conditional QA/deploy proof, end-of-work checks gate; standing worker briefs in briefs/
 ├── plugins/workflow-lab/      → lab: local and/or interactive; never required by the pipeline
 │   ├── .claude-plugin/plugin.json
 │   ├── .cursor-plugin/plugin.json
@@ -52,16 +52,17 @@ Each plugin's source directory contains only its own skills: `skills/` at the re
 - Lands a PR whose body's first line is the `Workflow-Plan:` marker. No status artifact exists to update — there is no `STATUS.md`.
 
 **comprehensive-review** (core): independent review keyed to the plan's acceptance criteria.
-- Locates the plan folder via the PR's `Workflow-Plan:` marker (or a direct local invocation); for functional/material no-plan PRs, falls back to reconstructing intent into `RECOVERED-INTENT.md`; trivial non-functional work may skip ceremony when the invoker classifies it as absorbable.
+- Locates the plan folder via the PR's `Workflow-Plan:` marker (or a direct local invocation); for no-plan PRs, reconstructs intent into `RECOVERED-INTENT.md`.
 - Assesses each `PLAN.md` acceptance criterion explicitly (met/partial/not met); applies an intent-and-assumptions lens that challenges the headless posture's assumption ledger.
-- Writes `REVIEW.md` (findings by severity, plan-sufficiency judgment) and a remediation brief per structural finding, into the plan folder.
+- Routes each finding one of three ways: fixed in place (mechanical, verified now — closed with no downstream loop), briefed for remediation (structural — `briefs/remediation-<NN>.md`), or noted as a non-blocking follow-up. Writes `REVIEW.md` (findings by severity, plan-sufficiency judgment, verdict reflecting the post-fix state) into the plan folder.
 - Never invokes or depends on `workflow-tuning` (lab) — the plan-sufficiency judgment is a one-way artifact `workflow-tuning` harvests later, not a call.
 
 **post-build** (core): orchestrates the pipeline stage against a PR — the stage execute's pipeline posture declares.
 - Resolves plan context: `Workflow-Plan:` marker first, then a bounded diff-based fallback (never tie-broken by number or recency), then tiered no-plan handling (ad-hoc for trivial non-functional; `RECOVERED-INTENT.md` for functional/material).
 - Classifies the change (intent source × surface × size) and right-sizes: orchestrator may absorb trivial/small non-functional work; functional work gets independent review.
-- Dispatches `comprehensive-review` when review is needed, then bounded finding-scoped remediation (briefs routed verbatim) and one fresh re-review; stops while any `blocker`/`high` finding stands.
-- Waits reactively for adapter-named required checks on the candidate SHA before merge-readiness (and before any QA-driven deploy).
+- Dispatches workers from standing briefs shipped in `skills/post-build/briefs/` plus a parameter block — never a hand-composed prompt. `comprehensive-review` is the reviewer's brief.
+- Dispatches `comprehensive-review` when review is needed; the reviewer fixes straightforward findings in place, so bounded finding-scoped remediation (briefs routed verbatim) and one fresh verification run only for briefed structural findings. Stops while any `blocker`/`high` finding stands.
+- Reads adapter-named required checks on the candidate SHA once, after the last code-changing phase; fixes a failure (one bounded cycle) only for non-trivial functional/mixed changes this PR broke, otherwise reports it and leaves it failing.
 - Derives `QA.md` (matrix only, committed before the candidate SHA) and runs exact-SHA deploy proof + deployed browser QA **only when** the surface is functional/mixed with driveable user-facing need; otherwise records an explicit skip.
 - Reports merge-readiness and stops — it never merges.
 - Repo-specific mechanics (production boundaries, required checks, deploy-proof commands, QA credentials/environment, worker routing) come from a per-repo **adapter skill**; garcia-music's `post-build-automation` is the reference adapter.
@@ -115,7 +116,7 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 - **Location**: `docs/plans/<NN>-<slug>/` on the PR branch when a plan folder exists. `NN` is best-effort ordering only; the slug is the unique key. The PR body's first line, `Workflow-Plan: docs/plans/<NN>-<slug>/`, is the only mechanical location mechanism — nothing scans or sorts folders by number. Ad-hoc trivial non-functional PRs may have no plan folder.
 - **Build-stage contents** (owned by plan + execute, written before PR creation): `PLAN.md` (required), `DESIGN.md` (when contracts need reification), `IMPLEMENTATION.md` (required, written progressively), `briefs/` (committed dispatch briefs).
 - **Pipeline-stage contents** (owned by `post-build`, committed back to the PR branch **before the candidate SHA** when those phases run): `REVIEW.md` (verdict + findings keyed to `PLAN.md`'s acceptance criteria, accumulating across remediation), `QA.md` (matrix only — one case per user-facing criterion with stable ID, entry point → action → expected result, evidence requirements; undriveable criteria listed with reason; no pre-execution pass/fail; **omitted when QA is not applicable**), `briefs/remediation-<NN>.md`.
-- **External-only outputs**: classification, check-wait outcomes, final SHA-specific QA results and media go to the PR conversation or automation output, never a trailing commit — a commit added after testing changes the SHA, and the merged commit must be the tested commit. Classification is report control state, not a new durable status file.
+- **External-only outputs**: classification, required-checks outcomes, final SHA-specific QA results and media go to the PR conversation or automation output, never a trailing commit — a commit added after testing changes the SHA, and the merged commit must be the tested commit. Classification is report control state, not a new durable status file.
 - **Fallback**: a PR with no plan folder does not break the pipeline — functional/material changes reconstruct intent into `RECOVERED-INTENT.md` and proceed; trivial/small non-functional changes may be absorbed without inventing plan ceremony.
 
 ## Artifact Taxonomy
@@ -140,7 +141,7 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 6. `DESIGN.md` is optional, only when it reifies contracts or target shape not cheaply inferable from code and stable docs.
 7. Core skills (`plan`, `execute`, `comprehensive-review`) never depend on lab skills. Lab skills may compose core skills. Data may flow lab-ward only as artifacts already written for another consumer (e.g. `workflow-tuning` harvesting `REVIEW.md`), never as a live call.
 8. `workflow-tuning` never auto-runs; user-invoked meta-skill only (`disable-model-invocation: true`).
-9. Deployed QA runs only when classification says it is applicable (functional/mixed with driveable user-facing need), only against a deployment proven to match the exact candidate SHA on a non-production target, and its results are never committed after testing. Required checks are waited for reactively before merge-readiness. `post-build` reports merge-readiness; nothing in this plugin merges.
+9. Deployed QA runs only when classification says it is applicable (functional/mixed with driveable user-facing need), after review has settled the code, only against a deployment proven to match the exact candidate SHA on a non-production target, and its results are never committed after testing. Required checks are read once, after the last code-changing phase; failures are fixed only for non-trivial functional changes this PR caused. `post-build` reports merge-readiness; nothing in this plugin merges.
 
 ## Data Flows
 
@@ -157,9 +158,9 @@ The contract an external cursor/pipeline automation codes against, so it can loc
 
 **Post-build session** (against a PR; triggered by an automation, an operator, or the user):
 1. Trigger → `post-build`, alongside the repo's adapter skill. Preflight + plan discovery (marker → diff fallback → tiered no-plan) + change classification (intent source × surface × size).
-2. Absorb path (trivial/small non-functional): light skim, wait for required checks, report. Otherwise dispatch `comprehensive-review`: acceptance-criteria assessment, lenses (always including intent-and-assumptions), `REVIEW.md` with verdict, remediation briefs, plan-sufficiency judgment.
-3. On `REMEDIATE`: finding-scoped fixers consume the remediation briefs untranslated; one fresh re-review updates the verdict.
-4. Wait for required checks on the candidate SHA. When QA applies: commit `QA.md` (matrix), prove the exact-SHA deployment via adapter mechanics, run deployed browser QA. When QA does not apply: record the skip. Emit the merge-readiness report externally. Merging stays with the human or a separate automation.
+2. Absorb path (trivial/small non-functional): light skim, end-of-work checks read (failures reported, never fixed), report. Otherwise dispatch `comprehensive-review`: acceptance-criteria assessment, lenses (always including intent-and-assumptions), straightforward findings fixed in place, remediation briefs for structural findings, `REVIEW.md` with post-fix verdict, plan-sufficiency judgment.
+3. On `REMEDIATE`: finding-scoped fixers consume the remediation briefs untranslated (dispatched via the standing `remediation-fixer.md` brief); one fresh verification updates the verdict. Skipped entirely when the reviewer resolved everything in place.
+4. When QA applies: commit `QA.md` (matrix, via the `qa-planner.md` brief). Read required checks once on the candidate SHA — one bounded fix cycle only for non-trivial functional failures this PR caused, otherwise report and leave failing. Then, when QA applies: prove the exact-SHA deployment via adapter mechanics and run deployed browser QA (`qa-driver.md` brief); otherwise record the skip. Emit the merge-readiness report externally. Merging stays with the human or a separate automation.
 
 **Setup session**:
 1. User → `setup` skill.

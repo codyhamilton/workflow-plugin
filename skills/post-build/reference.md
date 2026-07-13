@@ -22,9 +22,9 @@ Independence is load-bearing when a second context must challenge functional cla
 
 Browser QA proves user-observable behavior on a live deployment. Non-functional changes have no such behavior to prove; internal-only functional changes may need review and green checks without a UI matrix. Running QA anyway either tests nothing useful or forces an undriveable matrix that looks like coverage. Skipping QA is honest when classification says so; missing an **applicable** QA case is still a failed gate.
 
-## Why required checks are waited for reactively
+## Why required checks are read once, at the end of the work
 
-Proactive deploy babysitting (poke, redeploy, re-wait until something looks green) races CI and invents progress. Required checks are the platform's statement about the candidate SHA; the stage should **wait for that statement**, then act. If checks fail, stop (or one bounded in-scope fix). If checks pass and QA is not applicable, merge-readiness does not need a deploy babysitter. Deploy proof remains mandatory **when QA needs a live URL** — checks-green is not a substitute for exact-SHA proof of the URL under test.
+Proactive deploy babysitting (poke, redeploy, re-wait until something looks green) races CI and invents progress, and polling checks between phases buys nothing — the checks that matter are the ones on the final candidate SHA, which does not exist until review and remediation have settled the code. So the stage reads required checks exactly once, after the last code-changing phase, waiting for conclusion without interfering. Fixing a failed check is itself conditional: one bounded cycle, only for non-trivial functional/mixed changes whose failure this PR caused. On trivial or non-functional changes a failing check is cheaper for a human to triage than for the stage to guess at — leaving it failing and saying so is the honest outcome, not a shortfall. Deploy proof remains mandatory **when QA needs a live URL** — checks-green is not a substitute for exact-SHA proof of the URL under test.
 
 ## Why the exact-SHA gate is absolute
 
@@ -34,13 +34,21 @@ Branch-level "deployment ready" signals race: the readiness a wait script observ
 
 A results commit created after testing has a different SHA than the commit that was tested, so merging it merges an untested commit — the gate would invalidate itself in the act of recording its own success. Even a docs-only trailing commit breaks the SHA binding the whole stage exists to prove. Results therefore live in the PR conversation and automation output, which bind to the tested SHA by reference instead of by mutation. `QA.md` — the matrix — is committed *before* the candidate SHA precisely so the artifact record stays complete without a trailing write. When QA is skipped, there is no matrix to commit.
 
-## Why remediation is finding-scoped and re-review is fresh
+## Why the reviewer fixes in place, and delegated remediation gets fresh verification
 
-The reviewer holds the hottest context on each defect, so it authors the fix instruction (the remediation brief) — but the agent that raised a finding is the worst judge of whether the fix resolved it, having already committed to a theory of the defect. Splitting fix (scoped strictly to accepted findings, so review pressure cannot become scope creep) from verification (a clean context reading only the delta and the stable artifacts) is the same generation/acceptance split the rest of the plugin uses at the divergence bar and the plan Challenge pass.
+The reviewer holds the hottest context on each defect. For a mechanical, localized fix that focused verification can confirm, dispatching a separate fixer and then a fresh re-reviewer triples the agent count for a one-line defect — the loop cost exceeds the independence benefit, so the reviewer applies those fixes itself and closes the findings in its own run. The generation/acceptance split becomes load-bearing exactly where the fix requires judgment: for structural findings the reviewer authors a brief (it writes the fix instruction because it has the context) but does not attempt the fix, and once a delegated fixer has committed to a theory of the fix, a clean verifier — not the reviewer, who committed to a theory of the defect — reads only the delta and the evidence. Same split the plugin uses at the divergence bar and the plan Challenge pass, applied only where it pays.
+
+## Why worker prompts are standing briefs
+
+An orchestrator that hand-derives each worker's prompt pays twice: the derivation bloats its own context with instructions only the worker needs, and the instructions themselves drift — each run re-invents phrasing, drops a rule, or paraphrases the skill it should be routing. Shipping the per-phase briefs beside the skill (`briefs/`) makes the worker instructions versioned artifacts: the orchestrator routes a file reference plus a short parameter block, review of the instructions happens in the plugin repo, and every run dispatches the same discipline. The reviewer needs no such brief because `comprehensive-review` — a full skill — already is one. Per-finding remediation briefs are different animals: they are run-specific context authored by the reviewer into the plan folder; the standing `remediation-fixer.md` brief carries only the discipline that never changes between findings.
+
+## Why QA runs after review
+
+QA exercises the deployed build, so every code change after QA unbinds its results from the SHA under test. Review and remediation are the phases most likely to change code; running them first means QA tests settled code once, instead of being rerun (or silently invalidated) by a post-QA fix. The same logic pins the checks gate after remediation and QA planning: gates belong after the last write.
 
 ## Why the loops are bounded
 
-One remediation cycle plus one fresh re-review, one QA remediation cycle, one relaunch of a dead worker. Unbounded "loop until green" burns budget on exactly the changes least likely to converge — a second failed cycle is strong evidence the problem is architectural or environmental, which is human territory. Bounded loops make the stage's cost predictable enough to run on every PR, and make a stop with a specific handoff the honest terminal state rather than an embarrassing one.
+One remediation cycle plus one fresh verification, one QA remediation cycle, one checks fix cycle, one relaunch of a dead worker. Unbounded "loop until green" burns budget on exactly the changes least likely to converge — a second failed cycle is strong evidence the problem is architectural or environmental, which is human territory. Bounded loops make the stage's cost predictable enough to run on every PR, and make a stop with a specific handoff the honest terminal state rather than an embarrassing one.
 
 ## Why discovery never tie-breaks
 

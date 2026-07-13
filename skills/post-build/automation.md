@@ -22,7 +22,7 @@ Trigger **once per build handoff**, not on every push to the branch:
 - Manual/operator trigger is equally valid; garcia-music runs this way.
 - If the harness only offers push triggers, add a guard to the prompt: exit immediately when the head commit is the stage's own artifact commit (`REVIEW.md`/`QA.md`/remediation), so the automation cannot feed itself.
 - Pass an explicit plan-folder path in trigger context only to override discovery; normally the PR's `Workflow-Plan:` marker is sufficient.
-- Trivial non-functional PRs may still enter this automation; the skill is expected to classify, wait for checks, and exit early with an absorbed report rather than running the full stage.
+- Trivial non-functional PRs may still enter this automation; the skill is expected to classify, read the required checks at the end, and exit early with an absorbed report rather than running the full stage.
 
 ## Re-runs and resumability
 
@@ -45,17 +45,21 @@ Run the post-build workflow for <PR / current non-production branch>. Load the
 workflow plugin's post-build skill for portable stage semantics and
 <adapter skill path> for repository routing, safety, checks, deploy, and QA.
 You are the parent: coordinate by default; absorb only trivial/small
-non-functional changes per the skill. Resolve plan context from the PR's
-Workflow-Plan marker (or classify as ad-hoc when none is needed); stop and
-report ambiguity instead of guessing. Classify the change (intent source,
-surface, size), then right-size: wait for required checks reactively; skip
-QA and deploy proof when the change is non-functional or has no driveable
-user-facing need; otherwise delegate independent review, bounded
-finding-scoped remediation with a fresh re-review, QA planning, exact-SHA
-deploy proof, and deployed browser QA per the adapter's routing. Never touch
-production, never browser-test localhost, and never commit results after the
-candidate SHA is tested. Resume from artifacts already bound to the current
-SHA. Return the post-build final output schema.
+non-functional changes per the skill. Dispatch workers from the skill's
+standing briefs plus parameters — do not compose worker prompts yourself.
+Resolve plan context from the PR's Workflow-Plan marker (or classify as
+ad-hoc when none is needed); stop and report ambiguity instead of guessing.
+Classify the change (intent source, surface, size), then right-size:
+delegate independent review first (the reviewer fixes straightforward
+findings in place; only briefed structural findings get a fixer and a fresh
+verification); then QA planning, exact-SHA deploy proof, and deployed
+browser QA only when the change is functional with driveable user-facing
+need. Read required checks once at the end of the work — fix a failure only
+when the change is functional and non-trivial and this PR caused it;
+otherwise report it and leave it failing. Never touch production, never
+browser-test localhost, and never commit results after the candidate SHA is
+tested. Resume from artifacts already bound to the current SHA. Return the
+post-build final output schema.
 ```
 
 ## Pre-wiring checklist
@@ -67,4 +71,4 @@ SHA. Return the post-build final output schema.
 
 ## Canary
 
-Before trusting the wiring, run once against a known-good already-built PR. Expect: classification in the report; for a functional planned PR, committed `REVIEW.md` (verdict + reviewed SHA) and matrix-only `QA.md` on the branch when QA applies, required-checks wait reflected in the report, exact-SHA deployment proof only when QA ran, QA driven only against that URL, final results in the automation/PR output with **no trailing results commit**. Also canary a trivial docs-only PR: expect absorbed mode, checks waited, QA/deploy skipped, no invented plan folder. Any deviation is a wiring or adapter bug — fix it before putting the automation in the path of real PRs.
+Before trusting the wiring, run once against a known-good already-built PR. Expect: classification in the report; for a functional planned PR, committed `REVIEW.md` (verdict + reviewed SHA, straightforward findings resolved in the review itself) and matrix-only `QA.md` on the branch when QA applies, the end-of-work required-checks read reflected in the report, exact-SHA deployment proof only when QA ran, QA driven only against that URL, final results in the automation/PR output with **no trailing results commit**. Also canary a trivial docs-only PR: expect absorbed mode, checks read and reported (never fixed), QA/deploy skipped, no invented plan folder. Any deviation is a wiring or adapter bug — fix it before putting the automation in the path of real PRs.
