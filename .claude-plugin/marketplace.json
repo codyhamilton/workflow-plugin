@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "workflow",
-      "description": "Cloud-safe core: plan, refine, execute, comprehensive-review, close-out, post-build (plus its dispatch-only worker skills). No interactive gates that dead-end headless; installable in cloud build and pipeline environments.",
+      "description": "Cloud-safe core: plan, refine, execute, comprehensive-review, close-out, post-build. No interactive gates that dead-end headless; installable in cloud build and pipeline environments.",
       "author": {
         "name": "William Hamilton",
         "email": "codyh@ctzns.net"

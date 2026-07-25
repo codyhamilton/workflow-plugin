@@ -74,7 +74,7 @@ never paraphrase.** This is the plugin's widest invariant.
 
 Instantiated by: `refine` authoring implementation briefs and `execute` routing them;
 `comprehensive-review` authoring remediation briefs and `post-build` routing them by path;
-`iterate` passing its `briefs/` verbatim to composed skills.
+`post-build` and `iterate` both routing their standing worker briefs from `briefs/` by path.
 
 Paraphrase loses precision at every hop, and the loss compounds silently — nobody can see what was
 dropped. Authoring at the point of hottest context and routing untranslated is the only mechanism
@@ -86,12 +86,21 @@ Two corollaries:
 - **The static/dynamic split.** A worker's prompt has two parts. *Static direction* is the worker's
   own registered skill, which only the worker loads — the instruction text never enters the
   orchestrator's context at all. *Dynamic context* is the handful of lines only this run knows:
-  paths, SHAs, URLs, finding IDs. The orchestrator authors exactly that and nothing more. This is
-  why `post-build`'s worker phases are registered skills rather than files: registration gives the
-  right loading behavior on both sides — a dispatch-only description keeps the orchestrator from
-  loading it, name-and-description reinforcement makes the worker's load reliable, and a skill name
-  resolves through the harness registry wherever the plugin is installed, where a path would depend
-  on install location.
+  paths, SHAs, URLs, finding IDs. The orchestrator authors exactly that and nothing more.
+
+  **Static direction is a file, not a registered skill.** `post-build`'s worker phases were briefly
+  promoted to registered dispatch-only skills, on the theory that registration bought better
+  loading behavior on both sides and that a skill name resolves anywhere while a path depends on
+  install location. Both halves were wrong, and reverting them is the cleaner design. A brief is
+  read, not invoked, so it needs no description, no invocation gating, and no registry entry — a
+  worker told to read an absolute path does so unconditionally, where a skill it must decide to
+  load is a decision that can go the other way. Registration also charges rent the whole time:
+  every registered skill's name and description sit in every session's context, so four workers
+  nobody outside `post-build` can invoke were taxing every unrelated conversation. The path
+  argument dissolves once the orchestrator resolves `briefs/<name>.md` against its own skill
+  directory before dispatching — it knows where it was loaded from, which is exactly the fact the
+  worker lacks. Registration earns its cost only for an entry point a human or a peer skill names;
+  worker direction is neither.
 - **Authorship moves upstream where it can be reviewed.** Deriving briefs inside the dispatch loop
   works, but the decomposition is never inspectable before build spend, and a killed run loses every
   brief not yet dispatched. `refine` exists to move that authorship into its own reviewable stage.

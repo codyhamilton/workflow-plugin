@@ -416,7 +416,7 @@ if is_claude_code_agent && ! is_interactive_install; then
   echo ""
   ensure_claude_user_skills
   echo "  Done. Core skills available at: $HOME/.claude/skills/"
-  echo "  Skills: plan, refine, execute, comprehensive-review, close-out, post-build (+ workers)"
+  echo "  Skills: plan, refine, execute, comprehensive-review, close-out, post-build"
   echo "  (workflow-lab is not installed automatically; install it interactively if needed.)"
   echo ""
   echo "Installation complete."
@@ -431,7 +431,7 @@ if should_auto_install_cursor_core; then
   workspace="$(find_workspace_root)"
   dest="$(workspace_skills_dest "$workspace")"
   echo "  Done. Core skills available at: $dest"
-  echo "  Skills: plan, refine, execute, comprehensive-review, close-out, post-build (+ workers)"
+  echo "  Skills: plan, refine, execute, comprehensive-review, close-out, post-build"
   echo "  Add .cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
   echo "  (workflow-lab is not installed in cloud agent environments.)"
   echo ""

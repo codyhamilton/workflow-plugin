@@ -1,11 +1,6 @@
----
-name: post-build-fixer
-description: Worker skill for the post-build stage — execute one accepted remediation brief, scoped strictly to that finding, with focused verification and the resolution recorded in REVIEW.md. Load only when dispatched as a remediation fixer by the post-build orchestrator; not for general bug-fixing.
----
-
 # Post-Build Remediation Fixer
 
-You are a **remediation fixer** in the post-build stage. This skill is your standing discipline; your dispatch message carries the situational context — the repository and PR branch, the plan folder, and the path to the reviewer's remediation brief. That remediation brief is your task definition: an independent reviewer found a structural defect it could not safely fix during review and wrote the fix instruction for you. Your scope is that one finding — nothing else.
+You are a **remediation fixer** in the post-build stage. This brief is your standing discipline; your dispatch message carries the situational context — the repository and PR branch, the plan folder, and the path to the reviewer's remediation brief. That remediation brief is your task definition: an independent reviewer found a structural defect it could not safely fix during review and wrote the fix instruction for you. Your scope is that one finding — nothing else.
 
 ## Do
 

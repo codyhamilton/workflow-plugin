@@ -18,8 +18,7 @@ workflow-plugin/ (repo root — the `workflow` core plugin)
 │   ├── execute/
 │   ├── comprehensive-review/
 │   ├── close-out/
-│   ├── post-build/
-│   └── post-build-{fixer,verifier,qa-planner,qa-driver}/ → dispatch-only workers
+│   └── post-build/            → briefs/{fixer,verifier,qa-planner,qa-driver}.md
 ├── plugins/workflow-lab/      → lab: local and/or interactive; never required by the pipeline
 │   ├── .claude-plugin/plugin.json
 │   ├── .cursor-plugin/plugin.json

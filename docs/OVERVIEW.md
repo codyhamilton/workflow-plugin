@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A workflow plugin for Claude Code, opencode, and Cursor providing ten skills (plus four dispatch-only workers), split across two plugins, for structured plan/refine/execute/review workflows — usable identically by a human at the keyboard and by a staged cloud pipeline (build agent → automated review/QA → merge).
+A workflow plugin for Claude Code, opencode, and Cursor providing ten skills, split across two plugins, for structured plan/refine/execute/review workflows — usable identically by a human at the keyboard and by a staged cloud pipeline (build agent → automated review/QA → merge).
 
 ## Who Uses It
 
@@ -23,7 +23,7 @@ Teams and individual developers who want:
 3. **execute** — Executes an existing plan. Routes `refine`'s briefs verbatim to rightsized workers (authoring inline only where refinement was skipped), writes `IMPLEMENTATION.md` progressively, runs review sized to the declared posture (terminal: mandatory independent review; pipeline: pre-flight self-verification only), lands a PR carrying the `Workflow-Plan:` marker.
 4. **comprehensive-review** — Independent review keyed to `PLAN.md`'s acceptance criteria. Fixes straightforward findings in place (closing them without a downstream loop) and authors remediation briefs for structural ones; writes `REVIEW.md` (with a machine-actionable verdict reflecting the post-fix state) into the plan folder; includes an intent-and-assumptions lens and a plan-sufficiency judgment. Reconstructs intent when a PR arrives with no plan folder.
 5. **close-out** — Ends a plan. Appends an `## Outcome` section to `PLAN.md` recording what was actually built, deviations and why, how review resolved, and where follow-ups went; promotes a `DESIGN.md` worth keeping to `docs/design/`; deletes the interim artifacts in one commit. The branch history and the PR are the archive; the plan folder is the record.
-6. **post-build** — The pipeline stage that picks a PR up where the build leaves off: classifies the change and right-sizes the process, independent review via `comprehensive-review` when needed (delegated remediation and fresh verification only for briefed structural findings), conditional `QA.md` / exact-SHA deploy / browser QA for functional driveable need, a single end-of-work required-checks gate (failures fixed only for non-trivial functional changes), and an uncommitted merge-readiness report. Its delegated phases are dispatch-only worker skills (`post-build-fixer`, `post-build-verifier`, `post-build-qa-planner`, `post-build-qa-driver`) named in the dispatch and loaded only by the worker; repo mechanics come from a per-repo adapter skill.
+6. **post-build** — The pipeline stage that picks a PR up where the build leaves off: classifies the change and right-sizes the process, independent review via `comprehensive-review` when needed (delegated remediation and fresh verification only for briefed structural findings), conditional `QA.md` / exact-SHA deploy / browser QA for functional driveable need, a single end-of-work required-checks gate (failures fixed only for non-trivial functional changes), and an uncommitted merge-readiness report. Its delegated phases run from standing briefs in the skill's own `briefs/`, routed to workers by path and never read by the orchestrator; repo mechanics come from a per-repo adapter skill.
 
 **Lab plugin (`workflow-lab`)** — local and/or interactive; never required by the pipeline:
 

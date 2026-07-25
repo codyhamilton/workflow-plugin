@@ -56,7 +56,6 @@ bounded slice one worker can carry; everything else runs every time.
 | `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria; fixes straightforward findings in place, briefs structural ones |
 | `workflow` (core) | `close-out` | End a plan: append the Outcome to `PLAN.md`, promote or drop `DESIGN.md`, delete the interim artifacts in one commit |
 | `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
-| `workflow` (core) | `post-build-fixer` / `post-build-verifier` / `post-build-qa-planner` / `post-build-qa-driver` | Dispatch-only worker skills for post-build's delegated phases — named in the dispatch, loaded by the worker, never by the orchestrator |
 | `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
 | `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
