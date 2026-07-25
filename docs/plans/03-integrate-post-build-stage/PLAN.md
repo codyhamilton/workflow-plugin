@@ -84,3 +84,41 @@ Non-user-facing (observable statements):
 ## Provenance Notes
 
 Headless one-shot run; the Assumption Ledger above is the full decision record. Source material: `codyhamilton/garcia-music` `.claude/skills/post-build-automation/SKILL.md` (stage semantics, safety invariants, exact-SHA gate, bounded loops, output schema) and `.claude/skills/orchestration/SKILL.md` (deploy-babysit and QA phase shapes, failure-handling table).
+
+## Outcome
+
+The portable stage landed as planned. `post-build` exists as a core skill owning marker-first plan
+discovery with bounded fallbacks, independent review via `comprehensive-review`, one finding-scoped
+remediation cycle plus one fresh verification, `QA.md` matrix planning, exact-SHA deploy proof,
+deployed browser QA with one remediation cycle, portable safety invariants, an explicit adapter
+contract, and a merge-readiness report it never acts on. garcia-music kept its `post-build-automation`
+skill as the reference repo adapter; nothing repo-specific was ported.
+
+**Changed:** `skills/post-build/` (the skill, its design reference, and the automation wiring guide);
+`skills/comprehensive-review/SKILL.md` (verdict and severity enums, the findings-are-never-erased
+rule, stage naming); `docs/ARCHITECTURE.md` (component map, cross-skill contracts, PR Artifact Seam,
+invariant 9, the post-build data flow); `docs/OVERVIEW.md`, `README.md`, `install.sh`, and the three
+plugin manifests (skill lists and counts; core 2.0.0 → 2.1.0).
+
+**Deviations:** scope grew mid-PR to include the automation wiring guide and the re-run resumability
+rule, recorded at the time as Assumption 5. `QA.md` semantics changed from the 02-pivot seam's
+"executed pass/fail committed" to matrix-only-committed with results delivered externally
+(Assumption 1) — this superseded a contract the previous plan had set, which is the most consequential
+thing this change did. No worker delegation: a docs-only change with the orchestrator's context
+already hot with both source repos, per execute's delegation judgment call, so no `briefs/`.
+
+**Review:** none — the plan was executed in pipeline posture with the PR conversation standing in for
+the review stage, and `REVIEW.md` was deliberately not written. That was defensible for a docs-only
+change but it is the reason this folder then sat unfinished: nothing owned its ending. Validation was
+a portability grep against the new skill (no Vercel/Supabase/Wompi/model names) and a consistency
+check of the skill lists across `README.md`, `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, `install.sh`,
+and all three manifests.
+
+**QA:** not applicable — non-functional change, no driveable surface.
+
+**Residual risks:** the adapter contract had exactly one implementation (garcia-music) at the time, so
+its portability was asserted rather than demonstrated. A second adapter is the real test.
+
+**Follow-ups:** none open. Note for readers following old paths: `skills/post-build/reference.md` was
+later consolidated into `workflow-tuning/principles.md`, and `skills/post-build/automation.md`
+relocated to `docs/automation/post-build.md`, in `04-workflow-refine-and-closeout`.
