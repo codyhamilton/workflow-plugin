@@ -134,6 +134,7 @@ QA: RUN | SKIPPED (<reason>)
 QA cases: <case ID>: PASS|FAIL|NOT_RUN — <evidence> per line; QA remediation cycles: <0|1>
 Remaining non-blocking findings: <IDs or none>
 Blocker / human action: <specific action or none>
+After merge: close out <plan folder> via the close-out skill | N/A (no plan folder)
 ```
 
 Never report `PASS` while required checks are failing or still pending. Never report `PASS` while exact-SHA proof or an **applicable** QA case is missing — "applicable" means classification selected QA and a driveable case exists; skipped QA for non-functional or undriveable-only work is an honest skip, not a missing gate. Downgrade honestly.
@@ -152,7 +153,8 @@ Never report `PASS` while required checks are failing or still pending. Never re
 - When QA runs, `QA.md` is committed before the candidate SHA and carries the matrix only; executed results stay external. QA targets the exact proven-SHA URL or does not run.
 - `medium`/`low` findings may ride along as explicit non-blocking follow-ups; `blocker`/`high` stop the stage.
 - The stage reports merge-readiness; it never merges.
+- **The stage never closes out the plan folder.** `REVIEW.md` and `QA.md` are live inputs to the phases that follow them, and any commit that removed them would either break a later phase or become the trailing commit this stage exists to forbid. Close-out belongs to whoever ends the change: after the PR merges, on the default branch, via the `close-out` skill. Note it in the merge-readiness report as the remaining step; do not do it here.
 
-## Reference
+## Operator guide
 
-`automation.md`, beside this file, is the operator guide for wiring this stage into an external automation trigger — automation shape, trigger discipline, canonical prompt, and canary. `reference.md` holds the design rationale behind these rules — why the SHA gate is absolute, why results are never committed, why loops are bounded, why checks are read once at the end — for whoever revises this skill later. Neither is loaded during normal execution.
+`docs/automation/post-build.md` in the plugin repo is the operator guide for wiring this stage into an external automation trigger — automation shape, trigger discipline, canonical prompt, and canary. It is not loaded during skill execution.

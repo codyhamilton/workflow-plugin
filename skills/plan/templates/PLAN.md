@@ -42,6 +42,8 @@ User request, verbatim:
 
 ## Execution Phases
 
+<Light phasing at plan time — the shape and order of the work, not a dispatch list. `refine` rewrites this section into the definitive ordered dispatch list, each phase naming its brief file and its dependencies.>
+
 1. <define or land the next executable slice>
 2. <implement the core behavior or contract>
 3. <integrate, verify, and remove superseded behavior>
@@ -61,3 +63,12 @@ Non-user-facing (observable statement):
 See `PROVENANCE.md` in this plan folder, when present, for the plan conversation record — verbatim initial request, Q&A turns, and agent decisions written progressively during interactive sessions. Headless one-shot runs have no `PROVENANCE.md`; the Assumption Ledger above and this section together carry the full record.
 
 - <important rationale, tradeoff, or decision future agents should understand>
+
+<!--
+## Outcome
+
+Appended by `close-out` when the work lands — what was built, what changed, deviations from plan
+wording and why, review verdict and resolutions, QA result, residual risks, and where each follow-up
+went. Do not write this section at plan time; do not leave a placeholder for it.
+-->
+

@@ -92,8 +92,14 @@ To compare two candidate approaches, run each against the same scenario and comp
 
 ## Additional Resources
 
+- [principles.md](principles.md) — the cross-cutting design principles the skills are built on. This is where design rationale lives; a `SKILL.md` holds only what changes an executing agent's behavior. When a proposed change would contradict a principle, that is the argument to have — not a rule to quietly work around.
 - [reference.md](reference.md) — numbered lessons from real execution traces
-- [retros/](retros/) — staging area for per-execution retros; consumed and removed after consolidation
+- `retros/` — staging area for per-execution retros; created on demand, consumed and removed after consolidation, so its absence is the normal state
+
+`principles.md` and `reference.md` are different corpora and stay separate: principles are the
+reasoning the design rests on, lessons are what execution actually showed. A lesson that hardens
+into a design commitment gets promoted into `principles.md` and marked landed in `reference.md`; a
+principle a trace contradicts gets challenged, not silently dropped.
 
 ## Retro Lifecycle
 

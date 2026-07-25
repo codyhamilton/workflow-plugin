@@ -44,6 +44,14 @@ Six named phases. Move forward when a phase's output exists — this is not a nu
 5. **Challenge.** Run one adversarial review pass, using a clean subagent when possible. It should challenge value, alignment with intent, whether scope was widened enough, missing contracts, internal inconsistency, ordering mistakes, unnecessary documentation, and weak acceptance criteria. In headless posture, the pass explicitly challenges the assumption ledger — is each entry a real decision with a real rationale, or a placeholder? Apply findings that improve the plan and align with intent; report all findings to the user regardless of whether they were applied.
 6. **Checkpoint.** Interactive: hold here. Present the plan, and the assumption ledger if one exists, to the user before any execution starts. Headless: wave through — do not hold. The plan folder as it stands is the handoff artifact; downstream review is the backstop that keeps a waved-through ledger honest.
 
+## What happens next
+
+Execution Phases are **light phasing** — enough to show the shape and order of the work, not a dispatch list. When the work is more than one worker can carry, `refine` runs next: it does its own code recon, decomposes the phases into executable units with disjoint ownership, writes a complete brief per unit, and rewrites Execution Phases into the definitive dispatch list. A plan whose contracts are too weak to decompose gets bounced back here with the gaps named.
+
+This is why phases can stay indicative and why contracts cannot. Do not pre-empt refinement by writing briefs or file-level task lists into `PLAN.md`; do make sure the contracts a brief would have to cite are actually stated somewhere — `PLAN.md`, `DESIGN.md`, or the stable docs.
+
+The plan folder ends its life at close-out: `PLAN.md` survives with an appended `## Outcome` section, and the interim artifacts are deleted. Write `PLAN.md` as the document that will still be read years later, because it is the only one that will be.
+
 ## The plan folder
 
 - One plan folder per change/PR, at `docs/plans/<NN>-<slug>/`. The slug is the unique key; `NN` is best-effort ordering only — nothing may locate a folder by number. Two build agents branching from the same base may land on the same `NN`; that's fine and needs no resolution.
@@ -73,7 +81,4 @@ Six named phases. Move forward when a phase's output exists — this is not a nu
 - When `PROVENANCE.md` is used, write it progressively: create it at Capture, append each Q&A turn as it happens, append agent decisions before finalizing. Do not batch or defer.
 - Provenance records intent, not a transcript. Extract the substance — the decision, preference, or direction — in the user's words. Strip tone and filler. Omit conversational asides and anything not intended for persistence. Preserve exact phrasing only when it carries meaning a paraphrase would lose. If in doubt, omit.
 - Do not copy credentials, API keys, tokens, or large file dumps into `PROVENANCE.md` or `PLAN.md`.
-
-## Reference
-
-`reference.md`, beside this file, holds the design rationale behind these rules — why the model is shaped this way — for whoever revises this skill later. It is not loaded during normal execution.
+- Do not add status, progress, or version fields to any plan artifact. A plan folder's existence is its only signal.

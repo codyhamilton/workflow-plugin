@@ -22,7 +22,7 @@ provenance — leave them as they are. New plan folders from this version on fol
 The workflow design rests on these assumptions. Some are informally validated (noted where), none are proven in the cloud-pipeline context. We build to them now and evaluate later — a dedicated eval effort, out of scope for the current revisions, will test them. Each is falsifiable and names its validation route: **eval** (harness scenario runs, see `evals/`) or **observational** (harvested from real pipeline outcomes via workflow-tuning).
 
 1. **Verbatim intent survives; paraphrase decays.** Capturing the human's actual words (request, issue, task) lets downstream agents match what was done to why — anchoring review placement, QA derivation, and gap-filling. Paraphrase loses the intent that matters. *(Informally validated in human workflows. Observational.)*
-2. **Briefs beat messengers.** Context authored once by its owner and routed verbatim to its consumer outperforms orchestrator paraphrase — in subagent prompt quality (especially long-context jobs) and in review-remediation accuracy. *(Observed in iterate; untested as a plugin-wide invariant. Eval.)*
+2. **Briefs beat messengers.** Context authored once by its owner and routed verbatim to its consumer outperforms orchestrator paraphrase — in subagent prompt quality (especially long-context jobs) and in review-remediation accuracy. *(Strong observational support: a mid-run skill edit in a 67-subagent `iterate` session gave a clean before/after — gate prompts decayed 1199→213 chars with guidance inline, and held at 2833–3716 across three later cycles once it moved into verbatim-passed briefs. See lesson 20 in `workflow-tuning/reference.md`. Still untested head-to-head as a plugin-wide invariant. Eval.)*
 3. **A plan is a deliverable, not a stop on the way to a build.** A dedicated planning context produces more accurate plans than a fused plan-build workflow, and separation enables gating, plan validation, adversarial planning, and plans that are valuable unbuilt. *(Observed in iterate's divergence cycles; untested as a head-to-head. Eval.)*
 4. **Status belongs to the tracker, not the repo.** Removing the repo backlog (folder-status taxonomy, roadmap sync) sheds structural-compliance load without losing recoverability, because durable artifacts carry intent and outcome while PRs carry status. *(Untested. Observational.)*
 5. **Orienting-why beats persuading-why.** Skills that state the failures they prevent help agents fill unspecified gaps; prose that argues the design's correctness costs context without changing behavior. *(Untested. Eval.)*
@@ -45,20 +45,25 @@ Two plugins. **Core** (`workflow`) is cloud-safe — no interactive gates that d
 local-filesystem dependencies — and is what a build/pipeline environment installs. **Lab**
 (`workflow-lab`) is local and/or interactive; the pipeline never requires it.
 
+The loop: **plan → refine → execute → review → close-out.** `refine` is skipped when the work is one
+bounded slice one worker can carry; everything else runs every time.
+
 | Plugin | Skill | Description |
 |--------|-------|-------------|
 | `workflow` (core) | `plan` | Create and revise implementation plans; interactive or headless posture |
-| `workflow` (core) | `execute` | Execute planned work packages with brief-based delegation; review sized to terminal or pipeline posture |
+| `workflow` (core) | `refine` | Decompose a plan into ordered executable units and write one complete brief per unit; bounce the plan back if its contracts are too weak to decompose |
+| `workflow` (core) | `execute` | Execute planned work packages, routing briefs verbatim to rightsized workers; review sized to terminal or pipeline posture |
 | `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria; fixes straightforward findings in place, briefs structural ones |
+| `workflow` (core) | `close-out` | End a plan: append the Outcome to `PLAN.md`, promote or drop `DESIGN.md`, delete the interim artifacts in one commit |
 | `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
 | `workflow` (core) | `post-build-fixer` / `post-build-verifier` / `post-build-qa-planner` / `post-build-qa-driver` | Dispatch-only worker skills for post-build's delegated phases — named in the dispatch, loaded by the worker, never by the orchestrator |
 | `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
 | `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
-| `workflow-lab` | `workflow-tuning` | Improve the plan/execute/review workflow itself, from retros and merged-PR outcomes |
+| `workflow-lab` | `workflow-tuning` | Improve the workflow itself — design principles, lessons from retros and merged-PR outcomes, evals |
 
 To trigger `post-build` from an external automation (e.g. a Cursor Automation), see
-[`skills/post-build/automation.md`](skills/post-build/automation.md): one orchestrated automation
+[`docs/automation/post-build.md`](docs/automation/post-build.md): one orchestrated automation
 per stage, triggered once per build handoff, with repo mechanics supplied by a per-repo adapter skill.
 
 ## Quick install
@@ -122,6 +127,43 @@ Register it in the consuming repo's `.claude/settings.json` (merge if the file a
 The installer detects `CLAUDE_CODE_REMOTE`/`CLAUDECODE` itself and installs to `~/.claude/skills/`
 non-interactively — the `[[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]` guard above just keeps the hook
 a no-op on local clones of the consuming repo, where you'd rather run `install.sh` yourself.
+
+## Which install is live?
+
+There are two independent install paths, and **they update by different commands and drift apart
+silently**. A skills plugin gives an agent no runtime signal that the prompt it is executing is not
+the prompt in this repo, so before concluding "the skill is doing X", check the copy that is
+actually loaded.
+
+| | Path A — direct install | Path B — marketplace plugin |
+|---|---|---|
+| Installed by | `./install.sh` | `/plugin install workflow@workflow-plugin` |
+| Lives at | `~/.claude/skills/<skill>/` (or `.cursor/skills/workflow/`, `~/.cursor/plugins/local/workflow`) | `~/.claude/plugins/cache/workflow-plugin/<plugin>/<version>/` |
+| Source of truth | a copy made at install time | a git clone at `~/.claude/plugins/marketplaces/workflow-plugin`, pinned by `gitCommitSha` in `~/.claude/plugins/installed_plugins.json` |
+| Skills appear as | `plan`, `execute`, … | `workflow:plan`, `workflow:execute`, … |
+| Updates when | you re-run `./install.sh` | you run `/plugin update workflow@workflow-plugin` |
+
+Neither path notices that the other exists, and neither notices that this repo moved on.
+
+**To tell which is live**, look at how the skills are named in the harness's skill list: a
+`workflow:`/`workflow-lab:` prefix means Path B, bare names mean Path A. Then read the file that
+name resolves to — not this repo:
+
+```sh
+# Path B: what is pinned, and what the loaded copy actually says
+grep -A6 '"workflow@workflow-plugin"' ~/.claude/plugins/installed_plugins.json
+grep -rn "\[NEW\]" ~/.claude/plugins/cache/workflow-plugin/     # should return nothing
+
+# Path A
+ls ~/.claude/skills/
+```
+
+**To update Path B**, `/plugin update workflow@workflow-plugin` (and `workflow-lab@workflow-plugin`).
+That refetches the marketplace clone, re-pins `gitCommitSha`, and repopulates the version-numbered
+cache directory. Editing the cache by hand does not re-pin it and will be overwritten.
+
+If you use both paths, pick one as canonical for local work and remove the other — a stale copy that
+still resolves is worse than no copy at all.
 
 ## Manual installation
 
@@ -188,11 +230,16 @@ workflow-plugin/                    (repo root — the `workflow` core plugin)
 │   ├── plugin.json
 │   └── marketplace.json            (lists both plugins)
 ├── .cursor-plugin/plugin.json
-├── skills/                         (core: plan, execute, comprehensive-review, post-build)
+├── skills/                         (core plugin's skills)
 │   ├── plan/
+│   ├── refine/
 │   ├── execute/
 │   ├── comprehensive-review/
-│   └── post-build/
+│   ├── close-out/
+│   ├── post-build/
+│   └── post-build-{fixer,verifier,qa-planner,qa-driver}/
+├── docs/
+│   └── automation/                 (operator guides for external automation triggers)
 └── plugins/workflow-lab/           (lab plugin, its own manifests + skills/)
     ├── .claude-plugin/plugin.json
     ├── .cursor-plugin/plugin.json

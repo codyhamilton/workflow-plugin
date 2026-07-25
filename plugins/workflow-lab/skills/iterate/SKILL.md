@@ -260,9 +260,3 @@ Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTAT
 - Each candidate is built on its own branch off a shared base; losing branches are never deleted.
 - Stop when enough has been learned to commit. This skill exists to discover a spec by building,
   not to loop indefinitely.
-
-## Reference
-
-`reference.md`, beside this file, holds the design rationale behind this skill's mechanisms — why
-sequential beats parallel, why the divergence bar is split across two agents, why harden is a relay
-— for whoever revises this skill later. It is not loaded during normal execution.
