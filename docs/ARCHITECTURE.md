@@ -57,7 +57,7 @@ plan → refine → execute → review → close-out
 | `comprehensive-review` | core | Independent assessment against acceptance criteria; in-place fixes; remediation briefs | `REVIEW.md`, `briefs/remediation-<NN>.md`, `RECOVERED-INTENT.md` |
 | `post-build` | core | The pipeline stage against a PR: classify, review, remediate, QA, checks gate | Nothing itself — its workers write; its report is external |
 | `post-build-{fixer,verifier,qa-planner,qa-driver}` | core | One dispatched phase each | Per their brief; `QA.md` (planner) |
-| `close-out` | core | Ending a plan: the Outcome record and the collapse | `PLAN.md`'s `## Outcome`; deletes the rest |
+| `close-out` | core | Ending a plan: the outcome record and the collapse | `docs/plans/<NN>-<slug>.md`; deletes the folder |
 | `setup` | lab | Bootstrapping stable docs | `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md` |
 | `iterate` | lab | Long-horizon divergent exploration, composing the core skills | `OUTCOMES.md`, per-cycle artifacts |
 | `transcript-parser` | lab | Session transcript → cost metrics | A `cost-comparison.md`-schema section |
@@ -98,9 +98,9 @@ checks, deploy-proof mechanics, QA environment, and worker routing; `post-build`
 portable stage semantics. Authority on conflict: repo hard limits → adapter → `post-build` →
 triggering prompt. See [automation/post-build.md](automation/post-build.md) for wiring.
 
-**→ close-out**: `close-out` consumes every run-scoped artifact and leaves `PLAN.md` with an
-appended `## Outcome`. Its placement is posture-determined and is a hard constraint, not a
-preference:
+**→ close-out**: `close-out` consumes the whole plan folder — `PLAN.md` included — and leaves one
+record file, `docs/plans/<NN>-<slug>.md`, whose structure the skill defines. Its placement is
+posture-determined and is a hard constraint, not a preference:
 
 - **Terminal**: `execute` runs it after review settles, as the last commit before the PR.
 - **Pipeline**: it runs **after the PR merges**, on the default branch. It cannot run inside
@@ -140,7 +140,9 @@ plan folder mechanically:
   applicable**), `briefs/remediation-<NN>.md`.
 - **External-only outputs**: classification, required-checks outcomes, final SHA-specific QA results
   and media go to the PR conversation or automation output, never a trailing commit.
-- **Post-merge**: `close-out` collapses the folder to `PLAN.md` + `## Outcome`.
+- **Post-merge**: `close-out` collapses the folder into the single record file
+  `docs/plans/<NN>-<slug>.md` and deletes the folder. A merged PR's marker path therefore resolves to
+  the folder's history and to the record file that took its name.
 - **Fallback**: a PR with no plan folder does not break the pipeline — functional/material changes
   reconstruct intent into `RECOVERED-INTENT.md` and proceed; trivial/small non-functional changes may
   be absorbed without inventing plan ceremony.
@@ -149,11 +151,12 @@ plan folder mechanically:
 
 Four states, and every artifact is in exactly one:
 
-- **Durable** — `PLAN.md` (with its Outcome section), and any `DESIGN.md` promoted to `docs/design/`.
-  Survives close-out. This is the record.
-- **Consumed** — `PROVENANCE.md`, `IMPLEMENTATION.md`, `REVIEW.md`, `QA.md`, `briefs/` (including
-  remediation briefs), `RECOVERED-INTENT.md`. Load-bearing while the change is open; deleted at
-  close-out; recoverable from branch history and the PR forever.
+- **Durable** — the close-out record file `docs/plans/<NN>-<slug>.md`, and any `DESIGN.md` promoted
+  to `docs/design/`. Produced by close-out. This is the record.
+- **Consumed** — `PLAN.md`, `PROVENANCE.md`, `IMPLEMENTATION.md`, `REVIEW.md`, `QA.md`, `briefs/`
+  (including remediation briefs), `RECOVERED-INTENT.md` — the whole plan folder. Load-bearing while
+  the change is open; carried into the record and deleted at close-out; recoverable from branch
+  history and the PR forever.
 - **Promoted** — follow-ups that became tracker issues or design-intent docs in `docs/design/`.
 - **Status** — carried by nothing. PRs, branches, and the tracker carry status. Deferred work becomes
   a design-intent doc or a tracker issue, never a stale plan folder, never a `ROADMAP.md`, never a

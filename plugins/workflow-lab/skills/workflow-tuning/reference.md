@@ -49,8 +49,9 @@ useful for multi-session recovery and for evaluating workflow quality after the 
 
 What the lesson got wrong was their *lifetime*. It treated them as durable, which is how plan folders
 became piles nobody reads. They are run-scoped: load-bearing while the change is open, redundant once
-it lands, because their substance is condensed into `PLAN.md`'s Outcome section and their full text
-remains in the commits that introduced them. `close-out` consumes them. See lesson 27.
+it lands, because their substance is condensed into the close-out record file and their full text
+remains in the commits that introduced them. `close-out` consumes them — along with `PLAN.md` and the
+rest of the folder. See lesson 27.
 
 ## Stable Docs Versus Plan Docs
 
@@ -309,8 +310,8 @@ The general form of the fix is to bind an artifact to the thing it claims, at th
 it — the same reasoning as the exact-SHA gate. Where an artifact asserts an action produced a commit,
 it should name the commit or state its absence.
 
-This is also the strongest argument for `close-out` writing the Outcome section *from the artifacts,
-at the end*, rather than each phase asserting its own success as it goes.
+This is also the strongest argument for `close-out` writing its record *from the artifacts, at the
+end*, rather than each phase asserting its own success as it goes.
 
 ## Workflow Shape
 
@@ -324,8 +325,10 @@ into the execution context costs on four axes: the decomposition is never inspec
 spend commits; the orchestrator pays to derive what it then routes; a killed run loses every
 undispatched brief; and plan decomposability is discovered by a worker already running against it.
 
-The working shape observed here: `docs/plans/02-pivot-consolidate-focus/briefs/` — four complete
-per-agent briefs authored before dispatch — produced the cleanest execution in this repo's history.
+The working shape observed here: the pivot-consolidate-focus run's `briefs/` — four complete
+per-agent briefs authored before dispatch — produced the cleanest execution in this repo's history
+(the folder has since been closed out to `docs/plans/02-pivot-consolidate-focus.md`; the briefs
+themselves are in history at `c21ea12`).
 That is the pattern `refine` generalizes.
 
 Watch for the opposite failure: refinement becoming ceremony on single-worker work, where the brief
@@ -338,12 +341,19 @@ would be longer than the change (lesson 17). The skip rule exists for exactly th
 Every skill defined what it *wrote*; none defined what *survived*. The result was accretion — plan,
 design, provenance, briefs, implementation, review, QA, remediation briefs, all durable by default —
 and folders that simply stop, indistinguishable from work in progress.
-`docs/plans/03-integrate-post-build-stage/` sat with a plan and an implementation note and no ending
-for months.
+The post-build-integration folder sat with a plan and an implementation note and no ending for
+months.
 
 `close-out` is the fix, and its enabling sentence is the load-bearing part: *the branch history and
-the PR are the archive; the plan folder is the record.* Without that framing an agent will not
+the PR are the archive; the record file is the record.* Without that framing an agent will not
 delete, because deletion reads as loss.
+
+The first pass at the fix under-specified the collapse — it said what survives (`PLAN.md` plus an
+Outcome section) without saying that nothing else does, and the folder survived with it. Agents
+closed plans out by *appending* and left the tree standing, `[NEW]-` prefixes and child folders
+included. A collapse instruction has to name the end state as a shape, not as a surviving file: one
+plan, one file, folder deleted, phases as sections. Absence is not enforceable by describing
+presence.
 
 Ordering caveat worth remembering: close-out cannot run inside `post-build`. `REVIEW.md` and `QA.md`
 are live inputs to the phases that follow them, and any commit removing them would either break a

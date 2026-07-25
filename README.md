@@ -54,7 +54,7 @@ bounded slice one worker can carry; everything else runs every time.
 | `workflow` (core) | `refine` | Decompose a plan into ordered executable units and write one complete brief per unit; bounce the plan back if its contracts are too weak to decompose |
 | `workflow` (core) | `execute` | Execute planned work packages, routing briefs verbatim to rightsized workers; review sized to terminal or pipeline posture |
 | `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria; fixes straightforward findings in place, briefs structural ones |
-| `workflow` (core) | `close-out` | End a plan: append the Outcome to `PLAN.md`, promote or drop `DESIGN.md`, delete the interim artifacts in one commit |
+| `workflow` (core) | `close-out` | End a plan: collapse the whole folder into one record file at `docs/plans/<NN>-<slug>.md`, promote or drop `DESIGN.md`, delete the folder in one commit |
 | `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
 | `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
 | `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |

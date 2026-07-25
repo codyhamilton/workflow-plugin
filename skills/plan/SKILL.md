@@ -50,7 +50,7 @@ Execution Phases are **light phasing** — enough to show the shape and order of
 
 This is why phases can stay indicative and why contracts cannot. Do not pre-empt refinement by writing briefs or file-level task lists into `PLAN.md`; do make sure the contracts a brief would have to cite are actually stated somewhere — `PLAN.md`, `DESIGN.md`, or the stable docs.
 
-The plan folder ends its life at close-out: `PLAN.md` survives with an appended `## Outcome` section, and the interim artifacts are deleted. Write `PLAN.md` as the document that will still be read years later, because it is the only one that will be.
+The plan folder ends its life at close-out: the whole folder collapses into one record file, `docs/plans/<NN>-<slug>.md`, written from `PLAN.md` and the run's artifacts — and every artifact, including `PLAN.md` itself, is deleted. Write `PLAN.md` as the source that record will be built from: its Intent block is carried verbatim, and its scope and rationale are what a future reader gets if nothing else survives.
 
 ## The plan folder
 

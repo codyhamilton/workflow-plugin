@@ -167,8 +167,8 @@ A plan folder existing on a branch means the work is being built or was built �
 is no status file, no folder-name taxonomy, no schedule doc, no completion marker.
 
 Instantiated by: the plan-folder convention; the absence of `STATUS.md` and `ROADMAP.md`;
-`close-out`'s rule that a closed folder is not *marked* closed — it simply has an Outcome section
-and no interim files.
+`close-out`'s rule that a closed plan is not *marked* closed — it is simply a file instead of a
+folder.
 
 The removed system (an open-program folder prefix, numeric renumbering ceremony, a parent-program
 hierarchy, a canonical schedule file) was a shadow work tracker built for a repo-as-backlog mental
@@ -232,9 +232,9 @@ also why `PROVENANCE.md` is optional — a headless run has no Q&A to record, an
 transcript that never happened is ceremony wearing provenance's clothes.
 
 The corollary at the other end: an artifact whose consumers are gone has finished its job. That is
-what makes `close-out` safe. The branch history and the PR are the archive; the plan folder is the
-record. Nothing deleted at close-out is lost — what is removed is the obligation on every future
-reader to sift it.
+what makes `close-out` safe. The branch history and the PR are the archive; the single record file
+`close-out` leaves behind is the record. Nothing deleted at close-out is lost — what is removed is
+the obligation on every future reader to sift it.
 
 ## 12. Artifacts are written for their consumer, mechanically
 

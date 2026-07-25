@@ -142,5 +142,5 @@ There is no separate status file. Partial or paused state must be recoverable fr
 - Review posture is declared by the invoker, never inferred; terminal posture runs mandatory independent review, pipeline posture runs pre-flight self-verification only.
 - Write `IMPLEMENTATION.md` progressively as each slice completes, not at the end, recording each unit's outcome against its brief by name.
 - Record what actually happened, so a resumed run recovers both intent and progress from the branch alone.
-- In terminal posture, the run ends with close-out: the plan folder collapses to `PLAN.md` plus its Outcome section before the PR is opened. In pipeline posture, leave the artifacts in place — the stage needs them, and close-out happens after merge.
+- In terminal posture, the run ends with close-out: the plan folder collapses into the single record file `docs/plans/<NN>-<slug>.md` and is deleted, before the PR is opened. In pipeline posture, leave the artifacts in place — the stage needs them, and close-out happens after merge.
 - Completion is commits pushed plus a PR body whose first line is `Workflow-Plan: docs/plans/<NN>-<slug>/`. Do not rename plan folders or maintain schedule docs.

@@ -65,10 +65,10 @@ See `PROVENANCE.md` in this plan folder, when present, for the plan conversation
 - <important rationale, tradeoff, or decision future agents should understand>
 
 <!--
-## Outcome
-
-Appended by `close-out` when the work lands — what was built, what changed, deviations from plan
-wording and why, review verdict and resolutions, QA result, residual risks, and where each follow-up
-went. Do not write this section at plan time; do not leave a placeholder for it.
+No Outcome section here. When the work lands, `close-out` rewrites this whole folder into a single
+record file at `docs/plans/<NN>-<slug>.md` — what was built (per phase), deviations from plan wording
+and why, review verdict and resolutions, QA result, residual risks, and where each follow-up went —
+and deletes this file along with the rest of the folder. Do not write or reserve an Outcome section
+at plan time.
 -->
 

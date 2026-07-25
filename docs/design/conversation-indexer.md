@@ -28,7 +28,7 @@ code instead of a prompt.
 `tools/cursor/` ships the Cursor-only fast track: `find.py`, `extract.py`, `stats.py`, `search.py`,
 `iterate_analysis.py`, and `cost_window.py`, standalone with no dependencies and no indexing step.
 They were built because a 67-subagent session had to be analysed by hand and that cost must not
-repeat. See `docs/plans/05-cursor-toolkit/PLAN.md` for what shipped and what it cost.
+repeat. See `docs/plans/05-cursor-toolkit.md` for what shipped and what it cost.
 
 Two things that work should survive into any indexer: the **pipe shape** (`extract.py` emits a JSON
 document that every other tool consumes, so extraction is cached once and analysed many times) and
