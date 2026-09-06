@@ -83,6 +83,22 @@ Cursor JSONL uses `role` / `message.content[].type` structure. Count `tool_use` 
 
 Count pairs of `tool.execution_start` + `tool.execution_end` events per `toolName`. Each matched pair = one tool turn. Group by `turnId` to attribute turns to conversational rounds.
 
+## Known Gotchas
+
+- **Counting real API calls / summing usage.** A `type: "assistant"` JSONL line is one
+  content block, not one API call — a response that reasons before acting logs a `thinking`
+  fragment and a `tool_use` fragment as two lines sharing the same `message.id` and identical
+  `usage`. Raw line counts roughly double the true call count for any such response, and
+  summing `usage` per raw line double-counts cost. `parse_session.py` already avoids this by
+  counting `tool_use` blocks rather than lines; if you're counting or summing usage by hand,
+  dedupe by `message.id` first.
+- **Cache resets on agent resume.** `cache_read_input_tokens` can collapse back to near-zero
+  baseline at a resume (e.g. via `SendMessage`) regardless of elapsed wall time — observed
+  after a gap as short as 0.2 minutes, which rules out simple TTL expiry. It's a
+  resume-structural effect (the resume prompt likely invalidates the cached prefix), not a
+  clock. Expect a resumed agent's next call to cost roughly 6-8x a normal call at that
+  context depth.
+
 ## Output Format
 
 Produce a completed section matching the `cost-comparison.md` schema from `evals/README.md`. Specify whether this is Baseline or Candidate:

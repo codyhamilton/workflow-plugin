@@ -83,6 +83,12 @@ Two hard constraints:
   sequential — decide which, and record the dependency.
 - **A unit that cannot be named clearly is not a unit.** Do not decompose further to hit a count.
   Fewer, well-bounded units beat more, weakly justified ones.
+- **A unit whose done evidence depends on waiting on a long-running subprocess (roughly
+  5-10+ minutes) splits at the kickoff boundary.** One unit does setup and starts the
+  process, then hands off a short structured summary; a second, fresh unit waits for/verifies
+  the result and reports. Folding the wait into the same unit that did the setup produces a
+  busy-poll tail and, if the run stalls and gets resumed, a full cache re-embed on resume —
+  both of which a clean handoff avoids entirely.
 
 Order the units by real dependency, not by narrative convenience. State for each what it depends on
 and what may run alongside it.

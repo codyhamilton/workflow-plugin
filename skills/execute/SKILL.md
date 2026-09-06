@@ -42,11 +42,11 @@ The user has already chosen a plan/execute workflow. Treat that as evidence that
 
 **When `refine` has run** (briefs exist and Execution Phases names them), routing is the whole job:
 
-- Dispatch each worker with its brief routed verbatim plus mechanical pointers — repo path, branch, how to report back, and nothing else. Do not summarize the brief, restate the plan alongside it, or "add context" the brief already carries. If you find yourself explaining the brief, the brief is wrong; fix the brief, do not compensate in the prompt.
+- Dispatch each worker with its brief routed **by file path**, plus mechanical pointers — repo path, branch, how to report back, and nothing else. Do not paste the brief's contents into the dispatch prompt: the worker reads its own brief file; inlining it pays the brief's prompt-cache cost a second time in the orchestrator's own context for no benefit. Do not summarize the brief, restate the plan alongside it, or "add context" the brief already carries. If you find yourself explaining the brief, the brief is wrong; fix the brief, do not compensate in the prompt.
 - Follow the dispatch list's dependencies. Units marked as running alongside each other own disjoint paths and may go in parallel; the rest wait.
 - **Contradictions amend the brief.** When a worker reports a mismatch between its brief and the code or the plan, edit the brief file to record the resolution, then re-dispatch or continue from the amended brief. Never resolve a contradiction only in conversation — the amendment is the traceable record of where the decomposition was wrong, and the only thing a resumed run would see.
 
-**When `refine` was skipped** (the single-worker case, or a slice small enough that refinement was ceremony), author inline at dispatch time while your context is hot with the plan: derive the brief from `PLAN.md`/`DESIGN.md` contracts, write it to `docs/plans/<NN>-<slug>/briefs/`, commit it, and route it. It carries the same anatomy `refine` uses — consumer, owned paths, required reading in order, the contract, done evidence, report-back shape, and the standing instruction to report contradictions rather than resolve them silently.
+**When `refine` was skipped** (the single-worker case, or a slice small enough that refinement was ceremony), author inline at dispatch time while your context is hot with the plan: derive the brief from `PLAN.md`/`DESIGN.md` contracts, write it to `docs/plans/<NN>-<slug>/briefs/`, commit it, and route it **by path**, the same as a `refine`-produced brief. It carries the same anatomy `refine` uses — consumer, owned paths, required reading in order, the contract, done evidence, report-back shape, and the standing instruction to report contradictions rather than resolve them silently.
 
 Guard against the failure mode: this is not "write more artifacts". A brief with no named consumer is ceremony. Do not write a brief for work you are about to do yourself.
 
@@ -80,6 +80,17 @@ Optimize for outcome quality per token, not for maximal autonomy or maximal para
 
 Several small models with clearly bounded scope tend to be cheaper and faster in aggregate than one larger agent carrying the whole task — but only when the slices are genuinely independent, which is what the Sizing Method is for.
 
+## Long-Running Work
+
+Decomposing around a long-running subprocess is `refine`'s job (see its Decomposition
+section) — by the time `execute` is dispatching, that boundary should already be a unit
+split. If it isn't (a single-worker slice authored inline, or a unit that turns out to have
+an unexpectedly long wait), **never resume a stalled or waiting worker via `SendMessage`.** A
+resume forces a near-full cache re-embed regardless of how long the wait was — end the run
+there, have the worker (or the orchestrator, from what it reported) write a short handoff,
+and dispatch a fresh agent to pick up from it. A fresh agent's first call is cheaper than one
+resumed call on a bloated agent.
+
 ## Review Posture
 
 Review posture is **declared by the invoker, never inferred** from context, harness, or change size. Absent a declaration, assume terminal.
@@ -109,7 +120,7 @@ When a single run does plan, refine, and execute back to back, each skill still 
 5. Decide execution shape using the Sizing Method and the delegation judgment call above. Do not create more workers than the slice names clearly support.
 6. If delegating, get each worker its brief per Brief Routing and Authorship: route `refine`'s brief verbatim where one exists, author and commit one inline where it does not.
 7. While workers run, keep orchestration state lean. If blocked on worker output, wait instead of absorbing their implementation work into the main thread.
-8. As each slice or worker completes, synthesize its output and append to `IMPLEMENTATION.md` immediately — what was built, files or modules touched, tradeoffs, validation notes, and any intentional deviations from plan wording. Where briefs exist, record the outcome against its brief by name, so a resumed run can read the dispatch list and see which units are done. Never batch this to the end of the run; a killed run must leave the branch resumable from `IMPLEMENTATION.md` alone.
+8. As each slice or worker completes, synthesize its output and append to `IMPLEMENTATION.md` immediately — what was built, files or modules touched, tradeoffs, validation notes, and any intentional deviations from plan wording. Where briefs exist, record the outcome against its brief by name, so a resumed run can read the dispatch list and see which units are done. Never batch this to the end of the run; a killed run must leave the branch resumable from `IMPLEMENTATION.md` alone. If a worker's report-back defers a non-trivial, non-blocking bug (per the brief's standing instruction), dispatch a small, fresh ad-hoc agent to resolve it once the reporting worker's own slice is otherwise complete — do not reopen the reporting worker's context to fix it.
 9. Verify the full slice against the plan.
 10. Run review per the declared posture (Review Posture, above).
 11. If terminal review finds high or critical issues that fit within scope and do not require architectural replanning, have a clean subagent resolve and self-review. Do not default to repeated external review loops unless the change is unusually risky or the user asks for it.
@@ -136,6 +147,7 @@ There is no separate status file. Partial or paused state must be recoverable fr
 - Contracts may come from `DESIGN.md`, stable docs, or `PLAN.md`. If they are too weak for delegated implementation, stop and fix plan first.
 - Delegation is a judgment call weighing harness capability and context economics, not a default mandate — but when you do delegate, every worker gets a brief: `refine`'s routed verbatim, or one you authored inline.
 - A worker's reported contradiction amends the brief file. Never resolve one silently or only in conversation.
+- A worker's deferred non-blocking bug gets a small, fresh ad-hoc fixer agent, not a reopened worker context and not silence.
 - Prefer one clearly bounded worker over several weakly justified workers.
 - Prefer phased execution unless the user asks for end-to-end work or the plan makes the coupling unusually strong.
 - The orchestrator should not become an opportunistic implementor while workers are running.
