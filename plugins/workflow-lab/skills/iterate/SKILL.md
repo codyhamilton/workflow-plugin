@@ -31,12 +31,12 @@ challenger proposal, divergence gating, and synthesis to subagents. It never pla
 gates, or synthesizes priorities in its own context. Its own actions are limited to: routing work
 between subagents, collating their outputs into lean pointers, managing branches and loop control, and
 surfacing decisions to the user at the gates. Each stage composes the existing skills in this
-plugin — `plan`, `execute`, `comprehensive-review` — rather than reinventing them.
+plugin — `design`, `execute`, `comprehensive-review` — rather than reinventing them.
 
 ## Workflow
 
 A **cycle** is steps 2–7; step 8 starts the next cycle. Actors: the *orchestrator* (coordinator,
-above), *research subagents*, a *planning subagent* (via `plan`), an *approver subagent* (clean,
+above), *research subagents*, a *design subagent* (via `design`), an *approver subagent* (clean,
 applies the divergence bar), a *builder* (via `execute`), a *synthesis subagent* (clean, reads
 every candidate and reconceives priorities), and a *hardening reviewer relay* (clean, sequential
 passes that verify the consolidated base end-to-end). The orchestrator delegates every substantive
@@ -48,19 +48,19 @@ repairs.**
 
 0. **Capture scope and base.** Record the user's broad goal verbatim — do not pressure them for a
    success checklist; its absence is the reason for this skill. Establish iterate's own plan folder
-   at `docs/plans/<NN>-<slug>/` — the same plain convention `plan` and `execute` use elsewhere (no
+   at `docs/plans/<NN>-<slug>/` — the same plain convention `design` and `execute` use elsewhere (no
    `[NEW]-` prefix; the slug is the unique key, `NN` is best-effort ordering only) — and record the
    goal, the loop-control choice (gated vs. autonomous, depth), and the base commit. This folder
    holds iterate's own cross-cycle artifacts (`OUTCOMES.md`, `iteration-NN/`, below); each
-   candidate's own `plan`/`execute` artifacts live on its own branch, not here.
+   candidate's own `design`/`execute` artifacts live on its own branch, not here.
 
 1. **Initial research (delegated).** Dispatch 1–3 research subagents to map the problem space, the
    existing code surface, and the constraints. They report raw findings; the orchestrator forwards
    their output verbatim — no synthesis, filtering, or conclusions of its own. Research is not
-   planning; step 2 runs a separate planning subagent.
+   planning; step 2 runs a separate design subagent.
 
-2. **Plan and build candidate 1 (delegated).** A `plan` subagent — dispatched with headless posture
-   declared explicitly in its brief, since iterate's own gates (not plan's checkpoint) own user
+2. **Plan and build candidate 1 (delegated).** A `design` subagent — dispatched with headless posture
+   declared explicitly in its brief, since iterate's own gates (not design's checkpoint) own user
    interaction — receives the research output and produces the plan; then an `execute` subagent —
    dispatched with terminal review posture declared explicitly — builds it on its own branch off
    the base. The planning and execution are separate subagents — the orchestrator dispatches each
@@ -69,9 +69,9 @@ repairs.**
    mandates.
 
 3. **Propose and gate challengers (delegated).** For each challenger (up to 1–2), the divergence
-   check sits **between `plan` and `execute`** — the plan *is* the proposal, and only a plan that
+   check sits **between `design` and `execute`** — the plan *is* the proposal, and only a plan that
    clears the bar is built:
-   - **Plan = proposal.** Run `plan`, headless posture declared explicitly, against the prior
+   - **Plan = proposal.** Run `design`, headless posture declared explicitly, against the prior
      build(s) given as *real code, not a prose summary*, dispatched with
      `briefs/challenger-license.md` (the generative license, passed verbatim). The planner is not
      given the divergence tests — criteria given to a generator become a gaming target; criteria
@@ -99,7 +99,7 @@ repairs.**
    **Selection gate:** surface the revised outcomes and the selection rationale to the user (gated
    by default) — this is the moment to confirm or correct the reconceived priorities.
 
-5. **Consolidate onto the winner — capture (delegated).** A `plan` subagent, headless posture
+5. **Consolidate onto the winner — capture (delegated).** A `design` subagent, headless posture
    declared explicitly, receives a **defined scope** — the winner branch, the harvest list with its
    code pointers (plus any safe-union ideas harvested at step 3), and `OUTCOMES.md` as the
    design-altitude reference — and produces a consolidation plan; it does not re-research across
@@ -157,6 +157,19 @@ repairs.**
    unless the user sets a larger depth or stop condition. Stop when the depth/stop condition is
    reached, the gates say stop, or extrapolation produces no step worth building.
 
+## Phase mode: a design phase flagged approach-open
+
+`design` may flag a phase **approach: open** — its outcome is provable but no approach is settled.
+`execute` holds at that phase's boundary; the invoker runs it under this skill with a fixed scope:
+
+- The phase outcome from `DESIGN.md` is the yardstick, fixed. `OUTCOMES.md` is not written or
+  revised; synthesis (step 4) selects the approach that best makes the phase outcome true.
+- Scope is the phase: candidates are built on branches off the parent run's current commit, each
+  a headless `design` + `execute` for this phase only, against the code the earlier phases left.
+- The hardened commit closes the phase. Record the outcome and carried items in the parent run's
+  `IMPLEMENTATION.md` as `execute` would, and return to the parent's boundary.
+- Extrapolation (step 7) and loop control (step 8) do not run; the phase count is the design's.
+
 ## Model allocation
 
 The goal is **economy**: spend the quality premium only where cognition pays and starve it where the
@@ -194,7 +207,7 @@ An artifact's first job is to be a **forcing function**: requiring it guarantees
 happened. The handoff payload is secondary. So **specify the seam, not the substance** — require
 only what the consumer must mechanically locate (a branch name, code pointers, N separable
 options), mandate qualitative prose elsewhere, and **never** add status/score metadata, which
-invites Goodhart gaming (the same reason `plan` warns against forcing a template mechanically).
+invites Goodhart gaming (the same reason `design` warns against forcing a template mechanically).
 Every artifact below names a consumer or a gate; one that has neither is ceremony. `briefs/` holds
 the verbatim subagent context (see Workflow); it is the input counterpart to these outputs.
 
@@ -227,12 +240,12 @@ Per cycle, under `docs/plans/<NN>-<slug>/iteration-NN/`:
   from `HARDENING.md`'s next-worth findings, and which was chosen (or why the loop stopped).
   Consumed by loop control and the next-step gate.
 
-Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTATION.md`,
+Each candidate keeps its own `design`/`execute` artifacts (`DESIGN.md`, `IMPLEMENTATION.md`,
 `REVIEW.md`) on its branch, as those skills already require.
 
 ## Invariants
 
-- Composes `plan`, `execute`, and `comprehensive-review`; does not reimplement them.
+- Composes `design`, `execute`, and `comprehensive-review`; does not reimplement them.
 - The orchestrator decides nothing of substance — research, planning, execution, divergence gating,
   and synthesis are all delegated. Drift-sensitive subagent context is passed verbatim from
   `briefs/`, not paraphrased.
@@ -240,11 +253,12 @@ Each candidate keeps its own `plan`/`execute` artifacts (`PLAN.md`, `IMPLEMENTAT
 - A challenger is built only when its plan clears the divergence bar, judged by a clean approver,
   not the planner (the burden of proof is on building a challenger, not on stopping — "no genuine
   fork" is a valid, expected answer). A rejected plan is harvested, not built.
-- Posture is always declared explicitly when dispatching `plan` or `execute`, never left to default
-  inference: `plan` subagents run headless (iterate's gates, not plan's checkpoint, own user
-  interaction); `execute` subagents run terminal review posture for candidate builds (steps 2–3) and
-  pipeline review posture for the consolidation capture and refine builds (steps 5–6), where harden
-  is the downstream review stage.
+- Posture is always declared explicitly when dispatching `design` or `execute`, never left to default
+  inference: `design` subagents run headless (iterate's gates, not design's checkpoint, own user
+  interaction); `execute` subagents run boundary posture **continue** (a candidate is built through
+  all its phases) and terminal review posture for candidate builds (steps 2–3), pipeline review
+  posture for the consolidation capture and refine builds (steps 5–6), where harden is the
+  downstream review stage.
 - The synthesis agent reconceives priorities, selects, and harvests in one cross-candidate read,
   then stops — it does not plan or build. The consolidation planner gets a defined scope from it,
   not a remit to re-research the candidates.

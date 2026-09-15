@@ -17,6 +17,18 @@ folders. Old numbered folders (including `[NEW]-` prefixed ones) remain valid as
 provenance — leave them as they are. New plan folders from this version on follow the plain
 `docs/plans/<NN>-<slug>/` convention with no status encoded in the name.
 
+## Breaking change: `plan` is now `design`, and refinement is per phase
+
+`plan` is renamed `design` and writes `DESIGN.md` (the old `PLAN.md` and optional `DESIGN.md`
+merged). A design bounds the change — intent, problem, domain contracts, ownership — and cuts it
+into phases each closed by a provable outcome, with the phase count fixed at sign-off. `refine`
+now briefs one phase at a time against the code the previous phase left; `execute` runs one phase
+per orchestrator, verifies the outcome, records carried items, and holds or continues at the
+boundary. Review runs once, after the last phase. The folder path `docs/plans/<NN>-<slug>/` and the
+`Workflow-Plan:` marker are unchanged, and folders already carrying `PLAN.md` are still read.
+Skills are also rewritten to state outcomes and constraints rather than steps; see
+`workflow-tuning/principles.md` #1 and `docs/analysis/2026-09-08-workflow-vs-field.md` §7.
+
 ## Operating hypotheses
 
 The workflow design rests on these assumptions. Some are informally validated (noted where), none are proven in the cloud-pipeline context. We build to them now and evaluate later — a dedicated eval effort, out of scope for the current revisions, will test them. Each is falsifiable and names its validation route: **eval** (harness scenario runs, see `evals/`) or **observational** (harvested from real pipeline outcomes via workflow-tuning).
@@ -27,6 +39,8 @@ The workflow design rests on these assumptions. Some are informally validated (n
 4. **Status belongs to the tracker, not the repo.** Removing the repo backlog (folder-status taxonomy, roadmap sync) sheds structural-compliance load without losing recoverability, because durable artifacts carry intent and outcome while PRs carry status. *(Untested. Observational.)*
 5. **Orienting-why beats persuading-why.** Skills that state the failures they prevent help agents fill unspecified gaps; prose that argues the design's correctness costs context without changing behavior. *(Untested. Eval.)*
 6. **A cold reader keeps plans honest.** Plan quality holds only when a separate context must work from the artifacts alone — the executor locally, the downstream review stage in a pipeline. *(Untested. Observational.)*
+7. **Outcome-closed phases absorb drift more cheaply than up-front briefing.** Every closed plan record in `docs/plans/` shows late-phase discovery; refining one phase at a time against real code, with a provable outcome closing each phase, lands that discovery in refinement instead of in the build orchestrator, and a verified outcome gives backward signal to the design. *(Argued in `docs/analysis/2026-09-08-workflow-vs-field.md`; untested. Eval.)*
+8. **Cost is context integrated over turns.** Decomposition pays when saved reads exceed added cold starts — roughly past 40 to 75 turns for a cheap worker — and the controllable lever is context growth per turn. A fresh orchestrator per phase bounds the largest lifetime in the run. *(Modelled, not measured. Observational, via per-agent turn and context counts in `IMPLEMENTATION.md`.)*
 
 ### Variants worth testing
 
@@ -37,7 +51,9 @@ Beyond validating the hypotheses head-to-head, candidate variations to try when 
 - **Plan review shape**: single clean adversarial reviewer (current) vs a short sequential relay (iterate's harden pattern applied at plan stage) for ordinary plans.
 - **Remediation split**: iterate's split (straightforward fixes applied inline during review, briefs only for structural findings — now the core design) vs the all-briefs baseline (reviewer briefs everything, fixers and a fresh re-review handle all findings).
 - **QA authorship**: QA plan derived by the review stage from acceptance criteria (current design) vs authored by the plan stage upfront and merely executed downstream.
-- **Assumption-ledger salience**: ledger inline in PLAN.md vs a separate surfaced artifact at the checkpoint — does presentation change how often humans intervene, and to what benefit?
+- **Assumption-ledger salience**: ledger inline in DESIGN.md vs a separate surfaced artifact at the checkpoint — does presentation change how often humans intervene, and to what benefit?
+- **Refinement horizon**: one phase at a time (current design) vs all phases up front — how much of the up-front brief set is invalidated by later-phase discoveries, and what does re-dispatch cost?
+- **Phase verification tier**: cheap-tier outcome check per phase plus one terminal premium review (current design) vs premium review at every boundary.
 
 ## Skills
 
@@ -45,19 +61,21 @@ Two plugins. **Core** (`workflow`) is cloud-safe — no interactive gates that d
 local-filesystem dependencies — and is what a build/pipeline environment installs. **Lab**
 (`workflow-lab`) is local and/or interactive; the pipeline never requires it.
 
-The loop: **plan → refine → execute → review → close-out.** `refine` is skipped when the work is one
-bounded slice one worker can carry; everything else runs every time.
+The loop: **design → (refine → execute → verify → close) per phase → review → close-out.** A design
+fixes phases each closed by a provable outcome; each phase is refined against the code the previous
+phase left, built by a fresh orchestrator, and verified before the next is refined. `refine` is
+skipped for a one-unit phase.
 
 | Plugin | Skill | Description |
 |--------|-------|-------------|
-| `workflow` (core) | `plan` | Create and revise implementation plans; interactive or headless posture |
-| `workflow` (core) | `refine` | Decompose a plan into ordered executable units and write one complete brief per unit; bounce the plan back if its contracts are too weak to decompose |
-| `workflow` (core) | `execute` | Execute planned work packages, routing briefs verbatim to rightsized workers; review sized to terminal or pipeline posture |
-| `workflow` (core) | `comprehensive-review` | Independent review keyed to the plan's acceptance criteria; fixes straightforward findings in place, briefs structural ones |
-| `workflow` (core) | `close-out` | End a plan: collapse the whole folder into one record file at `docs/plans/<NN>-<slug>.md`, promote or drop `DESIGN.md`, delete the folder in one commit |
+| `workflow` (core) | `design` | Bound a change: verbatim intent, domain contracts, phases with provable outcomes; interactive or headless posture |
+| `workflow` (core) | `refine` | Decompose the next phase into units and write one complete brief per unit against the current code; bounce the design if a contract, boundary, or outcome is missing |
+| `workflow` (core) | `execute` | Build one phase: route briefs to rightsized workers, verify the outcome, record carried items, hold or continue; terminal review and close-out after the last phase |
+| `workflow` (core) | `comprehensive-review` | Independent review keyed to the design's phase outcomes; fixes mechanical findings in place, briefs structural ones |
+| `workflow` (core) | `close-out` | End a plan: collapse the folder into one record file at `docs/plans/<NN>-<slug>.md`, promote durable contracts to `docs/design/`, delete the folder in one commit |
 | `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
 | `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
-| `workflow-lab` | `iterate` | Branching plan/execute/review for goals with no fixed spec — build divergent candidates, judge, reconcile, extrapolate |
+| `workflow-lab` | `iterate` | Divergent candidates, judge, reconcile, extrapolate — for goals with no fixed spec, or for a design phase flagged approach-open |
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
 | `workflow-lab` | `workflow-tuning` | Improve the workflow itself — design principles, lessons from retros and merged-PR outcomes, evals |
 
@@ -139,7 +157,7 @@ actually loaded.
 | Installed by | `./install.sh` | `/plugin install workflow@workflow-plugin` |
 | Lives at | `~/.claude/skills/<skill>/` (or `.cursor/skills/workflow/`, `~/.cursor/plugins/local/workflow`) | `~/.claude/plugins/cache/workflow-plugin/<plugin>/<version>/` |
 | Source of truth | a copy made at install time | a git clone at `~/.claude/plugins/marketplaces/workflow-plugin`, pinned by `gitCommitSha` in `~/.claude/plugins/installed_plugins.json` |
-| Skills appear as | `plan`, `execute`, … | `workflow:plan`, `workflow:execute`, … |
+| Skills appear as | `design`, `execute`, … | `workflow:design`, `workflow:execute`, … |
 | Updates when | you re-run `./install.sh` | you run `/plugin update workflow@workflow-plugin` |
 
 Neither path notices that the other exists, and neither notices that this repo moved on.
@@ -203,7 +221,7 @@ Then install either or both plugins:
 /plugin install workflow-lab@workflow-plugin
 ```
 
-Skills become available as `workflow:plan`, `workflow:execute`, `workflow-lab:iterate`, etc.
+Skills become available as `workflow:design`, `workflow:execute`, `workflow-lab:iterate`, etc.
 
 ### Cursor
 
@@ -230,13 +248,12 @@ workflow-plugin/                    (repo root — the `workflow` core plugin)
 │   └── marketplace.json            (lists both plugins)
 ├── .cursor-plugin/plugin.json
 ├── skills/                         (core plugin's skills)
-│   ├── plan/
+│   ├── design/
 │   ├── refine/
 │   ├── execute/
 │   ├── comprehensive-review/
 │   ├── close-out/
-│   ├── post-build/
-│   └── post-build-{fixer,verifier,qa-planner,qa-driver}/
+│   └── post-build/                 (briefs/ for its workers)
 ├── docs/
 │   └── automation/                 (operator guides for external automation triggers)
 └── plugins/workflow-lab/           (lab plugin, its own manifests + skills/)

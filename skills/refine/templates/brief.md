@@ -1,56 +1,46 @@
-# Brief: <NN> — <unit name>
+# Brief: <phase>-<NN> — <unit name>
 
-Consumer: <the worker that will do this — implementation worker, fixer, reviewer, …>.
-Owned paths: `<path/glob>`, `<path/glob>`. Do not touch anything else.
-<Commit discipline: e.g. "Do not run git commit or push — leave changes in the working tree." or
-"Commit to the current branch when done evidence passes.">
-Depends on: <other unit(s), or "nothing — may start immediately">.
-Runs alongside: <other unit(s) that own disjoint paths, or "nothing">.
+Consumer: <the worker that will do this>.
+Owned paths: `<path>`, `<path>`. Touch nothing else.
+Commits: <"Leave changes in the working tree." | "Commit to the current branch when done evidence passes.">
+Depends on: <unit(s), or nothing>.
+Runs alongside: <unit(s) with disjoint paths, or nothing>.
+Budget: <N files to read, about N lines to change, N tool turns>. Past the budget, stop: write a handoff under this brief's name in `IMPLEMENTATION.md` (done, not done, what you learned), commit if this brief commits, and report `over budget`.
 
 ## Required reading, in order
 
-1. `<path>` — <what in it is binding, and which section>
-2. `<path>` — <what in it is binding>
-3. `<path>` — <what you are changing>
+1. `<path>` — <the section that is binding>
+2. `<path>` — <what you are changing>
+
+Read ranges and grep; do not read a whole file to find one section, do not re-read a file already in context, and truncate long tool output.
 
 ## Goal
 
-<One or two sentences, in the plan's own terms. What this unit is for, not how to do it.>
+<One or two sentences in the design's terms: what this unit is for, not how.>
 
 ## Contract
 
-<The contract this unit must satisfy, cited from PLAN.md / DESIGN.md / the code — quoted or
-referenced by section, not paraphrased into new words. Say explicitly which decisions are settled
-and not open for re-litigation.>
+<Cited from DESIGN.md or the code, by section or quotation. Say which decisions are settled.>
 
 ## Changes
 
-### <Area or file group>
-
-<What to add, remove, or restructure, at the level of decisions the worker should not have to
-re-derive. Not a diff, and not a list of edits — the decisions plus enough shape to act on them.>
-
-### <Area or file group>
-
-<…>
+<The decisions the worker should not have to re-derive, and no lower. Not a diff.>
 
 ### Keep untouched
 
-<Anything inside the owned paths that must survive unchanged, and why — the things a worker would
-otherwise reasonably tidy away.>
+<What inside the owned paths must survive, and why.>
 
 ## Done evidence
 
-- `<runnable check, e.g. a grep, a build, a test invocation>` → <expected result>
-- <observable statement that can be checked by reading the result>
+Identify or write the failing check before changing code. Report its output before and after.
+
+- `<runnable check>` → <expected result>
+- <observable statement>
 
 ## Report back
 
-A short summary: what you changed, anything you deviated from in this brief and why, and any
-contradiction you found between this brief and the contracts it cites. **Do not resolve
-contradictions silently — report them.**
+Under 1,500 tokens. Status: `done` | `done with concerns` | `blocked` | `needs context` | `over budget`. Then what changed, the check output before and after, any deviation from this brief and why, and any contradiction between this brief and the contracts it cites. Never resolve a contradiction silently.
 
-If you find a non-trivial bug outside what your own done evidence requires — real debugging,
-not a one-line fix, and not blocking your own contract — do not fix it here. Report it
-(symptom, location, root cause if you found one) and leave it; the orchestrator will dispatch
-a small, fresh agent to resolve it.
+A non-trivial bug outside your done evidence: report symptom, location, and root cause if found. Do not fix it here.
+
+Do not spawn agents beyond read-only research helpers. If this unit needs one, it was mis-sized: report `blocked` and say so.

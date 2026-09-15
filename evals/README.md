@@ -1,6 +1,6 @@
 # Evals
 
-An eval is a full end-to-end run of the workflow — plan then execute — on a fixture scenario. Evals measure whether a proposed change to the workflow produces meaningfully better outcomes than the baseline, compared against a known reference implementation.
+An eval is a full end-to-end run of the workflow — design, then refine and execute per phase — on a fixture scenario. Evals measure whether a proposed change to the workflow produces meaningfully better outcomes than the baseline, compared against a known reference implementation.
 
 Evals are not unit tests. There is no absolute pass/fail. The question is: **does a proposed change produce meaningfully better outcomes than the current baseline, and are those outcomes in the same ballpark as the known reference?**
 
@@ -33,7 +33,7 @@ scenarios/<name>/
 
 ## Task
 
-<description of the task to perform on this repo — what a plan session would receive as its request>
+<description of the task to perform on this repo — what a design session would receive as its request>
 
 ## Reference Notes
 
@@ -49,7 +49,7 @@ Contains artifacts or a description of the known-good solution. May be:
 
 ### `baseline/`
 
-Populated on the first eval run using the current workflow. Contains: `PLAN.md`, `IMPLEMENTATION.md`, and any other files produced during execution — the same artifacts as a `candidate/` folder. Once populated, baseline is **never overwritten** — it is the fixed comparison point for all future candidate runs on this scenario. If you are unsure whether a baseline exists, check whether `baseline/` is non-empty before proceeding.
+Populated on the first eval run using the current workflow. Contains: `DESIGN.md`, `IMPLEMENTATION.md`, and any other files produced during execution — the same artifacts as a `candidate/` folder. Once populated, baseline is **never overwritten** — it is the fixed comparison point for all future candidate runs on this scenario. If you are unsure whether a baseline exists, check whether `baseline/` is non-empty before proceeding.
 
 ## Results Format
 
@@ -58,7 +58,7 @@ Each eval run produces a folder at `results/<scenario>/<timestamp>/`. Use `YYYYM
 ```
 results/<scenario>/<timestamp>/
   candidate/             — all artifacts produced by the candidate workflow run
-    PLAN.md
+    DESIGN.md
     IMPLEMENTATION.md
     (any other files created during execution)
   cost-comparison.md     — objective cost metrics, baseline vs. candidate
@@ -114,7 +114,7 @@ results/<scenario>/<timestamp>/
 ## How to Run an Eval
 
 1. Clone the scenario repo at the specified commit into a temporary working directory.
-2. Run the full workflow on the task: `plan → execute`.
+2. Run the full workflow on the task: `design → refine/execute per phase`.
 3. Capture the cost metrics during the run (agents, model sizes, tool turns, context, wall time).
 4. Copy all output artifacts into `results/<scenario>/<timestamp>/candidate/`.
 5. If no baseline exists yet, copy the candidate artifacts into `scenarios/<name>/baseline/` — this becomes the baseline for future runs.

@@ -18,7 +18,7 @@ It is for improving the workflow itself, not for executing a single implementati
 - Prefer the minimum durable documentation set that helps agents reason beyond what the code already shows.
 - Keep plans concise and decision-oriented. Plans should explain intent, scope, implications, sequence, and observable success. They should not freeze speculative implementation detail.
 - Stable docs earn their keep when they act as concept maps and intent anchors. Free-text paraphrases of code usually do not.
-- Plan-scoped `DESIGN.md` is not mandatory. It is most valuable when it reifies target shape or cross-implementor contracts inside the scope of the change.
+- `DESIGN.md` bounds: domain boundaries, contracts, ownership, and phases closed by provable outcomes. Detail below the phase belongs in briefs, refined one phase at a time.
 - Phased execution is the default. End-to-end execution is an explicit cost/quality trade.
 - Review should be focused, right-sized, and usually capped at one external review loop before self-review and residual-risk reporting.
 
@@ -44,12 +44,7 @@ Default stack:
 - Stable design-intent docs: why the system or surface exists, what experience or outcome matters.
 - Plan docs: change-scoped intent, scope, implications, sequence, and acceptance criteria.
 
-Only add plan-scoped `DESIGN.md` when at least one of these is true:
-
-- the target shape is not obvious from stable docs and code
-- multiple implementors need a shared contract
-- architecture needs a scoped "to-be" shape inside the change boundary
-- acceptance depends on explicit ownership, interface, or behavior contracts
+State a contract in `DESIGN.md` only when it is not cheap to infer from stable docs and code, when more than one implementor needs it, or when a phase outcome depends on it. Everything else stays at bounding altitude.
 
 ## Improvement Priorities
 
@@ -58,13 +53,13 @@ Only add plan-scoped `DESIGN.md` when at least one of these is true:
 
 ## Eval Capability
 
-Use evals to validate that a proposed workflow change produces meaningfully better outcomes before committing to it. An eval is a full end-to-end run — plan then execute — on a fixture scenario, compared against a baseline (the current workflow's output on the same scenario) and a known reference implementation.
+Use evals to validate that a proposed workflow change produces meaningfully better outcomes before committing to it. An eval is a full end-to-end run — design, then refine and execute per phase — on a fixture scenario, compared against a baseline (the current workflow's output on the same scenario) and a known reference implementation.
 
 See `evals/README.md` for scenario format, results format, and full instructions.
 
 ### When to Run an Eval
 
-- Before merging a change to a skill prompt that affects plan, execution, or review behavior
+- Before merging a change to a skill prompt that affects design, refinement, execution, or review behavior
 - When a qualitative observation suggests a workflow change might help, but you want signal before committing
 - When comparing two candidate approaches (variant testing)
 
@@ -72,7 +67,7 @@ See `evals/README.md` for scenario format, results format, and full instructions
 
 1. Choose or create a scenario in `evals/scenarios/` — a real repo at a tagged commit with a known task and reference implementation.
 2. Clone the scenario repo at the specified commit into a temporary working directory.
-3. Run the full workflow on the task (plan + execute) using the candidate skill changes.
+3. Run the full workflow on the task (design, then refine and execute per phase) using the candidate skill changes.
 4. Capture cost metrics: agents spawned and model sizes, tool use turns per agent (and total), context estimate (or note if unavailable), wall time.
 5. Write results to `evals/results/<scenario>/<YYYYMMDD-HHMMSS>/` following the format in evals/README.md.
 6. If `evals/scenarios/<name>/baseline/` is empty, copy the candidate artifacts there — this establishes the baseline. Do not overwrite an existing baseline; it is fixed once set.

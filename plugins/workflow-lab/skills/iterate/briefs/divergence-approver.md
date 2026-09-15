@@ -5,7 +5,7 @@ a winner; that is the synthesis agent's job later.
 
 ## Read these
 
-1. The proposed plan: `<path to candidate PLAN.md (+ DESIGN.md if present)>`
+1. The proposed plan: `<path to candidate DESIGN.md>`
 2. The prior build(s) on branch(es) `<prior candidate branch name(s)>` — read the **actual
    code**, not a summary.
 3. The base state at `<base commit>` — what existed before this iteration.

@@ -5,9 +5,10 @@ a skill, adding a new one, or deciding whether a proposed rule is worth its toke
 
 This file holds **persuading-why** — the prose that argues a design is correct. It is deliberately
 not in any `SKILL.md`, because a skill body should hold only what changes an executing agent's
-behavior in an unspecified situation. The test, applied per sentence: *if the agent already trusted
-the rule, would this sentence change what it does?* Yes → it belongs in the skill. No → it belongs
-here.
+behavior in an unspecified situation. The test, applied per sentence: *could a capable agent have
+worked this out itself?* Yes → it does not belong in the skill. A skill states the outcome, the
+contracts other consumers depend on, and the constraints an agent could not infer. It does not
+narrate steps.
 
 Two neighbours, easily confused:
 
@@ -23,17 +24,20 @@ below names where it is instantiated and — where one exists — where it is de
 
 ---
 
-## 1. Orienting-why belongs in the skill; persuading-why belongs here
+## 1. Skills state outcomes; rationale lives here
 
-A skill that states the failures it prevents helps an agent fill gaps the prompt never anticipated:
-faced with an unspecified situation, it can reason from what the rule is for. A skill that argues its
-own correctness spends context on convincing a reader who has already complied.
+A skill body is what an executing agent must achieve and the constraints it could not infer: the
+artifact shapes other consumers read mechanically, the postures and their defaults, the rules that
+are non-obvious because they cut against an agent's instinct (bounce is success; delete at
+close-out; never resume a stalled worker). Everything an agent can work out for itself — how to
+read a file, in what order to do obvious things, why the rule is correct — costs context on every
+run and changes nothing.
 
-Instantiated by: the "This skill exists to prevent…" preamble every skill carries, and by the
-existence of this file.
+Instantiated by: every core `SKILL.md`'s "Outcome" section, and by the existence of this file.
 
-The failure this guards against is not verbosity — it is a skill body that reads as a defence of
-past decisions rather than as instructions.
+The failure this guards against is not verbosity in itself. It is a skill that hand-holds steps a
+capable agent would have taken anyway, or that reads as a defence of past decisions rather than as
+a statement of what done looks like.
 
 ## 2. Cold readers keep artifacts honest
 
@@ -41,14 +45,14 @@ An agent that has been reasoning about a change for a while stops seeing its own
 gate in this plugin is the same move from a different angle: force a context that did not author the
 thing to work from the artifact alone.
 
-Instantiated by: `plan`'s Challenge pass and its held checkpoint; the rule that `execute` reads the
-plan cold from committed artifacts even when `plan` just ran in the same session; `refine`'s
-executability verdict, which is a cold read by a context that must actually decompose the plan;
+Instantiated by: `design`'s adversarial pass and its held checkpoint; the rule that every stage
+reads the committed artifacts cold even when the previous stage just ran in the same session;
+`refine`'s verdict, which is a cold read by a context that must actually decompose the phase;
 `comprehensive-review`'s independence; the plan-sufficiency judgment, which is cold-reader pressure
 recorded as data.
 
-This is also why one-shot composition dispatches `plan` and `execute` as separate contexts rather
-than fusing them. A fused context would still produce both artifacts and would silently destroy the
+This is also why one-shot composition dispatches `design`, `refine`, and `execute` as separate
+contexts rather than fusing them. A fused context would still produce both artifacts and would silently destroy the
 pressure that makes them good.
 
 ## 3. Posture is declared, never inferred
@@ -57,7 +61,8 @@ Where a workflow's behavior depends on whether a human is reachable, or whether 
 exists, that fact is declared by the invoker — not sniffed from a TTY, an environment variable, or
 the shape of the change.
 
-Instantiated by: `plan`'s interactive/headless; `execute`'s terminal/pipeline review posture;
+Instantiated by: `design`'s interactive/headless; `execute`'s hold/continue boundary and its
+terminal/pipeline review posture;
 `close-out`'s terminal/pipeline placement; `iterate`'s rule that it always declares posture
 explicitly when dispatching a composed skill.
 
@@ -119,7 +124,7 @@ are different agents, and only the judge holds the tests.
 
 Instantiated by: `iterate`'s divergence bar (a licensed planner generates, a clean approver holds
 the three tests — and the split between `briefs/challenger-license.md` and
-`briefs/divergence-approver.md` *is* the split); `plan`'s Challenge pass; `post-build`'s rule that a
+`briefs/divergence-approver.md` *is* the split); `design`'s adversarial pass; `post-build`'s rule that a
 fresh verifier, never the reviewer and never the fixer, rules on a delegated remediation.
 
 Deliberately *not* applied where the loop cost exceeds the independence benefit:
@@ -138,7 +143,8 @@ One remediation cycle plus one fresh verification. One QA remediation cycle. One
 One relaunch of a dead worker. A fixed relay of hardening passes, never "review until clean".
 
 Instantiated by: `post-build` throughout; `iterate`'s harden relay and its cycle cap;
-`execute`'s rule against repeated external review loops.
+`execute`'s one escalated retry before a human; the refine/execute loop, bounded by the design's
+phase count.
 
 Unbounded loops burn budget on exactly the changes least likely to converge. A second failed cycle
 is strong evidence the problem is architectural or environmental — human territory. Bounded loops
@@ -152,8 +158,8 @@ Burning review, QA, and plan ceremony on a non-functional diff teaches the autom
 change is product risk and spends the budget that belonged to changes that can ship broken behavior.
 
 Instantiated by: `post-build`'s intent × surface × size classification and its absorb path;
-`execute`'s sizing ladder and its "delegation is a judgment call" framing; `refine`'s skip rule;
-`plan`'s rule that `DESIGN.md` is written only when it reifies something.
+`execute`'s cheapest-likely-worker rule; `refine`'s skip rule; `design`'s rule that a contract is
+stated only when it is not cheap to infer.
 
 Two disciplines make right-sizing safe rather than merely cheap. **Over-classify when unsure** — a
 docs majority must not hide a behavioral hunk. And **record the judgment**, so a skip is auditable
@@ -187,7 +193,7 @@ When more than one candidate answers "which plan folder is this?", the stage sto
 never picks by folder number, modification time, or lexical order.
 
 Instantiated by: `post-build`'s marker-first discovery with a single-candidate diff fallback;
-`comprehensive-review`'s "the marker is the only mechanical location mechanism"; `plan`'s rule that
+`comprehensive-review`'s "the marker is the only mechanical location mechanism"; `design`'s rule that
 `NN` is best-effort ordering and nothing may locate a folder by it.
 
 Numbers are not identity: two agents branching from the same base can independently pick the same
@@ -241,8 +247,8 @@ the obligation on every future reader to sift it.
 Where the next reader is a machine or a headless agent, the artifact's shape is a contract, not a
 style preference.
 
-Instantiated by: `plan`'s QA-drivable acceptance criteria (entry point → action → observable
-result), which is exactly what a computer-use QA agent needs to derive test steps without asking;
+Instantiated by: `design`'s phase outcomes (entry point → action → observable result), which is
+exactly what a computer-use QA agent needs to derive test steps without asking;
 `comprehensive-review`'s verdict enum, which a pipeline branches on without interpretation; the
 `Workflow-Plan:` marker; `post-build`'s final output schema.
 
@@ -255,9 +261,10 @@ prose beats structure, and imposing a schema is the same mistake in the other di
 Existing code is the most precise specification available. A challenger handed real code diverges
 meaningfully; one handed a prose summary diverges cosmetically.
 
-Instantiated by: `iterate`'s sequential candidates, each receiving prior builds as working code;
-its harden relay, where each pass receives its predecessors' findings; `close-out`'s reliance on
-the actual artifacts rather than the closing agent's memory of the run.
+Instantiated by: `refine` briefing one phase at a time against the code the previous phase left;
+`iterate`'s sequential candidates, each receiving prior builds as working code; its harden relay,
+where each pass receives its predecessors' findings; `close-out`'s reliance on the actual artifacts
+rather than the closing agent's memory of the run.
 
 This is also why losing branches are never deleted — they are the reified alternatives and the
 richest provenance the exercise produces.
@@ -300,7 +307,47 @@ written before anything existed measures the wrong thing.
 Instantiated by: `iterate`'s `OUTCOMES.md`, revised each cycle by the synthesis agent from what the
 builds revealed, with the yardstick written before the selection so the selection cannot bend it.
 
-Deliberately *not* applied to ordinary planned work, where acceptance criteria are written up front
-on purpose — the point of a plan is to fix the target before the build. `iterate` exists precisely
-for the cases where that is impossible; treating every change that way would be an excuse for
-unfalsifiable work.
+Deliberately *not* applied to ordinary designed work, where phase outcomes are written up front on
+purpose — the point of a design is to fix the target before the build. `iterate` exists for the
+cases where that is impossible. The middle case is a phase whose outcome is provable but whose
+approach is not settled: `design` flags it approach-open and `iterate` runs it with that outcome as
+a fixed yardstick, so the divergence gate and synthesis apply while the criteria-discovery machinery
+does not.
+
+## 17. Phases close on provable outcomes, and the design fixes how many there are
+
+A phase is defined by what becomes true, not by what changes. A phase that closes on a verifiable
+outcome tests the design's contract for that outcome and the refinement that decomposed it; when the
+outcome cannot be made true, the failure names something specific. A phase defined by surface can
+complete without proving anything, and its problems surface two phases later as unplanned work.
+
+Instantiated by: `design`'s phase rule (an outcome that cannot be stated as entry point → action →
+observable result, or as an observable statement, is not a phase); `execute`'s cheap-tier
+verification at every boundary; `refine` briefing only the next phase, against the code as it
+stands; the Carried section of a phase record, whose one consumer is the next refinement.
+
+Three consequences. The loop is bounded by construction: phases are enumerated at sign-off and a run
+that wants more has found a design problem. Surfaces still define units one level down, because
+"who may edit what" is a different question from "when is this done". And carried items are not a
+backlog: they are work not yet refined, ordered, with no status column and one consumer — a
+standalone backlog file would be principle 8's shadow tracker in a new costume.
+
+The evidence is in `docs/plans/`: every closed record carries a Deviations section, and the shape is
+consistently "discovered while building, late". Under refine-all-then-execute that drift lands in
+the execute orchestrator, the context `refine` exists to keep decomposition out of.
+
+## 18. Cost is context integrated over turns
+
+An agent's bill is roughly the sum over its turns of the context it carries, so it grows with the
+square of its lifetime. Decomposition pays when the reads it saves exceed the cold starts it adds —
+past roughly 40 to 75 turns for a cheap worker — and the controllable lever is context growth per
+turn, not the turn count alone.
+
+Instantiated by: one orchestrator per phase, which bounds the longest lifetime in the run; briefs
+that carry a budget, a reading discipline, and a capped report; the rule that an orchestrator never
+reads beyond a worker's report; premium review once at the end rather than at every boundary; per
+agent turn and context counts recorded in `IMPLEMENTATION.md` so the band can be measured.
+
+The argument is strongest for executors whose cache-read price is a small fraction of input and
+weakest at the premium tier, which is why premium models do design and the terminal review and
+cheap ones do the volume. See `docs/analysis/2026-09-08-workflow-vs-field.md` for the model.
