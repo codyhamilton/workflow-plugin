@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "purpose": "Heuristic token model for Cursor sessions when usage is absent from JSONL",
+    "method": "Simulate per-assistant-line API calls; cache_read accumulates; reconcile via cost_window.py",
+    "notes": [
+      "fixed_context is harness overhead (system, tools, rules, skills, MCP, subagent defs)",
+      "tool_delta are expected tokens added per tool_use (results are not in Cursor JSONL)",
+      "cache_miss_context triggers a full reload (fresh_in = context, cache_read = 0)",
+      "Override per repo with tools/transcript/estimate.json or <project>/estimate.json"
+    ]
+  },
+  "fixed_context": 16668,
+  "chars_per_token": 4,
+  "assistant_text_overhead": 200,
+  "cache_miss_every_queries": 3,
+  "cache_miss_min_context": 50000,
+  "tool_delta": {
+    "read": 9000,
+    "shell": 4500,
+    "grep": 4000,
+    "glob": 1500,
+    "write": 6000,
+    "edit": 3500,
+    "spawn": 2500,
+    "web_search": 3000,
+    "web_fetch": 5000,
+    "todo": 500,
+    "ask": 800,
+    "switch_mode": 400
+  },
+  "default_tool_delta": 3500,
+  "heavy_query_tools": 30,
+  "heavy_query_multiplier": 2.5,
+  "default_model": "composer-2.5"
+}

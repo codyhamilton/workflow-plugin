@@ -235,7 +235,7 @@ passed verbatim, before any gated dispatch, would have prevented the entire cycl
 
 ### 21. Cache read dominates cost; output barely moves the bill
 
-*Source: same session, reconstructed from published rates via `tools/cursor/cost_window.py --pricing`.*
+*Source: same session, reconstructed from published rates via `tools/transcript/cost_window.py --pricing`.*
 
 Reconstructed spend for the ~82M-token run: ~$29.50, split as:
 
