@@ -73,6 +73,15 @@ Interactive posture only. Headless runs carry intent, the assumption ledger, and
 - Added the driver's MCP transport: same resolve/dispatch/report primitive as the CLI, exposed as `status`/`trigger_phase`/`poll` to a calling agent session, defaulting to one phase per call rather than the CLI's run-to-completion default. Added as Phase 4, approach `open` — the primitive is Phase 2/3's provider layer, unchanged; what to do about an orphaned dispatch on host death is not yet settled.
 - Recorded the MCP host-lifetime risk in Open Questions rather than solving it: the same unresolved cold-read-on-death gap as a dropped subagent, not a new failure mode, and out of scope for this pass per the user's own framing ("we'll deal with this separately").
 
+### Turn 7
+
+**User responded:** Confirmed briefs stay until `close-out`. Refocused on Phase 1 — the primary, non-driver workflow. Distinguished three shapes: human-driven design then execute (no constraint, the human is the dispatch boundary); unattended design+execute in one session on a harness with subagent nesting (parent → executor → refine + briefs, works); and the same on a harness limited to one level of nesting, where the parent would have to call refine and briefs directly per phase to make up for the missing layer — naive-instructed but still one context accumulating every phase's work. Concluded that shape should not use naive coordination at all and should go to the driver MCP instead, since it bypasses the layering problem entirely. Asked to note this in the design, and to note that the driver should eventually run external to its caller rather than co-located.
+
+**Agent decisions:**
+
+- Named the nesting requirement precisely: naive coordination needs two levels of subagent dispatch (coordinator → `execute`, `execute` → `refine`/workers), not "some nesting." A one-level harness still runs a single `execute` invocation fine but can't also wrap it in a coordinator; flattening the coordinator into the top context to compensate just moves the accumulating-orchestrator problem up one frame rather than avoiding it. Added as Non-goal and Decision, with Phase 1's outcome and a new Provenance Note restating why the threshold is two, not one.
+- Recorded, as direction rather than a built phase, that the driver should eventually run on a host external to its caller: today the CLI runs on the invoker's machine (fine, the terminal outlives the run) and the MCP server's phase agent runs on the calling agent's own container (not fine — the same container-lifetime coupling that motivated one-phase-per-call). Added to Decisions, Open Questions, and a Provenance Note; explicitly not scoped to a phase, pending the container-lifetime research already deferred.
+
 ## Agent Decisions
 
 - **Driver never commits**: every repo write is a phase agent's. Rationale: the driver holds no model context and should hold no authority over artifacts; its state is stdout and an exit code, which keeps invariant 3 trivially true.
