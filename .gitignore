@@ -1,2 +1,2 @@
 # Installed by workflow-plugin install.sh in cloud agent / headless environments.
-.cursor/skills/workflow/
+__pycache__/
