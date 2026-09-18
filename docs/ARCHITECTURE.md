@@ -28,10 +28,12 @@ A skill directory holds only what an agent loads while working: `SKILL.md`, `tem
 ```
 design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──▶ review ──▶ close-out
                      │ refine → execute → verify → close │
-                     └───────── hold | continue ─────────┘
+                     └─── stop + report (Workflow-Phase:) ┘
                                                    terminal:  comprehensive-review in-run, close-out, PR
                                                    pipeline:  PR → post-build → merge → close-out
 ```
+
+`execute` always stops at its closing commit and reports; whether the next phase runs is a property of the invocation (a bare call, a coordinator, or the driver), never a flag read back from `execute` — see [plans/06-phase-driver/DESIGN.md](plans/06-phase-driver/DESIGN.md).
 
 | Skill | Owns | Writes |
 |---|---|---|
@@ -52,9 +54,9 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 
 **execute → refine → execute**: `execute` builds the next phase without a Units list by dispatching `refine` as a separate context, then routing its briefs. A one-unit phase is briefed inline by `execute`. The handoff into the next phase is `IMPLEMENTATION.md`'s closed phase record, including its Carried section, which the next `refine` must place or bounce.
 
-**phase boundary**: an optional stop (posture hold/continue, declared), a cheap-tier verification of the phase outcome, and the refinement bound for the next phase. A fresh orchestrator per phase. Termination is the design's phase count; more phases than signed off is a design change.
+**phase boundary**: `execute` always stops at its closing commit — the one carrying the git trailer `Workflow-Phase: <slug>:<n>` — and reports; it never dispatches its own successor. Whether another phase runs is a property of the invocation (a bare call, a coordinator instructed to run to completion, or the driver), never a posture declared to or read from `execute`. The open phase resolves cold, from `<default>..HEAD`'s trailers against `DESIGN.md`'s phase count: the lowest phase with no trailer; **wrap-up** when every phase has one and there is no `Workflow-Phase: <slug>:done`; **done** once that trailer lands too. A cheap-tier verification of the phase outcome gates the closing commit. A fresh orchestrator per phase. Termination is the design's phase count; more phases than signed off is a design change.
 
-**approach-open phases**: `execute` holds at the boundary unless the invoker declared how they run. `iterate` (lab) is the intended method, with the phase outcome as a fixed yardstick; core never depends on it.
+**approach-open phases**: `execute` reports `unsuccessful` and stops unless the invoker declared how they run. `iterate` (lab) is the intended method, with the phase outcome as a fixed yardstick; core never depends on it.
 
 **cold read**: every stage reads the committed artifacts, never the previous stage's context, even in the same session.
 
@@ -97,9 +99,10 @@ Declared by the invoker, never inferred. Every posture has a safe default.
 | Skill | Postures | Default |
 |---|---|---|
 | `design` | interactive (checkpoint held) / headless (assumption ledger) | interactive |
-| `execute` boundary | hold / continue | hold |
 | `execute` review | terminal / pipeline | terminal |
 | `close-out` | terminal (before the PR) / pipeline (after merge) | follows `execute` |
+
+`execute`'s phase boundary is not in this table: whether a next phase runs is a property of the invocation, not a declared posture (see The Loop, above).
 
 ## Key Invariants
 

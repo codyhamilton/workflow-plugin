@@ -1,6 +1,6 @@
 ---
 name: execute
-description: Build one phase of a signed-off design from `docs/plans/` — refine it if needed, route briefs to rightsized workers, verify the phase outcome, record it, then hold at the boundary or continue. Runs terminal review and close-out after the last phase. Use when the user wants designed work built.
+description: Build one phase of a signed-off design from `docs/plans/` — refine it if needed, route briefs to rightsized workers, verify the phase outcome, record it with its closing trailer, then stop and report. Runs terminal review and close-out after the last phase. Use when the user wants designed work built.
 ---
 
 # Execute
@@ -20,24 +20,29 @@ Read `DESIGN.md`, `IMPLEMENTATION.md`, and the briefs cold from the committed ar
 - The phase outcome in `DESIGN.md` has been verified against real behaviour by a cheap-tier check: the outcome's own entry point → action → result or observable statement, plus each unit's done evidence. Reports are not verification.
 - The phase record in `IMPLEMENTATION.md` closes with the verification result and a **Carried** section: deferred bugs, non-blocking findings, and brief amendments the next refinement must place. Ordered, no status column, "None" when empty.
 - Everything is committed. The branch resumes from `DESIGN.md` plus `IMPLEMENTATION.md` alone: units with a recorded outcome are done, the rest are the remaining work.
+- The commit that closes the phase record carries the git trailer `Workflow-Phase: <slug>:<n>` (the plan folder's slug, `<n>` the phase's 1-based index in `DESIGN.md`) — the sole durable signal that phase `<n>` is closed. It appears on no other commit. A re-dispatched agent that finds the record closed and verified but no trailer closes with a trailer-only commit.
 
 ## Boundary
 
-Declared by the invoker; default **hold**.
+`execute` always stops at its closing commit and reports; it never dispatches a successor itself. Whether another phase runs next is not a posture declared to `execute` — it is a property of what invoked it:
 
-- **Hold**: stop after the phase record. Report the outcome, the carried items, and the next phase.
-- **Continue**: dispatch a fresh orchestrator for the next phase. Never carry a second phase in this context.
+- A bare call stops and reports; nothing dispatches a successor.
+- A **coordinator** — a context that has done no phase work, instructed to run the design through completion — dispatches `execute` for each phase in series as a subagent, holding only each report, and repeats on `closed`; on `incomplete` (after one re-dispatch) or `unsuccessful` it stops and relays the report, unresolved. This needs two levels of subagent nesting: one for the coordinator to dispatch `execute`, one for `execute`'s own `refine`/worker dispatch inside the phase. A harness with only one level still runs a single `execute` invocation fine, but cannot also wrap it in a coordinator — an unattended, multi-phase run there is out of scope for this path; use the driver (`tools/driver/`) instead.
 
-A phase flagged **approach: open** is not built by this skill's default path. Hold at its boundary and report, unless the invoker declared how open phases run (for example `iterate` with the phase outcome as the fixed yardstick).
+The report is the run's final output: one fenced block tagged `workflow-report` holding a JSON object with `status` (`closed | incomplete | unsuccessful`), `phase` (`<n> | done`), and `reason` (free text, required for anything but `closed`). `closed` means the closing commit (or the done commit, after the last phase) exists on the branch; a run that closed and then stopped for any other reason still reports `closed`.
+
+A phase flagged **approach: open** is not built by this skill's default path. Report `unsuccessful` with the reason, unless the invoker declared how open phases run (for example `iterate` with the phase outcome as the fixed yardstick).
 
 ## After the last phase
 
-Review posture is declared by the invoker; default **terminal**.
+Invoked once every phase is closed — resolvable cold from `Workflow-Phase:` trailers on `<default>..HEAD` against `DESIGN.md`'s phase count: the run is in wrap-up when every phase has a trailer and there is no `Workflow-Phase: <slug>:done` yet. Review posture is declared by the invoker; default **terminal**.
 
 - **Terminal**: one independent review via `comprehensive-review` against the whole design, written to `REVIEW.md`. A `blocker` or `high` finding that is in scope and not architectural is resolved by a clean agent: one pass on the allocated model, then one retry on the next model tier, then stop for a human. Then `close-out`, as the last commit before the PR.
 - **Pipeline**: pre-flight self-verification only — it builds, the phase outcomes hold, the folder is complete — recorded in `IMPLEMENTATION.md`. No `REVIEW.md`; close-out happens after merge.
 
 "Skip review" is a pipeline declaration, not licence to skip verification.
+
+The commit that ends this path — terminal's close-out commit, pipeline's pre-flight record commit — carries `Workflow-Phase: <slug>:done`, the same mechanism as a phase closing. Without it, a run that dies between the last phase and the PR is indistinguishable from one that finished cleanly.
 
 Then push and open or update the PR with `Workflow-Plan: docs/plans/<NN>-<slug>/` as the first line of the body. Completion is the commits plus that marker.
 

@@ -160,7 +160,8 @@ repairs.**
 ## Phase mode: a design phase flagged approach-open
 
 `design` may flag a phase **approach: open** — its outcome is provable but no approach is settled.
-`execute` holds at that phase's boundary; the invoker runs it under this skill with a fixed scope:
+`execute` reports `unsuccessful` for it by default; the invoker declares this skill as how it runs,
+with a fixed scope:
 
 - The phase outcome from `DESIGN.md` is the yardstick, fixed. `OUTCOMES.md` is not written or
   revised; synthesis (step 4) selects the approach that best makes the phase outcome true.
@@ -255,10 +256,11 @@ Each candidate keeps its own `design`/`execute` artifacts (`DESIGN.md`, `IMPLEME
   fork" is a valid, expected answer). A rejected plan is harvested, not built.
 - Posture is always declared explicitly when dispatching `design` or `execute`, never left to default
   inference: `design` subagents run headless (iterate's gates, not design's checkpoint, own user
-  interaction); `execute` subagents run boundary posture **continue** (a candidate is built through
-  all its phases) and terminal review posture for candidate builds (steps 2–3), pipeline review
-  posture for the consolidation capture and refine builds (steps 5–6), where harden is the
-  downstream review stage.
+  interaction); a candidate is built through all its phases by this skill acting as `execute`'s
+  coordinator — dispatching `execute` per phase in series and repeating on `closed`, the same
+  naive-coordination shape `execute`'s own boundary describes — with terminal review posture for
+  candidate builds (steps 2–3), pipeline review posture for the consolidation capture and refine
+  builds (steps 5–6), where harden is the downstream review stage.
 - The synthesis agent reconceives priorities, selects, and harvests in one cross-candidate read,
   then stops — it does not plan or build. The consolidation planner gets a defined scope from it,
   not a remit to re-research the candidates.

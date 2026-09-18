@@ -23,8 +23,8 @@ provenance — leave them as they are. New plan folders from this version on fol
 merged). A design bounds the change — intent, problem, domain contracts, ownership — and cuts it
 into phases each closed by a provable outcome, with the phase count fixed at sign-off. `refine`
 now briefs one phase at a time against the code the previous phase left; `execute` runs one phase
-per orchestrator, verifies the outcome, records carried items, and holds or continues at the
-boundary. Review runs once, after the last phase. The folder path `docs/plans/<NN>-<slug>/` and the
+per orchestrator, verifies the outcome, records carried items with the closing `Workflow-Phase:`
+trailer, then always stops and reports. Review runs once, after the last phase. The folder path `docs/plans/<NN>-<slug>/` and the
 `Workflow-Plan:` marker are unchanged, and folders already carrying `PLAN.md` are still read.
 Skills are also rewritten to state outcomes and constraints rather than steps; see
 `workflow-tuning/principles.md` #1 and `docs/analysis/2026-09-08-workflow-vs-field.md` §7.
@@ -70,7 +70,7 @@ skipped for a one-unit phase.
 |--------|-------|-------------|
 | `workflow` (core) | `design` | Bound a change: verbatim intent, domain contracts, phases with provable outcomes; interactive or headless posture |
 | `workflow` (core) | `refine` | Decompose the next phase into units and write one complete brief per unit against the current code; bounce the design if a contract, boundary, or outcome is missing |
-| `workflow` (core) | `execute` | Build one phase: route briefs to rightsized workers, verify the outcome, record carried items, hold or continue; terminal review and close-out after the last phase |
+| `workflow` (core) | `execute` | Build one phase: route briefs to rightsized workers, verify the outcome, record carried items and close with a trailer, then stop and report; terminal review and close-out after the last phase |
 | `workflow` (core) | `comprehensive-review` | Independent review keyed to the design's phase outcomes; fixes mechanical findings in place, briefs structural ones |
 | `workflow` (core) | `close-out` | End a plan: collapse the folder into one record file at `docs/plans/<NN>-<slug>.md`, promote durable contracts to `docs/design/`, delete the folder in one commit |
 | `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |

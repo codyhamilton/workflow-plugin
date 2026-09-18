@@ -61,10 +61,15 @@ Where a workflow's behavior depends on whether a human is reachable, or whether 
 exists, that fact is declared by the invoker — not sniffed from a TTY, an environment variable, or
 the shape of the change.
 
-Instantiated by: `design`'s interactive/headless; `execute`'s hold/continue boundary and its
-terminal/pipeline review posture;
+Instantiated by: `design`'s interactive/headless; `execute`'s terminal/pipeline review posture;
 `close-out`'s terminal/pipeline placement; `iterate`'s rule that it always declares posture
 explicitly when dispatching a composed skill.
+
+Deliberately *not* applied to whether a next phase runs after one closes: `execute` always stops at
+its closing commit and reports, and never reads or declares a boundary posture. That is a property of
+the invocation — a bare call, a coordinator instructed to run to completion, or the driver's CLI vs.
+MCP front end — not a flag with a default to get wrong. See
+`docs/plans/06-phase-driver/DESIGN.md`.
 
 Inference fails in both directions and fails silently. A misdetected environment either skips a
 checkpoint a human actually wanted or stalls a headless run waiting for someone who was never there.
@@ -174,7 +179,13 @@ is no status file, no folder-name taxonomy, no schedule doc, no completion marke
 
 Instantiated by: the plan-folder convention; the absence of `STATUS.md` and `ROADMAP.md`;
 `close-out`'s rule that a closed plan is not *marked* closed — it is simply a file instead of a
-folder.
+folder; the PR body's `Workflow-Plan:` marker and the commit trailer `Workflow-Phase:` that closes a
+phase, each a mechanical locator on an object that cannot be edited after the fact — a PR body line,
+a commit — rather than a status field in a mutable artifact. That distinction is what keeps a
+trailer off the "completion marker" this principle refuses: a marker that can only be added once and
+never revised cannot drift from what it names, which is exactly what a status field can't promise.
+The trailer is the second marker in this class; treat the precedent as settled rather than
+relitigating it per skill.
 
 The removed system (an open-program folder prefix, numeric renumbering ceremony, a parent-program
 hierarchy, a canonical schedule file) was a shadow work tracker built for a repo-as-backlog mental
