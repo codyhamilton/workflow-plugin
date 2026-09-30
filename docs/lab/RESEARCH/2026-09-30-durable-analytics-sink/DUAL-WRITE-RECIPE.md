@@ -1,6 +1,6 @@
 # Dual-write recipe (lab / opt-in)
 
-**Not wired into default hooks or driver on master.** Copy pattern from [`proofs/dual_write_sink.py`](proofs/dual_write_sink.py) when implementing product wiring behind a proposal.
+**Not wired into default hooks or driver on master.** Copy pattern from [`proofs/dual_write_sink.py`](proofs/dual_write_sink.py) when implementing the resolved proposal [`../../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../../PROPOSALS/2026-09-30-durable-analytics-sink.md).
 
 ## Behaviour
 

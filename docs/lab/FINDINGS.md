@@ -220,6 +220,19 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-09-30 — Durable analytics sink white paper (resolved)
+
+### Observation (high)
+
+- Proposal [`PROPOSALS/2026-09-30-durable-analytics-sink.md`](PROPOSALS/2026-09-30-durable-analytics-sink.md) is `status: resolved`. Recommendations accepted pending product wiring. Default hooks, driver, `assert_phase`, Jev probes, and `classify.py` are unchanged. Remaining work is an opt-in dual-write helper shared by assert, Jev, and the driver. Collector deployment is out-of-repo ops.
+- Locked sink: always local JSONL on `.run-record.jsonl`, `.assert-log.jsonl`, and `.jev-signal-log.jsonl` (legacy row shape). Optional `WORKFLOW_ANALYTICS_URL` POST of envelope v1, optional bearer `WORKFLOW_ANALYTICS_TOKEN`. Remote failure leaves exit codes unchanged (`post_remote` does not raise).
+- Envelope contract: [`RESEARCH/2026-09-30-durable-analytics-sink/EVENT-SCHEMA.md`](RESEARCH/2026-09-30-durable-analytics-sink/EVENT-SCHEMA.md). Lab helper [`proofs/dual_write_sink.py`](RESEARCH/2026-09-30-durable-analytics-sink/proofs/dual_write_sink.py) stays guidance until implementation imports it. Git and PR comments stay low-rate checkpoints. Object storage sits behind the collector URL, one emitter path. Classify log stays out of the envelope.
+- **Cloud egress (closed):** [`proofs/validated/egress_cloud_result.json`](RESEARCH/2026-09-30-durable-analytics-sink/proofs/validated/egress_cloud_result.json) on master `1bff769` (PR #27) — `ok: true`, HTTP 200, `https://httpbin.org/post`, `host_kind: cloud` / `cursor-cloud`. Environment `3a472955-b113-11f1-a3d8-362438fd9788` has `egress.restricted: false` (research run and this resolution run).
+- **Proofs re-run (this resolution):** `./docs/lab/RESEARCH/2026-09-30-durable-analytics-sink/proofs/run_proofs.sh` exit 0. Unittest 4/4. Mock collector `http:204`. HTTPS egress `ok: true`, HTTP 200, `host_kind: cloud`. Checked-in `proofs/validated/` left as the PR #27 capture.
+- `assert_phase --deterministic` stays the kill line. Soft signals stay advisory. No new skill.
+
+---
+
 ## Template for future entries
 
 ```markdown

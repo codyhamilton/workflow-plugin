@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-30  
 **Slug:** `durable-analytics-sink`  
-**Status:** research closed (lab); no default hook/driver wiring
+**Status:** research closed; white paper [`../../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../../PROPOSALS/2026-09-30-durable-analytics-sink.md) is `status: resolved`; no default hook/driver wiring
 
 ## Problem
 
@@ -30,8 +30,8 @@ What **sink** and **envelope** should lab guidance recommend so bots and hooks c
 
 ## Non-goals
 
-- Product wiring into `install.sh`, default Claude hooks, or `run.py` / `assert_phase.py` (implementation follows a future proposal).
-- Full Grok white paper — see [`GROK-WHITEPAPER-STUB.md`](GROK-WHITEPAPER-STUB.md).
+- Product wiring into `install.sh`, default Claude hooks, or `run.py` / `assert_phase.py` (implementation of the resolved proposal, not more research).
+- A second copy of the white paper in this folder — see [`GROK-WHITEPAPER-STUB.md`](GROK-WHITEPAPER-STUB.md).
 
 ## Constraints (from Cody + Workflow System Manager)
 

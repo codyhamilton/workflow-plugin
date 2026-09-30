@@ -4,7 +4,7 @@ Confidence: **high** where backed by in-repo paths or proofs run on this branch;
 
 ## Recommendation (lab default guidance)
 
-**Dual-write:** keep today's **local gitignored JSONL** per family, plus optional **`WORKFLOW_ANALYTICS_URL` HTTP POST** of envelope v1 (`EVENT-SCHEMA.md`). Remote failures must **not** change hook or driver exit codes. Do **not** wire into default hooks/driver until a `PROPOSALS/` doc is accepted.
+**Dual-write:** keep today's **local gitignored JSONL** per family, plus optional **`WORKFLOW_ANALYTICS_URL` HTTP POST** of envelope v1 (`EVENT-SCHEMA.md`). Remote failures must **not** change hook or driver exit codes. The proposal is [`../../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../../PROPOSALS/2026-09-30-durable-analytics-sink.md) (`status: resolved`). Default hooks and the driver stay unwired until the implementation task imports the helper.
 
 **Default remote pattern:** minimal append-only HTTPS collector (B in `SINK-CANDIDATES.md`). Object-storage direct upload is deferred to the collector backend.
 
@@ -74,4 +74,4 @@ Teams with **restricted egress** must allow-list the collector origin; there is 
 
 ## White paper
 
-Grok-owned rewrite of `PROPOSALS/` — see [`GROK-WHITEPAPER-STUB.md`](GROK-WHITEPAPER-STUB.md). This pack does not add a proposal file.
+Resolved: [`../../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../../PROPOSALS/2026-09-30-durable-analytics-sink.md) (`status: resolved` — recommendations accepted pending product wiring). Pointer: [`GROK-WHITEPAPER-STUB.md`](GROK-WHITEPAPER-STUB.md). This pack does not duplicate the proposal.
