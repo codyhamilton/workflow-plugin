@@ -1,0 +1,6 @@
+{
+  "$comment": "Lab example — not installed by workflow-plugin install.sh",
+  "plugin": [
+    "file://.opencode/plugin/workflow-signals.ts"
+  ]
+}

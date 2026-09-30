@@ -198,6 +198,17 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-09-30 — OpenCode hooks plugin (research pack)
+
+### Observation (high)
+
+- Research pack [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md) closes OpenCode plugin API inventory, Claude/Cursor→OpenCode hook map (gaps explicit), analytics dual-write interaction, and packaging recommendation (**separate npm plugin**; orchestrate ≠ `tools/driver/` phase-runner).
+- **PostToolBatch gap:** OpenCode exposes per-tool `tool.execute.after` + `event` bus (`session.compacted`, `session.idle`, `message.updated`) — no Claude `PostToolBatch` stdin. Lab stub aggregates tools per model step and reuses Jev pack `post_tool_batch_signal` + `gate_thresholds` (turn **76** `band_exit` unchanged).
+- **Proofs:** `./docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/run_proofs.sh` — unittest 4/4; optional `WORKFLOW_ANALYTICS_URL` POST skipped when unset (`host_kind: opencode` when `WORKFLOW_INSTALL_MODE=opencode`).
+- **No default product wiring** — TS sketch under `proofs/plugin_sketch.ts` only; soft signals advisory; `assert_phase --deterministic` kill line unchanged.
+
+---
+
 ## 2026-09-30 — Durable analytics sink (research pack)
 
 ### Observation (high)
