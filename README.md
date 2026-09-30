@@ -217,8 +217,8 @@ still resolves is worse than no copy at all.
 
 OpenCode can run the same **workflow skills** as Claude Code and Cursor, but the harness differs:
 there is **no** OpenCode driver provider in `tools/driver/` yet, **no** Claude `SessionStart` hook,
-and **no** live `PostToolBatch` signal path (that integration is Claude Code today; OpenCode only
-has per-tool execute hooks unless you add a custom plugin). Unattended multi-phase loops remain
+and **no** live `PostToolBatch` signal path on a default install (Claude Code uses the command hook;
+OpenCode has per-tool execute hooks only until you register the optional signals plugin). Unattended multi-phase loops remain
 **Claude Code**, **Cursor cloud + driver**, or a human/coordinator dispatching `execute` per phase.
 
 **Skills (preferred):** symlink each skill directory from your checkout into OpenCode's config tree so
@@ -246,12 +246,29 @@ setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` vi
 | Agent definitions | OpenCode agent personas / config | ≠ Claude agent markdown files, ≠ Cursor plugin agents under `.cursor-plugin/` |
 
 **Assertions and cheap signals:** Jev-style soft signals are **advisory** where wired (Claude/Cursor).
-**`assert_phase --deterministic`** remains the hard kill line for phase boundaries. OpenCode soft
-signals are a separate npm plugin, still unwired: [`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
-Until that package is installed, the lab check is
-`docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/run_proofs.sh`
-(buffer `tool.execute.after`, flush once per step, shared gate). There is no native `PostToolBatch`,
-no `SubagentStop` / `Stop` parity, and Cursor Cloud still logs through the driver JSONL path.
+**`assert_phase --deterministic`** remains the hard kill line for phase boundaries.
+
+**OpenCode soft signals (optional plugin):** installable in-repo package
+[`packages/opencode-workflow-hooks/`](packages/opencode-workflow-hooks/) (`@codyhamilton/opencode-workflow-hooks`).
+It buffers `tool.execute.after`, flushes on `message.updated` / `session.idle`, and appends
+`tools/driver/.jev-signal-log.jsonl` via the shared Jev gate (never blocks the agent). Design:
+[`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
+
+Add to `opencode.json` (restart OpenCode):
+
+```json
+{
+  "plugin": [
+    "file://packages/opencode-workflow-hooks/src/index.ts"
+  ]
+}
+```
+
+Use an absolute `file://` URL if the project root is not the workflow-plugin checkout. Full steps:
+[`packages/opencode-workflow-hooks/README.md`](packages/opencode-workflow-hooks/README.md). Lab proofs:
+`docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/run_proofs.sh`.
+
+There is no native `PostToolBatch`, no `SubagentStop` / `Stop` parity, and Cursor Cloud still logs through the driver JSONL path.
 
 **DeepSeek Flash (review gate, guidance only):** Flash is **encouraged** to **execute briefs / phase units** when you need
 to ration orchestrator capacity (OpenCode map or equivalent). Sign-off rules only — see
@@ -293,6 +310,10 @@ done
 ```
 
 Or run `./install.sh --opencode-skills` from the checkout.
+
+**Soft signals plugin (optional):** register
+[`packages/opencode-workflow-hooks`](packages/opencode-workflow-hooks/) in `opencode.json` — see
+[`packages/opencode-workflow-hooks/README.md`](packages/opencode-workflow-hooks/README.md).
 
 Skills are available immediately. For marketplace-style install (so colleagues can
 `/plugin install workflow@workflow-plugin`), register this repo in

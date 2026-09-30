@@ -1,0 +1,12 @@
+{
+  "$comment": "Mirror of gate_thresholds.py — source of truth remains Python; regenerate when thresholds change.",
+  "ideal_turns": { "lo": 50, "hi": 75 },
+  "band_exit_turns": 76,
+  "handoff_signal_turns": 85,
+  "escalate_turns": 100,
+  "peak_ctx_warn": 125000,
+  "peak_ctx_jev": 128000,
+  "peak_ctx_escalate": 130000,
+  "jsonl_bytes_warn": 3145728,
+  "jsonl_bytes_escalate": 5242880
+}

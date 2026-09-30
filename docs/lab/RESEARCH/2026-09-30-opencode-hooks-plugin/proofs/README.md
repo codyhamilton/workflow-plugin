@@ -14,9 +14,9 @@ python3 -m unittest discover -s . -p 'test_*.py' -v
 
 | File | Role |
 |------|------|
-| `batch_aggregator.py` | Aggregate tool calls → `process_hook_input` (Jev pack) |
-| `batch_flush_cli.py` | Stdin helper for `plugin_sketch.ts` spawn |
-| `plugin_sketch.ts` | TS sketch: buffer + flush on `message.updated` / `session.idle` |
+| `batch_aggregator.py` | Shim → `packages/opencode-workflow-hooks/python/batch_aggregator.py` |
+| `batch_flush_cli.py` | Shim → package `python/batch_flush_cli.py` |
+| `plugin_sketch.ts` | Lab sketch; product plugin at `packages/opencode-workflow-hooks/` |
 | `test_proofs.py` | Simulates 76 model steps; expects signal log row + analytics skip |
 
 ## Dependencies (sibling packs)

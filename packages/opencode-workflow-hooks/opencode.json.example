@@ -1,0 +1,6 @@
+{
+  "$comment": "Register from project root or use absolute file:// URL to this package src/index.ts",
+  "plugin": [
+    "file://packages/opencode-workflow-hooks/src/index.ts"
+  ]
+}
