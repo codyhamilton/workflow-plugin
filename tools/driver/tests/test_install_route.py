@@ -18,6 +18,7 @@ WORKSPACE = Path(__file__).resolve().parents[3]
 DRIVER = Path(__file__).resolve().parents[1]
 INSTALL = WORKSPACE / "install.sh"
 BOOTSTRAP = WORKSPACE / "docs" / "lab" / "bootstrap"
+CLOUD_BOOTSTRAP = WORKSPACE / "tools" / "cloud-env" / "bootstrap-workflow-skills.sh"
 sys.path.insert(0, str(DRIVER))
 
 from check_skills import CORE_SKILLS, LAB_SKILLS, report_for_env  # noqa: E402
@@ -494,6 +495,50 @@ class TestBootstrapArtifacts(unittest.TestCase):
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
             for name in LAB_SKILLS:
                 self.assertFalse((root / name).exists(), name)
+
+    def test_cloud_bootstrap_uses_local_installer_core_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            ws = Path(tmp) / "ws"
+            home.mkdir()
+            ws.mkdir()
+            marker = Path(tmp) / "used-local"
+            wrapper = Path(tmp) / "wrap.sh"
+            wrapper.write_text(
+                textwrap.dedent(
+                    f"""\
+                    #!/bin/bash
+                    echo local > {marker}
+                    exec bash {INSTALL}
+                    """
+                ),
+                encoding="utf-8",
+            )
+            wrapper.chmod(wrapper.stat().st_mode | stat.S_IEXEC)
+            env = _base_env(home, HOSTNAME="devbox", CLAUDECODE="1")
+            env["WORKFLOW_INSTALL_SH"] = str(wrapper)
+            env.pop("WORKFLOW_INSTALL_MODE", None)
+            env.pop("WORKFLOW_WORKSPACE", None)
+            proc = subprocess.run(
+                ["bash", str(CLOUD_BOOTSTRAP)],
+                cwd=ws,
+                env={**env, "WORKFLOW_WORKSPACE": str(ws)},
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+            self.assertTrue(marker.is_file())
+            root = ws / ".cursor" / "skills" / "workflow"
+            for name in CORE_SKILLS:
+                self.assertTrue((root / name / "SKILL.md").is_file(), name)
+            for name in LAB_SKILLS:
+                self.assertFalse((root / name).exists(), name)
+
+    def test_cursor_setup_delegates_to_cloud_bootstrap(self) -> None:
+        legacy = (BOOTSTRAP / "cursor-cloud-setup.sh").read_text(encoding="utf-8")
+        self.assertIn("tools/cloud-env/bootstrap-workflow-skills.sh", legacy)
+        self.assertIn("exec bash", legacy)
 
 
 if __name__ == "__main__":

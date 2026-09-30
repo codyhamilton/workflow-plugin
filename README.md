@@ -83,7 +83,7 @@ skipped for a one-unit phase.
 
 ### Grok Bot / unattended driver
 
-Skills from this plugin are **not** auto-visible to Grok Bot or other cloud drivers until the **consuming** repo bootstraps them. Cursor cloud boots from a prebaked image: bake core-only `install.sh` (`docs/lab/bootstrap/cursor-cloud-setup.sh`) into that image. Claude Code on the web: SessionStart hook (`docs/lab/bootstrap/session-start.sh`). The measurable loop is driver CLIs, not chat classify:
+Skills from this plugin are **not** auto-visible to Grok Bot or other cloud drivers until the **consuming** repo bootstraps them. Cursor cloud: run [`tools/cloud-env/bootstrap-workflow-skills.sh`](tools/cloud-env/bootstrap-workflow-skills.sh) as the environment setup command (tracks **master**, syncs `.cursor/skills/workflow/`; daily rebuild keeps it fresh — see [`tools/cloud-env/README.md`](tools/cloud-env/README.md)). Legacy alias: `docs/lab/bootstrap/cursor-cloud-setup.sh`. Claude Code on the web: SessionStart hook (`docs/lab/bootstrap/session-start.sh`). The measurable loop is driver CLIs, not chat classify:
 
 0. `python3 tools/driver/check_skills.py` — exit 0 when the six core skill directories are on disk for this harness
 1. `python3 tools/driver/status.py <plan-folder>` — open phase from git trailers
@@ -119,9 +119,10 @@ and wins over ambient variables.
   scope: nothing is written into the repo working tree, so there's nothing to `.gitignore`.
 - **Cursor cloud agent** (`CURSOR_AGENT`, `HOSTNAME=cursor`, or the cloud plugin manifest detected)
   → `<workspace>/.cursor/skills/workflow/`, since Cursor cloud only scans project-local skills.
-  Add that path to `.gitignore`. Cursor loads those skills when the agent process starts. Bake
-  `docs/lab/bootstrap/cursor-cloud-setup.sh` into the environment image; there is no session hook
-  that reloads skills on the first turn.
+  Add that path to `.gitignore`. Cursor loads those skills when the agent process starts. Wire
+  `tools/cloud-env/bootstrap-workflow-skills.sh` as the Cloud Agent environment setup command (legacy
+  alias: `docs/lab/bootstrap/cursor-cloud-setup.sh`); there is no session hook that reloads skills
+  on the first turn.
 - **OpenCode** (explicit only) → symlinks under `~/.config/opencode/skills/<skill>` pointing at
   `<checkout>/skills/<skill>`. See [OpenCode (partial compatibility)](#opencode-partial-compatibility).
 
