@@ -32,6 +32,8 @@ Teams and individual developers who want:
 9. **transcript-parser** — Extracts cost metrics from a session transcript into eval cost-comparison format.
 10. **workflow-tuning** — Holds the design principles and the lessons corpus; runs evals; harvests retros and merged PRs' pipeline outcomes.
 
+**Workflow Optimiser docs** (`docs/lab/`) — durable research and ops notebook (goals, dated findings, proposals, analysis index, external research library). The Workflow Optimiser agent maintains this tree; interactive lab skills remain under `plugins/workflow-lab/`.
+
 **Driver tool** (`tools/driver/`) — a third, optional way to run the refine/execute loop across phases, beside the two plugins above. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`).
 
 ## Core Intent

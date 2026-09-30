@@ -79,6 +79,8 @@ skipped for a one-unit phase.
 | `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
 | `workflow-lab` | `workflow-tuning` | Improve the workflow itself — design principles, lessons from retros and merged-PR outcomes, evals |
 
+**Workflow Optimiser workspace:** research, goals, findings, and proposals for tuning this plugin live in [`docs/lab/`](docs/lab/) (maintained in-repo; separate from the interactive `workflow-lab` skills under `plugins/workflow-lab/`).
+
 To trigger `post-build` from an external automation (e.g. a Cursor Automation), see
 [`docs/automation/post-build.md`](docs/automation/post-build.md): one orchestrated automation
 per stage, triggered once per build handoff, with repo mechanics supplied by a per-repo adapter skill.
@@ -255,6 +257,7 @@ workflow-plugin/                    (repo root — the `workflow` core plugin)
 │   ├── close-out/
 │   └── post-build/                 (briefs/ for its workers)
 ├── docs/
+│   ├── lab/                        (Optimiser research/ops: goals, findings, proposals)
 │   └── automation/                 (operator guides for external automation triggers)
 └── plugins/workflow-lab/           (lab plugin, its own manifests + skills/)
     ├── .claude-plugin/plugin.json
