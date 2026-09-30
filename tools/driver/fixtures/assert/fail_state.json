@@ -1,0 +1,16 @@
+{
+  "question_id": "outcome-evidence",
+  "slug": "phase-driver",
+  "phase": 1,
+  "design_outcome": "Read-only status JSON from Workflow-Phase trailers and DESIGN.md phase count",
+  "closing_record": {
+    "headings": ["## Phase 1"],
+    "body": "## Phase 1\n\nShipped status.py without recording verification.\n"
+  },
+  "workflow_report": {
+    "status": "closed",
+    "phase": 1,
+    "reason": ""
+  },
+  "trailer": "phase-driver:1"
+}

@@ -12,7 +12,7 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 | Long-form architecture & plans | humans + design skill | `docs/ARCHITECTURE.md`, `docs/plans/` |
 | Eval harness layout | workflow-tuning | `evals/` |
 | Transcript tooling (cost, extract, classify viz) | engineering spikes | `tools/transcript/` |
-| Bot driver (status, one-phase trigger, asserts) | engineering spikes | `tools/driver/` (design only until built; see `docs/plans/06-phase-driver/`) |
+| Bot driver (status, one-phase trigger, asserts) | engineering spikes | `tools/driver/` (`status.py`, `assert_phase.py`; `run.py --once` pending) |
 
 ## Cadence
 

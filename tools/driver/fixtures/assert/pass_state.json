@@ -1,0 +1,16 @@
+{
+  "question_id": "outcome-evidence",
+  "slug": "phase-driver",
+  "phase": 1,
+  "design_outcome": "Read-only status JSON from Workflow-Phase trailers and DESIGN.md phase count",
+  "closing_record": {
+    "headings": ["## Phase 1", "### Verification", "### Carried"],
+    "body": "## Phase 1\n\nUnits recorded.\n\n### Verification\n\nRan `python3 -m unittest discover -s tools/driver/tests`. Read-only status JSON from Workflow-Phase trailers and DESIGN.md phase count matches resolve tests.\n\n### Carried\n\nNone\n"
+  },
+  "workflow_report": {
+    "status": "closed",
+    "phase": 1,
+    "reason": ""
+  },
+  "trailer": "phase-driver:1"
+}

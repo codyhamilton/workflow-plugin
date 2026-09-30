@@ -1,6 +1,23 @@
 # Phase driver
 
-Deterministic phase closure and one-phase dispatch for the Grok Bot loop (`docs/plans/06-phase-driver/DESIGN.md`, spike B in `docs/lab/ANALYSIS/2026-09-30-grokbot-driver-reorient.md`).
+Deterministic phase closure and bot-callable primitives for the Grok Bot loop (`docs/plans/06-phase-driver/DESIGN.md`). Policy: [`docs/lab/ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../../docs/lab/ANALYSIS/2026-09-30-grokbot-driver-reorient.md).
+
+## How Grok Bot discovers and drives the workflow
+
+Plugin **skills** (`design`, `execute`, …) are installed separately (`install.sh`, SessionStart hook, or Cursor project skills). They are **not** visible to Grok Bot until that install step runs in the consuming repo — see [`docs/lab/CONSUMING_REPO.md`](../../docs/lab/CONSUMING_REPO.md).
+
+The **driver** is a small Python toolkit the bot calls in a fixed loop:
+
+| Step | CLI (today) | Purpose |
+|------|-------------|---------|
+| 1 | `status.py <plan-folder>` | Read-only JSON: open phase, closed trailers, `done` |
+| 2 | `run.py <plan-folder> --once` | One fresh phase session; returns `workflow-report` + cost |
+| 3 | `assert_phase.py --state …` | Typed alignment on compact phase state; fail → stop and escalate |
+| 4 | Repeat 1→3 until `open` is `done` or report is `unsuccessful` |
+
+Session classify (`tools/transcript/classify.py`) is optional visualisation only — not part of this loop.
+
+Provider keys for step 2: `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` (design). The driver never commits.
 
 ## Status (read-only)
 
@@ -58,6 +75,26 @@ Use `--dry-run` or `--fixture-output <file>` to prove the report contract in CI 
 
 Live providers must return final output containing exactly one ` ```workflow-report ` JSON fence (see `skills/execute/SKILL.md`).
 
+## Assert (phase boundary, step 3)
+
+Compact **state JSON** (not a transcript snapshot): closing-record headings and body, `design_outcome` for the phase, `workflow_report`, and the `trailer` just observed. Built by the driver/bot after a phase returns — not by `classify.py`.
+
+```bash
+python3 tools/driver/assert_phase.py --dry-run --state tools/driver/fixtures/assert/pass_state.json
+python3 tools/driver/assert_phase.py --state state.json --live   # TYPESAFE_API_KEY; appends JSONL
+python3 tools/driver/assert_phase.py --fixture-jev tools/driver/fixtures/assert/pass_jev_response.json \
+  --state tools/driver/fixtures/assert/pass_state.json
+```
+
+- **Model:** TypeSafe Jev pin `jev-1.13.0` when `TYPESAFE_API_KEY` is set; `--dry-run` (or no key) prints the request JSON only.
+- **Log:** `tools/driver/.assert-log.jsonl` (gitignored), separate from `tools/transcript/.classify-log.jsonl`.
+- **Question:** `outcome-evidence` — Score on whether the closing record evidences the design outcome; documented pass threshold **≥ 2.5** on the Jev score.
+- **Pass/fail (authoritative):** deterministic checks on the same state (report `closed`, trailer/report phase match, Verification + Carried headings, outcome or substantive verification text).
+- **Fail branch:** `stop_and_escalate` — the bot must not treat `workflow-report.status: closed` as permission to continue when assert fails.
+- **Kill line:** if Jev disagrees with the deterministic result on fixtures, **keep deterministic** and log `jev.disagreed_with_deterministic` (see `fixtures/assert/fail_state.json` + `fail_jev_response.json`).
+
+Fixtures: `tools/driver/fixtures/assert/` (`pass_state.json`, `fail_state.json`).
+
 ## Grok Bot integration
 
 Typical unattended loop (shell or tool calls):
@@ -66,7 +103,7 @@ Typical unattended loop (shell or tool calls):
 2. If `open` is `done`, stop.
 3. **Trigger one phase** — `python3 tools/driver/run.py <plan-folder> --once` (with keys for live, or `--dry-run` in dev).
 4. Read `report.status`:
-   - `closed` → call `status` again (trailers should advance on the branch; driver does not commit).
+   - `closed` → build compact state and run **`assert_phase.py`**; on fail or `stop_and_escalate`, escalate — do not auto-continue.
    - `incomplete` → re-dispatch once per design, then escalate.
    - `unsuccessful` → escalate to a human; do not auto-continue.
 5. Repeat from step 1.

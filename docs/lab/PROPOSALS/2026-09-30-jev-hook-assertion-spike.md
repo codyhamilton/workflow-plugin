@@ -1,6 +1,6 @@
 ---
 title: Jev phase-boundary assert (steer and log)
-status: proposed
+status: landed
 author: Workflow Optimiser
 date: 2026-09-30
 updated: 2026-09-30

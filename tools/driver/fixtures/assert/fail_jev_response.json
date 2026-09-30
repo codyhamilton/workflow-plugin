@@ -1,0 +1,9 @@
+{
+  "answers": {
+    "outcome_evidence": 3.0
+  },
+  "usage": {
+    "input_tokens": 120,
+    "output_tokens": 8
+  }
+}

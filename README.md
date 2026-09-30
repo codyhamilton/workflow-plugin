@@ -81,6 +81,16 @@ skipped for a one-unit phase.
 
 **Workflow Optimiser workspace:** research, goals, findings, and proposals for tuning this plugin live in [`docs/lab/`](docs/lab/) (maintained in-repo; separate from the interactive `workflow-lab` skills under `plugins/workflow-lab/`).
 
+### Grok Bot / unattended driver
+
+Skills from this plugin are **not** auto-visible to Grok Bot or other cloud drivers until install hooks or project-local skills run in the **consuming** repo. The measurable loop is driver CLIs, not chat classify:
+
+1. `python3 tools/driver/status.py <plan-folder>` — open phase from git trailers
+2. `python3 tools/driver/run.py <plan-folder> --once` — one phase when implemented; provider by API key
+3. `python3 tools/driver/assert_phase.py --state <compact-state.json>` — phase-boundary assert (Jev logged; deterministic pass/fail)
+
+Repeat until `done` or `unsuccessful`. Details: [`tools/driver/README.md`](tools/driver/README.md) and paste template [`docs/lab/CONSUMING_REPO.md`](docs/lab/CONSUMING_REPO.md).
+
 To trigger `post-build` from an external automation (e.g. a Cursor Automation), see
 [`docs/automation/post-build.md`](docs/automation/post-build.md): one orchestrated automation
 per stage, triggered once per build handoff, with repo mechanics supplied by a per-repo adapter skill.

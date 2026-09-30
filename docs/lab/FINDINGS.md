@@ -108,6 +108,18 @@ Success metrics and kill lines are in the analysis doc. No driver code landed wi
 
 ---
 
+## 2026-09-30 — Phase assert CLI (spike C / step 3)
+
+### Observation (high)
+
+- **`tools/driver/assert_phase.py`** evaluates compact phase state (`closing_record`, `design_outcome`, `workflow_report`, `trailer`) — not session classify.
+- **Jev** pin `jev-1.13.0`; `--dry-run` / missing `TYPESAFE_API_KEY` prints request JSON; `--live` appends `tools/driver/.assert-log.jsonl` (separate from classify).
+- **Pass/fail** is **deterministic** (Verification + Carried headings, phase/trailer alignment, outcome or substantive verification text). Jev Score threshold documented at **≥ 2.5** for logging; **fail branch** `stop_and_escalate`.
+- **Kill line exercised:** `fixtures/assert/fail_state.json` fails deterministic while fixture Jev score 3.0 would pass — bot must follow deterministic (`jev.disagreed_with_deterministic`).
+- **Tests:** `python3 -m unittest discover -s tools/driver/tests`.
+
+---
+
 ## Template for future entries
 
 ```markdown

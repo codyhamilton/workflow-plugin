@@ -9,7 +9,6 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 
 ## P1 — asserts and outcomes
 
-- [ ] **Jev assert hook** — one question over compact phase state, dry-run JSON, live log separate from classify, fail branch for the bot (spike C; see `PROPOSALS/2026-09-30-jev-hook-assertion-spike.md`).
 - [ ] **Run record** — stdout or external JSON: last report, per-phase cost, assert results. No plan-folder status file.
 - [ ] **First outcome row** — one dogfood or `evals/scenarios/` run scored by verifier, trailers, and cost (`PROPOSALS/2026-09-30-first-eval-scenario.md`).
 
@@ -43,3 +42,4 @@ Classify remains available as a visualisation. These items are not on the measur
 - [x] Strategy reorientation for Grok Bot control (`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`, 2026-09-30).
 - [x] **Phase status CLI** — `tools/driver/status.py` (read-only JSON from trailers + `DESIGN.md`; spike A step 1).
 - [x] **One-phase trigger** — `tools/driver/run.py --once`, provider layer + dry-run, `mcp_server.py` (spike B step 2, 2026-09-30).
+- [x] **Jev assert hook** — `tools/driver/assert_phase.py` + `phase_assert.py`; fixtures/tests; deterministic kill line (spike C step 3).
