@@ -104,9 +104,10 @@ cd workflow-plugin
 ./install.sh
 ```
 
-The installer detects opencode, Claude Code, and Cursor and asks before installing into each — core
-and lab are separate prompts, so a cloud build image can accept core only. No flags, no config
-required.
+The installer detects **Claude Code** and **Cursor** (and asks before installing into each). It does
+**not** auto-detect OpenCode — use the OpenCode path below (`WORKFLOW_INSTALL_MODE=opencode` or
+`./install.sh --opencode-skills`). Core and lab are separate prompts on the interactive path, so a
+cloud build image can accept core only. No other config required for Claude/Cursor routes.
 
 When run non-interactively (piped via `curl | bash`, or invoked by an agent's Bash tool, which
 never has a TTY), the installer skips the prompts and auto-installs **core only** (never
@@ -121,6 +122,12 @@ and wins over ambient variables.
   Add that path to `.gitignore`. Cursor loads those skills when the agent process starts. Bake
   `docs/lab/bootstrap/cursor-cloud-setup.sh` into the environment image; there is no session hook
   that reloads skills on the first turn.
+- **OpenCode** (explicit only) → symlinks under `~/.config/opencode/skills/<skill>` pointing at
+  `<checkout>/skills/<skill>`. See [OpenCode (partial compatibility)](#opencode-partial-compatibility).
+
+`WORKFLOW_INSTALL_MODE=opencode` or `./install.sh --opencode-skills` runs only the OpenCode symlink
+path (idempotent). Optional: `WORKFLOW_OPENCODE_INCLUDE_LAB=1` to link lab skills too;
+`WORKFLOW_OPENCODE_SKILLS` overrides the destination root (default `~/.config/opencode/skills`).
 
 `./install.sh --print-route` prints the chosen route, destination, and `core_only` as JSON and does
 not copy files. After install, `python3 tools/driver/check_skills.py` exits 0 when the six core
@@ -205,11 +212,51 @@ cache directory. Editing the cache by hand does not re-pin it and will be overwr
 If you use both paths, pick one as canonical for local work and remove the other — a stale copy that
 still resolves is worse than no copy at all.
 
+## OpenCode (partial compatibility)
+
+OpenCode can run the same **workflow skills** as Claude Code and Cursor, but the harness differs:
+there is **no** OpenCode driver provider in `tools/driver/` yet, **no** Claude `SessionStart` hook,
+and **no** live `PostToolBatch` signal path (that integration is Claude Code today; OpenCode only
+has per-tool execute hooks unless you add a custom plugin). Unattended multi-phase loops remain
+**Claude Code**, **Cursor cloud + driver**, or a human/coordinator dispatching `execute` per phase.
+
+**Skills (preferred):** symlink each skill directory from your checkout into OpenCode's config tree so
+edits in the repo are picked up without copying:
+
+```sh
+# From a clone of this repo (or set WORKFLOW_INSTALL_MODE=opencode anywhere install.sh is available)
+./install.sh --opencode-skills
+# Equivalent:
+WORKFLOW_INSTALL_MODE=opencode ./install.sh
+```
+
+That creates `~/.config/opencode/skills/<name>` → `<checkout>/skills/<name>` (for example
+`~/workspace/workflow-plugin/skills/design`). **Symlinks only** — the installer does not force
+`~/.claude/skills` for OpenCode. OpenCode may also read Claude's personal skills directory on some
+setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` via symlink-to-checkout.
+
+**Names and personas (do not conflate harnesses):**
+
+| Topic | OpenCode | This plugin |
+|-------|----------|-------------|
+| Multi-phase delegation persona | Keep harness name **`orchestrate`** (delegation/orchestration) | Not a skill rename — workflow keeps skill names below |
+| Phase runner (one phase per fresh context) | Map to skill **`execute`** | `execute` closes a phase with `Workflow-Phase:` and stops; there is no separate OpenCode-primary "phase-runner" skill |
+| Planning | Built-in OpenCode command **`plan`** | Workflow skill **`design`** — different artifact (`DESIGN.md`, phases, outcomes). Leave OpenCode's built-in `plan` alone; use `design` for this workflow |
+| Agent definitions | OpenCode agent personas / config | ≠ Claude agent markdown files, ≠ Cursor plugin agents under `.cursor-plugin/` |
+
+**Assertions and cheap signals:** Jev-style soft signals are **advisory** where wired (Claude/Cursor).
+**`assert_phase --deterministic`** remains the hard kill line for phase boundaries. On OpenCode, treat
+`docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/run_proofs.sh` as the validated
+stand-in unless you add a custom batching plugin.
+
+Lab skills: interactive install can symlink `workflow-lab` too, or
+`WORKFLOW_OPENCODE_INCLUDE_LAB=1 WORKFLOW_INSTALL_MODE=opencode ./install.sh`.
+
 ## Manual installation
 
-### Claude Code / opencode
+### Claude Code
 
-Both Claude Code and opencode use the same skills directory. Copy core skills directly:
+Copy core skills directly:
 
 ```sh
 cp -r skills/* ~/.claude/skills/
@@ -220,6 +267,20 @@ Add the lab skills too, for local/interactive use:
 ```sh
 cp -r plugins/workflow-lab/skills/* ~/.claude/skills/
 ```
+
+### OpenCode
+
+Prefer symlinks (see [OpenCode (partial compatibility)](#opencode-partial-compatibility)):
+
+```sh
+mkdir -p ~/.config/opencode/skills
+for d in skills/*/; do
+  name="$(basename "$d")"
+  ln -sfn "$(pwd)/$d" "$HOME/.config/opencode/skills/$name"
+done
+```
+
+Or run `./install.sh --opencode-skills` from the checkout.
 
 Skills are available immediately. For marketplace-style install (so colleagues can
 `/plugin install workflow@workflow-plugin`), register this repo in

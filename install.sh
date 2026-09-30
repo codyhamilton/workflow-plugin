@@ -7,6 +7,7 @@ CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
 CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
 INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
 WORKFLOW_WORKSPACE_SKILLS_NAME="${WORKFLOW_WORKSPACE_SKILLS_NAME:-workflow}"
+OPENCODE_SKILLS_ROOT="${WORKFLOW_OPENCODE_SKILLS:-$HOME/.config/opencode/skills}"
 
 # Capture before any function runs — inside functions BASH_SOURCE[0] is the
 # function name (e.g. "main" for piped scripts), not the installer path.
@@ -62,7 +63,9 @@ should_auto_install_cursor_core() {
 }
 
 auto_install_reason() {
-  if [[ "${WORKFLOW_INSTALL_MODE:-}" == "claude-code" ]]; then
+  if [[ "${WORKFLOW_INSTALL_MODE:-}" == "opencode" ]]; then
+    echo "WORKFLOW_INSTALL_MODE=opencode"
+  elif [[ "${WORKFLOW_INSTALL_MODE:-}" == "claude-code" ]]; then
     echo "WORKFLOW_INSTALL_MODE=claude-code"
   elif [[ "${CLAUDECODE:-}" == "1" ]]; then
     echo "CLAUDECODE=1"
@@ -116,6 +119,7 @@ resolve_install_route() {
   case "$mode" in
     claude-code) echo claude-code; return ;;
     cloud) echo cursor-cloud; return ;;
+    opencode) echo opencode; return ;;
     interactive) echo interactive; return ;;
   esac
   if is_claude_code_agent; then
@@ -138,6 +142,9 @@ print_install_route() {
   case "$route" in
     claude-code)
       dest="${HOME}/.claude/skills"
+      ;;
+    opencode)
+      dest="$OPENCODE_SKILLS_ROOT"
       ;;
     cursor-cloud)
       if workspace="$(find_workspace_root)"; then
@@ -248,9 +255,14 @@ ensure_script_dir() {
 }
 
 # Route only — do not clone or copy. Used by tests and by the bot before install.
-if [[ "${1:-}" == "--print-route" ]]; then
+INSTALL_ARG="${1:-}"
+if [[ "$INSTALL_ARG" == "--print-route" ]]; then
   print_install_route
   exit 0
+fi
+if [[ "$INSTALL_ARG" == "--opencode-skills" ]]; then
+  WORKFLOW_INSTALL_MODE="${WORKFLOW_INSTALL_MODE:-opencode}"
+  INSTALL_ARG=""
 fi
 
 SCRIPT_DIR="$(ensure_script_dir)"
@@ -464,11 +476,123 @@ install_skills() {
   done
 }
 
+# OpenCode: symlink each skill directory into ~/.config/opencode/skills/<name>
+# so edits in the checkout are picked up without copying.
+symlink_skills() {
+  local src="$1"
+  local dest_root="$2"
+  local skill_dir skill_name dest src_abs target
+  mkdir -p "$dest_root"
+  for skill_dir in "$src"/*/; do
+    skill_name="$(basename "$skill_dir")"
+    dest="$dest_root/$skill_name"
+    src_abs="$(readlink -f "$skill_dir")"
+    if [[ -L "$dest" ]]; then
+      target="$(readlink -f "$dest" 2>/dev/null || true)"
+      if [[ "$target" == "$src_abs" ]]; then
+        echo "  Symlink up to date: $skill_name"
+        continue
+      fi
+      echo "  Replacing symlink: $skill_name"
+      rm -f "$dest"
+    elif [[ -e "$dest" ]]; then
+      echo "  Replacing existing path (not a matching symlink): $skill_name"
+      rm -rf "$dest"
+    else
+      echo "  Linking skill: $skill_name"
+    fi
+    ln -s "$src_abs" "$dest"
+  done
+}
+
+verify_symlinked_skills() {
+  local dest_root="$1"
+  local label="${2:-OpenCode skills}"
+  local errors=0
+  local skill_count=0
+  local skill_dir
+
+  if [[ ! -d "$dest_root" ]]; then
+    echo "  ERROR: missing $dest_root" >&2
+    return 1
+  fi
+
+  for skill_dir in "$dest_root"/*; do
+    [[ -d "$skill_dir" ]] || continue
+    [[ -f "$skill_dir/SKILL.md" ]] || continue
+    skill_count=$((skill_count + 1))
+    # Do not use a trailing slash on skill_dir — bash follows symlinks and -L would fail.
+    if [[ ! -L "$skill_dir" ]]; then
+      echo "  ERROR: $skill_dir is not a symlink (OpenCode install expects symlinks only)." >&2
+      errors=$((errors + 1))
+    fi
+  done
+  if [[ "$skill_count" -eq 0 ]]; then
+    echo "  ERROR: no skills with SKILL.md found under $dest_root" >&2
+    errors=$((errors + 1))
+  fi
+  if [[ "$errors" -gt 0 ]]; then
+    echo "  $label verification failed for $dest_root" >&2
+    return 1
+  fi
+  echo "  Verified $label at $dest_root ($skill_count skills, symlinks)"
+}
+
+ensure_opencode_skills() {
+  local include_lab="${WORKFLOW_OPENCODE_INCLUDE_LAB:-0}"
+  local src=""
+
+  if is_valid_plugin_source "$SCRIPT_DIR"; then
+    src="$SCRIPT_DIR/skills"
+  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
+    src="$INSTALL_SRC_CACHE/skills"
+  else
+    echo "  ERROR: no workflow skills source found." >&2
+    return 1
+  fi
+
+  echo "  Checkout skills: $src"
+  echo "  OpenCode skills dir: $OPENCODE_SKILLS_ROOT"
+  symlink_skills "$src" "$OPENCODE_SKILLS_ROOT"
+  verify_symlinked_skills "$OPENCODE_SKILLS_ROOT" "OpenCode core skills"
+
+  if [[ "$include_lab" == "1" ]]; then
+    local lab_src="$SCRIPT_DIR/plugins/workflow-lab/skills"
+    if [[ ! -d "$lab_src" && -d "$INSTALL_SRC_CACHE/plugins/workflow-lab/skills" ]]; then
+      lab_src="$INSTALL_SRC_CACHE/plugins/workflow-lab/skills"
+    fi
+    if [[ -d "$lab_src" ]]; then
+      echo "  Including workflow-lab skills"
+      symlink_skills "$lab_src" "$OPENCODE_SKILLS_ROOT"
+      verify_symlinked_skills "$OPENCODE_SKILLS_ROOT" "OpenCode skills (core + lab)"
+    else
+      echo "  workflow-lab skills not found — skipping lab symlink pass."
+    fi
+  fi
+}
+
 echo "workflow-plugin installer"
 echo "========================="
 
 route="$(resolve_install_route)"
 case "$route" in
+  opencode)
+    echo "OpenCode skills install ($(auto_install_reason)) — symlinking core workflow skills."
+    echo "  Preferred layout: $OPENCODE_SKILLS_ROOT/<skill> → <checkout>/skills/<skill>"
+    echo "  (Symlinks only — no copy into ~/.claude/skills.)"
+    echo ""
+    ensure_opencode_skills
+    echo "  Done. Core skills linked under: $OPENCODE_SKILLS_ROOT"
+    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
+    if [[ "${WORKFLOW_OPENCODE_INCLUDE_LAB:-0}" == "1" ]]; then
+      echo "  Lab skills were included (WORKFLOW_OPENCODE_INCLUDE_LAB=1)."
+    else
+      echo "  (workflow-lab not linked; set WORKFLOW_OPENCODE_INCLUDE_LAB=1 or re-run interactively.)"
+    fi
+    echo ""
+    echo "Installation complete."
+    exit 0
+    ;;
   claude-code)
     echo "Claude Code detected ($(auto_install_reason)) — installing core workflow skills to ~/.claude/skills/."
     echo "  (Personal-scope skills — nothing written to the repo workspace.)"
@@ -513,6 +637,27 @@ if [[ -d "$HOME/.claude" ]]; then
   fi
 else
   echo "Claude Code (~/.claude) not found — skipping."
+fi
+
+echo ""
+
+# OpenCode — symlink skills into ~/.config/opencode/skills/ (preferred over ~/.claude/skills).
+if [[ -d "$HOME/.config/opencode" || -d "$OPENCODE_SKILLS_ROOT" ]]; then
+  if ask "Install workflow core skills into OpenCode ($OPENCODE_SKILLS_ROOT/) as symlinks to this checkout?"; then
+    WORKFLOW_OPENCODE_INCLUDE_LAB=0
+    ensure_opencode_skills
+    echo "  Done. Core skills symlinked for OpenCode."
+    echo ""
+    if ask "Also symlink workflow-lab skills into OpenCode? Local/interactive only."; then
+      WORKFLOW_OPENCODE_INCLUDE_LAB=1
+      ensure_opencode_skills
+      echo "  Done. Lab skills symlinked for OpenCode."
+    fi
+  fi
+else
+  echo "OpenCode (~/.config/opencode) not found — skipping."
+  echo "  To install anyway: WORKFLOW_INSTALL_MODE=opencode ./install.sh"
+  echo "  or: ./install.sh --opencode-skills"
 fi
 
 echo ""

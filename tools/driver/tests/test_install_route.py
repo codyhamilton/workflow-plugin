@@ -128,6 +128,24 @@ class TestPrintRoute(unittest.TestCase):
             self.assertIn(str(ws), payload["dest"])
             self.assertNotIn(".claude/skills", payload["dest"])
 
+    def test_explicit_opencode_route(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            home.mkdir()
+            opencode_skills = home / ".config" / "opencode" / "skills"
+            env = _base_env(
+                home,
+                WORKFLOW_INSTALL_MODE="opencode",
+                WORKFLOW_OPENCODE_SKILLS=str(opencode_skills),
+            )
+            proc = _run_route(env)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            payload = json.loads(proc.stdout)
+            self.assertEqual(payload["route"], "opencode")
+            self.assertTrue(payload["core_only"])
+            self.assertEqual(payload["dest"], str(opencode_skills))
+            self.assertEqual(payload["reason"], "WORKFLOW_INSTALL_MODE=opencode")
+
     def test_explicit_claude_beats_cursor_signals(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp) / "home"
@@ -292,6 +310,64 @@ class TestCoreOnlyInstall(unittest.TestCase):
             for name in LAB_SKILLS:
                 self.assertFalse((root / name).exists(), name)
             self.assertFalse((ws / ".cursor").exists())
+
+
+class TestOpenCodeSymlinkInstall(unittest.TestCase):
+    def test_opencode_install_symlinks_core_not_lab(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            home.mkdir()
+            opencode_skills = home / ".config" / "opencode" / "skills"
+            env = _base_env(
+                home,
+                WORKFLOW_INSTALL_MODE="opencode",
+                WORKFLOW_OPENCODE_SKILLS=str(opencode_skills),
+            )
+            proc = subprocess.run(
+                ["bash", str(INSTALL), "--opencode-skills"],
+                cwd=WORKSPACE,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+            for name in CORE_SKILLS:
+                link = opencode_skills / name
+                self.assertTrue(link.is_symlink(), name)
+                self.assertTrue((link / "SKILL.md").is_file(), name)
+                self.assertTrue(
+                    str(link.resolve()).startswith(str(WORKSPACE.resolve())),
+                    f"{name} should point into checkout",
+                )
+            for name in LAB_SKILLS:
+                lab_link = opencode_skills / name
+                self.assertFalse(lab_link.exists(), name)
+
+    def test_opencode_install_idempotent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            home.mkdir()
+            opencode_skills = home / ".config" / "opencode" / "skills"
+            env = _base_env(
+                home,
+                WORKFLOW_INSTALL_MODE="opencode",
+                WORKFLOW_OPENCODE_SKILLS=str(opencode_skills),
+            )
+            for _ in range(2):
+                proc = subprocess.run(
+                    ["bash", str(INSTALL)],
+                    cwd=WORKSPACE,
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+            self.assertEqual(
+                len(list(opencode_skills.iterdir())),
+                len(CORE_SKILLS),
+            )
 
 
 class TestBootstrapArtifacts(unittest.TestCase):

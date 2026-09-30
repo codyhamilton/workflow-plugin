@@ -39,6 +39,7 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 ## Related entry points
 
 - Repo overview: [`docs/OVERVIEW.md`](../OVERVIEW.md)
+- OpenCode (skills symlink install, harness limits): [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility) and `./install.sh --opencode-skills`
 - Operating hypotheses: root [`README.md`](../../README.md) § Operating hypotheses
 - Eval format: [`evals/README.md`](../../evals/README.md)
 - Transcript toolkit: [`tools/transcript/README.md`](../../tools/transcript/README.md)
