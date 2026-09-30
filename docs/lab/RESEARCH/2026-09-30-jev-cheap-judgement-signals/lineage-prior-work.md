@@ -29,5 +29,5 @@
 
 ## Proposal
 
-- File: [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: draft`).
-- Linked from [`../INDEX.md`](../INDEX.md). Backlog: spike the hooks when Cody accepts; the white-paper item is done.
+- File: [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: resolved` — recommendations accepted pending product wiring).
+- Linked from [`../INDEX.md`](../INDEX.md). Proofs closed on `112ccfe`. Remaining work is product wiring, not a research spike.
