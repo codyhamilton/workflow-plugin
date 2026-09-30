@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A workflow plugin for Claude Code, opencode, and Cursor providing ten skills, split across two plugins, for a design → phased refine/execute → review → close-out workflow — usable identically by a human at the keyboard and by a staged cloud pipeline (build agent → automated review/QA → merge).
+A workflow plugin for Claude Code, Cursor, and (with documented limits) OpenCode — ten skills split across two plugins — for a design → phased refine/execute → review → close-out workflow. The loop is the same in intent; harness integration is not: unattended multi-phase driver, Claude `SessionStart`, and live `PostToolBatch` signals are Claude/Cursor today. OpenCode installs skills via symlinks under `~/.config/opencode/skills/` (see `README.md` § OpenCode); there is no OpenCode driver provider yet.
 
 ## Who Uses It
 
@@ -34,7 +34,9 @@ Teams and individual developers who want:
 
 **Workflow Optimiser docs** (`docs/lab/`) — durable research and ops notebook (goals, dated findings, proposals, analysis index, external research library). The Workflow Optimiser agent maintains this tree; interactive lab skills remain under `plugins/workflow-lab/`.
 
-**Driver tool** (`tools/driver/`) — a third, optional way to run the refine/execute loop across phases, beside the two plugins above. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`).
+**Driver tool** (`tools/driver/`) — a third, optional way to run the refine/execute loop across phases, beside the two plugins above. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`). OpenCode is out of scope for the driver until a provider exists; use human/`execute` coordination or Claude/Cursor for unattended loops.
+
+**OpenCode (partial)** — skills only: `./install.sh --opencode-skills` or `WORKFLOW_INSTALL_MODE=opencode` symlinks `skills/*` into `~/.config/opencode/skills/`. Phase running maps to the `execute` skill; harness persona name `orchestrate` is separate from skill names. Built-in OpenCode `plan` is not workflow `design`.
 
 ## Core Intent
 
