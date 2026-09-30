@@ -85,6 +85,17 @@ Success metrics and kill lines are in the analysis doc. No driver code landed wi
 
 ---
 
+## 2026-09-30 — Phase status CLI (spike A / step 1)
+
+### Observation (high)
+
+- **`tools/driver/status.py`** resolves `open` (`phase` | `wrap-up` | `done`), `phase`, `closed[]`, and `done` from `DESIGN.md` `### Phase` count and `Workflow-Phase:` trailers on `git log <default>..HEAD` only — no `IMPLEMENTATION.md`, no LLM.
+- **Kill line:** open phase does not depend on IMPLEMENTATION prose; trailer contract in `skills/execute/SKILL.md` is sufficient.
+- **Tests:** `python3 -m unittest discover -s tools/driver/tests` — mid-plan, wrap-up, done, malformed trailer ignored (git fixtures on a branch ahead of default).
+- **Usage:** `python3 tools/driver/status.py docs/plans/06-phase-driver/ [--default-branch master]`
+
+---
+
 ## Template for future entries
 
 ```markdown
