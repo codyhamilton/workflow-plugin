@@ -42,3 +42,4 @@ Classify remains available as a visualisation. These items are not on the measur
 - [x] Classify measurement strategy pass (`ANALYSIS/2026-09-30-strategy-pass.md`, 2026-09-30).
 - [x] Strategy reorientation for Grok Bot control (`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`, 2026-09-30).
 - [x] **Phase status CLI** — `tools/driver/status.py` (read-only JSON from trailers + `DESIGN.md`; spike A step 1).
+- [x] **One-phase trigger** — `tools/driver/run.py --once`, provider layer + dry-run, `mcp_server.py` (spike B step 2, 2026-09-30).
