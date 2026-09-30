@@ -47,6 +47,8 @@ This repo uses [workflow-plugin](https://github.com/codyhamilton/workflow-plugin
 - **Status lives in the PR/issue tracker**, not in plan folder names.
 
 Grok Bot does not auto-discover plugin skills. On Cursor cloud they have to be in the image before the process starts. On Claude Code remote the SessionStart hook installs them and reloads. Then call the driver CLIs.
+
+**OpenCode + DeepSeek Flash:** skills-only install (`./install.sh --opencode-skills`); no driver provider. If Flash agents execute briefs/units, use [`GUIDANCE-flash-review-gate.md`](GUIDANCE-flash-review-gate.md): mandatory phase review gate (Sonnet 5.5 on Flash work, then hold for Claude or Grok sign-off); Flash must not auto close-out or land `Workflow-Phase:`.
 ```
 
 Adjust `<path-to-workflow-plugin>` to a submodule path, vendored copy, or documented clone location your automation uses.
