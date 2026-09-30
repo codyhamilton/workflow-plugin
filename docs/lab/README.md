@@ -21,11 +21,12 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 
 ## How to use this space
 
-1. Start from [`GOALS.md`](GOALS.md) for current success metrics.
+1. Start from [`GOALS.md`](GOALS.md) for current success metrics and focus order.
 2. Read [`FINDINGS.md`](FINDINGS.md) for the latest grounded state of the plugin and tooling.
-3. Open [`PROPOSALS/`](PROPOSALS/) for draft work items (status in each file’s frontmatter).
-4. Follow [`ANALYSIS/README.md`](ANALYSIS/README.md) into deeper case studies under `docs/analysis/`.
-5. Browse [`RESEARCH/INDEX.md`](RESEARCH/INDEX.md) for external references mapped to this plugin’s skills and eval strategy.
+3. Read the latest strategy pass under [`ANALYSIS/`](ANALYSIS/) before promoting a proposal.
+4. Open [`PROPOSALS/`](PROPOSALS/) for draft work items (status in each file’s frontmatter).
+5. Follow [`ANALYSIS/README.md`](ANALYSIS/README.md) into deeper case studies under `docs/analysis/`.
+6. Browse [`RESEARCH/INDEX.md`](RESEARCH/INDEX.md) for external references mapped to this plugin’s skills and eval strategy.
 
 ## Agent defaults (Optimiser remit)
 

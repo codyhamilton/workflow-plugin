@@ -46,6 +46,10 @@ Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-
 |--------|----------|-------------|-------|
 | [LangGraph workflows doc — LangSmith tracing note](https://docs.langchain.com/oss/python/langgraph/workflows-agents) | Trace per-step data flow in complex graphs. | Until LangSmith integration exists, **`tools/transcript/` + JSONL classify log** are the tracing layer for this plugin. | medium |
 
+## Strategy constraint (2026-09-30)
+
+Implication rows above are analogies until an eval or observational verdict says otherwise. The strategy pass demotes driver work, Jev-on-artifacts, and an in-repo first scenario; it keeps ACI measurement, inference/grading split, and the classify review-gate shape. See [`../ANALYSIS/2026-09-30-strategy-pass.md`](../ANALYSIS/2026-09-30-strategy-pass.md).
+
 ## Maintenance notes
 
 - **AutoGen** is in maintenance mode; Microsoft points new production work to **Agent Framework** ([autogen README](https://github.com/microsoft/autogen)) — watch for patterns, not necessarily new dependencies.

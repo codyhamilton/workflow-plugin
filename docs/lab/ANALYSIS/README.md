@@ -1,6 +1,12 @@
 # Analysis pointers
 
-Long-form case studies and retros live under `docs/analysis/`. This folder only indexes them for the Optimiser — no duplication.
+Long-form case studies and retros live under `docs/analysis/`. Strategy passes for the Optimiser live in this folder. Case studies are indexed here, not copied.
+
+## Strategy passes
+
+| Date | Path | What it decided |
+|------|------|-----------------|
+| 2026-09-30 | [`2026-09-30-strategy-pass.md`](2026-09-30-strategy-pass.md) | No proposal promoted. Next three moves: snapshot parity, blind labels on the eight-row batch, hypothesis ledger plus external-scenario-or-kill. |
 
 | Date | Path | Relevance to workflow optimisation |
 |------|------|-------------------------------------|

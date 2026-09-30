@@ -45,6 +45,31 @@ Root `README.md` lists eight falsifiable hypotheses; most still **untested** in 
 
 ---
 
+## 2026-09-30 — Strategy pass on the eight-row classify batch
+
+Full argument: [`ANALYSIS/2026-09-30-strategy-pass.md`](ANALYSIS/2026-09-30-strategy-pass.md). No proposal promoted. No behaviour change.
+
+### Numbers re-derived from the log (high)
+
+Same eight rows as the entry above. Extra measurements:
+
+- **Non-state overhead** on Cursor is stable: `input_tokens − snapshot_token_estimate` = 728, 725, 729, 728.
+- **Claude state density:** `(input_tokens − 728) / snapshot_token_estimate` = 1.82, 1.99, 1.85, 1.94 (mean 1.90). Cursor state-implied tokens match the chars/4 estimate. Same questions and model, so the gap is in the Claude snapshot payload. Mechanism (newline-per-character join versus something else) is **not** confirmed; `parsers/claude.py` joins content blocks with newlines, which is only pathological if blocks are single characters.
+- **`mixed` probability is 0.0 on all 8 rows**, including `bd4f6c0d` (plan 0.37 / build 0.31 / workflow 0.29).
+- **Score confidence** ranges 0.46–0.70. None would pass a 0.8 gate. `30844998` is the illustration: kind confidence 0.85, score 2.46, score confidence 0.46, P(2)=0.47, P(3)=0.50.
+- **Alignment means** (Claude 2.28, Cursor 1.16) track kind mix (workflow/build/plan versus ops/question). Not attributed to the token-density gap.
+- **`output_tokens` is 110 on every row.** Schema size, not a signal.
+- Workflow probability ≥ 0.10 on 6/8 rows. Collision of “subject is the workflow plugin” with plan/build is the leading taxonomy issue. Unresolved until blind labels.
+
+### Decisions (high for the policy, medium for the taxonomy revision trigger)
+
+- Provisional review exemption stays at kind confidence ≥ 0.8. It is not a calibrated accuracy bar. 80% agreement is not claimable until ≥ 10 labeled rows sit above that line on one snapshot generation (3 rows qualify today).
+- Do not gate or rank sessions on `workflow_alignment`.
+- Do not pool later classify rows with these hashes if the snapshot builder changes.
+- Hypothesis 8 already has an observational-partial writeup in `docs/analysis/2026-09-08-workflow-vs-field.md` (quadratic cost supported; “nearly always cheaper” unsupported; 40–75 turns is a crossover). Ledger entry still to be written into FINDINGS by the next measurement move. Eval corpus remains empty on purpose until an external verifier exists.
+
+---
+
 ## Template for future entries
 
 ```markdown
