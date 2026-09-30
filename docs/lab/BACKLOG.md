@@ -20,6 +20,7 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 
 ## P3 — parked research
 
+- [ ] **White paper: Jev cheap judgement signals** — research pack [`RESEARCH/2026-09-30-jev-cheap-judgement-signals/`](RESEARCH/2026-09-30-jev-cheap-judgement-signals/INDEX.md) landed; Grok pass to write [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`lab-proposal` step 4).
 - [ ] LangGraph-style evaluator–optimizer for **brief quality**, offline, using an assert rather than session kind.
 - [ ] Document the Composer (collect) vs Grok (strategy) split with a pointer to a real run's inputs and the analysis file it produced.
 

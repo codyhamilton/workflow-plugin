@@ -4,6 +4,12 @@ Curated bibliography for optimising workflow-plugin. Each entry: **takeaway** â†
 
 Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-systems.md).
 
+**Dated research packs** (inputs to `PROPOSALS/` white papers; see `lab-proposal` skill):
+
+| Pack | Question | Proposal (if any) |
+|------|----------|-------------------|
+| [`2026-09-30-jev-cheap-judgement-signals/`](2026-09-30-jev-cheap-judgement-signals/INDEX.md) | Cheap conditional Jev judgements (hooks + refine/unit/phase soft signals) | *Grok follow-up:* `PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md` |
+
 **Current control and measurement policy** (2026-09-30, later pass): [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Implications in this index follow that pass: Grok Bot drives, Jev asserts steer, classify visualises.
 
 ---

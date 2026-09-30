@@ -7,7 +7,7 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 | Area | Owner | Location |
 |------|--------|----------|
 | Core workflow skills (design → close-out) | plugin releases | `skills/` |
-| Interactive / local lab skills | plugin releases | `plugins/workflow-lab/skills/` |
+| Interactive / local lab skills | plugin releases | `plugins/workflow-lab/skills/` (incl. `lab-proposal` for white-paper research packs) |
 | Research, goals, findings, proposals | **Workflow Optimiser** (agent + Cody) | `docs/lab/` |
 | Long-form architecture & plans | humans + design skill | `docs/ARCHITECTURE.md`, `docs/plans/` |
 | Eval harness layout | workflow-tuning | `evals/` |
@@ -19,6 +19,7 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 - **Weekly (light):** skim `FINDINGS.md`, update `GOALS.md` if remit shifted, triage `BACKLOG.md`, move or close items in `PROPOSALS/`.
 - **After a notable run:** append a dated bullet to `FINDINGS.md` (bot/driver log, assert result, eval verifier, merged PR harvest). Session classify may be attached as a chart; it is not the result.
 - **When exploring a theme:** add or extend a note under `RESEARCH/` and link it from `RESEARCH/INDEX.md`.
+- **When a signal may deserve a white paper:** run the **`lab-proposal`** skill (`plugins/workflow-lab/skills/lab-proposal/`) — **signal → triage (Grok) → research pack (Composer) → proposal (Grok 4.7)**. Research packs live under `RESEARCH/<date>-<slug>/`; finished proposals under `PROPOSALS/`. Weekly review skims open proposals; behaviour changes wait for Cody.
 
 ## How to use this space
 
