@@ -1,0 +1,9 @@
+Phase agent finished without closing (fixture).
+
+```workflow-report
+{
+  "status": "unsuccessful",
+  "phase": 2,
+  "reason": "Fixture: approach-open phase blocked unattended run."
+}
+```

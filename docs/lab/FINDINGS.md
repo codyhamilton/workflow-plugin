@@ -96,6 +96,18 @@ Success metrics and kill lines are in the analysis doc. No driver code landed wi
 
 ---
 
+## 2026-09-30 — One-phase trigger (spike B / step 2)
+
+### Observation (high)
+
+- **`tools/driver/run.py --once`** resolves via `status.py` / `resolve.py`, dispatches **one** phase or wrap-up through `tools/driver/providers/` (`dry-run` when no `ANTHROPIC_API_KEY` / `CURSOR_API_KEY`; Claude/Cursor stubs until design Phases 2–3), parses `workflow-report`, returns JSON with `turns` / `cost_usd` / `mode`. Does not commit.
+- **Dry-run kill line honoured:** default without keys returns `report.status: incomplete` and an explicit reason — not `closed` pretending work ran. Fixture path `tools/driver/tests/fixtures/agent_outputs/phase2_unsuccessful.txt` proves unsuccessful parsing.
+- **MCP-shaped:** `tools/driver/mcp_server.py` one-shot (`status`, `trigger_phase`) or stdio JSON lines; `poll` returns not in-flight for sync providers.
+- **Grok Bot loop:** documented in `tools/driver/README.md` — bot calls `status` → `run.py --once` → reads report → repeats; human on `unsuccessful`.
+- **Live dispatch:** not available in the plugin CI/cloud agent VM (no headless provider keys). Bot host must supply `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` before unattended multi-phase runs can close trailers without human `execute`.
+
+---
+
 ## Template for future entries
 
 ```markdown
