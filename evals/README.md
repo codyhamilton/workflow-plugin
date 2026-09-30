@@ -4,6 +4,8 @@ An eval is a full end-to-end run of the workflow — design, then refine and exe
 
 Evals are not unit tests. There is no absolute pass/fail. The question is: **does a proposed change produce meaningfully better outcomes than the current baseline, and are those outcomes in the same ballpark as the known reference?**
 
+The first populated scenario (`trailer-completeness`) is a narrower outcome row: an absolute trailer-completeness and assert gate. Later full runs still use the relative comparison below.
+
 ## Two Lenses
 
 **Cost** (objective): agents spawned and their model sizes, tool use turns per agent, estimated context tokens, wall time. Use to detect regressions (change costs significantly more without quality gain) and improvements (same or better quality at lower cost).
@@ -132,11 +134,19 @@ Small differences in cost or quality within normal variance are not meaningful �
 
 ## Fixture Corpus
 
-Scenarios are built up over time from repos where the workflow has already been used and the outcomes are known. The initial corpus is empty. Add scenarios by:
+Scenarios are built up over time from repos where the workflow has already been used and the outcomes are known. Add further scenarios by:
 
 1. Identifying a repo and task where you have a known-good reference outcome
 2. Creating `scenarios/<name>/source.md` with the repo URL, commit, task, and reference notes
 3. Adding the reference artifacts or description to `scenarios/<name>/reference/`
 4. Running the eval once to establish the baseline
 
-The system ships with the pattern, not the fixtures.
+## First outcome scenario
+
+`trailer-completeness` is a fixture stand-in, not a live design → execute dogfood. The quality signal is mechanical. `verify.py` checks `Workflow-Phase:` trailer completeness through `tools/driver/status.py`, runs `run.py --once` (skipped when the fixture history is already done), and gates on `assert_phase.py --deterministic`. Classify is not consulted. Reproduce with:
+
+```bash
+python3 evals/scenarios/trailer-completeness/verify.py
+```
+
+Exit 0 is pass. Stdout includes the trailer list and `cost`. Provider cost is unavailable unless a headless key is set and the provider returns `cost_usd`. The frozen first stdout is `scenarios/trailer-completeness/baseline/outcome.json` (do not overwrite). The row is recorded in `docs/lab/FINDINGS.md`.

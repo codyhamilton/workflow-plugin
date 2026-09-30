@@ -1,0 +1,23 @@
+{
+  "plan_dir": "docs/plans/01-trailer-completeness",
+  "commits": [
+    {"message": "close phase 1", "trailer": "trailer-completeness:1"},
+    {"message": "wrong slug ignored", "trailer": "other-slug:1"},
+    {"message": "close phase 2", "trailer": "trailer-completeness:2"},
+    {"message": "wrap-up done", "trailer": "trailer-completeness:done"}
+  ],
+  "status": {
+    "plan": "docs/plans/01-trailer-completeness",
+    "slug": "trailer-completeness",
+    "open": "done",
+    "phase": null,
+    "closed": ["trailer-completeness:1", "trailer-completeness:2"],
+    "done": true
+  },
+  "trailers": [
+    "trailer-completeness:1",
+    "trailer-completeness:2",
+    "trailer-completeness:done"
+  ],
+  "ignored_trailers": ["other-slug:1"]
+}

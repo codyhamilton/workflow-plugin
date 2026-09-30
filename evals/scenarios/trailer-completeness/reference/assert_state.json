@@ -1,0 +1,16 @@
+{
+  "question_id": "outcome-evidence",
+  "slug": "trailer-completeness",
+  "phase": 2,
+  "design_outcome": "accepted Workflow-Phase trailers are trailer-completeness:1, trailer-completeness:2, and trailer-completeness:done",
+  "closing_record": {
+    "headings": ["## Phase 2", "### Verification", "### Carried"],
+    "body": "## Phase 2\n\n### Verification\n\naccepted Workflow-Phase trailers are trailer-completeness:1, trailer-completeness:2, and trailer-completeness:done. Checked with tools/driver/status.py against the fixture git history.\n\n### Carried\n\nNone\n"
+  },
+  "workflow_report": {
+    "status": "closed",
+    "phase": 2,
+    "reason": ""
+  },
+  "trailer": "trailer-completeness:2"
+}

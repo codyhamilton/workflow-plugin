@@ -1,0 +1,47 @@
+{
+  "scenario": "trailer-completeness",
+  "command": "python3 evals/scenarios/trailer-completeness/verify.py",
+  "verifier": "pass",
+  "checks": {
+    "status": "pass",
+    "trailers": "pass",
+    "once": "pass",
+    "assert": "pass"
+  },
+  "failures": [],
+  "trailers": [
+    "trailer-completeness:1",
+    "trailer-completeness:2",
+    "trailer-completeness:done"
+  ],
+  "ignored_trailers": [
+    "other-slug:1"
+  ],
+  "status": {
+    "plan": "docs/plans/01-trailer-completeness",
+    "slug": "trailer-completeness",
+    "open": "done",
+    "phase": null,
+    "closed": [
+      "trailer-completeness:1",
+      "trailer-completeness:2"
+    ],
+    "done": true
+  },
+  "once": {
+    "exit_code": 0,
+    "skipped": true,
+    "skip_reason": "Run already has Workflow-Phase done trailer; nothing to dispatch."
+  },
+  "assert": {
+    "exit_code": 0,
+    "pass": true,
+    "decision_source": "deterministic"
+  },
+  "cost": {
+    "available": false,
+    "cost_usd": null,
+    "reason": "no ANTHROPIC_API_KEY or CURSOR_API_KEY"
+  },
+  "classify": "not used"
+}

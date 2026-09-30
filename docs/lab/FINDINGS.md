@@ -160,6 +160,22 @@ Claude's own hooks doc sets `CLAUDE_CODE_REMOTE=true` on the web and honors Sess
 
 ---
 
+## 2026-09-30 — First outcome row (step 6)
+
+### Observation (high)
+
+Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` in this environment. Classify was not called. The quality signal is the verifier exit code (trailer completeness + deterministic assert), not a person reading a diff.
+
+- **Command:** `python3 evals/scenarios/trailer-completeness/verify.py` (bot stand-in: `status.py` → `run.py --once` → `assert_phase.py --deterministic`).
+- **Verifier:** **pass** (exit 0). Checks: status pass, trailers pass, once pass (skipped — history already `done`), assert pass (`decision_source: deterministic`, exit 0).
+- **Trailers:** `trailer-completeness:1`, `trailer-completeness:2`, `trailer-completeness:done`. `other-slug:1` is on the fixture branch and is not in `closed`.
+- **Status:** `open: done`, `closed: ["trailer-completeness:1", "trailer-completeness:2"]`, `done: true`.
+- **Cost:** unavailable — no `ANTHROPIC_API_KEY` or `CURSOR_API_KEY`. Dry-run `cost_usd: 0` was not recorded as a provider cost. Live Claude/Cursor adapters are still stubs, so a key in this tree would not have produced a dollar figure either (`cost.reason` then contains "not implemented"; the trailer row still passes).
+- **Artifacts:** `evals/scenarios/trailer-completeness/` (`source.md`, `reference/expected.json`, `reference/assert_state.json`, frozen `baseline/outcome.json`). Negative check: `--omit-trailer trailer-completeness:2` exits 1.
+- **Tests:** `python3 -m unittest discover -s tools/driver/tests -p 'test_*.py'` (includes `test_outcome_scenario.py` and `assert_phase.py --deterministic`).
+
+---
+
 ## Template for future entries
 
 ```markdown

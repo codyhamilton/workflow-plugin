@@ -98,6 +98,14 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="POST to TypeSafe, append assert JSONL, print result (requires TYPESAFE_API_KEY)",
     )
+    mode.add_argument(
+        "--deterministic",
+        action="store_true",
+        help=(
+            "Evaluate the deterministic check only. Print result JSON and exit "
+            "0 on pass, 2 on fail. Does not call Jev or classify."
+        ),
+    )
     parser.add_argument(
         "--log",
         default=DEFAULT_LOG_PATH,
@@ -127,6 +135,22 @@ def main(argv: list[str] | None = None) -> int:
     state = _load_state(args.state, args.state is None)
     if args.question:
         state = {**state, "question_id": args.question}
+
+    if args.deterministic:
+        result_obj = evaluate_assert(state, jev_response=None)
+        result = result_obj.to_json_dict()
+        record_path = None if args.no_record else resolve_record_path(args.record)
+        if record_path is not None:
+            record_entry = entry_from_assert(
+                plan=state.get("plan"),
+                slug=state.get("slug"),
+                phase=state.get("phase"),
+                result=result,
+            )
+            append_record(record_path, record_entry)
+            result = {**result, "run_record": record_entry}
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0 if result_obj.pass_ else 2
 
     request = build_jev_request(state)
     live = args.live

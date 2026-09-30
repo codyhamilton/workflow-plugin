@@ -10,7 +10,7 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 ## P1 — asserts and outcomes
 
 - [x] **Run record** — `run_record.py`, JSONL outside plan folder; wired from `run.py`, `assert_phase.py`, `status.py --run-record` (step 4, 2026-09-30).
-- [ ] **First outcome row** — one dogfood or `evals/scenarios/` run scored by verifier, trailers, and cost (`PROPOSALS/2026-09-30-first-eval-scenario.md`).
+- [x] **First outcome row** — `evals/scenarios/trailer-completeness/` (`verify.py`: status → `--once` → `--deterministic` assert). Cost unavailable (no provider key). Classify not used (`PROPOSALS/2026-09-30-first-eval-scenario.md`, 2026-09-30).
 
 ## P2 — workflow follow-through
 
@@ -45,3 +45,4 @@ Classify remains available as a visualisation. These items are not on the measur
 - [x] **Jev assert hook** — `tools/driver/assert_phase.py` + `phase_assert.py`; fixtures/tests; deterministic kill line (spike C step 3).
 - [x] **Run record** — external JSONL per invocation; git + record for phase/cost/report (spike step 4).
 - [x] **Unattended core skills** — install route + disk check; Cursor image-bake recommendation; Claude SessionStart template (step 5, 2026-09-30).
+- [x] **First outcome row** — trailer-completeness verifier + FINDINGS row; fixture stand-in, cost unavailable (step 6, 2026-09-30).
