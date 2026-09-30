@@ -29,6 +29,17 @@
 | [`evidence-maps-claude-5h.md`](evidence-maps-claude-5h.md) | open-pajero-maps Claude 5h analysis (attached uploads) |
 | [`lineage-prior-work.md`](lineage-prior-work.md) | Prior spike + driver reorient; this paper is the next layer |
 
+## Proofs (white paper open questions)
+
+**Status: closed 4/4** — validated runnable pack under [`proofs/`](proofs/README.md) (`./proofs/run_proofs.sh`).
+
+| Proof | Doc |
+|-------|-----|
+| PostToolBatch / hooks | [`proofs/post-tool-batch-hooks.md`](proofs/post-tool-batch-hooks.md) |
+| Gate thresholds | [`proofs/deterministic-gate-thresholds.md`](proofs/deterministic-gate-thresholds.md) |
+| Jev state schemas | [`proofs/jev-compact-state-schemas.md`](proofs/jev-compact-state-schemas.md) |
+| Measurement / false negatives | [`proofs/false-negative-measurement-plan.md`](proofs/false-negative-measurement-plan.md) |
+
 ## Collect checklist (for future packs)
 
 - [x] In-repo assert behaviour and CLI modes
@@ -37,6 +48,7 @@
 - [x] Economics framing
 - [x] Quantitative session evidence (maps Claude)
 - [x] Lineage vs `PROPOSALS/2026-09-30-jev-hook-assertion-spike.md`
+- [x] Proofs runnable (`proofs/run_proofs.sh`)
 
 ## Links
 

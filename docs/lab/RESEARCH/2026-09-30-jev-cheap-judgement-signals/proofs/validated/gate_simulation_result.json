@@ -1,0 +1,103 @@
+{
+  "thresholds": {
+    "ideal_band": {
+      "turns": [
+        50,
+        75
+      ],
+      "peak_ctx_tokens": [
+        100000,
+        125000
+      ]
+    },
+    "trip_points": {
+      "band_exit_turns": 76,
+      "handoff_signal_turns": 85,
+      "escalate_turns": 100,
+      "peak_ctx_warn": 125000,
+      "peak_ctx_jev": 128000,
+      "peak_ctx_escalate": 130000,
+      "transcript_bytes_warn": 3145728,
+      "transcript_bytes_escalate": 5242880
+    },
+    "rationale": {
+      "band_exit": "Maps: 16% (24/150) over ideal; logging at 76 catches exit from 50\u201375 without per-turn Jev inside the band.",
+      "escalate_turns": "Maps: 8/150 workers exceeded 100 API turns; 296-call worker had zero prior signal today.",
+      "peak_ctx": "Maps: 17/150 over 125k; peak (not final) is sizing signal; worker 92a48e at 130k peak.",
+      "jsonl_bytes": "Worker 92a48e: 12.7MB JSONL with FAT_JSONL flag; 5MB escalate is conservative early warning.",
+      "jev_eligible": "Optional Jev only after handoff_signal; caps calls to ~minority of workers (maps 16% over ideal)."
+    }
+  },
+  "maps_aggregates": {
+    "subagents_analyzed": 150,
+    "over_ideal": 24,
+    "over_ctx_125k": 17,
+    "over_turns_100": 8
+  },
+  "workers": [
+    {
+      "id": "92a48e004519",
+      "api_turns": 296,
+      "gate": {
+        "band_exit": true,
+        "handoff_signal": true,
+        "escalate": true,
+        "jev_eligible": true,
+        "reasons": [
+          "api_turns>=76",
+          "peak_ctx>=125000",
+          "transcript_bytes>=3145728",
+          "peak_ctx>=130000",
+          "transcript_bytes>=5242880",
+          "jev_eligible"
+        ]
+      },
+      "first_band_exit_turn": 76,
+      "first_escalate_turn": 100,
+      "maps_flags": [
+        "OVER_TURNS",
+        "FAT_JSONL"
+      ]
+    },
+    {
+      "id": "bb6165018de0",
+      "api_turns": 154,
+      "gate": {
+        "band_exit": true,
+        "handoff_signal": true,
+        "escalate": true,
+        "jev_eligible": true,
+        "reasons": [
+          "api_turns>=76",
+          "peak_ctx>=125000",
+          "transcript_bytes>=3145728",
+          "jev_eligible"
+        ]
+      },
+      "first_band_exit_turn": 76,
+      "first_escalate_turn": 100,
+      "maps_flags": [
+        "OVER_TURNS"
+      ]
+    },
+    {
+      "id": "6c87c96bd9bb",
+      "api_turns": 70,
+      "gate": {
+        "band_exit": false,
+        "handoff_signal": false,
+        "escalate": false,
+        "jev_eligible": false,
+        "reasons": []
+      },
+      "first_band_exit_turn": null,
+      "first_escalate_turn": null,
+      "maps_flags": []
+    }
+  ],
+  "checks": {
+    "all_over_100_workers_escalate": true,
+    "smoking_gun_band_exit_before_100": true,
+    "smoking_gun_escalate": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "session_id": "proof-session-001",
+  "transcript_path": "fixtures/sample_transcript.jsonl",
+  "cwd": "/workspace",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolBatch",
+  "agent_id": "agent-proof-92a48e",
+  "tool_calls": [
+    {
+      "tool_name": "Read",
+      "tool_input": {"file_path": "/workspace/README.md"},
+      "tool_use_id": "toolu_proof_01",
+      "tool_response": "1\t# workflow-plugin\n"
+    }
+  ]
+}

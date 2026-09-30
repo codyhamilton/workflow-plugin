@@ -11,3 +11,5 @@ tools/driver/.assert-log.jsonl
 
 # Driver run record (external observability; not in plan folder)
 tools/driver/.run-record.jsonl
+tools/driver/.jev-signal-log.jsonl
+tools/driver/.jev-signal-audit.jsonl
