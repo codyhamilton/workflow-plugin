@@ -13,7 +13,8 @@ The **driver** is a small Python toolkit the bot calls in a fixed loop:
 | 1 | `status.py <plan-folder>` | Read-only JSON: open phase, closed trailers, `done` |
 | 2 | `run.py <plan-folder> --once` | One fresh phase session; returns `workflow-report` + cost |
 | 3 | `assert_phase.py --state …` | Typed alignment on compact phase state; fail → stop and escalate |
-| 4 | Repeat 1→3 until `open` is `done` or report is `unsuccessful` |
+| 4 | `status.py --run-record …` (optional) | Merge external run record: last report, per-phase cost, last assert |
+| 5 | Repeat 1→4 until `open` is `done` or report is `unsuccessful` |
 
 Session classify (`tools/transcript/classify.py`) is optional visualisation only — not part of this loop.
 
@@ -95,6 +96,35 @@ python3 tools/driver/assert_phase.py --fixture-jev tools/driver/fixtures/assert/
 
 Fixtures: `tools/driver/fixtures/assert/` (`pass_state.json`, `fail_state.json`).
 
+## Run record (step 4)
+
+One JSON object per driver invocation, **outside** the plan folder (Invariant 3 unchanged). Git trailers remain ground truth for which phase is open; the record holds what git cannot: provider **turns/cost**, the **last `workflow-report`**, and **assert** slices.
+
+Default log: `tools/driver/.run-record.jsonl` (gitignored). Override with `--record PATH` on `run.py` / `assert_phase.py`, `--run-record PATH` on `status.py`, or env `DRIVER_RUN_RECORD`.
+
+| Field in record | Kept? |
+|-----------------|-------|
+| `last_report` (`status`, `phase`, `reason`) | yes |
+| `phase_dispatch` (`turns`, `cost_usd`, `provider`, `mode`) per invocation | yes |
+| `assert` (`pass`, `question_id`, `fail_branch` when fail) | yes |
+| `closed[]`, `open`, IMPLEMENTATION prose | **no** (kill line — use git via `status.py`) |
+
+`run.py --once` appends a `trigger` line and echoes the same object under `run_record` in stdout JSON. `assert_phase.py` appends an `assert` line when `--fixture-jev` or `--live` runs.
+
+Summarize without git:
+
+```bash
+python3 tools/driver/record_cli.py --record /tmp/driver-run.jsonl --plan-folder docs/plans/06-phase-driver
+```
+
+Fresh session (phase from git, status/cost from record):
+
+```bash
+python3 tools/driver/status.py docs/plans/06-phase-driver/ --run-record /tmp/driver-run.jsonl
+```
+
+Stdout adds `run_record`: `{ last_report, phases, total_cost_usd, last_assert, … }` alongside the usual git-derived fields.
+
 ## Grok Bot integration
 
 Typical unattended loop (shell or tool calls):
@@ -103,10 +133,11 @@ Typical unattended loop (shell or tool calls):
 2. If `open` is `done`, stop.
 3. **Trigger one phase** — `python3 tools/driver/run.py <plan-folder> --once` (with keys for live, or `--dry-run` in dev).
 4. Read `report.status`:
-   - `closed` → build compact state and run **`assert_phase.py`**; on fail or `stop_and_escalate`, escalate — do not auto-continue.
+   - `closed` → build compact state and run **`assert_phase.py`** (pass `--record` or `DRIVER_RUN_RECORD`); on fail or `stop_and_escalate`, escalate — do not auto-continue.
    - `incomplete` → re-dispatch once per design, then escalate.
    - `unsuccessful` → escalate to a human; do not auto-continue.
-5. Repeat from step 1.
+5. **`status.py --run-record`** when resuming in a new session — open phase from git, last report status and cumulative cost from the record.
+6. Repeat from step 1.
 
 MCP-shaped RPC (stdio JSON lines or one-shot for simple bots):
 

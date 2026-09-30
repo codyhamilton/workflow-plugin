@@ -18,6 +18,7 @@ from phase_assert import (
     evaluate_assert,
     state_hash,
 )
+from run_record import append_record, entry_from_assert, resolve_record_path
 
 DEFAULT_LOG_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -109,6 +110,18 @@ def main(argv: list[str] | None = None) -> int:
         metavar="PATH",
         help="Offline: merge answers from a fixture response JSON (no API); still evaluates",
     )
+    parser.add_argument(
+        "--record",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="Append assert slice to external run record JSONL (DRIVER_RUN_RECORD env).",
+    )
+    parser.add_argument(
+        "--no-record",
+        action="store_true",
+        help="Do not append to run record even when DRIVER_RUN_RECORD is set.",
+    )
     args = parser.parse_args(argv)
 
     state = _load_state(args.state, args.state is None)
@@ -141,6 +154,16 @@ def main(argv: list[str] | None = None) -> int:
     if live or args.fixture_jev:
         if live:
             _append_log(args.log, _log_record(state, result, jev_response))
+        record_path = None if args.no_record else resolve_record_path(args.record)
+        if record_path is not None:
+            record_entry = entry_from_assert(
+                plan=state.get("plan"),
+                slug=state.get("slug"),
+                phase=state.get("phase"),
+                result=result,
+            )
+            append_record(record_path, record_entry)
+            result = {**result, "run_record": record_entry}
         print(json.dumps(result, indent=2, ensure_ascii=False))
         return 0 if result_obj.pass_ else 2
 

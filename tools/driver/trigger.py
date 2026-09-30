@@ -15,13 +15,20 @@ for _path in (_DRIVER, _PROVIDERS):
 
 from base import DispatchTarget, ProviderUnavailable  # noqa: E402
 from report import ReportParseError, WorkflowReport, parse_workflow_report  # noqa: E402
-from resolve import PhaseStatus, ResolveError, resolve_plan_folder  # noqa: E402
+from resolve import (  # noqa: E402
+    PhaseStatus,
+    ResolveError,
+    detect_default_branch,
+    resolve_plan_folder,
+    _git_root,
+)
 from picker import select_provider  # noqa: E402
 
 
 @dataclass(frozen=True)
 class TriggerOutcome:
     status: PhaseStatus
+    default_branch: str | None
     skipped: bool
     skip_reason: str | None
     dispatch: dict[str, Any] | None
@@ -35,6 +42,7 @@ class TriggerOutcome:
     def to_json_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "status": self.status.to_json_dict(),
+            "default_branch": self.default_branch,
             "skipped": self.skipped,
             "skip_reason": self.skip_reason,
             "dispatch": self.dispatch,
@@ -65,14 +73,19 @@ def trigger_once(
     fixture_output: Path | None = None,
     review_posture: str = "terminal",
 ) -> TriggerOutcome:
+    plan_folder = plan_folder.resolve()
+    repo_root = _git_root(plan_folder)
+    resolved_default_branch = detect_default_branch(repo_root, default_branch)
     status = resolve_plan_folder(
         plan_folder,
+        repo_root=repo_root,
         default_branch=default_branch,
     )
 
     if status.open == "done":
         return TriggerOutcome(
             status=status,
+            default_branch=resolved_default_branch,
             skipped=True,
             skip_reason="Run already has Workflow-Phase done trailer; nothing to dispatch.",
             dispatch=None,
@@ -118,6 +131,7 @@ def trigger_once(
 
     return TriggerOutcome(
         status=status,
+        default_branch=resolved_default_branch,
         skipped=False,
         skip_reason=None,
         dispatch=dispatch_info,

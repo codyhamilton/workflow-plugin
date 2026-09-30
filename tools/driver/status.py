@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from resolve import ResolveError, resolve_plan_folder
+from run_record import merge_status_with_record, resolve_record_path, summarize
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -29,6 +30,21 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Default branch for git log <default>..HEAD (default: detect origin/HEAD)",
     )
+    parser.add_argument(
+        "--run-record",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Merge rollup from external run record JSONL (DRIVER_RUN_RECORD if unset). "
+            "Open phase still comes from git only."
+        ),
+    )
+    parser.add_argument(
+        "--no-run-record",
+        action="store_true",
+        help="Do not read run record even when DRIVER_RUN_RECORD is set.",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -40,7 +56,17 @@ def main(argv: list[str] | None = None) -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
-    json.dump(status.to_json_dict(), sys.stdout, indent=2)
+    payload = status.to_json_dict()
+    record_path = None if args.no_run_record else resolve_record_path(args.run_record)
+    if record_path is not None:
+        try:
+            plan_path = payload["plan"]
+        except KeyError:
+            plan_path = str(args.plan_folder)
+        summary = summarize(record_path, plan=plan_path)
+        payload = merge_status_with_record(payload, summary)
+
+    json.dump(payload, sys.stdout, indent=2)
     sys.stdout.write("\n")
     return 0
 

@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from resolve import ResolveError
+from run_record import append_record, entry_from_trigger, resolve_record_path
 from trigger import trigger_once
 
 
@@ -59,6 +60,21 @@ def main(argv: list[str] | None = None) -> int:
         default="terminal",
         help="Review posture passed to the phase agent (wrap-up only).",
     )
+    parser.add_argument(
+        "--record",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Append one run-record JSON line per invocation (default: DRIVER_RUN_RECORD env). "
+            "Does not write inside the plan folder."
+        ),
+    )
+    parser.add_argument(
+        "--no-record",
+        action="store_true",
+        help="Do not append to the run record even when DRIVER_RUN_RECORD is set.",
+    )
     args = parser.parse_args(argv)
 
     if not args.once:
@@ -82,7 +98,28 @@ def main(argv: list[str] | None = None) -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
-    json.dump(outcome.to_json_dict(), sys.stdout, indent=2)
+    payload = outcome.to_json_dict()
+    record_path = None if args.no_record else resolve_record_path(args.record)
+    if record_path is not None:
+        status = outcome.status
+        dispatch = outcome.dispatch
+        target = (dispatch or {}).get("target") if dispatch else None
+        record_entry = entry_from_trigger(
+            plan=status.plan,
+            slug=status.slug,
+            default_branch=outcome.default_branch,
+            skipped=outcome.skipped,
+            report=payload.get("report"),
+            dispatch_target=target,
+            turns=outcome.turns,
+            cost_usd=outcome.cost_usd,
+            provider=outcome.provider,
+            mode=outcome.mode,
+        )
+        append_record(record_path, record_entry)
+        payload["run_record"] = record_entry
+
+    json.dump(payload, sys.stdout, indent=2)
     sys.stdout.write("\n")
     return 0
 
