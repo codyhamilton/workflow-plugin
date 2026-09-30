@@ -110,6 +110,49 @@ class TestAssertCli(unittest.TestCase):
         self.assertIsNotNone(jev)
         self.assertTrue(jev["disagreed_with_deterministic"])
 
+    def test_deterministic_pass_exit_code(self) -> None:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(ASSERT_CLI),
+                "--deterministic",
+                "--no-record",
+                "--state",
+                str(FIXTURES / "pass_state.json"),
+            ],
+            cwd=DRIVER_DIR,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        data = json.loads(proc.stdout)
+        self.assertTrue(data["pass"])
+        self.assertEqual(data["decision_source"], "deterministic")
+        self.assertIsNone(data["jev"])
+
+    def test_deterministic_fail_exit_code(self) -> None:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(ASSERT_CLI),
+                "--deterministic",
+                "--no-record",
+                "--state",
+                str(FIXTURES / "fail_state.json"),
+            ],
+            cwd=DRIVER_DIR,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 2, proc.stdout)
+        data = json.loads(proc.stdout)
+        self.assertFalse(data["pass"])
+        self.assertEqual(data["decision_source"], "deterministic")
+        self.assertEqual(data["fail_branch"], "stop_and_escalate")
+        self.assertIsNone(data["jev"])
+
     def test_fixture_jev_pass_exit_code(self) -> None:
         proc = subprocess.run(
             [

@@ -90,12 +90,15 @@ Compact **state JSON** (not a transcript snapshot): closing-record headings and 
 
 ```bash
 python3 tools/driver/assert_phase.py --dry-run --state tools/driver/fixtures/assert/pass_state.json
+python3 tools/driver/assert_phase.py --deterministic --no-record \
+  --state tools/driver/fixtures/assert/pass_state.json
 python3 tools/driver/assert_phase.py --state state.json --live   # TYPESAFE_API_KEY; appends JSONL
 python3 tools/driver/assert_phase.py --fixture-jev tools/driver/fixtures/assert/pass_jev_response.json \
   --state tools/driver/fixtures/assert/pass_state.json
 ```
 
 - **Model:** TypeSafe Jev pin `jev-1.13.0` when `TYPESAFE_API_KEY` is set; `--dry-run` (or no key) prints the request JSON only.
+- **`--deterministic`:** result JSON and exit 0 (pass) or 2 (fail). No Jev POST and no classify. This is the gate when `TYPESAFE_API_KEY` is unset — without the flag, a missing key prints the request and exits 0 without evaluating.
 - **Log:** `tools/driver/.assert-log.jsonl` (gitignored), separate from `tools/transcript/.classify-log.jsonl`.
 - **Question:** `outcome-evidence` — Score on whether the closing record evidences the design outcome; documented pass threshold **≥ 2.5** on the Jev score.
 - **Pass/fail (authoritative):** deterministic checks on the same state (report `closed`, trailer/report phase match, Verification + Carried headings, outcome or substantive verification text).
@@ -169,7 +172,7 @@ Typical unattended loop (shell or tool calls):
 2. If `open` is `done`, stop.
 3. **Trigger one phase** — `python3 tools/driver/run.py <plan-folder> --once` (with keys for live, or `--dry-run` in dev).
 4. Read `report.status`:
-   - `closed` → build compact state and run **`assert_phase.py`** (pass `--record` or `DRIVER_RUN_RECORD`); on fail or `stop_and_escalate`, escalate — do not auto-continue.
+   - `closed` → build compact state and run **`assert_phase.py --deterministic`** (add `--live` only to log a Jev score; pass/fail stays deterministic). On fail or `stop_and_escalate`, escalate — do not auto-continue.
    - `incomplete` → re-dispatch once per design, then escalate.
    - `unsuccessful` → escalate to a human; do not auto-continue.
 5. **`status.py --run-record`** when resuming in a new session — open phase from git, last report status and cumulative cost from the record.
@@ -198,4 +201,12 @@ No headless `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` is available in the workflow
 python3 -m unittest discover -s tools/driver/tests -p 'test_*.py'
 ```
 
-Includes `check_skills.py` and `install.sh --print-route` / core-only copy (`WORKFLOW_INSTALL_SKIP_REFRESH=1`, no network).
+Includes `check_skills.py` and `install.sh --print-route` / core-only copy (`WORKFLOW_INSTALL_SKIP_REFRESH=1`, no network). Also runs `evals/scenarios/trailer-completeness/verify.py`.
+
+## Outcome row (step 6)
+
+Fixture stand-in, not a live dogfood: [`evals/scenarios/trailer-completeness/`](../../evals/scenarios/trailer-completeness/). The verifier shells out to `status.py`, `run.py --once`, and `assert_phase.py --deterministic`. Classify is not a score.
+
+```bash
+python3 evals/scenarios/trailer-completeness/verify.py
+```
