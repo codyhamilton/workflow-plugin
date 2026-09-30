@@ -26,8 +26,10 @@ No in-repo hook implementations for these events yet; this note captures **publi
 - `docs/lab/README.md` — SessionStart / unattended skills (related bootstrap, not PostToolBatch).
 - `docs/lab/ANALYSIS/2026-09-30-grokbot-driver-reorient.md` — hooks + cloud-safe skills; bot event log = driver stdout + assert JSONL + git.
 
-## Open implementation questions (for white paper)
+## Closed (2026-09-30 proofs)
 
-- Which events are available in **headless / cloud** vs local Claude Code only?
-- How to pass **brief id / phase / unit** into hook state without reloading full skills?
-- Where to write hook signal JSONL so Grok Bot and weekly FINDINGS can skim it (parallel to `.run-record.jsonl`)?
+See [`proofs/post-tool-batch-hooks.md`](proofs/post-tool-batch-hooks.md) and [`proofs/README.md`](proofs/README.md). Summary:
+
+- **Events:** Same hook set in CLI, IDE, Desktop, and Claude cloud; Cursor Cloud agents have no Claude hooks — use `tools/driver/.jev-signal-log.jsonl`.
+- **State:** `session_id`, `transcript_path`, optional `agent_id`; turns from PostToolBatch counter or transcript scan; brief/phase via git trailer or driver env (documented, not default).
+- **Log path:** `WORKFLOW_JEV_SIGNAL_LOG` → default `tools/driver/.jev-signal-log.jsonl` (gitignored).

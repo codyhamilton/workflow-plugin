@@ -1,0 +1,4 @@
+{"type":"user","message":{"content":[{"type":"text","text":"start"}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"ok"}],"usage":{"input_tokens":40000,"cache_read_input_tokens":0,"output_tokens":10}}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"tools"}],"usage":{"input_tokens":90000,"cache_read_input_tokens":20000,"output_tokens":50}}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"more"}],"usage":{"input_tokens":128000,"cache_read_input_tokens":5000,"output_tokens":20}}}

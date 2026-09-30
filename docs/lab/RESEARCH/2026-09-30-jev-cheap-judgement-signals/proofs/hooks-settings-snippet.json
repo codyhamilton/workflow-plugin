@@ -1,0 +1,33 @@
+{
+  "hooks": {
+    "PostToolBatch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/post_tool_batch_signal.py"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/log_subagent_stop.py"
+            ],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

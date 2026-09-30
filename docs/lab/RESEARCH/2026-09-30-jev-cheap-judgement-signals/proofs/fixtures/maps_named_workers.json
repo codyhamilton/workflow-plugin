@@ -1,0 +1,33 @@
+{
+  "source": "evidence-maps-claude-5h.md headline workers + aggregates",
+  "aggregates": {
+    "subagents_analyzed": 150,
+    "over_ideal": 24,
+    "over_ctx_125k": 17,
+    "over_turns_100": 8
+  },
+  "workers": [
+    {
+      "id": "92a48e004519",
+      "api_turns": 296,
+      "peak_ctx": 130000,
+      "jsonl_bytes": 13312000,
+      "flags": ["OVER_TURNS", "FAT_JSONL"]
+    },
+    {
+      "id": "bb6165018de0",
+      "api_turns": 154,
+      "peak_ctx": 125000,
+      "jsonl_bytes": 3500000,
+      "flags": ["OVER_TURNS"]
+    },
+    {
+      "id": "6c87c96bd9bb",
+      "api_turns": 70,
+      "peak_ctx": 110000,
+      "jsonl_bytes": 900000,
+      "flags": [],
+      "note": "refine phase agent; use case 2 not PostToolBatch gate"
+    }
+  ]
+}
