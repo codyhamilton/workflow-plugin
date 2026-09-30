@@ -45,28 +45,43 @@ Root `README.md` lists eight falsifiable hypotheses; most still **untested** in 
 
 ---
 
-## 2026-09-30 — Strategy pass on the eight-row classify batch
+## 2026-09-30 — Classify batch measurement (superseded for prioritisation)
 
-Full argument: [`ANALYSIS/2026-09-30-strategy-pass.md`](ANALYSIS/2026-09-30-strategy-pass.md). No proposal promoted. No behaviour change.
+Full numbers and taxonomy notes: [`ANALYSIS/2026-09-30-strategy-pass.md`](ANALYSIS/2026-09-30-strategy-pass.md). No proposal promoted from that pass. The chart above remains valid; driver work does not wait on blind labels or snapshot parity.
 
-### Numbers re-derived from the log (high)
+---
 
-Same eight rows as the entry above. Extra measurements:
+## 2026-09-30 — Control and measurement reoriented to Grok Bot
 
-- **Non-state overhead** on Cursor is stable: `input_tokens − snapshot_token_estimate` = 728, 725, 729, 728.
-- **Claude state density:** `(input_tokens − 728) / snapshot_token_estimate` = 1.82, 1.99, 1.85, 1.94 (mean 1.90). Cursor state-implied tokens match the chars/4 estimate. Same questions and model, so the gap is in the Claude snapshot payload. Mechanism (newline-per-character join versus something else) is **not** confirmed; `parsers/claude.py` joins content blocks with newlines, which is only pathological if blocks are single characters.
-- **`mixed` probability is 0.0 on all 8 rows**, including `bd4f6c0d` (plan 0.37 / build 0.31 / workflow 0.29).
-- **Score confidence** ranges 0.46–0.70. None would pass a 0.8 gate. `30844998` is the illustration: kind confidence 0.85, score 2.46, score confidence 0.46, P(2)=0.47, P(3)=0.50.
-- **Alignment means** (Claude 2.28, Cursor 1.16) track kind mix (workflow/build/plan versus ops/question). Not attributed to the token-density gap.
-- **`output_tokens` is 110 on every row.** Schema size, not a signal.
-- Workflow probability ≥ 0.10 on 6/8 rows. Collision of “subject is the workflow plugin” with plan/build is the leading taxonomy issue. Unresolved until blind labels.
+### Policy (high)
 
-### Decisions (high for the policy, medium for the taxonomy revision trigger)
+Cody's updated remit, written through in [`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](ANALYSIS/2026-09-30-grokbot-driver-reorient.md) and reflected in `GOALS.md` / `BACKLOG.md` / `RESEARCH/`:
 
-- Provisional review exemption stays at kind confidence ≥ 0.8. It is not a calibrated accuracy bar. 80% agreement is not claimable until ≥ 10 labeled rows sit above that line on one snapshot generation (3 rows qualify today).
-- Do not gate or rank sessions on `workflow_alignment`.
-- Do not pool later classify rows with these hashes if the snapshot builder changes.
-- Hypothesis 8 already has an observational-partial writeup in `docs/analysis/2026-09-08-workflow-vs-field.md` (quadratic cost supported; “nearly always cheaper” unsupported; 40–75 turns is a crossover). Ledger entry still to be written into FINDINGS by the next measurement move. Eval corpus remains empty on purpose until an external verifier exists.
+- Optimise three layers: the workflow, observability, and **end-to-end control by Grok Bot** (or an equivalent unattended driver).
+- Jev is for **assert hooks** (alignment, logging, steering at phase boundaries).
+- `classify.py` is **visualisation** of session kind. The 8-row batch earlier in this file stays a sample chart. Its sub-0.8 rows and the Claude snapshot-size hypothesis are **not** blockers.
+- Composer collects observations; Grok writes strategy. This entry is the strategy pass.
+
+### Ranked next engineering steps (high as priorities, untested as outcomes)
+
+1. Read-only phase **status** JSON from `Workflow-Phase:` trailers.
+2. Bot-callable **one-phase trigger** (CLI `--once` or MCP).
+3. One **Jev assert** with a fail branch; kill if it disagrees with a deterministic check.
+4. External **run record** (report, cost, asserts) — no status file in the plan folder.
+5. **SessionStart** / cloud install so core skills exist with no human prompt.
+6. One **outcome row** (verifier + trailers + cost) that classify does not gate.
+
+Success metrics and kill lines are in the analysis doc. No driver code landed with this pass.
+
+### Proposals (high)
+
+| Proposal | Status after this pass |
+|----------|------------------------|
+| `2026-09-30-jev-hook-assertion-spike.md` | **proposed** — retargeted to a steering assert |
+| `2026-09-30-first-eval-scenario.md` | **proposed** — score is verifier + cost |
+| `2026-09-30-classify-human-label-workflow.md` | **deferred** |
+| `2026-09-30-snapshot-claude-text-join.md` | **deferred** |
+| `2026-09-30-spike-design-archive.md` | **deferred** (POC archive) |
 
 ---
 

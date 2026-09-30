@@ -1,58 +1,53 @@
 # Goals — workflow-plugin optimisation
 
-_Last updated: 2026-09-30 strategy pass (UTC). Maintained by Workflow Optimiser + Cody._
+_Last updated: 2026-09-30 (Brisbane), Grok Bot reorientation. Maintained by Workflow Optimiser + Cody._
+
+Strategy pass: [`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](ANALYSIS/2026-09-30-grokbot-driver-reorient.md).
 
 ## North star
 
-Improve **outcome quality per token** for the design → phased refine/execute → review → close-out loop (core `workflow` plugin), measured on real repos and harvested pipeline outcomes — without breaking cloud-safe defaults.
+Improve **outcome quality per token** for the design → phased refine/execute → review → close-out loop, measured on real runs the automated driver can observe — trailer-complete phases, verifier results, and provider cost — while core skills stay cloud-safe.
 
-## Current remit (Q4 2026)
+## Current remit
 
-1. **Optimise the plugin itself** — skills, brief patterns, evals, and lab tooling — not a new marketplace product.
-2. **Measure success** — honest classify and snapshot metrics first; an external eval scenario only when it has a verifier; transcript + Jev signals for cost/behaviour regressions. A frozen baseline is a milestone, not a verdict.
-3. **Cheap typed evaluation** — Jev Choice/Score over compact snapshots (`tools/transcript/classify.py`), not whole-transcript LLM judging.
-4. **Operational model policy** — cloud agents on Composer; Grok 4.7 medium for deep research passes; no fast tier; no high-context models by default.
-5. **Ship safely** — additive docs and tooling on `master`; behaviour-breaking skill changes only via explicit versioned releases.
+1. **The workflow** — cloud-safe core skills, verbatim briefs, `Workflow-Phase:` trailers, cold reads between phases.
+2. **Observability** — a fresh process (the bot, a later session, this notebook) can read phase state, the last report, per-phase cost, and assert results without opening a transcript.
+3. **Control** — **Grok Bot** or a similar unattended driver runs the loop end to end. Humans escalate on `unsuccessful`. They are not the default phase dispatcher.
+4. **Jev asserts** — TypeSafe Jev (`jev-1.13.0`) at phase boundaries for alignment, logging, and steering. Session classify (`tools/transcript/classify.py`) is visualisation only.
+5. **Measurable outcomes** — evals and dogfood runs scored by verifiers, trailers, and cost. Classify labels do not gate those scores.
+6. **Model split** — Composer (or an equivalent collector) gathers raw observations. Grok does strategy passes over that material.
+7. **Ship safely** — additive docs and tooling on `master`. Behaviour-breaking skill changes only via explicit versioned releases.
 
 ## Success metrics
 
-Strategy pass (2026-09-30) tightened these so a single unlabelled batch or a single self-scenario cannot close them. Detail: [`ANALYSIS/2026-09-30-strategy-pass.md`](ANALYSIS/2026-09-30-strategy-pass.md).
-
 | Metric | Target | How we know |
 |--------|--------|-------------|
-| Snapshot parity | Confirm or kill the Claude state token-density gap (~1.9× chars/4 estimate on the 2026-09-30 batch; Cursor matches) | FINDINGS paragraph: newline ratio, readability, mechanism verdict |
-| Classify pilot | All 8 current rows blind-labeled; agreement reported **split** at confidence ≥ 0.8 vs below | FINDINGS table. Publishing the table is success. Hitting 80% is not required |
-| Classify calibration (claim) | ≥80% agreement when `confidence ≥ 0.8`, only once **n ≥ 10** such labeled rows exist on one snapshot generation | JSONL `human_label` + FINDINGS. Not claimable on the current 3/8 |
-| Hypothesis status | Ledger line for all 8 README hypotheses; #8 recorded as observational-partial from the 2026-09-08 analysis, with the unmeasured remainder named | `FINDINGS.md` |
-| Eval corpus | External scenario spec (repo, pinned commit, verifier) **or** an explicit kill of the in-repo self-scenario. A frozen `baseline/` is a later milestone, not a verdict | `evals/scenarios/*/source.md` or a FINDINGS kill line |
-| Research hygiene | New external refs mapped to skills/evals when they change decisions | `RESEARCH/INDEX.md` updated |
-
-`workflow_alignment` is not a KPI until a human 0–3 exists. Cross-source score comparisons wait on snapshot parity. Do not grow the classify corpus for pooled metrics before that parity note.
-
-## Focus order
-
-Attention order from the 2026-09-30 strategy pass, not an effort estimate.
-
-1. **First window — honest ruler.** Snapshot parity dump; blind kind labels on the existing eight rows.
-2. **Second window — status, not a run.** Hypothesis ledger; external `source.md` only if a verifier can be named, otherwise kill the in-repo first scenario. Parser fix only if move 1 confirms the mechanism.
-3. **Third window — one baseline or stop.** One frozen baseline on an external spec, or leave `evals/scenarios/` empty and keep measurement observational. No Jev artifact hook and no driver in this window.
+| Bot phase advance | A ≥2 phase design reaches `done`, or stops at the first `unsuccessful`, with zero human `execute` dispatches | Driver/bot log in `FINDINGS.md` |
+| Phase status | Resolver JSON matches hand resolution on a fixture set (open phase, wrap-up, done) | Fixture run; bot consumes JSON only |
+| Assert steer | One Jev assert, pass fixture and fail fixture, logged; fail fixture takes the fail branch | Assert JSONL + fixture note |
+| Outcome row | ≥1 run with verifier pass/fail, trailer list, and cost; classify not in the gate | `FINDINGS.md` or `evals/` |
+| Cloud skills | Fresh unattended session lists core skills with no human install step | Hook, image bake, or Cursor `install.sh` note |
+| Research hygiene | External refs mapped to bot, hooks, trailers, or asserts when they change decisions | `RESEARCH/INDEX.md` |
 
 ## Non-goals (this quarter)
 
-- Replacing harness orchestration with a mandatory `tools/driver/` deployment (driver remains design-only).
-- Storing full message bodies in a conversation indexer (see `docs/design/conversation-indexer.md`).
-- Online per-turn gating of live agents via Jev (batch/offline classify first).
+- Classify calibration, `human_label` gates, and Claude/Cursor snapshot parity as blockers or KPIs.
+- Per-turn Jev gating inside worker loops.
+- Requiring the lab plugin (`iterate`, `workflow-tuning`) on the bot path.
+- A status file inside the plan folder (invariant: nothing in the repo carries status).
+- Storing full message bodies in a conversation indexer.
+- Deleting the naive coordinator path on harnesses that already nest two levels. That path stays; the bot path is what we measure next.
 
 ## Skill loop under optimisation
 
-The Optimiser explicitly maps research and proposals to these stages:
-
-| Stage | Skill | Optimisation levers |
-|-------|--------|---------------------|
-| Bound change | `design` | Phase outcomes, assumption ledger, verbatim intent |
+| Stage | Skill or tool | Optimisation levers |
+|-------|----------------|---------------------|
+| Bound change | `design` | Headless assumption ledger for the bot; verbatim intent |
 | Decompose | `refine` | Brief density, unit budgets, bounce rules |
-| Build | `execute` | Worker routing, per-phase verification, trailers |
+| Build | `execute` | One phase, trailer, report, then stop |
+| Drive | Grok Bot + `tools/driver/` | Status, one-phase trigger, loop ownership |
+| Align | Jev assert hook | Compact phase state, log, steer or escalate |
 | Judge | `comprehensive-review` | Outcome-keyed review, remediation split |
 | Finish | `close-out` | Record shape, contract promotion |
-| Pipeline | `post-build` | Classify/right-size, QA derivation |
-| Lab | `iterate`, `workflow-tuning`, `transcript-parser` | Divergence patterns, lessons corpus, cost extraction |
+| Pipeline | `post-build` | Right-size, QA derivation, required checks |
+| See | transcript tools, classify | Cost extraction and session-kind **charts**, not gates |

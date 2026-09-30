@@ -11,27 +11,28 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 | Research, goals, findings, proposals | **Workflow Optimiser** (agent + Cody) | `docs/lab/` |
 | Long-form architecture & plans | humans + design skill | `docs/ARCHITECTURE.md`, `docs/plans/` |
 | Eval harness layout | workflow-tuning | `evals/` |
-| Transcript / classify tooling | engineering spikes | `tools/transcript/` |
+| Transcript tooling (cost, extract, classify viz) | engineering spikes | `tools/transcript/` |
+| Bot driver (status, one-phase trigger, asserts) | engineering spikes | `tools/driver/` (design only until built; see `docs/plans/06-phase-driver/`) |
 
 ## Cadence
 
 - **Weekly (light):** skim `FINDINGS.md`, update `GOALS.md` if remit shifted, triage `BACKLOG.md`, move or close items in `PROPOSALS/`.
-- **After a notable run:** append a dated bullet to `FINDINGS.md` (session classify, eval result, merged PR harvest).
+- **After a notable run:** append a dated bullet to `FINDINGS.md` (bot/driver log, assert result, eval verifier, merged PR harvest). Session classify may be attached as a chart; it is not the result.
 - **When exploring a theme:** add or extend a note under `RESEARCH/` and link it from `RESEARCH/INDEX.md`.
 
 ## How to use this space
 
 1. Start from [`GOALS.md`](GOALS.md) for current success metrics and focus order.
 2. Read [`FINDINGS.md`](FINDINGS.md) for the latest grounded state of the plugin and tooling.
-3. Read the latest strategy pass under [`ANALYSIS/`](ANALYSIS/) before promoting a proposal.
-4. Open [`PROPOSALS/`](PROPOSALS/) for draft work items (status in each file’s frontmatter).
-5. Follow [`ANALYSIS/README.md`](ANALYSIS/README.md) into deeper case studies under `docs/analysis/`.
-6. Browse [`RESEARCH/INDEX.md`](RESEARCH/INDEX.md) for external references mapped to this plugin’s skills and eval strategy.
+3. Open [`PROPOSALS/`](PROPOSALS/) for draft work items (status in each file’s frontmatter).
+4. Read the current strategy pass via [`ANALYSIS/README.md`](ANALYSIS/README.md), then the case studies under `docs/analysis/`.
+5. Browse [`RESEARCH/INDEX.md`](RESEARCH/INDEX.md) for external references mapped to the bot, hooks, trailers, and asserts.
 
 ## Agent defaults (Optimiser remit)
 
-- **Cloud agents:** Composer default; **Grok 4.7 medium** for heavy synthesis — avoid “fast” and avoid high-context models unless explicitly requested.
-- **Typed eval:** TypeSafe Jev (`jev-1.13.0` pinned) for cheap structured labels over transcript snapshots (`tools/transcript/classify.py`).
+- **Control target:** Grok Bot (or an equivalent unattended driver) runs phases. Humans escalate on `unsuccessful`. Current strategy: [`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](ANALYSIS/2026-09-30-grokbot-driver-reorient.md).
+- **Collection vs strategy:** Composer (or an equivalent cheap collector) gathers trailers, costs, transcripts, and assert rows. **Grok** writes strategy passes. Avoid the fast tier; avoid high-context models unless a pass truly needs them.
+- **Jev:** TypeSafe (`jev-1.13.0` pinned) for **assert hooks** — alignment, logging, steering on compact phase state. `tools/transcript/classify.py` is visualisation of session kind, not a KPI.
 - **Landing policy:** additive, non-breaking changes merge to `master`.
 
 ## Related entry points
@@ -40,3 +41,4 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 - Operating hypotheses: root [`README.md`](../../README.md) § Operating hypotheses
 - Eval format: [`evals/README.md`](../../evals/README.md)
 - Transcript toolkit: [`tools/transcript/README.md`](../../tools/transcript/README.md)
+- Phase driver design: [`docs/plans/06-phase-driver/DESIGN.md`](../plans/06-phase-driver/DESIGN.md)

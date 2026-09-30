@@ -1,6 +1,7 @@
 ---
 title: First eval scenario from a known workflow-plugin change
 status: proposed
+updated: 2026-09-30
 author: Workflow Optimiser
 date: 2026-09-30
 ---
@@ -22,8 +23,12 @@ date: 2026-09-30
 ## Success criteria
 
 - Non-empty baseline folder.
-- `cost-comparison.md` and `quality-comparison.md` for the first run.
-- Linked from `FINDINGS.md` and `GOALS.md` success metrics table.
+- A **verifier** result (command, artifact rubric, or trailer completeness) plus cost. Classify output may be attached and does not gate the row.
+- Linked from `FINDINGS.md`. Prefer a run the bot drove (status + one-phase trigger) once that path exists; a single orchestrated run is acceptable as the first row.
+
+## Kill line
+
+If the only quality signal is a person reading the diff, leave the scenario empty and say so in FINDINGS. Do not substitute session-kind agreement.
 
 ## Skill mapping
 

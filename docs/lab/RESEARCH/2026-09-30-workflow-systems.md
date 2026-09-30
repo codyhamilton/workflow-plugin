@@ -1,8 +1,10 @@
 # Deep dive: How agentic / LLM workflow systems are designed
 
 **Date:** 2026-09-30 (Australia/Brisbane)  
-**Author:** Workflow Optimiser (seed)  
+**Author:** Workflow Optimiser (seed; implications revised the same day)  
 **Scope:** Patterns that inform workflow-plugin — not a framework comparison for greenfield apps.
+
+**Policy (later the same day):** Grok Bot (or an equivalent unattended driver) owns the loop. Jev is for phase-boundary asserts. Session classify is visualisation. Authoritative write-up: [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Sections 4–8 below match that policy.
 
 ---
 
@@ -27,9 +29,9 @@ workflow-plugin already encodes a **predetermined workflow** (design → refine 
 
 **Implication (high confidence):**
 
-- **`design` / `refine`** contexts should emphasise reasoning over artifacts (plans, contracts) with minimal tool thrash.
-- **`execute`** contexts should emphasise tool use bounded by briefs — orchestrator reasons on `IMPLEMENTATION.md`, workers act on code.
-- **Evals** should capture trajectories (transcript tools), not only `DESIGN.md` / `IMPLEMENTATION.md` finals — otherwise we cannot see ReAct-style failure modes.
+- **Grok Bot** holds a short reason step over status and the last report, then takes one environment action (`trigger_phase`). It does not absorb the phase transcript.
+- **`execute`** contexts emphasise tool use bounded by briefs — the phase orchestrator reasons on artifacts, workers act on code.
+- **Diagnosis** uses trailers, the `workflow-report`, per-phase cost, and assert logs. Transcript tools remain available for worker-level forensics.
 
 ### Orchestrator–worker (LangGraph pattern)
 
@@ -37,9 +39,9 @@ workflow-plugin already encodes a **predetermined workflow** (design → refine 
 
 **Implication (high confidence):**
 
-- **`refine`** is the orchestrator for a **single phase**; **`execute`** dispatches workers per brief — classic orchestrator–worker with a fixed phase boundary.
-- **`iterate`** is orchestrator–worker with **unknown worker count** (divergent candidates) — closer to LangGraph’s dynamic fan-out than core `execute`.
-- **Risk:** supervisor misrouting and worker echo loops — mitigated here by **disjoint brief ownership** and **phase trailers** (`Workflow-Phase:`).
+- **Grok Bot** is the supervisor across phases and does no phase work. **`execute`** is the orchestrator for a **single phase** and dispatches workers per brief.
+- **`iterate`** (lab, not on the bot's required path) is orchestrator–worker with an **unknown worker count**.
+- **Risk:** supervisor misrouting and worker echo loops — mitigated by **disjoint brief ownership**, **phase trailers**, and a bot that only advances when status says the phase closed.
 
 ### SWE-agent: the interface is the product
 
@@ -47,8 +49,9 @@ workflow-plugin already encodes a **predetermined workflow** (design → refine 
 
 **Implication (high confidence):**
 
-- Skill markdown + brief templates + git trailers are our ACI. Optimising the plugin is often **interface design** (what workers see, what is verbatim, what is forbidden).
-- **`transcript-parser`** and **`classify.py`** are how we measure ACI changes — tool histograms and session kind labels should move when skills change.
+- Skill markdown + brief templates + git trailers are the **worker** ACI.
+- The **bot** ACI is a small CLI/MCP: `status`, `trigger_phase`, and an assert result. Optimising control means designing that surface, not labeling chats.
+- **`transcript-parser`** still extracts cost when the provider did not print it. **`classify.py`** can show whether the mix of session kinds shifted; it does not measure the bot ACI.
 
 ---
 
@@ -60,8 +63,8 @@ workflow-plugin already encodes a **predetermined workflow** (design → refine 
 
 **Implication (medium confidence):**
 
-- Core workflow is a **linear graph** with optional bounce (`refine` → `design`). `iterate` adds **cycles** (diverge → judge → reconcile).
-- If we implement `tools/driver/`, represent phases as **checkpoints** (resume after human or CI) similar to LangGraph interrupt/checkpoint patterns described in practitioner guides — see [Phoenix LangGraph cookbook](https://arizeai-433a7140.mintlify.app/docs/phoenix/cookbook/agent-workflow-patterns/langgraph) (evaluator–optimizer, supervisor).
+- Core workflow is a **linear graph** with optional bounce (`refine` → `design`). `iterate` adds **cycles** (diverge → judge → reconcile) off the unattended path.
+- `tools/driver/` checkpoints are the **`Workflow-Phase:` trailers** already specified in `docs/plans/06-phase-driver/DESIGN.md`. The bot resumes from git, not from a carried transcript. A person is resumed only on `unsuccessful`.
 
 ### AutoGen: conversation as program
 
@@ -69,9 +72,9 @@ workflow-plugin already encodes a **predetermined workflow** (design → refine 
 
 **Implication (high confidence):**
 
-- **Briefs routed verbatim** ≈ AutoGen messages with fixed recipients — aligns with README hypothesis #2 (briefs beat messengers).
-- **Human input** modes map to interactive `design` checkpoints and assumption ledgers.
-- v0.4’s event/actor model ([Microsoft Research article](https://www.microsoft.com/en-us/research/articles/autogen-v0-4-reimagining-the-foundation-of-agentic-ai-for-scale-extensibility-and-robustness/)) suggests that if we outgrow skill prompts, an explicit event log may scale better than transcript-only forensics.
+- **Briefs routed verbatim** ≈ AutoGen messages with fixed recipients — aligns with README hypothesis #2 (briefs beat messengers). The bot routes the plan folder; it does not paraphrase the brief.
+- **Unattended design** uses the headless assumption ledger. Interactive checkpoints remain the human path.
+- v0.4’s event/actor model ([Microsoft Research article](https://www.microsoft.com/en-us/research/articles/autogen-v0-4-reimagining-the-foundation-of-agentic-ai-for-scale-extensibility-and-robustness/)) maps onto driver events (report, cost, assert) rather than a second transcript store.
 
 ### OpenHands SDK: production agent stack
 
@@ -79,9 +82,9 @@ workflow-plugin already encodes a **predetermined workflow** (design → refine 
 
 **Implication (medium confidence):**
 
-- **`workflow` core** ≈ remote/sandboxed pipeline workspace; **`workflow-lab`** ≈ local workspace with richer tools.
-- **`post-build`** QA + exact-SHA deploy proof ≈ OpenHands-style confirmation before irreversible ops.
-- **Condenser / context management** lessons support README hypothesis #8 (cost ∝ context × turns) — fresh orchestrator per phase is our condenser.
+- **`workflow` core** is what an unattended session installs (SessionStart hook, Cursor `install.sh`, or image bake). **`workflow-lab`** stays off that path.
+- **`post-build`** QA + exact-SHA deploy proof ≈ OpenHands-style confirmation before irreversible ops, invoked by the bot as a stage rather than by a person watching the terminal.
+- **Condenser / context management** lessons support README hypothesis #8 (cost ∝ context × turns) — a fresh phase session, started by the driver, is our condenser. The bot's own context stays on status and reports.
 
 ---
 
@@ -96,10 +99,11 @@ LangGraph docs name **evaluator–optimizer**: generate → evaluate → revise 
 | Plugin stage | Evaluator role |
 |--------------|----------------|
 | Per-phase verify in `execute` | Cheap-tier outcome check |
+| Jev assert hook | Typed steer on compact phase state, logged |
 | `comprehensive-review` | Premium evaluator on whole design |
-| Remediation briefs + re-run | Optimizer pass |
-| `evals/` harness | Offline evaluator–optimizer on full workflow |
-| Jev `classify.py` | Cheap **typed** evaluator on session behaviour (not code correctness) |
+| Remediation briefs + bot re-dispatch | Optimizer pass |
+| `evals/` harness | Offline evaluator on verifier + cost |
+| Jev `classify.py` | Optional **chart** of session kind, not a gate |
 
 ### SWE-bench style verification
 
@@ -107,8 +111,8 @@ LangGraph docs name **evaluator–optimizer**: generate → evaluate → revise 
 
 **Implication (high confidence):**
 
-- Our eval scenarios should declare **verifiers** (CI command, file rubric, or human sign-off) in `source.md`.
-- Separate **inference** (workflow run) from **grading** (harness) — same separation as SWE-agent inference vs SWE-bench eval.
+- Outcome rows declare **verifiers** (command, file rubric, or trailer completeness). A human sign-off is an escalation, not the default grader.
+- The bot's phase run is inference. Grading is the verifier plus provider cost — same separation as SWE-agent inference vs SWE-bench eval.
 
 ### Typed eval with Jev (TypeSafe)
 
@@ -116,21 +120,21 @@ LangGraph docs name **evaluator–optimizer**: generate → evaluate → revise 
 
 **Implication (high confidence):**
 
-- Use Jev where we need **calibrated probabilities** and **closed labels** — session kind, brief completeness, workflow alignment — not for compiling code.
-- Batch questions per request (Choice + Score) to minimise round trips — already in `classify.py` design.
-- **Review gate:** auto-accept Choice when `confidence ≥ 0.8`; else require `human_label` in JSONL (see FINDINGS 2026-09-30).
+- Use Jev where a **closed assert** on compact phase state can steer the bot (outcome evidence present, report consistent with the trailer) and a wrong answer is bounded by the kill line in the strategy pass.
+- Where git already decides (trailer present, phase index), skip Jev.
+- Session-kind Choice in `classify.py` may still be batched for visualisation. It is not a review gate and it does not block the driver. The 2026-09-30 classify batch in FINDINGS is a chart, including its low-confidence rows.
 
 ---
 
-## 5. Human-in-the-loop (HITL)
+## 5. Escalation (human on `unsuccessful` only)
 
 Sources: AutoGen human-input modes; OpenHands security/confirmation; LangGraph interrupt/checkpoint patterns (practitioner cookbooks).
 
 **Implication (medium confidence):**
 
-- **`design` interactive** and assumption ledger are HITL at plan time — prevents expensive autonomous thrash.
-- **Classify low-confidence rows** are HITL at measurement time — prevents bad metrics from poisoning eval conclusions.
-- **Do not** add HITL inside `execute` hot paths for cloud pipeline without a headless fallback (core plugin rule).
+- The **default driver is the bot**. Interactive `design` remains available for a person; the bot declares headless and gets the assumption ledger.
+- **`unsuccessful`** (approach-open, design bounce, assert fail that is trusted) is the interrupt. The bot stops and escalates. It does not open a prompt inside the phase agent.
+- Core skills keep a headless path so cloud sessions cannot dead-end. That is a standing plugin rule, and it is also the condition for SessionStart-installed skills to be usable unattended.
 
 ---
 
@@ -138,14 +142,17 @@ Sources: AutoGen human-input modes; OpenHands security/confirmation; LangGraph i
 
 LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graphs ([workflows doc](https://docs.langchain.com/oss/python/langgraph/workflows-agents)).
 
-**Our stack today (high confidence):**
+**Stack the bot reads (high confidence as design, not yet built):**
 
-- `tools/transcript/extract.py` → normalized JSON
-- `stats.py` / `cost.py` / `iterate_analysis.py` — deterministic analytics
-- `classify.py` + `.classify-log.jsonl` — typed semantic layer
-- `evals/results/` — outcome comparisons
+- `Workflow-Phase:` trailers + `DESIGN.md` → status JSON
+- `workflow-report` fence → last status and reason
+- Provider turns/cost printed per phase
+- Jev assert JSONL (separate from classify)
+- `evals/results/` when an outcome row exists
 
-**Gap:** no unified trace UI — BACKLOG addresses harvest and join keys.
+**Also in tree, not on the control path:** `tools/transcript/` extract, stats, cost, `iterate_analysis.py`, and `classify.py` (session-kind visualisation).
+
+**Gap:** `tools/driver/` is specified and not implemented. BACKLOG P0 is status, then one-phase trigger. A unified trace UI is out of scope.
 
 ---
 
@@ -154,24 +161,29 @@ LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graph
 | External pattern | workflow-plugin anchor |
 |------------------|------------------------|
 | Planner–executor | `design`+`refine` vs `execute` workers |
-| Orchestrator–worker | `execute` + briefs |
-| Supervisor routing | Human/coordinator dispatching skills |
-| Multi-agent debate | `iterate` divergence + judge |
-| Evaluator–optimizer | `comprehensive-review` + evals |
-| ACI design | Skills, briefs, trailers |
-| HITL | Interactive design, classify review gate |
-| Benchmark harness | `evals/` (fixture TBD) |
-| Typed cheap eval | Jev via `classify.py` |
+| Orchestrator–worker | `execute` + briefs, one phase |
+| Supervisor routing | **Grok Bot** via status + `trigger_phase` |
+| Checkpoints | `Workflow-Phase:` trailers |
+| Multi-agent debate | `iterate` (lab; not required unattended) |
+| Evaluator–optimizer | Phase verify, Jev assert, `comprehensive-review` |
+| Worker ACI | Skills, briefs, trailers |
+| Bot ACI | `tools/driver/` CLI/MCP |
+| Cloud bootstrap | `SessionStart` hook or `install.sh` (core only) |
+| Escalation | `unsuccessful` report, headless ledger |
+| Benchmark harness | Verifier + cost (`evals/`, fixture still empty) |
+| Typed steer | Jev assert on compact phase state |
+| Typed viz | `classify.py` session kind |
 
 ---
 
 ## 8. Open questions (for PROPOSALS / BACKLOG)
 
-1. Does Jev **workflow_alignment** Score correlate with human judgment of phase discipline? (Needs labeled data.) **2026-09-30 strategy pass:** not answerable from the eight-row log. Score confidence never reached 0.8; there is no human alignment field. Do not use Score as a KPI yet.
-2. Should session **kind** taxonomy merge with `iterate_analysis.py` phases or stay orthogonal? (Spike doc recommends orthogonal until labels settle.) **2026-09-30 strategy pass:** stay orthogonal. Disagreement is expected. `mixed` did not fire even on a three-way tie — ambiguity is not a label the model uses.
-3. When does a LangGraph-style **repair loop** belong inside `execute` verify vs bouncing to `refine`? **2026-09-30 strategy pass:** parked. Behaviour change; out of the measure-first window.
+1. Can status JSON from trailers alone drive the bot, with no read of `IMPLEMENTATION.md`? (P0 spike; kill line if no.)
+2. Which single Jev assert is safe to steer on, checked against a deterministic fixture? (P1; kill if it false-steers.)
+3. Which harness Grok Bot starts — Claude `SessionStart`, Cursor cloud `install.sh`, or a prebaked image?
+4. When does a repair loop belong inside `execute` verify versus bouncing to `refine`? (Unchanged workflow question.)
 
-The critique of this note and the reordered backlog live in [`../ANALYSIS/2026-09-30-strategy-pass.md`](../ANALYSIS/2026-09-30-strategy-pass.md).
+Parked, not open: whether `workflow_alignment` matches a human label, and whether session kind should merge with `iterate_analysis.py`. The eight-row classify measurements live in [`../ANALYSIS/2026-09-30-strategy-pass.md`](../ANALYSIS/2026-09-30-strategy-pass.md); they inform charts, not driver gates.
 
 ---
 

@@ -1,11 +1,14 @@
 ---
 title: Archive Jev classify spike design in-repo
-status: proposed
+status: deferred
+deferred_reason: POC archive for the classify visualisation. Not on the measurement path.
 author: Workflow Optimiser
 date: 2026-09-30
 ---
 
 # Archive classify spike design doc
+
+**Status: deferred / POC** (2026-09-30 strategy pass). The code on master is enough for a visualisation. An in-repo narrative can wait until someone is actively changing `classify.py`.
 
 ## Problem
 

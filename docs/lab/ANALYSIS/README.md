@@ -1,12 +1,15 @@
 # Analysis pointers
 
-Long-form case studies and retros live under `docs/analysis/`. Strategy passes for the Optimiser live in this folder. Case studies are indexed here, not copied.
+Strategy passes live in this folder. Long-form case studies and retros live under `docs/analysis/` and are indexed below — no duplication.
 
 ## Strategy passes
 
-| Date | Path | What it decided |
-|------|------|-----------------|
-| 2026-09-30 | [`2026-09-30-strategy-pass.md`](2026-09-30-strategy-pass.md) | No proposal promoted. Next three moves: snapshot parity, blind labels on the eight-row batch, hypothesis ledger plus external-scenario-or-kill. |
+| Date | Path | Decision |
+|------|------|----------|
+| 2026-09-30 | [`2026-09-30-grokbot-driver-reorient.md`](2026-09-30-grokbot-driver-reorient.md) | **Current policy.** Grok Bot drives; Jev asserts steer; classify visualises. Ranked next steps with success metrics and kill lines. |
+| 2026-09-30 | [`2026-09-30-strategy-pass.md`](2026-09-30-strategy-pass.md) | Superseded for prioritisation. Eight-row classify measurement hygiene; detailed numbers still cited from FINDINGS. |
+
+## Case studies
 
 | Date | Path | Relevance to workflow optimisation |
 |------|------|-------------------------------------|
