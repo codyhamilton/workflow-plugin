@@ -18,6 +18,7 @@ python3 tools/transcript/extract.py f06c7365 ~/workspace/open-pajero-maps > /tmp
 python3 tools/transcript/extract.py session_01GUoz3qj2N9czSfWTifD6rM   # Claude URL slug
 cat /tmp/s.json | python3 tools/transcript/stats.py
 cat /tmp/s.json | python3 tools/transcript/cost.py --label Candidate
+cat /tmp/s.json | python3 tools/transcript/classify.py --dry-run   # Jev snapshot classify (no API key)
 
 # One-shot
 python3 tools/transcript/stats.py --session latest --project ~/workspace/open-pajero-maps
@@ -36,10 +37,24 @@ python3 tools/transcript/cost.py --session latest --project ~/workspace/open-paj
 | `cost.py` | Emit `cost-comparison.md` schema via `--label Baseline\|Candidate` |
 | `search.py` | Pattern search across parent + subagent transcripts |
 | `iterate_analysis.py` | Classify spawn phases against iterate workflow |
+| `classify.py` | Jev session-kind Choice (+ optional workflow Score) from extract JSON snapshot |
 | `cost_window.py` | Token attribution from usage CSV against session wall-clock window |
 | `cost_estimate.py` | Ballpark Cursor token/cost estimate from transcript; `--reconcile-csv` compares to export |
 
 Run any script with `--help` for full options.
+
+### Jev transcript classification (spike)
+
+Builds a compact snapshot from normalized JSON (not raw JSONL), then calls TypeSafe System One with pinned model `jev-1.13.0`. Requires `TYPESAFE_API_KEY` for live calls; defaults to dry-run when the key is missing.
+
+```bash
+python3 tools/transcript/extract.py SESSION PROJECT > /tmp/s.json
+python3 tools/transcript/classify.py --dry-run < /tmp/s.json          # print request JSON
+python3 tools/transcript/classify.py --live < /tmp/s.json             # POST + append log
+python3 tools/transcript/classify.py --session latest --project PATH --live
+```
+
+Live runs append to `tools/transcript/.classify-log.jsonl` (gitignored) with `answers`, `usage`, `snapshot_hash`, and `human_label: null` for later comparison.
 
 ## Normalized output schema
 
