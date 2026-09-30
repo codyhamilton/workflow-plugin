@@ -106,6 +106,55 @@ workspace_skills_dest() {
   echo "$workspace/.cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME"
 }
 
+# Explicit WORKFLOW_INSTALL_MODE wins over ambient harness variables so an
+# image bake (mode=cloud) is not captured by a stray CLAUDECODE, and a
+# Claude hook (mode=claude-code) is not captured by HOSTNAME=cursor.
+# Unset mode keeps the historical order: Claude signals, then Cursor cloud
+# signals, then piped or non-interactive (workspace skills, core only).
+resolve_install_route() {
+  local mode="${WORKFLOW_INSTALL_MODE:-}"
+  case "$mode" in
+    claude-code) echo claude-code; return ;;
+    cloud) echo cursor-cloud; return ;;
+    interactive) echo interactive; return ;;
+  esac
+  if is_claude_code_agent; then
+    echo claude-code
+    return
+  fi
+  if should_auto_install_cursor_core; then
+    echo cursor-cloud
+    return
+  fi
+  echo interactive
+}
+
+print_install_route() {
+  local route dest reason core workspace
+  route="$(resolve_install_route)"
+  core="true"
+  dest=""
+  reason="$(auto_install_reason)"
+  case "$route" in
+    claude-code)
+      dest="${HOME}/.claude/skills"
+      ;;
+    cursor-cloud)
+      if workspace="$(find_workspace_root)"; then
+        dest="$(workspace_skills_dest "$workspace")"
+      else
+        reason="${reason}; workspace root not found"
+      fi
+      ;;
+    interactive)
+      core="false"
+      reason="interactive prompts"
+      ;;
+  esac
+  python3 -c 'import json,sys; print(json.dumps({"route":sys.argv[1],"core_only":sys.argv[2]=="true","dest":sys.argv[3] or None,"reason":sys.argv[4]}, indent=2))' \
+    "$route" "$core" "$dest" "$reason"
+}
+
 ask() {
   local prompt="$1"
   local reply=""
@@ -120,6 +169,8 @@ ask() {
 }
 
 refresh_git_checkout() {
+  # Tests and offline copies set this. Production installs still update.
+  [[ "${WORKFLOW_INSTALL_SKIP_REFRESH:-}" == "1" ]] && return 0
   local dir="$1"
   [[ -d "$dir/.git" ]] || return 0
   git -C "$dir" remote get-url origin &>/dev/null || return 0
@@ -195,6 +246,12 @@ ensure_script_dir() {
   fi
   echo "$INSTALL_SRC_CACHE"
 }
+
+# Route only — do not clone or copy. Used by tests and by the bot before install.
+if [[ "${1:-}" == "--print-route" ]]; then
+  print_install_route
+  exit 0
+fi
 
 SCRIPT_DIR="$(ensure_script_dir)"
 
@@ -410,34 +467,38 @@ install_skills() {
 echo "workflow-plugin installer"
 echo "========================="
 
-if is_claude_code_agent && ! is_interactive_install; then
-  echo "Claude Code detected ($(auto_install_reason)) — installing core workflow skills to ~/.claude/skills/."
-  echo "  (Personal-scope skills — nothing written to the repo workspace.)"
-  echo ""
-  ensure_claude_user_skills
-  echo "  Done. Core skills available at: $HOME/.claude/skills/"
-  echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-  echo "  (workflow-lab is not installed automatically; install it interactively if needed.)"
-  echo ""
-  echo "Installation complete."
-  exit 0
-fi
-
-if should_auto_install_cursor_core; then
-  echo "Non-interactive install ($(auto_install_reason)) — installing core workflow skills to workspace .cursor/skills/."
-  echo "  (Cloud agents load project skills from .cursor/skills/, not plugins/local/.)"
-  echo ""
-  ensure_cursor_workspace_skills
-  workspace="$(find_workspace_root)"
-  dest="$(workspace_skills_dest "$workspace")"
-  echo "  Done. Core skills available at: $dest"
-  echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-  echo "  Add .cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
-  echo "  (workflow-lab is not installed in cloud agent environments.)"
-  echo ""
-  echo "Installation complete."
-  exit 0
-fi
+route="$(resolve_install_route)"
+case "$route" in
+  claude-code)
+    echo "Claude Code detected ($(auto_install_reason)) — installing core workflow skills to ~/.claude/skills/."
+    echo "  (Personal-scope skills — nothing written to the repo workspace.)"
+    echo ""
+    ensure_claude_user_skills
+    echo "  Done. Core skills available at: $HOME/.claude/skills/"
+    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
+    echo "  (workflow-lab is not installed automatically; install it interactively if needed.)"
+    echo ""
+    echo "Installation complete."
+    exit 0
+    ;;
+  cursor-cloud)
+    echo "Non-interactive install ($(auto_install_reason)) — installing core workflow skills to workspace .cursor/skills/."
+    echo "  (Cloud agents load project skills from .cursor/skills/, not plugins/local/.)"
+    echo "  Cursor discovers those skills when the agent process starts. Bake this install"
+    echo "  into the image; there is no session hook that reloads skills mid-turn."
+    echo ""
+    ensure_cursor_workspace_skills
+    workspace="$(find_workspace_root)"
+    dest="$(workspace_skills_dest "$workspace")"
+    echo "  Done. Core skills available at: $dest"
+    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
+    echo "  Add .cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
+    echo "  (workflow-lab is not installed in cloud agent environments.)"
+    echo ""
+    echo "Installation complete."
+    exit 0
+    ;;
+esac
 
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then

@@ -1,4 +1,6 @@
 # Installed by workflow-plugin install.sh in cloud agent / headless environments.
+.cursor/skills/workflow/
+
 __pycache__/
 
 # Jev classify spike logs (local measurement)

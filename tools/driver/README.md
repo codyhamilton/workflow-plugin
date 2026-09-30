@@ -4,12 +4,20 @@ Deterministic phase closure and bot-callable primitives for the Grok Bot loop (`
 
 ## How Grok Bot discovers and drives the workflow
 
-Plugin **skills** (`design`, `execute`, …) are installed separately (`install.sh`, SessionStart hook, or Cursor project skills). They are **not** visible to Grok Bot until that install step runs in the consuming repo — see [`docs/lab/CONSUMING_REPO.md`](../../docs/lab/CONSUMING_REPO.md).
+Plugin **skills** (`design`, `execute`, …) are installed separately. They are **not** visible until that install has already landed on disk — see [`docs/lab/CONSUMING_REPO.md`](../../docs/lab/CONSUMING_REPO.md).
+
+| Harness | Bootstrap | Why |
+|---------|-----------|-----|
+| Cursor cloud | `docs/lab/bootstrap/cursor-cloud-setup.sh` in the **image** install, then snapshot | Agents boot from a prebaked image. Skills are read at process start. There is no session hook. |
+| Claude Code on the web | Copy `docs/lab/bootstrap/session-start.sh` + settings fragment | Fresh container per session. `reloadSkills` makes the install visible on that session. |
+
+Both paths install **core only** (never `workflow-lab`). `WORKFLOW_INSTALL_MODE=cloud` or `claude-code` forces the route.
 
 The **driver** is a small Python toolkit the bot calls in a fixed loop:
 
 | Step | CLI (today) | Purpose |
 |------|-------------|---------|
+| 0 | `check_skills.py` | Exit 0 iff the six core skill dirs exist for this harness |
 | 1 | `status.py <plan-folder>` | Read-only JSON: open phase, closed trailers, `done` |
 | 2 | `run.py <plan-folder> --once` | One fresh phase session; returns `workflow-report` + cost |
 | 3 | `assert_phase.py --state …` | Typed alignment on compact phase state; fail → stop and escalate |
@@ -125,10 +133,38 @@ python3 tools/driver/status.py docs/plans/06-phase-driver/ --run-record /tmp/dri
 
 Stdout adds `run_record`: `{ last_report, phases, total_cost_usd, last_assert, … }` alongside the usual git-derived fields.
 
+## Core skills check (step 5 bootstrap)
+
+```bash
+python3 tools/driver/check_skills.py
+./install.sh --print-route    # route JSON only; does not copy or fetch
+```
+
+`check_skills.py` prints JSON and does not use the network:
+
+```json
+{
+  "ok": true,
+  "harness": "cursor-cloud",
+  "skills_found": ["design", "refine", "execute", "comprehensive-review", "close-out", "post-build"],
+  "missing": [],
+  "skills_root": "<workspace>/.cursor/skills/workflow"
+}
+```
+
+| `harness` | `skills_root` |
+|-----------|----------------|
+| `cursor-cloud` | `<workspace>/.cursor/skills/workflow/<skill>/SKILL.md` |
+| `claude-code` | `~/.claude/skills/<skill>/SKILL.md` |
+| `interactive` | none — unattended install did not run; `ok` is false |
+
+Exit 0 only when `ok` is true. A skill counts when `<skill>/SKILL.md` is a file. Lab skills are ignored. Detection matches `install.sh` (explicit `WORKFLOW_INSTALL_MODE`, then Claude signals, then Cursor cloud signals or a non-interactive shell). This is disk presence, not a claim that the harness listed the skills in chat.
+
 ## Grok Bot integration
 
 Typical unattended loop (shell or tool calls):
 
+0. **Bootstrap once per fresh container / image**, then **`python3 tools/driver/check_skills.py`**. Stop if it exits non-zero — do not dispatch `execute` without core skills.
 1. **Read ground truth** — `python3 tools/driver/status.py <plan-folder>` → `open`, `phase`, `closed[]`.
 2. If `open` is `done`, stop.
 3. **Trigger one phase** — `python3 tools/driver/run.py <plan-folder> --once` (with keys for live, or `--dry-run` in dev).
@@ -137,7 +173,7 @@ Typical unattended loop (shell or tool calls):
    - `incomplete` → re-dispatch once per design, then escalate.
    - `unsuccessful` → escalate to a human; do not auto-continue.
 5. **`status.py --run-record`** when resuming in a new session — open phase from git, last report status and cumulative cost from the record.
-6. Repeat from step 1.
+6. Repeat from step 1 (re-run step 0 only after a fresh container).
 
 MCP-shaped RPC (stdio JSON lines or one-shot for simple bots):
 
@@ -161,3 +197,5 @@ No headless `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` is available in the workflow
 ```bash
 python3 -m unittest discover -s tools/driver/tests -p 'test_*.py'
 ```
+
+Includes `check_skills.py` and `install.sh --print-route` / core-only copy (`WORKFLOW_INSTALL_SKIP_REFRESH=1`, no network).

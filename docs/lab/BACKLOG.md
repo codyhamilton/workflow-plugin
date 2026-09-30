@@ -5,7 +5,7 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 ## P0 — automated driver
 
 - [x] **One-phase trigger** — `tools/driver/run.py --once`, `mcp_server.py` (`status` / `trigger_phase` / `poll`); provider interface + dry-run; driver never commits (spike B, 2026-09-30).
-- [ ] **Unattended core skills** — SessionStart installer hook, Cursor cloud `install.sh`, or image bake, so the bot's first turn sees core skills.
+- [x] **Unattended core skills** — Cursor cloud kill line: bake core-only `install.sh` into the image (`docs/lab/bootstrap/cursor-cloud-setup.sh`); hooks do not reload skills. Claude Code remote: copy `docs/lab/bootstrap/session-start.sh`. Gate: `python3 tools/driver/check_skills.py` (step 5, 2026-09-30). This environment's snapshot was not rebuilt.
 
 ## P1 — asserts and outcomes
 
@@ -44,3 +44,4 @@ Classify remains available as a visualisation. These items are not on the measur
 - [x] **One-phase trigger** — `tools/driver/run.py --once`, provider layer + dry-run, `mcp_server.py` (spike B step 2, 2026-09-30).
 - [x] **Jev assert hook** — `tools/driver/assert_phase.py` + `phase_assert.py`; fixtures/tests; deterministic kill line (spike C step 3).
 - [x] **Run record** — external JSONL per invocation; git + record for phase/cost/report (spike step 4).
+- [x] **Unattended core skills** — install route + disk check; Cursor image-bake recommendation; Claude SessionStart template (step 5, 2026-09-30).

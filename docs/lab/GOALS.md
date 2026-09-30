@@ -26,7 +26,7 @@ Improve **outcome quality per token** for the design → phased refine/execute �
 | Phase status | Resolver JSON matches hand resolution on a fixture set (open phase, wrap-up, done) | Fixture run; bot consumes JSON only |
 | Assert steer | One Jev assert, pass fixture and fail fixture, logged; fail fixture takes the fail branch | Assert JSONL + fixture note |
 | Outcome row | ≥1 run with verifier pass/fail, trailer list, and cost; classify not in the gate | `FINDINGS.md` or `evals/` |
-| Cloud skills | Fresh unattended session lists core skills with no human install step | Hook, image bake, or Cursor `install.sh` note |
+| Cloud skills | Fresh unattended session has the six core skills with no human install step | `check_skills.py` on the harness install root. Cursor cloud: image bake (FINDINGS bootstrap). Claude remote: SessionStart template |
 | Research hygiene | External refs mapped to bot, hooks, trailers, or asserts when they change decisions | `RESEARCH/INDEX.md` |
 
 ## Non-goals (this quarter)
