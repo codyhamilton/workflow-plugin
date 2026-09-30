@@ -120,6 +120,17 @@ Success metrics and kill lines are in the analysis doc. No driver code landed wi
 
 ---
 
+## 2026-09-30 — Run record (step 4)
+
+### Observation (high)
+
+- **`tools/driver/run_record.py`** appends one JSON object per `run.py --once` / `assert_phase.py` invocation to a log **outside** the plan folder (`tools/driver/.run-record.jsonl` by default, or `DRIVER_RUN_RECORD` / `--record`).
+- **Kill line:** record entries omit `closed[]` and other git-duplicative status; open phase still comes from `status.py` + trailers only.
+- **Resume:** `status.py --run-record PATH` merges `run_record` rollup (`last_report`, per-phase `turns`/`cost_usd`, `last_assert`, `total_cost_usd`) so a fresh bot session can state phase (git), last report status, and cost without transcripts or classify.
+- **CLI:** `record_cli.py` summarizes JSONL; tests in `test_run_record.py`.
+
+---
+
 ## Template for future entries
 
 ```markdown
