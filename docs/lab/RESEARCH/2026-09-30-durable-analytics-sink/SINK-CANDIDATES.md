@@ -53,4 +53,4 @@ Explicitly **out of scope** per remit (visualization POC only).
 
 1. **Dual-write:** local JSONL (existing paths per event family) + optional **HTTP append** when `WORKFLOW_ANALYTICS_URL` is set.  
 2. **Unify envelope** across families (`EVENT-SCHEMA.md`) so one collector ingests driver, assert, and Jev rows.  
-3. **Do not** wire into default hooks until a `PROPOSALS/` doc is accepted (Grok rewrite per stub).
+3. Proposal [`../../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../../PROPOSALS/2026-09-30-durable-analytics-sink.md) is `status: resolved`. Default hooks and the driver stay unwired; the implementation task opts in via `WORKFLOW_ANALYTICS_URL`.

@@ -1,10 +1,5 @@
-# Grok white paper — stub
+# Grok white paper — written
 
-A full **PROPOSALS/** white paper for durable analytics should be written by **Grok** after this research pack merges, using:
+The resolved proposal is [`../../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../../PROPOSALS/2026-09-30-durable-analytics-sink.md) (`status: resolved` — recommendations accepted pending product wiring). Proofs: master `1bff769` (PR #27).
 
-- [`SIGNAL.md`](SIGNAL.md), [`FINDINGS.md`](FINDINGS.md), [`SINK-CANDIDATES.md`](SINK-CANDIDATES.md), [`EVENT-SCHEMA.md`](EVENT-SCHEMA.md)
-- Proof SHA and [`proofs/validated/`](proofs/validated/) artifacts from the accepting PR
-
-Suggested proposal slug: `2026-09-30-durable-analytics-sink.md` with `status: draft` until Cody accepts wiring scope (driver wrapper vs hook-only vs collector SaaS).
-
-Do not duplicate the white paper in this folder; keep implementation behind explicit opt-in env vars until `status: resolved`.
+This folder keeps the research notes and the lab helper. It does not duplicate the white paper. `dual_write_sink.py` stays unwired from hooks and the driver until the implementation task lands. `WORKFLOW_ANALYTICS_URL` stays opt-in. Collector deployment stays out of repo.
