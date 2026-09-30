@@ -116,7 +116,7 @@ Record the call as `kind=jev_shadow` with `jev.question_id=session-progress`, `j
 |---------|----------------------|----------------|
 | Claude Code CLI, IDE, Desktop, cloud | Yes. Same events. Cloud sessions do not read local `~/.claude/settings.json`; seed the hook on the runner image. `CLAUDE_CODE_REMOTE=true` on the web. | Opt-in command hook in [`hooks-settings-snippet.json`](../RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/hooks-settings-snippet.json). Timeout 10s. `python3` on `post_tool_batch_signal.py`. |
 | Cursor Cloud Agent | No Claude hooks (`FINDINGS.md`: no `CLAUDECODE` / `CLAUDE_CODE_REMOTE`). | Driver or worker wrapper calls `evaluate_gate` and appends the same `post_tool_batch` row to `.jev-signal-log.jsonl`. |
-| OpenCode / LCD | No `PostToolBatch` command hook. Per-tool `execute` before/after only. | Do not expect a live log. `run_proofs.sh` is the stand-in (proved on `codyh-ubuntu` @ `112ccfe`). A live row requires a custom plugin that aggregates `tool.execute.after` and calls `process_hook_input`. |
+| OpenCode / LCD | No `PostToolBatch` command hook. Per-tool `execute` before/after only. | Lab proofs: Jev pack `run_proofs.sh` on `codyh-ubuntu` @ `112ccfe`, and the OpenCode aggregator proofs @ `d4c4da1`. Plugin shape is resolved in [`2026-09-30-opencode-hooks-plugin.md`](2026-09-30-opencode-hooks-plugin.md). The npm package is still unwired. |
 
 ### 2. After refine — complexity ratings, review top 3
 
@@ -215,6 +215,6 @@ Implementation, not research. None of this is in the default driver or plugin se
 1. Keep `gate_thresholds.py` and `jev_signal_schemas.py` as the source of numbers and request bodies. Do not retune them from a new study.
 2. Claude Code: install the opt-in snippet on the runner that should log. Command exits 0.
 3. Cursor Cloud: append the same `post_tool_batch` row from the driver or a worker wrapper. There is no Claude hook on that harness.
-4. OpenCode / LCD: keep `run_proofs.sh` as the check. Add a live log only with a plugin that aggregates `tool.execute.after` into one `process_hook_input` call.
+4. OpenCode / LCD: keep the lab `run_proofs.sh` checks. The accepted plugin (separate npm package, buffer `tool.execute.after`, flush on `message.updated` / `session.idle`) is [`2026-09-30-opencode-hooks-plugin.md`](2026-09-30-opencode-hooks-plugin.md). Publishing that package is product wiring.
 5. Call Jev only at the four points above (`jev_eligible`, each refine brief, unit close after the mechanical pre-gate, phase close after deterministic exit 0). Log `jev_shadow` or `refine_complete`. Do not block.
 6. Leave `evaluate_assert()`, `decision_source`, and `classify.py` unchanged.

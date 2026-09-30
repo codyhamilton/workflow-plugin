@@ -240,21 +240,26 @@ setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` vi
 
 | Topic | OpenCode | This plugin |
 |-------|----------|-------------|
-| Multi-phase delegation persona | Keep harness name **`orchestrate`** (delegation/orchestration) | Not a skill rename — workflow keeps skill names below |
+| Multi-phase delegation persona | Keep harness name **`orchestrate`** (delegation/orchestration). On this machine it is **task-and-skill only** | Not a skill rename — workflow keeps skill names below. `orchestrate` is not the phase-runner |
 | Phase runner (one phase per fresh context) | Map to skill **`execute`** | `execute` closes a phase with `Workflow-Phase:` and stops; there is no separate OpenCode-primary "phase-runner" skill |
 | Planning | Built-in OpenCode command **`plan`** | Workflow skill **`design`** — different artifact (`DESIGN.md`, phases, outcomes). Leave OpenCode's built-in `plan` alone; use `design` for this workflow |
 | Agent definitions | OpenCode agent personas / config | ≠ Claude agent markdown files, ≠ Cursor plugin agents under `.cursor-plugin/` |
 
 **Assertions and cheap signals:** Jev-style soft signals are **advisory** where wired (Claude/Cursor).
-**`assert_phase --deterministic`** remains the hard kill line for phase boundaries. On OpenCode, treat
-`docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/run_proofs.sh` as the validated
-stand-in unless you add a custom batching plugin.
+**`assert_phase --deterministic`** remains the hard kill line for phase boundaries. OpenCode soft
+signals are a separate npm plugin, still unwired: [`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
+Until that package is installed, the lab check is
+`docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/run_proofs.sh`
+(buffer `tool.execute.after`, flush once per step, shared gate). There is no native `PostToolBatch`,
+no `SubagentStop` / `Stop` parity, and Cursor Cloud still logs through the driver JSONL path.
 
-**DeepSeek Flash (review gate):** Flash is **encouraged** to **execute briefs / phase units** when you need
+**DeepSeek Flash (review gate, guidance only):** Flash is **encouraged** to **execute briefs / phase units** when you need
 to ration orchestrator capacity (OpenCode map or equivalent). Sign-off rules only — see
 [`docs/lab/GUIDANCE-flash-review-gate.md`](docs/lab/GUIDANCE-flash-review-gate.md): Flash on the build path
 ⇒ **no auto close-out**; **mandatory Sonnet 5.5** review of Flash work; then **hold** for **Claude Code or Grok**
 to review the phase and sign off (`Workflow-Phase:`). Pattern: Flash draft → Sonnet 5.5 review → Claude or Grok validation/sign-off.
+`install.sh` and the OpenCode signals plugin do not encode that chain. The hooks proposal records the same invariant:
+[`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
 
 Lab skills: interactive install can symlink `workflow-lab` too, or
 `WORKFLOW_OPENCODE_INCLUDE_LAB=1 WORKFLOW_INSTALL_MODE=opencode ./install.sh`.
