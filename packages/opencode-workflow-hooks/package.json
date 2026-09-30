@@ -1,0 +1,32 @@
+{
+  "name": "@codyhamilton/opencode-workflow-hooks",
+  "version": "0.1.0",
+  "description": "OpenCode plugin: buffer tool.execute.after, flush PostToolBatch-shaped soft signals via shared Jev gates",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codyhamilton/workflow-plugin.git",
+    "directory": "packages/opencode-workflow-hooks"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./workflow-signals.json": "./workflow-signals.json"
+  },
+  "files": [
+    "src",
+    "python",
+    "workflow-signals.json",
+    "opencode.json.example",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "keywords": [
+    "opencode",
+    "workflow",
+    "jev",
+    "hooks"
+  ]
+}

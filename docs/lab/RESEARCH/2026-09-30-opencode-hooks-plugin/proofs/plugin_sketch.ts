@@ -1,12 +1,7 @@
 /**
- * Lab sketch — workflow soft signals for OpenCode (not published npm).
+ * Lab sketch — use packages/opencode-workflow-hooks/src/index.ts for product wiring.
  *
- * Approximates Claude PostToolBatch by buffering tool.execute.after until the
- * assistant message for the step is complete, then appends JSONL via a small
- * Python helper (or inlined TS gate logic in a real package).
- *
- * Install (manual, lab): copy to .opencode/plugin/workflow-signals.ts and
- * register in opencode.json — see opencode.json.example.
+ * This file mirrors the subscription pattern; see package README for opencode.json.
  */
 import type { Plugin } from "@opencode-ai/plugin"
 import { spawn } from "child_process"
@@ -17,8 +12,7 @@ type PendingCall = { tool: string; callID: string; title: string; output: string
 const pendingBySession = new Map<string, PendingCall[]>()
 
 function repoRootFrom(ctxDir: string): string {
-  // consuming repo root; override with WORKFLOW_REPO_ROOT
-  return process.env.WORKFLOW_REPO_ROOT || ctxDir
+  return process.env.WORKFLOW_REPO_ROOT || path.join(ctxDir, "..", "..")
 }
 
 function flushBatch(sessionID: string, ctxDir: string, transcriptPath?: string) {
@@ -28,7 +22,7 @@ function flushBatch(sessionID: string, ctxDir: string, transcriptPath?: string) 
 
   const helper = path.join(
     repoRootFrom(ctxDir),
-    "docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/batch_flush_cli.py",
+    "packages/opencode-workflow-hooks/python/batch_flush_cli.py",
   )
   const payload = {
     session_id: sessionID,
@@ -41,12 +35,20 @@ function flushBatch(sessionID: string, ctxDir: string, transcriptPath?: string) 
       tool_response: c.output.slice(0, 500),
     })),
   }
-  // Non-blocking, advisory — never throw into hook chain
-  spawn(process.env.PYTHON || "python3", [helper], {
-    stdio: ["pipe", "ignore", "ignore"],
-  })
-    .stdin?.write(JSON.stringify(payload))
-    .end()
+  try {
+    const child = spawn(process.env.PYTHON || "python3", [helper], {
+      stdio: ["pipe", "ignore", "ignore"],
+      env: {
+        ...process.env,
+        WORKFLOW_INSTALL_MODE: process.env.WORKFLOW_INSTALL_MODE || "opencode",
+      },
+    })
+    child.on("error", () => {})
+    child.stdin?.write(JSON.stringify(payload))
+    child.stdin?.end()
+  } catch {
+    // advisory
+  }
 }
 
 export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
@@ -66,7 +68,6 @@ export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
     },
 
     event: async ({ event }) => {
-      // Flush when the assistant finishes a step (heuristic — validate on host).
       if (event.type === "message.updated" || event.type === "session.idle") {
         const sid = (event as { sessionID?: string }).sessionID
         if (sid) flushBatch(sid, ctx.directory)
