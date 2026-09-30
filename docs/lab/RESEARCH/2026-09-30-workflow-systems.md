@@ -142,8 +142,9 @@ Sources: AutoGen human-input modes; OpenHands security/confirmation; LangGraph i
 
 LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graphs ([workflows doc](https://docs.langchain.com/oss/python/langgraph/workflows-agents)).
 
-**Stack the bot reads (high confidence as design, not yet built):**
+**Stack the bot reads (CLIs on master; live provider keys still absent):**
 
+- Core skill dirs on disk → `tools/driver/check_skills.py`
 - `Workflow-Phase:` trailers + `DESIGN.md` → status JSON
 - `workflow-report` fence → last status and reason
 - Provider turns/cost printed per phase
@@ -152,7 +153,7 @@ LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graph
 
 **Also in tree, not on the control path:** `tools/transcript/` extract, stats, cost, `iterate_analysis.py`, and `classify.py` (session-kind visualisation).
 
-**Gap:** `tools/driver/` is specified and not implemented. BACKLOG P0 is status, then one-phase trigger. A unified trace UI is out of scope.
+**Gap:** live headless dispatch and the first outcome row are still open. A unified trace UI is out of scope.
 
 ---
 
@@ -168,7 +169,7 @@ LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graph
 | Evaluator–optimizer | Phase verify, Jev assert, `comprehensive-review` |
 | Worker ACI | Skills, briefs, trailers |
 | Bot ACI | `tools/driver/` CLI/MCP |
-| Cloud bootstrap | `SessionStart` hook or `install.sh` (core only) |
+| Cloud bootstrap | Cursor image bake of `install.sh` (core only); Claude remote `SessionStart` |
 | Escalation | `unsuccessful` report, headless ledger |
 | Benchmark harness | Verifier + cost (`evals/`, fixture still empty) |
 | Typed steer | Jev assert on compact phase state |
@@ -180,7 +181,7 @@ LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graph
 
 1. Can status JSON from trailers alone drive the bot, with no read of `IMPLEMENTATION.md`? (P0 spike; kill line if no.)
 2. Which single Jev assert is safe to steer on, checked against a deterministic fixture? (P1; kill if it false-steers.)
-3. Which harness Grok Bot starts — Claude `SessionStart`, Cursor cloud `install.sh`, or a prebaked image?
+3. Which harness Grok Bot starts — Claude `SessionStart`, Cursor cloud `install.sh`, or a prebaked image? **Cursor cloud, observed 2026-09-30:** the bot enters a prebaked image; bake core-only `install.sh` (see FINDINGS bootstrap). Claude Code on the web stays the SessionStart path; that container was not observed in the spike.
 4. When does a repair loop belong inside `execute` verify versus bouncing to `refine`? (Unchanged workflow question.)
 
 Parked, not open: whether `workflow_alignment` matches a human label, and whether session kind should merge with `iterate_analysis.py`. The eight-row classify measurements live in [`../ANALYSIS/2026-09-30-strategy-pass.md`](../ANALYSIS/2026-09-30-strategy-pass.md); they inform charts, not driver gates.

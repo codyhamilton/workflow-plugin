@@ -131,6 +131,35 @@ Success metrics and kill lines are in the analysis doc. No driver code landed wi
 
 ---
 
+## 2026-09-30 — Unattended core-skill bootstrap (step 5)
+
+### Observation (high) — Cursor cloud enters a prebaked image
+
+This cloud agent (`bc-f6673c0c-cb02-5af9-95c3-8e239f425b54`) booted from snapshot `bld-20260930-898776ef-818d-45ac-831f-6cd727afc323` (`gitSetup: reuse`, `warmFork: warm_fork`). `environmentJsonPath` is null (db-backed personal environment, not a repo `.cursor/environment.json`).
+
+At process start, before any install:
+
+- `CURSOR_AGENT=1`, hostname `cursor`, `~/.cursor/plugins/cache/.cloud-plugin-manifest.json` present. No TTY; `/dev/tty` does not open. No `CLAUDECODE`, `CLAUDE_CODE_REMOTE`, or `CLAUDE_CODE_ENTRYPOINT`.
+- `./install.sh --print-route` → `route: cursor-cloud`, `core_only: true`, `dest: /workspace/.cursor/skills/workflow`, `reason: CURSOR_AGENT=1`.
+- `python3 tools/driver/check_skills.py` exited **1**. `skills_found` was empty; `missing` was `design`, `refine`, `execute`, `comprehensive-review`, `close-out`, `post-build`. `~/.claude/skills/` was also absent.
+- The session skill list did not include those six names (Cursor built-ins under `~/.cursor/skills-cursor/` only).
+
+**Kill line for this harness:** hooks are the wrong layer. Cursor cloud has no SessionStart hook and no `reloadSkills`. Project skills are discovered when the agent process starts, so an install during the first turn cannot make that turn list core skills. Bake core-only `install.sh` into the environment image (`docs/lab/bootstrap/cursor-cloud-setup.sh`, `WORKFLOW_INSTALL_MODE=cloud`), snapshot, and require `check_skills.py` to exit 0 on the next boot **before** the first prompt. This spike did not rebuild the image.
+
+### Claude Code on the web (not observed live)
+
+Claude's own hooks doc sets `CLAUDE_CODE_REMOTE=true` on the web and honors SessionStart `reloadSkills`. That is the right layer for a fresh container per session. This VM is Cursor, so that path was not executed against a live Claude container. A consuming repo copies `docs/lab/bootstrap/session-start.sh` (same bytes as the root README heredoc) and merges `docs/lab/bootstrap/claude-settings-fragment.json`. The hook no-ops when `CLAUDE_CODE_REMOTE` is unset. The installer then writes core skills to `~/.claude/skills/` and does not install lab.
+
+### Installer and check (high)
+
+- Explicit `WORKFLOW_INSTALL_MODE=cloud|claude-code|interactive` wins over ambient signals, so an image bake is not captured by a stray `CLAUDECODE`, and a Claude hook is not captured by `HOSTNAME=cursor`.
+- Unset mode keeps the previous order: Claude signals, then Cursor signals, then piped or non-interactive → workspace `.cursor/skills/workflow/`. Core only on those routes.
+- `.gitignore` again ignores `.cursor/skills/workflow/` (the entry was replaced by `__pycache__/` in `bd92ef2`).
+- `check_skills.py` is the bot gate: JSON `{ok, harness, skills_found, missing, skills_root}`, exit 0 iff each core skill dir contains `SKILL.md`. Lab is not required. No network. Disk presence stands in for a chat skill list, which this spike cannot automate.
+- Tests: `python3 -m unittest discover -s tools/driver/tests` (route matrix, core-not-lab copy with `WORKFLOW_INSTALL_SKIP_REFRESH=1`, hook no-op vs `reloadSkills`, setup script).
+
+---
+
 ## Template for future entries
 
 ```markdown
