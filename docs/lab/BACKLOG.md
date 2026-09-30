@@ -21,7 +21,8 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 ## P3 — parked research
 
 - [x] **Durable analytics sink (research)** — pack [`RESEARCH/2026-09-30-durable-analytics-sink/`](RESEARCH/2026-09-30-durable-analytics-sink/INDEX.md): inventory, HTTP dual-write lab recipe, cloud HTTPS egress proof; no default driver/hook wiring (2026-09-30).
-- [ ] **Wire accepted cheap-Jev signals** — implementation, not research. Recommendations are `status: resolved` in [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md). Opt-in Claude hook and Cursor driver JSONL; Jev only at the four accepted points; `assert_phase --deterministic` stays the kill line; classify stays a POC. OpenCode/LCD keeps `run_proofs.sh` as the stand-in unless a plugin aggregates `tool.execute.after`.
+- [x] **OpenCode hooks plugin (research)** — pack [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md): API map, hook site gaps, `proofs/run_proofs.sh` batch aggregator; separate npm plugin recommended (2026-09-30).
+- [ ] **Wire accepted cheap-Jev signals** — implementation, not research. Recommendations are `status: resolved` in [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md). Opt-in Claude hook and Cursor driver JSONL; Jev only at the four accepted points; `assert_phase --deterministic` stays the kill line; classify stays a POC. OpenCode: publish optional npm plugin per [`RESEARCH/2026-09-30-opencode-hooks-plugin/RECOMMENDATION.md`](RESEARCH/2026-09-30-opencode-hooks-plugin/RECOMMENDATION.md) (lab proofs validate gates).
 - [ ] LangGraph-style evaluator–optimizer for **brief quality**, offline, using an assert rather than session kind.
 - [ ] Document the Composer (collect) vs Grok (strategy) split with a pointer to a real run's inputs and the analysis file it produced.
 
