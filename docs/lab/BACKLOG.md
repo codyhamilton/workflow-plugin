@@ -4,7 +4,6 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 
 ## P0 — automated driver
 
-- [ ] **Phase status CLI** — `tools/driver/status.py` JSON from trailers + `DESIGN.md` only (spike A in the strategy pass).
 - [ ] **One-phase trigger** — CLI `--once` and/or MCP `status` / `trigger_phase` / `poll` that Grok Bot can call; provider by key; driver never commits (spike B). Design: `docs/plans/06-phase-driver/DESIGN.md`.
 - [ ] **Unattended core skills** — SessionStart installer hook, Cursor cloud `install.sh`, or image bake, so the bot's first turn sees core skills.
 
@@ -42,3 +41,4 @@ Classify remains available as a visualisation. These items are not on the measur
 - [x] Composer vs Grok 4.7 medium split recorded in `docs/lab/README.md` (2026-09-30).
 - [x] Classify measurement strategy pass (`ANALYSIS/2026-09-30-strategy-pass.md`, 2026-09-30).
 - [x] Strategy reorientation for Grok Bot control (`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`, 2026-09-30).
+- [x] **Phase status CLI** — `tools/driver/status.py` (read-only JSON from trailers + `DESIGN.md`; spike A step 1).
