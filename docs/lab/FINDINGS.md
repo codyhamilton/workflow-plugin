@@ -176,6 +176,16 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-09-30 — Cheap-Jev judgement white paper (draft)
+
+### Observation (high)
+
+- Proposal [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: draft`) records four soft signals: PostToolBatch size/progress, post-refine brief complexity, unit-complete “needs review?”, phase-complete alignment sanity.
+- Inputs: research pack [`RESEARCH/2026-09-30-jev-cheap-judgement-signals/`](RESEARCH/2026-09-30-jev-cheap-judgement-signals/INDEX.md). Maps Claude evidence cited there: **16%** of 150 subagents over the ideal band; densest 5h window **~63.35M** tokens; worker `92a48e004519` at **296** API calls.
+- No hook and no `assert_phase` behaviour change. Spikes wait until Cody accepts. Deterministic phase kill line stays authoritative.
+
+---
+
 ## Template for future entries
 
 ```markdown

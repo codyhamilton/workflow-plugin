@@ -3,8 +3,8 @@
 **Date:** 2026-09-30  
 **Slug:** `jev-cheap-judgement-signals`  
 **Triage question:** Where should inexpensive typed Jev judgements sit *after* deterministic phase asserts and *before* expensive human or frontier follow-up — across hooks (PostToolBatch), refine, unit complete, and phase complete?  
-**Success metric (proposal):** Document 4 Cody-locked use cases with hook/event mapping, economics, and measurement that does not use session classify as a KPI; ready for Grok to draft `docs/lab/PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`.  
-**White paper:** *Not written in this pack* — Grok 4.7 high reasoning follow-up.
+**Success metric (proposal):** Document 4 Cody-locked use cases with hook/event mapping, economics, and measurement that does not use session classify as a KPI.  
+**White paper:** [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: draft`).
 
 ## How this maps to the upcoming proposal
 
@@ -40,6 +40,7 @@
 
 ## Links
 
+- White paper: [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: draft`)
 - Landed phase assert spike: [`../../PROPOSALS/2026-09-30-jev-hook-assertion-spike.md`](../../PROPOSALS/2026-09-30-jev-hook-assertion-spike.md)
 - Driver policy: [`../../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../../ANALYSIS/2026-09-30-grokbot-driver-reorient.md)
 - Parent index: [`../INDEX.md`](../INDEX.md)

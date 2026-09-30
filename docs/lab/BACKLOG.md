@@ -20,7 +20,7 @@ Prioritised for the Grok Bot remit in `GOALS.md`. Reorder when a kill line in th
 
 ## P3 — parked research
 
-- [ ] **White paper: Jev cheap judgement signals** — research pack [`RESEARCH/2026-09-30-jev-cheap-judgement-signals/`](RESEARCH/2026-09-30-jev-cheap-judgement-signals/INDEX.md) landed; Grok pass to write [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`lab-proposal` step 4).
+- [ ] **Spike cheap-Jev signal hooks when accepted** — [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) is `status: draft`. First spike is log-only PostToolBatch turn/size (no Jev call, no block). Wait for Cody to accept the proposal.
 - [ ] LangGraph-style evaluator–optimizer for **brief quality**, offline, using an assert rather than session kind.
 - [ ] Document the Composer (collect) vs Grok (strategy) split with a pointer to a real run's inputs and the analysis file it produced.
 
@@ -47,3 +47,4 @@ Classify remains available as a visualisation. These items are not on the measur
 - [x] **Run record** — external JSONL per invocation; git + record for phase/cost/report (spike step 4).
 - [x] **Unattended core skills** — install route + disk check; Cursor image-bake recommendation; Claude SessionStart template (step 5, 2026-09-30).
 - [x] **First outcome row** — trailer-completeness verifier + FINDINGS row; fixture stand-in, cost unavailable (step 6, 2026-09-30).
+- [x] **White paper: Jev cheap judgement signals** — [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: draft`, 2026-09-30). Research pack [`RESEARCH/2026-09-30-jev-cheap-judgement-signals/`](RESEARCH/2026-09-30-jev-cheap-judgement-signals/INDEX.md). Hooks wait on acceptance.

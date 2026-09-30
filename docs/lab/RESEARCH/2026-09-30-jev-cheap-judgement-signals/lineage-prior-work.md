@@ -27,7 +27,7 @@
 - P1 assert + first outcome row: **done** (`../../BACKLOG.md`).
 - P3 parked: “LangGraph-style evaluator–optimizer for **brief quality**, offline, using an assert rather than session kind” — use case **2** connects here but stays hook/signal oriented, not offline-only.
 
-## Expected proposal output (Grok)
+## Proposal
 
-- File: `docs/lab/PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md` (not created in this research pack).
-- Link back to this folder from `docs/lab/RESEARCH/INDEX.md` and a BACKLOG bullet when `status: draft|open`.
+- File: [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: draft`).
+- Linked from [`../INDEX.md`](../INDEX.md). Backlog: spike the hooks when Cody accepts; the white-paper item is done.
