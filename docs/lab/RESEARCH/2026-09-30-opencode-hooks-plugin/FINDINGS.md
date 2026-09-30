@@ -1,6 +1,6 @@
 # Findings — OpenCode hooks plugin research (2026-09-30)
 
-Confidence: **high** for API inventory (public manual); **medium** for batch-flush timing on `message.updated` vs `session.idle` until validated on host OpenCode build.
+Confidence: **high** for the API inventory (public manual) and for the Python batch proofs. The `message.updated` / `session.idle` flush is the accepted approximation in the resolved white paper. LCD on `codyh-ubuntu` @ `d4c4da1` ran `run_proofs.sh` only; `plugin_sketch.ts` was not installed, so those bus events were not observed live. That is closed evidence, not an open spike.
 
 ## Closed answers
 

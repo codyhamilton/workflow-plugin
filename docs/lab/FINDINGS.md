@@ -209,6 +209,23 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-09-30 — OpenCode hooks plugin (resolved)
+
+### Observation (high)
+
+- Proposal [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md) is `status: resolved`. Recommendations accepted pending product wiring. No npm package, no `opencode.json` registration, no driver or `assert_phase` change.
+- **Packaging:** separate npm OpenCode plugin. In-tree files stay lab proofs. Core `workflow` / `workflow-lab` manifests stay unchanged.
+- **Batch:** buffer `tool.execute.after`, flush on `message.updated` or `session.idle`, call shared `gate_thresholds` (`band_exit` at 76). OpenCode has no `PostToolBatch` event.
+- **Advisory:** soft signals log only. Kill line remains `assert_phase --deterministic`.
+- **Analytics:** optional `WORKFLOW_ANALYTICS_URL` via sink `dual_write_sink.py`. `WORKFLOW_INSTALL_MODE=opencode` sets `host_kind: opencode`. Unset URL skips the POST.
+- **Skills:** symlink path from PR #26 (`./install.sh --opencode-skills`). Plugin does not install skills.
+- **Ops:** on the OpenCode machine, persona `orchestrate` is task-and-skill only. Phase runner is skill `execute`. Plugin is neither.
+- **Gaps:** no `SubagentStop` / `Stop` parity. Cursor Cloud stays driver JSONL.
+- **LCD harness (closed):** Coding Harness Manager, host `codyh-ubuntu`, checkout `d4c4da1`. `proofs/run_proofs.sh` exit 0, unittest 4/4, one `post_tool_batch` row with `gate.band_exit=true` at turn 76. `plugin_sketch.ts` was not installed. Closed evidence, not a spike.
+- **Guidance (not wiring):** aligns with [`GUIDANCE-flash-review-gate.md`](GUIDANCE-flash-review-gate.md). DeepSeek Flash is encouraged to execute briefs and phase units when rationing capacity. Flash on the build path does not auto-close the phase: Sonnet 5.5 reviews Flash output, then the phase stays on hold until Claude Code or Grok signs (`Workflow-Phase:`). The plugin does not enforce this.
+
+---
+
 ## 2026-09-30 — Durable analytics sink (research pack)
 
 ### Observation (high)

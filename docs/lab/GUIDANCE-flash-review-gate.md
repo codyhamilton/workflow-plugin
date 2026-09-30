@@ -2,7 +2,7 @@
 
 **Status:** guidance (non-breaking). No installer, driver, or hook behaviour changes — operators and orchestrators follow this pattern by convention.
 
-**Related:** OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks research (no resolved proposal doc; lab pack only) — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md).
+**Related:** OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks proposal (`status: resolved`, plugin unwired) — [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md). Lab pack — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md).
 
 ## Encouraged use
 

@@ -1,6 +1,6 @@
 # OpenCode workflow-hooks plugin — research pack (2026-09-30)
 
-**Status:** closed (lab). **Not drop-in** Claude Code / Cursor hook compatibility — approximates soft-signal behaviour from the resolved [cheap-Jev proposal](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) using OpenCode-native hooks.
+**Status:** closed (lab). White paper: [`../../PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](../../PROPOSALS/2026-09-30-opencode-hooks-plugin.md) (`status: resolved`). Separate npm OpenCode plugin; approximates soft-signal behaviour from the resolved [cheap-Jev proposal](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md). No Claude/Cursor drop-in.
 
 ## Closed threads (evidence)
 
@@ -20,6 +20,8 @@ cd docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs
 ```
 
 Expect: unittest green, one `.jev-signal-log.jsonl` row at turn 76 (same gate semantics as Jev pack), optional analytics envelope when `WORKFLOW_ANALYTICS_URL` unset (local skip).
+
+**LCD (closed, not a spike).** Coding Harness Manager on `codyh-ubuntu`, checkout `d4c4da1`: `run_proofs.sh` exit 0, unittest 4/4, one `post_tool_batch` row with `gate.band_exit=true` at turn 76. `plugin_sketch.ts` was not installed.
 
 ## Related packs
 
