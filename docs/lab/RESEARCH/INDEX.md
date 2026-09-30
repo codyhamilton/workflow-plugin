@@ -9,6 +9,7 @@ Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-
 | Pack | Question | Proposal (if any) |
 |------|----------|-------------------|
 | [`2026-09-30-jev-cheap-judgement-signals/`](2026-09-30-jev-cheap-judgement-signals/INDEX.md) | Cheap conditional Jev judgements (hooks + refine/unit/phase soft signals) | [`../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) (`status: resolved` — recommendations accepted pending product wiring; proofs `112ccfe`) |
+| [`2026-09-30-durable-analytics-sink/`](2026-09-30-durable-analytics-sink/INDEX.md) | Durable observability sink for local + cloud agents (dual-write JSONL + HTTP) | Grok white paper stub only — see pack [`GROK-WHITEPAPER-STUB.md`](2026-09-30-durable-analytics-sink/GROK-WHITEPAPER-STUB.md) |
 
 **Current control and measurement policy** (2026-09-30, later pass): [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Implications in this index follow that pass: Grok Bot drives, Jev asserts steer, classify visualises.
 

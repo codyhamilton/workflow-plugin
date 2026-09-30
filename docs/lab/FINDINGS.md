@@ -198,6 +198,17 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-09-30 — Durable analytics sink (research pack)
+
+### Observation (high)
+
+- Research pack [`RESEARCH/2026-09-30-durable-analytics-sink/`](RESEARCH/2026-09-30-durable-analytics-sink/INDEX.md) closes inventory, sink comparison, envelope v1, dual-write recipe, and cloud HTTPS egress proof. Runnable: `./docs/lab/RESEARCH/2026-09-30-durable-analytics-sink/proofs/run_proofs.sh`.
+- **Recommendation (lab):** always local JSONL (existing paths); optional `WORKFLOW_ANALYTICS_URL` POST with Bearer `WORKFLOW_ANALYTICS_TOKEN`; remote failure does not block workflow. Git trailers stay low-rate checkpoints; classify log not promoted.
+- **Cloud egress (this environment):** `egress.restricted: false`; `prove_cloud_egress.py` succeeded to `https://httpbin.org/post` as `host_kind: cloud` / `cursor-cloud` — artifact `proofs/validated/egress_cloud_result.json` in the pack.
+- **No product wiring** on master; Grok proposal stub in pack `GROK-WHITEPAPER-STUB.md`.
+
+---
+
 ## Template for future entries
 
 ```markdown
