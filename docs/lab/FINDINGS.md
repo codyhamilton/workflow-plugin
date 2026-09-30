@@ -187,6 +187,17 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-09-30 — Cheap-Jev judgement white paper (resolved)
+
+### Observation (high)
+
+- Proposal [`PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md) rewritten to `status: resolved`. Recommendations accepted pending product wiring. Default hooks, driver, `assert_phase`, and `classify.py` are unchanged. Remaining work is implementation.
+- Accepted gate: `band_exit` at **76** turns; handoff at **85** / **125k** peak / **3MiB**; escalate at **100** / **130k** / **5MiB**. Optional Jev when `jev_eligible` (handoff and turns ≥ 85 or peak ≥ 128k or transcript ≥ 3MiB). Simulation on workers `92a48e004519` and `bb6165018de0` trips all four flags. Source: proofs on master `112ccfe` (PR #24).
+- Schemas in `proofs/jev_signal_schemas.py` are the contracts (`session-progress`, `refine-brief-complexity`, `unit-needs-review`, `phase-alignment-sanity`). Weekly skim recipe is the ops rule. `assert_phase --deterministic` stays the kill line. Classify stays a POC.
+- **LCD harness (closed):** host `codyh-ubuntu`, checkout `112ccfe`, OpenCode 1.18.33 + `deepseek/deepseek-flash`. `run_proofs.sh` exit 0; gate checks true; unittest 6/6; fixture wrote 1 `post_tool_batch` row (`handoff_signal` and `jev_eligible`). OpenCode cannot fire Claude `PostToolBatch` command hooks (per-tool execute before/after only). Live `.jev-signal-log.jsonl` on OpenCode skipped. Live logging is Claude Code, or a custom OpenCode plugin that aggregates `tool.execute.after`. The fixture probe is the LCD stand-in.
+
+---
+
 ## Template for future entries
 
 ```markdown

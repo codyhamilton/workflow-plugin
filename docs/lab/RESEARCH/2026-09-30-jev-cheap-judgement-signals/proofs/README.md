@@ -30,3 +30,9 @@ Expected: unittest OK, simulation JSON printed, hook probe writes non-empty temp
 3. **Schemas:** Four small `state` objects with Score/Choice questions in `jev_signal_schemas.py`; phase alignment sanity is separate from `outcome-evidence` and does not touch the kill line.
 
 4. **Measurement:** Weekly skim of `.jev-signal-log.jsonl` + `.assert-log.jsonl` with `weekly_skim_recipe.sh`; false negatives via deterministic assert join + 5-row human audit file `.jev-signal-audit.jsonl`.
+
+## LCD harness (closed)
+
+Host `codyh-ubuntu`, checkout `112ccfe` (master after PR #24). OpenCode 1.18.33 with `deepseek/deepseek-flash`: `run_proofs.sh` exit 0, gate simulation checks true, unittest 6/6, fixture wrote one `kind=post_tool_batch` row with `handoff_signal` and `jev_eligible`.
+
+OpenCode does not fire Claude `PostToolBatch` command hooks (per-tool `execute` before/after only). Live `.jev-signal-log.jsonl` was skipped there. Live PostToolBatch logging is Claude Code, or a custom OpenCode plugin that aggregates `tool.execute.after` into `process_hook_input`. This fixture probe is the validated LCD stand-in. Folded into the resolved white paper; not a further research item.

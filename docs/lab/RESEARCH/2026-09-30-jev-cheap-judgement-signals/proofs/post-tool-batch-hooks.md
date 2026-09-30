@@ -8,7 +8,8 @@
 |---------|-------------|--------|
 | Terminal CLI | Yes | Same event set per Anthropic: “fires the same hook events wherever it runs: terminal, IDE, Desktop, **cloud sessions**.” |
 | Claude Code on the web | Yes | `CLAUDE_CODE_REMOTE=true` in hook subprocess env (v2.1.199+); matches in-repo `session-start.sh` guard pattern. |
-| Cursor Cloud Agent (this repo’s VM) | **No** | `docs/lab/FINDINGS.md`: no `CLAUDECODE` / `CLAUDE_CODE_REMOTE`; skills baked in image — **driver JSONL path** is the Cursor stand-in until workers run under Claude Code hooks. |
+| Cursor Cloud Agent (this repo’s VM) | **No** | `docs/lab/FINDINGS.md`: no `CLAUDECODE` / `CLAUDE_CODE_REMOTE`; skills baked in image — **driver JSONL path** is the Cursor stand-in. |
+| OpenCode / LCD (`codyh-ubuntu`, OpenCode 1.18.33 @ `112ccfe`) | **No** | Per-tool `execute` before/after only. `run_proofs.sh` passed (unittest 6/6, one fixture `post_tool_batch` row, handoff + `jev_eligible`). Live log skipped. Stand-in is this probe; a live row needs a plugin that aggregates `tool.execute.after`. |
 
 Cloud-specific settings: cloud sessions **do not** read local `~/.claude/settings.json`; operator-seeded hooks on the runner image apply instead (same doc § settings carry-over).
 
@@ -62,8 +63,8 @@ See `hooks-settings-snippet.json` and `post_tool_batch_signal.py`. Behaviour:
 
 | Field | How to populate |
 |-------|-----------------|
-| `slug` / `phase` | Read `Workflow-Phase:` trailer via `git log -1 --format=%b` or env `WORKFLOW_SLUG` / `WORKFLOW_PHASE` set by driver bootstrap (documented pattern; not shipped by default). |
-| `brief_id` | `SubagentStart` matcher on `agent_type` + map to brief file under `docs/plans/.../briefs/`; or parse Task tool metadata when driver spawns workers. |
-| `unit_id` | Trailer slug + phase index, or brief filename stem at `SubagentStop`. |
+| `slug` / `phase` | `WORKFLOW_SLUG` / `WORKFLOW_PHASE` when the driver set them, otherwise the `Workflow-Phase:` trailer from `git log -1 --format=%b`. Not shipped in the probe. |
+| `brief_id` | Brief filename stem the driver already used to spawn the worker. |
+| `unit_id` | Trailer `slug:phase`, or brief filename stem at `SubagentStop`. |
 
-Proof hook logs raw `session_id` / `agent_id` only; driver integration is a later spike.
+Proof hook logs raw `session_id` / `agent_id`. Slug, phase, and brief id are filled at product wiring from `WORKFLOW_SLUG` / `WORKFLOW_PHASE` or the `Workflow-Phase:` trailer, and from the brief filename stem. That wiring is implementation. The harness decision is closed: Claude Code for a live `PostToolBatch` hook, Cursor Cloud for a driver JSONL row, OpenCode/LCD for this fixture probe.
