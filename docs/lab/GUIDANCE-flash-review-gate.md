@@ -4,17 +4,21 @@
 
 **Related:** OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks research (no resolved proposal doc; lab pack only) — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md).
 
-## When this applies
+## Encouraged use
 
-This gate applies when **DeepSeek Flash** agents (or an equivalent cheap OpenCode map) are used on the **build path** — specifically to **execute briefs** or **implement phase units** under `execute`. That includes first-pass implementation during Claude availability gaps. The same intent applies if Flash is used outside OpenCode but in the same economic tier for unit work.
+**DeepSeek Flash is encouraged** on the build path when you need to **ration orchestrator capacity** — during Claude availability gaps, parallel unit throughput, or cost/token pressure. Map Flash freely to **execute briefs** and **implement phase units**; this document does **not** limit *whether* to use Flash. It only bounds **who may sign off** the phase after Flash contributed unit work.
 
-It does **not** relax design, refine, or plan-end `comprehensive-review` rules; it adds a **phase review hold** whenever Flash touched unit execution.
+## When the gate applies
 
-## Core rule
+The gate applies whenever Flash (or an equivalent cheap OpenCode map) **executed briefs or phase units** under `execute`. The same sign-off rules apply if Flash is used outside OpenCode in the same economic tier for unit work.
 
-**Flash in the build path ⇒ the phase review gate is mandatory. No auto close-out.**
+It does **not** relax design, refine, or plan-end `comprehensive-review` rules; it adds a **phase review hold** after Flash touched unit execution.
 
-Flash workers must **not** close the phase automatically: no terminal phase verification, no `Workflow-Phase:` trailer, and no treating the phase as done. Using Flash for brief/unit work **auto-triggers the need for phase review** — stop and **hold** until **Grok** or **Claude Code** reviews the phase outcome and signs off.
+## Core rule (sign-off only)
+
+**Flash in the build path ⇒ mandatory phase review before close. No auto close-out.**
+
+Flash workers must **not** sign off or close the phase: no terminal phase verification, no `Workflow-Phase:` trailer, and no treating the phase as done. That responsibility stays with the orchestrator tier. Using Flash for brief/unit work **auto-triggers the need for phase review** — **hold** until **Grok** or **Claude Code** reviews the phase outcome and signs off.
 
 ## Required pattern
 
@@ -22,9 +26,9 @@ Flash workers must **not** close the phase automatically: no terminal phase veri
 Flash draft (briefs / units)  →  Sonnet 5.5 review of Flash work  →  Claude Code or Grok phase validation and sign-off
 ```
 
-1. **Flash may draft and implement freely** on assigned briefs and units. Speed and cost are appropriate here; Flash is not a signatory.
-2. **Every use of Flash on the build path always triggers a Sonnet 5.5 review agent afterward — not optional.** Route Flash output (diffs, brief completion, unit reports) to an independent **Sonnet 5.5** pass keyed to the design phase outcome and brief done-evidence. Mandatory relay, not “if time permits.”
-3. **Phase validation and sign-off are Claude Code or Grok only** (Build Orchestrator). They review the phase (including Sonnet’s review of Flash work), verify the phase outcome, and only then may land `Workflow-Phase:` and close the phase. **Never Flash alone**; **never** let a Flash run imply the phase is closed.
+1. **Flash drafts and implements** on assigned briefs and units — encouraged when capacity needs rationing.
+2. **Every Flash build-path pass triggers a Sonnet 5.5 review agent afterward — not optional.** Route Flash output (diffs, brief completion, unit reports) to an independent **Sonnet 5.5** pass keyed to the design phase outcome and brief done-evidence. Mandatory relay, not “if time permits.”
+3. **Phase validation and sign-off are Claude Code or Grok only** (Build Orchestrator). They review the phase (including Sonnet’s review of Flash work), verify the phase outcome, and only then may land `Workflow-Phase:` and close the phase. Flash does not sign off; a Flash run must not imply the phase is closed.
 
 Flash does not replace `comprehensive-review` at plan end.
 
@@ -32,17 +36,17 @@ Flash does not replace `comprehensive-review` at plan end.
 
 - **`assert_phase --deterministic`** remains the hard kill line for phase boundaries on any harness where it is wired.
 - **Jev / PostToolBatch-style soft signals** stay **advisory** where installed (Claude Code, Cursor driver, OpenCode lab proofs). This guidance does not add enforcement hooks.
-- **Skill names and install paths** are unchanged (`execute`, `comprehensive-review`, OpenCode symlinks under `~/.config/opencode/skills/`). The `execute` skill still always stops after a phase close — Flash simply **must not** perform that close.
+- **Skill names and install paths** are unchanged (`execute`, `comprehensive-review`, OpenCode symlinks under `~/.config/opencode/skills/`). The `execute` skill still always stops after a phase close — only Claude Code or Grok performs that close when Flash ran on units.
 
 ## Operator checklist
 
 | Step | Model / role | Required? |
 |------|----------------|-----------|
-| Execute briefs / implement phase units | DeepSeek Flash (OpenCode map or equivalent) | When chosen for economics |
+| Execute briefs / implement phase units | DeepSeek Flash (OpenCode map or equivalent) | **Encouraged** when rationing capacity |
 | Review Flash unit work | **Sonnet 5.5** review agent | **Always** after Flash on the build path |
-| **Hold** — phase review before close | — | **Always** when Flash ran on units; do not auto close-out |
-| Phase outcome verification + `Workflow-Phase:` close | **Claude Code** or **Grok** (orchestrator) | **Always**; never Flash |
+| **Hold** — phase review before close | — | **Always** when Flash ran on units; no auto close-out |
+| Phase outcome verification + `Workflow-Phase:` close | **Claude Code** or **Grok** (orchestrator) | **Always** for sign-off; not Flash |
 
 ## Rationale (one paragraph)
 
-Flash optimises tokens on brief and unit execution; it is not an orchestrator. Mandatory Sonnet 5.5 review of Flash work catches drift before orchestrator time. Requiring Grok or Claude Code to review and sign off keeps phase boundaries aligned with `execute` (orchestrator-owned close-out) and prevents unattended Flash runs from silently finishing a phase.
+Flash stretches orchestrator capacity across more unit work without changing workflow quality bars. The gate is narrow: Sonnet 5.5 reviews Flash output, then Grok or Claude Code signs the phase so boundaries stay with the Build Orchestrator and Flash never auto-closes a phase.
