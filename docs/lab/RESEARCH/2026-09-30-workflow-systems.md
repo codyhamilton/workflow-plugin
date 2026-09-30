@@ -167,9 +167,11 @@ LangGraph documentation recommends tracing (e.g. LangSmith) for multi-step graph
 
 ## 8. Open questions (for PROPOSALS / BACKLOG)
 
-1. Does Jev **workflow_alignment** Score correlate with human judgment of phase discipline? (Needs labeled data.)
-2. Should session **kind** taxonomy merge with `iterate_analysis.py` phases or stay orthogonal? (Spike doc recommends orthogonal until labels settle.)
-3. When does a LangGraph-style **repair loop** belong inside `execute` verify vs bouncing to `refine`?
+1. Does Jev **workflow_alignment** Score correlate with human judgment of phase discipline? (Needs labeled data.) **2026-09-30 strategy pass:** not answerable from the eight-row log. Score confidence never reached 0.8; there is no human alignment field. Do not use Score as a KPI yet.
+2. Should session **kind** taxonomy merge with `iterate_analysis.py` phases or stay orthogonal? (Spike doc recommends orthogonal until labels settle.) **2026-09-30 strategy pass:** stay orthogonal. Disagreement is expected. `mixed` did not fire even on a three-way tie — ambiguity is not a label the model uses.
+3. When does a LangGraph-style **repair loop** belong inside `execute` verify vs bouncing to `refine`? **2026-09-30 strategy pass:** parked. Behaviour change; out of the measure-first window.
+
+The critique of this note and the reordered backlog live in [`../ANALYSIS/2026-09-30-strategy-pass.md`](../ANALYSIS/2026-09-30-strategy-pass.md).
 
 ---
 
