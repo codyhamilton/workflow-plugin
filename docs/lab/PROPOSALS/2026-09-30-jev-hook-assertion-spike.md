@@ -1,29 +1,36 @@
 ---
-title: Jev hook assertion spike (offline fixture)
+title: Jev phase-boundary assert (steer and log)
 status: proposed
 author: Workflow Optimiser
 date: 2026-09-30
+updated: 2026-09-30
 ---
 
-# Jev hook assertion spike
+# Jev phase-boundary assert
 
 ## Problem
 
-We have session-level classify (`session_kind`, `workflow_alignment`). We lack **artifact-level** typed checks cheap enough to run in eval or post-phase verify (e.g. “does this `IMPLEMENTATION.md` mention verification evidence per unit?”).
+The bot can see a `workflow-report` and a git trailer. It cannot yet apply a typed alignment check on the closing record — for example, whether the phase outcome's evidence is actually present — and it cannot log that check separately from session-kind visualisation.
+
+`tools/transcript/classify.py` answers "what kind of chat was this?" It is not this spike.
 
 ## Proposal
 
-1. Define one **Noul or Score** question over a JSON `state` built from plan folder artifacts (not full chat) — e.g. parse headings from `IMPLEMENTATION.md` + phase list from `DESIGN.md`.
-2. Implement a dry-run CLI beside `classify.py` (`--dry-run` pattern) that prints request JSON without POST.
-3. Run against 3 fixture folders (synthetic or redacted from `docs/plans/`).
-4. Document expected use: optional hook after `execute` verify, **offline only** in v0.
+1. Pick **one** Score or Noul question over JSON `state` built from the plan folder and the trailer just observed (headings in the closing record, the outcome line from `DESIGN.md`, the report's `phase`). No transcript snapshot.
+2. CLI beside the future driver: `tools/driver/assert_phase.py --dry-run` prints the Jev request; `--live` POSTs with pin `jev-1.13.0` and appends a gitignored assert log, not `.classify-log.jsonl`.
+3. Two fixtures: one that should pass, one that should fail. Document the threshold (for example Score ≥ 2.5).
+4. On fail, the bot stops and escalates even if the report said `closed`.
 
 ## Success criteria
 
-- Pinned `jev-1.13.0` request JSON checked into `evals/` or `tools/transcript/fixtures/` (no API keys).
-- Clear accept/reject threshold documented (e.g. Score ≥ 2.5).
-- BACKLOG item for live POST gated on classify calibration.
+- Dry-run request JSON checked in with no API key.
+- Pass fixture and fail fixture agree with the threshold.
+- Fail fixture yields a log row and the fail branch.
+
+## Kill line
+
+If the assert disagrees with a deterministic check available in the same state, drop the Jev call and keep the check. Do not open classify calibration to repair it.
 
 ## Maps to research
 
-Evaluator–optimizer loop (LangGraph); TypeSafe Choice/Score ([docs.typesafe.ai](https://docs.typesafe.ai/)).
+Evaluator–optimizer (LangGraph docs); TypeSafe Choice/Score ([docs.typesafe.ai](https://docs.typesafe.ai/)). Strategy: [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md) step 3 / spike C.

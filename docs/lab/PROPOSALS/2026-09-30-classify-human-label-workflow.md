@@ -1,11 +1,14 @@
 ---
 title: Classify human-label workflow and calibration report
-status: proposed
+status: deferred
+deferred_reason: Classify is visualisation-only after the 2026-09-30 Grok Bot reorientation. Calibration is not a KPI and does not block the driver.
 author: Workflow Optimiser
 date: 2026-09-30
 ---
 
 # Classify calibration workflow
+
+**Status: deferred** (2026-09-30 strategy pass). Session classify remains a chart. Do not staff the human-label gate ahead of bot status, one-phase trigger, or Jev asserts. See [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md).
 
 ## Problem
 

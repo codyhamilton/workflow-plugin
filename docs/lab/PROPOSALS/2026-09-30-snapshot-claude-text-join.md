@@ -1,11 +1,14 @@
 ---
 title: Fix Claude user-text extraction for Jev snapshots
-status: proposed
+status: deferred
+deferred_reason: Snapshot parity between Claude and Cursor is not a blocker. Classify is visualisation-only.
 author: Workflow Optimiser
 date: 2026-09-30
 ---
 
 # Fix Claude snapshot user-message text (newline-per-char)
+
+**Status: deferred** (2026-09-30 strategy pass). The distortion hypothesis in FINDINGS still stands. It does not gate driver work or outcome metrics. Reopen only if a visualisation the collector relies on is unreadable.
 
 ## Problem
 

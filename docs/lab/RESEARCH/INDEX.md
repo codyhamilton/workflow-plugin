@@ -4,51 +4,49 @@ Curated bibliography for optimising workflow-plugin. Each entry: **takeaway** �
 
 Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-systems.md).
 
+**Current control and measurement policy** (2026-09-30, later pass): [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Implications in this index follow that pass: Grok Bot drives, Jev asserts steer, classify visualises.
+
 ---
 
 ## Foundations: reason + act
 
 | Source | Takeaway | Implication (skills / evals / tooling) | Conf. |
 |--------|----------|------------------------------------------|-------|
-| [ReAct (Yao et al., ICLR 2023)](https://arxiv.org/abs/2210.03629) | Interleave reasoning traces and environment actions so plans update from observations. | `execute` workers should **act** (tools) while orchestrators **reason** on artifacts; avoid fusing plan+build in one context (matches cold-read design). Evals should log tool traces, not only final files. | high |
-| [Google Research blog — ReAct](https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/) | Same paradigm; emphasises diagnosable trajectories. | `workflow-tuning` harvest should keep **verbatim briefs + trailers** for post-hoc diagnosis (aligns with README hypothesis #2). | high |
+| [ReAct (Yao et al., ICLR 2023)](https://arxiv.org/abs/2210.03629) | Interleave reasoning traces and environment actions so plans update from observations. | **Grok Bot** reasons on status JSON and the phase report, then acts by triggering one phase. Workers inside `execute` act on briefs. The bot does not fuse every phase into its own context. | high |
+| [Google Research blog — ReAct](https://research.google/blog/react-synergizing-reasoning-and-acting-in-language-models/) | Same paradigm; emphasises diagnosable trajectories. | The bot's diagnosable trail is **trailers + workflow-report + per-phase cost + assert log**. Briefs stay verbatim (README hypothesis #2). | high |
 
 ## Interfaces & coding agents
 
 | Source | Takeaway | Implication | Conf. |
 |--------|----------|-------------|-------|
-| [SWE-agent (Yang et al., NeurIPS 2024)](https://arxiv.org/abs/2405.15793) | Custom **agent–computer interface (ACI)** materially changes success on repo tasks. | Skills are our ACI: tool names, brief shape, and `Workflow-Phase:` trailers matter as much as model choice. Invest in **transcript tools** (`tools/transcript/`) to see ACI effects. | high |
-| [SWE-agent GitHub](https://github.com/SWE-agent/SWE-agent) | Inference vs evaluation split; Docker sandbox. | Mirror: **execute** produces artifacts; **evals/** + SWE-bench-style harnesses verify outcomes separately from prompting. | medium |
-| [OpenHands SDK docs](https://docs.openhands.dev/sdk) | Modular agents: LLM + tools + workspace + conversation lifecycle. | Maps to core/lab split: `workflow` = pipeline-safe workspace; `workflow-lab` = local/interactive workspace extensions. | medium |
-| [OpenHands SDK paper (arXiv:2511.03690)](https://arxiv.org/html/2511.03690v2) | Event-sourced state, typed tools, security/confirmation before risky actions. | `design` assumption ledger + interactive checkpoints ≈ HITL; `post-build` deploy proof ≈ confirmation gate. Log events in eval runs for replay. | medium |
+| [SWE-agent (Yang et al., NeurIPS 2024)](https://arxiv.org/abs/2405.15793) | Custom **agent–computer interface (ACI)** materially changes success on repo tasks. | Two ACIs: skills/briefs/trailers for workers, and a **bot-callable CLI/MCP** (`status`, `trigger_phase`) for Grok Bot. Transcript tools show worker behaviour; they are not the bot's control surface. | high |
+| [SWE-agent GitHub](https://github.com/SWE-agent/SWE-agent) | Inference vs evaluation split; Docker sandbox. | The driver runs inference one phase at a time. **Evals** grade with a verifier and cost, separate from the bot's prompt. | medium |
+| [OpenHands SDK docs](https://docs.openhands.dev/sdk) | Modular agents: LLM + tools + workspace + conversation lifecycle. | Core skills are the cloud-safe workspace the bot installs. Lab skills stay off the unattended path. | medium |
+| [OpenHands SDK paper (arXiv:2511.03690)](https://arxiv.org/html/2511.03690v2) | Event-sourced state, typed tools, security/confirmation before risky actions. | Events we keep: driver stdout, assert JSONL, git trailers. Headless assumption ledger is the bot's confirmation path; `unsuccessful` escalates. | medium |
 
 ## Multi-agent orchestration
 
 | Source | Takeaway | Implication | Conf. |
 |--------|----------|-------------|-------|
-| [AutoGen (Wu et al., arXiv:2308.08155)](https://arxiv.org/abs/2308.08155) | **Conversation programming**: composable agent chats with humans/tools in the loop. | `refine` → `execute` routing is a **static** conversation pattern; `iterate` is dynamic multi-agent. Document which pattern a task uses in FINDINGS. | high |
-| [AutoGen v0.4 (Microsoft Research)](https://www.microsoft.com/en-us/research/articles/autogen-v0-4-reimagining-the-foundation-of-agentic-ai-for-scale-extensibility-and-robustness/) | Actor/event model for scale. | If `tools/driver/` ships, prefer explicit message/event log over ad-hoc coordinator prose. | medium |
-| [LangGraph multi-agent (LangChain blog, Jan 2024)](https://www.langchain.com/blog/langgraph-multi-agent-workflows) | Agents as graph nodes; supervisor and hierarchical teams. | `execute` coordinator (human or agent) ≈ supervisor; brief-routed workers ≈ team nodes. Phase boundaries ≈ graph checkpoints. | medium |
-| [LangGraph workflows & agents (LangChain docs)](https://docs.langchain.com/oss/python/langgraph/workflows-agents) | Named patterns: routing, parallelization, orchestrator–worker, **evaluator–optimizer**. | **Evaluator–optimizer** maps to `comprehensive-review` + remediation briefs + re-verify; eval harness is offline evaluator–optimizer. | high |
+| [AutoGen (Wu et al., arXiv:2308.08155)](https://arxiv.org/abs/2308.08155) | **Conversation programming**: composable agent chats with humans/tools in the loop. | The bot's program is tool calls, not a human relay of briefs. `refine` → workers stays a static pattern inside one phase. | high |
+| [AutoGen v0.4 (Microsoft Research)](https://www.microsoft.com/en-us/research/articles/autogen-v0-4-reimagining-the-foundation-of-agentic-ai-for-scale-extensibility-and-robustness/) | Actor/event model for scale. | Driver events (report, cost, assert) beat coordinator prose as the log the next session reads. | medium |
+| [LangGraph multi-agent (LangChain blog, Jan 2024)](https://www.langchain.com/blog/langgraph-multi-agent-workflows) | Agents as graph nodes; supervisor and hierarchical teams. | **Grok Bot is the supervisor.** It does no phase work. Workers are brief-routed inside `execute`. Trailers are the checkpoints. | high |
+| [LangGraph workflows & agents (LangChain docs)](https://docs.langchain.com/oss/python/langgraph/workflows-agents) | Named patterns: routing, parallelization, orchestrator–worker, **evaluator–optimizer**. | Evaluator–optimizer is phase verify + **Jev assert** + `comprehensive-review`. The bot applies the optimizer step by re-dispatching or escalating. | high |
 
 ## Evaluation & benchmarks
 
 | Source | Takeaway | Implication | Conf. |
 |--------|----------|-------------|-------|
-| [SWE-bench overview](https://www.swebench.com/SWE-bench/) | Real issues + Dockerized test verification. | `evals/` scenarios should pin repo+commit and define **verifiable** outcomes (tests or artifact rubric), not vibes-only. | high |
-| [SWE-bench evaluation guide](https://www.swebench.com/SWE-bench/guides/evaluation/) | JSONL predictions; harness caches by `run_id`. | When we add eval automation, use immutable `run_id` per candidate and store `results/<scenario>/<timestamp>/`. | high |
-| [TypeSafe / Jev docs](https://docs.typesafe.ai/) | Typed questions (Choice, Score, Noul) over compact `state`. | `classify.py` for session **kind** + cheap alignment score; future hooks for brief-quality Scores. Pin `jev-1.13.0` in logs. | high |
-| [Jev context budgets (how-to-use)](https://www.jevtypesafeai.com/how-to-use) | Hard token limits on state+questions. | Keep snapshots ~1–3k tokens; store `snapshot_hash` not prose in any indexer. | high |
+| [SWE-bench overview](https://www.swebench.com/SWE-bench/) | Real issues + Dockerized test verification. | Outcome rows use a **verifier** (command, rubric, or trailer completeness) plus cost. The bot can re-run them. Session-kind charts are optional attachments. | high |
+| [SWE-bench evaluation guide](https://www.swebench.com/SWE-bench/guides/evaluation/) | JSONL predictions; harness caches by `run_id`. | When eval automation lands, key results by `run_id` under `evals/results/<scenario>/<timestamp>/`. | high |
+| [TypeSafe / Jev docs](https://docs.typesafe.ai/) | Typed questions (Choice, Score, Noul) over compact `state`. | **Assert hooks** on phase state (alignment, log, steer). Pin `jev-1.13.0`. `classify.py` remains a session-kind visualisation, not the measurement path. | high |
+| [Jev context budgets (how-to-use)](https://www.jevtypesafeai.com/how-to-use) | Hard token limits on state+questions. | Assert `state` is headings, trailer, and the outcome line — far under the budget. Store `snapshot_hash` in the assert log. | high |
 
 ## Observability (industry)
 
 | Source | Takeaway | Implication | Conf. |
 |--------|----------|-------------|-------|
-| [LangGraph workflows doc — LangSmith tracing note](https://docs.langchain.com/oss/python/langgraph/workflows-agents) | Trace per-step data flow in complex graphs. | Until LangSmith integration exists, **`tools/transcript/` + JSONL classify log** are the tracing layer for this plugin. | medium |
-
-## Strategy constraint (2026-09-30)
-
-Implication rows above are analogies until an eval or observational verdict says otherwise. The strategy pass demotes driver work, Jev-on-artifacts, and an in-repo first scenario; it keeps ACI measurement, inference/grading split, and the classify review-gate shape. See [`../ANALYSIS/2026-09-30-strategy-pass.md`](../ANALYSIS/2026-09-30-strategy-pass.md).
+| [LangGraph workflows doc — LangSmith tracing note](https://docs.langchain.com/oss/python/langgraph/workflows-agents) | Trace per-step data flow in complex graphs. | The bot's trace is **status JSON, workflow-report, per-phase cost, assert JSONL**, plus git. Classify JSONL is a side chart. No LangSmith dependency. | medium |
 
 ## Maintenance notes
 
@@ -59,5 +57,5 @@ Implication rows above are analogies until an eval or observational verdict says
 
 1. Primary source URL (paper, official docs, or authoritative blog).
 2. One-line takeaway grounded in that source.
-3. Concrete mapping to a skill, eval artifact, or `tools/transcript/` hook.
+3. Concrete mapping to the bot, a hook, a trailer, an assert, or an outcome verifier.
 4. Confidence if the mapping is inferential.
