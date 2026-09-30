@@ -250,6 +250,12 @@ setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` vi
 `docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/run_proofs.sh` as the validated
 stand-in unless you add a custom batching plugin.
 
+**DeepSeek Flash (review gate):** Flash is **encouraged** to **execute briefs / phase units** when you need
+to ration orchestrator capacity (OpenCode map or equivalent). Sign-off rules only — see
+[`docs/lab/GUIDANCE-flash-review-gate.md`](docs/lab/GUIDANCE-flash-review-gate.md): Flash on the build path
+⇒ **no auto close-out**; **mandatory Sonnet 5.5** review of Flash work; then **hold** for **Claude Code or Grok**
+to review the phase and sign off (`Workflow-Phase:`). Pattern: Flash draft → Sonnet 5.5 review → Claude or Grok validation/sign-off.
+
 Lab skills: interactive install can symlink `workflow-lab` too, or
 `WORKFLOW_OPENCODE_INCLUDE_LAB=1 WORKFLOW_INSTALL_MODE=opencode ./install.sh`.
 
