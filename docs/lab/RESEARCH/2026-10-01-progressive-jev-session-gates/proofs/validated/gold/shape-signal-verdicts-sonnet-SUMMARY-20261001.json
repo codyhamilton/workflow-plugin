@@ -1,0 +1,155 @@
+{
+  "seat": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "protocol": "shape-signal-panel-v1",
+  "terms": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/TERMS.md \u00a711",
+  "pack_source": "shape-signal-judge-packs-20261001-212524.jsonl",
+  "n_workers": 7,
+  "n_checkpoints_in_packs": 45,
+  "schema_note": "Primary unit is per-worker (one JSONL object per worker minimum). Fields: shape (late_pivot|early_thrash|unclear), shape_why, why_T_large, inflection_points[{turn_range,what_changed}], early_signals[{anchor_turns,signal}], recommended_exit_turn, earliness_vs_ideal, optional_cp_notes[{checkpoint_turn,note}]. optional_cp_notes carry checkpoint-level observations when useful; this seat does NOT emit per-cp binary A0 checkout rows.",
+  "signed": true,
+  "via": "claude -p --model sonnet",
+  "per_worker": {
+    "92a48e004519": {
+      "T": 296,
+      "shape": "unclear",
+      "recommended_exit_turn": null,
+      "earliness_vs_ideal": "No exit recommended. The run converges, with the last pack at turn 285 (T=296) showing gates running and the amendment being written. Exiting at any checkpoint before about 270 would have cut off productive work; letting it run was on time.",
+      "n_inflections": 4,
+      "n_early_signals": 4,
+      "checkpoints_seen": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255,
+        270,
+        285
+      ]
+    },
+    "ca977b9ca0dd": {
+      "T": 109,
+      "shape": "early_thrash",
+      "recommended_exit_turn": 75,
+      "earliness_vs_ideal": "Exit at the first checkpoint (75) is on time or slightly late. Thrash is already established by 75 (10 compactions, 10 re-reads of _cenc.c), and the 75-105 extension adds only more of the same. The actual run reached 109, so it ran about 34 turns past the recommended exit.",
+      "n_inflections": 3,
+      "n_early_signals": 6,
+      "checkpoints_seen": [
+        75,
+        90,
+        105
+      ]
+    },
+    "bb6165018de0": {
+      "T": 154,
+      "shape": "unclear",
+      "recommended_exit_turn": 150,
+      "earliness_vs_ideal": "On time for outcome: census finishes t149 and analysis begins t150, so exiting earlier (e.g. t75-120) would have abandoned a job that completed. On time at t150 (T=154). Cost-wise, about 75 turns (t75-149) were poll overhead that a single blocking wait or background Monitor would have avoided. Judged as wait-bound rather than thrash, exiting before t143 would be too early.",
+      "n_inflections": 5,
+      "n_early_signals": 5,
+      "checkpoints_seen": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ]
+    },
+    "0aab88c525de": {
+      "T": 192,
+      "shape": "unclear",
+      "recommended_exit_turn": null,
+      "earliness_vs_ideal": "No exit is recommended. There is no clear pivot or thrash in turns 75-180. Exiting at 180 is reasonable only if the wait continues, and T=192 ends shortly after, so the run ends on time.",
+      "n_inflections": 4,
+      "n_early_signals": 3,
+      "checkpoints_seen": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180
+      ]
+    },
+    "036ff3ed4a89": {
+      "T": 161,
+      "shape": "unclear",
+      "recommended_exit_turn": null,
+      "earliness_vs_ideal": "No early exit is warranted. The worker was making usable progress through t150 and finished at T=161. Any checkout before about t150 would have been too early. t105-135 was wait-heavy but not unproductive.",
+      "n_inflections": 4,
+      "n_early_signals": 3,
+      "checkpoints_seen": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ]
+    },
+    "7b00225cb824": {
+      "T": 137,
+      "shape": "unclear",
+      "recommended_exit_turn": 135,
+      "earliness_vs_ideal": "On time, at the commit/push at turns 134-135. Exiting at the 75 or 90 checkpoint would have been too early, since the run recovered and delivered.",
+      "n_inflections": 4,
+      "n_early_signals": 3,
+      "checkpoints_seen": [
+        75,
+        90,
+        105,
+        120,
+        135
+      ]
+    },
+    "5163c22a6a3e": {
+      "T": 90,
+      "shape": "unclear",
+      "recommended_exit_turn": null,
+      "earliness_vs_ideal": "Not applicable. No clear pivot or thrash is shown by turn 90. If the shape were later judged late_pivot, the likely pivot is around 76-90 (building to waiting), and an exit at 90 would be on time to slightly early.",
+      "n_inflections": 2,
+      "n_early_signals": 4,
+      "checkpoints_seen": [
+        75,
+        90
+      ]
+    }
+  },
+  "shapes": {
+    "92a48e004519": "unclear",
+    "ca977b9ca0dd": "early_thrash",
+    "bb6165018de0": "unclear",
+    "0aab88c525de": "unclear",
+    "036ff3ed4a89": "unclear",
+    "7b00225cb824": "unclear",
+    "5163c22a6a3e": "unclear"
+  },
+  "recommended_exits": {
+    "92a48e004519": null,
+    "ca977b9ca0dd": 75,
+    "bb6165018de0": 150,
+    "0aab88c525de": null,
+    "036ff3ed4a89": null,
+    "7b00225cb824": 135,
+    "5163c22a6a3e": null
+  },
+  "failures": [],
+  "note": "Independent shape-signal panel seat. Fresh judgments from hybrid_v0 packs only. NOT old A0 checkout protocol. No --call-jev. No parent-pull-v1.",
+  "shape_tally": {
+    "unclear": 6,
+    "early_thrash": 1
+  },
+  "shape_distribution_note": "Sonnet 5.5 labeled 1/7 early_thrash (ca977b9ca0dd) and 6/7 unclear. No late_pivot. Unclear is allowed by TERMS \u00a711 when neither binary shape fits; several unclear rows are wait/poll-bound productive runs or long tasks that eventually delivered. Exit-turn spread vs other seats is secondary for this experiment.",
+  "total_cost_usd": 0.9463
+}

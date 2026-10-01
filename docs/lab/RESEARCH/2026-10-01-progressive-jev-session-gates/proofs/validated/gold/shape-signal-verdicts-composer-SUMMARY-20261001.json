@@ -1,0 +1,24 @@
+{
+  "experiment": "shape-signal-panel-v1",
+  "seat": "composer",
+  "model": "composer-2.5",
+  "pack_source": "shape-signal-judge-packs-20261001-212524.jsonl",
+  "rubric": "shape-signal (TERMS.md §11; no parent-pull-v1)",
+  "generated_at": "2026-10-01",
+  "rows": 7,
+  "shape_counts": {
+    "early_thrash": 1,
+    "late_pivot": 6
+  },
+  "recommended_exit_turn_by_worker": {
+    "92a48e004519": 180,
+    "ca977b9ca0dd": 90,
+    "bb6165018de0": null,
+    "0aab88c525de": null,
+    "036ff3ed4a89": 135,
+    "7b00225cb824": null,
+    "5163c22a6a3e": null
+  },
+  "workers_with_counterfactual_exit": 3,
+  "note": "Composer seat on shape-signal shortlist (7 workers, hybrid_v0 packs only). Primary scoring target is shape/early_signals/inflection agreement across seats; exit-turn spread is secondary. No --call-jev."
+}

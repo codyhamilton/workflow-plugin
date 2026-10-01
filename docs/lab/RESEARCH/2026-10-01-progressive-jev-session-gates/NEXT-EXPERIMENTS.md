@@ -2,7 +2,7 @@
 
 **Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null**). Experiment **(d)** thrash-screen **passes** H5 on its own 3×12 table (α = **0.8276**) with **A0 = 90** on `ca977b9ca0dd` only. Experiment **(e)** thrash-expand is a **miss**: strict ca977 shape empty on the remaining maps pool; best-available panel **A0 null** on all three workers; **0/5** checkout on every seat. Expand-only α is **undefined** (all `not_yet`; a De=0 convention of 1.0 is not a pass). Combined (d)+(e) is 17 prefixes, α = **0.8377**, and still **one** non-null A0. Experiment **(f)** cross-project ca977 screen is **blocked** (empty). **No hook change.**
 
-**Gold protocol update (Cody 2026-10-01):** experiment **`shape-signal-panel-v1`** **supersedes** the unanimous A0 / ≥2 A0 gate as the primary next measurement. Do **not** require three-model exact exit agreement. Multi-model agreement on early signals / shape / inflections is primary; exit-turn spread is secondary. **Hold Jev behaviour ship** and do **not** `--call-jev` until signal-agreement notes exist on several workers. Definitions: [`TERMS.md`](TERMS.md) §11.
+**Gold protocol update (Cody 2026-10-01):** experiment **`shape-signal-panel-v1`** **supersedes** the unanimous A0 / ≥2 A0 gate as the primary next measurement. Do **not** require three-model exact exit agreement. Multi-model agreement on early signals / shape / inflections is primary; exit-turn spread is secondary. **Panel + agreement done** — see [`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md). **Hold Jev behaviour ship** and do **not** `--call-jev` until WSM progressive revalidation + validation handoff ([`TERMS.md`](TERMS.md) §§12–13) have a pre-registered decay schedule / harness design. Definitions: [`TERMS.md`](TERMS.md) §§11–13.
 
 ## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
@@ -232,11 +232,15 @@ The maps remainder is exhausted for ca977 twins. (e) screened the remaining open
 
 ---
 
-## Primary next — experiment **`shape-signal-panel-v1`** (NEW gold protocol — Phase 1 packs landed; panel held)
+## Completed — experiment **`shape-signal-panel-v1`** (NEW gold protocol — packs + three seats + agreement)
 
-**Status:** Phase 1 **done** (2026-10-01) — docs + packs only. **Panel held** (no seats in Phase 1). **Supersedes** unanimous A0 / ≥2 A0 as the hard gate.
+**Status:** Phase 1 packs **done**; Phase 2 seats **done** (Composer PR #66, Grok #67, Sonnet #68); agreement SUMMARY **done** (2026-10-01). **Supersedes** unanimous A0 / ≥2 A0 as the hard gate.
 
-**Why now.** (e) and (f) exhausted ca977-twin hunting. Exact exit-turn unanimity kept Jev blocked on a single A0 and discarded useful disagreement. This experiment asks seats for **shape** and **early signals** first, then a recommended exit. Agreement on signals/shape/inflections is the unlock path; exit-turn spread is secondary.
+**Artifacts:** seat JSONLs `shape-signal-verdicts-{composer,grok,sonnet}-20261001.jsonl` (+ seat SUMMARYs); agreement [`shape-signal-agreement-SUMMARY-20261001.json`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.json) / [`.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md); packs [`shape-signal-judge-packs-20261001-212524.jsonl`](proofs/validated/gold/packs/shape-signal-judge-packs-20261001-212524.jsonl).
+
+**Agreement highlights:** **`ca977b9ca0dd`** unanimous `early_thrash` (exits 75–90); **`92a48e004519`** shape **split** but thrash signals around ~90 in ≥1 seat; five other workers majority `unclear` (wait/implement arcs). Exit-turn spread reported, not a hard fail.
+
+**Why it ran.** (e) and (f) exhausted ca977-twin hunting. Exact exit-turn unanimity kept Jev blocked on a single A0 and discarded useful disagreement. This experiment asked seats for **shape** and **early signals** first, then a recommended exit. Agreement on signals/shape/inflections is the unlock path; exit-turn spread is secondary.
 
 ### Per-seat questions
 
@@ -270,11 +274,12 @@ Reopen Maps `T≥75` including prior A0-null and shape-miss workers. Prefer **di
 
 **Artifacts (Phase 1):** [`proofs/validated/gold/packs/shape-signal-judge-packs-20261001-212524.jsonl`](proofs/validated/gold/packs/shape-signal-judge-packs-20261001-212524.jsonl) (45 rows); ranking [`SUMMARY-shape-signal-20261001-212524.md`](proofs/validated/gold/packs/SUMMARY-shape-signal-20261001-212524.md). Leak-scan PASS. No new per-worker packs (all reuse).
 
-### Protocol sketch (later phases)
+### Protocol sketch (as run)
 
-1. **Phase 1 (this task):** TERMS §11 + NEXT-EXPERIMENTS + combined packs + SUMMARY. Branch/PR. **Hold panel.**
-2. **Phase 2+ (not this task):** three seats on the shortlist packs; collect shape/signal/inflection/exit answers; publish agreement notes. Original rubric patterns still available; do not revive `parent-pull-v1` without a new experiment.
-3. **Jev:** no `--call-jev` and no behaviour ship until signal-agreement notes exist on **several** workers.
+1. **Phase 1:** TERMS §11 + NEXT-EXPERIMENTS + combined packs + SUMMARY. **Hold panel** in that task.
+2. **Phase 2:** three seats on the shortlist packs (PRs #66/#67/#68); collect shape/signal/inflection/exit answers.
+3. **Agreement:** publish agreement SUMMARY (this close-out). Original rubric patterns still available; do not revive `parent-pull-v1` without a new experiment.
+4. **Jev:** no `--call-jev` and no behaviour ship until §§12–13 decay/handoff have a written harness design (WSM fold). Signal-agreement notes now exist on several workers; that alone does **not** ship behaviour.
 
 ### Success sketch
 
@@ -292,15 +297,15 @@ Reopen Maps `T≥75` including prior A0-null and shape-miss workers. Prefer **di
 2. **No Jev early.** Do not `--call-jev` or ship behaviour before signal-agreement notes on several workers.
 3. **No padding.** Do not add near-duplicate poll-class workers to inflate N.
 4. **No parent-pull.** Do not include the draft parent-pull delta in seat prompts.
-5. **Phase hold.** Phase 1 must not run seats.
+5. **Phase hold (Phase 1 only).** Phase 1 must not run seats. Phase 2 seats and agreement are complete.
 
 </details>
 
 ---
 
-## Plan/hold — **`progressive-decay-bar-v1`** and **`validation-handoff-steer-v1`** (WSM design fold — no harness)
+## Primary next — **`progressive-decay-bar-v1`** and **`validation-handoff-steer-v1`** (WSM design fold — no harness yet)
 
-**Status:** **plan/hold** (2026-10-01). **Owner:** Workflow System Manager (orchestration docs). **Does not start** until **`shape-signal-panel-v1`** Phase 2+ seats run and **signal/shape/inflection agreement** notes exist on several workers (§11). **No harness work in this PR path** — definitions live in [`TERMS.md`](TERMS.md) §12–§13 only.
+**Status:** **plan/hold** (2026-10-01). **Owner:** Workflow System Manager (orchestration docs). **Shape-signal unlock prerequisite met** — Phase 2 seats (PRs #66/#67/#68) + agreement SUMMARY ([`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md)). Still **no harness work** and **no `--call-jev`** until a decay schedule is pre-registered and reviewed. Definitions: [`TERMS.md`](TERMS.md) §12–§13.
 
 These two ids split Cody’s same design fold for traceability; they ship together when unlocked, not as competing primaries.
 
@@ -315,13 +320,13 @@ These two ids split Cody’s same design fold for traceability; they ship togeth
 
 - No `--call-jev`, no stats-gate sweep, no hook or plugin behaviour.
 - Do not pad the shape-signal shortlist or revive `parent-pull-v1`.
-- Do not implement decay schedule or validation questions in the replay harness until shape-signal unlock criteria pass.
+- Do not implement decay schedule or validation questions in the replay harness until a decay schedule is written and reviewed (shape-signal unlock is met; harness still blocked).
 
 **Unlock sketch (pre-register before harness):**
 
 | Gate | Criterion |
 |------|-----------|
-| Prerequisite | `shape-signal-panel-v1` Phase 2+ complete; primary score = signal/shape/inflection agreement on **≥ several** workers |
+| Prerequisite | `shape-signal-panel-v1` Phase 2+ **done** (agreement SUMMARY 2026-10-01); several workers have shared early-signal notes (`ca977` unanimous; `92a48e` thrash@~90) |
 | Docs | §12–§13 unchanged or versioned in TERMS; decay schedule written before any live `confidence_min` decay |
 | Harness | Separate PR / seats — **not** this lab-docs fold |
 
