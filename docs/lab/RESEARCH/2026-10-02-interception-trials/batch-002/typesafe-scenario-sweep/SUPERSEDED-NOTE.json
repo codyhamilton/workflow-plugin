@@ -1,0 +1,11 @@
+{
+  "archived_reason": "same-shape\u00d7window cartesian \u2014 only 1 scenario \u00d7 many cps/sessions; superseded by scenario-first sweep",
+  "n_cells": 1184,
+  "n_distinct_scenarios": 2,
+  "n_sessions": 41,
+  "scenarios": {
+    "delta_only|compaction_storm": 969,
+    "tail_focus|compaction_storm": 215
+  },
+  "soft_hold": true
+}
