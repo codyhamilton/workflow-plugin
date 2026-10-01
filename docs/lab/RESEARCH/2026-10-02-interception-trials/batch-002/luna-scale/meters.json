@@ -1,0 +1,127 @@
+{
+  "generated_at": "2026-10-02 01:45:00 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0-scale",
+  "driver": "luna",
+  "capture_dir": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/luna-scale",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "soft_standard_hold": true,
+  "typesafe_used": false,
+  "hooks_unlock": false,
+  "n_variants": 960,
+  "parse_miss_cells": 900,
+  "error_count": 0,
+  "fire_count": 9,
+  "rating_hist": {
+    "0": 2,
+    "1": 49,
+    "2": 8,
+    "3": 1
+  },
+  "harness_cell_counts": {
+    "claude-code": 607,
+    "opencode": 284,
+    "cursor": 24,
+    "codex": 45
+  },
+  "framing_counts": {
+    "H1": 960
+  },
+  "state_variant_counts": {
+    "stats_only": 438,
+    "hybrid_v0": 438,
+    "stats_plus_delta": 84
+  },
+  "dense_schedule": [
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120
+  ],
+  "fire_rate_among_at_risk_cells": {
+    "45": {
+      "n": 31,
+      "fire_rate": 0.1613
+    },
+    "50": {
+      "n": 28,
+      "fire_rate": 0.1429
+    },
+    "55": {
+      "n": 1,
+      "fire_rate": 0.0
+    },
+    "60": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "65": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "70": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "75": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "80": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "85": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "90": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "95": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "100": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "105": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "110": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "115": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "120": {
+      "n": 0,
+      "fire_rate": null
+    }
+  },
+  "prompt_leak_spotcheck_hits": [],
+  "cell_id_salt": "b002s",
+  "partial": true,
+  "batches_done": 10,
+  "n_batches": 160,
+  "wall_s_so_far": 122.4,
+  "model": "gpt-6-luna"
+}

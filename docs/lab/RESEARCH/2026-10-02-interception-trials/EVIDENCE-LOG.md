@@ -26,3 +26,7 @@ Reading guide and next waves (TypeSafe included, no behaviour greenlight): [`../
 ## Batch notes
 - `batch-002/archive-t45-only/`: discarded first decontam run that only sampled checkpoint 45 (allocation bug); not evidence.
 - Current `batch-002/` results = schedule-breadth re-run (v2).
+
+## Flash/Luna streaming expand (2026-10-02 01:45 AEST)
+
+Soft HOLD. Complementary to sibling TypeSafe bulk. Captures: `luna-b/` (180 done), `flash-hframings-b/` (in flight), `flash-scale/`+`luna-scale/` (2400+960 dense/trim axes), `flash-mid/`+`luna-mid/` (T≥30 expand). See `batch-002/CUMULATIVE-STREAM.md`. No hooks unlock.
