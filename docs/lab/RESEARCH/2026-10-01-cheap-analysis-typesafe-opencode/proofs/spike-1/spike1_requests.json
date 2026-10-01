@@ -140,8 +140,8 @@
     "early-signal-v0": {
       "decision": "dry_run",
       "schema_id": "early-signal-v0",
-      "framing_id": "signal-v0-default#1a3071620f3945b1",
-      "cache_key": "c8fc49ec792755b72e55c3eec7d84051e7d5b5949eea363791e386aca6797272",
+      "framing_id": "signal-v0-default#8b25557e0768ab57",
+      "cache_key": "0f2ba43c1f36160e8169f4f55afcfc220143d4e53a660b43f4e7220c6308d8f8",
       "request": {
         "model": "jev-1.13.0",
         "state": {
@@ -260,10 +260,6 @@
               "yes": "Yes",
               "no": "No"
             }
-          },
-          "compaction_event_count": {
-            "type": "report",
-            "instructions": "Report cumulative.compaction_event_count as an integer (not a judgment)."
           }
         }
       },
