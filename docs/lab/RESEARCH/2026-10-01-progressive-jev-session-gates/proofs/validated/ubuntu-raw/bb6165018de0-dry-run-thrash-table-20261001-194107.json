@@ -1,0 +1,209 @@
+[
+  {
+    "worker_id": "bb6165018de0",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1661,
+    "gold_bundle_chars": 3296,
+    "gold_bundle_status": "ok",
+    "api_turns": 75,
+    "peak_ctx_tokens": 127123,
+    "tool_histogram": {
+      "Bash": 66,
+      "Read": 8,
+      "Monitor": 2,
+      "ToolSearch": 1,
+      "Write": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/spec/format_english/pdf/0702122e.pdf",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 2174,
+    "delta_since_prior": {}
+  },
+  {
+    "worker_id": "bb6165018de0",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1805,
+    "gold_bundle_chars": 3357,
+    "gold_bundle_status": "ok",
+    "api_turns": 90,
+    "peak_ctx_tokens": 136126,
+    "tool_histogram": {
+      "Bash": 79,
+      "Read": 8,
+      "Monitor": 3,
+      "Write": 2,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/spec/format_english/pdf/0702122e.pdf",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 2548,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Monitor": 1,
+        "Write": 1
+      }
+    }
+  },
+  {
+    "worker_id": "bb6165018de0",
+    "checkpoint_turn": 105,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1898,
+    "gold_bundle_chars": 3293,
+    "gold_bundle_status": "ok",
+    "api_turns": 105,
+    "peak_ctx_tokens": 143913,
+    "tool_histogram": {
+      "Bash": 94,
+      "Read": 8,
+      "Monitor": 3,
+      "Write": 2,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/spec/format_english/pdf/0702122e.pdf",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 2924,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 15
+      }
+    }
+  },
+  {
+    "worker_id": "bb6165018de0",
+    "checkpoint_turn": 120,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1927,
+    "gold_bundle_chars": 3294,
+    "gold_bundle_status": "ok",
+    "api_turns": 120,
+    "peak_ctx_tokens": 146213,
+    "tool_histogram": {
+      "Bash": 109,
+      "Read": 8,
+      "Monitor": 3,
+      "Write": 2,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/spec/format_english/pdf/0702122e.pdf",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 3283,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 15
+      }
+    }
+  },
+  {
+    "worker_id": "bb6165018de0",
+    "checkpoint_turn": 135,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1635,
+    "gold_bundle_chars": 2938,
+    "gold_bundle_status": "ok",
+    "api_turns": 135,
+    "peak_ctx_tokens": 146781,
+    "tool_histogram": {
+      "Bash": 123,
+      "Read": 8,
+      "Monitor": 3,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/spec/format_english/pdf/0702122e.pdf",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 3283,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 14,
+        "Edit": 1
+      }
+    }
+  },
+  {
+    "worker_id": "bb6165018de0",
+    "checkpoint_turn": 150,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1932,
+    "gold_bundle_chars": 2864,
+    "gold_bundle_status": "ok",
+    "api_turns": 150,
+    "peak_ctx_tokens": 146781,
+    "tool_histogram": {
+      "Bash": 137,
+      "Read": 9,
+      "Monitor": 3,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/spec/format_english/pdf/0702122e.pdf",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 3572,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/tmp/claude-1000/-home-codyh-workspace-open-pajero-maps/bd4f6c0d-5061-4e77-9a4c-2e083814b952/scratchpad/analysis_out.txt"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 14,
+        "Read": 1
+      }
+    }
+  }
+]
