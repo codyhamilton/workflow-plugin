@@ -1,6 +1,6 @@
 # Next experiments — progressive Jev gold labeling
 
-**Confidence: not high.** H5 failed on the P0 panel (α = 0.1189, **A0 null**). No Jev sweep, no hook change.
+**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null** on all three new workers). No Jev sweep, no hook change.
 
 ## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
@@ -45,9 +45,25 @@ Stop rules included: over-fire on hold-out → discard as gold; no second identi
 
 ---
 
-## Primary next — experiment **(c)** `corpus-expand-hybrid-panel-original`
+## Completed — experiment **(c)** `corpus-expand-hybrid-panel-original` (**H5 not passed; gold unusable for A0**)
 
-**Status:** plan. **Goal:** enlarge the labeled corpus under the **original** rubric (body of [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) **without** the draft parent-pull delta), then re-run the **three-seat** panel (Sonnet signed final + Composer + Grok) on **hybrid_v0** judge packs. This addresses H5 underpowering and the n = 2 smoking-gun island; it is **not** a Jev tuning sweep.
+**Status:** done (2026-10-01). **Artifacts:** three-seat expansion JSONLs under [`proofs/validated/gold/`](proofs/validated/gold/) (`expansion-checkout-verdicts-{sonnet,composer,grok}-20261001.jsonl`, 20 rows each, same pack ids); agreement [`expansion-panel-agreement-20261001.json`](proofs/validated/gold/expansion-panel-agreement-20261001.json); human summary in [`PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md) §(c).
+
+| Gate | Result |
+|------|--------|
+| Corpus | **3** workers labeled (`0aab88c525de`, `036ff3ed4a89`, `0853bc21d3aa`), **20** pooled `75:15` prefixes |
+| Panel | Sonnet **0**/20 checkout; Grok **0**/20; Composer **1**/20 (`036ff3ed4a89@135` only) |
+| **A0** | **null** on all three expansion workers (no unanimous checkout prefix) |
+| H5 (expansion-only 3×20) | Krippendorff α_nominal = **0.0000** (< 0.40) — **fail** |
+| Positive-class mass | **1** total `checkout_recommended=true` across 60 seat-labels |
+
+**Interpretation:** Raw pairwise agreement on expansion is **95–100%** (almost all `not_yet`), but that is agreement-on-false, not usable unanimous gold. A single Composer-only checkout at `036ff3ed4a89@135` prevents any **A0** exit. **Do not** run a Jev sweep. P0 numbers (α **0.1189**, **A0 null** on smoking guns) are unchanged.
+
+**Consequences:** Treat expansion labels as research corpus only until a follow-on design yields non-null **A0** or an explicitly pre-registered alternate gold rule. Do **not** return to `parent-pull-v1` without a new experiment.
+
+### Archived protocol — (c) corpus + original-rubric panel (for audit)
+
+**Goal:** enlarge the labeled corpus under the **original** rubric (body of [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) **without** the draft parent-pull delta), then re-run the **three-seat** panel on **hybrid_v0** judge packs. Not a Jev tuning sweep.
 
 ### Why (c) now
 
@@ -86,11 +102,35 @@ Keep existing P0 packs under [`proofs/validated/gold/packs/`](proofs/validated/g
 | H5 | Pooled α **≥ 0.40** on the combined P0 + new workers |
 | Gold rule | Report **A0** per worker; unanimous exit may still be null on some workers |
 
-Failure to clear α after expansion does **not** authorize a return to `parent-pull-v1` without a new explicit experiment. Confidence stays **not high** until (c) completes and is read against [`HYPOTHESIS.md`](HYPOTHESIS.md).
+Failure to clear α after expansion does **not** authorize a return to `parent-pull-v1` without a new explicit experiment. Confidence stays **not high** ([`HYPOTHESIS.md`](HYPOTHESIS.md)).
 
-### Stop rules (c)
+<details>
+<summary>Stop rules (c) — as run</summary>
 
 1. **Under-corpus.** Fewer than two new workers labeled → status **blocked**, not a rubric pass/fail.
 2. **Rubric leak.** Any seat prompt includes the parent-pull draft, other seats’ labels, or target turns → discard that worker’s panel and re-run.
 3. **No Jev.** Do not interpret H1–H4 / H6–H7 from Jev dry-run or live cache until H5 clears on the enlarged gold table.
 4. **(b) rows.** Never promote `p0-checkout-verdicts-sonnet-relabel-*.jsonl` to gold.
+
+</details>
+
+---
+
+## Primary next — experiment **(d)** `ubuntu-thrash-screen-before-pack-v1`
+
+**Status:** plan. **Goal:** before building more hybrid_v0 judge packs, **screen** the Ubuntu maps worker enum (`ubuntu-raw` dry-run thrash tables + `replay_progressive_gates` metrics) for sessions that already look **runaway / low_progress / context_thrash**-like at `75:15`, instead of sampling additional **T ≥ 75** workers at random. Label only workers that pass the screen (expect checkout disagreement mass similar to `92a48e004519`, not census-wait tails like `0aab88c525de` / `bb6165018de0`).
+
+### Why (d) now
+
+Experiment **(c)** met the corpus-size gate but added **no** unanimous gold: **A0** stayed null everywhere and only **one** checkout bit fired across 60 seat-labels. High agreement on `not_yet` does not repair H5 or unlock **A0**. Re-pooling P0 smoking guns with expansion under one combined α still leaves **A0 null** on all five workers — that path is **not** chosen as primary.
+
+### Protocol sketch
+
+1. **Screen:** Rank workers with `T ≥ 75` using committed [`proofs/validated/ubuntu-raw/*-dry-run-thrash-table-*.json`](proofs/validated/ubuntu-raw/) signals (re-read loops, peak ctx, tool histogram skew) plus maps fixtures manifest. Publish a ranked shortlist (top **N**, pre-register **N** before labeling).
+2. **Pack:** Build hybrid_v0 packs only for shortlisted workers ([`build_gold_judge_packs.py`](proofs/build_gold_judge_packs.py)); keep P0 + expansion packs read-only.
+3. **Panel:** Same three seats and original rubric as (c); target at least **2** new workers with **≥1** non-null per-seat earliest checkout among Sonnet/Grok/Composer before expecting **A0**.
+4. **Metrics:** Report **A0** per worker and pooled nominal α on new prefixes; H5 floor unchanged (**≥ 0.40**). **No Jev sweep.**
+
+### Alternate (not primary)
+
+**`combined-panel-p0-expansion-smoking-gun-v1`:** recompute agreement on **P0 + expansion (41 cps)** with `92a48e004519` in the same table — diagnostic only; does not fix **A0 null** and is deferred unless (d) is blocked on missing ubuntu-raw bundles.

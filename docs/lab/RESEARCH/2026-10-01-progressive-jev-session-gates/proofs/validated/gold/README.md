@@ -50,6 +50,8 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 | `p0-checkout-verdicts-sonnet-relabel-20261001.jsonl` | Experiment **(b)** `parent-pull-v1` Sonnet seat — **discarded as gold** (over-fire @255) |
 | `p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json` | (b) scorecard + CHM α hint ≈ 0.57 — **not** adopted |
 | `PANEL-FINDINGS-20261001.md` | Human-readable panel result |
+| `expansion-checkout-verdicts-*-20261001.jsonl` | Experiment **(c)** three-seat labels (20 cps each) |
+| `expansion-panel-agreement-20261001.json` | **(c)** A0, α, pairwise metrics |
 
 ## Headline result (three-seat panel)
 
@@ -58,6 +60,7 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 - **A0** (unanimous checkout): **null** on both workers — no cp where all three seats agree checkout.
 - Krippendorff α = **0.1189** (< H5 floor 0.40). Confidence remains **not high**; panel count meets floor but gold exit does not.
 - **A_maj** and **A_gc** recomputed from the signed JSONL are both **180** on `92a48e004519` and **null** on `bb6165018de0` ([`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json)). They are documented alternates, not the fit target.
-- Experiment **(b)** Sonnet re-label under `parent-pull-v1` **failed** (hold-out checkout at `92a48e@255`; checkout on all Grok-only 105–165). Relabel JSONL is **not** gold. Next: **(c)** `corpus-expand-hybrid-panel-original` — [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
+- Experiment **(b)** Sonnet re-label under `parent-pull-v1` **failed** (hold-out checkout at `92a48e@255`; checkout on all Grok-only 105–165). Relabel JSONL is **not** gold.
+- Experiment **(c)** expansion panel **complete** — **A0 null** on `0aab88c525de`, `036ff3ed4a89`, `0853bc21d3aa`; expansion-only α **0.0000** (3×20); see [`expansion-panel-agreement-20261001.json`](expansion-panel-agreement-20261001.json) and [`PANEL-FINDINGS-20261001.md`](PANEL-FINDINGS-20261001.md) §(c). Next: **(d)** `ubuntu-thrash-screen-before-pack-v1` — [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
 
 No `--call-jev` / `TYPESAFE_API_KEY` was used for labeling or this aggregation.
