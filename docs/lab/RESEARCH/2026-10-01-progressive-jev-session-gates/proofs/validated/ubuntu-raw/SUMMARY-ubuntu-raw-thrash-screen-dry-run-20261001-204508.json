@@ -1,0 +1,107 @@
+{
+  "generated_at_brisbane": "2026-10-01 20:45:08 AEST",
+  "run": "20261001-204508",
+  "schedule": "75:15",
+  "dry_run": true,
+  "live_call_jev": false,
+  "experiment": "ubuntu-thrash-screen-before-pack-v1",
+  "workers": {
+    "ca977b9ca0dd": {
+      "agent_id": "a1ae9ca977b9ca0dd",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/subagents/agent-a1ae9ca977b9ca0dd.jsonl",
+      "sha256": "a7f9c2332962310178f5d3863810dbf697a51028a23753508db6d910939bfa4d",
+      "bytes": 5279247,
+      "T": 109,
+      "T_enum": 109,
+      "tool_assistant_turns": 108,
+      "peak_ctx_tokens": 127736,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ],
+      "n_checkpoints": 3,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 3,
+        "state_chars_max": 2032,
+        "state_chars_median": 1916.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 2898
+      },
+      "artifacts": {
+        "with_state": "ca977b9ca0dd-dry-run-checkpoints-20261001-204508.with-state.jsonl",
+        "omit_state": "ca977b9ca0dd-dry-run-checkpoints-20261001-204508.omit-state.jsonl",
+        "thrash_table": "ca977b9ca0dd-dry-run-thrash-table-20261001-204508.json",
+        "gold_bundles": "ca977b9ca0dd-gold-bundles-20261001-204508.jsonl",
+        "metrics": "ca977b9ca0dd-dry-run-metrics-20261001-204508.json"
+      }
+    },
+    "daf933273c8f": {
+      "agent_id": "a65f2daf933273c8f",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/subagents/agent-a65f2daf933273c8f.jsonl",
+      "sha256": "0fa7efaf276b3b8bc62617714a231c4fadc3859618c441fab6dcb1be9808d9e4",
+      "bytes": 3186949,
+      "T": 122,
+      "T_enum": 122,
+      "tool_assistant_turns": 121,
+      "peak_ctx_tokens": 125620,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120
+      ],
+      "n_checkpoints": 4,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 4,
+        "state_chars_max": 1675,
+        "state_chars_median": 1643.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 2613
+      },
+      "artifacts": {
+        "with_state": "daf933273c8f-dry-run-checkpoints-20261001-204508.with-state.jsonl",
+        "omit_state": "daf933273c8f-dry-run-checkpoints-20261001-204508.omit-state.jsonl",
+        "thrash_table": "daf933273c8f-dry-run-thrash-table-20261001-204508.json",
+        "gold_bundles": "daf933273c8f-gold-bundles-20261001-204508.jsonl",
+        "metrics": "daf933273c8f-dry-run-metrics-20261001-204508.json"
+      }
+    },
+    "7b00225cb824": {
+      "agent_id": "a56f77b00225cb824",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/670245db-d72a-4875-86cf-4f4b98803720/subagents/agent-a56f77b00225cb824.jsonl",
+      "sha256": "6f41e4258deb6830fc26d6352f92f5db579b2b8c00d65306f377712f7e23e7ff",
+      "bytes": 1660339,
+      "T": 137,
+      "T_enum": 137,
+      "tool_assistant_turns": 136,
+      "peak_ctx_tokens": 162349,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135
+      ],
+      "n_checkpoints": 5,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 5,
+        "state_chars_max": 2162,
+        "state_chars_median": 1927.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 3778
+      },
+      "artifacts": {
+        "with_state": "7b00225cb824-dry-run-checkpoints-20261001-204508.with-state.jsonl",
+        "omit_state": "7b00225cb824-dry-run-checkpoints-20261001-204508.omit-state.jsonl",
+        "thrash_table": "7b00225cb824-dry-run-thrash-table-20261001-204508.json",
+        "gold_bundles": "7b00225cb824-gold-bundles-20261001-204508.jsonl",
+        "metrics": "7b00225cb824-dry-run-metrics-20261001-204508.json"
+      }
+    }
+  },
+  "pack_counts": {}
+}

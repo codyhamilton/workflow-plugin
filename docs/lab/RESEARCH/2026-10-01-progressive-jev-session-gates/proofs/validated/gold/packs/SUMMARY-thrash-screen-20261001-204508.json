@@ -1,0 +1,98 @@
+{
+  "experiment": "ubuntu-thrash-screen-before-pack-v1",
+  "run": "20261001-204508",
+  "schedule": "75:15",
+  "snapshot_mode": "hybrid_v0",
+  "exclude_prior": [
+    "92a48e004519",
+    "bb6165018de0",
+    "0aab88c525de",
+    "036ff3ed4a89",
+    "0853bc21d3aa"
+  ],
+  "n_enum_candidates_Tge75": 29,
+  "n_scored": 29,
+  "shortlist": [
+    {
+      "rank": 1,
+      "worker_id": "ca977b9ca0dd",
+      "T": 109,
+      "thrash_score": 71.07,
+      "max_reread": 14,
+      "paths_ge3": 5,
+      "max_compact": 16,
+      "peak_ctx_tokens": 127736,
+      "frozen_intervals": 1,
+      "edit_write": 0,
+      "bash_frac": 0.517,
+      "sleep_bash": 0,
+      "pollish_bash": 0,
+      "why": "max_reread=14; paths\u22653=5; compact=16; no Edit/Write; peak=127736",
+      "n_checkpoints": 3,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ]
+    },
+    {
+      "rank": 2,
+      "worker_id": "7b00225cb824",
+      "T": 137,
+      "thrash_score": 25.75,
+      "max_reread": 7,
+      "paths_ge3": 2,
+      "max_compact": 2,
+      "peak_ctx_tokens": 162349,
+      "frozen_intervals": 0,
+      "edit_write": 19,
+      "bash_frac": 0.693,
+      "sleep_bash": 17,
+      "pollish_bash": 8,
+      "why": "max_reread=7; sleep_bash=17; pollish=8 (runaway wait/poll class)",
+      "n_checkpoints": 5,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135
+      ]
+    },
+    {
+      "rank": 3,
+      "worker_id": "daf933273c8f",
+      "T": 122,
+      "thrash_score": 21.69,
+      "max_reread": 3,
+      "paths_ge3": 1,
+      "max_compact": 8,
+      "peak_ctx_tokens": 125620,
+      "frozen_intervals": 2,
+      "edit_write": 3,
+      "bash_frac": 0.858,
+      "sleep_bash": 6,
+      "pollish_bash": 2,
+      "why": "compact=8; peak=125620; bash_frac=0.86; frozen_intervals=2; sleep_bash=6",
+      "n_checkpoints": 4,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120
+      ]
+    }
+  ],
+  "pack_files": {
+    "per_worker": [
+      "ca977b9ca0dd-judge-packs-20261001-204508.jsonl",
+      "7b00225cb824-judge-packs-20261001-204508.jsonl",
+      "daf933273c8f-judge-packs-20261001-204508.jsonl"
+    ],
+    "combined": "thrash-screen-judge-packs-20261001-204508.jsonl",
+    "combined_rows": 12
+  },
+  "panel_held": true,
+  "note": "Safe metrics only. No verdicts, no --call-jev, no parent-pull-v1. Gold-bundles/with-state remain gitignored under ubuntu-raw/.",
+  "reference_smoking_gun_score": 150.96
+}
