@@ -54,16 +54,33 @@ Absolute Ubuntu paths are replaced with `<REPO>/`, `<HOME>/`, `<MOUNT>/…`,
 
 ## Files
 
+### Smoking-gun seats (run `20261001-194107`)
+
 | File | Rows |
 |------|------|
 | `92a48e004519-judge-packs-20261001-194107.jsonl` | 15 (cps 75…285) |
 | `bb6165018de0-judge-packs-20261001-194107.jsonl` | 6 (cps 75…150) |
 | `p0-judge-packs-20261001-194107.jsonl` | 21 combined (convenience) |
 
+### Expansion open-pajero-maps workers (run `20261001-202909`)
+
+Same schema / hybrid_v0 budget / P0 schedule `75:15`. No gold verdicts — packs only.
+
+| File | T | Rows |
+|------|---|------|
+| `0aab88c525de-judge-packs-20261001-202909.jsonl` | 192 | 8 (cps 75…180) |
+| `036ff3ed4a89-judge-packs-20261001-202909.jsonl` | 161 | 6 (cps 75…150) |
+| `0853bc21d3aa-judge-packs-20261001-202909.jsonl` | 155 | 6 (cps 75…150) |
+| `expansion-judge-packs-20261001-202909.jsonl` | — | 20 combined |
+
 Regenerate locally (needs gitignored gold-bundles on the Ubuntu box):
 
 ```bash
-python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_gold_judge_packs.py
+python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_gold_judge_packs.py \
+  --run 20261001-194107 --workers 92a48e004519 bb6165018de0
+
+python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_gold_judge_packs.py \
+  --run 20261001-202909 --workers 0aab88c525de 036ff3ed4a89 0853bc21d3aa
 ```
 
 ## What is *not* here
