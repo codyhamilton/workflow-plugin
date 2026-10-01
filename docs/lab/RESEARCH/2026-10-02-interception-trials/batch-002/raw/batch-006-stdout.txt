@@ -1,0 +1,10 @@
+[{"cell_id":"6291e34dba40b7f7","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"cp105 diverse tools, moderate compaction; some continuation but not excessive."},
+{"cell_id":"af378bf8afc72068","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"cp105 no turn detail; insufficient evidence of excessive continuation."},
+{"cell_id":"c05e2b9cef9041d8","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"cp120 Bash-only 120 calls, 9 compactions, tiny text: clear grinding loop."},
+{"cell_id":"3690d106aa94df6e","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"cp120 ten compactions, heavy agent churn; likely overrunning."},
+{"cell_id":"2b43ab6eb48907bf","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"cp120 seventeen wakeups, repeated plan rereads: self-perpetuating loop."},
+{"cell_id":"74097608bedb74ce","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"cp120 heavy bash plus orchestration polling; likely overrunning."},
+{"cell_id":"d94c73b24f51aa40","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"cp120 edits and writes still converging; not yet excessive."},
+{"cell_id":"72c831f1b2afa0b5","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"cp120 no turn detail; cannot infer excessive continuation."},
+{"cell_id":"e55358d93ae48450","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"cp45 productive first checkpoint; too early to steer."},
+{"cell_id":"0248d17db5e81404","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"cp45 productive, low compaction; defer steering."}]

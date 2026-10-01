@@ -1,0 +1,10 @@
+[{"cell_id":"34ee94be065800ba","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Unit 02 done; unit 07 pytest still running. Stopping now truncates near-done work."},
+{"cell_id":"9ca9c2e5b797bf5d","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Blocked awaiting user decision on 3C-04 while 3C-08 runs; no stop needed."},
+{"cell_id":"209abbf0f0c9d6f8","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Unit 31b agent running; WP1 near completion, truncation risk outweighs benefit."},
+{"cell_id":"f34e3dc4c1647a8d","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Repeated stale idle-monitor notices; loop churning with little real progress."},
+{"cell_id":"fadec03e3dbcd5ef","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Phase 3 nearly done; content decision pending from user, keep going."},
+{"cell_id":"7fe843a52014ae1a","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Eight compactions, huge prefix, verbose close-out; costly session, timely wrap-up."},
+{"cell_id":"e16ece44c49a520c","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"39 Bash, minimal output, 166k context; likely spinning, stop plausible."},
+{"cell_id":"4ba8c51bb4ad6c49","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"No snapshot messages or tail; cannot justify steering."},
+{"cell_id":"02040d69954a74fd","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"No snapshot messages or tail; cannot justify steering."},
+{"cell_id":"4617b0fef3d43227","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"No snapshot messages or tail; cannot justify steering."}]

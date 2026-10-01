@@ -1,0 +1,10 @@
+[{"cell_id":"3516531450396fde","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Refine proceeding, briefs committed; mid-flight productive work, not a stop boundary."},
+{"cell_id":"94c455322e13f756","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Cost-analysis wrap-up, no dev work truncated; no stall signal yet."},
+{"cell_id":"8810a341604ef42e","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Explicitly part-way through active phase; steering now would truncate productive work."},
+{"cell_id":"603367408877d3e2","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"WP1 near-done, one worker fixing last envelope row; let it finish first."},
+{"cell_id":"3c6dc58aa516de14","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Orchestrator correctly waiting on long background run; stopping wastes active work."},
+{"cell_id":"b94d4bf9c5e5a739","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"No state provided; insufficient evidence, hold by default."},
+{"cell_id":"a36d6d57604c0480","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"No state provided; insufficient evidence, hold by default."},
+{"cell_id":"ab96ae58010c0192","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite prefix only, no usable signal; hold by default."},
+{"cell_id":"e0c8a67bac03a0dc","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"75 Bash calls, near-zero narrative across turns 72-75; grinding loop, steer now."},
+{"cell_id":"193c43dd2c8fb2a5","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Productive layer writing with high narrative output; not a stopping point."}]

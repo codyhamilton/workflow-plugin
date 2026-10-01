@@ -1,0 +1,328 @@
+{
+  "harness": "claude-code",
+  "worker_id": "4f4b98803720",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/670245db-d72a-4875-86cf-4f4b98803720.jsonl",
+  "T": 114,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "shape": "mid",
+  "ideal_window": [
+    64,
+    99
+  ],
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "inventory_rank": 6,
+  "norm_length": 135.0,
+  "checkpoints": [
+    {
+      "checkpoint": 75,
+      "prior": null,
+      "state_chars": 2517,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "4f4b98803720",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check current WP1 plan progress, we stopped mid-flight. lets reconcile status /workflow:refine outstanding work. I still think some of the allocations were a bit off, multiple agents blocked for long periods waiting for build work. We need to have them be able to kick off background work and complete, then only when that work is complete we kick off a new agent. Our monitor process needs to be more relaxed, allowing longer wait periods (wait for process end or maybe more infrequent like max 30mi",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 102685,
+          "prefix_bytes": 1772419,
+          "tool_histogram": {
+            "Bash": 45,
+            "Read": 13,
+            "Edit": 6,
+            "Agent": 4,
+            "AskUserQuestion": 1,
+            "Skill": 1
+          },
+          "reread_paths": [
+            {
+              "path": "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/IMPLEMENTATION.md",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 9,
+          "compaction_event_count": 5,
+          "assistant_text_chars": 9500
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "Both units 13 and 14 are now dispatched in parallel, each routed to its brief file. I'll wait for their reports and update `IMPLEMENTATION.md` as each lands, then move on to units 15/15b.",
+            "tool_names": []
+          },
+          {
+            "turn": 69,
+            "excerpt": "Unit 13 landed (commit `3ed14a6`, pushed) \u2014 division works, but the envelope check fails more broadly than the brief anticipated (dense Perth macro-cells at levels 10/12 blow past even type-2 division by ~60x), so `divide.py` added a lossy bisection fallback as a stopgap pending unit 14's selection. I'll record this in `IMPLEMENTATION.md` now and wait for unit 14 before deciding whether the brief ",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "Unit 13's outcome is recorded and pushed (`56c48f7`). Waiting on unit 14 to complete before assessing whether the envelope/capacity findings need another brief amendment ahead of units 15/15b.",
+            "tool_names": []
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "That's a minimal, mechanical fix confined to test call sites \u2014 no conflict with unit 13's changes. Let me confirm full suite is green post-merge and record the outcome.",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 90,
+      "prior": 75,
+      "state_chars": 2511,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "4f4b98803720",
+        "checkpoint_turn": 90,
+        "prior_checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check current WP1 plan progress, we stopped mid-flight. lets reconcile status /workflow:refine outstanding work. I still think some of the allocations were a bit off, multiple agents blocked for long periods waiting for build work. We need to have them be able to kick off background work and complete, then only when that work is complete we kick off a new agent. Our monitor process needs to be more relaxed, allowing longer wait periods (wait for process end or maybe more infrequent like max 30mi",
+        "cumulative": {
+          "api_turns": 90,
+          "peak_ctx_tokens": 102685,
+          "prefix_bytes": 1909943,
+          "tool_histogram": {
+            "Bash": 52,
+            "Read": 17,
+            "Edit": 8,
+            "Agent": 5,
+            "AskUserQuestion": 1,
+            "Skill": 1
+          },
+          "reread_paths": [
+            {
+              "path": "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/IMPLEMENTATION.md",
+              "count": 5
+            }
+          ],
+          "distinct_read_paths": 11,
+          "compaction_event_count": 5,
+          "assistant_text_chars": 10319
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/briefs/15-full-build-and-record.md",
+            "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/briefs/15b-full-build-verify-and-record.md"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 7,
+            "Read": 4,
+            "Edit": 2,
+            "Agent": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 83,
+            "excerpt": "Briefs 15/15b already have a general \"PASS or recorded deviation naming its file-table row\" contract, which comfortably absorbs the envelope/bisection findings from 13/14 \u2014 no further brief amendment needed. Dispatching unit 15 (kickoff only, no waiting) now.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 84,
+            "excerpt": "Units 13 and 14 are both done and recorded (`3ed14a6`/`56c48f7`, `dfe4d7d`/`bfa8fe9`). Unit 15's kickoff worker is now running \u2014 it should finish quickly since it only starts the background job and confirms it's alive. Once it reports back, I'll dispatch a fresh unit 15b to wait for the multi-hour build and verify/record the final result.",
+            "tool_names": []
+          },
+          {
+            "turn": 85,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 86,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 87,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 88,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 89,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 90,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 105,
+      "prior": 90,
+      "state_chars": 3123,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "4f4b98803720",
+        "checkpoint_turn": 105,
+        "prior_checkpoint_turn": 90,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check current WP1 plan progress, we stopped mid-flight. lets reconcile status /workflow:refine outstanding work. I still think some of the allocations were a bit off, multiple agents blocked for long periods waiting for build work. We need to have them be able to kick off background work and complete, then only when that work is complete we kick off a new agent. Our monitor process needs to be more relaxed, allowing longer wait periods (wait for process end or maybe more infrequent like max 30mi",
+        "cumulative": {
+          "api_turns": 105,
+          "peak_ctx_tokens": 127540,
+          "prefix_bytes": 2091635,
+          "tool_histogram": {
+            "Bash": 60,
+            "Read": 18,
+            "Edit": 10,
+            "Agent": 6,
+            "AskUserQuestion": 1,
+            "Skill": 1
+          },
+          "reread_paths": [
+            {
+              "path": "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/IMPLEMENTATION.md",
+              "count": 6
+            }
+          ],
+          "distinct_read_paths": 11,
+          "compaction_event_count": 5,
+          "assistant_text_chars": 13269
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 8,
+            "Edit": 2,
+            "Agent": 1,
+            "Read": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 98,
+            "excerpt": "That backgrounded itself twice \u2014 the notification just confirms the launcher script exited, not the actual wait. Let me redo it as a single tracked background call.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 99,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 100,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 101,
+            "excerpt": "The first unit 15b attempt stalled itself instead of blocking on the wait, so per the plan's own long-running-work rule I didn't resume it \u2014 I recorded that and am now waiting on the build directly myself. This is a multi-hour wait (extraction alone took 1:27:24 last time); I'll dispatch the real verify/record unit 15b agent once it actually finishes, so that agent does only bounded, deterministic",
+            "tool_names": []
+          },
+          {
+            "turn": 102,
+            "excerpt": "That's the same unit-15b agent checking in again on its own (via a background loop it started, not a resume I triggered) \u2014 it's still legitimately waiting on the build, not stalled. Since it's actively progressing on its own and owns the actual verify/record work (`PLAN.md`, `docs/design/target-disc.md`, `docs/provenance.md`), I'll let it continue rather than dispatch a duplicate agent that would ",
+            "tool_names": []
+          },
+          {
+            "turn": 103,
+            "excerpt": "My own wait loop finished \u2014 the extract+build chain has exited. Let me check the results.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 104,
+            "excerpt": "The build finished \u2014 exit 0 both stages, `ALLDATA.KWI` written (814MB), disk fine (34G free, spool only 6.9GB thanks to unit 14's selection filtering at extraction time, well under the earlier 21GB worry). But there's a real anomaly: **levels 10 and 12 have zero roads, zero backgrounds, zero names, zero parcels** \u2014 completely empty, despite unit 14's own dry-run predicting ~38 background admits at",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 105,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

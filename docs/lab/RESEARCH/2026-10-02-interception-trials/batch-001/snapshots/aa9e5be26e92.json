@@ -1,0 +1,99 @@
+{
+  "harness": "claude-code",
+  "worker_id": "aa9e5be26e92",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps--claude-worktrees-brief-34-ceiling-only/107c3d34-cc31-4b60-8994-aa9e5be26e92.jsonl",
+  "T": 83,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "shape": "short_natural",
+  "ideal_window": null,
+  "project": "open-pajero-maps (worktree ceiling-only)",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "inventory_rank": 10,
+  "norm_length": 98.0,
+  "checkpoints": [
+    {
+      "checkpoint": 75,
+      "prior": null,
+      "state_chars": 3751,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "aa9e5be26e92",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "You are the orchestrator for open-pajero-maps WP1 remaining work. CWD: /home/codyh/workspace/open-pajero-maps. Use workflow plugin skills (/workflow:refine, /workflow:execute) as needed. Commit and push per CLAUDE.md.\n\n## Goal\nDrive WP1 to a complete implementation: close remaining planned units and any WP1-scope harness failures they surface. Do not start WP2.\n\n## Current state (reconcile against the branch; do not trust this blindly)\n- master is clean at ~59dd914. Units 01\u201315b done. Ad-hoc bri",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 133215,
+          "prefix_bytes": 1421626,
+          "tool_histogram": {
+            "Agent": 20,
+            "Bash": 12,
+            "TaskStop": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 30194
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "No WP1-scope fixes remain, but WP1 is not complete: the last envelope FAILs need your accept-or-reject on the declared deviations. master is clean and pushed at 2b8bd39, WP2 was not started, and I ticked no acceptance boxes.\n\n**Rebuild #6 result.** The harness passes container, decode, pointers, `mfde`, mht29, shape, vocab and spotcheck (14/14). The suite passes at 279. Envelope fails on two rows ",
+            "tool_names": []
+          },
+          {
+            "turn": 69,
+            "excerpt": "That was the brief 33c agent's completion notice, which has already reported. Nothing is running now.\n\nWP1 is waiting on your decision on the nine proposed deviations in `PLAN.md`, under the \"Build record (2026-09-19, rebuild #6)\" section. master is clean and pushed at 2b8bd39.",
+            "tool_names": []
+          },
+          {
+            "turn": 70,
+            "excerpt": "The ratio is G/R, meaning our generated disc divided by the reference disc. It is not an expected size gap. The **envelope** check asks whether our disc has roughly the same shape and load as a real one. It doesn't test whether the map is correct. The head unit's firmware was built around real discs, so the check guards against sizes or counts far outside what it has seen. A frame over the 131,070",
+            "tool_names": []
+          },
+          {
+            "turn": 71,
+            "excerpt": "Yes, the whole disc is generated from the OSM extract. Reference discs are only used as the oracle to compare against and for structural constants like the parcel mask and size budgets. None of R's content is copied in.\n\nOn names, 0.149x means G has about 15% as many name entries as R at level 0. That's a count of name entries per level 0 parcel, and it doesn't measure how good the data is. My ear",
+            "tool_names": []
+          },
+          {
+            "turn": 72,
+            "excerpt": "The limits are the largest sub-frame sizes R contains, per level and per kind (road, background, name). The builder loads them from R's `frame_kind_max_bytes` as budgets. Separately, the hard frame ceiling is 131,070 bytes, and that comes from the frame format.\n\n**Why trimming happens.** OSM is denser than R in some places, especially dense city cells at zoomed-out levels. A cell's roads, backgrou",
+            "tool_names": []
+          },
+          {
+            "turn": 73,
+            "excerpt": "I don't remember the source, so I'll check the repo.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "It comes from our own writer, and it's an inference about the format, not something read from a spec.\n\n- The Map Frame header stores its size as a 16-bit word count (`total_size // 2`), so the largest representable frame is 65,535 words \u00d7 2 = 131,070 bytes.\n- Our writer in `parser/kiwiw/synth.py` raises `N does not fit in u16` above that limit. That crash, found on 2026-09-09, is where the ceiling",
+            "tool_names": []
+          }
+        ]
+      }
+    }
+  ]
+}

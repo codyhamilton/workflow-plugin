@@ -1,0 +1,119 @@
+{
+  "harness": "codex",
+  "worker_id": "rollout-2026-04-07T04-10",
+  "path": "/home/codyh/.codex/sessions/2026/04/07/rollout-2026-04-07T04-10-34-019d6622-9190-77b1-93c6-4ef4524cc8a4.jsonl",
+  "T": 59,
+  "schedule": {
+    "first_at": 14,
+    "interval": 15
+  },
+  "shape": "short_natural",
+  "ideal_window": null,
+  "project": "garcia-music",
+  "corpus_source": "deterministic_30",
+  "maps_family": false,
+  "inventory_rank": 18,
+  "norm_length": 59.0,
+  "checkpoints": [
+    {
+      "checkpoint": 14,
+      "prior": null,
+      "state_chars": 351,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 14,
+        "harness": "codex",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 14,
+          "approx_progress_frac": 0.237,
+          "file_lines": 859,
+          "role_histogram_top": {
+            "response_item": 534,
+            "event_msg": 295,
+            "turn_context": 28,
+            "session_meta": 2
+          },
+          "userish_count_full_session": 0,
+          "T_observed": 59,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    },
+    {
+      "checkpoint": 29,
+      "prior": null,
+      "state_chars": 351,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 29,
+        "harness": "codex",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 29,
+          "approx_progress_frac": 0.492,
+          "file_lines": 859,
+          "role_histogram_top": {
+            "response_item": 534,
+            "event_msg": 295,
+            "turn_context": 28,
+            "session_meta": 2
+          },
+          "userish_count_full_session": 0,
+          "T_observed": 59,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    },
+    {
+      "checkpoint": 44,
+      "prior": null,
+      "state_chars": 351,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 44,
+        "harness": "codex",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 44,
+          "approx_progress_frac": 0.746,
+          "file_lines": 859,
+          "role_histogram_top": {
+            "response_item": 534,
+            "event_msg": 295,
+            "turn_context": 28,
+            "session_meta": 2
+          },
+          "userish_count_full_session": 0,
+          "T_observed": 59,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    },
+    {
+      "checkpoint": 59,
+      "prior": null,
+      "state_chars": 349,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 59,
+        "harness": "codex",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 59,
+          "approx_progress_frac": 1.0,
+          "file_lines": 859,
+          "role_histogram_top": {
+            "response_item": 534,
+            "event_msg": 295,
+            "turn_context": 28,
+            "session_meta": 2
+          },
+          "userish_count_full_session": 0,
+          "T_observed": 59,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    }
+  ]
+}

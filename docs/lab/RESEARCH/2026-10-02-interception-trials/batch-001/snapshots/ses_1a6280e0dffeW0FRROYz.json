@@ -1,0 +1,76 @@
+{
+  "harness": "opencode",
+  "worker_id": "ses_1a6280e0dffeW0FRROYz",
+  "path": "sqlite:/home/codyh/.local/share/opencode/opencode.db#session/ses_1a6280e0dffeW0FRROYzKNpNV8",
+  "T": 54,
+  "schedule": {
+    "first_at": 18,
+    "interval": 15
+  },
+  "shape": "short_natural",
+  "ideal_window": null,
+  "maps_family": false,
+  "project": "llama.cpp",
+  "corpus_source": "deterministic_30",
+  "inventory_rank": 21,
+  "norm_length": 54.5,
+  "checkpoints": [
+    {
+      "checkpoint": 18,
+      "prior": null,
+      "state_chars": 245,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 18,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Llama.cpp high system RAM when idle",
+        "project": "llama.cpp",
+        "cumulative": {
+          "api_turns": 18,
+          "messages_full": 109,
+          "norm_length": 54.5,
+          "T_proxy": 54
+        }
+      }
+    },
+    {
+      "checkpoint": 27,
+      "prior": null,
+      "state_chars": 245,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 27,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Llama.cpp high system RAM when idle",
+        "project": "llama.cpp",
+        "cumulative": {
+          "api_turns": 27,
+          "messages_full": 109,
+          "norm_length": 54.5,
+          "T_proxy": 54
+        }
+      }
+    },
+    {
+      "checkpoint": 54,
+      "prior": null,
+      "state_chars": 245,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 54,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Llama.cpp high system RAM when idle",
+        "project": "llama.cpp",
+        "cumulative": {
+          "api_turns": 54,
+          "messages_full": 109,
+          "norm_length": 54.5,
+          "T_proxy": 54
+        }
+      }
+    }
+  ]
+}

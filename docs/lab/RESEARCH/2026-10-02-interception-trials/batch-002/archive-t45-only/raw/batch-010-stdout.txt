@@ -1,0 +1,10 @@
+[{"cell_id":"a6dd017a53a4f0d5","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Empty role histogram, zero user proxy; no content to judge near-done vs runaway."},
+{"cell_id":"d9e6a147a735a166","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Normal 45-turn session shape, 28 turn contexts, no completion or runaway markers."},
+{"cell_id":"d9e6a147a735a166","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Normal session shape with 28 turn contexts; no near-done or runaway evidence."},
+{"cell_id":"60a19af2038e1627","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Standard histogram shape, 27 turns, no failure or completion signal present."},
+{"cell_id":"7e046ad4747ebaa0","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Blank role histogram and zero user proxy; snapshot carries no usable signal."},
+{"cell_id":"2fdee6510ad41e30","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Active build-perf fix, real regression debugging; no runaway signal, re-check later."},
+{"cell_id":"8c01efd9d77d2b6f","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Productive design coordination with agents and pushes; healthy, defer re-check."},
+{"cell_id":"2fe8fe45d9ca7a45","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Four compactions and six self-wakeups with looping language indicate runaway; fire now."},
+{"cell_id":"d042d7d32461f0ef","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Coordinated parallel wave dispatch, no runaway pattern; safe to defer re-check."},
+{"cell_id":"4b5a1ee6d6c496ca","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Driving phase to completion, awaiting worker; no runaway, defer and re-check."}]

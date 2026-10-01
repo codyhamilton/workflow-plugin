@@ -1,0 +1,406 @@
+{
+  "harness": "claude-code",
+  "worker_id": "730a03ecdc0d",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/f06c7365-e8be-4dbf-b6c3-730a03ecdc0d.jsonl",
+  "T": 144,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "shape": "mid",
+  "ideal_window": [
+    94,
+    129
+  ],
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "inventory_rank": 4,
+  "norm_length": 165.0,
+  "checkpoints": [
+    {
+      "checkpoint": 75,
+      "prior": null,
+      "state_chars": 1118,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "730a03ecdc0d",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check what work is outstanding on WP1",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 121179,
+          "prefix_bytes": 1419910,
+          "tool_histogram": {
+            "Bash": 40,
+            "Agent": 9,
+            "ListAgents": 4,
+            "ScheduleWakeup": 2,
+            "SendMessage": 2,
+            "Read": 1,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 1,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 10362
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "Waiting for this run to finish.",
+            "tool_names": []
+          },
+          {
+            "turn": 69,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "Monitoring the test run for completion.",
+            "tool_names": []
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "All 236 tests pass. Pushing master now.",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 105,
+      "prior": 75,
+      "state_chars": 1306,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "730a03ecdc0d",
+        "checkpoint_turn": 105,
+        "prior_checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check what work is outstanding on WP1",
+        "cumulative": {
+          "api_turns": 105,
+          "peak_ctx_tokens": 135746,
+          "prefix_bytes": 1598686,
+          "tool_histogram": {
+            "Bash": 60,
+            "Agent": 10,
+            "ListAgents": 4,
+            "SendMessage": 3,
+            "ScheduleWakeup": 2,
+            "Read": 1,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 1,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 11613
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 20,
+            "Agent": 1,
+            "SendMessage": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 98,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 99,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 100,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 101,
+            "excerpt": "Genuinely running (state R), memory pressure eased somewhat (5.2Gi free now). Let me wait a bit more.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 102,
+            "excerpt": "Waiting another minute for the test suite.",
+            "tool_names": []
+          },
+          {
+            "turn": 103,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 104,
+            "excerpt": "Progressing (60%+). Let it continue.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 105,
+            "excerpt": "Waiting for completion.",
+            "tool_names": []
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 120,
+      "prior": 105,
+      "state_chars": 2742,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "730a03ecdc0d",
+        "checkpoint_turn": 120,
+        "prior_checkpoint_turn": 105,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check what work is outstanding on WP1",
+        "cumulative": {
+          "api_turns": 120,
+          "peak_ctx_tokens": 140174,
+          "prefix_bytes": 2437053,
+          "tool_histogram": {
+            "Bash": 68,
+            "Agent": 12,
+            "ListAgents": 4,
+            "SendMessage": 3,
+            "ScheduleWakeup": 2,
+            "Read": 1,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 1,
+          "compaction_event_count": 6,
+          "assistant_text_chars": 15860
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 8,
+            "Agent": 2
+          }
+        },
+        "tail": [
+          {
+            "turn": 113,
+            "excerpt": "All four root-cause groups are implemented, tested, and pushed to `master`. Summary:\n\n**Group 1 \u2014 dune-drop / background-selection consistency (briefs 19+24):** `selection.json`'s level 10/12 predicate switched from the unmappable `natural=dune` to `natural=bay` (26 ways vs. R's 25). Also found `boundary=administrative`/306 is structurally unreachable from way-level tags in this dataset (relation-",
+            "tool_names": []
+          },
+          {
+            "turn": 114,
+            "excerpt": "I'll dispatch a fresh agent to run the `plan` skill for the remaining open work (the full-Australia rebuild needed to confirm the group-1 container fix and to drive the group-2 envelope recalibration), then follow with `refine` once that lands.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 115,
+            "excerpt": "Planning agent is running in the background on the remaining work (full-Australia rebuild confirmation + envelope recalibration, plus a check on brief 17's status). Once it reports back, I'll dispatch a follow-up agent to run `refine` on whatever it produces.",
+            "tool_names": []
+          },
+          {
+            "turn": 116,
+            "excerpt": "Planning is done and pushed (`4f9699a`) \u2014 brief 17 turned out already resolved, so it's a non-issue. Now dispatching a fresh agent to run `refine` on the four new units (25/25b/26/26b) so they get properly decomposed into briefs before execution.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 117,
+            "excerpt": "Refine agent is now running on units 25/25b/26/26b to produce the briefs. I'll report back once it completes.",
+            "tool_names": []
+          },
+          {
+            "turn": 118,
+            "excerpt": "Both stages are done and pushed.\n\n**Plan** (`4f9699a`): extended `PLAN.md` with 4 new units \u2014 25/25b (full-Australia rebuild #2, confirming the group-1 dune\u2192bay fix at scale) and 26/26b (envelope admission-rate recalibration off a fresh `report.json`). Confirmed brief 17 is a non-issue \u2014 already resolved before this run. Fixed a stale dangling reference in `PLAN.md` while there.\n\n**Refine** (`9194",
+            "tool_names": []
+          },
+          {
+            "turn": 119,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 120,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 135,
+      "prior": 120,
+      "state_chars": 2228,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "730a03ecdc0d",
+        "checkpoint_turn": 135,
+        "prior_checkpoint_turn": 120,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Check what work is outstanding on WP1",
+        "cumulative": {
+          "api_turns": 135,
+          "peak_ctx_tokens": 140174,
+          "prefix_bytes": 2595270,
+          "tool_histogram": {
+            "Bash": 73,
+            "Agent": 14,
+            "ListAgents": 4,
+            "Read": 3,
+            "SendMessage": 3,
+            "ScheduleWakeup": 2,
+            "Monitor": 1,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 3,
+          "compaction_event_count": 6,
+          "assistant_text_chars": 17353
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/briefs/25-full-australia-rebuild2-kickoff.md",
+            "/home/codyh/workspace/open-pajero-maps/docs/plans/01-eval-harness-and-map-layer/briefs/25b-full-australia-rebuild2-verify-and-record.md"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 5,
+            "Agent": 2,
+            "Read": 2,
+            "Monitor": 1,
+            "ToolSearch": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 128,
+            "excerpt": "This waits ~40 minutes for a background build. Dispatching a fresh general-purpose agent to do the wait-and-verify.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 129,
+            "excerpt": "Unit 25b is running now \u2014 it will wait for the full-Australia rebuild (~40 min) then verify group 1's fix and record the fresh report. I'll wait for its completion notification before proceeding to unit 26.",
+            "tool_names": []
+          },
+          {
+            "turn": 130,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 131,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 132,
+            "excerpt": "",
+            "tool_names": [
+              "ToolSearch"
+            ]
+          },
+          {
+            "turn": 133,
+            "excerpt": "",
+            "tool_names": [
+              "Monitor"
+            ]
+          },
+          {
+            "turn": 134,
+            "excerpt": "The unit-25b agent's wait command timed out before the ~40-minute build finished, so per the \"never resume a stalled worker\" rule I let that agent's run end there rather than resuming it. I'm now monitoring the background pipeline directly and will dispatch a fresh unit-25b agent once it's confirmed finished.",
+            "tool_names": []
+          },
+          {
+            "turn": 135,
+            "excerpt": "That's the earlier unit-25b agent I've already superseded \u2014 I'm not resuming it, since I'm independently monitoring the pipeline now. Waiting for my own monitor to report completion.",
+            "tool_names": []
+          }
+        ]
+      }
+    }
+  ]
+}

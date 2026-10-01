@@ -1,0 +1,322 @@
+{
+  "harness": "claude-code",
+  "worker_id": "919012be9f39",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/b9eb9e9a-900e-487e-8ae0-919012be9f39.jsonl",
+  "T_eligibility_only": 75,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [
+    45,
+    60,
+    75
+  ],
+  "never_reached_checkpoints": [
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "checkpoints": [
+    {
+      "checkpoint": 45,
+      "prior": null,
+      "state_chars": 1978,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "919012be9f39",
+        "checkpoint_turn": 45,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "del",
+        "cumulative": {
+          "api_turns": 45,
+          "peak_ctx_tokens": 126425,
+          "prefix_bytes": 1226696,
+          "tool_histogram": {
+            "Bash": 23,
+            "Agent": 7,
+            "Skill": 4
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 11470
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 38,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 39,
+            "excerpt": "Tree clean, pushed, no live tests. Record 2-01 and dispatch 2-02.",
+            "tool_names": [
+              "Bash",
+              "Agent"
+            ]
+          },
+          {
+            "turn": 40,
+            "excerpt": "Unit 2-01 (the C frame decoders) is done and recorded, and a Sonnet worker is now on 2-02, the C parcel-tree walker and the equivalence test. I haven't heard back from it.\n\n2-01 is `621e624`, pushed, with the record in `IMPLEMENTATION.md`. What I verified myself is that the tree is clean and no tests are still running. Everything else comes from the worker's report.\n\n- **Evidence:** the 11 new tes",
+            "tool_names": []
+          },
+          {
+            "turn": 41,
+            "excerpt": "That was a duplicate notice from the 2-01 worker. It adds nothing new, and 2-01 stays recorded as done with concerns (`621e624`). I'm still waiting on the 2-02 worker.",
+            "tool_names": []
+          },
+          {
+            "turn": 42,
+            "excerpt": "Another duplicate notice from the 2-01 worker, this one from an idle timer it had started. Nothing changes: 2-01 stays recorded as done, and I'm still waiting on 2-02.",
+            "tool_names": []
+          },
+          {
+            "turn": 43,
+            "excerpt": "Another stale-monitor notice from the 2-01 worker. It carries nothing new, and 2-01 stays done. I'm still waiting on 2-02.",
+            "tool_names": []
+          },
+          {
+            "turn": 44,
+            "excerpt": "Another idle-timer notice from the 2-01 worker. Nothing new, and 2-01 stays done. I'm still waiting on 2-02.",
+            "tool_names": []
+          },
+          {
+            "turn": 45,
+            "excerpt": "",
+            "tool_names": [
+              "Bash",
+              "Agent"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 60,
+      "prior": 45,
+      "state_chars": 2366,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "919012be9f39",
+        "checkpoint_turn": 60,
+        "prior_checkpoint_turn": 45,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "del",
+        "cumulative": {
+          "api_turns": 60,
+          "peak_ctx_tokens": 126425,
+          "prefix_bytes": 1424580,
+          "tool_histogram": {
+            "Bash": 27,
+            "Agent": 11,
+            "Skill": 4,
+            "ListAgents": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 18643
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Agent": 4,
+            "Bash": 4,
+            "ListAgents": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 53,
+            "excerpt": "",
+            "tool_names": [
+              "Bash",
+              "Agent"
+            ]
+          },
+          {
+            "turn": 54,
+            "excerpt": "Unit 2-05 (K1 completeness plus the all-kinds equality test) is done (`363283c`, pushed) and recorded. I've dispatched 2-06, the thin driver, to a Sonnet worker and haven't heard back. The driver makes `--engine c` the default, keeps `--engine python` as the count oracle, and adds summed-PSS memory sampling and a `-j 1` versus `-j 4` byte-compare. I told that worker not to start the long full-disc",
+            "tool_names": []
+          },
+          {
+            "turn": 55,
+            "excerpt": "",
+            "tool_names": [
+              "Bash",
+              "Agent"
+            ]
+          },
+          {
+            "turn": 56,
+            "excerpt": "Unit 2-06 (the thin driver) is done with concerns (`12a893c`, pushed) and recorded. I've dispatched 2-07, the full-disc kickoff, to a Sonnet worker and haven't heard back. It starts the long run under the heavy-job lock and hands off a short summary, and 2-08 does the verifying.\n\n**2-06 results**, from the worker's report (I haven't re-run them):\n- **Driver:** `quantisation_roundtrip.py` now defau",
+            "tool_names": []
+          },
+          {
+            "turn": 57,
+            "excerpt": "The 2-07 worker's message is interim. The long run is going under the heavy lock and the worker is watching it, so I'm waiting for its final handoff before dispatching 2-08.",
+            "tool_names": []
+          },
+          {
+            "turn": 58,
+            "excerpt": "That's a stale-monitor notice from the 2-04 worker. 2-04 stays done (`8c84efb`), and I'm still waiting on the 2-07 handoff.",
+            "tool_names": []
+          },
+          {
+            "turn": 59,
+            "excerpt": "Received: no Sonnet worker for 2-08, no further Sonnet execute agents, and I'm leaving 2-07's run and lock alone. I'm waiting on 2-07 only, and I'll hand you a short status summary once it reaches ALLDONE or ABORT.",
+            "tool_names": []
+          },
+          {
+            "turn": 60,
+            "excerpt": "",
+            "tool_names": [
+              "ListAgents"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 75,
+      "prior": 60,
+      "state_chars": 2716,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "919012be9f39",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": 60,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "del",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 126425,
+          "prefix_bytes": 1640707,
+          "tool_histogram": {
+            "Bash": 35,
+            "Agent": 12,
+            "Skill": 4,
+            "ListAgents": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 27893
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 8,
+            "Agent": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "Reviewing the Flash 2-08 draft: every number matches the raw files. I'm applying two wording fixes and the review note now.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "**Review result: pass with fixes.** The fixes are pushed as `6a00f2e`. I re-read every figure in the Flash 2-08 draft against the raw files in `output/scratch-2-07/`.\n\n**What matched**\n- **K1 counts:** all eight checked/failing pairs equal the 3C-04 table to the integer, in all four reports (`k1_a`, `k1_b`, `k1_c`, `k1_j1`). Total failing is 17,989,704.\n- **Explained counters:** `name_anchor_halo`",
+            "tool_names": []
+          },
+          {
+            "turn": 71,
+            "excerpt": "Understood. I haven't signed the PSS ceiling or the Phase 4 budgets, and I won't until Cody does through the parent. Phase 2 stays open, so I haven't written the `Workflow-Phase: 04-c-core-orchestration:2` closing commit. I'm idle.",
+            "tool_names": []
+          },
+          {
+            "turn": 72,
+            "excerpt": "Received: Phase 2 closed at `a576413`, and I'm starting the Phase 3 refine now. Refine stays on Sonnet and execution units go to Flash.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "Phase 3 refine is running. A Sonnet refine agent has the brief, and I haven't heard back.\n\nExecution stays on Flash with a Sonnet 5.5 review per unit, as you directed. I told the agent to mark any unit that needs real geometry reasoning as risky for Flash, so I can ask you or the parent about a stronger worker. Because Phase 3 is flagged open, I told it not to invent fix briefs for causes nobody k",
+            "tool_names": []
+          },
+          {
+            "turn": 75,
+            "excerpt": "Phase 3 refine is done: verdict **proceed**, committed and pushed as `ac758cd`. I haven't dispatched any worker, because your last message asked for the refine only. I'm holding for your go-ahead to execute Phase 3.\n\n**Why there are no fix units yet.** Phase 3 is flagged open and the number of fixes depends on the cause table, so I didn't invent fix briefs. After the cause table lands I'll author ",
+            "tool_names": []
+          }
+        ]
+      }
+    }
+  ]
+}

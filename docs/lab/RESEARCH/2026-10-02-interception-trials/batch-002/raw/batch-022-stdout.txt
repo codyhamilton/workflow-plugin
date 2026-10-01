@@ -1,0 +1,10 @@
+[{"cell_id":"63f7f9d6df951e71","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Empty lite state, no activity signal; nothing to truncate, low urgency."},
+{"cell_id":"d8ad73382bb1d790","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Substantial active session, 28 turn contexts, no closure evidence; development ongoing."},
+{"cell_id":"d8ad73382bb1d790","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Active prefix, 28 turn contexts, no closing indicators; stopping premature."},
+{"cell_id":"ca3a99a343998878","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Active session, 27 turn contexts, no near-done signal; continue."},
+{"cell_id":"3a37b44fcf0b42f6","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Identical empty lite state; no evidence, low urgency."},
+{"cell_id":"efb4f937318f02a8","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Active performance investigation with productive reasoning; stopping truncates development."},
+{"cell_id":"06aca94411bcec63","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Coordinating inventory of remaining work; still productive, not a clean stop."},
+{"cell_id":"5e0230de73b9b450","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Recording unit outcomes, closing work in progress; stopping now would truncate it."},
+{"cell_id":"3e120d72e35c7cbc","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Mid integration of agent waves; productive coordination in flight."},
+{"cell_id":"c63e80d12b90c41c","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Active edits and reads continuing; no completion signal, keep going."}]

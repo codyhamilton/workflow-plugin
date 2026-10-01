@@ -1,0 +1,109 @@
+{
+  "generated_at": "2026-10-02 00:43:00 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0",
+  "score_ready_path": true,
+  "protocol_decontaminated_r1_r2_r3": true,
+  "fixed_schedule": [
+    45,
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "target_cells": 240,
+  "n_cells": 240,
+  "n_sessions": 22,
+  "n_sessions_independent": 22,
+  "n_variants": 240,
+  "lever_combos": [
+    {
+      "state": "stats_only",
+      "question": "continue_excessively",
+      "response_class": "likert_0_3"
+    },
+    {
+      "state": "stats_only",
+      "question": "steer_now",
+      "response_class": "binary_fire"
+    },
+    {
+      "state": "stats_only",
+      "question": "thrash_bundle",
+      "response_class": "four_class"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "steer_now",
+      "response_class": "likert_0_3"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "near_done",
+      "response_class": "four_class"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "defer_recheck",
+      "response_class": "binary_fire"
+    },
+    {
+      "state": "stats_plus_delta",
+      "question": "productive_arc",
+      "response_class": "likert_0_3"
+    },
+    {
+      "state": "stats_plus_delta",
+      "question": "continue_excessively",
+      "response_class": "rating_plus_offset"
+    },
+    {
+      "state": "compact_focus",
+      "question": "thrash_bundle",
+      "response_class": "binary_fire"
+    },
+    {
+      "state": "compact_focus",
+      "question": "steer_now",
+      "response_class": "four_class"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "continue_excessively",
+      "response_class": "four_class"
+    },
+    {
+      "state": "stats_only",
+      "question": "defer_recheck",
+      "response_class": "rating_plus_offset"
+    }
+  ],
+  "window_status": "unidentified",
+  "typesafe_used": false,
+  "soft_standard_hold": true,
+  "flash_role": "policy-under-test",
+  "maps_concentration": {
+    "sessions_maps": 14,
+    "sessions_total": 22,
+    "cells_maps": 181,
+    "cells_total": 240
+  },
+  "n_at_risk": {
+    "45": 21,
+    "60": 13,
+    "75": 12,
+    "90": 8,
+    "105": 8,
+    "120": 6
+  },
+  "n_never_reached": {
+    "45": 1,
+    "60": 9,
+    "75": 10,
+    "90": 14,
+    "105": 14,
+    "120": 16
+  },
+  "pack_errors": []
+}

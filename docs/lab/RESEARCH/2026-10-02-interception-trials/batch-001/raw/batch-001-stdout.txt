@@ -1,0 +1,10 @@
+[{"cell_id":"155f68f8f1c9f46d","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Early progress 0.25, no thrash or runaway signal in lite state; cannot confirm excessive continuation."},
+{"cell_id":"5f439ebcd12fa9b8","label":"1","rating":1,"fire":false,"fire_offset_turns":15,"rationale":"Weak signal at 0.25 progress; defer and re-check rather than fire now."},
+{"cell_id":"56f2b4992e4b9788","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Progress tracks turns linearly at 0.5, suggesting steady build; no runaway evidence."},
+{"cell_id":"bdf1458d4875369e","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Half-done with proportional progress; no basis to interrupt now."},
+{"cell_id":"490ccef95a6e9951","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"No delta or tail evidence for compaction slope, rereads, or weak output; thrash unproven."},
+{"cell_id":"fc38fee6d559adb0","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Mid-progress, no qualitative signal of misbehavior; low steer urgency."},
+{"cell_id":"13cc0136a4f7cf3f","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Progress 0.5 indicates mid-run, not closing; not clearly runaway either."},
+{"cell_id":"8acb00f4875acc39","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Insufficient signal at checkpoint; defer and re-check later."},
+{"cell_id":"4b01af9f7e764a50","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Progress rising with turns, file output modest; consistent with productive build, no thrash."},
+{"cell_id":"89b6d51ba9b79163","label":"1","rating":1,"fire":false,"fire_offset_turns":15,"rationale":"Mid-run steady progress; not excessive now, re-check shortly."}]

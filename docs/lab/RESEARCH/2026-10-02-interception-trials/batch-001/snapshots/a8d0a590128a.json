@@ -1,0 +1,412 @@
+{
+  "harness": "claude-code",
+  "worker_id": "a8d0a590128a",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/6c5f98ce-1345-4287-914c-a8d0a590128a.jsonl",
+  "T": 176,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "shape": "long_runawayish",
+  "ideal_window": [
+    86,
+    146
+  ],
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "inventory_rank": 2,
+  "norm_length": 254.0,
+  "checkpoints": [
+    {
+      "checkpoint": 75,
+      "prior": null,
+      "state_chars": 2281,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a8d0a590128a",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Work out what is remaining in implementation and coordinate design/execution",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 139680,
+          "prefix_bytes": 2017359,
+          "tool_histogram": {
+            "Bash": 39,
+            "Agent": 21,
+            "Write": 5,
+            "AskUserQuestion": 2,
+            "Read": 1,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 1,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 48912
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "Nine schema files are being written by subagents in parallel. While they run, I'm amending plan 03's design so the flag table and its unknowns live in `docs/schema/`.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "Plan 03's design now points at `docs/schema/` and is committed and pushed. The nine layer files are still being written. I'll run the lint and spot-check their `verified` rows as each one lands, then regenerate `UNKNOWNS.md` and build `flags.md` from the road, frame and name tables.",
+            "tool_names": []
+          },
+          {
+            "turn": 74,
+            "excerpt": "`parameters-metadata.md` is written: 16 verified, 17 observed, 5 spec-only, 1 assumed and 19 unknown rows. The lint passes on it apart from the expected stale `UNKNOWNS.md`.\n\nTwo things from the agent's report:\n\n- **Spec vs R:** the spec's ch.13 examples don't match R's `METADATA.KWI`. I went with R.\n- **R must be mounted:** the `verified` rows rest on `test_roundtrip_misc.py`, which skips when R ",
+            "tool_names": []
+          },
+          {
+            "turn": 75,
+            "excerpt": "`map-background.md` is written: 22 verified, 22 observed, 5 spec-only, 6 assumed and 2 unknown rows. The lint passes on it apart from the expected stale `UNKNOWNS.md`.\n\n- **Coordinate range:** the sources disagree, so the agent left the row `unknown`.\n  - Code assumes 2^15.\n  - The spec says 4096 per separate parcel.\n  - R measured 4096 at L2\u2013L10, 3072 at L12 and 16384 at L0.\n  - This is the open ",
+            "tool_names": []
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 90,
+      "prior": 75,
+      "state_chars": 2373,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a8d0a590128a",
+        "checkpoint_turn": 90,
+        "prior_checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Work out what is remaining in implementation and coordinate design/execution",
+        "cumulative": {
+          "api_turns": 90,
+          "peak_ctx_tokens": 139680,
+          "prefix_bytes": 2425019,
+          "tool_histogram": {
+            "Bash": 46,
+            "Agent": 22,
+            "Write": 5,
+            "AskUserQuestion": 2,
+            "Read": 1,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 1,
+          "compaction_event_count": 7,
+          "assistant_text_chars": 58265
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 7,
+            "Agent": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 83,
+            "excerpt": "I spot-checked the trunk-to-ferry claim against spec ch.32.2, and it holds. Road class code 10 is \"Ferry route\" there, and `road_type.json` maps OSM trunk to 10. The agent's R counts back this up: 1,772 class-10 links at L0 against 374,388 class 5. Plan 03 Phase 7 already covers the road vocabulary mapping. The schema row now records the evidence.\n\nI also read the `verified` rows around the displa",
+            "tool_names": []
+          },
+          {
+            "turn": 84,
+            "excerpt": "",
+            "tool_names": [
+              "Agent",
+              "Bash"
+            ]
+          },
+          {
+            "turn": 85,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 86,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 87,
+            "excerpt": "The coordinate-range rows in `map-frame.md` and `map-background.md` now agree. Both give the observed maxima, and both leave \"is this the true cell range\" as `unknown` until Phase 2 settles it. The flags agent is still working and will report other cross-file inconsistencies, which I'll fix. Then I'll regenerate `UNKNOWNS.md`, run the lint, and commit.",
+            "tool_names": []
+          },
+          {
+            "turn": 88,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 89,
+            "excerpt": "`docs/schema/` is committed and pushed: ten files plus a generated `UNKNOWNS.md`. The lint reports 0 errors. Of 503 unverified rows, 92 are `unknown`, 39 `assumed`, 52 `spec-only` and 320 `observed`.\n\n## Things the build found that the old docs got wrong\n\nEach is recorded in the schema as a conflict with the winner named, not silently fixed.\n\n**Bearing on plan 03:**\n- Header word 0 is the first-sl",
+            "tool_names": []
+          },
+          {
+            "turn": 90,
+            "excerpt": "I'll start by pulling the open threads from plan 01 so the close-out can capture or drop each one explicitly.",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 120,
+      "prior": 90,
+      "state_chars": 1525,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a8d0a590128a",
+        "checkpoint_turn": 120,
+        "prior_checkpoint_turn": 90,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Work out what is remaining in implementation and coordinate design/execution",
+        "cumulative": {
+          "api_turns": 120,
+          "peak_ctx_tokens": 139680,
+          "prefix_bytes": 3061751,
+          "tool_histogram": {
+            "Bash": 69,
+            "Agent": 23,
+            "Write": 7,
+            "Monitor": 3,
+            "Read": 3,
+            "AskUserQuestion": 2,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 3,
+          "compaction_event_count": 10,
+          "assistant_text_chars": 60631
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "/home/codyh/workspace/open-pajero-maps/docs/ARCHITECTURE.md",
+            "/home/codyh/workspace/open-pajero-maps/docs/design/build-performance.md"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 23,
+            "Monitor": 3,
+            "Read": 2,
+            "Write": 2,
+            "Agent": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 113,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 114,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 115,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 116,
+            "excerpt": "Writing the new OVERVIEW and ARCHITECTURE now. The old unknowns already live in the schema rows, so I'm retargeting the schema rows that cite `ARCHITECTURE.md`.",
+            "tool_names": [
+              "Write",
+              "Write",
+              "Bash"
+            ]
+          },
+          {
+            "turn": 117,
+            "excerpt": "Now the archive move and link retargeting.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 118,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 119,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 120,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 165,
+      "prior": 120,
+      "state_chars": 1518,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a8d0a590128a",
+        "checkpoint_turn": 165,
+        "prior_checkpoint_turn": 120,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "Work out what is remaining in implementation and coordinate design/execution",
+        "cumulative": {
+          "api_turns": 165,
+          "peak_ctx_tokens": 140581,
+          "prefix_bytes": 3833507,
+          "tool_histogram": {
+            "Bash": 108,
+            "Agent": 23,
+            "Write": 7,
+            "Monitor": 3,
+            "Read": 3,
+            "AskUserQuestion": 2,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 3,
+          "compaction_event_count": 12,
+          "assistant_text_chars": 70387
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 39
+          }
+        },
+        "tail": [
+          {
+            "turn": 158,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 159,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 160,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 161,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 162,
+            "excerpt": "Both moves are done (`d94cd7e`, pushed). Tests pass (298) and the lint reports 0 errors.\n\n**Vocab:** `parser/refdata/vocab/README.md` is now `docs/design/osm-vocabulary-mapping.md`, rewritten from about 310 lines to about 90. It now holds the mapping tables and the reasoning, with the brief-report narrative cut. The three JSON tables stay in `parser/refdata/vocab/`. Code, test and `selection.json`",
+            "tool_names": []
+          },
+          {
+            "turn": 163,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 164,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 165,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

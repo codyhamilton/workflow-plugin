@@ -1,0 +1,94 @@
+{
+  "harness": "claude-code",
+  "worker_id": "b13d1a65a961",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961.jsonl",
+  "T": 86,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "shape": "short_natural",
+  "ideal_window": null,
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "inventory_rank": 9,
+  "norm_length": 99.0,
+  "checkpoints": [
+    {
+      "checkpoint": 75,
+      "prior": null,
+      "state_chars": 2723,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "b13d1a65a961",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "What is current status? We look part way through an active phase",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 126045,
+          "prefix_bytes": 1848785,
+          "tool_histogram": {
+            "Bash": 50,
+            "Agent": 9,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 13098
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "The first 3C-12 worker died on the API session limit (which reset at 11:30pm). A Sonnet reviewer/fixer is now working on the Flash draft, and I haven't seen its results yet.\n\n- **Draft under review:** the `flash/3c-12-encoder-deletion` worktree at c4475be. It works through your seven checklist items, including the ~14.11 s wall regression, the ~15 GB RSS figure and wiring the local `l0_divided_tri",
+            "tool_names": []
+          },
+          {
+            "turn": 69,
+            "excerpt": "The reviewer's notice is interim. It has finished its review and fixes and is now running the step-gate script in the background under one monitor, and it should notify again when the gates finish. I'm not polling. Once its final report arrives, I'll check the branch against your seven items and report.",
+            "tool_names": []
+          },
+          {
+            "turn": 70,
+            "excerpt": "Still interim. The reviewer reports the pytest gate passed (474 tests, no skips, so the local golden now runs) and the Perth builds are done. The three full-AU builds are running, and I'm waiting for its final notification.",
+            "tool_names": []
+          },
+          {
+            "turn": 71,
+            "excerpt": "Nothing new: the reviewer's notice repeats the last one (474 passed, no skips, Perth `-j 1` and `-j 4` match). The three full-AU benches are still running, and I'm waiting for its final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 72,
+            "excerpt": "Bench 1 of the three full-AU builds finished in 13 s, in line with the 3C-11 figure (12.87 s median). Its sha and manifest checks and benches 2 and 3 are still pending. I'm waiting for the reviewer's final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 73,
+            "excerpt": "Bench 1 passes: sha 87a01b14\u2026 at 1,731,021,568 B, and its manifest matches the 3-11 reference. Benches 2 and 3 are still running, and I'm waiting for the reviewer's final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 74,
+            "excerpt": "Bench 2 finished in 13 s. Its sha and manifest checks and bench 3 are still to come, and I'm still waiting for the reviewer's final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 75,
+            "excerpt": "Bench 2 also passes its sha and manifest checks. Bench 3 is the last build still to come, and I'm waiting for the reviewer's final report.",
+            "tool_names": []
+          }
+        ]
+      }
+    }
+  ]
+}

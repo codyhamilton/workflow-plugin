@@ -1,0 +1,10 @@
+[{"cell_id":"aab0954c394e2d4c","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only; no compaction, reread, or output signal to establish thrash bundle"},
+{"cell_id":"af48a4c50ea20ca4","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only counts; cannot confirm compaction, rereads, or weak output triad"},
+{"cell_id":"dab01124bd345a85","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Degenerate prefix, empty role histogram, zero turn proxy; no thrash evidence"},
+{"cell_id":"e4ac26ef1a13cce3","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Active perf debugging with recent substantive progress; keep developing"},
+{"cell_id":"15df81a0cf514339","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Coordinating design decisions, high text output; productive, not near done"},
+{"cell_id":"ee6d97bd99bc3d78","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Work reported complete and pushed; ScheduleWakeup loop spinning, stop now"},
+{"cell_id":"7f316877e8f32c59","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Three parallel workers in flight; stopping truncates active production"},
+{"cell_id":"23fa7c4a1c7f9475","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Waiting on background pytest worker mid-phase; productive work outstanding"},
+{"cell_id":"51bd1c28d6bd2253","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Running refine on outstanding units; active mid-flight reconciliation"},
+{"cell_id":"34ee94be065800ba","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Unit 02 landed, unit 07 running; active orchestration, not near done"}]

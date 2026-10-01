@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-10-02 00:45:40 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "reason_fp_miss_board_false": "window_status=unidentified; length-derived windows forbidden (R2). Diagnostic fire rates among at-risk sessions only.",
+  "protocol_fixes": [
+    "R1_no_T_in_prompt_or_state",
+    "R2_non_length_outcome_sheet",
+    "R3_fixed_schedule_hazard"
+  ],
+  "soft_standard_hold": true,
+  "typesafe_used": false,
+  "hooks_unlock": false,
+  "n_sessions_independent": 22,
+  "n_variants": 240,
+  "n_flash_batches": 24,
+  "flash_model": "deepseek/deepseek-flash",
+  "flash_role": "policy-under-test",
+  "flash_total_elapsed_s": 464.5,
+  "parse_miss_cells": 0,
+  "fire_count": 75,
+  "abstain_approx": 30,
+  "rating_hist": {
+    "2": 33,
+    "3": 42,
+    "1": 73,
+    "0": 92
+  },
+  "harness_cell_counts": {
+    "claude-code": 181,
+    "opencode": 35,
+    "cursor": 12,
+    "codex": 12
+  },
+  "maps_concentration": {
+    "sessions_maps": 14,
+    "sessions_total": 22,
+    "cells_maps": 181,
+    "cells_total": 240
+  },
+  "fixed_schedule": [
+    45,
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "n_at_risk": {
+    "45": 21,
+    "60": 13,
+    "75": 12,
+    "90": 8,
+    "105": 8,
+    "120": 6
+  },
+  "n_never_reached": {
+    "45": 1,
+    "60": 9,
+    "75": 10,
+    "90": 14,
+    "105": 14,
+    "120": 16
+  },
+  "fire_rate_among_at_risk_cells": {
+    "45": {
+      "n": 84,
+      "fire_rate": 0.25
+    },
+    "60": {
+      "n": 52,
+      "fire_rate": 0.2692
+    },
+    "75": {
+      "n": 38,
+      "fire_rate": 0.3947
+    },
+    "90": {
+      "n": 24,
+      "fire_rate": 0.375
+    },
+    "105": {
+      "n": 24,
+      "fire_rate": 0.3333
+    },
+    "120": {
+      "n": 18,
+      "fire_rate": 0.4444
+    }
+  },
+  "prompt_leak_spotcheck_hits": [],
+  "luna_used": false,
+  "paths": {
+    "batch": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002",
+    "mirror": "/tmp/2026-10-02-interception-trials-batch-002"
+  }
+}
