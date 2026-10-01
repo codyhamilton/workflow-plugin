@@ -1,14 +1,27 @@
-# Session-analysis open field — proofs
+# Open-field proofs
 
-Offline tooling for [`TOOLING-MVP.md`](../TOOLING-MVP.md) items 3–4. **0 live TypeSafe POSTs** in the committed slice.
+Lab scripts for the session-analysis open field. **No live TypeSafe POSTs** in the committed phase-1b/1c slice; phase 1a is **0 network** as well.
+
+## Phase 1a — marker screen
+
+```bash
+pip install -r requirements-lab.txt  # once per environment
+python3 docs/lab/RESEARCH/2026-10-01-session-analysis-open-field/proofs/run_phase_1a.py
+```
+
+Outputs under [`phase-1a/`](phase-1a/): `marker_features.jsonl`, `marker_analysis.json`, `cox_sketch.json`, `SPIKE-RESULT.md`, `CYCLEResult.md`.
+
+Cox sketch: [`run_cox_sketch.py`](run_cox_sketch.py) (also invoked by the phase runner). Future gate from [`ALTERNATES.md`](../2026-10-01-session-analysis-alternate-angles/ALTERNATES.md): concordance ≤ **0.70** on a proper gold → kill Alternate E.
+
+## Phase 1b + 1c — framing dry-run and mount probe
+
+[`TOOLING-MVP.md`](../TOOLING-MVP.md) items 3–4. Reuses [`cheap-analysis` spike lib](../../2026-10-01-cheap-analysis-typesafe-opencode/proofs/lib/) (`batch_trial`, `classify`). No OpenCode registration. No `replay_progressive_gates.py --call-jev`.
 
 | Script | Phase | Output |
 |--------|-------|--------|
 | `run_framing_dry_run.py` | 1b | `validated/phase-1b-1c/dry_run_batch_log.json`, `framing/registry.json` |
 | `run_card_hash_manifest.py` | 1b | `manifests/card_hash_manifest.json` |
 | `probe_progressive_corpus_mount.py` | 1c | `validated/phase-1b-1c/mount_probe_results.json` |
-
-Reuses [`cheap-analysis` spike lib](../../2026-10-01-cheap-analysis-typesafe-opencode/proofs/lib/) (`batch_trial`, `classify`, cap/dedupe). No OpenCode registration. No `replay_progressive_gates.py --call-jev`.
 
 ```bash
 cd docs/lab/RESEARCH/2026-10-01-session-analysis-open-field/proofs

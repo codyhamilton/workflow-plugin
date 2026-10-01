@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-01  
 **Slug:** `session-analysis-open-field`  
-**Status:** exploring. **Confidence: not high.** No approach here has been run. None is the plan of record.  
+**Status:** phase 1a marker-screen cycle closed (`gate_cleared`). **Confidence: not high** on downstream prose margin; distribution proof only.  
 **Question:** Which combinations of abstract summaries, early-window markers, TypeSafe framings, and agent cadence can score Maps session shape from the first ~120 `api_turn`s, cheaply enough to search that space, without feeding raw transcripts into an expensive seat and without treating checkout `A0` as the target?  
 **Success metric (for a later lock, not met here):** Two or more named approaches each publish a pre-registered result on the same `shape-qual-full-maps-v1` workers, with a recorded cost, and at least one kill criterion fires or a proof gate clears. A single narrative that all five "could work" is not success. Until a cycle runs, the honest output of this pack is the comparison itself.  
 **Behaviour:** not shipped. No live `--call-jev`, no hook edit, no OpenCode tool registration, no change to progressive TERMS.
@@ -17,8 +17,8 @@ This pack sits beside the cheap-analysis harness. It does not replace that harne
 | [`CANDIDATE-APPROACHES.md`](CANDIDATE-APPROACHES.md) | Five named end-to-end approaches, proof gates, kill criteria, comparison |
 | [`RESEARCH-OPS.md`](RESEARCH-OPS.md) | How Workflow System Manager runs the cycles, closes threads, and escalates |
 | [`TOOLING-MVP.md`](TOOLING-MVP.md) | What to build first, and what waits |
-| [`proofs/README.md`](proofs/README.md) | Phase 1b framing dry-run + 1c mount probe (0 live POSTs) |
-| [`cycles/CYCLE-LOG.md`](cycles/CYCLE-LOG.md) | WSM cycle log |
+| [`proofs/README.md`](proofs/README.md) | Phase 1a marker screen; phase 1b framing dry-run + 1c mount probe |
+| [`cycles/CYCLE-LOG.md`](cycles/CYCLE-LOG.md) | Closed cycle log (1a, 1b, 1c) |
 
 ## How this sits on earlier packs
 

@@ -1,17 +1,22 @@
-"""Repo paths for session-analysis open-field proofs."""
+"""Paths for session-analysis open-field proofs."""
 
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-PACK_ROOT = Path(__file__).resolve().parents[1]
-OPEN_FIELD = PACK_ROOT.parent
-REPO_ROOT = OPEN_FIELD.parents[3]
+# open-field research pack root (…/2026-10-01-session-analysis-open-field)
+PACK_ROOT = Path(__file__).resolve().parents[2]
+PROOFS_ROOT = PACK_ROOT / "proofs"
+REPO_ROOT = PACK_ROOT.parents[3]
 
 CHEAP_LIB = (
     REPO_ROOT
     / "docs/lab/RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/proofs/lib"
+)
+PACK_REL = (
+    "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/"
+    "validated/gold/packs/shape-qual-full-maps-v1-judge-packs-20261001-214046.jsonl"
 )
 PROGRESSIVE_PROOFS = (
     REPO_ROOT
@@ -23,6 +28,10 @@ DEFAULT_FIXTURES = (
 )
 GOLD_PACKS = PROGRESSIVE_PROOFS / "validated/gold/packs"
 SHAPE_QUAL_PACK = GOLD_PACKS / "shape-qual-full-maps-v1-judge-packs-20261001-214046.jsonl"
+SHAPE_QUAL_INVENTORY = (
+    PROGRESSIVE_PROOFS
+    / "validated/gold/packs/INVENTORY-shape-qual-full-maps-v1-20261001-214046.json"
+)
 AGREEMENT_MATRIX = (
     PROGRESSIVE_PROOFS
     / "validated/gold/shape-qual-full-maps-v1/agreement-matrix.json"
@@ -53,8 +62,12 @@ MOUNT_PROBE_WORKERS = (
 )
 
 
+def phase_out_dir(slug: str) -> Path:
+    return PROOFS_ROOT / slug
+
+
 def validated_dir(name: str) -> Path:
-    return PACK_ROOT / "validated" / name
+    return PROOFS_ROOT / "validated" / name
 
 
 def resolve_corpus_dir() -> Path | None:
