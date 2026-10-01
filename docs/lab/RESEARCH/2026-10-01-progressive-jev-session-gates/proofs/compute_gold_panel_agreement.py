@@ -4,6 +4,10 @@
 Lab analysis only — not wired into run_proofs.sh. Uses the `krippendorff` package when
 installed; otherwise a stdlib binary nominal implementation (same coincidence-matrix
 definition for complete 3-coder units).
+
+`--panel expansion` (default) scores the corpus-expand seat files. `--panel thrash`
+scores the experiment (d) thrash-screen seat files. Seat filenames can be overridden
+with `--sonnet-file`, `--composer-file`, and `--grok-file`.
 """
 
 from __future__ import annotations
@@ -18,11 +22,46 @@ from typing import Any
 PROOFS = Path(__file__).resolve().parent
 GOLD = PROOFS / "validated" / "gold"
 
-SEAT_FILES = {
-    "sonnet": "expansion-checkout-verdicts-sonnet-20261001.jsonl",
-    "composer": "expansion-checkout-verdicts-composer-20261001.jsonl",
-    "grok": "expansion-checkout-verdicts-grok-20261001.jsonl",
+SEAT_ORDER = ("sonnet", "composer", "grok")
+
+# Default seat JSONLs per panel. `--panel` selects one; `--sonnet-file` /
+# `--composer-file` / `--grok-file` override filenames (gold-dir relative or path).
+PANELS: dict[str, dict[str, Any]] = {
+    "expansion": {
+        "generated_for": "experiment (c) corpus-expand-hybrid-panel-original",
+        "schedule": "P0 first_at=75 interval=15",
+        "seat_files": {
+            "sonnet": "expansion-checkout-verdicts-sonnet-20261001.jsonl",
+            "composer": "expansion-checkout-verdicts-composer-20261001.jsonl",
+            "grok": "expansion-checkout-verdicts-grok-20261001.jsonl",
+        },
+        "out": GOLD / "expansion-panel-agreement-20261001.json",
+        "notes": [
+            "Expansion workers: 0aab88c525de, 036ff3ed4a89, 0853bc21d3aa (20 pooled prefixes).",
+            "A0 null on all three — no unanimous checkout even though raw agreement is high (prevalence of not_yet).",
+            "H5 fails on expansion-only α; usable gold for A0 tuning still blocked. No Jev sweep.",
+        ],
+    },
+    "thrash": {
+        "generated_for": "experiment (d) ubuntu-thrash-screen-before-pack-v1",
+        "schedule": "P0 first_at=75 interval=15",
+        "pack_source": "thrash-screen-judge-packs-20261001-204508.jsonl",
+        "seat_files": {
+            "sonnet": "thrash-screen-checkout-verdicts-sonnet-20261001.jsonl",
+            "composer": "thrash-screen-checkout-verdicts-composer-20261001.jsonl",
+            "grok": "thrash-screen-checkout-verdicts-grok-20261001.jsonl",
+        },
+        "out": GOLD / "thrash-screen-panel-agreement-20261001.json",
+        "notes": [
+            "Thrash-screen workers: ca977b9ca0dd (3 cps), daf933273c8f (4), 7b00225cb824 (5); 12 pooled prefixes.",
+            "A0 is 90 on ca977b9ca0dd (Sonnet alone at 75; unanimous from 90) and null on daf933273c8f and 7b00225cb824.",
+            "H5 passes on thrash-only nominal alpha (>= 0.40) with only one non-null A0. Jev/stats sweep stays blocked on that single-A0 caveat. No behaviour change.",
+        ],
+    },
 }
+
+# Backward-compatible alias for the expansion seat map.
+SEAT_FILES = PANELS["expansion"]["seat_files"]
 
 
 def _load_sonnet_p0(path: Path) -> list[dict[str, Any]]:
@@ -193,21 +232,46 @@ def pairwise_metrics(
     return pairs
 
 
-def expansion_panel() -> dict[str, Any]:
-    seat_order = ("sonnet", "composer", "grok")
-    seat_rows = {seat: _load_jsonl(GOLD / fname) for seat, fname in SEAT_FILES.items()}
+def _resolve_seat_path(name_or_path: str) -> Path:
+    path = Path(name_or_path)
+    if path.is_file():
+        return path
+    return GOLD / name_or_path
+
+
+def panel_report(
+    panel: str = "expansion",
+    seat_files: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Build the agreement report for a named panel.
+
+    `seat_files` overrides the panel's default JSONL names (values are gold-dir
+    filenames or filesystem paths). Seat order stays sonnet, composer, grok.
+    """
+    if panel not in PANELS:
+        known = ", ".join(sorted(PANELS))
+        raise SystemExit(f"unknown panel {panel!r}; choose from {known}")
+    spec = PANELS[panel]
+    files = dict(spec["seat_files"])
+    if seat_files:
+        files.update(seat_files)
+    seat_order = SEAT_ORDER
+    seat_rows = {seat: _load_jsonl(_resolve_seat_path(files[seat])) for seat in seat_order}
     keys, matrix = build_matrix(seat_rows, seat_order)
     alpha = krippendorff_alpha_nominal_binary(matrix)
     pos = checkout_positive_counts(keys, matrix, seat_order)
     workers = sorted({k[0] for k in keys})
     worker_cps = {w: sum(1 for k in keys if k[0] == w) for w in workers}
+    panel_block: dict[str, Any] = {
+        "seats": list(seat_order),
+        "sources": {s: Path(files[s]).name for s in seat_order},
+        "schedule": spec["schedule"],
+    }
+    if spec.get("pack_source"):
+        panel_block["pack_source"] = spec["pack_source"]
     return {
-        "generated_for": "experiment (c) corpus-expand-hybrid-panel-original",
-        "panel": {
-            "seats": list(seat_order),
-            "sources": {s: SEAT_FILES[s] for s in seat_order},
-            "schedule": "P0 first_at=75 interval=15",
-        },
+        "generated_for": spec["generated_for"],
+        "panel": panel_block,
         "n_checkpoints": len(keys),
         "workers": worker_cps,
         "earliest_checkout_recommended_by_seat": earliest_checkout_by_seat(keys, matrix, seat_order),
@@ -227,26 +291,41 @@ def expansion_panel() -> dict[str, Any]:
         },
         "checkout_positive_counts": {**pos, "total_true_labels": sum(pos.values())},
         "pairwise_agreement": pairwise_metrics(keys, matrix, seat_order),
-        "notes": [
-            "Expansion workers: 0aab88c525de, 036ff3ed4a89, 0853bc21d3aa (20 pooled prefixes).",
-            "A0 null on all three — no unanimous checkout even though raw agreement is high (prevalence of not_yet).",
-            "H5 fails on expansion-only α; usable gold for A0 tuning still blocked. No Jev sweep.",
-        ],
+        "notes": list(spec["notes"]),
     }
+
+
+def expansion_panel() -> dict[str, Any]:
+    return panel_report("expansion")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--panel",
+        choices=sorted(PANELS),
+        default="expansion",
+        help="Which gold panel to score (default: expansion). 'thrash' is experiment (d).",
+    )
+    parser.add_argument("--sonnet-file", help="Override the sonnet seat JSONL (filename or path)")
+    parser.add_argument("--composer-file", help="Override the composer seat JSONL (filename or path)")
+    parser.add_argument("--grok-file", help="Override the grok seat JSONL (filename or path)")
+    parser.add_argument(
         "--out",
         type=Path,
-        default=GOLD / "expansion-panel-agreement-20261001.json",
-        help="Write machine-readable agreement JSON",
+        default=None,
+        help="Write machine-readable agreement JSON (default: the panel's registered path)",
     )
     parser.add_argument("--print-alpha", action="store_true", help="Print nominal alpha to stdout")
     args = parser.parse_args()
-    report = expansion_panel()
-    args.out.write_text(json.dumps(report, indent=2) + "\n")
+    overrides = {
+        seat: getattr(args, f"{seat}_file")
+        for seat in SEAT_ORDER
+        if getattr(args, f"{seat}_file")
+    }
+    report = panel_report(args.panel, overrides or None)
+    out = args.out if args.out is not None else PANELS[args.panel]["out"]
+    out.write_text(json.dumps(report, indent=2) + "\n")
     if args.print_alpha:
         print(report["krippendorff_alpha"]["value"])
 

@@ -1,6 +1,6 @@
 # Next experiments — progressive Jev gold labeling
 
-**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null** on all three new workers). No Jev sweep, no hook change.
+**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null**). Experiment **(d)** thrash-screen **passes** H5 on its own 3×12 table (α = **0.8276**) with **A0 = 90** on `ca977b9ca0dd` only. **Jev stays blocked:** one non-null A0 is not a tuning corpus. No hook change.
 
 ## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
@@ -116,9 +116,26 @@ Failure to clear α after expansion does **not** authorize a return to `parent-p
 
 ---
 
-## Primary next — experiment **(d)** `ubuntu-thrash-screen-before-pack-v1`
+## Completed — experiment **(d)** `ubuntu-thrash-screen-before-pack-v1` (**H5 pass on 3×12; A0 on one worker; Jev still blocked**)
 
-**Status:** plan. **Goal:** before building more hybrid_v0 judge packs, **screen** the Ubuntu maps worker enum (`ubuntu-raw` dry-run thrash tables + `replay_progressive_gates` metrics) for sessions that already look **runaway / low_progress / context_thrash**-like at `75:15`, instead of sampling additional **T ≥ 75** workers at random. Label only workers that pass the screen (expect checkout disagreement mass similar to `92a48e004519`, not census-wait tails like `0aab88c525de` / `bb6165018de0`).
+**Status:** packs + panel done (2026-10-01). **Artifacts:** hybrid_v0 packs [`proofs/validated/gold/packs/thrash-screen-judge-packs-20261001-204508.jsonl`](proofs/validated/gold/packs/thrash-screen-judge-packs-20261001-204508.jsonl) (12 rows); seat JSONLs `thrash-screen-checkout-verdicts-{sonnet,composer,grok}-20261001.jsonl`; agreement [`thrash-screen-panel-agreement-20261001.json`](proofs/validated/gold/thrash-screen-panel-agreement-20261001.json); human summary in [`PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md) §(d); scorecard [`thrash-screen-panel-SCORECARD-20261001.md`](proofs/validated/gold/thrash-screen-panel-SCORECARD-20261001.md).
+
+| Gate | Result |
+|------|--------|
+| Corpus | **3** screened workers, **12** pooled `75:15` prefixes (`ca977b9ca0dd` 3, `daf933273c8f` 4, `7b00225cb824` 5) |
+| Panel | Sonnet **3/12** checkout; Composer **2/12**; Grok **2/12**. All positive labels are on `ca977b9ca0dd` |
+| **A0** | **90** on `ca977b9ca0dd` (Sonnet alone at 75; unanimous at 90 and 105). **null** on `daf933273c8f` and `7b00225cb824` |
+| H5 (thrash-only 3×12) | Krippendorff α_nominal = **0.8276** (≥ 0.40) — **pass** |
+| Pairwise κ | sonnet↔composer **0.75**; sonnet↔grok **0.75**; composer↔grok **1.0** |
+| Jev | **Blocked.** α clears the floor and only one worker has non-null **A0** |
+
+**Interpretation:** The screen’s rank-1 worker (no Edit/Write, high reread) is the first new unanimous gold exit in this study. Ranks 2–3 stayed `not_yet` on every seat. High α here is real agreement on that one worker’s checkout bit, not the expansion prevalence paradox (α **0.0000**). It is still one exit turn. **Do not** run a Jev or stats sweep. P0 (α **0.1189**, **A0 null**) and expansion (**A0 null**) are unchanged.
+
+**Consequences:** Keep these labels as research gold for `ca977b9ca0dd@90` only. Do not treat thrash-only α as a pass of the original P0 H5 table. Do not ship behaviour.
+
+### Archived protocol — (d) thrash screen before pack (for audit)
+
+**Status at planning:** plan. **Goal:** before building more hybrid_v0 judge packs, **screen** the Ubuntu maps worker enum (`ubuntu-raw` dry-run thrash tables + `replay_progressive_gates` metrics) for sessions that already look **runaway / low_progress / context_thrash**-like at `75:15`, instead of sampling additional **T ≥ 75** workers at random. Label only workers that pass the screen (expect checkout disagreement mass similar to `92a48e004519`, not census-wait tails like `0aab88c525de` / `bb6165018de0`).
 
 ### Why (d) now
 
@@ -131,6 +148,40 @@ Experiment **(c)** met the corpus-size gate but added **no** unanimous gold: **A
 3. **Panel:** Same three seats and original rubric as (c); target at least **2** new workers with **≥1** non-null per-seat earliest checkout among Sonnet/Grok/Composer before expecting **A0**.
 4. **Metrics:** Report **A0** per worker and pooled nominal α on new prefixes; H5 floor unchanged (**≥ 0.40**). **No Jev sweep.**
 
+### Alternate (not primary) — not chosen
+
+**`combined-panel-p0-expansion-smoking-gun-v1`:** recompute agreement on **P0 + expansion (41 cps)** with `92a48e004519` in the same table — diagnostic only; does not fix **A0 null**. Still not primary after (d): thrash-only H5 passed, but the blocker is a single **A0**, which pooling with null-A0 tables does not repair.
+
+---
+
+## Primary next — experiment **(e)** `ubuntu-thrash-high-score-expand-v1`
+
+**Status:** plan. **Goal:** pack and label **more** workers that match the shape that actually produced **A0** in (d) — rank-1 `ca977b9ca0dd` (no Edit/Write, high max-reread, high compaction) — and **hold Jev** until at least a second worker has non-null **A0**.
+
+### Why (e) now
+
+**(d)** cleared thrash-only H5 (α = **0.8276** ≥ 0.40) and produced the first new unanimous exit (**A0 = 90** on `ca977b9ca0dd`). The confidence caveat is on the record: `daf933273c8f` and `7b00225cb824` are **A0 null**, and nine of twelve prefixes are unanimous `not_yet`. A sweep on that table would tune to a single exit turn, so Jev and any stats sweep stay blocked.
+
+Ranks 2–3 (sleep/poll and Contract-W Bash) stayed `not_yet` on every seat. The next packs should follow the `ca977b9ca0dd` / `92a48e004519` shape: no Edit/Write, high max-reread, high compaction (smoking-gun thrash score ≈ 151). Leave the poll class off the shortlist.
+
+### Protocol sketch
+
+1. **Screen:** From the remaining Ubuntu maps workers with `T ≥ 75`, exclude already labeled ids (`92a48e004519`, `bb6165018de0`, `0aab88c525de`, `036ff3ed4a89`, `0853bc21d3aa`, `ca977b9ca0dd`, `daf933273c8f`, `7b00225cb824`). Rank with the same dry-run thrash tables. **Prefer** no Edit/Write in the tool histogram, high max-reread, and high compaction. **Deprioritize** sleep/poll and brief-mandated Bash monitors — (d) labeled that class `not_yet`.
+2. **Pre-register N** before labeling. Pack hybrid_v0 (`75:15`) for the next workers that meet the stricter shape. Target **≥ 3** additional workers when the screen has them. If fewer than two meet the shape, record **blocked** for the rest; do not pad with poll-class workers to hit a count.
+3. **Panel:** Same three seats and original rubric as (d). Keep P0, expansion, and (d) JSONLs read-only.
+4. **Metrics:** **A0** per new worker and nominal α on the enlarged thrash table (d’s 12 prefixes plus the new ones). H5 floor unchanged (**≥ 0.40**).
+5. **Jev gate (explicit):** no Jev sweep and no stats-gate sweep in (e). A later sweep is in scope only after **both** (i) thrash-table α ≥ 0.40 **and** (ii) **≥ 2** workers with non-null **A0**. One worker (`ca977b9ca0dd`) already counts toward (ii); (e) has to add another. Document confidence caveats either way. Do not ship hooks, plugins, or behaviour.
+
+### Success sketch
+
+| Gate | Criterion |
+|------|-----------|
+| Corpus | ≥ **2** new workers packed under the stricter shape, or an explicit **blocked** note if the screen cannot supply them |
+| Panel | Three seats on every new prefix; original rubric only |
+| Gold rule | ≥ **2** workers with non-null **A0** across (d)+(e), or a written miss |
+| H5 | Enlarged thrash-table α **≥ 0.40** |
+| Non-goal | No `--call-jev`, no stats sweep, no hook or plugin edit, no adoption of **A_maj** / **A_gc** |
+
 ### Alternate (not primary)
 
-**`combined-panel-p0-expansion-smoking-gun-v1`:** recompute agreement on **P0 + expansion (41 cps)** with `92a48e004519` in the same table — diagnostic only; does not fix **A0 null** and is deferred unless (d) is blocked on missing ubuntu-raw bundles.
+**Hold.** Leave (d) as the last measurement and do not pack further until a human spot-check of `ca977b9ca0dd@75` (Sonnet-only) versus `@90` (unanimous) is on file. That check does not by itself authorize a Jev sweep.

@@ -70,7 +70,7 @@ Independent Sonnet 5.5 judgments on the same 21 hybrid_v0 pack rows, rubric revi
 
 **α hint if seat swapped (CHM):** nominal 3×21 α ≈ **0.5674** with this relabel seat — still **does not** override over-fire discard.
 
-**Next measurement (was):** experiment **(c)** — now complete; see §(c) below. Primary next: **(d)** `ubuntu-thrash-screen-before-pack-v1` in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). P0 A0/α in the table above are unchanged. Confidence remains **not high**.
+**Next measurement (was):** experiment **(c)** — now complete; see §(c). Experiment **(d)** is also complete; see §(d). Primary next: **(e)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). P0 A0/α in the table above are unchanged. Confidence remains **not high**.
 
 ---
 
@@ -108,4 +108,46 @@ Composer alone recommends checkout once (`036ff3ed4a89@135`; runaway + low_progr
 1. **H5 not passed for usable gold** — even though most prefixes agree on `not_yet`, **A0** is null on every expansion worker, so there is still no unanimous gold exit to tune against.
 2. **Do not interpret high raw agreement as H5 pass** — agreement-on-false inflates apparent consensus while leaving **A0** empty; expansion α **0.0000** with a single positive seat-label is below the 0.40 floor.
 3. **No Jev sweep** — same stop rule as P0. Pooled P0+expansion diagnostic α ≈ **0.1757** (41 cps) also fails H5 and does not create any new **A0**.
-4. **Next measurement:** experiment **(d)** `ubuntu-thrash-screen-before-pack-v1` — screen Ubuntu workers for thrash/runaway-like sessions before packing, instead of random long `T ≥ 75` workers ([`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md)).
+4. **Next measurement (was):** experiment **(d)** — now complete; see §(d). Primary next is **(e)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
+
+---
+
+## Experiment (d) — thrash-screen panel `ubuntu-thrash-screen-before-pack-v1` (2026-10-01)
+
+**Panel:** Sonnet 5.5 (`gold_seat`), Composer 2.5, Grok 4.7 high on **hybrid_v0** thrash-screen packs (`packs/thrash-screen-judge-packs-20261001-204508.jsonl`, 12 rows). **Original rubric only** (no `parent-pull-v1`).  
+**Schedule:** `75:15` on **`ca977b9ca0dd`** (3 cps), **`daf933273c8f`** (4 cps), **`7b00225cb824`** (5 cps) → **12** pooled prefixes.  
+**Machine-readable:** [`thrash-screen-panel-agreement-20261001.json`](thrash-screen-panel-agreement-20261001.json). Seat JSONLs: `thrash-screen-checkout-verdicts-{sonnet,composer,grok}-20261001.jsonl`. Gate table: [`thrash-screen-panel-SCORECARD-20261001.md`](thrash-screen-panel-SCORECARD-20261001.md).
+
+Numbers below were recomputed from the seat JSONLs (`checkout_recommended`), not copied from the seat SUMMARY files. Those summaries match.
+
+### Hard result — gold rule `A0` is 90 on one worker
+
+| Worker | A0 | Earliest checkout by seat (Sonnet / Composer / Grok) | Checkout turns |
+|--------|-----|------------------------------------------------------|----------------|
+| `ca977b9ca0dd` | **90** | **75** / **90** / **90** | Sonnet **75, 90, 105**; Composer **90, 105**; Grok **90, 105** |
+| `daf933273c8f` | **null** | null / null / null | none (4 cps) |
+| `7b00225cb824` | **null** | null / null / null | none (5 cps) |
+
+At `ca977b9ca0dd@75` only Sonnet has `checkout_recommended=true`. Composer and Grok stay `not_yet` there and join at **90** and **105**. Unanimous exit is therefore **90**, not Sonnet’s earlier 75. The other two shortlist workers are `not_yet` on every prefix and every seat.
+
+### Reliability (H5 floor) — thrash-only 3×12
+
+| Metric | Value | H5 floor (≥ 0.40) |
+|--------|-------|-------------------|
+| Krippendorff α (nominal, binary checkout, 3×12) | **0.8276** | **Pass** |
+| Cohen κ sonnet ↔ composer | **0.75** | — |
+| Cohen κ sonnet ↔ grok | **0.75** | — |
+| Cohen κ composer ↔ grok | **1.0** | — |
+
+**Pairwise % agreement:** sonnet↔composer **91.67%**, sonnet↔grok **91.67%**, composer↔grok **100%**. The only mismatched prefix is `ca977b9ca0dd@75` (Sonnet checkout, Composer and Grok `not_yet`).
+
+**Checkout-positive counts (12 cps):** Sonnet **3/12**, Composer **2/12**, Grok **2/12** → **7** true labels across 36 seat-rows. All seven sit on `ca977b9ca0dd`.
+
+Same nominal Krippendorff implementation as §(c) (`krippendorff` package; `alpha_method=krippendorff`). This α is the thrash-screen table alone. It does not replace P0 α **0.1189** or expansion α **0.0000**.
+
+### Implications
+
+1. **H5 passes on the thrash-only table.** α **0.8276** ≥ 0.40. Unlike expansion, this is not agreement-on-false: Composer and Grok agree on both checkout prefixes, and Sonnet agrees with them at 90 and 105. κ **0.75** / **1.0** is positive-class agreement, not a prevalence artifact of a single stray checkout.
+2. **The corpus is still one gold exit.** Non-null **A0** exists for `ca977b9ca0dd` only. Nine of twelve prefixes are unanimous `not_yet`. A fit against **A0** would be n = 1 worker (turn 90).
+3. **Jev remains blocked.** Thrash-only α clears the floor, and the caveat that blocks a sweep is the single non-null **A0**. Do not run a Jev or stats-gate sweep on this panel. No hook or plugin change. Confidence stays **not high**.
+4. **The screen was directional and thin.** Rank 1 (`ca977b9ca0dd`: no Edit/Write, max reread 14, 16 compactions) is the only checkout. Ranks 2–3 (sleep/poll and Contract-W Bash) produced none. Next measurement is a stricter high-score shortlist — experiment **(e)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md) — not a Jev grid.
