@@ -1,0 +1,187 @@
+{
+  "card_kind": "stats_card_placeholder",
+  "phase_1a_dependency": "Full stats-card extractor (marker columns, round-trip gate) is phase 1a. This manifest uses shape-qual pack rows \u2264120 until 1a merges.",
+  "n_workers": 34,
+  "stratified_eight_hashes": {
+    "0677f597286e": "0abc45650eb81b6d1911cfac58f8773ad216c50d124ae514f65f64786b1e2711",
+    "07357f196666": "54b92a2ca2aba616b2d89d16ea6fbeb87b2c15659cfd24e76a29aa3255f7f8f0",
+    "074c8cf22927": "3120f47fd7c301c6b30a47e1b83514e0d7f8b35eacb434dfec7d7c464441d6b4",
+    "15f24c7ba18c": "e81022e8fb7bf465b953d0f4cd63a05635910717e42c0b0c981a1ff87722ecf3",
+    "87a380bc64ff": "83beb9d16d4975f5bb70f367943cefaaf3bbfb56f10cabfbf82c1f59ddd7d5c0",
+    "92a48e004519": "2e2bc4d833a00f40cdbb0af172309bf88fe263dd23914a59639bf6da22a45119",
+    "bb6165018de0": "0065b221fd88d033181c08485ac127ad2e7efb2f212ccab89313bec65a2079d7",
+    "ca977b9ca0dd": "77bd2071a9e1e9985892903b5949a344ecd7bb42de7de26b5b16e36300bc0f1d"
+  },
+  "workers": [
+    {
+      "worker_id": "036ff3ed4a89",
+      "card_hash": "dcc0a139f127bff7155a77d0a00950809f9c4403e1664cbaa8845f200de020a7",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "0677f597286e",
+      "card_hash": "0abc45650eb81b6d1911cfac58f8773ad216c50d124ae514f65f64786b1e2711",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "07357f196666",
+      "card_hash": "54b92a2ca2aba616b2d89d16ea6fbeb87b2c15659cfd24e76a29aa3255f7f8f0",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "074c8cf22927",
+      "card_hash": "3120f47fd7c301c6b30a47e1b83514e0d7f8b35eacb434dfec7d7c464441d6b4",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "0853bc21d3aa",
+      "card_hash": "779f176c5507db6492b101309002f476055f8c715b6c86d79333aa428e51bb42",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "0aab88c525de",
+      "card_hash": "cce768e3b63d9c9ada902868ce0ff987bff6d28f55756994f27186cd97a9c305",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "15f24c7ba18c",
+      "card_hash": "e81022e8fb7bf465b953d0f4cd63a05635910717e42c0b0c981a1ff87722ecf3",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "16a958631580",
+      "card_hash": "940f76b5e814ba2f9e0c1e856105a1d29f9075ada3e62615d9e46d528bffd4b0",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "5163c22a6a3e",
+      "card_hash": "39ebf6e9e51fda2e5b42965df18308d9677df00026c29c97812cb3042cb6a8fa",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "52ea24516a6e",
+      "card_hash": "402c32471520cb3e7ae374cec63ca271800a6af1ae49f984f28d0419107a429f",
+      "checkpoint_turn": 105
+    },
+    {
+      "worker_id": "582c23b3c6e4",
+      "card_hash": "e5b415d674cbd08daf96f9254a4506bc5054ef869a260d5b5056c81d90c5dcc5",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "5a152464f6e5",
+      "card_hash": "7fe1e328b6fb2fbc4fa3410b8c2bda17759cd0b8f97672fdb13a80c152e2c4d8",
+      "checkpoint_turn": 105
+    },
+    {
+      "worker_id": "6e06ab86aa72",
+      "card_hash": "7ed6c0af48fcb6921e93a77ac18e10cedf201d91729c2edfed3e913beb8cde16",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "79a557b56a6e",
+      "card_hash": "9898134fb60bd2baebc66f0c60eda8158e1ce91a3e728dd2d1927d64a7cf02e0",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "7af2854bba92",
+      "card_hash": "eba9bab4ad063252bbaf8747ccfd61fa0c914fa3c2e5d716137381a71f153bd7",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "7b00225cb824",
+      "card_hash": "d2d9b6f5466a26f897c2eb0ba5d8645b89e76a4eb5bc34ef202c097be95c8a51",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "7c99c180742e",
+      "card_hash": "7cac35dc2d15bbdec9b310651d73464636e3740e31e535fd035dfe7b18deee4e",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "87a380bc64ff",
+      "card_hash": "83beb9d16d4975f5bb70f367943cefaaf3bbfb56f10cabfbf82c1f59ddd7d5c0",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "89608cc68603",
+      "card_hash": "aebcc5a55694b83633a5ebe1325835327640e0b74772f1ba9246a22ef1643b97",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "8e36f8e80baa",
+      "card_hash": "9de3a3b05e27fee3120abcbd54c2e54a2e906f4aa2bb812631c40be4f3c76bee",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "91a9aa8050fb",
+      "card_hash": "99c84638dca5786bde00e03060eec4f6e52331ced2fcc17dc3e5e239852fb17c",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "92a48e004519",
+      "card_hash": "2e2bc4d833a00f40cdbb0af172309bf88fe263dd23914a59639bf6da22a45119",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "9b156dbab5d9",
+      "card_hash": "6c3a18fb83ce6c08c9eb2107d5f7e77294d31874aecca8e93e36ed6e033020db",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "9da2f589b11b",
+      "card_hash": "d4b3bb541a053c97a6a59bf3c2f3877022de6c0943ca3c6d5685c52849f3bdb0",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "a318f4b89a6a",
+      "card_hash": "09d504bbd5f1efee761a28cb3c42969a6a8f381736a8e66796dabd244a553ca8",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "a3cc4da7e21c",
+      "card_hash": "e00fcc668fdca289130ca76140ffddbc88ae5cf0980b062d604b6b96d061357f",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "card_hash": "0065b221fd88d033181c08485ac127ad2e7efb2f212ccab89313bec65a2079d7",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "ca977b9ca0dd",
+      "card_hash": "77bd2071a9e1e9985892903b5949a344ecd7bb42de7de26b5b16e36300bc0f1d",
+      "checkpoint_turn": 105
+    },
+    {
+      "worker_id": "d34bb8ba01ba",
+      "card_hash": "584b9b6055247e1c46119716efdb0b561edbf94361ee4fc1aa37e21bc10e4f0b",
+      "checkpoint_turn": 105
+    },
+    {
+      "worker_id": "d84416c7c9d4",
+      "card_hash": "5fab49f23172af9ef40ba0dbb4f0988c6ab6649d47301e2ce89b214e356e82a3",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "daf933273c8f",
+      "card_hash": "ff4cb1201103b71daff9a1815a5a6d8654bd29cc79de87c848c3a518985f60e9",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "de5b76cc68a6",
+      "card_hash": "8e84486392eb5f717a475528743f2a47ded71ae749ef1d94d8c071c60d1472e3",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "e28a2428b192",
+      "card_hash": "8686b9178a9556d52efbaa402c7034722b5ceb8a19753709950948904e228e96",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "e8aa4f271927",
+      "card_hash": "61b5f0b44996fac3e5a2ca11375bcd60dafdded48f9f98cf10dcf9079fa956fa",
+      "checkpoint_turn": 75
+    }
+  ]
+}

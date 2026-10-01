@@ -17,8 +17,8 @@ This pack sits beside the cheap-analysis harness. It does not replace that harne
 | [`CANDIDATE-APPROACHES.md`](CANDIDATE-APPROACHES.md) | Five named end-to-end approaches, proof gates, kill criteria, comparison |
 | [`RESEARCH-OPS.md`](RESEARCH-OPS.md) | How Workflow System Manager runs the cycles, closes threads, and escalates |
 | [`TOOLING-MVP.md`](TOOLING-MVP.md) | What to build first, and what waits |
-| [`proofs/`](proofs/README.md) | Lab scripts (phase 1a marker screen + Cox sketch) |
-| [`cycles/CYCLE-LOG.md`](cycles/CYCLE-LOG.md) | Closed cycle log |
+| [`proofs/README.md`](proofs/README.md) | Phase 1a marker screen; phase 1b framing dry-run + 1c mount probe |
+| [`cycles/CYCLE-LOG.md`](cycles/CYCLE-LOG.md) | Closed cycle log (1a, 1b, 1c) |
 
 ## How this sits on earlier packs
 

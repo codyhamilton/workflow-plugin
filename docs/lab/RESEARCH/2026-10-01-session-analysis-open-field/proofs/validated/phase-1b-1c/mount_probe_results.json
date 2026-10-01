@@ -1,0 +1,60 @@
+{
+  "phase": "1c",
+  "WORKFLOW_PROGRESSIVE_CORPUS": null,
+  "corpus_dir": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers",
+  "documented_default": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers",
+  "workers": [
+    {
+      "worker_id": "ca977b9ca0dd",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/ca977b9ca0dd.jsonl",
+      "status": "absent",
+      "reason": "file_missing"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/92a48e004519.jsonl",
+      "status": "prose_required",
+      "T": 296,
+      "reason": "redacted_or_empty_assistant_text"
+    },
+    {
+      "worker_id": "87a380bc64ff",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/87a380bc64ff.jsonl",
+      "status": "absent",
+      "reason": "file_missing"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/bb6165018de0.jsonl",
+      "status": "prose_required",
+      "T": 154,
+      "reason": "redacted_or_empty_assistant_text"
+    },
+    {
+      "worker_id": "6e06ab86aa72",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/6e06ab86aa72.jsonl",
+      "status": "absent",
+      "reason": "file_missing"
+    },
+    {
+      "worker_id": "0aab88c525de",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/0aab88c525de.jsonl",
+      "status": "prose_required",
+      "T": 192,
+      "reason": "redacted_or_empty_assistant_text"
+    },
+    {
+      "worker_id": "15f24c7ba18c",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/15f24c7ba18c.jsonl",
+      "status": "absent",
+      "reason": "file_missing"
+    },
+    {
+      "worker_id": "8e36f8e80baa",
+      "jsonl": "/workspace/docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/8e36f8e80baa.jsonl",
+      "status": "absent",
+      "reason": "file_missing"
+    }
+  ],
+  "mount_status": "resolved"
+}
