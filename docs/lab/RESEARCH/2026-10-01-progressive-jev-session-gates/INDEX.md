@@ -69,6 +69,7 @@ Live Claude `PostToolBatch`, hook `additionalContext`, and any parent-surface fo
 
 ## Links
 
+- Sibling harness design (does not change these terms, `A0`, or this pack's proofs): [`../2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md`](../2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md)
 - Stub: [`../../PROPOSALS/2026-10-01-progressive-jev-session-gates.md`](../../PROPOSALS/2026-10-01-progressive-jev-session-gates.md)
 - Resolved predecessor: [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md)
 - Predecessor pack: [`../2026-09-30-jev-cheap-judgement-signals/INDEX.md`](../2026-09-30-jev-cheap-judgement-signals/INDEX.md)

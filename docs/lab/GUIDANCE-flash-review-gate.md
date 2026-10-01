@@ -2,7 +2,7 @@
 
 **Status:** guidance (non-breaking). No installer, driver, or hook behaviour changes — operators and orchestrators follow this pattern by convention.
 
-**Related:** OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks proposal (`status: resolved`, plugin unwired) — [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md). Lab pack — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md).
+**Related:** OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks proposal (`status: resolved`, plugin unwired) — [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md). Lab pack — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md). Cheap analysis harness (Flash drafts, local volume labels, TypeSafe fan-out — design only) — [`RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/`](RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md).
 
 ## Encouraged use
 
@@ -31,6 +31,10 @@ Flash draft (briefs / units)  →  Sonnet 5.5 review of Flash work  →  Claude 
 3. **Phase validation and sign-off are Claude Code or Grok only** (Build Orchestrator). They review the phase (including Sonnet’s review of Flash work), verify the phase outcome, and only then may land `Workflow-Phase:` and close the phase. Flash does not sign off; a Flash run must not imply the phase is closed.
 
 Flash does not replace `comprehensive-review` at plan end.
+
+## Volume analysis is not this gate's build path
+
+Transcript summaries, early-window labels, and TypeSafe framing trials are specified in [`RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/DESIGN.md`](RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/DESIGN.md). Flash may draft those artifacts. Sonnet 5.5 reviews the drafts, and Claude Code or Grok signs the review as a **study convention** for those artifacts. That convention does not add a phase-close rule and does not change the checklist below. Drafts do not become gold seats. A local llama.cpp server (default `http://127.0.0.1:8080/v1`, override `WORKFLOW_LOCAL_LLM_URL`) is for high-volume window labels only. It is not the OpenCode default for other agents, and this guidance does not write provider config.
 
 ## What does not change
 
