@@ -1,13 +1,13 @@
 # SCENARIO-PROGRESS — TypeSafe corpus sweep
 
-**Generated:** 2026-10-02T09:02:17+10:00
+**Generated:** 2026-10-02T09:15:16+10:00
 
 **Soft Standard HOLD** — measured corpus only; no product wiring.
 
 ## Metric (not n_cells)
-- **n_distinct_scenarios:** 297
+- **n_distinct_scenarios:** 392
 - **n_sessions_swept:** 41
-- n_cells (incidental = scenarios × sessions): 12169
+- n_cells (incidental = scenarios × sessions): 13522
 - window cartesian: **false** (1 representative checkpoint / session)
 
 ## Scenario list (state × question)
@@ -77,17 +77,25 @@
 - `state.compact_focus|q.validation_loop` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.abort_cheaper` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.activity_without_value` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.bash_retry_storm` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.brief_abandon` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.closing_protect` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.compaction_storm` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.context_pressure` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.context_thrash_compact` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.continue_learns` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.deliverable_orphan` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.dependency_wait` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.docs_only_drift` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.duplicate_work` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.early_false_alarm` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.edit_churn` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.handoff_ready` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.late_miss_risk` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.mid_arc_healthy` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.output_starvation` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.over_polish` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.parallel_agent_thrash` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.plan_execute_drift` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.recheck_interval` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.recoverable_stall` — sessions=41 fire_rate=0.0
@@ -96,8 +104,10 @@
 - `state.delta_only|q.resource_asymmetry` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.scope_drift` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.silent_stall` — sessions=41 fire_rate=0.6098
+- `state.delta_only|q.speculative_rewrite` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.stop_preserves_value` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.tail_risk` — sessions=41 fire_rate=0.0
+- `state.delta_only|q.test_flake_loop` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.thrash_vs_explore` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.tool_error_cascade` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.under_verified` — sessions=41 fire_rate=0.0
@@ -147,23 +157,108 @@
 - `state.deterministic_trim_v2|q.under_verified` — sessions=41 fire_rate=0.0
 - `state.deterministic_trim_v2|q.user_wait_signal` — sessions=41 fire_rate=0.0
 - `state.deterministic_trim_v2|q.validation_loop` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.bash_retry_storm` — sessions=41 fire_rate=0.0244
-- `state.markers_focus|q.brief_abandon` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.context_thrash_compact` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.deliverable_orphan` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.dependency_wait` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.docs_only_drift` — sessions=41 fire_rate=0.0244
-- `state.markers_focus|q.edit_churn` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.idle_tool_spin` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.parallel_agent_thrash` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.scope_creep_silent` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.speculative_rewrite` — sessions=41 fire_rate=0.0
-- `state.markers_focus|q.test_flake_loop` — sessions=41 fire_rate=0.0
-- `state.phase_hints_focus|q.bash_retry_storm` — sessions=41 fire_rate=0.0732
-- `state.phase_hints_focus|q.brief_abandon` — sessions=41 fire_rate=0.0
-- `state.phase_hints_focus|q.edit_churn` — sessions=41 fire_rate=0.0
-- `state.phase_hints_focus|q.parallel_agent_thrash` — sessions=41 fire_rate=0.0
-- `state.phase_hints_focus|q.test_flake_loop` — sessions=33 fire_rate=0.0
+- `state.markers_focus|q.abort_cheaper` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.bash_retry_storm` — sessions=16 fire_rate=0.0625
+- `state.markers_focus|q.brief_abandon` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.compaction_storm` — sessions=16 fire_rate=0.4375
+- `state.markers_focus|q.context_pressure` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.context_thrash_compact` — sessions=16 fire_rate=0.0625
+- `state.markers_focus|q.continue_learns` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.deliverable_orphan` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.dependency_wait` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.docs_only_drift` — sessions=16 fire_rate=0.125
+- `state.markers_focus|q.duplicate_work` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.early_false_alarm` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.edit_churn` — sessions=16 fire_rate=0.0625
+- `state.markers_focus|q.handoff_ready` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.idle_tool_spin` — sessions=16 fire_rate=0.5625
+- `state.markers_focus|q.late_miss_risk` — sessions=16 fire_rate=0.0625
+- `state.markers_focus|q.mid_arc_healthy` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.output_starvation` — sessions=16 fire_rate=0.625
+- `state.markers_focus|q.over_polish` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.parallel_agent_thrash` — sessions=16 fire_rate=0.1875
+- `state.markers_focus|q.plan_execute_drift` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.recovery_possible` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.reread_loop` — sessions=16 fire_rate=0.125
+- `state.markers_focus|q.resource_asymmetry` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.scope_creep_silent` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.silent_stall` — sessions=16 fire_rate=0.875
+- `state.markers_focus|q.speculative_rewrite` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.stop_preserves_value` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.test_flake_loop` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.thrash_vs_explore` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.tool_error_cascade` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.under_verified` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.user_wait_signal` — sessions=16 fire_rate=0.0
+- `state.markers_focus|q.validation_loop` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.abort_cheaper` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.bash_retry_storm` — sessions=16 fire_rate=0.3125
+- `state.phase_hints_focus|q.brief_abandon` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.compaction_storm` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.context_pressure` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.context_thrash_compact` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.continue_learns` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.deliverable_orphan` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.dependency_wait` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.docs_only_drift` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.duplicate_work` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.early_false_alarm` — sessions=16 fire_rate=0.0625
+- `state.phase_hints_focus|q.edit_churn` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.handoff_ready` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.idle_tool_spin` — sessions=16 fire_rate=0.125
+- `state.phase_hints_focus|q.late_miss_risk` — sessions=16 fire_rate=0.375
+- `state.phase_hints_focus|q.mid_arc_healthy` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.output_starvation` — sessions=16 fire_rate=0.1875
+- `state.phase_hints_focus|q.over_polish` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.parallel_agent_thrash` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.plan_execute_drift` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.recovery_possible` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.reread_loop` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.resource_asymmetry` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.scope_creep_silent` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.silent_stall` — sessions=16 fire_rate=0.125
+- `state.phase_hints_focus|q.speculative_rewrite` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.stop_preserves_value` — sessions=16 fire_rate=0.0625
+- `state.phase_hints_focus|q.test_flake_loop` — sessions=16 fire_rate=0.625
+- `state.phase_hints_focus|q.thrash_vs_explore` — sessions=16 fire_rate=0.125
+- `state.phase_hints_focus|q.tool_error_cascade` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.under_verified` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.user_wait_signal` — sessions=16 fire_rate=0.0
+- `state.phase_hints_focus|q.validation_loop` — sessions=16 fire_rate=0.1875
+- `state.recent_delta_brief|q.abort_cheaper` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.bash_retry_storm` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.brief_abandon` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.compaction_storm` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.context_pressure` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.context_thrash_compact` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.continue_learns` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.deliverable_orphan` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.dependency_wait` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.docs_only_drift` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.duplicate_work` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.early_false_alarm` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.edit_churn` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.handoff_ready` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.idle_tool_spin` — sessions=16 fire_rate=0.0625
+- `state.recent_delta_brief|q.late_miss_risk` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.mid_arc_healthy` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.output_starvation` — sessions=16 fire_rate=0.375
+- `state.recent_delta_brief|q.over_polish` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.parallel_agent_thrash` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.plan_execute_drift` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.recovery_possible` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.reread_loop` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.resource_asymmetry` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.scope_creep_silent` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.silent_stall` — sessions=16 fire_rate=0.5625
+- `state.recent_delta_brief|q.speculative_rewrite` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.stop_preserves_value` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.test_flake_loop` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.thrash_vs_explore` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.tool_error_cascade` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.under_verified` — sessions=16 fire_rate=0.0625
+- `state.recent_delta_brief|q.user_wait_signal` — sessions=16 fire_rate=0.0
+- `state.recent_delta_brief|q.validation_loop` — sessions=16 fire_rate=0.0
 - `state.state_length_mid|q.abort_cheaper` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.closing_protect` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.compaction_storm` — sessions=41 fire_rate=0.0
