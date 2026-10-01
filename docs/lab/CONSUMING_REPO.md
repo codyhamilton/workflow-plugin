@@ -6,23 +6,25 @@ Paste the block below into a project that drives builds with the workflow plugin
 
 Two harnesses, two layers. Do not invent a Cursor session hook.
 
-**Cursor cloud** boots from a prebaked image. Project skills under `.cursor/skills/` are discovered when the agent process starts. There is no `SessionStart` / `reloadSkills`. Put this in the **environment install / setup** command (runs on each environment build — a **daily rebuild** keeps skills synced to workflow-plugin **master** without pinning SHAs):
+**Cursor cloud** boots from a prebaked image. Project skills under `.cursor/skills/` are discovered when the agent process starts. There is no `SessionStart` / `reloadSkills`. **Preferred:** commit [`.cursor/environment.json`](https://cursor.com/docs/cloud-agent/environments) using [`tools/cloud-env/environment.json.example`](../../tools/cloud-env/environment.json.example) (or append its `install` to an existing one). The repo file beats dashboard config. Environment **builds** run `install` before agents start; **daily rebuild** tracks workflow-plugin **master** without pinning SHAs.
 
-```bash
-export WORKFLOW_WORKSPACE="$(git rev-parse --show-toplevel)"
-bash /path/to/workflow-plugin/tools/cloud-env/bootstrap-workflow-skills.sh
-```
-
-Same behavior via legacy path: `docs/lab/bootstrap/cursor-cloud-setup.sh` (execs the script above).
-
-From GitHub without a local clone:
+If the repo has no committed env file, use the dashboard **install** command or the curl one-liner below (fallback only — skills are not on the first turn if install runs only after the agent boots):
 
 ```bash
 export WORKFLOW_WORKSPACE="${WORKFLOW_WORKSPACE:-/workspace}"
 curl -fsSL https://raw.githubusercontent.com/codyhamilton/workflow-plugin/master/tools/cloud-env/bootstrap-workflow-skills.sh | bash
 ```
 
-That tracks `master` in `~/.cache/workflow-plugin`, runs `install.sh` **core only** into `<repo>/.cursor/skills/workflow/`. Optional lab skills: `WORKFLOW_INSTALL_LAB=1` (see [`tools/cloud-env/README.md`](../../tools/cloud-env/README.md)). Add the core path to `.gitignore`. A first-turn install does not put the skills on the first turn's skill list.
+With a local clone or vendored copy:
+
+```bash
+export WORKFLOW_WORKSPACE="$(git rev-parse --show-toplevel)"
+bash /path/to/workflow-plugin/tools/cloud-env/bootstrap-workflow-skills.sh
+```
+
+Same behavior via legacy path: `docs/lab/bootstrap/cursor-cloud-setup.sh` (execs the bootstrap script).
+
+That tracks `master` in `~/.cache/workflow-plugin`, runs `install.sh` **core only** into `<repo>/.cursor/skills/workflow/`. Optional lab skills: `WORKFLOW_INSTALL_LAB=1` (see [`tools/cloud-env/README.md`](../../tools/cloud-env/README.md)). Add the core path to `.gitignore`.
 
 **Claude Code on the web** starts a fresh container per session and does support a hook. Copy:
 
@@ -46,7 +48,7 @@ Exit 0 means `design`, `refine`, `execute`, `comprehensive-review`, `close-out`,
 
 This repo uses [workflow-plugin](https://github.com/codyhamilton/workflow-plugin) for design → per-phase execute → review → close-out.
 
-- **Skills (core only, no lab):** bootstrap before the first phase, then `python3 <path-to-workflow-plugin>/tools/driver/check_skills.py` (exit 0). Cursor cloud: environment setup runs `tools/cloud-env/bootstrap-workflow-skills.sh` (or `docs/lab/bootstrap/cursor-cloud-setup.sh`); daily rebuild refreshes master (no session hook). Claude Code on the web: copy `docs/lab/bootstrap/session-start.sh` to `.claude/hooks/session-start.sh` and merge `docs/lab/bootstrap/claude-settings-fragment.json` into `.claude/settings.json`. Gitignore `<repo>/.cursor/skills/workflow/` if the Cursor path is used.
+- **Skills (core only, no lab):** bootstrap before the first phase, then `python3 <path-to-workflow-plugin>/tools/driver/check_skills.py` (exit 0). Cursor cloud: commit `.cursor/environment.json` from `tools/cloud-env/environment.json.example` (or dashboard/curl fallback — see above); daily rebuild refreshes master (no session hook). Claude Code on the web: copy `docs/lab/bootstrap/session-start.sh` to `.claude/hooks/session-start.sh` and merge `docs/lab/bootstrap/claude-settings-fragment.json` into `.claude/settings.json`. Gitignore `<repo>/.cursor/skills/workflow/` if the Cursor path is used.
 - **Phase loop (bot or human):** check skills → read-only status → one phase → assert → repeat until `done` or `unsuccessful`.
   - Skills: `python3 <path-to-workflow-plugin>/tools/driver/check_skills.py`
   - Status: `python3 <path-to-workflow-plugin>/tools/driver/status.py docs/plans/<NN>-<slug>/`
