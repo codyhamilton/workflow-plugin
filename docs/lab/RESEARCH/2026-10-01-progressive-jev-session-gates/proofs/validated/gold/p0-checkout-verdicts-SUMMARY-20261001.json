@@ -1,0 +1,86 @@
+{
+  "generated_at_brisbane": "2026-10-01 ~19:50 AEST",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "schedule": "P0 = 75:15 (checkpoints 75,90,...,<=T)",
+  "workers_labeled": {
+    "92a48e004519": {
+      "T": 296,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255,
+        270,
+        285
+      ]
+    },
+    "bb6165018de0": {
+      "T": 154,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ]
+    }
+  },
+  "optional_extra_75plus_session": null,
+  "review_chain": "Flash draft (unsigned) \u2192 Sonnet 5.5 review (signed final). Cody Flash gate: do not treat Flash-only as final.",
+  "models": {
+    "draft": {
+      "id": "deepseek/deepseek-flash",
+      "via": "opencode run",
+      "count": 21
+    },
+    "reviewer": {
+      "id": "claude-sonnet-5-5",
+      "via": "claude -p --model sonnet",
+      "count": 21,
+      "status": "ok"
+    },
+    "optional_third": {
+      "requested": [
+        "Grok",
+        "Composer"
+      ],
+      "status": "skipped",
+      "reason": "OpenCode providers only DeepSeek + local llama.cpp; no Grok/xAI/Composer credentials without new secrets"
+    }
+  },
+  "judge_first_checkout": {
+    "deepseek/deepseek-flash": {
+      "92a48e004519": {
+        "first_checkout_on_p0_grid": 75,
+        "first_checkout_guess_at_that_cp": 58
+      },
+      "bb6165018de0": {
+        "first_checkout_on_p0_grid": 75,
+        "first_checkout_guess_at_that_cp": 62
+      }
+    },
+    "claude-sonnet-5-5": {
+      "92a48e004519": {
+        "first_checkout_on_p0_grid": null,
+        "first_checkout_guess_at_that_cp": null
+      },
+      "bb6165018de0": {
+        "first_checkout_on_p0_grid": null,
+        "first_checkout_guess_at_that_cp": null
+      }
+    }
+  },
+  "a0_note": "Under A0 (earliest unanimous checkout) these two seats never unanimously checkout on either smoking gun at any P0 cp (Flash often checkout; Sonnet always not_yet). Panel still underpowered vs TUNING-PLAN three-judge minimum; treat as two-seat draft gold pending Grok/Composer.",
+  "bundle_source": "ubuntu-raw/*-gold-bundles-20261001-194107.jsonl (gitignored; not committed)",
+  "n_verdict_rows": 42
+}
