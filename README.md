@@ -285,7 +285,7 @@ Lab skills: interactive install can symlink `workflow-lab` too, or
 
 ## Codex (separate harness)
 
-**Codex** (OpenAI `codex` / `codex exec` CLI) is a **separate harness**, not an OpenCode provider and not Cursor Composer. Use it to **maximize Plus/Codex + Claude subscriptions**: promote Codex for **high-thinking** and mechanically rich unit work **alongside** Claude Code; keep OpenCode **DeepSeek Flash** for cheap brief/unit drafts under the Flash review gate.
+**Codex** (OpenAI `codex` / `codex exec` CLI) is a **separate harness**, not an OpenCode provider and not Cursor Composer. Use it to **balance Plus/Codex + Claude subscriptions**: Codex often fits **high-thinking** and mechanically rich unit work **alongside** Claude Code (soft effort×fit routing — ask CHM when unsure); keep OpenCode **DeepSeek Flash** for cheap brief/unit drafts under the Flash review gate.
 
 **Pins (Codex CLI 0.159.3 catalog; confirm with CHM smoke):**
 
@@ -296,10 +296,10 @@ Lab skills: interactive install can symlink `workflow-lab` too, or
 
 ```sh
 codex exec -m gpt-6.1-sol -c model_reasoning_effort=high "…"
-codex exec -m gpt-6-luna -c model_reasoning_effort=medium "…"
+codex exec -m gpt-6-luna -c model_reasoning_effort=high "…"
 ```
 
-Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). No Codex installer mode or hooks in this plugin yet (docs/routing advert only). BDK wiring is deferred.
+Pass the prompt on the command line (close stdin) so `codex exec` does not hang. **`~/.codex/config.toml` may still default to `gpt-5.4`** — always pass **`-m`** for Sol/Luna. Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). No Codex installer mode or hooks in this plugin yet (docs/routing advert only). BDK wiring is deferred.
 
 ## Manual installation
 
