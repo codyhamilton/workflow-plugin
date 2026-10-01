@@ -45,3 +45,24 @@ Turn count alone must not drive checkout. Patterns: `runaway`, `low_progress`, `
 - Panel remains **underpowered** vs TUNING-PLAN’s three-judge floor until Grok (or another seat) is added.
 
 No `--call-jev` / `TYPESAFE_API_KEY` was used for this PR.
+
+## Aggregating these rows
+
+`aggregate_gold.py` reads this directory. A row votes only when `signed` is true. On this file that is the Sonnet `reviewer_final` seat. Unsigned Flash `role=draft` rows stay in `draft_review` (20 checkouts corrected to `not_yet`, one agree on `not_yet`). They do not set `gold_exit`.
+
+Reserved seats `grok-4.7-high` and `composer` stay `pending` until CHM commits signed packs in this directory. Primary `gold_exit` stays null until three seats have voted. That null is an incomplete panel. It is not a decision that either worker should have run to `T`.
+
+```bash
+cd docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs
+python3 aggregate_gold.py \
+  --labels validated/gold \
+  --out validated/gold/summary.json
+python3 score_vs_gold.py \
+  --replay validated/ubuntu-raw/92a48e004519-dry-run-checkpoints-20261001-194107.omit-state.jsonl \
+  --replay validated/ubuntu-raw/bb6165018de0-dry-run-checkpoints-20261001-194107.omit-state.jsonl \
+  --metrics validated/ubuntu-raw/92a48e004519-dry-run-metrics-20261001-194107.json \
+  --metrics validated/ubuntu-raw/bb6165018de0-dry-run-metrics-20261001-194107.json \
+  --gold validated/gold/summary.json
+```
+
+`score_vs_gold.py` leaves `overshoot`, `false_early`, and `false_late` null while `gold_exit` is null. A dry-run replay still reports `max_allowed_turns = T` because no checkpoint fired. Confidence stays not high.

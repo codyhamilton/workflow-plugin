@@ -1,6 +1,6 @@
 # Proofs — offline replay plan
 
-**Status: harness dry-run only.** No gold labels, no live Jev cache, no sweep, no lock memo. **Confidence: not high.**
+**Status: harness dry-run, plus a two-model P0 label file.** Signed Sonnet rows are the only voting seat. `gold_exit` is null on both smoking guns. Grok 4.7 and Composer seats are empty. No live Jev cache, no sweep, no lock memo. **Confidence: not high.**
 
 This directory has a replay harness and the stage contract below. The harness indexes assistant turns, builds `hybrid_v0` state, and can dry-run checkpoint rows. It calls Jev only with `--call-jev` when `TYPESAFE_API_KEY` is set. A green `run_proofs.sh` checks the schedule and the 12_000-character guard. It does not test H1–H7.
 
@@ -14,6 +14,8 @@ Running Claude Code, installing a `PostToolBatch` hook, or editing `install.sh` 
 | `hybrid_v0` state, shrink order, gold bundle (60_000) | `snapshot_state.py` |
 | `session-checkout` questions, fail-open `R(t)`, overshoot | `session_checkout.py` |
 | CLI | `replay_progressive_gates.py` |
+| Gold aggregation (signed rows vote; Grok and Composer seats stay empty) | `aggregate_gold.py`, `score_vs_gold.py`, `gold_panel.py` |
+| P0 Flash drafts and Sonnet-signed finals | [`validated/gold/README.md`](validated/gold/README.md) |
 | Synthetic 90-turn JSONL | `fixtures/synthetic_worker_90.jsonl` |
 | Expected ids and Ubuntu paths | [`corpus/MANIFEST.md`](corpus/MANIFEST.md) |
 
