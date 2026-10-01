@@ -1,14 +1,14 @@
 {
   "metric": "scenario_progress",
-  "n_distinct_scenarios": 200,
+  "n_distinct_scenarios": 297,
   "n_sessions_swept": 41,
-  "n_cells_incidental": 8200,
+  "n_cells_incidental": 12169,
   "n_packs_available": 41,
-  "n_scenarios_planned": 200,
+  "n_scenarios_planned": 280,
   "errors": 0,
-  "tok_in": 4621254,
-  "tok_out": 426284,
-  "wall_s": 166.8,
+  "tok_in": 2172741,
+  "tok_out": 170524,
+  "wall_s": 229.7,
   "checkpoint_policy": "one_representative_mid_per_session",
   "window_cartesian": false,
   "soft_standard_hold": true,
@@ -1013,6 +1013,491 @@
       "n_sessions": 41,
       "fire_count": 1,
       "fire_rate": 0.0244
+    },
+    "state.markers_focus|q.edit_churn": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.bash_retry_storm": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.markers_focus|q.brief_abandon": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.parallel_agent_thrash": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.test_flake_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.docs_only_drift": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.markers_focus|q.dependency_wait": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.speculative_rewrite": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.context_thrash_compact": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.deliverable_orphan": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.scope_creep_silent": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.idle_tool_spin": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.edit_churn": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.bash_retry_storm": {
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.0732
+    },
+    "state.state_length_mid|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.brief_abandon": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.parallel_agent_thrash": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.test_flake_loop": {
+      "n_sessions": 33,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 9,
+      "fire_rate": 0.2195
+    },
+    "state.deterministic_trim_v1|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.deterministic_trim_v1|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v1|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 9,
+      "fire_rate": 0.2195
+    },
+    "state.deterministic_trim_v2|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.deterministic_trim_v2|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 7,
+      "fire_rate": 0.1707
+    },
+    "state.deterministic_trim_v2|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.deterministic_trim_v2|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 5,
+      "fire_rate": 0.122
+    },
+    "state.stats_only|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.stats_only|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.stats_only|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.stats_only|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.stats_only|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.stats_only|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.stats_only|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.stats_only|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.compact_focus|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.compact_focus|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
     }
   },
   "scenario_ids": [
@@ -1072,6 +1557,14 @@
     "state.chars_budget_1200|q.under_verified",
     "state.chars_budget_1200|q.user_wait_signal",
     "state.chars_budget_1200|q.validation_loop",
+    "state.compact_focus|q.compaction_storm",
+    "state.compact_focus|q.context_pressure",
+    "state.compact_focus|q.handoff_ready",
+    "state.compact_focus|q.plan_execute_drift",
+    "state.compact_focus|q.reread_loop",
+    "state.compact_focus|q.silent_stall",
+    "state.compact_focus|q.tool_error_cascade",
+    "state.compact_focus|q.validation_loop",
     "state.delta_only|q.abort_cheaper",
     "state.delta_only|q.activity_without_value",
     "state.delta_only|q.closing_protect",
@@ -1100,17 +1593,94 @@
     "state.delta_only|q.under_verified",
     "state.delta_only|q.user_wait_signal",
     "state.delta_only|q.validation_loop",
+    "state.deterministic_trim_v1|q.abort_cheaper",
+    "state.deterministic_trim_v1|q.compaction_storm",
+    "state.deterministic_trim_v1|q.context_pressure",
+    "state.deterministic_trim_v1|q.continue_learns",
+    "state.deterministic_trim_v1|q.duplicate_work",
+    "state.deterministic_trim_v1|q.early_false_alarm",
+    "state.deterministic_trim_v1|q.handoff_ready",
+    "state.deterministic_trim_v1|q.late_miss_risk",
+    "state.deterministic_trim_v1|q.mid_arc_healthy",
+    "state.deterministic_trim_v1|q.output_starvation",
+    "state.deterministic_trim_v1|q.over_polish",
+    "state.deterministic_trim_v1|q.plan_execute_drift",
+    "state.deterministic_trim_v1|q.recovery_possible",
+    "state.deterministic_trim_v1|q.reread_loop",
+    "state.deterministic_trim_v1|q.resource_asymmetry",
+    "state.deterministic_trim_v1|q.silent_stall",
+    "state.deterministic_trim_v1|q.stop_preserves_value",
+    "state.deterministic_trim_v1|q.thrash_vs_explore",
+    "state.deterministic_trim_v1|q.tool_error_cascade",
+    "state.deterministic_trim_v1|q.under_verified",
+    "state.deterministic_trim_v1|q.user_wait_signal",
+    "state.deterministic_trim_v1|q.validation_loop",
+    "state.deterministic_trim_v2|q.abort_cheaper",
+    "state.deterministic_trim_v2|q.compaction_storm",
+    "state.deterministic_trim_v2|q.context_pressure",
+    "state.deterministic_trim_v2|q.continue_learns",
+    "state.deterministic_trim_v2|q.duplicate_work",
+    "state.deterministic_trim_v2|q.early_false_alarm",
+    "state.deterministic_trim_v2|q.handoff_ready",
+    "state.deterministic_trim_v2|q.late_miss_risk",
+    "state.deterministic_trim_v2|q.mid_arc_healthy",
+    "state.deterministic_trim_v2|q.output_starvation",
+    "state.deterministic_trim_v2|q.over_polish",
+    "state.deterministic_trim_v2|q.plan_execute_drift",
+    "state.deterministic_trim_v2|q.recovery_possible",
+    "state.deterministic_trim_v2|q.reread_loop",
+    "state.deterministic_trim_v2|q.resource_asymmetry",
+    "state.deterministic_trim_v2|q.silent_stall",
+    "state.deterministic_trim_v2|q.stop_preserves_value",
+    "state.deterministic_trim_v2|q.thrash_vs_explore",
+    "state.deterministic_trim_v2|q.tool_error_cascade",
+    "state.deterministic_trim_v2|q.under_verified",
+    "state.deterministic_trim_v2|q.user_wait_signal",
+    "state.deterministic_trim_v2|q.validation_loop",
+    "state.markers_focus|q.bash_retry_storm",
+    "state.markers_focus|q.brief_abandon",
+    "state.markers_focus|q.context_thrash_compact",
+    "state.markers_focus|q.deliverable_orphan",
+    "state.markers_focus|q.dependency_wait",
+    "state.markers_focus|q.docs_only_drift",
+    "state.markers_focus|q.edit_churn",
+    "state.markers_focus|q.idle_tool_spin",
+    "state.markers_focus|q.parallel_agent_thrash",
+    "state.markers_focus|q.scope_creep_silent",
+    "state.markers_focus|q.speculative_rewrite",
+    "state.markers_focus|q.test_flake_loop",
+    "state.phase_hints_focus|q.bash_retry_storm",
+    "state.phase_hints_focus|q.brief_abandon",
+    "state.phase_hints_focus|q.edit_churn",
+    "state.phase_hints_focus|q.parallel_agent_thrash",
+    "state.phase_hints_focus|q.test_flake_loop",
     "state.state_length_mid|q.abort_cheaper",
+    "state.state_length_mid|q.closing_protect",
     "state.state_length_mid|q.compaction_storm",
     "state.state_length_mid|q.context_pressure",
+    "state.state_length_mid|q.continue_learns",
     "state.state_length_mid|q.duplicate_work",
+    "state.state_length_mid|q.early_false_alarm",
     "state.state_length_mid|q.handoff_ready",
+    "state.state_length_mid|q.late_miss_risk",
+    "state.state_length_mid|q.mid_arc_healthy",
+    "state.state_length_mid|q.output_starvation",
+    "state.state_length_mid|q.over_polish",
     "state.state_length_mid|q.plan_execute_drift",
+    "state.state_length_mid|q.recheck_interval",
+    "state.state_length_mid|q.recovery_possible",
     "state.state_length_mid|q.reread_loop",
+    "state.state_length_mid|q.resource_asymmetry",
     "state.state_length_mid|q.silent_stall",
+    "state.state_length_mid|q.stop_preserves_value",
+    "state.state_length_mid|q.thrash_vs_explore",
     "state.state_length_mid|q.tool_error_cascade",
+    "state.state_length_mid|q.under_verified",
+    "state.state_length_mid|q.user_wait_signal",
     "state.state_length_mid|q.validation_loop",
     "state.state_length_short|q.abort_cheaper",
+    "state.state_length_short|q.activity_without_value",
+    "state.state_length_short|q.closing_protect",
     "state.state_length_short|q.compaction_storm",
     "state.state_length_short|q.context_pressure",
     "state.state_length_short|q.continue_learns",
@@ -1122,16 +1692,28 @@
     "state.state_length_short|q.output_starvation",
     "state.state_length_short|q.over_polish",
     "state.state_length_short|q.plan_execute_drift",
+    "state.state_length_short|q.recheck_interval",
+    "state.state_length_short|q.recoverable_stall",
     "state.state_length_short|q.recovery_possible",
     "state.state_length_short|q.reread_loop",
     "state.state_length_short|q.resource_asymmetry",
+    "state.state_length_short|q.scope_drift",
     "state.state_length_short|q.silent_stall",
     "state.state_length_short|q.stop_preserves_value",
+    "state.state_length_short|q.tail_risk",
     "state.state_length_short|q.thrash_vs_explore",
     "state.state_length_short|q.tool_error_cascade",
     "state.state_length_short|q.under_verified",
     "state.state_length_short|q.user_wait_signal",
     "state.state_length_short|q.validation_loop",
+    "state.stats_only|q.compaction_storm",
+    "state.stats_only|q.context_pressure",
+    "state.stats_only|q.handoff_ready",
+    "state.stats_only|q.plan_execute_drift",
+    "state.stats_only|q.reread_loop",
+    "state.stats_only|q.silent_stall",
+    "state.stats_only|q.tool_error_cascade",
+    "state.stats_only|q.validation_loop",
     "state.tail_focus|q.abort_cheaper",
     "state.tail_focus|q.activity_without_value",
     "state.tail_focus|q.closing_protect",
@@ -1217,5 +1799,5 @@
     "state.window_delta_tools|q.user_wait_signal",
     "state.window_delta_tools|q.validation_loop"
   ],
-  "generated_at": "2026-10-02T01:53:30+10:00"
+  "generated_at": "2026-10-02T09:02:17+10:00"
 }

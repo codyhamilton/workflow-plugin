@@ -1,13 +1,13 @@
 # SCENARIO-PROGRESS — TypeSafe corpus sweep
 
-**Generated:** 2026-10-02T01:53:30+10:00
+**Generated:** 2026-10-02T09:02:17+10:00
 
 **Soft Standard HOLD** — measured corpus only; no product wiring.
 
 ## Metric (not n_cells)
-- **n_distinct_scenarios:** 200
+- **n_distinct_scenarios:** 297
 - **n_sessions_swept:** 41
-- n_cells (incidental = scenarios × sessions): 8200
+- n_cells (incidental = scenarios × sessions): 12169
 - window cartesian: **false** (1 representative checkpoint / session)
 
 ## Scenario list (state × question)
@@ -67,6 +67,14 @@
 - `state.chars_budget_1200|q.under_verified` — sessions=41 fire_rate=0.0
 - `state.chars_budget_1200|q.user_wait_signal` — sessions=41 fire_rate=0.0
 - `state.chars_budget_1200|q.validation_loop` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.compaction_storm` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.context_pressure` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.handoff_ready` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.plan_execute_drift` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.reread_loop` — sessions=41 fire_rate=0.0488
+- `state.compact_focus|q.silent_stall` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.tool_error_cascade` — sessions=41 fire_rate=0.0
+- `state.compact_focus|q.validation_loop` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.abort_cheaper` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.activity_without_value` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.closing_protect` — sessions=41 fire_rate=0.0
@@ -95,17 +103,94 @@
 - `state.delta_only|q.under_verified` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.user_wait_signal` — sessions=41 fire_rate=0.0
 - `state.delta_only|q.validation_loop` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.abort_cheaper` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.compaction_storm` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.context_pressure` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.continue_learns` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.duplicate_work` — sessions=41 fire_rate=0.0244
+- `state.deterministic_trim_v1|q.early_false_alarm` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.handoff_ready` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.late_miss_risk` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.mid_arc_healthy` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.output_starvation` — sessions=41 fire_rate=0.2195
+- `state.deterministic_trim_v1|q.over_polish` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.plan_execute_drift` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.recovery_possible` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.reread_loop` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.resource_asymmetry` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.silent_stall` — sessions=41 fire_rate=0.2195
+- `state.deterministic_trim_v1|q.stop_preserves_value` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.thrash_vs_explore` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.tool_error_cascade` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.under_verified` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.user_wait_signal` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v1|q.validation_loop` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.abort_cheaper` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.compaction_storm` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.context_pressure` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.continue_learns` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.duplicate_work` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.early_false_alarm` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.handoff_ready` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.late_miss_risk` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.mid_arc_healthy` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.output_starvation` — sessions=41 fire_rate=0.122
+- `state.deterministic_trim_v2|q.over_polish` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.plan_execute_drift` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.recovery_possible` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.reread_loop` — sessions=41 fire_rate=0.0488
+- `state.deterministic_trim_v2|q.resource_asymmetry` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.silent_stall` — sessions=41 fire_rate=0.1707
+- `state.deterministic_trim_v2|q.stop_preserves_value` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.thrash_vs_explore` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.tool_error_cascade` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.under_verified` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.user_wait_signal` — sessions=41 fire_rate=0.0
+- `state.deterministic_trim_v2|q.validation_loop` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.bash_retry_storm` — sessions=41 fire_rate=0.0244
+- `state.markers_focus|q.brief_abandon` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.context_thrash_compact` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.deliverable_orphan` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.dependency_wait` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.docs_only_drift` — sessions=41 fire_rate=0.0244
+- `state.markers_focus|q.edit_churn` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.idle_tool_spin` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.parallel_agent_thrash` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.scope_creep_silent` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.speculative_rewrite` — sessions=41 fire_rate=0.0
+- `state.markers_focus|q.test_flake_loop` — sessions=41 fire_rate=0.0
+- `state.phase_hints_focus|q.bash_retry_storm` — sessions=41 fire_rate=0.0732
+- `state.phase_hints_focus|q.brief_abandon` — sessions=41 fire_rate=0.0
+- `state.phase_hints_focus|q.edit_churn` — sessions=41 fire_rate=0.0
+- `state.phase_hints_focus|q.parallel_agent_thrash` — sessions=41 fire_rate=0.0
+- `state.phase_hints_focus|q.test_flake_loop` — sessions=33 fire_rate=0.0
 - `state.state_length_mid|q.abort_cheaper` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.closing_protect` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.compaction_storm` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.context_pressure` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.continue_learns` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.duplicate_work` — sessions=41 fire_rate=0.0244
+- `state.state_length_mid|q.early_false_alarm` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.handoff_ready` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.late_miss_risk` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.mid_arc_healthy` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.output_starvation` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.over_polish` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.plan_execute_drift` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.recheck_interval` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.recovery_possible` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.reread_loop` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.resource_asymmetry` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.silent_stall` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.stop_preserves_value` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.thrash_vs_explore` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.tool_error_cascade` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.under_verified` — sessions=41 fire_rate=0.0
+- `state.state_length_mid|q.user_wait_signal` — sessions=41 fire_rate=0.0
 - `state.state_length_mid|q.validation_loop` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.abort_cheaper` — sessions=41 fire_rate=0.0
+- `state.state_length_short|q.activity_without_value` — sessions=41 fire_rate=0.0
+- `state.state_length_short|q.closing_protect` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.compaction_storm` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.context_pressure` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.continue_learns` — sessions=41 fire_rate=0.0
@@ -117,16 +202,28 @@
 - `state.state_length_short|q.output_starvation` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.over_polish` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.plan_execute_drift` — sessions=41 fire_rate=0.0
+- `state.state_length_short|q.recheck_interval` — sessions=41 fire_rate=0.0
+- `state.state_length_short|q.recoverable_stall` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.recovery_possible` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.reread_loop` — sessions=41 fire_rate=0.0488
 - `state.state_length_short|q.resource_asymmetry` — sessions=41 fire_rate=0.0
+- `state.state_length_short|q.scope_drift` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.silent_stall` — sessions=41 fire_rate=0.0244
 - `state.state_length_short|q.stop_preserves_value` — sessions=41 fire_rate=0.0
+- `state.state_length_short|q.tail_risk` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.thrash_vs_explore` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.tool_error_cascade` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.under_verified` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.user_wait_signal` — sessions=41 fire_rate=0.0
 - `state.state_length_short|q.validation_loop` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.compaction_storm` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.context_pressure` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.handoff_ready` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.plan_execute_drift` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.reread_loop` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.silent_stall` — sessions=41 fire_rate=0.0244
+- `state.stats_only|q.tool_error_cascade` — sessions=41 fire_rate=0.0
+- `state.stats_only|q.validation_loop` — sessions=41 fire_rate=0.0
 - `state.tail_focus|q.abort_cheaper` — sessions=41 fire_rate=0.0
 - `state.tail_focus|q.activity_without_value` — sessions=41 fire_rate=0.0
 - `state.tail_focus|q.closing_protect` — sessions=41 fire_rate=0.0244
@@ -211,3 +308,4 @@
 - `state.window_delta_tools|q.under_verified` — sessions=41 fire_rate=0.0
 - `state.window_delta_tools|q.user_wait_signal` — sessions=41 fire_rate=0.0
 - `state.window_delta_tools|q.validation_loop` — sessions=41 fire_rate=0.0
+

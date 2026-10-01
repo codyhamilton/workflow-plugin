@@ -1,0 +1,191 @@
+{
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "hooks_unlock": false,
+  "metric": "scenario_progress",
+  "n_distinct_scenarios": 337,
+  "n_sessions_swept": 41,
+  "n_cells_incidental": 13796,
+  "errors": 0,
+  "meters_file": {
+    "n_distinct_scenarios": 297,
+    "n_sessions_swept": 41,
+    "n_cells_incidental": 12169,
+    "errors": 0,
+    "tok_in": 2172741,
+    "tok_out": 170524,
+    "wall_s": 229.7
+  },
+  "landed_prior": {
+    "n_distinct_scenarios": 200,
+    "n_sessions": 41,
+    "pr": 104
+  },
+  "growth_states": [
+    "markers_focus",
+    "phase_hints_focus",
+    "recent_delta_brief"
+  ],
+  "growth_state_scenario_count": 57,
+  "growth_by_state": {
+    "markers_focus": 33,
+    "phase_hints_focus": 12,
+    "recent_delta_brief": 12
+  },
+  "growth_fire_top": [
+    {
+      "scenario_id": "state.markers_focus|q.silent_stall",
+      "fire": 41,
+      "n": 41,
+      "rate": 1.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.bash_retry_storm",
+      "fire": 3,
+      "n": 41,
+      "rate": 0.0732
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.idle_tool_spin",
+      "fire": 2,
+      "n": 41,
+      "rate": 0.0488
+    },
+    {
+      "scenario_id": "state.markers_focus|q.reread_loop",
+      "fire": 2,
+      "n": 41,
+      "rate": 0.0488
+    },
+    {
+      "scenario_id": "state.markers_focus|q.duplicate_work",
+      "fire": 2,
+      "n": 41,
+      "rate": 0.0488
+    },
+    {
+      "scenario_id": "state.markers_focus|q.bash_retry_storm",
+      "fire": 1,
+      "n": 41,
+      "rate": 0.0244
+    },
+    {
+      "scenario_id": "state.markers_focus|q.docs_only_drift",
+      "fire": 1,
+      "n": 41,
+      "rate": 0.0244
+    },
+    {
+      "scenario_id": "state.markers_focus|q.edit_churn",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.brief_abandon",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.parallel_agent_thrash",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.test_flake_loop",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.dependency_wait",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.speculative_rewrite",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.context_thrash_compact",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.deliverable_orphan",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.scope_creep_silent",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.markers_focus|q.idle_tool_spin",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.edit_churn",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.brief_abandon",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.parallel_agent_thrash",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.test_flake_loop",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.docs_only_drift",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.dependency_wait",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.speculative_rewrite",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    },
+    {
+      "scenario_id": "state.phase_hints_focus|q.context_thrash_compact",
+      "fire": 0,
+      "n": 41,
+      "rate": 0.0
+    }
+  ],
+  "window_cartesian": false,
+  "score_ready_fp_miss_board": false,
+  "fill_wave": "TS_MAX_SCENARIOS=320 growth-priority fix; may still be streaming at PR open",
+  "note": "No FP/miss product claim. Join: Sol bc-7bfd7ac9. Analysis design: Sol Codex seat (not Flash)."
+}
