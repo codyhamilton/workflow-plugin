@@ -41,6 +41,7 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 - Repo overview: [`docs/OVERVIEW.md`](../OVERVIEW.md)
 - OpenCode (skills symlink install, harness limits): [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility) and `./install.sh --opencode-skills`
 - OpenCode + DeepSeek Flash (encouraged for units; sign-off review gate, guidance only): [`GUIDANCE-flash-review-gate.md`](GUIDANCE-flash-review-gate.md)
+- Codex harness (separate from OpenCode; Sol/Luna pins; routing advert): [`GUIDANCE-codex-harness.md`](GUIDANCE-codex-harness.md)
 - Operating hypotheses: root [`README.md`](../../README.md) § Operating hypotheses
 - Eval format: [`evals/README.md`](../../evals/README.md)
 - Transcript toolkit: [`tools/transcript/README.md`](../../tools/transcript/README.md)

@@ -2,7 +2,7 @@
 
 **Status:** guidance (non-breaking). No installer, driver, or hook behaviour changes — operators and orchestrators follow this pattern by convention.
 
-**Related:** OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks proposal (`status: resolved`, plugin unwired) — [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md). Lab pack — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md). Cheap analysis harness (Flash drafts, local volume labels, TypeSafe fan-out — design only) — [`RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/`](RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md).
+**Related:** Codex harness (separate from OpenCode; Sol/Luna) — [`GUIDANCE-codex-harness.md`](GUIDANCE-codex-harness.md). OpenCode skills install and harness limits — [`README.md` § OpenCode](../../README.md#opencode-partial-compatibility). OpenCode hooks proposal (`status: resolved`, plugin unwired) — [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md). Lab pack — [`RESEARCH/2026-09-30-opencode-hooks-plugin/`](RESEARCH/2026-09-30-opencode-hooks-plugin/INDEX.md). Cheap analysis harness (Flash drafts, local volume labels, TypeSafe fan-out — design only) — [`RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/`](RESEARCH/2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md).
 
 ## Encouraged use
 

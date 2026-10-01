@@ -48,7 +48,7 @@ Then push and open or update the PR with `Workflow-Plan: docs/plans/<NN>-<slug>/
 
 ## Workers
 
-- One worker per unit, on the cheapest worker likely to succeed. Starting allocations, to tune: Claude Code — Haiku for research and small bounded changes, Sonnet for large or ambiguous ones, Opus only where directed. Cursor — Composer unless directed. Codex — GPT5.4 high, mini for exploration, xhigh for review.
+- One worker per unit, on the cheapest worker likely to succeed. Starting allocations, to tune: Claude Code — Haiku for research and small bounded changes, Sonnet for large or ambiguous ones, Opus only where directed. Cursor — Composer unless directed. Codex (separate harness, not OpenCode) — **sol** (`gpt-6.1-sol`) with elevated reasoning for high-thinking / rich mechanical units; **luna** (`gpt-6-luna`) for focused Codex volume; see `docs/lab/GUIDANCE-codex-harness.md`.
 - A failed unit gets one retry on the next model tier, then a human.
 - Implementing a small unit directly is a judgment call when no worker is running and the orchestrator's context is already hot with the design. Never while workers run.
 - Never resume a stalled worker by message. End it, take its handoff, dispatch a fresh one.
