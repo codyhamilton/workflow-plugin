@@ -1,0 +1,61 @@
+{
+  "seat": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "rubric_note": "ORIGINAL rubric only; Parent-pull draft delta NOT in force; rubric_rev omitted (original-seat convention).",
+  "pack_source": "expansion-judge-packs-20261001-202909.jsonl",
+  "n_rows": 20,
+  "signed": true,
+  "via": "claude -p --model sonnet",
+  "earliest_checkout_turn": {
+    "0aab88c525de": null,
+    "036ff3ed4a89": null,
+    "0853bc21d3aa": null
+  },
+  "checkout_turns": {
+    "0aab88c525de": [],
+    "036ff3ed4a89": [],
+    "0853bc21d3aa": []
+  },
+  "checkout_counts": {
+    "0aab88c525de": 0,
+    "036ff3ed4a89": 0,
+    "0853bc21d3aa": 0
+  },
+  "workers_labeled": {
+    "036ff3ed4a89": {
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ]
+    },
+    "0853bc21d3aa": {
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ]
+    },
+    "0aab88c525de": {
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180
+      ]
+    }
+  },
+  "note": "Independent expansion-panel gold seat. Fresh judgments from hybrid_v0 packs only. Did not overwrite p0 smoking-gun verdicts. No --call-jev. No PR.",
+  "failures": []
+}
