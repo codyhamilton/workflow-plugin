@@ -1,0 +1,686 @@
+{
+  "phase": "1b",
+  "live_posts": 0,
+  "dry": {
+    "cells": [
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "211f64f062284908ae5142792e76a757ca0c468f5d9cda64d3146415e78cc4e2",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "4c18f24bd24bb0ffabd81a4266edc5bd20003057f1a13dc8e23b55217852afac",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "109f0dce6f83b36013bf706a3b1fdc4bbcd0f007332110e25f5495510f90a927",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "62e488fb6950c08a3a1abd9f5083aa6831ac4a49f5fe56c6749c7a693428d97d",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "fff9db8e6ca1575c87753702ed3dfe329881cebff546334542c46b7cd1249e36",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "41f50b23fa3e7141ecf1ea5b4205f7c361ae1495a1754fc5cdbd4c924ae32b2f",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "e7e40cf2b7772af1b29336cf43aebaed13556adf2591d41c994ef3af32d3bb71",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "5b43a5640b336f4bda0e8a5a42eb9b0b0b54686dc25f193b4778f7683b2fe717",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "f5c257c9a4de08bfd2260ec7f5bb51a0c20931c869be1fbfb5d45c24de2e15a3",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "ccf70ab96dc05854cf32ecea79e301e0df86b5f5f5d1284296e8b5986dbdc3d0",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "1c8c7c3aa06229f2283106e694b8a266be250bb9cbf80d63fbf6dd5d40d0feee",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "3b17d8705bbc025fc7ac4d5ed7a1cdd50a21db84431235c3e5295a01aa5472ca",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "2c1a6f4229a11997186a3ad516309d12a7bb4ab6dc061cef7f8430adf83e4478",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "326a785f920f2a52f56f78b7cc59a50c662779e05a524f4a331f4ee19461a5f7",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "78ae1a1b67d90dec8d31b94671c974828941930b5df73e7205bfc7e2a31a9fe2",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "ab8db280e0665cffed824a06dd4fe8456df723bf7f26bcbbdbbb3689de7311f6",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "e0320b25d9c51c09243de760e031e28ef3b9e42313b6bd5222a9141806feaf84",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "e98f646c6ac2d02856a943a83ee01f9bedadab93484791e894cb0107be5467fe",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "13a37ace0c8677637677b690542690269caa3e3158b9ac8ba6b5e42894e49358",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "6fd2b438cd2da75e2ac775577449faee5489e6e12743ee5e9dbcb63c5d07ffc4",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "f11b31146de72251f618c4a1f49f0e303784e19a0615eb71332e652fe3077603",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "39ce011375cc55162ab0c347a98824336355f96fdeaea59a6e3f8fe2d8bd7ba2",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "4da723b0d262170b2b627a21638a95848455f1bd3dc2096e138a4b260c2c7cde",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "97ab427cf29c4601374f2adb3e734fc113bf98a27b688579882f17bc8023eca6",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "b2b710cb2bc6abe4dbe7325c114fe577a17873d60a67c3f221d4c14d89ab9639",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "4fbf932c8cf44bb4acbbdfeea02b80d4e94a37d2fcbdbd6154c6b854f5d23e60",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "b406e6cd35fd77b52316ce58adaf936a6594f743020898ec88fbb16d18647c1a",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "c2b464ad52ca09fa3bf1e5de4e2520201c325a43b8ca75e87217e72e662c3a0d",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "e84e959aaea21020ec828b98757814dae16f833ca7a7d958415241af6c0540ef",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "7e979d37ec6a82ef27f907adf5924bdc0f706c997ed34c6e325c795d34458db6",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "9447ccac7a5cce7d42feb90ef8524998912a4232296bab29bcb6582a44c36093",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "4e80e6cd4ad635949d9a7dc40db868ee977ebd3c43a1722d947130c6a0f327a6",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": "duplicate_input",
+        "cache_key": "211f64f062284908ae5142792e76a757ca0c468f5d9cda64d3146415e78cc4e2",
+        "deduped": true
+      }
+    ],
+    "posts": 0,
+    "duplicate_post_rate": 0.0,
+    "capped": 0,
+    "rejected": false,
+    "unique_cell_count": 32,
+    "input_cell_count": 33
+  },
+  "capped": {
+    "cells": [
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "dry_run",
+        "reason": null,
+        "cache_key": "211f64f062284908ae5142792e76a757ca0c468f5d9cda64d3146415e78cc4e2",
+        "deduped": false
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "ca977b9ca0dd:stats_card:105",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "92a48e004519:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "87a380bc64ff:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "bb6165018de0:stats_card:120",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "15f24c7ba18c:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "0677f597286e:stats_card:90",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "074c8cf22927:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      },
+      {
+        "model_tier": "typesafe",
+        "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+        "segment_id": "07357f196666:stats_card:75",
+        "schema_id": "early-signal-v0",
+        "decision": "missing",
+        "reason": "cap",
+        "cache_key": null
+      }
+    ],
+    "posts": 1,
+    "duplicate_post_rate": 0.0,
+    "capped": 31,
+    "rejected": false,
+    "unique_cell_count": 32,
+    "input_cell_count": 32
+  },
+  "unregistered_demo": {
+    "decision": "missing",
+    "reason": "unregistered_framing",
+    "schema_id": "early-signal-v0",
+    "framing_id": "never-registered-slug",
+    "cache_key": null,
+    "model": "jev-1.13.0"
+  },
+  "budget_split": {
+    "frozen_card_search_budget_split": {
+      "baseline_arm_calls": 8,
+      "search_arm_calls": 24,
+      "baseline_draw": "random slug from registry pool (\u22658 blobs)",
+      "search_arm_default": "6 workers \u00d7 4 tournament framings (24 cells)",
+      "hold_out_workers": "26 workers not in STRATIFIED_EIGHT"
+    },
+    "pool_slugs": [
+      "tournament-binary-foreshadow",
+      "tournament-likert-collapsed",
+      "tournament-monitor-called-out",
+      "tournament-no-story-beyond-counts",
+      "pool-likert-foreshadow",
+      "pool-echo-guard-reread",
+      "pool-phase-hint-stats",
+      "pool-anchor-agnostic",
+      "signal-v0-default",
+      "signal-v0-alt"
+    ],
+    "registered_blob_count": 10
+  },
+  "checks": {
+    "dry_run_decisions": true,
+    "cartesian_32_unique_plus_dedupe_row": true,
+    "cartesian_unique_count": true,
+    "duplicate_input_once": true,
+    "duplicate_post_rate_zero": true,
+    "registry_at_least_8_blobs": true,
+    "unregistered_framing_missing": true,
+    "no_api_key_leak": true,
+    "live_shaped_cap": true,
+    "all_pass": true,
+    "grep_dummy_key_absent": true
+  }
+}

@@ -17,6 +17,8 @@ This pack sits beside the cheap-analysis harness. It does not replace that harne
 | [`CANDIDATE-APPROACHES.md`](CANDIDATE-APPROACHES.md) | Five named end-to-end approaches, proof gates, kill criteria, comparison |
 | [`RESEARCH-OPS.md`](RESEARCH-OPS.md) | How Workflow System Manager runs the cycles, closes threads, and escalates |
 | [`TOOLING-MVP.md`](TOOLING-MVP.md) | What to build first, and what waits |
+| [`proofs/README.md`](proofs/README.md) | Phase 1b framing dry-run + 1c mount probe (0 live POSTs) |
+| [`cycles/CYCLE-LOG.md`](cycles/CYCLE-LOG.md) | WSM cycle log |
 
 ## How this sits on earlier packs
 

@@ -1,0 +1,75 @@
+{
+  "schema_id": "early-signal-v0",
+  "rows": [
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "tournament-binary-foreshadow",
+      "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
+      "questions_sha256": "a44e2b63c864be8ba2bc352bdd63b1ce8ee9b4cbb6ca26534ed188ad503dfe8d",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "tournament-likert-collapsed",
+      "framing_id": "tournament-likert-collapsed#4ddae065dda2245f",
+      "questions_sha256": "4ddae065dda2245fbe46a9de7dbc61e56fd66c1d7938ccb7c45e5aff6fe35031",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "tournament-monitor-called-out",
+      "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
+      "questions_sha256": "95fd5fc062f1b94f0d31504ac6ef620e6bbc4f7ccf600d011127f9349a7d3b7b",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "tournament-no-story-beyond-counts",
+      "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
+      "questions_sha256": "7a26c8fca8ac76a4a4676b16f567cfe74cb74144d09e3b3cb6b8b97c156479cb",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "pool-likert-foreshadow",
+      "framing_id": "pool-likert-foreshadow#a0e714fe85525e7e",
+      "questions_sha256": "a0e714fe85525e7eb41d60092c1fdf6a5d1eaf9d8637e7303478e53c3e87a0a3",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "pool-echo-guard-reread",
+      "framing_id": "pool-echo-guard-reread#40f7e07c78cfa5f7",
+      "questions_sha256": "40f7e07c78cfa5f74ee17064aebec4911cfc933898ef54683444bc6a82114c9a",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "pool-phase-hint-stats",
+      "framing_id": "pool-phase-hint-stats#0b6387955bb83f36",
+      "questions_sha256": "0b6387955bb83f36203f77670dfef9117fcad44c9d3d025d6b076955f5d6c80f",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "pool-anchor-agnostic",
+      "framing_id": "pool-anchor-agnostic#b14f3619bdbeda4f",
+      "questions_sha256": "b14f3619bdbeda4f745d3c1b225d0988d6217ae34f4354f42521765e9ab88780",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "signal-v0-default",
+      "framing_id": "signal-v0-default#1a3071620f3945b1",
+      "questions_sha256": "1a3071620f3945b10484ab96ad3bf2070d0efdb4de0e2f42d324f19f1332fb26",
+      "registered": true
+    },
+    {
+      "schema_id": "early-signal-v0",
+      "slug": "signal-v0-alt",
+      "framing_id": "signal-v0-alt#40f7e07c78cfa5f7",
+      "questions_sha256": "40f7e07c78cfa5f74ee17064aebec4911cfc933898ef54683444bc6a82114c9a",
+      "registered": true
+    }
+  ]
+}
