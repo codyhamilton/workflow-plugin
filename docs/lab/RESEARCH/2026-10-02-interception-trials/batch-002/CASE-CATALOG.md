@@ -1,6 +1,6 @@
 # CASE-CATALOG — batch-002 scenarios (Soft HOLD)
 
-**Generated:** 2026-10-02 01:50 AEST
+**Generated:** 2026-10-02 01:50 AEST  
 **Soft Standard HOLD** — no hooks / assert_phase product wiring / Soft Standard unlock.
 
 ## Progress metric (WSM / Cody)
@@ -21,8 +21,8 @@ Drivers: TypeSafe (bulk), Flash/Luna (competing approaches). Soft yield Claude/S
 
 ### Family S — interception policy scenarios (Jev/Flash/Luna)
 
-`scenario_id = state.<sel> × q.<fmt>`
-Optional thin framing (H1/H3/H5) is a **probe variant**, not a new scenario family.
+`scenario_id = state.<sel> × q.<fmt>`  
+Optional thin framing (H1/H3/H5) is a **probe variant**, not a new scenario family.  
 Response-class (`binary_fire`, `ternary_fire`, …) is an **output-format variant**; default volume uses `binary_fire`.
 
 ### Family P — phase-gate scenarios
@@ -78,6 +78,17 @@ Response-class (`binary_fire`, `ternary_fire`, …) is an **output-format varian
 ### Flash/Luna EXTRA (canonical)
 `q.recheck_interval`, `q.closing_protect`, `q.scope_drift`, `q.activity_without_value`, `q.tail_risk`, `q.recoverable_stall`
 
+
+### GROWTH state-selections (wave beyond 200×41)
+| case_id | what it selects |
+|---------|-----------------|
+| `state.markers_focus` | Markers + thin counters |
+| `state.phase_hints_focus` | Phase hints + thin cum |
+| `state.recent_delta_brief` | Brief + delta + recent[-2] |
+
+### GROWTH questions (wave beyond 200×41)
+`q.edit_churn`, `q.bash_retry_storm`, `q.brief_abandon`, `q.parallel_agent_thrash`, `q.test_flake_loop`, `q.docs_only_drift`, `q.dependency_wait`, `q.speculative_rewrite`, `q.context_thrash_compact`, `q.deliverable_orphan`, `q.scope_creep_silent`, `q.idle_tool_spin`
+
 ### NEW TypeSafe (≥20) — priority with NEW states
 `q.compaction_storm`, `q.reread_loop`, `q.silent_stall`, `q.tool_error_cascade`, `q.context_pressure`, `q.validation_loop`, `q.plan_execute_drift`, `q.handoff_ready`, `q.abort_cheaper`, `q.duplicate_work`, `q.over_polish`, `q.under_verified`, `q.mid_arc_healthy`, `q.early_false_alarm`, `q.late_miss_risk`, `q.recovery_possible`, `q.stop_preserves_value`, `q.continue_learns`, `q.thrash_vs_explore`, `q.user_wait_signal`, `q.resource_asymmetry`, `q.output_starvation`
 
@@ -100,5 +111,5 @@ Response-class (`binary_fire`, `ternary_fire`, …) is an **output-format varian
 3. Meters: `n_distinct_scenarios`, `n_sessions_swept`, `outcomes_by_scenario` (fire rates across sessions). `n_cells` is incidental (= scenarios × sessions × optional thin probes).
 4. Soft HOLD throughout.
 
-Runner: `run_typesafe_scenario_corpus_sweep.py` → `typesafe-scenario-sweep/`
+Runner: `run_typesafe_scenario_corpus_sweep.py` → `typesafe-scenario-sweep/`  
 Review family top-up: `run_typesafe_review_topup.py` → `typesafe-review-check/` (separate family R).

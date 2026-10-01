@@ -1,17 +1,17 @@
 {
-  "n_cells_file": 1744,
-  "new": 1500,
-  "ok": 1500,
+  "n_cells_file": 2744,
+  "new": 1000,
+  "ok": 1000,
   "errors": 0,
   "by_builder_all": {
-    "unit_needs_review": 828,
-    "refine_brief": 486,
-    "session_progress": 430
+    "unit_needs_review": 1289,
+    "refine_brief": 794,
+    "session_progress": 661
   },
-  "tok_in": 838750,
-  "tok_out": 68920,
-  "wall_s": 53.3,
+  "tok_in": 556642,
+  "tok_out": 45881,
+  "wall_s": 68.9,
   "soft_hold": true,
   "product_wiring": false,
-  "generated_at": "2026-10-02T01:50:13+10:00"
+  "generated_at": "2026-10-02T09:00:28+10:00"
 }

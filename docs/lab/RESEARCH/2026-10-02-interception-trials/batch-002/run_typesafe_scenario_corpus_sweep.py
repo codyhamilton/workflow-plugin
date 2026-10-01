@@ -16,7 +16,7 @@ from collections import Counter, defaultdict
 from zoneinfo import ZoneInfo
 import importlib.util
 
-REPO = Path(os.environ.get('WORKFLOW_PLUGIN_REPO', Path(__file__).resolve().parents[5]))
+REPO = Path('/home/codyh/workspace/workflow-plugin')
 BATCH = REPO / 'docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002'
 SNAP_DIRS = [BATCH/'snapshots-mid', BATCH/'snapshots-dense', BATCH/'snapshots']
 OUT = BATCH / 'typesafe-scenario-sweep'
@@ -25,8 +25,8 @@ OUT.mkdir(parents=True, exist_ok=True)
 AEST = ZoneInfo('Australia/Brisbane')
 URL = 'https://api.typesafe.ai/v1/systemone'
 # Cap cells ≈ scenarios × sessions (not windows)
-MAX_SCENARIOS = int(os.environ.get('TS_MAX_SCENARIOS', '200'))
-WORKERS = int(os.environ.get('TS_SCENARIO_WORKERS', '14'))
+MAX_SCENARIOS = int(os.environ.get('TS_MAX_SCENARIOS', '320'))
+WORKERS = int(os.environ.get('TS_SCENARIO_WORKERS', '4'))
 FRAMING = 'H1'  # thin single probe — not a scenario multiplier
 JEV = 'jev-1.13.0'
 
@@ -40,6 +40,10 @@ project_state_fl = _fl.project_state
 STATES_NEW = (
     'delta_only', 'tail_focus', 'tool_hist_focus',
     'brief_cum_no_tail', 'chars_budget_1200', 'window_delta_tools',
+)
+# Growth wave (beyond 200×41 landed designs)
+STATES_GROWTH = (
+    'markers_focus', 'phase_hints_focus', 'recent_delta_brief',
 )
 # Canonical F/L states not yet TypeSafe-swept as scenarios
 STATES_FL = (
@@ -85,7 +89,22 @@ Q_BASE = {
     'steer_now': 'Is NOW a useful time to steer toward stopping, without truncating productive or near-done work? Judge only the snapshot.',
     'thrash_bundle': 'Do compaction, rereads, and weak new output form a thrash bundle? Judge only the snapshot.',
 }
-QUESTIONS = {**Q_NEW, **Q_FL, **Q_BASE}
+
+Q_GROWTH = {
+    'edit_churn': 'Are edit operations churning the same regions without net progress? Snapshot only.',
+    'bash_retry_storm': 'Are bash/tool retries storming without a corrected approach? Snapshot only.',
+    'brief_abandon': 'Has the run abandoned the brief for opportunistic side quests? Snapshot only.',
+    'parallel_agent_thrash': 'Is multi-worker/parallel dispatch thrashing without mergeable progress? Snapshot only.',
+    'test_flake_loop': 'Is the run stuck in flake/retry test loops without product movement? Snapshot only.',
+    'docs_only_drift': 'Has work drifted into docs-only polish while core delivery stalls? Snapshot only.',
+    'dependency_wait': 'Is the prefix blocked on external/dependency wait making steer moot? Snapshot only.',
+    'speculative_rewrite': 'Is a speculative rewrite discarding working path without evidence of gain? Snapshot only.',
+    'context_thrash_compact': 'Are compaction/context resets thrashing without recovering trajectory? Snapshot only.',
+    'deliverable_orphan': 'Are claimed deliverables orphaned (uncommitted/unverified) enough to intervene? Snapshot only.',
+    'scope_creep_silent': 'Is silent scope creep expanding work without an explicit replan? Snapshot only.',
+    'idle_tool_spin': 'Are tools spinning idly (list/search/status) without substantive edits? Snapshot only.',
+}
+QUESTIONS = {**Q_NEW, **Q_FL, **Q_BASE, **Q_GROWTH}
 LEAK = {'t','T','session_length','norm_length','progress_frac','full_length','T_eligibility_only','length_metric'}
 
 def strip_leaks(obj):
@@ -120,6 +139,19 @@ def project(full, mode):
     if mode == 'window_delta_tools':
         return {'checkpoint_turn': cp, 'evidence_class': 'window_delta_tools',
                 'delta_since_prior': {k: delta.get(k) for k in ('tool_histogram','assistant_text_chars','api_turns','compaction_event_count')}}
+    if mode == 'markers_focus':
+        return {'checkpoint_turn': cp, 'evidence_class': 'markers_focus',
+                'markers': full.get('markers') or {},
+                'cumulative': {k: cum.get(k) for k in ('api_turns','compaction_event_count','reread_paths')}}
+    if mode == 'phase_hints_focus':
+        return {'checkpoint_turn': cp, 'evidence_class': 'phase_hints_focus',
+                'phase_hints': full.get('phase_hints') or {},
+                'cumulative': {k: cum.get(k) for k in ('api_turns','assistant_text_chars','tool_histogram')}}
+    if mode == 'recent_delta_brief':
+        return {'checkpoint_turn': cp, 'evidence_class': 'recent_delta_brief',
+                'brief_anchor': (full.get('brief_anchor') or '')[:200],
+                'delta_since_prior': delta,
+                'recent': (full.get('recent') or [])[-2:]}
     return strip_leaks(project_state_fl(full, mode))
 
 def load_packs():
@@ -142,17 +174,23 @@ def pick_rep_snap(pack):
     return cps[len(cps)//2]
 
 def scenario_list(max_scenarios):
-    """Priority: NEW×NEW, NEW×FL-q, FL-state×NEW-q, base contrasts. Deduped."""
+    """Priority: landed NEW/FL first (stable resume), then GROWTH append. Deduped."""
     scen = []
     def add(states, qs):
         for st in states:
             for q in qs:
                 scen.append((st, q))
+    # Landed core first (~168), then GROWTH before FL expansion so MAX>=280 includes designs
     add(STATES_NEW, list(Q_NEW))          # 6×22 = 132
-    add(STATES_NEW, list(Q_FL))           # 6×6 = 36
+    add(STATES_NEW, list(Q_FL))           # 6×6 = 36 → 168
+    add(STATES_GROWTH, list(Q_GROWTH))    # 3×12 = 36 → 204
+    add(STATES_GROWTH, list(Q_NEW))       # 3×22 = 66 → 270
+    add(STATES_NEW, list(Q_GROWTH))       # 6×12 = 72 → beyond 280
     add(STATES_FL, list(Q_NEW))           # 4×22 = 88
     add(STATES_BASE, list(Q_NEW)[:8])     # thin base contrast
     add(STATES_FL, list(Q_FL))            # FL×FL
+    add(STATES_FL, list(Q_GROWTH))        # FL×growth
+    add(STATES_GROWTH, list(Q_FL))        # growth×FL
     # dedupe preserve order
     out, seen = [], set()
     for s in scen:
