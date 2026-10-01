@@ -1,0 +1,6 @@
+# Raw-hybrid / gold dumps embed assistant/user prose from Ubuntu Claude JSONLs — never commit.
+*-gold-bundles-*.jsonl
+*-with-state*
+*.with-state.jsonl
+*.with-state.json
+*-dry-run-*.log

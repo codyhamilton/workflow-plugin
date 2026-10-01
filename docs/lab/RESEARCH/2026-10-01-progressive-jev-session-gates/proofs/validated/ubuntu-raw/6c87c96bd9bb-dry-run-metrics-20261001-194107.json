@@ -1,0 +1,50 @@
+{
+  "status": "diagnostic",
+  "dry_run": true,
+  "schedule": "75:15",
+  "model": "jev-1.13.0",
+  "question_set": "Y_full",
+  "confidence_min": 3,
+  "on_uncertain": "open",
+  "h5_pass": null,
+  "h5": "not_run",
+  "note": "Dry-run or single replay. Not a lock recommendation. h5_pass is null because alpha was not computed.",
+  "workers": [
+    {
+      "worker_id": "6c87c96bd9bb",
+      "agent_id": "a95386c87c96bd9bb",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/af9b5cb1-edc5-4155-b521-a56bad1c7f13/subagents/agent-a95386c87c96bd9bb.jsonl",
+      "sha256": "cef6400f8ebfe49234cb5b725c403ebf0adc260effdbe1073144ed680d754c7c",
+      "bytes": 2059935,
+      "T": 70,
+      "tool_assistant_turns": 69,
+      "peak_ctx_tokens": 125993,
+      "sidechain_mode": "subagent_file",
+      "schedule": {
+        "first_at": 75,
+        "interval": 15
+      },
+      "checkpoints": [],
+      "model": "jev-1.13.0",
+      "dry_run": true,
+      "first_checkout_turn": null,
+      "max_allowed_turns": 70,
+      "worker_policy": "continue",
+      "missing_rate": null,
+      "gold_exit": null,
+      "overshoot": null,
+      "false_early": null,
+      "false_late": null,
+      "on_time": null,
+      "within_one_interval": null,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 0,
+        "state_chars_max": null,
+        "state_chars_median": null,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": null
+      }
+    }
+  ]
+}

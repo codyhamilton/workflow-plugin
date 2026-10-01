@@ -1,0 +1,762 @@
+[
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1866,
+    "gold_bundle_chars": 2876,
+    "gold_bundle_status": "ok",
+    "api_turns": 75,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 55,
+      "Read": 31
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 10
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 6
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 3
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 12,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {}
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1933,
+    "gold_bundle_chars": 2884,
+    "gold_bundle_status": "ok",
+    "api_turns": 90,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 70,
+      "Read": 34
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 10
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 14,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 15,
+        "Read": 3
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 105,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1933,
+    "gold_bundle_chars": 2892,
+    "gold_bundle_status": "ok",
+    "api_turns": 105,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 81,
+      "Read": 42
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 13
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 8
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 8
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 6
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 18,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 11,
+        "Read": 8
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 120,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1938,
+    "gold_bundle_chars": 2909,
+    "gold_bundle_status": "ok",
+    "api_turns": 120,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 94,
+      "Read": 47
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 13
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 11
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 10
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 6
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 20,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Read": 5
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 135,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1953,
+    "gold_bundle_chars": 2922,
+    "gold_bundle_status": "ok",
+    "api_turns": 135,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 106,
+      "Read": 52,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 11
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 10
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 22,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 12,
+        "Read": 5,
+        "bash": 1
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 150,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1942,
+    "gold_bundle_chars": 2922,
+    "gold_bundle_status": "ok",
+    "api_turns": 150,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 120,
+      "Read": 56,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 18
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 12
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 11
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 24,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 14,
+        "Read": 4
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 165,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1934,
+    "gold_bundle_chars": 2914,
+    "gold_bundle_status": "ok",
+    "api_turns": 165,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 131,
+      "Read": 62,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 21
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 14
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 12
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 26,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 11,
+        "Read": 6
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 180,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2027,
+    "gold_bundle_chars": 2983,
+    "gold_bundle_status": "ok",
+    "api_turns": 180,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 142,
+      "Read": 67,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 23
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 15
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 13
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 28,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 11,
+        "Read": 5
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 195,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2030,
+    "gold_bundle_chars": 2978,
+    "gold_bundle_status": "ok",
+    "api_turns": 195,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 153,
+      "Read": 72,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 25
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 15
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 32,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 11,
+        "Read": 5
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 210,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2027,
+    "gold_bundle_chars": 2978,
+    "gold_bundle_status": "ok",
+    "api_turns": 210,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 162,
+      "Read": 79,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 26
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 20
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 36,
+    "assistant_text_chars": 36,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 9,
+        "Read": 7
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 225,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2092,
+    "gold_bundle_chars": 3016,
+    "gold_bundle_status": "ok",
+    "api_turns": 225,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 177,
+      "Read": 81,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 26
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 20
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 36,
+    "assistant_text_chars": 68,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/output/scratch-3C-09/parts/p1.c"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 15,
+        "Read": 2
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 240,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2137,
+    "gold_bundle_chars": 3136,
+    "gold_bundle_status": "ok",
+    "api_turns": 240,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 192,
+      "Read": 81,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 26
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 20
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 38,
+    "assistant_text_chars": 195,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 15
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 255,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2018,
+    "gold_bundle_chars": 3136,
+    "gold_bundle_status": "ok",
+    "api_turns": 255,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 208,
+      "Read": 81,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 26
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 20
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 38,
+    "assistant_text_chars": 235,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 16
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 270,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2148,
+    "gold_bundle_chars": 3147,
+    "gold_bundle_status": "ok",
+    "api_turns": 270,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 224,
+      "Read": 81,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 26
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 20
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 40,
+    "assistant_text_chars": 365,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 16
+      }
+    }
+  },
+  {
+    "worker_id": "92a48e004519",
+    "checkpoint_turn": 285,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 2129,
+    "gold_bundle_chars": 3344,
+    "gold_bundle_status": "ok",
+    "api_turns": 285,
+    "peak_ctx_tokens": 129961,
+    "tool_histogram": {
+      "Bash": 238,
+      "Read": 81,
+      "Monitor": 1,
+      "ToolSearch": 1,
+      "bash": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_cenc.c",
+        "count": 26
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/divide.py",
+        "count": 20
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/_e2.c",
+        "count": 16
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 7
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/cenc.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 40,
+    "assistant_text_chars": 562,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 14,
+        "Monitor": 1,
+        "ToolSearch": 1
+      }
+    }
+  }
+]
