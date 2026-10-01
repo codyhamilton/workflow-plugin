@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-REPO = Path("/home/codyh/workspace/workflow-plugin")
+REPO = Path(os.environ.get("WF_REPO", "/home/codyh/workspace/workflow-plugin"))
 BATCH = REPO / "docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002"
 INVENTORY = REPO / "docs/lab/RESEARCH/2026-10-02-local-session-inventory"
 PROG_PROOFS = REPO / "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs"

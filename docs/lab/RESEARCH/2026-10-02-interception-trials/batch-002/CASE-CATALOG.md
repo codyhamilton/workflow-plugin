@@ -86,6 +86,8 @@ Response-class (`binary_fire`, `ternary_fire`, …) is an **output-format varian
 | `state.phase_hints_focus` | Phase hints + thin cum |
 | `state.recent_delta_brief` | Brief + delta + recent[-2] |
 
+Fields are derived by `growth_fill.py` (see `GROWTH-DESIGN-NOTES.md`); sessions without a `tail` (lite-prefix packs) are gated out, so GROWTH scenarios run on claude-code sessions only (16 of 41). Results before `growth-fill-v1` judged empty fields and are excluded from meters.
+
 ### GROWTH questions (wave beyond 200×41)
 `q.edit_churn`, `q.bash_retry_storm`, `q.brief_abandon`, `q.parallel_agent_thrash`, `q.test_flake_loop`, `q.docs_only_drift`, `q.dependency_wait`, `q.speculative_rewrite`, `q.context_thrash_compact`, `q.deliverable_orphan`, `q.scope_creep_silent`, `q.idle_tool_spin`
 

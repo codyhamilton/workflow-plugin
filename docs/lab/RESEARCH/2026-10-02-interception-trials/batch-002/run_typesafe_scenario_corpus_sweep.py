@@ -16,7 +16,7 @@ from collections import Counter, defaultdict
 from zoneinfo import ZoneInfo
 import importlib.util
 
-REPO = Path('/home/codyh/workspace/workflow-plugin')
+REPO = Path(os.environ.get('WF_REPO', '/home/codyh/workspace/workflow-plugin'))
 BATCH = REPO / 'docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002'
 SNAP_DIRS = [BATCH/'snapshots-mid', BATCH/'snapshots-dense', BATCH/'snapshots']
 OUT = BATCH / 'typesafe-scenario-sweep'
@@ -35,6 +35,11 @@ _fl = importlib.util.module_from_spec(_spec)
 sys.modules['fl_scale_batch002'] = _fl
 _spec.loader.exec_module(_fl)
 project_state_fl = _fl.project_state
+
+_gspec = importlib.util.spec_from_file_location('growth_fill', BATCH/'growth_fill.py')
+_gf = importlib.util.module_from_spec(_gspec)
+sys.modules['growth_fill'] = _gf
+_gspec.loader.exec_module(_gf)
 
 # Priority NEW states (§D)
 STATES_NEW = (
@@ -114,8 +119,15 @@ def strip_leaks(obj):
         return [strip_leaks(x) for x in obj]
     return obj
 
+class GrowthIneligible(Exception):
+    """Snapshot cannot supply the field a GROWTH state-selection projects."""
+
 def project(full, mode):
     full = strip_leaks(json.loads(json.dumps(full)))
+    if mode in _gf.GROWTH_FIELD:
+        full = _gf.fill_growth_fields(full, mode)
+        if full is None:
+            raise GrowthIneligible(mode)
     cum = full.get('cumulative') or {}
     delta = full.get('delta_since_prior') or {}
     cp = full.get('checkpoint_turn')
@@ -205,6 +217,7 @@ def build_cells():
     packs = sorted(packs, key=lambda p: (0 if p.get('harness')=='claude-code' else 1, p['worker_id']))
     scenarios = scenario_list(MAX_SCENARIOS)
     cells = []
+    gated = Counter()
     for state_v, qk in scenarios:
         qtext = QUESTIONS[qk]
         for pack in packs:
@@ -217,11 +230,17 @@ def build_cells():
                 full = {**full, 'checkpoint_turn': cp}
             try:
                 state = project(full, state_v)
+            except GrowthIneligible:
+                gated[state_v] += 1
+                continue
             except Exception:
                 continue
             sid = pack['worker_id']
             scenario_id = f'state.{state_v}|q.{qk}'
+            state_fill = _gf.FILL_VERSION if state_v in _gf.GROWTH_FIELD else None
             raw = f'scenario|{scenario_id}|{sid}|rep{cp}|{FRAMING}|binary_fire'
+            if state_fill:
+                raw += f'|{state_fill}'
             cid = hashlib.sha1(raw.encode()).hexdigest()[:16]
             cells.append({
                 'cell_id': cid,
@@ -235,10 +254,11 @@ def build_cells():
                 'question': qtext,
                 'response_class': 'binary_fire',
                 'state': state,
+                'state_fill': state_fill,
                 'harness': pack.get('harness'),
                 'project': pack.get('project'),
             })
-    return cells, packs, scenarios
+    return cells, packs, scenarios, gated
 
 def post(cell):
     key = os.environ['TYPESAFE_API_KEY'].strip()
@@ -291,6 +311,7 @@ def post(cell):
         'checkpoint_role': cell['checkpoint_role'],
         'framing': cell['framing'],
         'response_class': cell['response_class'],
+        'state_fill': cell.get('state_fill'),
         'harness': cell.get('harness'), 'project': cell.get('project'),
         'wall_s': round(time.time()-t0, 3), 'http': code, 'error': err,
         'answers': (ans or {}).get('answers') if ans else None,
@@ -360,11 +381,13 @@ def write_scenario_meters(rows, packs, scenarios, wall_s, tok_in, tok_out, err):
 
 def main():
     assert os.environ.get('TYPESAFE_API_KEY', '').strip()
-    cells, packs, scenarios = build_cells()
+    cells, packs, scenarios, gated = build_cells()
     plan = {
         'n_distinct_scenarios': len(scenarios),
         'n_sessions': len(packs),
         'n_cells_incidental': len(cells),
+        'growth_fill_version': _gf.FILL_VERSION,
+        'growth_cells_gated_no_tail': dict(gated),
         'scenarios': [f'state.{a}|q.{b}' for a,b in scenarios],
         'checkpoint_policy': 'one_representative_mid_per_session',
         'window_cartesian': False,
@@ -407,7 +430,14 @@ def main():
                     'err': err, 'tok_in': tok_in, 'wall_s': round(time.time()-t0,1),
                 }), flush=True)
     rows=[json.loads(l) for l in results.open()]
+    # Pre-fill GROWTH rows (no state_fill) judged empty fields; keep on disk, exclude from meters.
+    is_stale=lambda r: r['state_selection'] in _gf.GROWTH_FIELD and not r.get('state_fill')
+    stale=[r for r in rows if is_stale(r)]
+    rows=[r for r in rows if not is_stale(r)]
     meters=write_scenario_meters(rows, packs, scenarios, round(time.time()-t0,1), tok_in, tok_out, err)
+    meters['stale_growth_rows_excluded']=len(stale)
+    meters['growth_fill_version']=_gf.FILL_VERSION
+    (OUT/'meters.json').write_text(json.dumps(meters, indent=2)+'\n')
     print(json.dumps({
         'n_distinct_scenarios': meters['n_distinct_scenarios'],
         'n_sessions_swept': meters['n_sessions_swept'],
