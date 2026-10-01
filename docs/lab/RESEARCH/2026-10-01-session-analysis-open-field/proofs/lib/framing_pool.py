@@ -100,6 +100,24 @@ def _anchor_agnostic() -> dict[str, Any]:
     }
 
 
+def _thrash_card_anchor() -> dict[str, Any]:
+    return {
+        **questions_early_signal_stats(),
+        "frozen_narration_bundle": _bool_q(
+            "Mechanical: flat assistant_text_chars with rising compaction_event_count and no Edit/Write?"
+        ),
+    }
+
+
+def _residual_baseline() -> dict[str, Any]:
+    return {
+        **questions_early_signal_stats(),
+        "productive_arc": _bool_q(
+            "Default-negative: is there evidence of a steady build (mutation + text growth) without thrash bundle?"
+        ),
+    }
+
+
 # Slug → canonical question JSON (schema early-signal-v0, stats_card state)
 OPEN_FIELD_FRAMING_SLUGS: dict[str, dict[str, Any]] = {
     "tournament-binary-foreshadow": _binary_foreshadow_ids(),
@@ -110,6 +128,8 @@ OPEN_FIELD_FRAMING_SLUGS: dict[str, dict[str, Any]] = {
     "pool-echo-guard-reread": _echo_guard_reread(),
     "pool-phase-hint-stats": _phase_hint_stats(),
     "pool-anchor-agnostic": _anchor_agnostic(),
+    "pool-thrash-card-anchor": _thrash_card_anchor(),
+    "pool-residual-baseline": _residual_baseline(),
     # Aliases into cheap-analysis spike registry (imported at runtime for hashes)
     "signal-v0-default": None,
     "signal-v0-alt": None,

@@ -70,6 +70,19 @@ def validated_dir(name: str) -> Path:
     return PROOFS_ROOT / "validated" / name
 
 
+def capture_root(registration_id: str = "pilot-field-proof") -> Path:
+    return PROOFS_ROOT / "capture" / registration_id
+
+
+def capture_jev_dir(registration_id: str, mode: str) -> Path:
+    """mode: dry-twin | live"""
+    return capture_root(registration_id) / "jev" / mode
+
+
+def capture_local_swarm_dir(registration_id: str) -> Path:
+    return capture_root(registration_id) / "local-swarm"
+
+
 def resolve_corpus_dir() -> Path | None:
     env = os.environ.get("WORKFLOW_PROGRESSIVE_CORPUS", "").strip()
     if env:

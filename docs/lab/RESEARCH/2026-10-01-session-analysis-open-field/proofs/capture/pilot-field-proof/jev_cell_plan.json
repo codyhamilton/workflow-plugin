@@ -1,0 +1,498 @@
+{
+  "registration_id": "pilot-field-proof-wave-001",
+  "max_calls": 96,
+  "budget_tokens": 400000,
+  "waves": [
+    {
+      "wave_index": 1,
+      "cells": 96,
+      "cap": 256
+    }
+  ],
+  "baseline_arm_calls": 8,
+  "search_arm_calls": 24,
+  "matrix_fill_calls": 64,
+  "framing_pool_size": 12,
+  "cells": [
+    {
+      "arm": "baseline",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "0677f597286e",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "0677f597286e",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "07357f196666",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "0677f597286e",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "baseline",
+      "worker_id": "92a48e004519",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "search",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "search",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "search",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "search",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "search",
+      "worker_id": "92a48e004519",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "search",
+      "worker_id": "92a48e004519",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "search",
+      "worker_id": "92a48e004519",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "search",
+      "worker_id": "92a48e004519",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "search",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "search",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "search",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "search",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "search",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "search",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "search",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "search",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "search",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "search",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "search",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "search",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "search",
+      "worker_id": "0677f597286e",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "search",
+      "worker_id": "0677f597286e",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "search",
+      "worker_id": "0677f597286e",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "search",
+      "worker_id": "0677f597286e",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "ca977b9ca0dd",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "92a48e004519",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "87a380bc64ff",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "bb6165018de0",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "15f24c7ba18c",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "0677f597286e",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "0677f597286e",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "0677f597286e",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "0677f597286e",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "0677f597286e",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "pool-thrash-card-anchor"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "074c8cf22927",
+      "framing_slug": "signal-v0-alt"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "tournament-binary-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "tournament-likert-collapsed"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "tournament-monitor-called-out"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "tournament-no-story-beyond-counts"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "pool-likert-foreshadow"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "pool-echo-guard-reread"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "pool-phase-hint-stats"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "pool-anchor-agnostic"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "pool-residual-baseline"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "signal-v0-default"
+    },
+    {
+      "arm": "matrix_fill",
+      "worker_id": "07357f196666",
+      "framing_slug": "signal-v0-alt"
+    }
+  ]
+}

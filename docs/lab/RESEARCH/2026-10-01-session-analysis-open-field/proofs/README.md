@@ -31,3 +31,20 @@ python3 probe_progressive_corpus_mount.py
 ```
 
 Raw Ubuntu JSONL: set `WORKFLOW_PROGRESSIVE_CORPUS` to a directory of `{worker_id}.jsonl` files. The repo does not vendor them.
+
+## Pilot field-proof (registration + dry-twin)
+
+[`cycles/REGISTRATION-pilot-field-proof.md`](../cycles/REGISTRATION-pilot-field-proof.md). Capture layout: [`capture/README.md`](capture/README.md).
+
+| Script | Output |
+|--------|--------|
+| `run_pilot_dry_twin.py` | `capture/pilot-field-proof/jev/dry-twin/`, `validated/pilot-field-proof/dry_twin_batch_log.json` |
+| `run_local_swarm_pilot.py` | `capture/pilot-field-proof/local-swarm/` (add `--live-local` on Ubuntu) |
+
+```bash
+cd docs/lab/RESEARCH/2026-10-01-session-analysis-open-field/proofs
+python3 run_pilot_dry_twin.py
+python3 run_local_swarm_pilot.py
+```
+
+Local swarm runbook: [`pilot/RUNBOOK-local-swarm.md`](pilot/RUNBOOK-local-swarm.md).
