@@ -1,0 +1,32 @@
+{
+  "fill_version": "growth-fill-v1",
+  "checkpoint_policy": "one_representative_mid_per_session",
+  "n_sessions": 41,
+  "n_eligible": 16,
+  "n_gated_no_tail": 25,
+  "by_harness": {
+    "claude-code": {
+      "sessions": 16,
+      "eligible": 16
+    },
+    "cursor": {
+      "sessions": 2,
+      "eligible": 0
+    },
+    "codex": {
+      "sessions": 3,
+      "eligible": 0
+    },
+    "opencode": {
+      "sessions": 20,
+      "eligible": 0
+    }
+  },
+  "nonempty_after_fill": {
+    "markers": 16,
+    "phase_hints": 16,
+    "recent": 16
+  },
+  "soft_standard_hold": true,
+  "product_wiring": false
+}
