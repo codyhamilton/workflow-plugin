@@ -50,7 +50,9 @@ Suggested default replay set:
 - Extra 75+: `0aab88c525de.jsonl`, `036ff3ed4a89.jsonl`
 - Extra in-band: `3ff8479be14a.jsonl`, `6135cffdf32a.jsonl`
 
-Cross-link from `docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/` (PR #35 branch) to this MANIFEST when wiring the offline corpus.
+The progressive replay harness uses this directory as its default corpus when `WORKFLOW_PROGRESSIVE_CORPUS` is unset:
+
+`docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/replay_progressive_gates.py`
 
 ## Git / secrets
 

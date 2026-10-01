@@ -1,0 +1,94 @@
+{
+  "status": "ok",
+  "corpus_dir": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers",
+  "counting": "unique message.id on type=assistant; subagent files whose assistant rows are all isSidechain are counted",
+  "n_workers_ge_75": 4,
+  "priority_found": {
+    "92a48e004519": true,
+    "bb6165018de0": true
+  },
+  "priority_mismatch": [],
+  "workers": [
+    {
+      "worker_id": "036ff3ed4a89",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/036ff3ed4a89.jsonl",
+      "sha256": "fcccbe6c87e3c0986446f8ce55f023e3f7b8d03644e8c12827918dac1daaf9a6",
+      "bytes": 321250,
+      "T": 161,
+      "tool_assistant_turns": 160,
+      "peak_ctx_tokens": 156769,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    },
+    {
+      "worker_id": "0aab88c525de",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/0aab88c525de.jsonl",
+      "sha256": "abc82dd6892b838afffd7c51873192e19bea4b2357860cf753e933f20c180bca",
+      "bytes": 415572,
+      "T": 192,
+      "tool_assistant_turns": 184,
+      "peak_ctx_tokens": 166836,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/92a48e004519.jsonl",
+      "sha256": "ea47a419dde5f4ac84fb2b19a343b5dfbf1cc4f719a3824352c380de98b2f33e",
+      "bytes": 743285,
+      "T": 296,
+      "tool_assistant_turns": 294,
+      "peak_ctx_tokens": 129961,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/bb6165018de0.jsonl",
+      "sha256": "8f37ee5cd7044e79596bab99e4d3932d92dfd614c644a50bdf998e53bbb6449f",
+      "bytes": 314194,
+      "T": 154,
+      "tool_assistant_turns": 153,
+      "peak_ctx_tokens": 146781,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    }
+  ],
+  "negative_control": [
+    {
+      "worker_id": "6c87c96bd9bb",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/6c87c96bd9bb.jsonl",
+      "sha256": "84bb9e0cb2ee94476750ac130d1e70c59d5c4b407479f95915309dea6fb9fe9d",
+      "bytes": 163060,
+      "T": 70,
+      "tool_assistant_turns": 69,
+      "peak_ctx_tokens": 125993,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    }
+  ],
+  "excluded_under_75": [
+    {
+      "worker_id": "3ff8479be14a",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/3ff8479be14a.jsonl",
+      "sha256": "d79cdd4243e5d0cfc8a2c0375c90da3977387e24501bfee16dcd0e2a878d6c1e",
+      "bytes": 147513,
+      "T": 68,
+      "tool_assistant_turns": 64,
+      "peak_ctx_tokens": 124156,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    },
+    {
+      "worker_id": "6135cffdf32a",
+      "path": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/6135cffdf32a.jsonl",
+      "sha256": "3ecd44d8b58b725bf85fb13d1ef8b2a5ab909023f3cca4510f403ec36416280d",
+      "bytes": 158579,
+      "T": 68,
+      "tool_assistant_turns": 67,
+      "peak_ctx_tokens": 106679,
+      "sidechain_mode": "subagent_file",
+      "source": "maps"
+    }
+  ]
+}

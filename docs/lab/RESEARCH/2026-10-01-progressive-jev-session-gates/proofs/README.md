@@ -1,8 +1,56 @@
 # Proofs — offline replay plan
 
-**Status: not run.** No manifest, no labels, no Jev cache, no metric file. **Confidence: not high.**
+**Status: harness dry-run only.** No gold labels, no live Jev cache, no sweep, no lock memo. **Confidence: not high.**
 
-This directory is the contract for a future harness. It does not contain that harness. Building it is the next research task, after a transcript directory exists. Running Claude Code, installing a `PostToolBatch` hook, or editing `install.sh` is not that task.
+This directory has a replay harness and the stage contract below. The harness indexes assistant turns, builds `hybrid_v0` state, and can dry-run checkpoint rows. It calls Jev only with `--call-jev` when `TYPESAFE_API_KEY` is set. A green `run_proofs.sh` checks the schedule and the 12_000-character guard. It does not test H1–H7.
+
+Running Claude Code, installing a `PostToolBatch` hook, or editing `install.sh` is not this task.
+
+## Harness
+
+| Piece | File |
+|-------|------|
+| Turn index and `checkpoints(first_at, interval, T)` | `turn_index.py` |
+| `hybrid_v0` state, shrink order, gold bundle (60_000) | `snapshot_state.py` |
+| `session-checkout` questions, fail-open `R(t)`, overshoot | `session_checkout.py` |
+| CLI | `replay_progressive_gates.py` |
+| Synthetic 90-turn JSONL | `fixtures/synthetic_worker_90.jsonl` |
+| Expected ids and Ubuntu paths | [`corpus/MANIFEST.md`](corpus/MANIFEST.md) |
+
+Default corpus, when the directory exists:
+
+`docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/`
+
+`WORKFLOW_PROGRESSIVE_CORPUS` overrides that directory. Do not point the harness at a raw tree you have not redacted if the output will be committed.
+
+Dry-run from this directory:
+
+```bash
+chmod +x run_proofs.sh
+./run_proofs.sh
+```
+
+One smoking gun, redacted fixture (no Jev call):
+
+```bash
+python3 replay_progressive_gates.py \
+  --transcript ../../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/92a48e004519.jsonl \
+  --schedule 75:15 \
+  --dry-run
+```
+
+One smoking gun once the Ubuntu tree is mounted:
+
+```bash
+python3 replay_progressive_gates.py \
+  --transcript /home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/subagents/agent-a23c692a48e004519.jsonl \
+  --schedule 75:15 \
+  --dry-run
+```
+
+`--call-jev` POSTs `jev-1.13.0` to `https://api.typesafe.ai/v1/systemone` with question set `session-checkout` (`runaway_pattern`, `progress_since_prior`, `scope_drift`, `checkout_now`, `checkout_confidence`). Checkout fires only when the choice is `checkout` and `checkout_confidence >= 3`. Every other outcome, including a missing answer, leaves the counterfactual worker running. A missing answer is stored as `decision=missing`, not `continue`.
+
+`validated/corpus_manifest.json`, `validated/dry_run_checkpoints.jsonl`, and `validated/dry_run_metrics.json` are dry-run diagnostics from the redacted fixtures. They are not gold labels and not a lock.
 
 Predecessor proofs that *have* run, and that this plan must not redo:
 
@@ -14,7 +62,9 @@ Those results are baseline `B`’s definition. They are not progressive-gate res
 
 ## What a finished proof emits
 
-All paths relative to this directory. None of these files exist yet. Do not commit invented JSON.
+All paths relative to this directory. Do not commit invented gold labels, Jev answers, or sweep numbers.
+
+The harness may commit three dry-run files when the redacted maps fixtures are on the checkout: `validated/corpus_manifest.json` (stage 1 scan), `validated/dry_run_checkpoints.jsonl`, and `validated/dry_run_metrics.json`. Those rows have `decision=missing` and `reason=dry_run`. They are not `gold_labels.jsonl`, `jev_cache.jsonl`, `sweep_metrics.json`, or `LOCK.md`.
 
 | File | Stage | Hard numbers inside |
 |------|-------|---------------------|
@@ -30,12 +80,13 @@ Stage 0 of interpretation is the agreement file. If `gold_agreement.json` has `a
 
 ## Stage 1 — manifest
 
-Input: a directory of Claude JSONL supplied at run time, not vendored here.
+Input: a directory of Claude JSONL. The default is the redacted maps fixtures. `WORKFLOW_PROGRESSIVE_CORPUS` overrides it. Raw Ubuntu files are not vendored.
 
 ```
 for each file:
-  T = count of records with type=assistant and not isSidechain,
-      deduped by message.id when present
+  T = unique message.id on type=assistant
+      (a parent file that also has non-sidechain assistants drops isSidechain rows;
+       a subagent file whose assistant rows are all isSidechain counts those rows)
   keep if T >= 75
 write corpus_manifest.json
 ```
@@ -57,7 +108,7 @@ If the directory is missing, the only legal output is:
 }
 ```
 
-That file would be the first hard number. It is not checked in today because the directory has not been configured and an empty blocked file would look like a completed search.
+`validated/corpus_manifest.json` is that scan of the redacted fixtures (`n_workers_ge_75` = 4, both priority ids found, control `T` = 70). A missing directory still emits only the blocked object above, and that blocked object is not checked in.
 
 ## Stage 2 — schema budget
 
@@ -66,6 +117,8 @@ For each corpus worker and each snapshot cell in [`../TUNING-PLAN.md`](../TUNING
 Pass condition for a cell to be eligible for Jev: after the shrink order in [`../TERMS.md`](../TERMS.md) §5, `state_chars <= 12000`. Cells that still overflow are `ineligible`, with `n_over_budget` reported. No API call.
 
 This stage can falsify “hybrid v0 fits,” which is a precondition of H2. It cannot support H1.
+
+P0 only (`hybrid_v0`, N=8, excerpt 400) is in `validated/dry_run_metrics.json` under `schema_budget_p0`. The 13-cell `schema_budget.json` is not emitted. Redacted fixtures keep tool names and token usage. They replace prose, tool paths, and compaction subtypes with `[REDACTED]`, so `reread_paths` and `compaction_event_count` on those files stay empty, and `state_chars` stays near 1_000. That shows the guard is not tripped. It does not stress it. A mounted raw JSONL is the stress test.
 
 ## Stage 3 — gold
 
@@ -208,4 +261,4 @@ These are pure functions. They are the only tests that can land before the corpu
 | Overshoot signs | the six imagined rows in TERMS §8 |
 | State guard | a dict whose JSON is 12_001 characters is rejected before POST |
 
-A future patch may add those tests under this directory. This revision does not, because a green unit test of the arithmetic would be easy to mistake for a replay. The assertions live here so the harness author does not invent a second definition of `gate_exit`.
+Those checks are `test_proofs.py`. A green run means the arithmetic matches TERMS. It does not raise confidence in the scientific claims. `validated/dry_run_*.json` is the same kind of artifact: schema and schedule on stored JSONL, with `decision=missing` because the default path does not call Jev.

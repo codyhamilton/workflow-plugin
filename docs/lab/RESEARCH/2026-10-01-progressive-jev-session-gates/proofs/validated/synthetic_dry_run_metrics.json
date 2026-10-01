@@ -1,0 +1,53 @@
+{
+  "status": "diagnostic",
+  "dry_run": true,
+  "schedule": "75:15",
+  "model": "jev-1.13.0",
+  "question_set": "Y_full",
+  "confidence_min": 3,
+  "on_uncertain": "open",
+  "h5_pass": null,
+  "h5": "not_run",
+  "note": "Dry-run or single replay. Not a lock recommendation. h5_pass is null because alpha was not computed.",
+  "workers": [
+    {
+      "worker_id": "synthetic_worker_90",
+      "agent_id": null,
+      "path": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/fixtures/synthetic_worker_90.jsonl",
+      "sha256": "24932237916eb0c86af1e2ff1be4ee1e2a8c7a65a2a301a822aa96cc45674649",
+      "bytes": 25719,
+      "T": 90,
+      "tool_assistant_turns": 18,
+      "peak_ctx_tokens": 9000,
+      "sidechain_mode": "unmarked",
+      "schedule": {
+        "first_at": 75,
+        "interval": 15
+      },
+      "checkpoints": [
+        75,
+        90
+      ],
+      "model": "jev-1.13.0",
+      "dry_run": true,
+      "first_checkout_turn": null,
+      "max_allowed_turns": 90,
+      "worker_policy": "continue",
+      "missing_rate": 1.0,
+      "gold_exit": null,
+      "overshoot": null,
+      "false_early": null,
+      "false_late": null,
+      "on_time": null,
+      "within_one_interval": null,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 2,
+        "state_chars_max": 1261,
+        "state_chars_median": 1219.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 2696
+      }
+    }
+  ]
+}

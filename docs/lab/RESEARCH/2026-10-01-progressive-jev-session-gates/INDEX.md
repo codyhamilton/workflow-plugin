@@ -17,7 +17,7 @@ High confidence, in Cody’s sense for this design, means all three of the follo
 2. The run produced **hard numbers** on offline replay: corpus counts, inter-rater agreement, overshoot, false early, false late, `max_allowed_turns`.
 3. Those numbers have been read **against public studies** where a study actually measures a related quantity, with the non-transfers written down.
 
-This pack completes the definitions, the citations, and the proof plan. It does not complete (1) or (2). Literature in [`LITERATURE.md`](LITERATURE.md) is input to (3), not a substitute for (2). The coordinator should treat every default below as unvalidated.
+This pack completes the definitions, the citations, and the proof plan. A dry-run harness now replays the redacted fixtures (`proofs/run_proofs.sh`). It does not complete the Jev calls in (1) or the agreement numbers in (2). Literature in [`LITERATURE.md`](LITERATURE.md) is input to (3), not a substitute for (2). The coordinator should treat every default below as unvalidated.
 
 | Bar | State on 2026-10-01 |
 |-----|---------------------|
@@ -25,7 +25,7 @@ This pack completes the definitions, the citations, and the proof plan. It does 
 | Hypotheses falsifiable before looking at outcomes | Yes, in [`HYPOTHESIS.md`](HYPOTHESIS.md) |
 | Gold protocol and rubric written | Yes, [`TUNING-PLAN.md`](TUNING-PLAN.md), [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) |
 | Public studies cited with what transfers | Yes, [`LITERATURE.md`](LITERATURE.md) |
-| JSONL corpus in hand | No. Smoking-gun paths are not in this repo |
+| JSONL corpus in hand | Redacted maps fixtures, not the raw Ubuntu JSONLs. Default path: [`../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/`](../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/MANIFEST.md). Harness dry-run only; no gold labels |
 | Gold labels | No |
 | Jev replay metrics | No |
 | Design high-confidence | **No** |

@@ -67,7 +67,7 @@ None of these are resolved. The sweep and the pre-registered hypotheses are in [
 
 ## What has to be true before a recommendation can lock
 
-1. A corpus manifest of real JSONLs with at least 75 assistant turns, including the two smoking guns when their paths exist. Those paths are not in this repo today.
+1. A corpus manifest of real JSONLs with at least 75 assistant turns, including the two smoking guns when their paths exist. Redacted copies are in `docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/`. Raw Ubuntu JSONLs are not in this repo.
 2. A multi-model gold table whose inter-rater reliability clears the pre-registered floor (Krippendorff’s alpha, with the Landis–Koch moderate band as the floor). Below that floor the rubric changes. Jev does not get tuned to noise.
 3. An offline sweep of the grid against that gold: overshoot, false early, false late, and `max_allowed_turns`, stratified by transcript length so repeated testing of long workers is visible.
 4. A written comparison of those numbers to the public results cited in [`LITERATURE.md`](../RESEARCH/2026-10-01-progressive-jev-session-gates/LITERATURE.md), including where those results do not transfer (SWE-bench step counts are not this band; LLM-judge agreement with humans is not agreement among our panel).
