@@ -2,6 +2,8 @@
 
 **Status:** ordered spikes. None of them ship behaviour. None of them call `--call-jev`, edit hooks, or change progressive TERMS.
 
+**Open field.** Competing session-analysis pipelines (summaries, early markers, framing search, agent cadence) live in the sibling pack [`../2026-10-01-session-analysis-open-field/INDEX.md`](../2026-10-01-session-analysis-open-field/INDEX.md). Spikes 0–8 below stay the harness path. The sibling does not schedule `--call-jev` and does not amend TERMS.
+
 A failed gate stops the spikes that depend on it. It does not stop an independent measurement. After a prose-α failure the spikes that may still run are 0, 1, 2, 3a, 5, and 8 (table only, marked `agreement_withheld`). Spikes 3b's precision, 4's precision, 6's claim to have read prose it did not have, and 7's usefulness score do not run. Do not re-collect a failed rubric version under the same id.
 
 ## 0 — Segment inventory, no network
