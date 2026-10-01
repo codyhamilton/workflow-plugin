@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-01  
 **Cycle id:** `pilot-field-proof-wave-001`  
-**Status:** `live_complete` (wave-001); **next wave** `registered_awaiting_live` on pruned pool + Luna swarm  
+**Status:** wave-001 `live_complete`; wave-002 `gate_failed_jev_idle` (WSM Jev idle, Soft Standard HOLD); **next wave** `registered_awaiting_live` on pruned pool + Luna swarm  
 **Harness:** Ubuntu live run folded at master `a0310a0` ([#88](https://github.com/codyhamilton/workflow-plugin/pull/88)); CYCLE-NOTES fold [#89](https://github.com/codyhamilton/workflow-plugin/pull/89)
 
 **2026-10-01 fix:** Pilot live smoke hit TypeSafe HTTP 400 (`api_usage_error`) because early-signal stats framings included illegal Jev `type: "report"` (`compaction_event_count`, `instruction_scope`). Removed those questions (count stays in `state.cumulative`); added `jev_client` / `classify` preflight for `choice` | `score` | `noul` only.
@@ -67,3 +67,10 @@
 
 - Dry-twin + swarm capture under [`capture/pilot-field-proof/`](../../capture/pilot-field-proof/).
 - Close-out row: [`cycles/CYCLE-LOG.md`](../../cycles/CYCLE-LOG.md).
+
+## Wave-002 dual-label (2026-10-01)
+
+- **Cycle id:** `pilot-wave-002-luna-swarm-dual-label` — full note: [`cycles/CYCLE-wave-002-dual-label-idle.md`](../../cycles/CYCLE-wave-002-dual-label-idle.md)
+- **Luna** (`live-luna`): **18/18** completions, **0/8** conflict workers → kill **PASS** (volume-label evidence only; does not authorize Jev or Soft Standard alone).
+- **Flash** (`live-flash`): **17/18** completions (1 timeout), **5/8** conflict workers → kill **FAIL**.
+- **WSM:** Jev idle; Soft Standard / Max **HOLD**; no TypeSafe spend on this gate fail; no harness unlock.
