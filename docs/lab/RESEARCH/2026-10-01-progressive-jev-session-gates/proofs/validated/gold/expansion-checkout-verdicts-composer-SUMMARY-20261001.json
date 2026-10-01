@@ -1,0 +1,15 @@
+{
+  "seat": "composer",
+  "model": "composer-2.5",
+  "pack_source": "expansion-judge-packs-20261001-202909.jsonl",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "rows": 20,
+  "checkout_recommended_count": 1,
+  "not_yet_count": 19,
+  "earliest_checkout_recommended_turn": {
+    "0aab88c525de": null,
+    "036ff3ed4a89": 135,
+    "0853bc21d3aa": null
+  },
+  "note": "Expansion experiment (c) gold seat Composer; prefix-causal labels on hybrid_v0 packs only (original rubric, no parent-pull-v1)."
+}
