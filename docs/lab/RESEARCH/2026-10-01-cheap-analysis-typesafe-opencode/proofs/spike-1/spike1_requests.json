@@ -1,0 +1,300 @@
+{
+  "schema_runs": {
+    "shape-v0": {
+      "decision": "dry_run",
+      "schema_id": "shape-v0",
+      "framing_id": "shape-v0-default#8b25557e0768ab57",
+      "cache_key": "0f2ba43c1f36160e8169f4f55afcfc220143d4e53a660b43f4e7220c6308d8f8",
+      "request": {
+        "model": "jev-1.13.0",
+        "state": {
+          "question_id": "early-signal-v0",
+          "jev_model": "jev-1.13.0",
+          "worker_id": "92a48e004519",
+          "checkpoint_turn": 75,
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14\u2026 at -j 12",
+          "cumulative": {
+            "api_turns": 75,
+            "peak_ctx_tokens": 129961,
+            "prefix_bytes": 4202317,
+            "tool_histogram": {
+              "Bash": 55,
+              "Read": 31
+            },
+            "reread_paths": [
+              {
+                "path": "<REPO>/parser/kiwiw/_cenc.c",
+                "count": 10
+              },
+              {
+                "path": "<REPO>/parser/kiwiw/divide.py",
+                "count": 7
+              },
+              {
+                "path": "<REPO>/parser/kiwiw/_e2.c",
+                "count": 6
+              },
+              {
+                "path": "<REPO>/parser/build_alldata.py",
+                "count": 3
+              },
+              {
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+                "count": 3
+              }
+            ],
+            "distinct_read_paths": 7,
+            "compaction_event_count": 12,
+            "assistant_text_chars": 36
+          },
+          "delta_since_prior": {},
+          "tail": [
+            {
+              "turn": 68,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 69,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 70,
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ]
+            },
+            {
+              "turn": 71,
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Bash"
+              ]
+            },
+            {
+              "turn": 72,
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ]
+            },
+            {
+              "turn": 73,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 74,
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read",
+                "Read"
+              ]
+            },
+            {
+              "turn": 75,
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ]
+            }
+          ]
+        },
+        "questions": {
+          "reread_cluster": {
+            "type": "choice",
+            "instructions": "Does any single read path appear at least three times in cumulative.reread_paths?",
+            "criteria": {
+              "yes": "Yes",
+              "no": "No"
+            }
+          }
+        }
+      },
+      "model": "jev-1.13.0",
+      "would_post": false
+    },
+    "phase-sketch-v0": {
+      "decision": "missing",
+      "reason": "prose_required",
+      "schema_id": "phase-sketch-v0",
+      "framing_id": "phase-v0-default",
+      "cache_key": null,
+      "model": "jev-1.13.0"
+    },
+    "early-signal-v0": {
+      "decision": "dry_run",
+      "schema_id": "early-signal-v0",
+      "framing_id": "signal-v0-default#1a3071620f3945b1",
+      "cache_key": "c8fc49ec792755b72e55c3eec7d84051e7d5b5949eea363791e386aca6797272",
+      "request": {
+        "model": "jev-1.13.0",
+        "state": {
+          "question_id": "early-signal-v0",
+          "jev_model": "jev-1.13.0",
+          "worker_id": "92a48e004519",
+          "checkpoint_turn": 75,
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14\u2026 at -j 12",
+          "cumulative": {
+            "api_turns": 75,
+            "peak_ctx_tokens": 129961,
+            "prefix_bytes": 4202317,
+            "tool_histogram": {
+              "Bash": 55,
+              "Read": 31
+            },
+            "reread_paths": [
+              {
+                "path": "<REPO>/parser/kiwiw/_cenc.c",
+                "count": 10
+              },
+              {
+                "path": "<REPO>/parser/kiwiw/divide.py",
+                "count": 7
+              },
+              {
+                "path": "<REPO>/parser/kiwiw/_e2.c",
+                "count": 6
+              },
+              {
+                "path": "<REPO>/parser/build_alldata.py",
+                "count": 3
+              },
+              {
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+                "count": 3
+              }
+            ],
+            "distinct_read_paths": 7,
+            "compaction_event_count": 12,
+            "assistant_text_chars": 36
+          },
+          "delta_since_prior": {},
+          "tail": [
+            {
+              "turn": 68,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 69,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 70,
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ]
+            },
+            {
+              "turn": 71,
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Bash"
+              ]
+            },
+            {
+              "turn": 72,
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ]
+            },
+            {
+              "turn": 73,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 74,
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read",
+                "Read"
+              ]
+            },
+            {
+              "turn": 75,
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ]
+            }
+          ]
+        },
+        "questions": {
+          "reread_cluster": {
+            "type": "choice",
+            "instructions": "Does any single read path appear at least three times in cumulative.reread_paths?",
+            "criteria": {
+              "yes": "Yes",
+              "no": "No"
+            }
+          },
+          "compaction_event_count": {
+            "type": "report",
+            "instructions": "Report cumulative.compaction_event_count as an integer (not a judgment)."
+          }
+        }
+      },
+      "model": "jev-1.13.0",
+      "would_post": false
+    }
+  },
+  "y_full": {
+    "match": true,
+    "edited_framing_id": "Y_full-edited#70fe61ebc55afe1f",
+    "y_full_framing_id": "Y_full#a5308cbe6aa0305f"
+  },
+  "unregistered": {
+    "decision": "missing",
+    "reason": "unregistered_framing",
+    "schema_id": "early-signal-v0",
+    "framing_id": "not-registered-slug",
+    "cache_key": null,
+    "model": "jev-1.13.0"
+  },
+  "state_chars": 1673,
+  "checks": {
+    "state_under_12k": true,
+    "y_full_questions_match_builder": true,
+    "edited_framing_differs": true,
+    "unregistered_framing": true,
+    "stats_early_signal_dry_run": true,
+    "stats_no_prose_questions": true,
+    "phase_sketch_prose_required": true,
+    "shape_stats_dry_run": true,
+    "no_raw_mount": true,
+    "all_pass": true
+  }
+}
