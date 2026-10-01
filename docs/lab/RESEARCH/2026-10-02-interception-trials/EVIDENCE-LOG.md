@@ -10,7 +10,9 @@ LLM agreement is not gold. Flash may be **policy-under-test** or **variant drive
 
 ## Deferred (post batch-002)
 
-Formal **near-done false-positive** and **runaway-await** labels on a **non-length** outcome sheet (transcript / deliverable observables, not `f(T)`) are **not published yet**. Until that sheet lands, `batch-002/` meters remain score-ready-path **diagnostics** only — not an FP/miss leaderboard (`window_status=unidentified` under R2).
+**Outcome sheet protocol — landed.** [`OUTCOME-SHEET.md`](OUTCOME-SHEET.md) defines framing-agnostic **near-done** vs **runaway-like** observables, ideal steer windows (`none` / turn range / `ambiguous`), sidecar label schema, and join rules without leaking labels into judge inputs. Opus **R2** documentation gate for Wave-0 is satisfied at the **protocol** layer; **R3** schedule + R1 audit were already fixed in `batch-002/`.
+
+**Session labels — still pending.** No `batch-002/outcome-labels.jsonl`; all `results.jsonl` cells remain `window_status=unidentified`, `outcome_tag=null`. Until human labels exist, `batch-002/` meters stay score-ready-path **diagnostics** only — **not** a formal near-done FP / runaway-await FP/miss leaderboard.
 
 ## Rules
 
