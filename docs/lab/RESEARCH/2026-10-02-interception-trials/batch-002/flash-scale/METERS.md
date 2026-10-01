@@ -1,8 +1,8 @@
 # METERS — batch-002 flash-scale
-**Generated:** 2026-10-02 01:44:48 AEST
+**Generated:** 2026-10-02 01:46:04 AEST
 **Soft Standard HOLD** — Flash/Luna volume only; no TypeSafe / hooks / product unlock.
 - n_variants: **2400**
-- parse_miss: **2250**; fire: **57**; errors: **0**
+- parse_miss: **2150**; fire: **96**; errors: **0**
 - leak_hits: **0**
 - dense_schedule: `[45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120]`
 - framings: {"H1": 1095, "H2": 876, "H3": 429}

@@ -1,0 +1,10 @@
+[{"cell_id":"9d5150067ab7b521","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Productive transcript/cost analysis, rich narration, fresh distinct reads; not thrash."},
+{"cell_id":"b3d0ef450d394dee","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Near-done: unit recorded/pushed, checks and pytest pass; active coordination."},
+{"cell_id":"751c46e476385d5d","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"WP1 near-complete, spotcheck 14/14; bounded worker diagnosing remaining envelope row."},
+{"cell_id":"1b0fb4043da3cca4","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Blocked awaiting long 2-07 run; legitimate wait, some agent activity, not runaway."},
+{"cell_id":"bbb966842035586e","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite state only, no messages or tail; insufficient evidence to fire."},
+{"cell_id":"3f809134d81660a7","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite checkpoint index only, empty tail; no thrash signal."},
+{"cell_id":"35674f0011678a00","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite prefix-only, no session-length or tool fields; cannot justify firing."},
+{"cell_id":"7988282fcfab747b","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"75 turns of Bash only, 15 consecutive silent calls, minimal narration: runaway thrash."},
+{"cell_id":"cc3530d197f0059f","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"High narration, layer files landing, lint/progress updates; clearly productive."},
+{"cell_id":"9fd13fc0f0bf23f0","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Adaptively ended stalled worker, dispatched fresh; wakeups/rereads but progressing."}]

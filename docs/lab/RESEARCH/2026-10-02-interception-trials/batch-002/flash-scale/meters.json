@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02 01:44:48 AEST",
+  "generated_at": "2026-10-02 01:46:04 AEST",
   "batch": "batch-002",
   "wave": "Wave-0-scale",
   "driver": "flash",
@@ -10,14 +10,14 @@
   "typesafe_used": false,
   "hooks_unlock": false,
   "n_variants": 2400,
-  "parse_miss_cells": 2250,
+  "parse_miss_cells": 2150,
   "error_count": 0,
-  "fire_count": 57,
+  "fire_count": 96,
   "rating_hist": {
-    "3": 20,
-    "1": 61,
-    "2": 35,
-    "0": 25
+    "3": 38,
+    "1": 92,
+    "2": 56,
+    "0": 55
   },
   "harness_cell_counts": {
     "claude-code": 1555,
@@ -56,8 +56,8 @@
   ],
   "fire_rate_among_at_risk_cells": {
     "45": {
-      "n": 31,
-      "fire_rate": 0.2581
+      "n": 62,
+      "fire_rate": 0.2258
     },
     "50": {
       "n": 28,
@@ -80,51 +80,51 @@
       "fire_rate": 0.5385
     },
     "75": {
-      "n": 9,
-      "fire_rate": 0.4444
+      "n": 13,
+      "fire_rate": 0.3077
     },
     "80": {
-      "n": 7,
-      "fire_rate": 0.4286
+      "n": 13,
+      "fire_rate": 0.4615
     },
     "85": {
-      "n": 3,
-      "fire_rate": 0.6667
+      "n": 10,
+      "fire_rate": 0.4
     },
     "90": {
-      "n": 0,
-      "fire_rate": null
+      "n": 8,
+      "fire_rate": 0.375
     },
     "95": {
-      "n": 0,
-      "fire_rate": null
+      "n": 8,
+      "fire_rate": 0.625
     },
     "100": {
-      "n": 0,
-      "fire_rate": null
+      "n": 8,
+      "fire_rate": 0.5
     },
     "105": {
-      "n": 0,
-      "fire_rate": null
+      "n": 8,
+      "fire_rate": 0.75
     },
     "110": {
-      "n": 0,
-      "fire_rate": null
+      "n": 8,
+      "fire_rate": 0.375
     },
     "115": {
-      "n": 0,
-      "fire_rate": null
+      "n": 6,
+      "fire_rate": 0.6667
     },
     "120": {
-      "n": 0,
-      "fire_rate": null
+      "n": 6,
+      "fire_rate": 0.5
     }
   },
   "prompt_leak_spotcheck_hits": [],
   "cell_id_salt": "b002s",
   "partial": true,
-  "batches_done": 15,
+  "batches_done": 25,
   "n_batches": 240,
-  "wall_s_so_far": 110.2,
+  "wall_s_so_far": 186.2,
   "model": "deepseek/deepseek-flash"
 }

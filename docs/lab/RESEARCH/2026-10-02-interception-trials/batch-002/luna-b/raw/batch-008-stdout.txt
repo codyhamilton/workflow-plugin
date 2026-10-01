@@ -1,0 +1,8 @@
+[
+  {"cell_id":"e62a1117b6f6b65a","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"High activity, but sparse tool variety and two compactions do not establish runaway thrash."},
+  {"cell_id":"37a7e5355564b99f","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Repeated compactions and sustained tool use suggest the work may continue excessively."},
+  {"cell_id":"8110118f868e352b","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Five rereads of one plan plus many compactions suggest potential thrash."},
+  {"cell_id":"57228919afe68228","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Six compactions and high output indicate sustained work with elevated continuation risk."},
+  {"cell_id":"c18a29b7d138629f","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Checkpoint index alone provides no evidence of excessive continuation."},
+  {"cell_id":"077971437294e70f","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"At turn 105, 104 Bash calls and seven compactions strongly suggest runaway activity."}
+]
