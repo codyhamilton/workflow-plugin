@@ -1,7 +1,7 @@
 # Flash vol2 parse-miss glance (Soft HOLD)
 
-**Status:** bounded diagnosis from the landed runner and repository artifacts.  
-**Reported symptom:** Flash vol2 `parse_miss=10` (WSM report).  
+**Status:** bounded diagnosis from the landed runner and repository artifacts.
+**Reported symptom:** Flash vol2 `parse_miss=10` (WSM report).
 **Soft Standard HOLD:** no hooks, behavior ship, or FP/miss product claim.
 
 ## Finding
