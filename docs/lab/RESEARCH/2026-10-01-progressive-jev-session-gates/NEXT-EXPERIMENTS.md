@@ -295,3 +295,34 @@ Reopen Maps `T≥75` including prior A0-null and shape-miss workers. Prefer **di
 5. **Phase hold.** Phase 1 must not run seats.
 
 </details>
+
+---
+
+## Plan/hold — **`progressive-decay-bar-v1`** and **`validation-handoff-steer-v1`** (WSM design fold — no harness)
+
+**Status:** **plan/hold** (2026-10-01). **Owner:** Workflow System Manager (orchestration docs). **Does not start** until **`shape-signal-panel-v1`** Phase 2+ seats run and **signal/shape/inflection agreement** notes exist on several workers (§11). **No harness work in this PR path** — definitions live in [`TERMS.md`](TERMS.md) §12–§13 only.
+
+These two ids split Cody’s same design fold for traceability; they ship together when unlocked, not as competing primaries.
+
+| Id | Design slice | TERMS |
+|----|--------------|-------|
+| **`progressive-decay-bar-v1`** | ~15-turn revalidation; **decaying `confidence_min`**; **leap** (high-confidence near-done) vs **accumulate** (stacked stop-signals) exit paths | §12 |
+| **`validation-handoff-steer-v1`** | Progressive checks ~**50 / 60 / 75** (then §2 schedule): ask if agent is **already in validation**; if **not**, **steer** via `additionalContext` and **new agent** for validation rather than hard-exiting the builder; if **yes**, use §12 paths only | §13 |
+
+**Agreement weight (both):** Multi-model agreement on **early signals**, **shape**, and **inflections** (§11) **>>** exact exit turn when tuning decay or interpreting handoff inflections. Cross-link §11; do **not** rewrite shape-signal seat prompts or packs.
+
+**Explicit non-goals (hold):**
+
+- No `--call-jev`, no stats-gate sweep, no hook or plugin behaviour.
+- Do not pad the shape-signal shortlist or revive `parent-pull-v1`.
+- Do not implement decay schedule or validation questions in the replay harness until shape-signal unlock criteria pass.
+
+**Unlock sketch (pre-register before harness):**
+
+| Gate | Criterion |
+|------|-----------|
+| Prerequisite | `shape-signal-panel-v1` Phase 2+ complete; primary score = signal/shape/inflection agreement on **≥ several** workers |
+| Docs | §12–§13 unchanged or versioned in TERMS; decay schedule written before any live `confidence_min` decay |
+| Harness | Separate PR / seats — **not** this lab-docs fold |
+
+**Confidence:** stays **not high** until offline replay shows decay + handoff beats fixed `P0` on gold-relevant metrics; WSM steer remains convention until product wiring accepts it.
