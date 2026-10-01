@@ -135,3 +135,32 @@ Phase 1: docs + packs only. **Panel held.** Gold protocol supersedes unanimous A
 | `5163c22a6a3e` | 90 | 2 | `5163c22a6a3e-judge-packs-20261001-210125.jsonl` |
 
 Combined: `shape-signal-judge-packs-20261001-212524.jsonl` (45 rows). Ranking: `SUMMARY-shape-signal-20261001-212524.md`. Leak-scan PASS. No `--call-jev`.
+
+
+## Shape-qual full Maps (v1) — `shape-qual-full-maps-v1` (`20261001-214046`)
+
+Full open-pajero-maps **T ≥ 75** corpus (**n = 34**). Supersedes the 7-worker shape-signal shortlist. **Panel held** (packs + docs). Early signals **≤ ~120T** (see research [`TERMS.md`](../../../../TERMS.md) §14).
+
+| Coverage | Count |
+|----------|------:|
+| Reuse prior hybrid_v0 packs | 11 |
+| Gap-filled this run | 23 |
+| Combined pack rows | 104 |
+
+- Inventory: `INVENTORY-shape-qual-full-maps-v1-20261001-214046.json`
+- Combined (reuse + gap): `shape-qual-full-maps-v1-judge-packs-20261001-214046.jsonl`
+- Gap-only: `shape-qual-full-maps-v1-gap-judge-packs-20261001-214046.jsonl` (46 rows)
+- Summary: `SUMMARY-shape-qual-full-maps-v1-20261001-214046.{md,json}`
+
+```bash
+python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_gold_judge_packs.py \
+  --run 20261001-214046 --workers \
+  89608cc68603 6e06ab86aa72 5a152464f6e5 d34bb8ba01ba 52ea24516a6e \
+  e28a2428b192 7c99c180742e 7af2854bba92 8e36f8e80baa 79a557b56a6e \
+  16a958631580 de5b76cc68a6 0677f597286e 15f24c7ba18c 9b156dbab5d9 \
+  a3cc4da7e21c 87a380bc64ff 91a9aa8050fb 07357f196666 d84416c7c9d4 \
+  582c23b3c6e4 074c8cf22927 9da2f589b11b
+# rename combined p0-judge-packs-*.jsonl → shape-qual-full-maps-v1-gap-judge-packs-*.jsonl
+```
+
+`pack_meta.early_signal_window` on combined rows: early foreshadowing only in turns ≤ ~120.

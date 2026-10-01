@@ -1,0 +1,71 @@
+[
+  {
+    "worker_id": "79a557b56a6e",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 121144,
+    "tool_histogram": {
+      "Bash": 51,
+      "Edit": 12,
+      "Read": 9,
+      "Monitor": 1,
+      "ToolSearch": 1,
+      "Write": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-ad97279a557b56a6e/parser/osm_to_parcel_geometry.py",
+        "count": 8
+      }
+    ],
+    "distinct_read_paths": 2,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 1353,
+    "delta_since_prior": {},
+    "state_chars": 1666,
+    "gold_bundle_chars": 3227,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "79a557b56a6e",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 139435,
+    "tool_histogram": {
+      "Bash": 64,
+      "Edit": 12,
+      "Read": 10,
+      "Write": 2,
+      "Monitor": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-ad97279a557b56a6e/parser/osm_to_parcel_geometry.py",
+        "count": 8
+      }
+    ],
+    "distinct_read_paths": 3,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 1643,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-ad97279a557b56a6e/docs/plans/01-eval-harness-and-map-layer/briefs/23-vocab-name-type-leak.md"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Read": 1,
+        "Write": 1
+      }
+    },
+    "state_chars": 1924,
+    "gold_bundle_chars": 3024,
+    "gold_bundle_status": "ok"
+  }
+]

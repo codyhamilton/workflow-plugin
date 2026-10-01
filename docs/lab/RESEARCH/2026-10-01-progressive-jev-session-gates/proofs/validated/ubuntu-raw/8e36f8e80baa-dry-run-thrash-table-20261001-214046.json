@@ -1,0 +1,71 @@
+[
+  {
+    "worker_id": "8e36f8e80baa",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 146033,
+    "tool_histogram": {
+      "Bash": 51,
+      "Read": 5,
+      "Monitor": 3,
+      "ToolSearch": 3,
+      "Agent": 2,
+      "SendMessage": 2,
+      "Edit": 1,
+      "Skill": 1
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 3,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 3355,
+    "delta_since_prior": {},
+    "state_chars": 1956,
+    "gold_bundle_chars": 3573,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "8e36f8e80baa",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 146033,
+    "tool_histogram": {
+      "Bash": 61,
+      "Read": 7,
+      "Monitor": 5,
+      "ToolSearch": 4,
+      "Agent": 2,
+      "SendMessage": 2,
+      "Edit": 1,
+      "Skill": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 4,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 3905,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/docs/plans/03-map-layer-parity-remediation/GATE-2.md"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 10,
+        "Monitor": 2,
+        "Read": 2,
+        "ToolSearch": 1
+      }
+    },
+    "state_chars": 2093,
+    "gold_bundle_chars": 3787,
+    "gold_bundle_status": "ok"
+  }
+]

@@ -1,0 +1,156 @@
+[
+  {
+    "worker_id": "89608cc68603",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 120874,
+    "tool_histogram": {
+      "Bash": 67,
+      "Read": 12,
+      "Edit": 3,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_divide.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 7,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 2515,
+    "delta_since_prior": {},
+    "state_chars": 1576,
+    "gold_bundle_chars": 4028,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "89608cc68603",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 140930,
+    "tool_histogram": {
+      "Bash": 77,
+      "Read": 15,
+      "Edit": 5,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_divide.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/osm_to_parcel_geometry.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 3161,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_name_record_vocab.py"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 10,
+        "Read": 3,
+        "Edit": 2
+      }
+    },
+    "state_chars": 2383,
+    "gold_bundle_chars": 3948,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "89608cc68603",
+    "checkpoint_turn": 105,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 105,
+    "peak_ctx_tokens": 154743,
+    "tool_histogram": {
+      "Bash": 86,
+      "Read": 18,
+      "Edit": 8,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_divide.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_name_record_vocab.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/osm_to_parcel_geometry.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 3599,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 9,
+        "Edit": 3,
+        "Read": 3
+      }
+    },
+    "state_chars": 2202,
+    "gold_bundle_chars": 3931,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "89608cc68603",
+    "checkpoint_turn": 120,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 120,
+    "peak_ctx_tokens": 164006,
+    "tool_histogram": {
+      "Bash": 99,
+      "Read": 18,
+      "Edit": 10,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_divide.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/tests/test_name_record_vocab.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/.claude/worktrees/agent-aef9389608cc68603/parser/osm_to_parcel_geometry.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 8,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 4614,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Edit": 2
+      }
+    },
+    "state_chars": 2635,
+    "gold_bundle_chars": 4316,
+    "gold_bundle_status": "ok"
+  }
+]
