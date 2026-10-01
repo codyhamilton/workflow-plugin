@@ -1,6 +1,7 @@
 # Progressive Jev — multi-model gold checkout verdicts (P0)
 
-**Status:** two-seat draft gold (Flash draft → Sonnet 5.5 signed review).  
+**Status:** three-seat P0 gold panel (Sonnet signed final + Composer + Grok 4.7); Flash drafts excluded from panel metrics.  
+**Agreement:** [`PANEL-FINDINGS-20261001.md`](PANEL-FINDINGS-20261001.md), [`p0-panel-agreement-20261001.json`](p0-panel-agreement-20261001.json).  
 **Not committed here:** raw gold-bundles / ubuntu-raw transcripts (gitignored under `../ubuntu-raw/`).
 
 ## What `checkout_recommended` means
@@ -28,7 +29,7 @@ Turn count alone must not drive checkout. Patterns: `runaway`, `low_progress`, `
 1. **DeepSeek Flash** (`deepseek/deepseek-flash` via OpenCode) drafts each `(worker, cp)` from the gold-bundle row only.
 2. **Claude Sonnet 5.5** (`claude-sonnet-5-5` via `claude -p`) independently re-judges and **agree/correct**s the draft.
 3. Only `role=reviewer_final` rows with `signed=true` count as signed labels for downstream use.
-4. Optional Grok/Composer: **skipped** (no credentials on this machine without new secrets).
+4. **Composer 2.5** and **Grok 4.7** gold seats on redacted judge packs (`packs/p0-judge-packs-*.jsonl`).
 
 ## Safe packs for cloud seats (3–4)
 
@@ -41,13 +42,17 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 | File | Contents |
 |------|----------|
 | `p0-checkout-verdicts-20261001.jsonl` | 42 rows = 21 cps × (Flash draft + Sonnet final) |
-| `p0-checkout-verdicts-SUMMARY-20261001.json` | Models, per-judge first-checkout, A0 note |
+| `p0-checkout-verdicts-composer-20261001.jsonl` | Composer seat, 21 cps |
+| `p0-checkout-verdicts-grok-20261001.jsonl` | Grok seat, 21 cps |
+| `p0-checkout-verdicts-SUMMARY-20261001.json` | Two-seat summary (pre-panel); see panel JSON for A0 |
+| `p0-panel-agreement-20261001.json` | Three-seat A0, pairwise agreement, α |
+| `PANEL-FINDINGS-20261001.md` | Human-readable panel result |
 
-## Headline result (this run)
+## Headline result (three-seat panel)
 
-- Flash: checkout on almost all `92a48e004519` cps and most early `bb6165018de0` cps.
-- Sonnet 5.5: **corrected every Flash checkout to `not_yet`** on both workers (one Flash `not_yet` at `bb6165018de0@150` agreed).
-- A0 unanimous gold exit: **null** on both workers with this two-seat panel.
-- Panel remains **underpowered** vs TUNING-PLAN’s three-judge floor until Grok (or another seat) is added.
+- Flash (excluded from gold panel): checkout on almost all `92a48e004519` cps; Sonnet signed final **always `not_yet`** on both workers.
+- Grok earliest checkout on `92a48e004519`: **105**; Composer: **180**; Sonnet: **null**.
+- **A0** (unanimous checkout): **null** on both workers — no cp where all three seats agree checkout.
+- Krippendorff α = **0.1189** (< H5 floor 0.40). Confidence remains **not high**; panel count meets floor but gold exit does not.
 
-No `--call-jev` / `TYPESAFE_API_KEY` was used for this PR.
+No `--call-jev` / `TYPESAFE_API_KEY` was used for labeling or this aggregation.

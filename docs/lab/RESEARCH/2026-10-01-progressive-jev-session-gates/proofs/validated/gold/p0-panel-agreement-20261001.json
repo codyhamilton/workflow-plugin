@@ -1,0 +1,438 @@
+{
+  "generated_at_utc": "2026-10-01T10:05:30Z",
+  "panel": {
+    "seats": [
+      "sonnet",
+      "composer",
+      "grok-4.7"
+    ],
+    "sonnet_source": "p0-checkout-verdicts-20261001.jsonl (role=reviewer_final, signed=true only; Flash drafts excluded)",
+    "composer_source": "p0-checkout-verdicts-composer-20261001.jsonl",
+    "grok_source": "p0-checkout-verdicts-grok-20261001.jsonl",
+    "flash_drafts_excluded": true
+  },
+  "schedule": "P0 first_at=75 interval=15",
+  "n_checkpoints": 21,
+  "workers": {
+    "92a48e004519": {
+      "T": 296,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255,
+        270,
+        285
+      ]
+    },
+    "bb6165018de0": {
+      "T": 154,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ]
+    }
+  },
+  "earliest_checkout_recommended_by_seat": {
+    "sonnet": {
+      "92a48e004519": null,
+      "bb6165018de0": null
+    },
+    "composer": {
+      "92a48e004519": 180,
+      "bb6165018de0": null
+    },
+    "grok-4.7": {
+      "92a48e004519": 105,
+      "bb6165018de0": null
+    }
+  },
+  "a0_unanimous_checkout": {
+    "rule": "Earliest checkpoint turn c where sonnet, composer, and grok-4.7 all have checkout_recommended=true at that prefix",
+    "by_worker": {
+      "92a48e004519": null,
+      "bb6165018de0": null
+    }
+  },
+  "pairwise_agreement": {
+    "overall_pct_across_21_cps": {
+      "sonnet_vs_composer": 85.71,
+      "sonnet_vs_grok-4.7": 61.9,
+      "composer_vs_grok-4.7": 76.19
+    },
+    "cohen_kappa_overall": {
+      "sonnet_vs_composer": -0.0,
+      "sonnet_vs_grok-4.7": 0.0,
+      "composer_vs_grok-4.7": 0.4262
+    },
+    "per_checkpoint": [
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 75,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 90,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 105,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 0.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 120,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 0.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 135,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 0.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 150,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 0.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 165,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 0.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 180,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": true,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 0.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 195,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": true,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 0.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 210,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": true,
+          "grok-4.7": true
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 0.0,
+          "sonnet_vs_grok-4.7": 0.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": false,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 225,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 240,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 255,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 270,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "92a48e004519",
+        "checkpoint_turn": 285,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 75,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 90,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 105,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 120,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 135,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 150,
+        "checkout_recommended": {
+          "sonnet": false,
+          "composer": false,
+          "grok-4.7": false
+        },
+        "pairwise_agreement_pct": {
+          "sonnet_vs_composer": 100.0,
+          "sonnet_vs_grok-4.7": 100.0,
+          "composer_vs_grok-4.7": 100.0
+        },
+        "all_three_agree": true,
+        "unanimous_checkout": false
+      }
+    ]
+  },
+  "krippendorff_alpha": {
+    "scale": "nominal",
+    "variable": "checkout_recommended (binary)",
+    "coders": 3,
+    "units": 21,
+    "value": 0.1189,
+    "h5_floor": 0.4,
+    "h5_pass": false
+  },
+  "checkout_positive_counts": {
+    "sonnet": 0,
+    "composer": 3,
+    "grok-4.7": 8
+  },
+  "notes": [
+    "A0 is null on both P0 workers: Sonnet never recommends checkout; Composer and Grok diverge on 92a48e004519 before Sonnet would join.",
+    "H5 fails at alpha=0.1189 (<0.40); do not tune Jev against this panel without rubric revision or additional labeling."
+  ]
+}
