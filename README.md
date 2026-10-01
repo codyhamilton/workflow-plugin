@@ -92,6 +92,8 @@ Skills from this plugin are **not** auto-visible to Grok Bot or other cloud driv
 
 Repeat 1–3 until `done` or `unsuccessful`. Lab skills are not required. Details: [`tools/driver/README.md`](tools/driver/README.md) and paste template [`docs/lab/CONSUMING_REPO.md`](docs/lab/CONSUMING_REPO.md).
 
+**Bot discovery pattern:** status → trigger → asserts. Listing skills in chat is not enough for Grok Bot — bake or hook skills first, then call the driver CLIs. Harness routing (when to use Codex vs Claude vs Composer vs OpenCode Flash): [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md).
+
 To trigger `post-build` from an external automation (e.g. a Cursor Automation), see
 [`docs/automation/post-build.md`](docs/automation/post-build.md): one orchestrated automation
 per stage, triggered once per build handoff, with repo mechanics supplied by a per-repo adapter skill.
@@ -215,7 +217,7 @@ still resolves is worse than no copy at all.
 
 ## OpenCode (partial compatibility)
 
-OpenCode can run the same **workflow skills** as Claude Code and Cursor, but the harness differs:
+OpenCode can run the same **workflow skills** as Claude Code and Cursor, but the harness differs (and **Codex is not OpenCode** — see [Codex (separate harness)](#codex-separate-harness)):
 there is **no** OpenCode driver provider in `tools/driver/` yet, **no** Claude `SessionStart` hook,
 and **no** live `PostToolBatch` signal path on a default install (Claude Code uses the command hook;
 OpenCode has per-tool execute hooks only until you register the optional signals plugin). Unattended multi-phase loops remain
@@ -280,6 +282,24 @@ to review the phase and sign off (`Workflow-Phase:`). Pattern: Flash draft → S
 
 Lab skills: interactive install can symlink `workflow-lab` too, or
 `WORKFLOW_OPENCODE_INCLUDE_LAB=1 WORKFLOW_INSTALL_MODE=opencode ./install.sh`.
+
+## Codex (separate harness)
+
+**Codex** (OpenAI `codex` / `codex exec` CLI) is a **separate harness**, not an OpenCode provider and not Cursor Composer. Use it to **maximize Plus/Codex + Claude subscriptions**: promote Codex for **high-thinking** and mechanically rich unit work **alongside** Claude Code; keep OpenCode **DeepSeek Flash** for cheap brief/unit drafts under the Flash review gate.
+
+**Pins (Codex CLI 0.159.3 catalog; confirm with CHM smoke):**
+
+| Alias | Model id | Use |
+|-------|----------|-----|
+| **sol** | `gpt-6.1-sol` | High-thinking / workhorse |
+| **luna** | `gpt-6-luna` | Focused high-volume **inside Codex** (still not Flash) |
+
+```sh
+codex exec -m gpt-6.1-sol -c model_reasoning_effort=high "…"
+codex exec -m gpt-6-luna -c model_reasoning_effort=medium "…"
+```
+
+Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). No Codex installer mode or hooks in this plugin yet (docs/routing advert only). BDK wiring is deferred.
 
 ## Manual installation
 
