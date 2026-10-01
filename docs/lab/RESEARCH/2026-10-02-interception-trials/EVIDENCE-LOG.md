@@ -13,7 +13,9 @@ LLM agreement is not gold. Flash may be **policy-under-test** or **variant drive
 
 **Outcome sheet protocol — landed.** [`OUTCOME-SHEET.md`](OUTCOME-SHEET.md) defines framing-agnostic **near-done** vs **runaway-like** observables, ideal steer windows (`none` / turn range / `ambiguous`), sidecar label schema, and join rules without leaking labels into judge inputs. Opus **R2** documentation gate for Wave-0 is satisfied at the **protocol** layer; **R3** schedule + R1 audit were already fixed in `batch-002/`.
 
-**Session labels — landed (sidecar).** `batch-002/outcome-labels.jsonl` has **20/20** rows (`label_status=labeled`, `labeler=chm-sol-adjudication`, `protocol_rev=outcome-sheet-v1`, independence attestation all false). Blind Sol adjudication from transcript digests only (no Flash rating/fire). Soft HOLD remains: `results.jsonl` cells stay `window_status=unidentified` / `outcome_tag=null` until a documented join/report; **do not** claim FP/miss scoreboard yet. Join/report TBD.
+**Session labels — landed (sidecar).** `batch-002/outcome-labels.jsonl` has **20/20** rows (`label_status=labeled`, `labeler=chm-sol-adjudication`, `protocol_rev=outcome-sheet-v1`, independence attestation all false). Blind Sol adjudication from transcript digests only (no Flash rating/fire). Soft HOLD remains: `results.jsonl` cells stay `window_status=unidentified` / `outcome_tag=null`; FP/miss scoreboard **not** claimed.
+
+**Corpus analysis — landed (docs).** [`../2026-10-02-interception-steer-to-stop/ANALYSIS.md`](../2026-10-02-interception-steer-to-stop/ANALYSIS.md) inventories batch-002 streams (incl. **200×41** TypeSafe scenario sweep #104), exploratory fire/rating tables, and **PROVISIONAL** outcome join ([`analysis/PROVISIONAL-join-wave0-flash.jsonl`](../2026-10-02-interception-steer-to-stop/analysis/PROVISIONAL-join-wave0-flash.jsonl)). Re-run: `batch-002/analyze_corpus.py`.
 
 ## Rules
 

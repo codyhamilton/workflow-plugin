@@ -1,0 +1,3378 @@
+{
+  "soft_standard_hold": true,
+  "provisional": true,
+  "generated_at": "2026-10-01T22:56:07Z",
+  "source": "docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/typesafe-scenario-sweep/results.jsonl",
+  "n_distinct_scenarios": 200,
+  "overall_fire_rate": 0.014146,
+  "by_state_selection": {
+    "brief_cum_no_tail": {
+      "fire_rate": 0.02439,
+      "fire_count": 28,
+      "n_cells": 1148
+    },
+    "chars_budget_1200": {
+      "fire_rate": 0.006098,
+      "fire_count": 7,
+      "n_cells": 1148
+    },
+    "delta_only": {
+      "fire_rate": 0.021777,
+      "fire_count": 25,
+      "n_cells": 1148
+    },
+    "state_length_mid": {
+      "fire_rate": 0.002439,
+      "fire_count": 1,
+      "n_cells": 410
+    },
+    "state_length_short": {
+      "fire_rate": 0.006652,
+      "fire_count": 6,
+      "n_cells": 902
+    },
+    "tail_focus": {
+      "fire_rate": 0.035714,
+      "fire_count": 41,
+      "n_cells": 1148
+    },
+    "tool_hist_focus": {
+      "fire_rate": 0.006969,
+      "fire_count": 8,
+      "n_cells": 1148
+    },
+    "window_delta_tools": {
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 1148
+    }
+  },
+  "by_question_format_top": [
+    {
+      "question_format": "silent_stall",
+      "fire_rate": 0.20122,
+      "fire_count": 66,
+      "n_cells": 328
+    },
+    {
+      "question_format": "reread_loop",
+      "fire_rate": 0.039634,
+      "fire_count": 13,
+      "n_cells": 328
+    },
+    {
+      "question_format": "output_starvation",
+      "fire_rate": 0.038328,
+      "fire_count": 11,
+      "n_cells": 287
+    },
+    {
+      "question_format": "late_miss_risk",
+      "fire_rate": 0.031359,
+      "fire_count": 9,
+      "n_cells": 287
+    },
+    {
+      "question_format": "activity_without_value",
+      "fire_rate": 0.028455,
+      "fire_count": 7,
+      "n_cells": 246
+    },
+    {
+      "question_format": "duplicate_work",
+      "fire_rate": 0.018293,
+      "fire_count": 6,
+      "n_cells": 328
+    },
+    {
+      "question_format": "resource_asymmetry",
+      "fire_rate": 0.006969,
+      "fire_count": 2,
+      "n_cells": 287
+    },
+    {
+      "question_format": "recheck_interval",
+      "fire_rate": 0.004065,
+      "fire_count": 1,
+      "n_cells": 246
+    },
+    {
+      "question_format": "closing_protect",
+      "fire_rate": 0.004065,
+      "fire_count": 1,
+      "n_cells": 246
+    },
+    {
+      "question_format": "compaction_storm",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "tool_error_cascade",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "context_pressure",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "validation_loop",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "plan_execute_drift",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "handoff_ready",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "abort_cheaper",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 328
+    },
+    {
+      "question_format": "over_polish",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 287
+    },
+    {
+      "question_format": "under_verified",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 287
+    },
+    {
+      "question_format": "mid_arc_healthy",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 287
+    },
+    {
+      "question_format": "early_false_alarm",
+      "fire_rate": 0.0,
+      "fire_count": 0,
+      "n_cells": 287
+    }
+  ],
+  "rankings": [
+    {
+      "scenario_id": "state.tail_focus|q.silent_stall",
+      "state_selection": "tail_focus",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 33,
+      "fire_rate": 0.804878
+    },
+    {
+      "scenario_id": "state.delta_only|q.silent_stall",
+      "state_selection": "delta_only",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 25,
+      "fire_rate": 0.609756
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.reread_loop",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 7,
+      "fire_rate": 0.170732
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.silent_stall",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 6,
+      "fire_rate": 0.146341
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.activity_without_value",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 6,
+      "fire_rate": 0.146341
+    },
+    {
+      "scenario_id": "state.tail_focus|q.output_starvation",
+      "state_selection": "tail_focus",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 5,
+      "fire_rate": 0.121951
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.late_miss_risk",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 4,
+      "fire_rate": 0.097561
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.output_starvation",
+      "state_selection": "tool_hist_focus",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.073171
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.output_starvation",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.073171
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.late_miss_risk",
+      "state_selection": "chars_budget_1200",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.073171
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.reread_loop",
+      "state_selection": "tool_hist_focus",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.resource_asymmetry",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.reread_loop",
+      "state_selection": "chars_budget_1200",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.duplicate_work",
+      "state_selection": "chars_budget_1200",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.state_length_short|q.reread_loop",
+      "state_selection": "state_length_short",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.state_length_short|q.duplicate_work",
+      "state_selection": "state_length_short",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.tail_focus|q.duplicate_work",
+      "state_selection": "tail_focus",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.silent_stall",
+      "state_selection": "tool_hist_focus",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.late_miss_risk",
+      "state_selection": "tool_hist_focus",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tail_focus|q.recheck_interval",
+      "state_selection": "tail_focus",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tail_focus|q.closing_protect",
+      "state_selection": "tail_focus",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.activity_without_value",
+      "state_selection": "tool_hist_focus",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.state_length_short|q.silent_stall",
+      "state_selection": "state_length_short",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.state_length_short|q.late_miss_risk",
+      "state_selection": "state_length_short",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.duplicate_work",
+      "state_selection": "state_length_mid",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.delta_only|q.compaction_storm",
+      "state_selection": "delta_only",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.reread_loop",
+      "state_selection": "delta_only",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.tool_error_cascade",
+      "state_selection": "delta_only",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.context_pressure",
+      "state_selection": "delta_only",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.validation_loop",
+      "state_selection": "delta_only",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.plan_execute_drift",
+      "state_selection": "delta_only",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.handoff_ready",
+      "state_selection": "delta_only",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.abort_cheaper",
+      "state_selection": "delta_only",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.duplicate_work",
+      "state_selection": "delta_only",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.over_polish",
+      "state_selection": "delta_only",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.under_verified",
+      "state_selection": "delta_only",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.mid_arc_healthy",
+      "state_selection": "delta_only",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.early_false_alarm",
+      "state_selection": "delta_only",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.late_miss_risk",
+      "state_selection": "delta_only",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.recovery_possible",
+      "state_selection": "delta_only",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.stop_preserves_value",
+      "state_selection": "delta_only",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.continue_learns",
+      "state_selection": "delta_only",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.thrash_vs_explore",
+      "state_selection": "delta_only",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.user_wait_signal",
+      "state_selection": "delta_only",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.resource_asymmetry",
+      "state_selection": "delta_only",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.output_starvation",
+      "state_selection": "delta_only",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.compaction_storm",
+      "state_selection": "tail_focus",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.reread_loop",
+      "state_selection": "tail_focus",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.tool_error_cascade",
+      "state_selection": "tail_focus",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.context_pressure",
+      "state_selection": "tail_focus",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.validation_loop",
+      "state_selection": "tail_focus",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.plan_execute_drift",
+      "state_selection": "tail_focus",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.handoff_ready",
+      "state_selection": "tail_focus",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.abort_cheaper",
+      "state_selection": "tail_focus",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.over_polish",
+      "state_selection": "tail_focus",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.under_verified",
+      "state_selection": "tail_focus",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.mid_arc_healthy",
+      "state_selection": "tail_focus",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.early_false_alarm",
+      "state_selection": "tail_focus",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.late_miss_risk",
+      "state_selection": "tail_focus",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.recovery_possible",
+      "state_selection": "tail_focus",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.stop_preserves_value",
+      "state_selection": "tail_focus",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.continue_learns",
+      "state_selection": "tail_focus",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.thrash_vs_explore",
+      "state_selection": "tail_focus",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.user_wait_signal",
+      "state_selection": "tail_focus",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.resource_asymmetry",
+      "state_selection": "tail_focus",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.compaction_storm",
+      "state_selection": "tool_hist_focus",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.tool_error_cascade",
+      "state_selection": "tool_hist_focus",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.context_pressure",
+      "state_selection": "tool_hist_focus",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.validation_loop",
+      "state_selection": "tool_hist_focus",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.plan_execute_drift",
+      "state_selection": "tool_hist_focus",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.handoff_ready",
+      "state_selection": "tool_hist_focus",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.abort_cheaper",
+      "state_selection": "tool_hist_focus",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.duplicate_work",
+      "state_selection": "tool_hist_focus",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.over_polish",
+      "state_selection": "tool_hist_focus",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.under_verified",
+      "state_selection": "tool_hist_focus",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.mid_arc_healthy",
+      "state_selection": "tool_hist_focus",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.early_false_alarm",
+      "state_selection": "tool_hist_focus",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.recovery_possible",
+      "state_selection": "tool_hist_focus",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.stop_preserves_value",
+      "state_selection": "tool_hist_focus",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.continue_learns",
+      "state_selection": "tool_hist_focus",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.thrash_vs_explore",
+      "state_selection": "tool_hist_focus",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.user_wait_signal",
+      "state_selection": "tool_hist_focus",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.resource_asymmetry",
+      "state_selection": "tool_hist_focus",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.compaction_storm",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.tool_error_cascade",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.context_pressure",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.validation_loop",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.plan_execute_drift",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.handoff_ready",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.abort_cheaper",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.duplicate_work",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.over_polish",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.under_verified",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.mid_arc_healthy",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.early_false_alarm",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.recovery_possible",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.stop_preserves_value",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.continue_learns",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.thrash_vs_explore",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.user_wait_signal",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.compaction_storm",
+      "state_selection": "chars_budget_1200",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.silent_stall",
+      "state_selection": "chars_budget_1200",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.tool_error_cascade",
+      "state_selection": "chars_budget_1200",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.context_pressure",
+      "state_selection": "chars_budget_1200",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.validation_loop",
+      "state_selection": "chars_budget_1200",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.plan_execute_drift",
+      "state_selection": "chars_budget_1200",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.handoff_ready",
+      "state_selection": "chars_budget_1200",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.abort_cheaper",
+      "state_selection": "chars_budget_1200",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.over_polish",
+      "state_selection": "chars_budget_1200",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.under_verified",
+      "state_selection": "chars_budget_1200",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.mid_arc_healthy",
+      "state_selection": "chars_budget_1200",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.early_false_alarm",
+      "state_selection": "chars_budget_1200",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.recovery_possible",
+      "state_selection": "chars_budget_1200",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.stop_preserves_value",
+      "state_selection": "chars_budget_1200",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.continue_learns",
+      "state_selection": "chars_budget_1200",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.thrash_vs_explore",
+      "state_selection": "chars_budget_1200",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.user_wait_signal",
+      "state_selection": "chars_budget_1200",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.resource_asymmetry",
+      "state_selection": "chars_budget_1200",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.output_starvation",
+      "state_selection": "chars_budget_1200",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.compaction_storm",
+      "state_selection": "window_delta_tools",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.reread_loop",
+      "state_selection": "window_delta_tools",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.silent_stall",
+      "state_selection": "window_delta_tools",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.tool_error_cascade",
+      "state_selection": "window_delta_tools",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.context_pressure",
+      "state_selection": "window_delta_tools",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.validation_loop",
+      "state_selection": "window_delta_tools",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.plan_execute_drift",
+      "state_selection": "window_delta_tools",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.handoff_ready",
+      "state_selection": "window_delta_tools",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.abort_cheaper",
+      "state_selection": "window_delta_tools",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.duplicate_work",
+      "state_selection": "window_delta_tools",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.over_polish",
+      "state_selection": "window_delta_tools",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.under_verified",
+      "state_selection": "window_delta_tools",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.mid_arc_healthy",
+      "state_selection": "window_delta_tools",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.early_false_alarm",
+      "state_selection": "window_delta_tools",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.late_miss_risk",
+      "state_selection": "window_delta_tools",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.recovery_possible",
+      "state_selection": "window_delta_tools",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.stop_preserves_value",
+      "state_selection": "window_delta_tools",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.continue_learns",
+      "state_selection": "window_delta_tools",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.thrash_vs_explore",
+      "state_selection": "window_delta_tools",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.user_wait_signal",
+      "state_selection": "window_delta_tools",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.resource_asymmetry",
+      "state_selection": "window_delta_tools",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.output_starvation",
+      "state_selection": "window_delta_tools",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.recheck_interval",
+      "state_selection": "delta_only",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.closing_protect",
+      "state_selection": "delta_only",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.scope_drift",
+      "state_selection": "delta_only",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.activity_without_value",
+      "state_selection": "delta_only",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.tail_risk",
+      "state_selection": "delta_only",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.recoverable_stall",
+      "state_selection": "delta_only",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.scope_drift",
+      "state_selection": "tail_focus",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.activity_without_value",
+      "state_selection": "tail_focus",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.tail_risk",
+      "state_selection": "tail_focus",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.recoverable_stall",
+      "state_selection": "tail_focus",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.recheck_interval",
+      "state_selection": "tool_hist_focus",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.closing_protect",
+      "state_selection": "tool_hist_focus",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.scope_drift",
+      "state_selection": "tool_hist_focus",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.tail_risk",
+      "state_selection": "tool_hist_focus",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.recoverable_stall",
+      "state_selection": "tool_hist_focus",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.recheck_interval",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.closing_protect",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.scope_drift",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.tail_risk",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.recoverable_stall",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.recheck_interval",
+      "state_selection": "chars_budget_1200",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.closing_protect",
+      "state_selection": "chars_budget_1200",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.scope_drift",
+      "state_selection": "chars_budget_1200",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.activity_without_value",
+      "state_selection": "chars_budget_1200",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.tail_risk",
+      "state_selection": "chars_budget_1200",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.recoverable_stall",
+      "state_selection": "chars_budget_1200",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.recheck_interval",
+      "state_selection": "window_delta_tools",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.closing_protect",
+      "state_selection": "window_delta_tools",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.scope_drift",
+      "state_selection": "window_delta_tools",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.activity_without_value",
+      "state_selection": "window_delta_tools",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.tail_risk",
+      "state_selection": "window_delta_tools",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.recoverable_stall",
+      "state_selection": "window_delta_tools",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.compaction_storm",
+      "state_selection": "state_length_short",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.tool_error_cascade",
+      "state_selection": "state_length_short",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.context_pressure",
+      "state_selection": "state_length_short",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.validation_loop",
+      "state_selection": "state_length_short",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.plan_execute_drift",
+      "state_selection": "state_length_short",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.handoff_ready",
+      "state_selection": "state_length_short",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.abort_cheaper",
+      "state_selection": "state_length_short",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.over_polish",
+      "state_selection": "state_length_short",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.under_verified",
+      "state_selection": "state_length_short",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.mid_arc_healthy",
+      "state_selection": "state_length_short",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.early_false_alarm",
+      "state_selection": "state_length_short",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.recovery_possible",
+      "state_selection": "state_length_short",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.stop_preserves_value",
+      "state_selection": "state_length_short",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.continue_learns",
+      "state_selection": "state_length_short",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.thrash_vs_explore",
+      "state_selection": "state_length_short",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.user_wait_signal",
+      "state_selection": "state_length_short",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.resource_asymmetry",
+      "state_selection": "state_length_short",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.output_starvation",
+      "state_selection": "state_length_short",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.compaction_storm",
+      "state_selection": "state_length_mid",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.reread_loop",
+      "state_selection": "state_length_mid",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.silent_stall",
+      "state_selection": "state_length_mid",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.tool_error_cascade",
+      "state_selection": "state_length_mid",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.context_pressure",
+      "state_selection": "state_length_mid",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.validation_loop",
+      "state_selection": "state_length_mid",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.plan_execute_drift",
+      "state_selection": "state_length_mid",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.handoff_ready",
+      "state_selection": "state_length_mid",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.abort_cheaper",
+      "state_selection": "state_length_mid",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    }
+  ],
+  "often_fires": [
+    {
+      "scenario_id": "state.tail_focus|q.silent_stall",
+      "state_selection": "tail_focus",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 33,
+      "fire_rate": 0.804878
+    },
+    {
+      "scenario_id": "state.delta_only|q.silent_stall",
+      "state_selection": "delta_only",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 25,
+      "fire_rate": 0.609756
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.reread_loop",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 7,
+      "fire_rate": 0.170732
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.silent_stall",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 6,
+      "fire_rate": 0.146341
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.activity_without_value",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 6,
+      "fire_rate": 0.146341
+    },
+    {
+      "scenario_id": "state.tail_focus|q.output_starvation",
+      "state_selection": "tail_focus",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 5,
+      "fire_rate": 0.121951
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.late_miss_risk",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 4,
+      "fire_rate": 0.097561
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.output_starvation",
+      "state_selection": "tool_hist_focus",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.073171
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.output_starvation",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.073171
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.late_miss_risk",
+      "state_selection": "chars_budget_1200",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.073171
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.reread_loop",
+      "state_selection": "tool_hist_focus",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.resource_asymmetry",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.reread_loop",
+      "state_selection": "chars_budget_1200",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.duplicate_work",
+      "state_selection": "chars_budget_1200",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.state_length_short|q.reread_loop",
+      "state_selection": "state_length_short",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.state_length_short|q.duplicate_work",
+      "state_selection": "state_length_short",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.04878
+    },
+    {
+      "scenario_id": "state.tail_focus|q.duplicate_work",
+      "state_selection": "tail_focus",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.silent_stall",
+      "state_selection": "tool_hist_focus",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.late_miss_risk",
+      "state_selection": "tool_hist_focus",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tail_focus|q.recheck_interval",
+      "state_selection": "tail_focus",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tail_focus|q.closing_protect",
+      "state_selection": "tail_focus",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.activity_without_value",
+      "state_selection": "tool_hist_focus",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.state_length_short|q.silent_stall",
+      "state_selection": "state_length_short",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.state_length_short|q.late_miss_risk",
+      "state_selection": "state_length_short",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.duplicate_work",
+      "state_selection": "state_length_mid",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.02439
+    }
+  ],
+  "never_fires": [
+    {
+      "scenario_id": "state.delta_only|q.compaction_storm",
+      "state_selection": "delta_only",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.reread_loop",
+      "state_selection": "delta_only",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.tool_error_cascade",
+      "state_selection": "delta_only",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.context_pressure",
+      "state_selection": "delta_only",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.validation_loop",
+      "state_selection": "delta_only",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.plan_execute_drift",
+      "state_selection": "delta_only",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.handoff_ready",
+      "state_selection": "delta_only",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.abort_cheaper",
+      "state_selection": "delta_only",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.duplicate_work",
+      "state_selection": "delta_only",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.over_polish",
+      "state_selection": "delta_only",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.under_verified",
+      "state_selection": "delta_only",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.mid_arc_healthy",
+      "state_selection": "delta_only",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.early_false_alarm",
+      "state_selection": "delta_only",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.late_miss_risk",
+      "state_selection": "delta_only",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.recovery_possible",
+      "state_selection": "delta_only",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.stop_preserves_value",
+      "state_selection": "delta_only",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.continue_learns",
+      "state_selection": "delta_only",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.thrash_vs_explore",
+      "state_selection": "delta_only",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.user_wait_signal",
+      "state_selection": "delta_only",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.resource_asymmetry",
+      "state_selection": "delta_only",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.output_starvation",
+      "state_selection": "delta_only",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.compaction_storm",
+      "state_selection": "tail_focus",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.reread_loop",
+      "state_selection": "tail_focus",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.tool_error_cascade",
+      "state_selection": "tail_focus",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.context_pressure",
+      "state_selection": "tail_focus",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.validation_loop",
+      "state_selection": "tail_focus",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.plan_execute_drift",
+      "state_selection": "tail_focus",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.handoff_ready",
+      "state_selection": "tail_focus",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.abort_cheaper",
+      "state_selection": "tail_focus",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.over_polish",
+      "state_selection": "tail_focus",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.under_verified",
+      "state_selection": "tail_focus",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.mid_arc_healthy",
+      "state_selection": "tail_focus",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.early_false_alarm",
+      "state_selection": "tail_focus",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.late_miss_risk",
+      "state_selection": "tail_focus",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.recovery_possible",
+      "state_selection": "tail_focus",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.stop_preserves_value",
+      "state_selection": "tail_focus",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.continue_learns",
+      "state_selection": "tail_focus",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.thrash_vs_explore",
+      "state_selection": "tail_focus",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.user_wait_signal",
+      "state_selection": "tail_focus",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.resource_asymmetry",
+      "state_selection": "tail_focus",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.compaction_storm",
+      "state_selection": "tool_hist_focus",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.tool_error_cascade",
+      "state_selection": "tool_hist_focus",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.context_pressure",
+      "state_selection": "tool_hist_focus",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.validation_loop",
+      "state_selection": "tool_hist_focus",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.plan_execute_drift",
+      "state_selection": "tool_hist_focus",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.handoff_ready",
+      "state_selection": "tool_hist_focus",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.abort_cheaper",
+      "state_selection": "tool_hist_focus",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.duplicate_work",
+      "state_selection": "tool_hist_focus",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.over_polish",
+      "state_selection": "tool_hist_focus",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.under_verified",
+      "state_selection": "tool_hist_focus",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.mid_arc_healthy",
+      "state_selection": "tool_hist_focus",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.early_false_alarm",
+      "state_selection": "tool_hist_focus",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.recovery_possible",
+      "state_selection": "tool_hist_focus",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.stop_preserves_value",
+      "state_selection": "tool_hist_focus",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.continue_learns",
+      "state_selection": "tool_hist_focus",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.thrash_vs_explore",
+      "state_selection": "tool_hist_focus",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.user_wait_signal",
+      "state_selection": "tool_hist_focus",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.resource_asymmetry",
+      "state_selection": "tool_hist_focus",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.compaction_storm",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.tool_error_cascade",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.context_pressure",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.validation_loop",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.plan_execute_drift",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.handoff_ready",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.abort_cheaper",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.duplicate_work",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.over_polish",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.under_verified",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.mid_arc_healthy",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.early_false_alarm",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.recovery_possible",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.stop_preserves_value",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.continue_learns",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.thrash_vs_explore",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.user_wait_signal",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.compaction_storm",
+      "state_selection": "chars_budget_1200",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.silent_stall",
+      "state_selection": "chars_budget_1200",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.tool_error_cascade",
+      "state_selection": "chars_budget_1200",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.context_pressure",
+      "state_selection": "chars_budget_1200",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.validation_loop",
+      "state_selection": "chars_budget_1200",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.plan_execute_drift",
+      "state_selection": "chars_budget_1200",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.handoff_ready",
+      "state_selection": "chars_budget_1200",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.abort_cheaper",
+      "state_selection": "chars_budget_1200",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.over_polish",
+      "state_selection": "chars_budget_1200",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.under_verified",
+      "state_selection": "chars_budget_1200",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.mid_arc_healthy",
+      "state_selection": "chars_budget_1200",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.early_false_alarm",
+      "state_selection": "chars_budget_1200",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.recovery_possible",
+      "state_selection": "chars_budget_1200",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.stop_preserves_value",
+      "state_selection": "chars_budget_1200",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.continue_learns",
+      "state_selection": "chars_budget_1200",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.thrash_vs_explore",
+      "state_selection": "chars_budget_1200",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.user_wait_signal",
+      "state_selection": "chars_budget_1200",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.resource_asymmetry",
+      "state_selection": "chars_budget_1200",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.output_starvation",
+      "state_selection": "chars_budget_1200",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.compaction_storm",
+      "state_selection": "window_delta_tools",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.reread_loop",
+      "state_selection": "window_delta_tools",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.silent_stall",
+      "state_selection": "window_delta_tools",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.tool_error_cascade",
+      "state_selection": "window_delta_tools",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.context_pressure",
+      "state_selection": "window_delta_tools",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.validation_loop",
+      "state_selection": "window_delta_tools",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.plan_execute_drift",
+      "state_selection": "window_delta_tools",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.handoff_ready",
+      "state_selection": "window_delta_tools",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.abort_cheaper",
+      "state_selection": "window_delta_tools",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.duplicate_work",
+      "state_selection": "window_delta_tools",
+      "question_format": "duplicate_work",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.over_polish",
+      "state_selection": "window_delta_tools",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.under_verified",
+      "state_selection": "window_delta_tools",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.mid_arc_healthy",
+      "state_selection": "window_delta_tools",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.early_false_alarm",
+      "state_selection": "window_delta_tools",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.late_miss_risk",
+      "state_selection": "window_delta_tools",
+      "question_format": "late_miss_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.recovery_possible",
+      "state_selection": "window_delta_tools",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.stop_preserves_value",
+      "state_selection": "window_delta_tools",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.continue_learns",
+      "state_selection": "window_delta_tools",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.thrash_vs_explore",
+      "state_selection": "window_delta_tools",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.user_wait_signal",
+      "state_selection": "window_delta_tools",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.resource_asymmetry",
+      "state_selection": "window_delta_tools",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.output_starvation",
+      "state_selection": "window_delta_tools",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.recheck_interval",
+      "state_selection": "delta_only",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.closing_protect",
+      "state_selection": "delta_only",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.scope_drift",
+      "state_selection": "delta_only",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.activity_without_value",
+      "state_selection": "delta_only",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.tail_risk",
+      "state_selection": "delta_only",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.delta_only|q.recoverable_stall",
+      "state_selection": "delta_only",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.scope_drift",
+      "state_selection": "tail_focus",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.activity_without_value",
+      "state_selection": "tail_focus",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.tail_risk",
+      "state_selection": "tail_focus",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tail_focus|q.recoverable_stall",
+      "state_selection": "tail_focus",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.recheck_interval",
+      "state_selection": "tool_hist_focus",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.closing_protect",
+      "state_selection": "tool_hist_focus",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.scope_drift",
+      "state_selection": "tool_hist_focus",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.tail_risk",
+      "state_selection": "tool_hist_focus",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.tool_hist_focus|q.recoverable_stall",
+      "state_selection": "tool_hist_focus",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.recheck_interval",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.closing_protect",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.scope_drift",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.tail_risk",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.brief_cum_no_tail|q.recoverable_stall",
+      "state_selection": "brief_cum_no_tail",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.recheck_interval",
+      "state_selection": "chars_budget_1200",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.closing_protect",
+      "state_selection": "chars_budget_1200",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.scope_drift",
+      "state_selection": "chars_budget_1200",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.activity_without_value",
+      "state_selection": "chars_budget_1200",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.tail_risk",
+      "state_selection": "chars_budget_1200",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.chars_budget_1200|q.recoverable_stall",
+      "state_selection": "chars_budget_1200",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.recheck_interval",
+      "state_selection": "window_delta_tools",
+      "question_format": "recheck_interval",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.closing_protect",
+      "state_selection": "window_delta_tools",
+      "question_format": "closing_protect",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.scope_drift",
+      "state_selection": "window_delta_tools",
+      "question_format": "scope_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.activity_without_value",
+      "state_selection": "window_delta_tools",
+      "question_format": "activity_without_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.tail_risk",
+      "state_selection": "window_delta_tools",
+      "question_format": "tail_risk",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.window_delta_tools|q.recoverable_stall",
+      "state_selection": "window_delta_tools",
+      "question_format": "recoverable_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.compaction_storm",
+      "state_selection": "state_length_short",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.tool_error_cascade",
+      "state_selection": "state_length_short",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.context_pressure",
+      "state_selection": "state_length_short",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.validation_loop",
+      "state_selection": "state_length_short",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.plan_execute_drift",
+      "state_selection": "state_length_short",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.handoff_ready",
+      "state_selection": "state_length_short",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.abort_cheaper",
+      "state_selection": "state_length_short",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.over_polish",
+      "state_selection": "state_length_short",
+      "question_format": "over_polish",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.under_verified",
+      "state_selection": "state_length_short",
+      "question_format": "under_verified",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.mid_arc_healthy",
+      "state_selection": "state_length_short",
+      "question_format": "mid_arc_healthy",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.early_false_alarm",
+      "state_selection": "state_length_short",
+      "question_format": "early_false_alarm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.recovery_possible",
+      "state_selection": "state_length_short",
+      "question_format": "recovery_possible",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.stop_preserves_value",
+      "state_selection": "state_length_short",
+      "question_format": "stop_preserves_value",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.continue_learns",
+      "state_selection": "state_length_short",
+      "question_format": "continue_learns",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.thrash_vs_explore",
+      "state_selection": "state_length_short",
+      "question_format": "thrash_vs_explore",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.user_wait_signal",
+      "state_selection": "state_length_short",
+      "question_format": "user_wait_signal",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.resource_asymmetry",
+      "state_selection": "state_length_short",
+      "question_format": "resource_asymmetry",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_short|q.output_starvation",
+      "state_selection": "state_length_short",
+      "question_format": "output_starvation",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.compaction_storm",
+      "state_selection": "state_length_mid",
+      "question_format": "compaction_storm",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.reread_loop",
+      "state_selection": "state_length_mid",
+      "question_format": "reread_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.silent_stall",
+      "state_selection": "state_length_mid",
+      "question_format": "silent_stall",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.tool_error_cascade",
+      "state_selection": "state_length_mid",
+      "question_format": "tool_error_cascade",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.context_pressure",
+      "state_selection": "state_length_mid",
+      "question_format": "context_pressure",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.validation_loop",
+      "state_selection": "state_length_mid",
+      "question_format": "validation_loop",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.plan_execute_drift",
+      "state_selection": "state_length_mid",
+      "question_format": "plan_execute_drift",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.handoff_ready",
+      "state_selection": "state_length_mid",
+      "question_format": "handoff_ready",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    {
+      "scenario_id": "state.state_length_mid|q.abort_cheaper",
+      "state_selection": "state_length_mid",
+      "question_format": "abort_cheaper",
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    }
+  ]
+}

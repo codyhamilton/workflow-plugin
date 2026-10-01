@@ -21,7 +21,7 @@ Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-
 
 | Thread | Log | Status |
 |--------|-----|--------|
-| Wave-0 offline lever trials | [`2026-10-02-interception-trials/EVIDENCE-LOG.md`](2026-10-02-interception-trials/EVIDENCE-LOG.md) · [`OUTCOME-SHEET.md`](2026-10-02-interception-trials/OUTCOME-SHEET.md) · reading guide [`../PROPOSALS/2026-10-02-interception-steer-to-stop.md`](../PROPOSALS/2026-10-02-interception-steer-to-stop.md) | **batch-001** quarantined (T leak). **batch-002** R1/R3 fixed; outcome-sheet **protocol** landed; labels **pending**. Meters **diagnostic only** until `outcome-labels.jsonl`. batch-002 (240 cells, one driver) is below the scale bar. Standing waves: ≥1,000 new trials per driver (TypeSafe, Flash, Luna) on real transcripts. Behaviour ship stays held. |
+| Wave-0 offline lever trials | [`2026-10-02-interception-trials/EVIDENCE-LOG.md`](2026-10-02-interception-trials/EVIDENCE-LOG.md) · [`OUTCOME-SHEET.md`](2026-10-02-interception-trials/OUTCOME-SHEET.md) · [`2026-10-02-interception-steer-to-stop/ANALYSIS.md`](2026-10-02-interception-steer-to-stop/ANALYSIS.md) | **batch-001** quarantined. **batch-002** decontam + **20** sidecar labels; **PROVISIONAL** join (not FP/miss board). TypeSafe **200×41** scenario sweep landed (#104). Scale bar still open. Behaviour ship held. |
 
 **Current control and measurement policy** (2026-09-30, later pass): [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Implications in this index follow that pass: Grok Bot drives, Jev asserts steer, classify visualises.
 
