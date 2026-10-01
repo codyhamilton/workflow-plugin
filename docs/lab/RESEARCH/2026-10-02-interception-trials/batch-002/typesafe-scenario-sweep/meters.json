@@ -1,14 +1,14 @@
 {
   "metric": "scenario_progress",
-  "n_distinct_scenarios": 297,
+  "n_distinct_scenarios": 392,
   "n_sessions_swept": 41,
-  "n_cells_incidental": 12169,
+  "n_cells_incidental": 13522,
   "n_packs_available": 41,
   "n_scenarios_planned": 280,
   "errors": 0,
-  "tok_in": 2172741,
-  "tok_out": 170524,
-  "wall_s": 229.7,
+  "tok_in": 1332161,
+  "tok_out": 106081,
+  "wall_s": 147.8,
   "checkpoint_policy": "one_representative_mid_per_session",
   "window_cartesian": false,
   "soft_standard_hold": true,
@@ -1014,57 +1014,7 @@
       "fire_count": 1,
       "fire_rate": 0.0244
     },
-    "state.markers_focus|q.edit_churn": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.bash_retry_storm": {
-      "n_sessions": 41,
-      "fire_count": 1,
-      "fire_rate": 0.0244
-    },
-    "state.markers_focus|q.brief_abandon": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.parallel_agent_thrash": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.test_flake_loop": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.docs_only_drift": {
-      "n_sessions": 41,
-      "fire_count": 1,
-      "fire_rate": 0.0244
-    },
-    "state.markers_focus|q.dependency_wait": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.speculative_rewrite": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.context_thrash_compact": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
     "state.state_length_mid|q.over_polish": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.deliverable_orphan": {
       "n_sessions": 41,
       "fire_count": 0,
       "fire_rate": 0.0
@@ -1074,17 +1024,7 @@
       "fire_count": 0,
       "fire_rate": 0.0
     },
-    "state.markers_focus|q.scope_creep_silent": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
     "state.state_length_mid|q.mid_arc_healthy": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.markers_focus|q.idle_tool_spin": {
       "n_sessions": 41,
       "fire_count": 0,
       "fire_rate": 0.0
@@ -1094,27 +1034,12 @@
       "fire_count": 0,
       "fire_rate": 0.0
     },
-    "state.phase_hints_focus|q.edit_churn": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
     "state.state_length_mid|q.late_miss_risk": {
       "n_sessions": 41,
       "fire_count": 0,
       "fire_rate": 0.0
     },
-    "state.phase_hints_focus|q.bash_retry_storm": {
-      "n_sessions": 41,
-      "fire_count": 3,
-      "fire_rate": 0.0732
-    },
     "state.state_length_mid|q.recovery_possible": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.phase_hints_focus|q.brief_abandon": {
       "n_sessions": 41,
       "fire_count": 0,
       "fire_rate": 0.0
@@ -1124,18 +1049,8 @@
       "fire_count": 0,
       "fire_rate": 0.0
     },
-    "state.phase_hints_focus|q.parallel_agent_thrash": {
-      "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
     "state.state_length_mid|q.continue_learns": {
       "n_sessions": 41,
-      "fire_count": 0,
-      "fire_rate": 0.0
-    },
-    "state.phase_hints_focus|q.test_flake_loop": {
-      "n_sessions": 33,
       "fire_count": 0,
       "fire_rate": 0.0
     },
@@ -1498,6 +1413,566 @@
       "n_sessions": 41,
       "fire_count": 0,
       "fire_rate": 0.0
+    },
+    "state.markers_focus|q.edit_churn": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.markers_focus|q.bash_retry_storm": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.markers_focus|q.brief_abandon": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.parallel_agent_thrash": {
+      "n_sessions": 16,
+      "fire_count": 3,
+      "fire_rate": 0.1875
+    },
+    "state.markers_focus|q.test_flake_loop": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.docs_only_drift": {
+      "n_sessions": 16,
+      "fire_count": 2,
+      "fire_rate": 0.125
+    },
+    "state.markers_focus|q.dependency_wait": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.speculative_rewrite": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.context_thrash_compact": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.markers_focus|q.deliverable_orphan": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.scope_creep_silent": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.idle_tool_spin": {
+      "n_sessions": 16,
+      "fire_count": 9,
+      "fire_rate": 0.5625
+    },
+    "state.phase_hints_focus|q.edit_churn": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.bash_retry_storm": {
+      "n_sessions": 16,
+      "fire_count": 5,
+      "fire_rate": 0.3125
+    },
+    "state.phase_hints_focus|q.brief_abandon": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.parallel_agent_thrash": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.test_flake_loop": {
+      "n_sessions": 16,
+      "fire_count": 10,
+      "fire_rate": 0.625
+    },
+    "state.phase_hints_focus|q.docs_only_drift": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.dependency_wait": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.speculative_rewrite": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.context_thrash_compact": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.deliverable_orphan": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.scope_creep_silent": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.idle_tool_spin": {
+      "n_sessions": 16,
+      "fire_count": 2,
+      "fire_rate": 0.125
+    },
+    "state.recent_delta_brief|q.edit_churn": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.bash_retry_storm": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.brief_abandon": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.parallel_agent_thrash": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.test_flake_loop": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.docs_only_drift": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.dependency_wait": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.speculative_rewrite": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.context_thrash_compact": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.deliverable_orphan": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.scope_creep_silent": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.idle_tool_spin": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.markers_focus|q.compaction_storm": {
+      "n_sessions": 16,
+      "fire_count": 7,
+      "fire_rate": 0.4375
+    },
+    "state.markers_focus|q.reread_loop": {
+      "n_sessions": 16,
+      "fire_count": 2,
+      "fire_rate": 0.125
+    },
+    "state.markers_focus|q.silent_stall": {
+      "n_sessions": 16,
+      "fire_count": 14,
+      "fire_rate": 0.875
+    },
+    "state.markers_focus|q.tool_error_cascade": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.context_pressure": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.validation_loop": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.plan_execute_drift": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.handoff_ready": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.abort_cheaper": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.duplicate_work": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.over_polish": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.under_verified": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.mid_arc_healthy": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.early_false_alarm": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.late_miss_risk": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.markers_focus|q.recovery_possible": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.stop_preserves_value": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.continue_learns": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.thrash_vs_explore": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.user_wait_signal": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.resource_asymmetry": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.markers_focus|q.output_starvation": {
+      "n_sessions": 16,
+      "fire_count": 10,
+      "fire_rate": 0.625
+    },
+    "state.phase_hints_focus|q.compaction_storm": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.reread_loop": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.silent_stall": {
+      "n_sessions": 16,
+      "fire_count": 2,
+      "fire_rate": 0.125
+    },
+    "state.phase_hints_focus|q.tool_error_cascade": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.context_pressure": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.validation_loop": {
+      "n_sessions": 16,
+      "fire_count": 3,
+      "fire_rate": 0.1875
+    },
+    "state.phase_hints_focus|q.plan_execute_drift": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.handoff_ready": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.abort_cheaper": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.duplicate_work": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.over_polish": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.under_verified": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.mid_arc_healthy": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.early_false_alarm": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.phase_hints_focus|q.late_miss_risk": {
+      "n_sessions": 16,
+      "fire_count": 6,
+      "fire_rate": 0.375
+    },
+    "state.phase_hints_focus|q.recovery_possible": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.stop_preserves_value": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.phase_hints_focus|q.continue_learns": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.thrash_vs_explore": {
+      "n_sessions": 16,
+      "fire_count": 2,
+      "fire_rate": 0.125
+    },
+    "state.phase_hints_focus|q.user_wait_signal": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.resource_asymmetry": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.phase_hints_focus|q.output_starvation": {
+      "n_sessions": 16,
+      "fire_count": 3,
+      "fire_rate": 0.1875
+    },
+    "state.recent_delta_brief|q.compaction_storm": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.reread_loop": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.silent_stall": {
+      "n_sessions": 16,
+      "fire_count": 9,
+      "fire_rate": 0.5625
+    },
+    "state.recent_delta_brief|q.tool_error_cascade": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.context_pressure": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.validation_loop": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.plan_execute_drift": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.handoff_ready": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.abort_cheaper": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.duplicate_work": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.over_polish": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.under_verified": {
+      "n_sessions": 16,
+      "fire_count": 1,
+      "fire_rate": 0.0625
+    },
+    "state.recent_delta_brief|q.mid_arc_healthy": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.early_false_alarm": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.late_miss_risk": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.recovery_possible": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.stop_preserves_value": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.continue_learns": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.thrash_vs_explore": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.user_wait_signal": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.resource_asymmetry": {
+      "n_sessions": 16,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.output_starvation": {
+      "n_sessions": 16,
+      "fire_count": 6,
+      "fire_rate": 0.375
+    },
+    "state.delta_only|q.edit_churn": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.bash_retry_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.brief_abandon": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.parallel_agent_thrash": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.test_flake_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.docs_only_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.dependency_wait": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.speculative_rewrite": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.context_thrash_compact": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.deliverable_orphan": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
     }
   },
   "scenario_ids": [
@@ -1567,17 +2042,25 @@
     "state.compact_focus|q.validation_loop",
     "state.delta_only|q.abort_cheaper",
     "state.delta_only|q.activity_without_value",
+    "state.delta_only|q.bash_retry_storm",
+    "state.delta_only|q.brief_abandon",
     "state.delta_only|q.closing_protect",
     "state.delta_only|q.compaction_storm",
     "state.delta_only|q.context_pressure",
+    "state.delta_only|q.context_thrash_compact",
     "state.delta_only|q.continue_learns",
+    "state.delta_only|q.deliverable_orphan",
+    "state.delta_only|q.dependency_wait",
+    "state.delta_only|q.docs_only_drift",
     "state.delta_only|q.duplicate_work",
     "state.delta_only|q.early_false_alarm",
+    "state.delta_only|q.edit_churn",
     "state.delta_only|q.handoff_ready",
     "state.delta_only|q.late_miss_risk",
     "state.delta_only|q.mid_arc_healthy",
     "state.delta_only|q.output_starvation",
     "state.delta_only|q.over_polish",
+    "state.delta_only|q.parallel_agent_thrash",
     "state.delta_only|q.plan_execute_drift",
     "state.delta_only|q.recheck_interval",
     "state.delta_only|q.recoverable_stall",
@@ -1586,8 +2069,10 @@
     "state.delta_only|q.resource_asymmetry",
     "state.delta_only|q.scope_drift",
     "state.delta_only|q.silent_stall",
+    "state.delta_only|q.speculative_rewrite",
     "state.delta_only|q.stop_preserves_value",
     "state.delta_only|q.tail_risk",
+    "state.delta_only|q.test_flake_loop",
     "state.delta_only|q.thrash_vs_explore",
     "state.delta_only|q.tool_error_cascade",
     "state.delta_only|q.under_verified",
@@ -1637,23 +2122,108 @@
     "state.deterministic_trim_v2|q.under_verified",
     "state.deterministic_trim_v2|q.user_wait_signal",
     "state.deterministic_trim_v2|q.validation_loop",
+    "state.markers_focus|q.abort_cheaper",
     "state.markers_focus|q.bash_retry_storm",
     "state.markers_focus|q.brief_abandon",
+    "state.markers_focus|q.compaction_storm",
+    "state.markers_focus|q.context_pressure",
     "state.markers_focus|q.context_thrash_compact",
+    "state.markers_focus|q.continue_learns",
     "state.markers_focus|q.deliverable_orphan",
     "state.markers_focus|q.dependency_wait",
     "state.markers_focus|q.docs_only_drift",
+    "state.markers_focus|q.duplicate_work",
+    "state.markers_focus|q.early_false_alarm",
     "state.markers_focus|q.edit_churn",
+    "state.markers_focus|q.handoff_ready",
     "state.markers_focus|q.idle_tool_spin",
+    "state.markers_focus|q.late_miss_risk",
+    "state.markers_focus|q.mid_arc_healthy",
+    "state.markers_focus|q.output_starvation",
+    "state.markers_focus|q.over_polish",
     "state.markers_focus|q.parallel_agent_thrash",
+    "state.markers_focus|q.plan_execute_drift",
+    "state.markers_focus|q.recovery_possible",
+    "state.markers_focus|q.reread_loop",
+    "state.markers_focus|q.resource_asymmetry",
     "state.markers_focus|q.scope_creep_silent",
+    "state.markers_focus|q.silent_stall",
     "state.markers_focus|q.speculative_rewrite",
+    "state.markers_focus|q.stop_preserves_value",
     "state.markers_focus|q.test_flake_loop",
+    "state.markers_focus|q.thrash_vs_explore",
+    "state.markers_focus|q.tool_error_cascade",
+    "state.markers_focus|q.under_verified",
+    "state.markers_focus|q.user_wait_signal",
+    "state.markers_focus|q.validation_loop",
+    "state.phase_hints_focus|q.abort_cheaper",
     "state.phase_hints_focus|q.bash_retry_storm",
     "state.phase_hints_focus|q.brief_abandon",
+    "state.phase_hints_focus|q.compaction_storm",
+    "state.phase_hints_focus|q.context_pressure",
+    "state.phase_hints_focus|q.context_thrash_compact",
+    "state.phase_hints_focus|q.continue_learns",
+    "state.phase_hints_focus|q.deliverable_orphan",
+    "state.phase_hints_focus|q.dependency_wait",
+    "state.phase_hints_focus|q.docs_only_drift",
+    "state.phase_hints_focus|q.duplicate_work",
+    "state.phase_hints_focus|q.early_false_alarm",
     "state.phase_hints_focus|q.edit_churn",
+    "state.phase_hints_focus|q.handoff_ready",
+    "state.phase_hints_focus|q.idle_tool_spin",
+    "state.phase_hints_focus|q.late_miss_risk",
+    "state.phase_hints_focus|q.mid_arc_healthy",
+    "state.phase_hints_focus|q.output_starvation",
+    "state.phase_hints_focus|q.over_polish",
     "state.phase_hints_focus|q.parallel_agent_thrash",
+    "state.phase_hints_focus|q.plan_execute_drift",
+    "state.phase_hints_focus|q.recovery_possible",
+    "state.phase_hints_focus|q.reread_loop",
+    "state.phase_hints_focus|q.resource_asymmetry",
+    "state.phase_hints_focus|q.scope_creep_silent",
+    "state.phase_hints_focus|q.silent_stall",
+    "state.phase_hints_focus|q.speculative_rewrite",
+    "state.phase_hints_focus|q.stop_preserves_value",
     "state.phase_hints_focus|q.test_flake_loop",
+    "state.phase_hints_focus|q.thrash_vs_explore",
+    "state.phase_hints_focus|q.tool_error_cascade",
+    "state.phase_hints_focus|q.under_verified",
+    "state.phase_hints_focus|q.user_wait_signal",
+    "state.phase_hints_focus|q.validation_loop",
+    "state.recent_delta_brief|q.abort_cheaper",
+    "state.recent_delta_brief|q.bash_retry_storm",
+    "state.recent_delta_brief|q.brief_abandon",
+    "state.recent_delta_brief|q.compaction_storm",
+    "state.recent_delta_brief|q.context_pressure",
+    "state.recent_delta_brief|q.context_thrash_compact",
+    "state.recent_delta_brief|q.continue_learns",
+    "state.recent_delta_brief|q.deliverable_orphan",
+    "state.recent_delta_brief|q.dependency_wait",
+    "state.recent_delta_brief|q.docs_only_drift",
+    "state.recent_delta_brief|q.duplicate_work",
+    "state.recent_delta_brief|q.early_false_alarm",
+    "state.recent_delta_brief|q.edit_churn",
+    "state.recent_delta_brief|q.handoff_ready",
+    "state.recent_delta_brief|q.idle_tool_spin",
+    "state.recent_delta_brief|q.late_miss_risk",
+    "state.recent_delta_brief|q.mid_arc_healthy",
+    "state.recent_delta_brief|q.output_starvation",
+    "state.recent_delta_brief|q.over_polish",
+    "state.recent_delta_brief|q.parallel_agent_thrash",
+    "state.recent_delta_brief|q.plan_execute_drift",
+    "state.recent_delta_brief|q.recovery_possible",
+    "state.recent_delta_brief|q.reread_loop",
+    "state.recent_delta_brief|q.resource_asymmetry",
+    "state.recent_delta_brief|q.scope_creep_silent",
+    "state.recent_delta_brief|q.silent_stall",
+    "state.recent_delta_brief|q.speculative_rewrite",
+    "state.recent_delta_brief|q.stop_preserves_value",
+    "state.recent_delta_brief|q.test_flake_loop",
+    "state.recent_delta_brief|q.thrash_vs_explore",
+    "state.recent_delta_brief|q.tool_error_cascade",
+    "state.recent_delta_brief|q.under_verified",
+    "state.recent_delta_brief|q.user_wait_signal",
+    "state.recent_delta_brief|q.validation_loop",
     "state.state_length_mid|q.abort_cheaper",
     "state.state_length_mid|q.closing_protect",
     "state.state_length_mid|q.compaction_storm",
@@ -1799,5 +2369,7 @@
     "state.window_delta_tools|q.user_wait_signal",
     "state.window_delta_tools|q.validation_loop"
   ],
-  "generated_at": "2026-10-02T09:02:17+10:00"
+  "generated_at": "2026-10-02T09:15:16+10:00",
+  "stale_growth_rows_excluded": 2312,
+  "growth_fill_version": "growth-fill-v1"
 }
