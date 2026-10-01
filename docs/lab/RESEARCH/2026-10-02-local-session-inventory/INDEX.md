@@ -4,7 +4,7 @@
 
 **Status:** Inventory + stats + provisional shortlist. Soft Standard HOLD. No behaviour ship. Prefer Flash.
 
-**Not a selection rule.** Length-biased and Flash shortlists are evidence for comparing selection lenses (length, shape, thrash, diversity, recency, harness-balance). The interception white paper’s next selection trial (40% harness and Maps caps, length lens as baseline only) is [`../../PROPOSALS/2026-10-02-interception-steer-to-stop.md`](../../PROPOSALS/2026-10-02-interception-steer-to-stop.md).
+**Not a selection rule.** Length-biased and Flash shortlists are evidence for comparing selection lenses (length, shape, thrash, diversity, recency, harness-balance). The interception white paper samples as many right-sized real transcripts as exist (40% harness and Maps caps, length lens as baseline only, 24 sessions as the first balanced slice rather than the corpus): [`../../PROPOSALS/2026-10-02-interception-steer-to-stop.md`](../../PROPOSALS/2026-10-02-interception-steer-to-stop.md).
 
 ## Artefacts
 

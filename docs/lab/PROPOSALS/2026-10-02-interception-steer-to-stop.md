@@ -1,7 +1,7 @@
 ---
 title: Interception / steer-to-stop
 status: resolved-soft
-disposition: recommendations recorded; product and hooks held; trial waves GO
+disposition: recommendations recorded; behaviour ship held; continuous large-n trial waves are the evidence path
 date: 2026-10-02
 updated: 2026-10-02
 signal: Steer-to-stop has to catch jobs that would run long and leave near-done closing work alone; Wave-0 Flash trials exist and are not an FP/miss board.
@@ -12,9 +12,9 @@ confidence: protocol-resolved; framings provisionally ordered; not score-ranked
 
 # Interception / steer-to-stop
 
-**Soft Standard HOLD — product and hooks only.** This paper does not ship behaviour, hooks, Pilot, Standard, Max, or live in-loop Jev. It does not pause trials. Flash, TypeSafe, and Luna measurement waves are GO without a further greenlight.
+**Soft Standard HOLD — behaviour ship only.** This paper does not ship behaviour, hooks, Pilot, Standard, Max, or live in-loop Jev. It does not pause trials and it does not treat a thin pilot as evidence. The evidence path is continuous large-n waves on real transcripts, run by TypeSafe, Flash, and Luna, analysed with session-level statistics. Behaviour is built after that evidence is in the paper and Cody accepts it.
 
-**Status: resolved-soft.** Recommendations below are the lab’s current reading of the pack, the adversarial gate, and Wave-0. They are not an accepted runtime policy. Cody’s accept is what would later turn a measured rule into product wiring.
+**Status: resolved-soft.** Recommendations below are the lab’s current reading of the pack, the adversarial gate, and Wave-0. They are not an accepted runtime policy. batch-002 (240 Flash cells, 22 sessions, one driver) is a decontaminated diagnostic. It is below the scale bar.
 
 Research pack: [`../RESEARCH/2026-10-02-interception-steer-to-stop/`](../RESEARCH/2026-10-02-interception-steer-to-stop/INDEX.md). Trials: [`../RESEARCH/2026-10-02-interception-trials/`](../RESEARCH/2026-10-02-interception-trials/INDEX.md).
 
@@ -26,13 +26,33 @@ This is the next layer after [`2026-10-01-progressive-jev-session-gates`](2026-1
 |---------|-------------|
 | Hooks, `additionalContext`, parent-surface injection, `install.sh`, driver defaults, `assert_phase` defaults, `gate_thresholds.py`, `classify.py` | Held |
 | Pilot, Standard, Max, live in-loop Jev | Held |
-| Flash, TypeSafe (`jev-1.13.0`), and Luna **trial** waves on frozen prefix snapshots | **GO** — no behaviour greenlight required |
+| TypeSafe (`jev-1.13.0`), Flash, and Luna trial waves on real prefix snapshots | **GO** — continuous, large-n, no behaviour greenlight |
+| Thin pilots (hundreds of cells, one driver, a few dozen sessions) | Below the bar. batch-002 stays on disk as a diagnostic and does not close the evidence path |
 | FP/miss leaderboard | Starts when [`outcome-labels.jsonl`](../RESEARCH/2026-10-02-interception-trials/OUTCOME-SHEET.md) exists and is joined |
-| Variant generation | Runs in parallel with labeling |
+| Variant generation | Runs in parallel with labeling, at thousands of trials |
 
 ### Resolved recommendations
 
-Record the hold as two columns, not one lock. Product wiring stays off. The next measured corpus starts now, under the waves in [Next spikes](#next-spikes).
+The hold covers behaviour ship. It does not cover trial volume. The evidence path in [Scale bar](#scale-bar) and [Next spikes](#next-spikes) starts now and keeps going until the statistical estimates are in this paper. Building the steer waits on those estimates and on Cody’s accept.
+
+## Scale bar
+
+Cody’s bar for this work is **thousands of trials**, not a single batch that finishes the named grid. [`H1-DETAIL.md`](../RESEARCH/2026-10-02-interception-steer-to-stop/H1-DETAIL.md) §4b already sets the planning band at **1,000–5,000 distinct lever variants** (a sketch of 24 state scenarios × 12 queries × 8 response classes = 2,304). Executed trials are that grid crossed with checkpoints, real sessions, and three drivers. batch-002’s 240 cells are about an order of magnitude under the variant floor, on one driver, and the 240 cap is why eight planned combos never ran.
+
+| Requirement | Rule |
+|-------------|------|
+| Volume | Continuous waves, starting now. Each wave adds at least **1,000 new trials per driver** (TypeSafe, Flash, and Luna). Keep going until the running total per driver is in the thousands. A few hundred cells are a wave in progress, not a finished corpus |
+| Drivers | The same trial list on all three drivers. Each driver is a policy-under-test. Cross-driver disagreement is a sensitivity column. It is not a vote and not a label |
+| Variants | Move four axes, first one at a time, then crossed: **longer vs shorter state**, **deterministic trimming** (counts-only, trimmed tool payloads, hybrid), **state window** (cumulative prefix, delta since the prior checkpoint, tail-only, brief-anchor plus tail), **query** (including the unrun `near_done`, `defer_recheck`, and `productive_arc` texts). The existing 12,000-character state guard is one of the length caps, not the only one |
+| Sessions | **As many right-sized real transcripts as the inventory and stored JSONLs contain.** Right-sized means the session survives to the checkpoint under analysis, the prefix can be built without post-checkpoint fields, and the logical session is deduped. Cover productive-at-75, closing, thrash, and natural completion. Length-max ranking is not the sampler |
+| Analysis | Statistical, on those transcripts. The independent unit is the **session**. Cells are repeated measures. See [Measurement](#measurement) |
+| Order | Waves and human labels run together. Estimates land in this paper as waves complete. Behaviour build comes after the large-n estimates are written down and Cody accepts behaviour |
+
+A few hundred coherent cells remain useful as a leakage and plumbing check. They are not the result.
+
+### Resolved recommendations
+
+Set the evidence path at thousands of trials per driver, on as many right-sized sessions as exist, with the four variant axes above, analysed by session-clustered contrasts. Keep batch-002 as the decontamination record. Do not ship behaviour off it, and do not stop the waves when the eight missing combos have a handful of cells.
 
 ## Signal
 
@@ -141,7 +161,7 @@ Support at the re-check is thin: 8 sessions and 24 cells at t=90. Enough to see 
 
 #### Resolved recommendations
 
-Publish and quote the survival table as a diagnostic of the policy-under-test. Use the t=75 split (10/12 vs 1/12) as the reason the next wave must keep **both** questions, not as an accuracy result. Withhold every FP/miss ranking until the outcome-sheet join. Run the eight missing combos and the H3/H4 probes in the next batch rather than re-interpreting these 240 cells.
+Publish and quote the survival table as a diagnostic of one thin pilot. Use the t=75 split (10/12 vs 1/12) as a paired contrast the large-n waves must re-estimate with session-clustered intervals, not as an accuracy result. Withhold every FP/miss ranking until the outcome-sheet join. The eight missing combos and the H3/H4 probes enter the first standing wave at the scale bar, rather than as another few hundred cells.
 
 ### 4. Framings — provisional primary, live runners-up, demotions
 
@@ -156,7 +176,7 @@ No Wave-0 number ranks H1–H5. batch-002 exercised a slice of the H1 chain and 
 | **H3 progress velocity** | **Live runner-up. Must be measured** | The outcome sheet’s runaway-like class is thrash, low checkable progress, post-boundary overrun, and scope drift. `thrash_bundle` ran only as one confounded combo (3/12 fires at t=75). Plateau features belong in **state**, with a one-checkpoint recovery allowance so a temporary stall is a defer |
 | **H2 horizon control** | **Demoted to a required null baseline. Still computed every wave** | R2 showed what happens when a horizon defines the label. Constant-turn fires (first checkpoint ≥ 75, first checkpoint ≥ 90) and never-fire are computed from the schedule with no model. They sit beside every scorecard. H2 does not supply `ideal_steer_window` |
 | **H5 counterfactual waste** | **Demoted from winner contention. Component rows still emitted** | Observational replay has one future. Each wave emits the component fields (avoidable continuation, useful work at risk, closing cost, overhead) as `unidentified` when no paired branch exists. A causal net-benefit claim waits on paired branches. The row is still written |
-| **H6 monitor agreement** | **Rejected as gold** | Flash vs TypeSafe vs Luna agreement is a dissociation column. It cannot confirm a window or release the product hold |
+| **H6 monitor agreement** | **Rejected as gold** | Flash vs TypeSafe vs Luna agreement is a sensitivity column. It cannot confirm a window or release the behaviour hold |
 | H7–H12 | Not promoted | `termination_cause` and `human_steer_count` are already label fields (H7 as a biased reference, not gold). At-risk scoring (H11) is already the R3 rule |
 
 Ranking gate, applied **after** labels exist, on components reported separately. The weighted sum in batch-001 (premature 1.0 / near-done 1.2 / runaway miss 1.5) stays an evaluation choice from the adversarial gate, not a finding, and is not the decision statistic.
@@ -186,13 +206,13 @@ Next selection trial, run as its own labeled pool in parallel with Wave-1 on the
 | Shape × thrash | Sessions with thrash, a visible closing sequence, or a human stop, including sessions that miss the length top 15 | Supplies near-done and censored rows the length list undersamples |
 | Harness balance | Cap claude-code at 40% of the pool and `open-pajero-maps` at 40%. Fill from qualitative rows already named: opencode lemmings, llama.cpp, free-frontier; codex garcia-music and lemmings; cursor garcia-music | Moves the base rate off one project family |
 
-Pool target once labels are being written: 24 sessions, at most 10 claude-code, at most 10 Maps, at least 4 opencode, 3 codex, and 3 cursor. Dedup before rank: codex rollouts that share a `session_id` are one session (called out in `SHORTLIST.md`). If a quota cannot be filled from the inventory, score inside the strata that exist and record the gap in the evidence log. Backfill is not more Maps length.
+The balanced slice starts at 24 sessions (at most 10 claude-code, at most 10 Maps, at least 4 opencode, 3 codex, and 3 cursor) and then **keeps growing**. Twenty-four is the first check that the 40% caps are enforceable. It is not the corpus. The corpus is every right-sized real transcript the inventory and stored JSONLs can supply. Dedup before rank: codex rollouts that share a `session_id` are one session (called out in `SHORTLIST.md`). If a quota cannot be filled, score inside the strata that exist, record the gap, and keep adding sessions that do exist. Backfill is not more Maps length.
 
 The length lens remains the corpus rule only if labeled component rates keep the same sign when Maps share drops from batch-002’s 14/22 to 40% or below. If the sign flips, the length lens is retired as the sampling rule and the balanced pool replaces it.
 
 #### Resolved recommendations
 
-Keep both shortlists as evidence of lenses. Run Wave-1a/1b on the existing batch-002 packs immediately, stamped Maps-concentrated. Open the three-lens pool as a parallel corpus, with the 40% caps as the sampling rule under test. Do not promote either shortlist to a committed selector.
+Keep both shortlists as evidence of lenses, not as the sample. Stamp any estimate that uses only the current Maps-heavy packs as Maps-concentrated. Sample onward under the 40% caps until right-sized sessions run out. Do not promote either shortlist to a committed selector.
 
 ### 6. Product landing vs trial landing
 
@@ -210,7 +230,7 @@ Keep both shortlists as evidence of lenses. Run Wave-1a/1b on the existing batch
 
 #### Resolved recommendations
 
-Leave product surfaces untouched. Spend the next lab effort on batch-003 and the label sidecar. A later greenlight reads this file; it does not get new behaviour from the merge of this file.
+Leave behaviour unwired. Spend the lab effort on the standing large-n waves and the growing label sidecar. Fold each wave’s statistical table back into this paper. A later behaviour accept reads those tables. This merge does not build the steer.
 
 ## Economics
 
@@ -218,11 +238,11 @@ The burn being targeted is the fat tail already measured: multi-hundred-turn Map
 
 Per-turn frontier review of the worker loop stays out of remit (`GOALS.md`). A hard turn cap is cheaper to compute and, on this evidence, the wrong objective: batch-001’s length window would have scored a productive 400-turn session as a runaway miss if the policy deferred (adversarial gate, R2). The expensive error is asymmetric and only visible in components: cutting a job that is in closing work (stop at 75, finish near 85) versus missing a thrash tail that would have run toward 360.
 
-Conditional TypeSafe and Flash calls at survived checkpoints, cached and prefix-only, are the spend this paper authorizes. Hook installation and live Pilot Jev are a different spend, and they stay unauthorized. Volume targets in `H1-DETAIL.md` (hundreds, then a working band of 1,000–5,000 lever variants, with variant count reported separately from independent sessions) are sweep targets for these trials. Hitting a count does not release the product hold. A thin unlabeled pilot also does not.
+The spend this paper authorizes is continuous TypeSafe, Flash, and Luna calls at survived checkpoints, on prefix-only state, cached, at the scale bar (at least 1,000 new trials per driver per wave, thousands accumulated per driver). batch-002’s 464.5 seconds for 240 Flash cells is the unit cost of a thin pilot, useful for planning throughput, not a reason to stay at 240. Hook installation and live Pilot Jev are a different spend, and they stay unauthorized. Variant count and session count stay separate columns, as [`H1-DETAIL.md`](../RESEARCH/2026-10-02-interception-steer-to-stop/H1-DETAIL.md) §4b and the evidence log already require. Reaching a thousand trials does not release the behaviour hold. Stopping at a few hundred does not finish the evidence path.
 
 ### Resolved recommendations
 
-Pay for multi-approach trial volume (Flash, TypeSafe, Luna subsample) on prefix snapshots. Report `n_sessions_independent` and `n_variants` separately, as the evidence log already requires. Keep per-turn live Jev and length caps out of the budget.
+Pay for continuous large-n waves on all three drivers across as many right-sized sessions as exist. Report `n_sessions_independent` and `n_trials` separately, with session-clustered intervals. Keep per-turn live Jev and length caps out of the budget. Build the product steer after those estimates are in the paper and Cody accepts behaviour.
 
 ## Non-goals
 
@@ -234,38 +254,48 @@ Pay for multi-approach trial volume (Flash, TypeSafe, Luna subsample) on prefix 
 - Retuning the resolved cheap-Jev thresholds or turning `classify.py` into a KPI.
 - Treating the provisional H1 defer rule as a runtime default.
 - Collapsing H2–H5 out of the measured corpus because H1 is the provisional primary.
+- Treating batch-002, or any later few-hundred-cell batch, as enough evidence to build.
 
 ### Resolved recommendations
 
-The non-goals are the product hold and the banned scoreboards. They are not a hold on the next batch.
+The non-goals are the behaviour hold and the banned scoreboards. Trial volume stays open, at the scale bar, until the statistical estimates are written back into this paper.
 
 ## Measurement
 
-Success for a **trial wave** is a clean batch: leakage audit pass, fixed schedule, at-risk denominators, every live framing present at the cell budget in §4, null baselines in the meter file, `n_sessions` and `n_variants` split, Maps share disclosed.
+Analyse real transcript trials with statistics. Do not read a point fire rate off a few dozen sessions as a result.
 
-Success for a **ranking** is the component test in §4 on a labeled join. `classify.py` is not in that test. Steer adherence stays unmeasured and the meter header keeps the batch-002 line: assessment and decision layer only.
+| Estimator | Rule |
+|-----------|------|
+| Independent unit | The session. Resample **sessions** (percentile bootstrap, 1,000 draws) for every interval. A cell is a repeated measure inside its `session_id` |
+| Paired lever contrast | Same session, same checkpoint, same driver, two variants that differ on one axis (state length, trim, window, or query). Report the mean paired fire difference and its session-clustered interval |
+| At-risk rate | Fire rate at t uses `n_at_risk(t)`, as batch-002 already does, plus the session-clustered interval. Publish `n_never_reached` beside it |
+| Strata | Repeat the paired contrast inside harness and inside Maps vs other projects. A pooled estimate that hides a sign change across strata is not used |
+| Drivers | Fit the same contrasts separately for TypeSafe, Flash, and Luna. Cross-driver discordance on the same cell is a sensitivity column (H6). It does not pick the fire |
+| Multiplicity | Pre-register the contrast list for the wave. Publish every contrast. The most extreme cell is a description, not the finding (adversarial gate R9) |
+| Labels, when present | The same paired estimator on `near_done_fp`, `productive_interrupt`, and `runaway_miss`, against the H2 nulls, components kept separate. Until the sidecar exists, the statistical object is lever sensitivity, not accuracy |
+| Stability | A contrast is stable when a later wave’s **held-out** sessions show the same sign. If the inventory of right-sized sessions is exhausted and the interval still covers zero, record the lever as unresolved and leave it out of any behaviour proposal |
 
-A wave that is clean and unlabeled is a successful wave. It publishes diagnostics and feeds the next sweep. It does not publish a winner.
+`classify.py` is not in this measurement. Steer adherence stays unmeasured. The meter header stays the batch-002 line: assessment and decision layer only.
+
+A wave succeeds when it is leakage-clean, hits the per-driver trial floor, covers the pre-registered contrasts, and adds a statistical table. A framing is ahead only under the labeled component test in §4, at large session n, on held-out sessions. Those are different exits.
 
 ### Resolved recommendations
 
-Split “wave succeeded” from “framing is ahead.” batch-002 succeeded as a decontaminated diagnostic and failed as a ranking, because the labels and the missing combos are absent. The next wave’s exit condition is the clean multi-approach batch, not a greenlight and not an FP/miss table.
+Every standing wave publishes session-clustered paired contrasts for the four variant axes, separately per driver, with strata and the full contrast list. batch-002’s point rates stay a thin-pilot diagnostic. Behaviour build uses the stable large-n table, after Cody accepts it.
 
 ## Next spikes
 
-Run these in order. 1a, 1b, and the label sidecar start together. 1a does not wait for labels or for 1c. New batches get new ids. batch-002 `results.jsonl` stays frozen.
+batch-002 `results.jsonl` stays frozen. Every later batch gets a new id. The standing wave does not wait for labels, and labels do not wait for the wave to “finish.” There is no last thin pilot.
 
-| Wave | What to run | Instrument | Done when |
-|------|-------------|------------|-----------|
-| **1a. Finish the named grid** | The eight `LEVER_COMBOS` entries that batch-002 did not execute, on the same packs and `FIXED_SCHEDULE`, prefix-only state, same R1 field ban. New directory `batch-003/` | Flash as policy-under-test, same role as batch-002 | Leakage audit pass, leak spotcheck 0, cells for `near_done`, `defer_recheck`, `productive_arc`, `rating_plus_offset`, `stats_plus_delta`, `compact_focus` present, meters labeled diagnostic |
-| **1b. Second instrument** | The four executed combos plus the 1a eight, same prefixes | TypeSafe `jev-1.13.0` Choice/Score, trial wave, GO. Luna on a pre-registered subsample of the same cells | TypeSafe rows logged beside Flash with `judge_role` set. Agreement counted only under an H6 column. No hook, no `assert_phase` default change |
-| **1c. Framing probes and nulls** | H2 constant-turn and never-fire baselines (no model). H3 plateau features inside state, one-checkpoint recovery. H4 `near_done` plus a post-boundary marker in state. H5 component row, `unidentified` without a paired branch. Cell budget: H3 and H4 each ≥ half the H1 pair’s cells on shared sessions | Flash and TypeSafe for H3/H4; script for H2 nulls | Scorecard shows all five framings plus nulls, or an explicit volume-asymmetric stamp. Still no FP/miss board |
-| **Labels (parallel)** | Human sidecar `batch-002/outcome-labels.jsonl`, then the same schema on batch-003 sessions, per [`OUTCOME-SHEET.md`](../RESEARCH/2026-10-02-interception-trials/OUTCOME-SHEET.md) | Human reviewer. Not Flash, not TypeSafe, not Luna | Draft written before that session’s judge file is opened. `independence` attestation present |
-| **1d. Selection pool** | Three-lens pool in §5, same schedule and the H1 pair plus H3 and H4 probes | Same instruments as 1b | Pool meets the quotas or the evidence log records the unfilled stratum. Rankings that use only the Maps-heavy packs stay stamped Maps-concentrated |
-| **1e. First ranked card** | Join labels to fire/defer under the outcome-sheet meter definitions. Compare H1, H3, H4, and the H2 nulls on the component test | Derived meters in a new report. Historical `results.jsonl` kept | Card published only if the minimum labeled support in §4 is met. Otherwise the report stays diagnostic and 1a–1d continue |
-
-After 1a–1c, push sparse cells (near-done checkpoints and runaway-like checkpoints, once any labels exist) toward the `H1-DETAIL.md` band of 1,000–5,000 variants. Variant count is not session count. Source-session dependence stays grouped.
+| Step | What runs | Floor |
+|------|-----------|-------|
+| **Standing wave, from batch-003 onward** | Same trial list on **TypeSafe (`jev-1.13.0`), Flash, and Luna**. Prefix-only state, R1 field ban, `FIXED_SCHEDULE`, at-risk denominators. Axes in the [scale bar](#scale-bar): state length, deterministic trim, state window, query. The eight combos batch-002 skipped are in the first wave’s query and state lists, at this floor, not as a 240-cell sequel. H2 never-fire and constant-turn nulls are computed in the meter script every wave. H3 plateau features and H4 boundary markers are state variants in the same list. H5 component rows are emitted as `unidentified` until a paired branch exists | **≥ 1,000 new trials per driver per wave.** Running total in the thousands per driver. Leakage audit before the wave is called clean. `judge_role` set per driver. No hook and no `assert_phase` default change |
+| **Sessions, continuous** | Add every right-sized real transcript still unused. First balanced slice is the 24-session check in §5; sampling continues under the 40% caps | Stop adding only when the inventory of right-sized sessions is exhausted. Maps-only estimates stay stamped Maps-concentrated |
+| **Statistics, every wave** | Session-clustered paired contrasts from [Measurement](#measurement), full contrast list, strata, held-out sessions once the pool can support a hold-out | A table appended to the evidence log and folded back into this paper. Point fire rates without intervals do not count as the wave’s result |
+| **Labels, parallel** | Human `outcome-labels.jsonl` per [`OUTCOME-SHEET.md`](../RESEARCH/2026-10-02-interception-trials/OUTCOME-SHEET.md), growing as sessions are added | Draft written before that session’s judge file is opened. Drivers stay out of `labeler` |
+| **Ranked card, when labels and n allow** | Join labels. Compare H1, H3, H4, and the H2 nulls on the component test in §4, with session-clustered intervals, on held-out sessions | Publish the card only at the labeled minimum in §4 **and** after each driver is in the thousands of trials. Otherwise the report stays a lever-sensitivity table and the standing wave continues |
+| **Build** | Behaviour wiring (hooks, Pilot, live in-loop Jev, cadence defaults) | Starts after the large-n tables are in this paper and Cody accepts behaviour. Not after the first clean thousand, and not from batch-002 |
 
 ### Resolved recommendations
 
-The immediate work is batch-003 (the eight missing combos) and a TypeSafe pass on the same prefixes, with labeling in parallel and H2 nulls in the meter script. That is the measured multi-approach corpus. The product hold remains. No framing is shipped from this merge.
+Run continuous large-n TypeSafe, Flash, and Luna waves on real right-sized transcripts, analyse them with session-clustered contrasts, and write the estimates back into this paper. That is the evidence path. Behaviour ship stays held until Cody accepts it. No framing is built from this merge.

@@ -1,6 +1,6 @@
 # Evidence log — interception / steer-to-stop trials
 
-**Soft Standard HOLD** (product and hooks only). Assessment/decision layer only; steer adherence unmeasured.  
+**Soft Standard HOLD** (behaviour ship only). Assessment/decision layer only; steer adherence unmeasured. batch-002 is below the scale bar (thousands of trials per driver).  
 LLM agreement is not gold. Flash may be **policy-under-test** or **variant driver** — never silent reference gold.  
 Reading guide and next waves (TypeSafe included, no behaviour greenlight): [`../../PROPOSALS/2026-10-02-interception-steer-to-stop.md`](../../PROPOSALS/2026-10-02-interception-steer-to-stop.md).
 
