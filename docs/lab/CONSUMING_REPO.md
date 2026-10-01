@@ -4,7 +4,7 @@ Paste the block below into a project that drives builds with the workflow plugin
 
 ## What a consuming repo copies
 
-Claude Code and Cursor cloud are the two bootstrap layers below. **Codex** is a separate CLI harness (not OpenCode, not Composer) — advertise it for high-thinking work; see [`GUIDANCE-codex-harness.md`](GUIDANCE-codex-harness.md). Do not invent a Cursor session hook.
+Claude Code and Cursor cloud are the two bootstrap layers below. **Codex** is a separate CLI harness (not OpenCode, not Composer) — advertise it with soft routing guidance (CHM when unsure); see [`GUIDANCE-codex-harness.md`](GUIDANCE-codex-harness.md). Do not invent a Cursor session hook.
 
 **Cursor cloud** boots from a prebaked image. Project skills under `.cursor/skills/` are discovered when the agent process starts. There is no `SessionStart` / `reloadSkills`. **Preferred:** commit [`.cursor/environment.json`](https://cursor.com/docs/cloud-agent/environments) using [`tools/cloud-env/environment.json.example`](../../tools/cloud-env/environment.json.example) (or append its `install` to an existing one). The repo file beats dashboard config. Environment **builds** run `install` before agents start; **daily rebuild** tracks workflow-plugin **master** without pinning SHAs.
 
@@ -61,7 +61,7 @@ Grok Bot does not auto-discover plugin skills. On Cursor cloud they have to be i
 
 **OpenCode + DeepSeek Flash:** skills-only install (`./install.sh --opencode-skills`); no driver provider. Flash is encouraged for brief/unit work when rationing capacity; [`GUIDANCE-flash-review-gate.md`](GUIDANCE-flash-review-gate.md) bounds sign-off only (Sonnet 5.5 on Flash work, hold for Claude or Grok — no Flash auto close-out or `Workflow-Phase:`).
 
-**Codex (separate harness):** not an OpenCode provider. Pin **sol** → `gpt-6.1-sol` and **luna** → `gpt-6-luna` for Plus/Codex work (`codex exec -m … -c model_reasoning_effort=…`). Promote for high-thinking / mechanically rich units alongside Claude. Discovery for bots is still status → trigger → asserts (skills alone are not enough for Grok Bot). Details: [`GUIDANCE-codex-harness.md`](GUIDANCE-codex-harness.md).
+**Codex (separate harness):** not an OpenCode provider. Pin **sol** → `gpt-6.1-sol` and **luna** → `gpt-6-luna` for Plus/Codex work (`codex exec -m … -c model_reasoning_effort=…`; pass prompt on argv, override `-m` if config still says `gpt-5.4`). Often fits high-thinking / mechanically rich units alongside Claude — soft routing, not mandatory. Discovery for bots is still status → trigger → asserts (skills alone are not enough for Grok Bot). Details: [`GUIDANCE-codex-harness.md`](GUIDANCE-codex-harness.md).
 ```
 
 Adjust `<path-to-workflow-plugin>` to a submodule path, vendored copy, or documented clone location your automation uses.
