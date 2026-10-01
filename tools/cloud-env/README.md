@@ -12,9 +12,25 @@ Cursor Cloud Agents discover **project** skills under `.cursor/skills/` when the
 
 Legacy alias: [`docs/lab/bootstrap/cursor-cloud-setup.sh`](../../docs/lab/bootstrap/cursor-cloud-setup.sh) execs this script.
 
-## Cursor Cloud Agents setup command
+## Commit `.cursor/environment.json` (recommended)
 
-In the consuming repo’s Cursor **environment** configuration, set the install/setup command to run before agents start (exact UI field name may vary):
+Product repos should commit [`.cursor/environment.json`](https://cursor.com/docs/cloud-agent/environments) so Cursor **environment builds** run workflow bootstrap before any agent starts. A committed file takes **precedence** over the same `install` string configured only in the Cursor dashboard.
+
+Copy [`environment.json.example`](environment.json.example) to `.cursor/environment.json` in the consuming repo (or merge its `install` into an existing `install` command — run bootstrap and `check_skills.py` in the same shell chain):
+
+```json
+{
+  "install": "export WORKFLOW_WORKSPACE=\"${WORKFLOW_WORKSPACE:-$(pwd)}\" && curl -fsSL https://raw.githubusercontent.com/codyhamilton/workflow-plugin/master/tools/cloud-env/bootstrap-workflow-skills.sh | bash && python3 \"$HOME/.cache/workflow-plugin/tools/driver/check_skills.py\""
+}
+```
+
+On each **environment build** (including scheduled **daily rebuilds**), Cursor runs `install`, clones or updates workflow-plugin **master** in `~/.cache/workflow-plugin`, syncs core skills into `<workspace>/.cursor/skills/workflow/`, then verifies with `check_skills.py` (exit `0` when all six core skills are present). Skills are on disk before the agent process starts — no first-turn install gap.
+
+Add `<repo>/.cursor/skills/workflow/` to `.gitignore`.
+
+## Dashboard or shell fallback
+
+If the repo has no committed `.cursor/environment.json`, set the environment **install** command in the Cursor dashboard (field name may vary):
 
 ```bash
 export WORKFLOW_WORKSPACE="${WORKFLOW_WORKSPACE:-/workspace}"
@@ -28,17 +44,11 @@ export WORKFLOW_WORKSPACE="$(git rev-parse --show-toplevel)"
 bash /path/to/workflow-plugin/tools/cloud-env/bootstrap-workflow-skills.sh
 ```
 
-Add `<repo>/.cursor/skills/workflow/` to `.gitignore`.
-
-**Daily rebuild:** when the environment is rebuilt on a schedule, this command runs again and pulls the latest `master`, so skills stay current without pinning SHAs.
-
 After setup (no network required):
 
 ```bash
 python3 /path/to/workflow-plugin/tools/driver/check_skills.py
 ```
-
-Exit `0` when all six core skills are present.
 
 ## Optional lab skills
 
