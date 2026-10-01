@@ -1,8 +1,7 @@
 # Evidence log — interception / steer-to-stop trials
 
-**Soft Standard HOLD** (behaviour ship only). Assessment/decision layer only; steer adherence unmeasured. batch-002 is below the scale bar (thousands of trials per driver).  
-LLM agreement is not gold. Flash may be **policy-under-test** or **variant driver** — never silent reference gold.  
-Reading guide and next waves (TypeSafe included, no behaviour greenlight): [`../../PROPOSALS/2026-10-02-interception-steer-to-stop.md`](../../PROPOSALS/2026-10-02-interception-steer-to-stop.md).
+**Soft Standard HOLD.** Assessment/decision layer only; steer adherence unmeasured.  
+LLM agreement is not gold. Flash may be **policy-under-test** or **variant driver** — never silent reference gold.
 
 | Batch | Wave | Status | n_sessions | n_variants | Notes |
 |-------|------|--------|------------|------------|-------|
@@ -14,7 +13,7 @@ Reading guide and next waves (TypeSafe included, no behaviour greenlight): [`../
 
 **Outcome sheet protocol — landed.** [`OUTCOME-SHEET.md`](OUTCOME-SHEET.md) defines framing-agnostic **near-done** vs **runaway-like** observables, ideal steer windows (`none` / turn range / `ambiguous`), sidecar label schema, and join rules without leaking labels into judge inputs. Opus **R2** documentation gate for Wave-0 is satisfied at the **protocol** layer; **R3** schedule + R1 audit were already fixed in `batch-002/`.
 
-**Session labels — still pending.** No `batch-002/outcome-labels.jsonl`; all `results.jsonl` cells remain `window_status=unidentified`, `outcome_tag=null`. Until human labels exist, `batch-002/` meters stay score-ready-path **diagnostics** only — **not** a formal near-done FP / runaway-await FP/miss leaderboard.
+**Session labels — landed (sidecar).** `batch-002/outcome-labels.jsonl` has **20/20** rows (`label_status=labeled`, `labeler=chm-sol-adjudication`, `protocol_rev=outcome-sheet-v1`, independence attestation all false). Blind Sol adjudication from transcript digests only (no Flash rating/fire). Soft HOLD remains: `results.jsonl` cells stay `window_status=unidentified` / `outcome_tag=null` until a documented join/report; **do not** claim FP/miss scoreboard yet. Join/report TBD.
 
 ## Rules
 

@@ -57,3 +57,6 @@
 
 yes — Wave-0 batch-002 decontaminated path live; 240 cells / 22 sessions; leak_spotcheck_hits=0; FP/miss board **not** claimed (windows unidentified); TypeSafe unused; Soft Standard HOLD.
 
+## Outcome labels (2026-10-02)
+
+Sidecar `outcome-labels.jsonl` exists (20 labeled sessions, `chm-sol-adjudication`, `outcome-sheet-v1`). Soft HOLD: meters remain **diagnostics**; FP/miss join/report **TBD** — do not treat labels as unlocking Soft Standard or rewriting `window_status` in `results.jsonl`.
