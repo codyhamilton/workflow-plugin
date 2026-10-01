@@ -21,7 +21,7 @@ Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-
 
 | Thread | Log | Status |
 |--------|-----|--------|
-| Wave-0 offline lever trials | [`2026-10-02-interception-trials/EVIDENCE-LOG.md`](2026-10-02-interception-trials/EVIDENCE-LOG.md) (`batch-001/` quarantine + `batch-002/` protocol/results) | **batch-001** contaminated (T leak; Opus R1–R3). **batch-002** protocol fixed R1–R3. Meters are **diagnostic only** — **not** an FP/miss scoreboard. **Soft Standard HOLD.** Formal **near-done FP** / **runaway-await** non-length outcome sheet **not landed** (see log). |
+| Wave-0 offline lever trials | [`2026-10-02-interception-trials/EVIDENCE-LOG.md`](2026-10-02-interception-trials/EVIDENCE-LOG.md) · [`OUTCOME-SHEET.md`](2026-10-02-interception-trials/OUTCOME-SHEET.md) (`batch-001/` quarantine + `batch-002/` protocol/results) | **batch-001** contaminated (T leak; Opus R1–R3). **batch-002** R1–R3 fixed; **non-length outcome sheet protocol landed** (labels **pending**). Meters **diagnostic only** — **not** an FP/miss board until `outcome-labels.jsonl`. **Soft Standard HOLD.** |
 
 **Current control and measurement policy** (2026-09-30, later pass): [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Implications in this index follow that pass: Grok Bot drives, Jev asserts steer, classify visualises.
 
