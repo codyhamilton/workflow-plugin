@@ -122,7 +122,7 @@ When `ideal_steer_window` is `none` or `ambiguous`, or `label_status≠labeled`,
 | R1 leakage audit | PASS (`LEAKAGE-AUDIT.md`) |
 | R3 T-independent schedule | Fixed `(45, 60, 75, 90, 105, 120)` + at-risk reporting (`METERS.md`) |
 | R2 outcome sheet **protocol** | **Landed** (this file) |
-| `outcome-labels.jsonl` | **Landed** — 20/20 labeled (`chm-sol-adjudication`); join/report TBD; Soft HOLD |
+| `outcome-labels.jsonl` | **Landed** — 20/20 labeled (`chm-sol-adjudication`); **PROVISIONAL** join in [`../2026-10-02-interception-steer-to-stop/ANALYSIS.md`](../2026-10-02-interception-steer-to-stop/ANALYSIS.md); Soft HOLD |
 | `results.jsonl` | All cells: `window_status=unidentified`, `outcome_tag=null` |
 | FP/miss scoreboard | **Not claimed** — meters diagnostic until labels exist |
 

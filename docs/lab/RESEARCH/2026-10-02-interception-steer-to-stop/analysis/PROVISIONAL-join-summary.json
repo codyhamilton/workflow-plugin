@@ -1,0 +1,63 @@
+{
+  "soft_standard_hold": true,
+  "provisional": true,
+  "not_fp_miss_scoreboard": true,
+  "generated_at": "2026-10-01T22:56:07Z",
+  "join_spec": "OUTCOME-SHEET.md checkpoint join; tags prefixed PROVISIONAL_",
+  "why_window_status_unidentified": "R2: results.jsonl is frozen at emit time with window_status=unidentified until a batch-wide label pass and documented meter regeneration. Sidecar outcome-labels.jsonl (20 sessions) is not merged back into results.jsonl by design (no silent backfill). FP/miss leaderboard rows are derived-only.",
+  "wave0_cells": 240,
+  "labeled_sessions_in_join": 20,
+  "provisional_tag_counts": {
+    "PROVISIONAL_productive_interrupt": 48,
+    "PROVISIONAL_near_done_fp": 27,
+    "PROVISIONAL_runaway_miss_candidate": 15
+  },
+  "ideal_steer_window_not_none": [
+    {
+      "session_id": "a56bad1c7f13",
+      "ideal_steer_window": [
+        55,
+        62
+      ],
+      "pattern_tags": [
+        "productive_mid",
+        "closing_stage",
+        "low_progress"
+      ]
+    },
+    {
+      "session_id": "ses_1a0369734ffeqlVOz4S8",
+      "ideal_steer_window": [
+        161,
+        174
+      ],
+      "pattern_tags": [
+        "closing_stage",
+        "productive_mid",
+        "thrash",
+        "low_progress",
+        "natural_completion"
+      ]
+    },
+    {
+      "session_id": "ses_1a0328cd5ffe6iabFeMK",
+      "ideal_steer_window": [
+        22,
+        164
+      ],
+      "pattern_tags": [
+        "thrash",
+        "low_progress",
+        "scope_drift",
+        "natural_completion"
+      ]
+    }
+  ],
+  "next_measured_join_steps": [
+    "Add ideal_steer_window_by_cp when per-checkpoint adjudication exists.",
+    "Regenerate METERS.md from join with session-clustered CIs (not point rates).",
+    "Cross-driver join on session_id+checkpoint for Flash/Luna/TypeSafe lever waves.",
+    "Scenario sweep: join only at representative checkpoint \u2014 do not claim window FP/miss."
+  ],
+  "output_join_table": "docs/lab/RESEARCH/2026-10-02-interception-steer-to-stop/analysis/PROVISIONAL-join-wave0-flash.jsonl"
+}

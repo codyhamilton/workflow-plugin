@@ -59,4 +59,4 @@ yes — Wave-0 batch-002 decontaminated path live; 240 cells / 22 sessions; leak
 
 ## Outcome labels (2026-10-02)
 
-Sidecar `outcome-labels.jsonl` exists (20 labeled sessions, `chm-sol-adjudication`, `outcome-sheet-v1`). Soft HOLD: meters remain **diagnostics**; FP/miss join/report **TBD** — do not treat labels as unlocking Soft Standard or rewriting `window_status` in `results.jsonl`.
+Sidecar `outcome-labels.jsonl` exists (20 labeled sessions, `chm-sol-adjudication`, `outcome-sheet-v1`). Soft HOLD: meters remain **diagnostics**; **PROVISIONAL** join only — [`../../2026-10-02-interception-steer-to-stop/ANALYSIS.md`](../../2026-10-02-interception-steer-to-stop/ANALYSIS.md) + [`../../2026-10-02-interception-steer-to-stop/analysis/PROVISIONAL-join-summary.json`](../../2026-10-02-interception-steer-to-stop/analysis/PROVISIONAL-join-summary.json). Do not rewrite `window_status` in `results.jsonl` or claim FP/miss scoreboard.

@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-10-01T22:56:07Z",
+  "note": "Only 4/12 planned lever combos executed in Wave-0 Flash (240-cell cap).",
+  "combos": [
+    {
+      "state_variant": "stats_only",
+      "question_variant": "continue_excessively",
+      "response_class": "likert_0_3",
+      "n_cells": 68,
+      "fire_count": 43,
+      "fire_rate": 0.6324
+    },
+    {
+      "state_variant": "stats_only",
+      "question_variant": "steer_now",
+      "response_class": "binary_fire",
+      "n_cells": 68,
+      "fire_count": 16,
+      "fire_rate": 0.2353
+    },
+    {
+      "state_variant": "stats_only",
+      "question_variant": "thrash_bundle",
+      "response_class": "four_class",
+      "n_cells": 68,
+      "fire_count": 11,
+      "fire_rate": 0.1618
+    },
+    {
+      "state_variant": "hybrid_v0",
+      "question_variant": "steer_now",
+      "response_class": "likert_0_3",
+      "n_cells": 36,
+      "fire_count": 5,
+      "fire_rate": 0.1389
+    }
+  ]
+}
