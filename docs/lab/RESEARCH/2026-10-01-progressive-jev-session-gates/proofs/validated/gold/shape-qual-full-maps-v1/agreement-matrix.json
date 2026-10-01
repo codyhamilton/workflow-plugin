@@ -1,0 +1,564 @@
+{
+  "experiment": "shape-qual-full-maps-v1",
+  "n_workers": 34,
+  "seats": [
+    "composer",
+    "sonnet",
+    "grok"
+  ],
+  "shape_label_histograms": {
+    "composer": {
+      "late_pivot": 6,
+      "unclear": 23,
+      "early_thrash": 5
+    },
+    "sonnet": {
+      "unclear": 32,
+      "early_thrash": 2
+    },
+    "grok": {
+      "unclear": 24,
+      "late_pivot": 4,
+      "poll_monitor": 4,
+      "early_thrash": 2
+    }
+  },
+  "agreement_counts": {
+    "unanimous": 18,
+    "2-of-3": 15,
+    "diverge": 1
+  },
+  "workers": [
+    {
+      "worker_id": "036ff3ed4a89",
+      "T": 161,
+      "shape_label": {
+        "composer": "late_pivot",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "wait_verify_then_record",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "zero_edit_write",
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "0677f597286e",
+      "T": 93,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": []
+    },
+    {
+      "worker_id": "07357f196666",
+      "T": 83,
+      "shape_label": {
+        "composer": "early_thrash",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "bash_only_silent",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "compaction",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "074c8cf22927",
+      "T": 76,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": []
+    },
+    {
+      "worker_id": "0853bc21d3aa",
+      "T": 155,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "reread_loop",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "0aab88c525de",
+      "T": 192,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "late_pivot"
+      },
+      "sonnet_shape_detail": "steady_build_then_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "15f24c7ba18c",
+      "T": 93,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "poll_monitor"
+      },
+      "sonnet_shape_detail": "orchestrator_monitor_burst",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "16a958631580",
+      "T": 94,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "reread_loop",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "5163c22a6a3e",
+      "T": 90,
+      "shape_label": {
+        "composer": "late_pivot",
+        "sonnet": "unclear",
+        "grok": "late_pivot"
+      },
+      "sonnet_shape_detail": "build_then_long_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "late_pivot",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "reread_loop"
+      ]
+    },
+    {
+      "worker_id": "52ea24516a6e",
+      "T": 107,
+      "shape_label": {
+        "composer": "late_pivot",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "build_then_long_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "582c23b3c6e4",
+      "T": 77,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "late_pivot"
+      },
+      "sonnet_shape_detail": "bash_only_silent",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": []
+    },
+    {
+      "worker_id": "5a152464f6e5",
+      "T": 119,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "6e06ab86aa72",
+      "T": 123,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "poll_monitor_wait",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "79a557b56a6e",
+      "T": 95,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "reread_loop",
+        "productive_edits",
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "7af2854bba92",
+      "T": 99,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "orchestrator_dispatch_wait",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "7b00225cb824",
+      "T": 137,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_with_perf_debug",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "zero_edit_write",
+        "reread_loop",
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "7c99c180742e",
+      "T": 100,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "late_pivot"
+      },
+      "sonnet_shape_detail": "build_then_long_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "87a380bc64ff",
+      "T": 89,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "poll_monitor"
+      },
+      "sonnet_shape_detail": "poll_monitor_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait",
+        "zero_edit_write",
+        "reread_loop",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "89608cc68603",
+      "T": 125,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "8e36f8e80baa",
+      "T": 97,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "poll_monitor"
+      },
+      "sonnet_shape_detail": "orchestrator_dispatch_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "91a9aa8050fb",
+      "T": 86,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "92a48e004519",
+      "T": 296,
+      "shape_label": {
+        "composer": "late_pivot",
+        "sonnet": "early_thrash",
+        "grok": "early_thrash"
+      },
+      "sonnet_shape_detail": "churn_compaction_loop",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "early_thrash",
+      "shared_early_themes_2plus_seats": [
+        "compaction",
+        "reread_loop",
+        "bash_read_only",
+        "frozen_text"
+      ]
+    },
+    {
+      "worker_id": "9b156dbab5d9",
+      "T": 93,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": []
+    },
+    {
+      "worker_id": "9da2f589b11b",
+      "T": 76,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "reread_loop"
+      ]
+    },
+    {
+      "worker_id": "a318f4b89a6a",
+      "T": 95,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "debug_iterate_runaway_job",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "reread_loop",
+        "productive_edits",
+        "compaction"
+      ]
+    },
+    {
+      "worker_id": "a3cc4da7e21c",
+      "T": 91,
+      "shape_label": {
+        "composer": "late_pivot",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "build_then_long_wait",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": []
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "T": 154,
+      "shape_label": {
+        "composer": "late_pivot",
+        "sonnet": "unclear",
+        "grok": "poll_monitor"
+      },
+      "sonnet_shape_detail": "poll_monitor_wait",
+      "agreement_tier": "diverge",
+      "majority_shape_label": null,
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "ca977b9ca0dd",
+      "T": 109,
+      "shape_label": {
+        "composer": "early_thrash",
+        "sonnet": "early_thrash",
+        "grok": "early_thrash"
+      },
+      "sonnet_shape_detail": "churn_compaction_loop",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "early_thrash",
+      "shared_early_themes_2plus_seats": [
+        "zero_edit_write",
+        "compaction",
+        "reread_loop",
+        "frozen_text",
+        "productive_edits"
+      ]
+    },
+    {
+      "worker_id": "d34bb8ba01ba",
+      "T": 116,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_with_audit_of_existing",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "reread_loop",
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "d84416c7c9d4",
+      "T": 81,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "research_measurement",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "daf933273c8f",
+      "T": 122,
+      "shape_label": {
+        "composer": "early_thrash",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "silent_bash_loop_then_monitor",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "reread_loop",
+        "monitor_wait",
+        "compaction"
+      ]
+    },
+    {
+      "worker_id": "de5b76cc68a6",
+      "T": 94,
+      "shape_label": {
+        "composer": "early_thrash",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "bash_only_silent",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "monitor_wait"
+      ]
+    },
+    {
+      "worker_id": "e28a2428b192",
+      "T": 102,
+      "shape_label": {
+        "composer": "early_thrash",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "bash_only_silent",
+      "agreement_tier": "2-of-3",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": []
+    },
+    {
+      "worker_id": "e8aa4f271927",
+      "T": 76,
+      "shape_label": {
+        "composer": "unclear",
+        "sonnet": "unclear",
+        "grok": "unclear"
+      },
+      "sonnet_shape_detail": "steady_build_to_commit",
+      "agreement_tier": "unanimous",
+      "majority_shape_label": "unclear",
+      "shared_early_themes_2plus_seats": [
+        "productive_edits",
+        "compaction",
+        "monitor_wait"
+      ]
+    }
+  ]
+}
