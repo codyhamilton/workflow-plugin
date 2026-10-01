@@ -17,6 +17,7 @@ This pack sits beside the cheap-analysis harness. It does not replace that harne
 | [`CANDIDATE-APPROACHES.md`](CANDIDATE-APPROACHES.md) | Five named end-to-end approaches, proof gates, kill criteria, comparison |
 | [`RESEARCH-OPS.md`](RESEARCH-OPS.md) | How Workflow System Manager runs the cycles, closes threads, and escalates |
 | [`TOOLING-MVP.md`](TOOLING-MVP.md) | What to build first, and what waits |
+| [`RESOURCE-BUDGET-AGGRESSIVE.md`](RESOURCE-BUDGET-AGGRESSIVE.md) | Costed Pilot / Standard / Max tiers for additive Phase-1.5 / Phase-2 waves (estimate only; Cody sign-off) |
 | [`proofs/README.md`](proofs/README.md) | Phase 1a marker screen; phase 1b framing dry-run + 1c mount probe |
 | [`cycles/CYCLE-LOG.md`](cycles/CYCLE-LOG.md) | Closed cycle log (1a, 1b, 1c) |
 
