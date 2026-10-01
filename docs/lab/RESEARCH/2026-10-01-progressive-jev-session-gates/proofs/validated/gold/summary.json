@@ -1,0 +1,322 @@
+{
+  "status": "diagnostic",
+  "confidence": "not-high",
+  "gold_rule": "A0",
+  "primary_min_judges": 3,
+  "diagnostic_min_judges": 2,
+  "alpha": null,
+  "alpha_method": "krippendorff_nominal",
+  "alpha_method_note": "Krippendorff nominal alpha on {not_yet, checkout}. A unit is one (worker_id, checkpoint_turn). Null checkout_recommended is missing data, not not_yet. For each unit with m>=2 assignments, coincidence o_ck adds n_c*(n_c-1)/(m-1) on the diagonal and n_c*n_k/(m-1) off it. Nominal delta^2 is 0 when the categories match and 1 otherwise. alpha = 1 - D_o/D_e. D_e = 0 (one category only) leaves alpha null. Ordinal alpha is the same ratio with delta^2(c,k) = (sum of marginal counts from c through k, minus (n_c+n_k)/2)^2 (Krippendorff, 2011, Computing Krippendorff's Alpha-Reliability). Use ordinal alpha for ordered 0-3 pattern scores. CHM verdicts are boolean checkout_recommended, so the H5 number is nominal and alpha_ordinal stays null until a verdict carries an ordered score.",
+  "alpha_ordinal": null,
+  "alpha_ordinal_note": "Ordinal Krippendorff alpha is implemented as krippendorff_alpha(..., level='ordinal') and applies to ordered scores. Boolean checkout_recommended has no ordinal scale, so this field stays null on CHM verdicts.",
+  "n_prefixes": 0,
+  "n_judges_min": 0,
+  "n_labels_filled": 21,
+  "n_labels_pending": 0,
+  "n_labels_invalid": 0,
+  "n_labels_draft": 21,
+  "seats": [
+    {
+      "seat": "claude-sonnet",
+      "status": "filled",
+      "voting": true,
+      "models": [
+        "claude-sonnet-5-5"
+      ]
+    },
+    {
+      "seat": "grok-4.7-high",
+      "status": "pending",
+      "voting": false,
+      "models": []
+    },
+    {
+      "seat": "composer",
+      "status": "pending",
+      "voting": false,
+      "models": []
+    }
+  ],
+  "draft_review": {
+    "voting": false,
+    "n_draft_rows": 21,
+    "n_draft_checkout": 20,
+    "n_corrected_to_not_yet": 20,
+    "n_agree_not_yet": 1,
+    "n_agree_checkout": 0,
+    "note": "Unsigned role=draft rows are not votes. a0_if_drafts_voted is what earliest-unanimous would have been if they voted. It is not gold_exit."
+  },
+  "n_duplicate_keys": 0,
+  "invalid_label_rate": 0.0,
+  "pairwise_kappa": {},
+  "h5_pass": null,
+  "h5": "underpowered",
+  "h5_floor": 0.4,
+  "note": "Voting rows are signed=true. On the 2026-10-01 JSONL that is the Sonnet reviewer_final seat. Unsigned Flash drafts do not vote. grok-4.7-high and composer are pending seats. gold_exit stays null until three seats have voted at the turn; a null gold_exit on this file is an incomplete panel, not a decision to run to T. a0_if_drafts_voted is not gold_exit. Confidence is not high.",
+  "workers": [
+    {
+      "worker_id": "92a48e004519",
+      "T": null,
+      "panel": "underpowered",
+      "gold_status": "underpowered",
+      "primary": false,
+      "n_judges": 1,
+      "judges": [
+        "claude-sonnet-5-5"
+      ],
+      "gold_exit": null,
+      "gold_exit_rule": "A0",
+      "A0": null,
+      "A1": null,
+      "A2": null,
+      "A3": "inapplicable",
+      "A3_reason": "Dawid–Skene is inapplicable below 30 workers (Dawid and Skene, 1979).",
+      "gold_exit_unanimous_min2": null,
+      "a0_if_drafts_voted": null,
+      "judge_first_checkout": {
+        "claude-sonnet-5-5": null
+      },
+      "never_checkout": [
+        "claude-sonnet-5-5"
+      ],
+      "spread": null,
+      "first_checkout_turn_guess": {
+        "claude-sonnet-5-5": {
+          "values": [
+            null
+          ],
+          "conflict": false
+        }
+      },
+      "turns": [
+        {
+          "checkpoint_turn": 75,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 90,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 105,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 120,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 135,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 150,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 165,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 180,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 195,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 210,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 225,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 240,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 255,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 270,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 285,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        }
+      ]
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "T": null,
+      "panel": "underpowered",
+      "gold_status": "underpowered",
+      "primary": false,
+      "n_judges": 1,
+      "judges": [
+        "claude-sonnet-5-5"
+      ],
+      "gold_exit": null,
+      "gold_exit_rule": "A0",
+      "A0": null,
+      "A1": null,
+      "A2": null,
+      "A3": "inapplicable",
+      "A3_reason": "Dawid–Skene is inapplicable below 30 workers (Dawid and Skene, 1979).",
+      "gold_exit_unanimous_min2": null,
+      "a0_if_drafts_voted": null,
+      "judge_first_checkout": {
+        "claude-sonnet-5-5": null
+      },
+      "never_checkout": [
+        "claude-sonnet-5-5"
+      ],
+      "spread": null,
+      "first_checkout_turn_guess": {
+        "claude-sonnet-5-5": {
+          "values": [
+            null
+          ],
+          "conflict": false
+        }
+      },
+      "turns": [
+        {
+          "checkpoint_turn": 75,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 90,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 105,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 120,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 135,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        },
+        {
+          "checkpoint_turn": 150,
+          "n": 1,
+          "n_checkout": 0,
+          "unanimous_checkout": false,
+          "votes": {
+            "claude-sonnet-5-5": false
+          }
+        }
+      ]
+    }
+  ],
+  "labels_path": "validated/gold"
+}

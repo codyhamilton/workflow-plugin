@@ -8,7 +8,7 @@ echo "== synthetic fixture =="
 python3 synthetic_fixture.py
 
 echo "== unittest =="
-python3 -m unittest -v test_proofs.py
+python3 -m unittest -v test_proofs.py test_gold.py
 
 echo "== synthetic dry-run =="
 python3 replay_progressive_gates.py \
