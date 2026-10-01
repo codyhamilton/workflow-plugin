@@ -1,0 +1,139 @@
+[
+  {
+    "worker_id": "daf933273c8f",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1553,
+    "gold_bundle_chars": 2613,
+    "gold_bundle_status": "ok",
+    "api_turns": 75,
+    "peak_ctx_tokens": 125620,
+    "tool_histogram": {
+      "Bash": 67,
+      "Read": 9,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/quantisation_roundtrip.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 5,
+    "compaction_event_count": 6,
+    "assistant_text_chars": 196,
+    "delta_since_prior": {}
+  },
+  {
+    "worker_id": "daf933273c8f",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1675,
+    "gold_bundle_chars": 2603,
+    "gold_bundle_status": "ok",
+    "api_turns": 90,
+    "peak_ctx_tokens": 125620,
+    "tool_histogram": {
+      "Bash": 80,
+      "Read": 12,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/quantisation_roundtrip.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 6,
+    "assistant_text_chars": 251,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/spool.py"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Read": 3
+      }
+    }
+  },
+  {
+    "worker_id": "daf933273c8f",
+    "checkpoint_turn": 105,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1618,
+    "gold_bundle_chars": 2611,
+    "gold_bundle_status": "ok",
+    "api_turns": 105,
+    "peak_ctx_tokens": 125620,
+    "tool_histogram": {
+      "Bash": 96,
+      "Read": 12,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/quantisation_roundtrip.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 6,
+    "assistant_text_chars": 251,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 16
+      }
+    }
+  },
+  {
+    "worker_id": "daf933273c8f",
+    "checkpoint_turn": 120,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "state_chars": 1668,
+    "gold_bundle_chars": 2587,
+    "gold_bundle_status": "ok",
+    "api_turns": 120,
+    "peak_ctx_tokens": 125620,
+    "tool_histogram": {
+      "Bash": 109,
+      "Read": 12,
+      "ToolSearch": 2,
+      "Write": 2,
+      "Edit": 1,
+      "Monitor": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/quantisation_roundtrip.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 6,
+    "compaction_event_count": 8,
+    "assistant_text_chars": 251,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Monitor": 1,
+        "ToolSearch": 1
+      }
+    }
+  }
+]

@@ -83,6 +83,24 @@ python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_
   --run 20261001-202909 --workers 0aab88c525de 036ff3ed4a89 0853bc21d3aa
 ```
 
+### Thrash-screen shortlist — experiment (d) (run `20261001-204508`)
+
+Screened `T≥75` open-pajero-maps workers for runaway / low_progress / context_thrash-like dry-run signals before packing. Same schema / hybrid_v0 budget / `75:15`. **No gold verdicts** — packs only; panel held.
+
+| File | T | Rows | Screen note |
+|------|---|------|-------------|
+| `ca977b9ca0dd-judge-packs-20261001-204508.jsonl` | 109 | 3 (cps 75…105) | Top thrash twin of smoking gun (reread/compact, no Edit/Write) |
+| `7b00225cb824-judge-packs-20261001-204508.jsonl` | 137 | 5 (cps 75…135) | Sleep/poll runaway class (17 sleep bash) |
+| `daf933273c8f-judge-packs-20261001-204508.jsonl` | 122 | 4 (cps 75…120) | Bash-spin + frozen intervals + compaction |
+| `thrash-screen-judge-packs-20261001-204508.jsonl` | — | 12 combined | |
+| `SUMMARY-thrash-screen-20261001-204508.{md,json}` | — | — | Ranking table (safe metrics) |
+
+```bash
+python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_gold_judge_packs.py \
+  --run 20261001-204508 --workers ca977b9ca0dd 7b00225cb824 daf933273c8f
+# then rename combined p0-judge-packs-*.jsonl → thrash-screen-judge-packs-*.jsonl
+```
+
 ## What is *not* here
 
 - Raw gold-bundles / with-state hybrid prose dumps
