@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from typing import Any
 
 from bootstrap import ensure_progressive_proofs
+from paths import REPO_ROOT
 from pack_io import pack_row_to_jev_state
 from schemas import (
     DEFAULT_INSTRUCTION,
@@ -22,6 +24,19 @@ from schemas import (
 )
 
 TYPESAFE_ENDPOINT = "https://api.typesafe.ai/v1/systemone"
+
+
+def _preflight_questions(questions: dict[str, Any]) -> str | None:
+    transcript_root = str(REPO_ROOT / "tools" / "transcript")
+    if transcript_root not in sys.path:
+        sys.path.insert(0, transcript_root)
+    from lib.jev_client import validate_systemone_questions  # noqa: WPS433
+
+    try:
+        validate_systemone_questions(questions)
+    except ValueError as e:
+        return str(e)
+    return None
 
 
 def _checkout_questions(question_set: str) -> dict[str, Any]:
@@ -112,6 +127,19 @@ def classify(
             "framing_id": framing_slug,
             "cache_key": None,
             "model": JEV_MODEL,
+        }
+
+    preflight_err = _preflight_questions(questions)
+    if preflight_err:
+        return {
+            "decision": "missing",
+            "reason": "invalid_questions",
+            "detail": preflight_err,
+            "schema_id": schema_id,
+            "framing_id": framing_id(framing_slug, questions),
+            "cache_key": None,
+            "model": JEV_MODEL,
+            "would_post": False,
         }
 
     size = state_json_len(state)

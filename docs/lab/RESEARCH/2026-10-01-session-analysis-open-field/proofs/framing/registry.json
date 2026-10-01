@@ -4,8 +4,8 @@
     {
       "schema_id": "early-signal-v0",
       "slug": "tournament-binary-foreshadow",
-      "framing_id": "tournament-binary-foreshadow#a44e2b63c864be8b",
-      "questions_sha256": "a44e2b63c864be8ba2bc352bdd63b1ce8ee9b4cbb6ca26534ed188ad503dfe8d",
+      "framing_id": "tournament-binary-foreshadow#d0f736b5ecc043ce",
+      "questions_sha256": "d0f736b5ecc043ce235cff655a3d3b72bc9b09fc8e231fe3b696e625893981f6",
       "registered": true
     },
     {
@@ -18,15 +18,15 @@
     {
       "schema_id": "early-signal-v0",
       "slug": "tournament-monitor-called-out",
-      "framing_id": "tournament-monitor-called-out#95fd5fc062f1b94f",
-      "questions_sha256": "95fd5fc062f1b94f0d31504ac6ef620e6bbc4f7ccf600d011127f9349a7d3b7b",
+      "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
+      "questions_sha256": "77ace2e03f04a9daf622faa0e49da54a620af1c0cf7b94be89e45fd9720e7db6",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "tournament-no-story-beyond-counts",
-      "framing_id": "tournament-no-story-beyond-counts#7a26c8fca8ac76a4",
-      "questions_sha256": "7a26c8fca8ac76a4a4676b16f567cfe74cb74144d09e3b3cb6b8b97c156479cb",
+      "framing_id": "tournament-no-story-beyond-counts#73c15b9e84f49e30",
+      "questions_sha256": "73c15b9e84f49e3003a470fd32f0f77658536e2d3710f04cfe5d0821f2b818e7",
       "registered": true
     },
     {
@@ -39,50 +39,50 @@
     {
       "schema_id": "early-signal-v0",
       "slug": "pool-echo-guard-reread",
-      "framing_id": "pool-echo-guard-reread#40f7e07c78cfa5f7",
-      "questions_sha256": "40f7e07c78cfa5f74ee17064aebec4911cfc933898ef54683444bc6a82114c9a",
+      "framing_id": "pool-echo-guard-reread#ab733639de049349",
+      "questions_sha256": "ab733639de04934998459c16fd055c3fa65d9976f13d136d5862f7740bac2271",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "pool-phase-hint-stats",
-      "framing_id": "pool-phase-hint-stats#0b6387955bb83f36",
-      "questions_sha256": "0b6387955bb83f36203f77670dfef9117fcad44c9d3d025d6b076955f5d6c80f",
+      "framing_id": "pool-phase-hint-stats#e326bb733f5d57c7",
+      "questions_sha256": "e326bb733f5d57c73424e7b4593d0dc2060f60b60ac602442c0bbbcbeac65cfb",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "pool-anchor-agnostic",
-      "framing_id": "pool-anchor-agnostic#b14f3619bdbeda4f",
-      "questions_sha256": "b14f3619bdbeda4f745d3c1b225d0988d6217ae34f4354f42521765e9ab88780",
+      "framing_id": "pool-anchor-agnostic#3e623a5e87698536",
+      "questions_sha256": "3e623a5e8769853621a20284322017adc4abdb7d7aea4abdf015b4893da34752",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "pool-thrash-card-anchor",
-      "framing_id": "pool-thrash-card-anchor#d4334c1c6ce3d14d",
-      "questions_sha256": "d4334c1c6ce3d14d545f8a490e8e9bc3319324a7850b64951d18ba1ce3685b5e",
+      "framing_id": "pool-thrash-card-anchor#511308c92de2cee5",
+      "questions_sha256": "511308c92de2cee5cc76040715ea0bfd4449cefde5e3ee08b4ff716429d4ff8b",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "pool-residual-baseline",
-      "framing_id": "pool-residual-baseline#92e72d49ed8451c9",
-      "questions_sha256": "92e72d49ed8451c906f0c29bcdade0ecf7a4be69feb9afb3b47f3e7cbedfc682",
+      "framing_id": "pool-residual-baseline#d4ba3f8065a9a264",
+      "questions_sha256": "d4ba3f8065a9a264c606c045558a7c89b29393e153b3ce38bbe339541f549564",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "signal-v0-default",
-      "framing_id": "signal-v0-default#1a3071620f3945b1",
-      "questions_sha256": "1a3071620f3945b10484ab96ad3bf2070d0efdb4de0e2f42d324f19f1332fb26",
+      "framing_id": "signal-v0-default#8b25557e0768ab57",
+      "questions_sha256": "8b25557e0768ab57a21ce367b8354defb55f9e073281dfceea86629dc1af318c",
       "registered": true
     },
     {
       "schema_id": "early-signal-v0",
       "slug": "signal-v0-alt",
-      "framing_id": "signal-v0-alt#40f7e07c78cfa5f7",
-      "questions_sha256": "40f7e07c78cfa5f74ee17064aebec4911cfc933898ef54683444bc6a82114c9a",
+      "framing_id": "signal-v0-alt#ab733639de049349",
+      "questions_sha256": "ab733639de04934998459c16fd055c3fa65d9976f13d136d5862f7740bac2271",
       "registered": true
     }
   ]

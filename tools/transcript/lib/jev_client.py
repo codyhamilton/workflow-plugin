@@ -10,6 +10,7 @@ from typing import Any
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
 JEV_MODEL = "jev-1.13.0"
+ALLOWED_QUESTION_TYPES = frozenset({"choice", "score", "noul"})
 
 SESSION_KIND_CRITERIA: dict[str, str] = {
     "question": "User seeking explanation or advice; little implementation",
@@ -70,6 +71,37 @@ def build_questions(*, include_workflow_alignment: bool = True) -> dict[str, Any
     return questions
 
 
+def validate_systemone_questions(questions: dict[str, Any]) -> None:
+    """Reject question shapes TypeSafe System One will not accept (before HTTP)."""
+    if not isinstance(questions, dict):
+        raise ValueError("questions must be a JSON object")
+    for qid, spec in questions.items():
+        if not isinstance(spec, dict):
+            raise ValueError(f"question '{qid}': must be an object")
+        qtype = spec.get("type")
+        if qtype not in ALLOWED_QUESTION_TYPES:
+            allowed = ", ".join(sorted(ALLOWED_QUESTION_TYPES))
+            raise ValueError(
+                f"question '{qid}': type '{qtype}' is invalid; allowed: {allowed}"
+            )
+        criteria = spec.get("criteria")
+        if qtype == "score":
+            if not isinstance(criteria, list):
+                raise ValueError(
+                    f"question '{qid}': score criteria must be an array of level strings"
+                )
+        elif qtype == "choice":
+            if not isinstance(criteria, dict):
+                raise ValueError(f"question '{qid}': choice criteria must be a map")
+
+
+def validate_systemone_request(request: dict[str, Any]) -> None:
+    questions = request.get("questions")
+    if questions is None:
+        raise ValueError("request missing questions")
+    validate_systemone_questions(questions)
+
+
 def build_request(
     state: dict[str, Any],
     *,
@@ -86,6 +118,11 @@ def post_systemone(request: dict[str, Any], *, api_key: str | None = None) -> di
     key = (api_key or os.environ.get("TYPESAFE_API_KEY") or "").strip()
     if not key:
         require_api_key()
+
+    try:
+        validate_systemone_request(request)
+    except ValueError as e:
+        raise SystemExit(f"TypeSafe request preflight failed: {e}") from e
 
     body = json.dumps(request).encode("utf-8")
     req = urllib.request.Request(

@@ -17,7 +17,7 @@ PROSE_FIELD_IDS = frozenset(
         "trajectory",
     }
 )
-STATS_MECHANICAL_IDS = frozenset({"reread_cluster", "compaction_event_count"})
+STATS_MECHANICAL_IDS = frozenset({"reread_cluster"})
 
 
 def _choice(instructions: str, criteria: dict[str, str]) -> dict[str, Any]:
@@ -32,14 +32,11 @@ def _bool_q(instructions: str) -> dict[str, Any]:
 
 
 def questions_early_signal_stats() -> dict[str, Any]:
+    # compaction_event_count lives in state.cumulative only (not a Jev question; TypeSafe has no report type).
     return {
         "reread_cluster": _bool_q(
             "Does any single read path appear at least three times in cumulative.reread_paths?"
         ),
-        "compaction_event_count": {
-            "type": "report",
-            "instructions": "Report cumulative.compaction_event_count as an integer (not a judgment).",
-        },
     }
 
 

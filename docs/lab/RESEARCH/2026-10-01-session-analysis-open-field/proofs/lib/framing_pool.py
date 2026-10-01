@@ -57,14 +57,14 @@ def _monitor_called_out() -> dict[str, Any]:
 
 
 def _no_story_beyond_counts() -> dict[str, Any]:
+    scope = (
+        "Answer only from printed cumulative fields; do not infer a story beyond the counts. "
+    )
     return {
-        **questions_early_signal_stats(),
-        "instruction_scope": {
-            "type": "report",
-            "instructions": (
-                "Do not infer a story beyond the counts. Answer only from printed cumulative fields."
-            ),
-        },
+        "reread_cluster": _bool_q(
+            scope
+            + "Mechanical: is any reread_paths[].count >= 3 in the snapshot state?"
+        ),
     }
 
 

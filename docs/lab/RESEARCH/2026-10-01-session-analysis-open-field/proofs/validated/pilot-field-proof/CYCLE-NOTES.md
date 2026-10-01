@@ -5,6 +5,8 @@
 **Status:** `registered_awaiting_live`  
 **Live TypeSafe POSTs:** **0** (cloud VM: `TYPESAFE_API_KEY` unset)
 
+**2026-10-01 fix:** Pilot live smoke hit TypeSafe HTTP 400 (`api_usage_error`) because early-signal stats framings included illegal Jev `type: "report"` (`compaction_event_count`, `instruction_scope`). Removed those questions (count stays in `state.cumulative`); added `jev_client` / `classify` preflight for `choice` | `score` | `noul` only.
+
 ## Registration
 
 - [`cycles/REGISTRATION-pilot-field-proof.md`](../../cycles/REGISTRATION-pilot-field-proof.md)
