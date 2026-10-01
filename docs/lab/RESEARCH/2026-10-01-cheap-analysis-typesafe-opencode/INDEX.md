@@ -33,6 +33,7 @@ This pack designs the harness. It does not replace the progressive session-gate 
 ## Links
 
 - Plan: [`../../../plans/07-cheap-analysis-harness/DESIGN.md`](../../../plans/07-cheap-analysis-harness/DESIGN.md)
+- Open field (competing approaches, not a replacement for this harness): [`../2026-10-01-session-analysis-open-field/INDEX.md`](../2026-10-01-session-analysis-open-field/INDEX.md)
 - Parent index: [`../INDEX.md`](../INDEX.md)
 - Maps evidence: [`../2026-09-30-jev-cheap-judgement-signals/evidence-maps-claude-5h.md`](../2026-09-30-jev-cheap-judgement-signals/evidence-maps-claude-5h.md)
 - Corpus manifest: [`../2026-10-01-progressive-jev-session-gates/proofs/corpus/MANIFEST.md`](../2026-10-01-progressive-jev-session-gates/proofs/corpus/MANIFEST.md)
