@@ -145,7 +145,6 @@ def derive_rows(
     labels: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     derived: list[dict[str, Any]] = []
-    seen_cell_ids: set[str] = set()
     for line_number, result in enumerate(results, 1):
         location = f"results line {line_number}"
         session_id = result.get("session_id")
@@ -158,9 +157,6 @@ def derive_rows(
         if cell_id is not None:
             if not isinstance(cell_id, str) or not cell_id:
                 raise JoinError(f"{location}: cell_id must be a non-empty string")
-            if cell_id in seen_cell_ids:
-                raise JoinError(f"{location}: duplicate cell_id {cell_id!r}")
-            seen_cell_ids.add(cell_id)
 
         label = labels.get(session_id)
         window_status, window = classify_window(label, checkpoint)
@@ -178,6 +174,10 @@ def derive_rows(
 
         derived.append(
             {
+                "source_row": line_number,
+                "derived_row_id": (
+                    f"{cell_id}@{line_number}" if cell_id else f"row@{line_number}"
+                ),
                 "cell_id": cell_id,
                 "session_id": session_id,
                 "checkpoint": checkpoint,
@@ -209,6 +209,12 @@ def summarize(
     statuses = Counter(row["window_status"] for row in derived)
     status_counts = {status: statuses.get(status, 0) for status in WINDOW_STATUSES}
     complete = sum(row["checkpoint_outcomes_complete"] for row in derived)
+    cell_ids = Counter(
+        row["cell_id"] for row in results if isinstance(row.get("cell_id"), str)
+    )
+    duplicate_cell_ids = sorted(
+        cell_id for cell_id, count in cell_ids.items() if count > 1
+    )
     windows = []
     for session_id in sorted(result_sessions & labeled_sessions):
         window = labels[session_id]["ideal_steer_window"]
@@ -234,6 +240,11 @@ def summarize(
             )
     return {
         "result_rows": len(results),
+        "unique_cell_ids": len(cell_ids),
+        "duplicate_cell_ids": duplicate_cell_ids,
+        "duplicate_cell_id_extra_rows": sum(
+            cell_ids[cell_id] - 1 for cell_id in duplicate_cell_ids
+        ),
         "result_sessions": len(result_sessions),
         "sidecar_labels": len(labels),
         "labeled_result_sessions": len(result_sessions & labeled_sessions),

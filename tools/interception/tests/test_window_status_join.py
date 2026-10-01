@@ -52,10 +52,24 @@ class WindowStatusJoinTests(unittest.TestCase):
         outcome_label = label([22, 164])
         row = {"cell_id": "cell-1", "session_id": "session-1", "checkpoint": 55}
         derived = JOIN.derive_rows([row], {"session-1": outcome_label})[0]
+        self.assertEqual(derived["derived_row_id"], "cell-1@1")
         self.assertEqual(derived["window_status"], "inside_steer_window")
         self.assertIsNone(derived["near_done"])
         self.assertIsNone(derived["runaway_like"])
         self.assertFalse(derived["checkpoint_outcomes_complete"])
+
+    def test_preserves_duplicate_source_cells_with_unique_derived_ids(self):
+        row = {"cell_id": "cell-1", "session_id": "session-1", "checkpoint": 60}
+        results = [row.copy(), row.copy()]
+        derived = JOIN.derive_rows(results, {"session-1": label()})
+        self.assertEqual(
+            [item["derived_row_id"] for item in derived],
+            ["cell-1@1", "cell-1@2"],
+        )
+        summary = JOIN.summarize(results, {"session-1": label()}, derived)
+        self.assertEqual(summary["unique_cell_ids"], 1)
+        self.assertEqual(summary["duplicate_cell_ids"], ["cell-1"])
+        self.assertEqual(summary["duplicate_cell_id_extra_rows"], 1)
 
     def test_rejects_leakage_attestation(self):
         outcome_label = label()

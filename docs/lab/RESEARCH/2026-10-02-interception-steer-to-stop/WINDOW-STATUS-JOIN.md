@@ -27,9 +27,11 @@ python3 tools/interception/window_status_join.py \
   --results "$BATCH/typesafe-scenario-sweep/results.jsonl"
 ```
 
-Pass `--output /tmp/window-map.jsonl` for a cell-keyed derived table. The tool
-never rewrites a source `results.jsonl`, reads no judge rating/fire field, and
-computes no FP/miss metric.
+Pass `--output /tmp/window-map.jsonl` for a source-row-keyed derived table.
+`derived_row_id` combines the source `cell_id` with its one-based row number,
+because the Wave-0 source contains repeated cell IDs. The tool never rewrites a
+source `results.jsonl`, reads no judge rating/fire field, and computes no
+FP/miss metric.
 
 ## Identification method
 
@@ -95,6 +97,12 @@ Each status cell is `unique / rows`. This table makes no claim about model
 quality. It shows that the original 240-row join is mechanically complete,
 while the scenario join is not.
 
+Wave-0 has 236 unique `cell_id` values across 240 rows. Four IDs each occur
+twice, and each pair is byte-for-byte identical at the parsed-object level.
+The status derivation preserves all source rows and reports the collision; a
+future scoreboard must choose and document a deduplication rule before setting
+independent denominators.
+
 ## Relationship to #105 provisional tags
 
 The #105 row table remains useful as a fire-bearing **provisional** table.
@@ -133,7 +141,10 @@ near-done/runaway checkpoint labels remain separate axes.
    second-pass agreement or adjudication state. Any added labels or overrides
    need a new `protocol_rev` (or an explicit amendment record), not silent
    mutation.
-6. **Scoreboard aggregation:** after coverage closes, meter generation still
+6. **Row identity:** `cell_id` is not unique in Wave-0 (four exact duplicate
+   pairs). A full join must use source-row identity while deriving, then apply
+   an explicit provenance-preserving deduplication rule.
+7. **Scoreboard aggregation:** after coverage closes, meter generation still
    needs session-clustered denominators and explicit handling for `ambiguous`,
    `excluded`, censoring, and repeated cells. Cell-level counts are not
    independent trials.
