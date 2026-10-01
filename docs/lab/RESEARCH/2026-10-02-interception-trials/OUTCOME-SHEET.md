@@ -1,6 +1,6 @@
 # Outcome sheet — Wave-0 interception trials (non-length reference)
 
-**Soft Standard HOLD.** Docs only. No hooks, TypeSafe, Pilot unlock, or product behaviour change.
+**Soft Standard HOLD** (behaviour ship only). This sheet does not ship behaviour, hooks, Pilot, Standard, Max, or live in-loop Jev. It does not gate trial volume: continuous large-n TypeSafe, Flash, and Luna waves are the evidence path in [`../../PROPOSALS/2026-10-02-interception-steer-to-stop.md`](../../PROPOSALS/2026-10-02-interception-steer-to-stop.md). Labels in this sheet stay human-written; the drivers are not labelers.
 
 This document **freezes the labeling protocol** for Opus adversarial **R2** (closing R3’s remaining gate piece alongside batch-002’s R1-clean inputs and T-independent schedule). It does **not** populate labels for any batch. Until labeled rows exist in a sidecar file (see below), batch-002 meters stay **diagnostics only** — not a formal **near-done false-positive** or **runaway-await** scoreboard (`window_status=unidentified` in `results.jsonl`).
 
@@ -130,4 +130,4 @@ When `ideal_steer_window` is `none` or `ambiguous`, or `label_status≠labeled`,
 
 ## Explicit non-authorization
 
-This sheet **does not** unlock Soft Standard, TypeSafe, hooks, or live Jev. Favorable future FP/miss numbers **do not** release any hold. batch-002 is **not** score-ready for FP/miss until human labels are published and joined under this schema.
+This sheet does not unlock hooks, Pilot, Standard, Max, or live in-loop Jev. TypeSafe trial waves are specified in the white paper and may run before labels exist. Favorable future FP/miss numbers do not release the product hold. batch-002 stays off the FP/miss board until human labels are published and joined under this schema.
