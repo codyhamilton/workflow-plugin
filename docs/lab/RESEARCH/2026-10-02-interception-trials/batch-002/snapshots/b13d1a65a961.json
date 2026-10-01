@@ -1,0 +1,321 @@
+{
+  "harness": "claude-code",
+  "worker_id": "b13d1a65a961",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961.jsonl",
+  "T_eligibility_only": 86,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [
+    45,
+    60,
+    75
+  ],
+  "never_reached_checkpoints": [
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "checkpoints": [
+    {
+      "checkpoint": 45,
+      "prior": null,
+      "state_chars": 1821,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "b13d1a65a961",
+        "checkpoint_turn": 45,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "What is current status? We look part way through an active phase",
+        "cumulative": {
+          "api_turns": 45,
+          "peak_ctx_tokens": 108374,
+          "prefix_bytes": 1188663,
+          "tool_histogram": {
+            "Bash": 38,
+            "Agent": 3,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 7164
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 38,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 39,
+            "excerpt": "3C-07 is done and recorded in `IMPLEMENTATION.md` (commit `bd54ca0`, outcome record `15a45ae`, both pushed). I re-ran `test_e2.py` and `test_c_units.py` myself and got 11 passed. The kernel reproduces all eight goldens byte for byte, including the local trim golden.\n\nThe worker's full suite had one failure, `test_bench_record::test_bench_output_byte_identical_to_unbenched`, from a temp file that d",
+            "tool_names": []
+          },
+          {
+            "turn": 40,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 41,
+            "excerpt": "",
+            "tool_names": [
+              "Bash",
+              "Agent"
+            ]
+          },
+          {
+            "turn": 42,
+            "excerpt": "3C-04 is committed as `33fcf0b`, but its done evidence is not met. 3C-08 is now running, and I need a decision from you on 3C-04.\n\n**3C-04 (round-trip tool redesign)**\n- **What works:** the tool decodes the disc and checks it against the spool without importing any build module. It completes, with a peak of 15 GB real memory, so the earlier \"104 GB\" alarm was a false reading. Its 9 tests pass, and",
+            "tool_names": []
+          },
+          {
+            "turn": 43,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 44,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 45,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 60,
+      "prior": 45,
+      "state_chars": 1886,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "b13d1a65a961",
+        "checkpoint_turn": 60,
+        "prior_checkpoint_turn": 45,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "What is current status? We look part way through an active phase",
+        "cumulative": {
+          "api_turns": 60,
+          "peak_ctx_tokens": 126045,
+          "prefix_bytes": 1685175,
+          "tool_histogram": {
+            "Bash": 46,
+            "Agent": 7,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 9994
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 8,
+            "Agent": 4
+          }
+        },
+        "tail": [
+          {
+            "turn": 53,
+            "excerpt": "The usage limit had cleared (it's 6:33 pm Brisbane), so I restarted 3C-09 as a fresh Sonnet worker. It starts from the brief and a saved copy of the dead worker's partial diff, `output/scratch-3C-09/handoff-uncommitted.diff` (about 260 lines). I reset the working tree first.\n\nPer your standing order I did not add a 3C-04 checker unit. Its unmet 120 s and background-failure evidence stays open, and",
+            "tool_names": []
+          },
+          {
+            "turn": 54,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 55,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 56,
+            "excerpt": "",
+            "tool_names": [
+              "Agent",
+              "Agent"
+            ]
+          },
+          {
+            "turn": 57,
+            "excerpt": "3C-09 is done and recorded (`a5d2a27`, outcome record `fda1b88`, both pushed). Division, retile, trim and name halo now run in C, and `divide.py` and E3 are gone.\n\n- **Checks:** three full-Australia builds gave the same sha `87a01b14\u2026` and their manifests match 3-11's. Perth `-j 1` and `-j 4` match at `da13a775\u2026`, and the full pytest suite passed (545). I re-ran the goldens and wiring tests myself",
+            "tool_names": []
+          },
+          {
+            "turn": 58,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 59,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 60,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 75,
+      "prior": 60,
+      "state_chars": 2827,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "b13d1a65a961",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": 60,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "What is current status? We look part way through an active phase",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 126045,
+          "prefix_bytes": 1848785,
+          "tool_histogram": {
+            "Bash": 50,
+            "Agent": 9,
+            "Skill": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 13098
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 4,
+            "Agent": 2
+          }
+        },
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "The first 3C-12 worker died on the API session limit (which reset at 11:30pm). A Sonnet reviewer/fixer is now working on the Flash draft, and I haven't seen its results yet.\n\n- **Draft under review:** the `flash/3c-12-encoder-deletion` worktree at c4475be. It works through your seven checklist items, including the ~14.11 s wall regression, the ~15 GB RSS figure and wiring the local `l0_divided_tri",
+            "tool_names": []
+          },
+          {
+            "turn": 69,
+            "excerpt": "The reviewer's notice is interim. It has finished its review and fixes and is now running the step-gate script in the background under one monitor, and it should notify again when the gates finish. I'm not polling. Once its final report arrives, I'll check the branch against your seven items and report.",
+            "tool_names": []
+          },
+          {
+            "turn": 70,
+            "excerpt": "Still interim. The reviewer reports the pytest gate passed (474 tests, no skips, so the local golden now runs) and the Perth builds are done. The three full-AU builds are running, and I'm waiting for its final notification.",
+            "tool_names": []
+          },
+          {
+            "turn": 71,
+            "excerpt": "Nothing new: the reviewer's notice repeats the last one (474 passed, no skips, Perth `-j 1` and `-j 4` match). The three full-AU benches are still running, and I'm waiting for its final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 72,
+            "excerpt": "Bench 1 of the three full-AU builds finished in 13 s, in line with the 3C-11 figure (12.87 s median). Its sha and manifest checks and benches 2 and 3 are still pending. I'm waiting for the reviewer's final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 73,
+            "excerpt": "Bench 1 passes: sha 87a01b14\u2026 at 1,731,021,568 B, and its manifest matches the 3-11 reference. Benches 2 and 3 are still running, and I'm waiting for the reviewer's final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 74,
+            "excerpt": "Bench 2 finished in 13 s. Its sha and manifest checks and bench 3 are still to come, and I'm still waiting for the reviewer's final report.",
+            "tool_names": []
+          },
+          {
+            "turn": 75,
+            "excerpt": "Bench 2 also passes its sha and manifest checks. Bench 3 is the last build still to come, and I'm waiting for the reviewer's final report.",
+            "tool_names": []
+          }
+        ]
+      }
+    }
+  ]
+}

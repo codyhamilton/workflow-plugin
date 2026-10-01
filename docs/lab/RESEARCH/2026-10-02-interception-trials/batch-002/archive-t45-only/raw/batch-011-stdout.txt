@@ -1,0 +1,10 @@
+[{"cell_id":"d7db43ca3ceeab3a","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Actively running refine on units 13/14; productive reads and bash, no stall."},
+{"cell_id":"0f2230b42a2aedf9","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Monitor watching unit 07 pytest; active edits and sends, awaiting result legitimately."},
+{"cell_id":"308b36632dcc9725","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Active bash-heavy work after surfacing a decision on 3C-04; progressing, not idle."},
+{"cell_id":"b19b9c5128552fc6","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Healthy orchestration: 14 agents dispatched, unit 31b running with pending report."},
+{"cell_id":"6bc192d77a4c7fbc","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Stuck in repeated stale duplicate notices waiting on 2-02; loop needs breaking now."},
+{"cell_id":"27bff5a5e20a5969","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Phase 3 executor progressing; 3-08 committed, decision surfaced on 3-07 content."},
+{"cell_id":"3365deb5b376eee5","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Eight compactions, very large prefix, long wait on background R run indicates thrash."},
+{"cell_id":"e26079fcef777597","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Peak context 166k with minimal assistant text across 45 turns; silent churn risk."},
+{"cell_id":"d0525abb2543df84","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"No state or tail evidence available; cannot justify firing."},
+{"cell_id":"e4b3ae4e2e29f364","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"No state or tail evidence available; cannot justify firing."}]

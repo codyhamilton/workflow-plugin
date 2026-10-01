@@ -1,0 +1,63 @@
+{
+  "harness": "opencode",
+  "worker_id": "ses_1a6280e0dffeW0FRROYz",
+  "path": "sqlite:/home/codyh/.local/share/opencode/opencode.db#session/ses_1a6280e0dffeW0FRROYzKNpNV8",
+  "T_eligibility_only": 54,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [
+    45
+  ],
+  "never_reached_checkpoints": [
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "llama.cpp",
+  "corpus_source": "deterministic_30",
+  "maps_family": false,
+  "checkpoints": [
+    {
+      "checkpoint": 45,
+      "prior": null,
+      "state_chars": 354,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 45,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory_prefix",
+        "project": "llama.cpp",
+        "title": "Llama.cpp high system RAM when idle",
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "cumulative": {
+          "api_turns": 45,
+          "note": "opencode lite: checkpoint index only; no messages_full/T in state"
+        }
+      }
+    }
+  ]
+}

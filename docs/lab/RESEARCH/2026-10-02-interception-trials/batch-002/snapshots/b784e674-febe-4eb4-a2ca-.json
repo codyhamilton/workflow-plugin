@@ -1,0 +1,98 @@
+{
+  "harness": "cursor",
+  "worker_id": "b784e674-febe-4eb4-a2ca-",
+  "path": "/home/codyh/.cursor/projects/home-codyh-workspace-garcia-music/agent-transcripts/b784e674-febe-4eb4-a2ca-ea2b1c5f7f26/b784e674-febe-4eb4-a2ca-ea2b1c5f7f26.jsonl",
+  "T_eligibility_only": 61,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [
+    45,
+    60
+  ],
+  "never_reached_checkpoints": [
+    75,
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "garcia-music",
+  "corpus_source": "deterministic_30",
+  "maps_family": false,
+  "checkpoints": [
+    {
+      "checkpoint": 45,
+      "prior": null,
+      "state_chars": 351,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 45,
+        "harness": "cursor",
+        "evidence_class": "lite_prefix",
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "cumulative": {
+          "api_turns": 45,
+          "prefix_lines_read": 45,
+          "prefix_role_histogram_top": {
+            "": 45
+          },
+          "prefix_userish_or_turn_proxy": 0,
+          "note": "lite prefix-only; no full-session length fields"
+        }
+      }
+    },
+    {
+      "checkpoint": 60,
+      "prior": null,
+      "state_chars": 351,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 60,
+        "harness": "cursor",
+        "evidence_class": "lite_prefix",
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "cumulative": {
+          "api_turns": 60,
+          "prefix_lines_read": 60,
+          "prefix_role_histogram_top": {
+            "": 60
+          },
+          "prefix_userish_or_turn_proxy": 0,
+          "note": "lite prefix-only; no full-session length fields"
+        }
+      }
+    }
+  ]
+}

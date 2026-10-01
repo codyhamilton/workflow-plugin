@@ -1,0 +1,32 @@
+{
+  "harness": "claude-code",
+  "worker_id": "9a9249e2f356",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps--claude-worktrees-brief-34-ceiling-only/71e96d1e-20be-4655-8dbb-9a9249e2f356.jsonl",
+  "T_eligibility_only": 40,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [],
+  "never_reached_checkpoints": [
+    45,
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "open-pajero-maps (worktree ceiling-only)",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "checkpoints": []
+}

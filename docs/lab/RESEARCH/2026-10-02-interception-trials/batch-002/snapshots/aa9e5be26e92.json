@@ -1,0 +1,318 @@
+{
+  "harness": "claude-code",
+  "worker_id": "aa9e5be26e92",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps--claude-worktrees-brief-34-ceiling-only/107c3d34-cc31-4b60-8994-aa9e5be26e92.jsonl",
+  "T_eligibility_only": 83,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [
+    45,
+    60,
+    75
+  ],
+  "never_reached_checkpoints": [
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "open-pajero-maps (worktree ceiling-only)",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "checkpoints": [
+    {
+      "checkpoint": 45,
+      "prior": null,
+      "state_chars": 2821,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "aa9e5be26e92",
+        "checkpoint_turn": 45,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "You are the orchestrator for open-pajero-maps WP1 remaining work. CWD: /home/codyh/workspace/open-pajero-maps. Use workflow plugin skills (/workflow:refine, /workflow:execute) as needed. Commit and push per CLAUDE.md.\n\n## Goal\nDrive WP1 to a complete implementation: close remaining planned units and any WP1-scope harness failures they surface. Do not start WP2.\n\n## Current state (reconcile against the branch; do not trust this blindly)\n- master is clean at ~59dd914. Units 01\u201315b done. Ad-hoc bri",
+        "cumulative": {
+          "api_turns": 45,
+          "peak_ctx_tokens": 103889,
+          "prefix_bytes": 822888,
+          "tool_histogram": {
+            "Agent": 14,
+            "Bash": 6,
+            "TaskStop": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 12970
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 38,
+            "excerpt": "The Adelaide fix is in (29f377c), so briefs 28, 29 and 30 and the Adelaide correction have all landed. Dispatching the rebuild kickoff (brief 31) as a fresh agent.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 39,
+            "excerpt": "The rebuild kickoff (brief 31) is running in a fresh agent, and I'm waiting on it. It starts the assembly-only rebuild in the background and confirms it is alive, but it won't wait for the result. The spool from rebuild #3 is reused, so this should take about 10 minutes. It then hands off to a fresh 31b agent to verify and record.",
+            "tool_names": []
+          },
+          {
+            "turn": 40,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 41,
+            "excerpt": "The assembly is running as PID 3300685 and should finish around 05:40\u201305:45 AEST. A background watcher will notify me when the process exits. Then I'll dispatch a fresh agent for 31b to verify and record.",
+            "tool_names": []
+          },
+          {
+            "turn": 42,
+            "excerpt": "That was the kickoff agent's completion notice, which has already reported. The assembly is still running, and the background watcher will notify me when it finishes.",
+            "tool_names": []
+          },
+          {
+            "turn": 43,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 44,
+            "excerpt": "The assembly finished and wrote a 1.40GB `ALLDATA.KWI` at 05:41. Dispatching a fresh agent for 31b.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 45,
+            "excerpt": "Unit 31b is running as a fresh agent, and I'm waiting on it. It will run the full harness on the new `ALLDATA.KWI` and record the result in `PLAN.md` and `IMPLEMENTATION.md`. It will also report brief 29's trim table and whether the entry-10 copy at level 6 and up pushes any frames over their size budgets. It won't change code. Its report should say which failures remain and whether WP1 is complet",
+            "tool_names": []
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 60,
+      "prior": 45,
+      "state_chars": 3097,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "aa9e5be26e92",
+        "checkpoint_turn": 60,
+        "prior_checkpoint_turn": 45,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "You are the orchestrator for open-pajero-maps WP1 remaining work. CWD: /home/codyh/workspace/open-pajero-maps. Use workflow plugin skills (/workflow:refine, /workflow:execute) as needed. Commit and push per CLAUDE.md.\n\n## Goal\nDrive WP1 to a complete implementation: close remaining planned units and any WP1-scope harness failures they surface. Do not start WP2.\n\n## Current state (reconcile against the branch; do not trust this blindly)\n- master is clean at ~59dd914. Units 01\u201315b done. Ad-hoc bri",
+        "cumulative": {
+          "api_turns": 60,
+          "peak_ctx_tokens": 124421,
+          "prefix_bytes": 1004865,
+          "tool_histogram": {
+            "Agent": 19,
+            "Bash": 8,
+            "TaskStop": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 18551
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Agent": 5,
+            "Bash": 2
+          }
+        },
+        "tail": [
+          {
+            "turn": 53,
+            "excerpt": "That was the kickoff agent's completion notice, which has already reported. The rebuild #5 assembly is still running, and I'm waiting on the background watcher.",
+            "tool_names": []
+          },
+          {
+            "turn": 54,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 55,
+            "excerpt": "Rebuild #5 finished and wrote a 1.43GB `ALLDATA.KWI`. Dispatching a fresh agent for 32c.",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 56,
+            "excerpt": "Unit 32c is running as a fresh agent, and I'm waiting on it. It will run the full harness on the new 1.43GB `ALLDATA.KWI` and record the result in `PLAN.md` and `IMPLEMENTATION.md`, without changing code. The report should show whether the Perth and Adelaide spotchecks pass again, whether the three sub-frame rows are gone, and what the halo cost in encode time and names.",
+            "tool_names": []
+          },
+          {
+            "turn": 57,
+            "excerpt": "Agent 32c is still working on its own background task, so this is only an interim notice and there's no report yet. I'm waiting for its hand-back.",
+            "tool_names": []
+          },
+          {
+            "turn": 58,
+            "excerpt": "Rebuild #5 leaves WP1 nearly complete. Spotcheck is now 14/14, and every other check passes except envelope. The envelope failures are down to three: two proposed count deviations and one sub-frame row at level 8 road, 121,080 against R's 99,794. That last row is still WP1-scope, and it comes from a single cell. I'm sending one bounded worker to diagnose it and, if the fix is clean, write a final ",
+            "tool_names": [
+              "Agent"
+            ]
+          },
+          {
+            "turn": 59,
+            "excerpt": "Rebuild #5 is verified. WP1 is close but not complete: three envelope checks fail and one of them still needs a fix. A bounded worker is now diagnosing that one.\n\n**Passing:** container, decode, pointers, `mfde`, mht29, shape, vocab, and spotcheck at 14/14. The road-name halo restored Hay Street and Pulteney Street. Level 0 and level 8 background sub-frame maxima are now at or under R.\n\n**Failing,",
+            "tool_names": []
+          },
+          {
+            "turn": 60,
+            "excerpt": "",
+            "tool_names": [
+              "Agent"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 75,
+      "prior": 60,
+      "state_chars": 3855,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "aa9e5be26e92",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": 60,
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "brief_anchor": "You are the orchestrator for open-pajero-maps WP1 remaining work. CWD: /home/codyh/workspace/open-pajero-maps. Use workflow plugin skills (/workflow:refine, /workflow:execute) as needed. Commit and push per CLAUDE.md.\n\n## Goal\nDrive WP1 to a complete implementation: close remaining planned units and any WP1-scope harness failures they surface. Do not start WP2.\n\n## Current state (reconcile against the branch; do not trust this blindly)\n- master is clean at ~59dd914. Units 01\u201315b done. Ad-hoc bri",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 133215,
+          "prefix_bytes": 1421626,
+          "tool_histogram": {
+            "Agent": 20,
+            "Bash": 12,
+            "TaskStop": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 30194
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 4,
+            "Agent": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "No WP1-scope fixes remain, but WP1 is not complete: the last envelope FAILs need your accept-or-reject on the declared deviations. master is clean and pushed at 2b8bd39, WP2 was not started, and I ticked no acceptance boxes.\n\n**Rebuild #6 result.** The harness passes container, decode, pointers, `mfde`, mht29, shape, vocab and spotcheck (14/14). The suite passes at 279. Envelope fails on two rows ",
+            "tool_names": []
+          },
+          {
+            "turn": 69,
+            "excerpt": "That was the brief 33c agent's completion notice, which has already reported. Nothing is running now.\n\nWP1 is waiting on your decision on the nine proposed deviations in `PLAN.md`, under the \"Build record (2026-09-19, rebuild #6)\" section. master is clean and pushed at 2b8bd39.",
+            "tool_names": []
+          },
+          {
+            "turn": 70,
+            "excerpt": "The ratio is G/R, meaning our generated disc divided by the reference disc. It is not an expected size gap. The **envelope** check asks whether our disc has roughly the same shape and load as a real one. It doesn't test whether the map is correct. The head unit's firmware was built around real discs, so the check guards against sizes or counts far outside what it has seen. A frame over the 131,070",
+            "tool_names": []
+          },
+          {
+            "turn": 71,
+            "excerpt": "Yes, the whole disc is generated from the OSM extract. Reference discs are only used as the oracle to compare against and for structural constants like the parcel mask and size budgets. None of R's content is copied in.\n\nOn names, 0.149x means G has about 15% as many name entries as R at level 0. That's a count of name entries per level 0 parcel, and it doesn't measure how good the data is. My ear",
+            "tool_names": []
+          },
+          {
+            "turn": 72,
+            "excerpt": "The limits are the largest sub-frame sizes R contains, per level and per kind (road, background, name). The builder loads them from R's `frame_kind_max_bytes` as budgets. Separately, the hard frame ceiling is 131,070 bytes, and that comes from the frame format.\n\n**Why trimming happens.** OSM is denser than R in some places, especially dense city cells at zoomed-out levels. A cell's roads, backgrou",
+            "tool_names": []
+          },
+          {
+            "turn": 73,
+            "excerpt": "I don't remember the source, so I'll check the repo.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "It comes from our own writer, and it's an inference about the format, not something read from a spec.\n\n- The Map Frame header stores its size as a 16-bit word count (`total_size // 2`), so the largest representable frame is 65,535 words \u00d7 2 = 131,070 bytes.\n- Our writer in `parser/kiwiw/synth.py` raises `N does not fit in u16` above that limit. That crash, found on 2026-09-09, is where the ceiling",
+            "tool_names": []
+          }
+        ]
+      }
+    }
+  ]
+}

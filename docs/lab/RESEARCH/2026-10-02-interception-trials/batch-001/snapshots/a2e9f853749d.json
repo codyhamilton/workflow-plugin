@@ -1,0 +1,408 @@
+{
+  "harness": "claude-code",
+  "worker_id": "a2e9f853749d",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/8f018224-5f7f-4713-a2bc-a2e9f853749d.jsonl",
+  "T": 248,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "shape": "long_runawayish",
+  "ideal_window": [
+    158,
+    218
+  ],
+  "project": "open-pajero-maps",
+  "corpus_source": "deterministic_30",
+  "maps_family": true,
+  "inventory_rank": 1,
+  "norm_length": 284.0,
+  "checkpoints": [
+    {
+      "checkpoint": 75,
+      "prior": null,
+      "state_chars": 1128,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a2e9f853749d",
+        "checkpoint_turn": 75,
+        "prior_checkpoint_turn": null,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "<command-message>workflow:execute</command-message>\n<command-name>/workflow:execute</command-name>\n<command-args>implement the plan to improve build performance</command-args>",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 109317,
+          "prefix_bytes": 1715697,
+          "tool_histogram": {
+            "Bash": 75
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 2876
+        },
+        "delta_since_prior": {},
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "Level 6 (27\u00d734 cells) is small enough for a fill-mask test.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 165,
+      "prior": 75,
+      "state_chars": 2056,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a2e9f853749d",
+        "checkpoint_turn": 165,
+        "prior_checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "<command-message>workflow:execute</command-message>\n<command-name>/workflow:execute</command-name>\n<command-args>implement the plan to improve build performance</command-args>",
+        "cumulative": {
+          "api_turns": 165,
+          "peak_ctx_tokens": 116515,
+          "prefix_bytes": 4983940,
+          "tool_histogram": {
+            "Bash": 161,
+            "Read": 3,
+            "Skill": 2,
+            "Write": 2
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 2,
+          "compaction_event_count": 19,
+          "assistant_text_chars": 7604
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/synth.py",
+            "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/coordconv.py"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 86,
+            "Read": 3,
+            "Skill": 2,
+            "Write": 2
+          }
+        },
+        "tail": [
+          {
+            "turn": 158,
+            "excerpt": "`kw_col_key` returns an integer index into the count keys, not a string. I'm fixing the test to compare it against the key's position.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 159,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 160,
+            "excerpt": "Meanwhile I'll add the design doc note.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 161,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 162,
+            "excerpt": "All 296 tests pass. Committing and pushing.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 163,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 164,
+            "excerpt": "Master is at the previous commit, so I'm fast-forwarding it, as you said committing to master is intended.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 165,
+            "excerpt": "The full build now takes about 90 s, down from 263 s at `-j 12`, and the output is unchanged. It's committed and pushed to both `plan-02-build-performance` and `master`.\n\n- **Timing:** about 58 s encoding plus about 31 s of serial assembly.\n- **Byte identity:** the full-build sha256 is still `51c254ac\u2026`. The Perth fixture sha `e275879f\u2026` is identical at `-j 1`, `-j 4`, and `-j 4` with C disabled (",
+            "tool_names": []
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 195,
+      "prior": 165,
+      "state_chars": 1381,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a2e9f853749d",
+        "checkpoint_turn": 195,
+        "prior_checkpoint_turn": 165,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "<command-message>workflow:execute</command-message>\n<command-name>/workflow:execute</command-name>\n<command-args>implement the plan to improve build performance</command-args>",
+        "cumulative": {
+          "api_turns": 195,
+          "peak_ctx_tokens": 145036,
+          "prefix_bytes": 6146189,
+          "tool_histogram": {
+            "Bash": 191,
+            "Read": 3,
+            "Skill": 2,
+            "Write": 2
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 2,
+          "compaction_event_count": 21,
+          "assistant_text_chars": 11945
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 30
+          }
+        },
+        "tail": [
+          {
+            "turn": 188,
+            "excerpt": "Steps 1\u20133 first (chunk balancing, worker-side spills, C assembly), then the C divide port, with the sha256 checked after each.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 189,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 190,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 191,
+            "excerpt": "Starting with steps 1\u20132. I'll re-read the chunking and worker code first.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 192,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 193,
+            "excerpt": "",
+            "tool_names": [
+              "Bash",
+              "Bash"
+            ]
+          },
+          {
+            "turn": 194,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 195,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "checkpoint": 240,
+      "prior": 195,
+      "state_chars": 1737,
+      "shrink_steps": [],
+      "full_state": {
+        "question_id": "session-checkout",
+        "jev_model": "jev-1.13.0",
+        "worker_id": "a2e9f853749d",
+        "checkpoint_turn": 240,
+        "prior_checkpoint_turn": 195,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "brief_anchor": "<command-message>workflow:execute</command-message>\n<command-name>/workflow:execute</command-name>\n<command-args>implement the plan to improve build performance</command-args>",
+        "cumulative": {
+          "api_turns": 240,
+          "peak_ctx_tokens": 145036,
+          "prefix_bytes": 7156595,
+          "tool_histogram": {
+            "Bash": 235,
+            "Read": 3,
+            "Write": 3,
+            "Skill": 2
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 2,
+          "compaction_event_count": 23,
+          "assistant_text_chars": 13588
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 44,
+            "Write": 1
+          }
+        },
+        "tail": [
+          {
+            "turn": 233,
+            "excerpt": "The full build now takes 32.5 s and the sha matches exactly. That is close to the 30 s line, so I'll re-profile the heavy cell and see whether one cheap fix gets under it.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 234,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 235,
+            "excerpt": "All 297 tests pass and the no-C oracle path still gives the Perth sha. I'll add a direct test of the C probe against the Python encoders, then update the docs.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 236,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 237,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 238,
+            "excerpt": "That commit went out with my new test failing, so I'll fix it now.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 239,
+            "excerpt": "The random cell is over the format ceiling. The C probe correctly declines it and Python raises `ValueError`. The test should only compare when C answered.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 240,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

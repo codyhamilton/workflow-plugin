@@ -17,6 +17,12 @@ Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-
 | [`2026-09-30-durable-analytics-sink/`](2026-09-30-durable-analytics-sink/INDEX.md) | Durable observability sink for local + cloud agents (dual-write JSONL + HTTP) | [`../PROPOSALS/2026-09-30-durable-analytics-sink.md`](../PROPOSALS/2026-09-30-durable-analytics-sink.md) (`status: resolved` — recommendations accepted pending product wiring; proofs `1bff769`) |
 | [`2026-09-30-opencode-hooks-plugin/`](2026-09-30-opencode-hooks-plugin/INDEX.md) | OpenCode-native plugin for PostToolBatch-like soft signals (separate npm package; no Claude/Cursor drop-in) | [`../PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](../PROPOSALS/2026-09-30-opencode-hooks-plugin.md) (`status: resolved` — recommendations accepted pending product wiring; proofs `d4c4da1`, LCD 4/4) |
 
+**Evidence threads** (offline Wave-0 lever trials; sibling of [`2026-10-02-interception-steer-to-stop/`](2026-10-02-interception-steer-to-stop/INDEX.md); no behaviour unlock):
+
+| Thread | Log | Status |
+|--------|-----|--------|
+| Wave-0 offline lever trials | [`2026-10-02-interception-trials/EVIDENCE-LOG.md`](2026-10-02-interception-trials/EVIDENCE-LOG.md) (`batch-001/` quarantine + `batch-002/` protocol/results) | **batch-001** contaminated (T leak; Opus R1–R3). **batch-002** protocol fixed R1–R3. Meters are **diagnostic only** — **not** an FP/miss scoreboard. **Soft Standard HOLD.** Formal **near-done FP** / **runaway-await** non-length outcome sheet **not landed** (see log). |
+
 **Current control and measurement policy** (2026-09-30, later pass): [`../ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](../ANALYSIS/2026-09-30-grokbot-driver-reorient.md). Implications in this index follow that pass: Grok Bot drives, Jev asserts steer, classify visualises.
 
 ---

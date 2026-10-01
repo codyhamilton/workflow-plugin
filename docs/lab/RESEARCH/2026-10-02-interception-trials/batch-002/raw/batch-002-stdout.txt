@@ -1,0 +1,10 @@
+[{"cell_id":"4481749cc0c48377","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Lite stats only at first checkpoint; 45 turns, no excess signal, low urgency."},
+{"cell_id":"d66d440ffffa008d","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"60 turns of pure Bash with 4 compactions signals repetitive churn; steer soon."},
+{"cell_id":"12c9a4cc68f1ded6","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"High 38k assistant text, 139k ctx and 4 compactions indicate runaway length."},
+{"cell_id":"2e1e4558e8c549c6","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"Reread file 3x plus 4 compactions suggests looping; moderate steer urgency."},
+{"cell_id":"121110a86c6f2cbf","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Only 2 compactions; orchestration calls look intentional, limited excess at 60."},
+{"cell_id":"ae95f480a7760d9c","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Productive edits and writes, 2 compactions; no strong runaway signal yet."},
+{"cell_id":"615e882997ee7f5a","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"5 compactions, 38 Bash, 60 turns; strong runaway churn, urgent steer."},
+{"cell_id":"47ca39f2362c9922","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"4 compactions with monitor/send loops and 136k ctx indicate prolonged excess."},
+{"cell_id":"319c599821dab3e1","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"46 Bash plus 7 agents and 4 compactions; heavy churn, urgent steer."},
+{"cell_id":"230e714083002deb","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Zero compactions and TaskStop present; agent-heavy but appears controlled."}]

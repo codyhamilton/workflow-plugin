@@ -1,0 +1,79 @@
+{
+  "harness": "opencode",
+  "worker_id": "ses_1a0369734ffeqlVOz4S8",
+  "path": "sqlite:/home/codyh/.local/share/opencode/opencode.db#session/ses_1a0369734ffeqlVOz4S81bAuz0",
+  "T": 128,
+  "schedule": {
+    "first_at": 42,
+    "interval": 15
+  },
+  "shape": "mid",
+  "ideal_window": [
+    78,
+    113
+  ],
+  "maps_family": false,
+  "project": "lemmings",
+  "corpus_source": "deterministic_30",
+  "inventory_rank": 8,
+  "norm_length": 128.5,
+  "checkpoints": [
+    {
+      "checkpoint": 42,
+      "prior": null,
+      "state_chars": 234,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 42,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Plan Execution workflow",
+        "project": "lemmings",
+        "cumulative": {
+          "api_turns": 42,
+          "messages_full": 257,
+          "norm_length": 128.5,
+          "T_proxy": 128
+        }
+      }
+    },
+    {
+      "checkpoint": 64,
+      "prior": null,
+      "state_chars": 234,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 64,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Plan Execution workflow",
+        "project": "lemmings",
+        "cumulative": {
+          "api_turns": 64,
+          "messages_full": 257,
+          "norm_length": 128.5,
+          "T_proxy": 128
+        }
+      }
+    },
+    {
+      "checkpoint": 128,
+      "prior": null,
+      "state_chars": 236,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 128,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Plan Execution workflow",
+        "project": "lemmings",
+        "cumulative": {
+          "api_turns": 128,
+          "messages_full": 257,
+          "norm_length": 128.5,
+          "T_proxy": 128
+        }
+      }
+    }
+  ]
+}

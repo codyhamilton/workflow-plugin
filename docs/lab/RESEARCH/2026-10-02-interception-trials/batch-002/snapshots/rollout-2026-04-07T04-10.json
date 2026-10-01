@@ -1,0 +1,69 @@
+{
+  "harness": "codex",
+  "worker_id": "rollout-2026-04-07T04-10",
+  "path": "/home/codyh/.codex/sessions/2026/04/07/rollout-2026-04-07T04-10-34-019d6622-9190-77b1-93c6-4ef4524cc8a4.jsonl",
+  "T_eligibility_only": 59,
+  "schedule": {
+    "first_at": 45,
+    "interval": 15,
+    "fixed": [
+      45,
+      60,
+      75,
+      90,
+      105,
+      120
+    ]
+  },
+  "reached_checkpoints": [
+    45
+  ],
+  "never_reached_checkpoints": [
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "window_status": "unidentified",
+  "project": "garcia-music",
+  "corpus_source": "deterministic_30",
+  "maps_family": false,
+  "checkpoints": [
+    {
+      "checkpoint": 45,
+      "prior": null,
+      "state_chars": 423,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 45,
+        "harness": "codex",
+        "evidence_class": "lite_prefix",
+        "schedule": {
+          "first_at": 45,
+          "interval": 15,
+          "fixed": [
+            45,
+            60,
+            75,
+            90,
+            105,
+            120
+          ]
+        },
+        "cumulative": {
+          "api_turns": 45,
+          "prefix_lines_read": 859,
+          "prefix_role_histogram_top": {
+            "response_item": 534,
+            "event_msg": 295,
+            "turn_context": 28,
+            "session_meta": 2
+          },
+          "prefix_userish_or_turn_proxy": 28,
+          "note": "lite prefix-only; no full-session length fields"
+        }
+      }
+    }
+  ]
+}

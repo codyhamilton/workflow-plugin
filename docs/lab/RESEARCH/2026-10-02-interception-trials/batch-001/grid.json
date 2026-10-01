@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-10-02 00:37:34 AEST",
+  "target_cells": 240,
+  "n_cells": 240,
+  "n_sessions": 22,
+  "state_variants": [
+    "stats_only",
+    "hybrid_v0",
+    "stats_plus_delta",
+    "compact_focus"
+  ],
+  "question_variants": [
+    "continue_excessively",
+    "steer_now",
+    "productive_arc",
+    "near_done",
+    "thrash_bundle",
+    "defer_recheck"
+  ],
+  "response_classes": [
+    "binary_fire",
+    "likert_0_3",
+    "four_class",
+    "rating_plus_offset"
+  ],
+  "lever_combos": [
+    {
+      "state": "stats_only",
+      "question": "continue_excessively",
+      "response_class": "likert_0_3"
+    },
+    {
+      "state": "stats_only",
+      "question": "steer_now",
+      "response_class": "binary_fire"
+    },
+    {
+      "state": "stats_only",
+      "question": "thrash_bundle",
+      "response_class": "four_class"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "steer_now",
+      "response_class": "likert_0_3"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "near_done",
+      "response_class": "four_class"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "defer_recheck",
+      "response_class": "binary_fire"
+    },
+    {
+      "state": "stats_plus_delta",
+      "question": "productive_arc",
+      "response_class": "likert_0_3"
+    },
+    {
+      "state": "stats_plus_delta",
+      "question": "continue_excessively",
+      "response_class": "rating_plus_offset"
+    },
+    {
+      "state": "compact_focus",
+      "question": "thrash_bundle",
+      "response_class": "binary_fire"
+    },
+    {
+      "state": "compact_focus",
+      "question": "steer_now",
+      "response_class": "four_class"
+    },
+    {
+      "state": "hybrid_v0",
+      "question": "continue_excessively",
+      "response_class": "four_class"
+    },
+    {
+      "state": "stats_only",
+      "question": "defer_recheck",
+      "response_class": "rating_plus_offset"
+    }
+  ],
+  "soft_standard_hold": true,
+  "typesafe_used": false,
+  "maps_concentration": {
+    "sessions_maps": 14,
+    "sessions_total": 22,
+    "cells_maps": 154,
+    "cells_total": 240
+  },
+  "pack_errors": []
+}

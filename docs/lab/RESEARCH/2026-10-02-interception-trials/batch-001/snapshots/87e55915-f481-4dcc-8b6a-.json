@@ -1,0 +1,111 @@
+{
+  "harness": "cursor",
+  "worker_id": "87e55915-f481-4dcc-8b6a-",
+  "path": "/home/codyh/.cursor/projects/home-codyh-workspace-garcia-music/agent-transcripts/87e55915-f481-4dcc-8b6a-54c69392fcf9/87e55915-f481-4dcc-8b6a-54c69392fcf9.jsonl",
+  "T": 49,
+  "schedule": {
+    "first_at": 12,
+    "interval": 12
+  },
+  "shape": "short_natural",
+  "ideal_window": null,
+  "project": "garcia-music",
+  "corpus_source": "deterministic_30",
+  "maps_family": false,
+  "inventory_rank": 23,
+  "norm_length": 49.0,
+  "checkpoints": [
+    {
+      "checkpoint": 12,
+      "prior": null,
+      "state_chars": 304,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 12,
+        "harness": "cursor",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 12,
+          "approx_progress_frac": 0.245,
+          "file_lines": 247,
+          "role_histogram_top": {
+            "assistant": 198,
+            "user": 49
+          },
+          "userish_count_full_session": 49,
+          "T_observed": 49,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    },
+    {
+      "checkpoint": 24,
+      "prior": null,
+      "state_chars": 303,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 24,
+        "harness": "cursor",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 24,
+          "approx_progress_frac": 0.49,
+          "file_lines": 247,
+          "role_histogram_top": {
+            "assistant": 198,
+            "user": 49
+          },
+          "userish_count_full_session": 49,
+          "T_observed": 49,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    },
+    {
+      "checkpoint": 36,
+      "prior": null,
+      "state_chars": 304,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 36,
+        "harness": "cursor",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 36,
+          "approx_progress_frac": 0.735,
+          "file_lines": 247,
+          "role_histogram_top": {
+            "assistant": 198,
+            "user": 49
+          },
+          "userish_count_full_session": 49,
+          "T_observed": 49,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    },
+    {
+      "checkpoint": 49,
+      "prior": null,
+      "state_chars": 302,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 49,
+        "harness": "cursor",
+        "evidence_class": "lite",
+        "cumulative": {
+          "api_turns": 49,
+          "approx_progress_frac": 1.0,
+          "file_lines": 247,
+          "role_histogram_top": {
+            "assistant": 198,
+            "user": 49
+          },
+          "userish_count_full_session": 49,
+          "T_observed": 49,
+          "note": "lite non-CC state; no chat bodies"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "harness": "opencode",
+  "worker_id": "ses_1a0328cd5ffe6iabFeMK",
+  "path": "sqlite:/home/codyh/.local/share/opencode/opencode.db#session/ses_1a0328cd5ffe6iabFeMKOf28Ad",
+  "T": 84,
+  "schedule": {
+    "first_at": 28,
+    "interval": 15
+  },
+  "shape": "short_natural",
+  "ideal_window": null,
+  "maps_family": false,
+  "project": "lemmings",
+  "corpus_source": "deterministic_30",
+  "inventory_rank": 13,
+  "norm_length": 84.5,
+  "checkpoints": [
+    {
+      "checkpoint": 28,
+      "prior": null,
+      "state_chars": 262,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 28,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Refactor CLI entry point index.js (@general subagent)",
+        "project": "lemmings",
+        "cumulative": {
+          "api_turns": 28,
+          "messages_full": 169,
+          "norm_length": 84.5,
+          "T_proxy": 84
+        }
+      }
+    },
+    {
+      "checkpoint": 42,
+      "prior": null,
+      "state_chars": 262,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 42,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Refactor CLI entry point index.js (@general subagent)",
+        "project": "lemmings",
+        "cumulative": {
+          "api_turns": 42,
+          "messages_full": 169,
+          "norm_length": 84.5,
+          "T_proxy": 84
+        }
+      }
+    },
+    {
+      "checkpoint": 84,
+      "prior": null,
+      "state_chars": 262,
+      "shrink_steps": [],
+      "full_state": {
+        "checkpoint_turn": 84,
+        "harness": "opencode",
+        "evidence_class": "lite_inventory",
+        "title": "Refactor CLI entry point index.js (@general subagent)",
+        "project": "lemmings",
+        "cumulative": {
+          "api_turns": 84,
+          "messages_full": 169,
+          "norm_length": 84.5,
+          "T_proxy": 84
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-10-02 00:36:59 AEST",
+  "batch": "batch-001",
+  "soft_standard_hold": true,
+  "typesafe_used": false,
+  "hooks_unlock": false,
+  "n_sessions": 22,
+  "n_cells": 180,
+  "n_flash_batches": 18,
+  "flash_model": "deepseek/deepseek-flash",
+  "flash_parallel": 3,
+  "cells_per_flash": 10,
+  "flash_total_elapsed_s": 269.4,
+  "flash_parse_miss_cells": 0,
+  "fire_count": 16,
+  "outcome_counts": {
+    "defer_ok": 114,
+    "runaway_miss_candidate": 50,
+    "premature": 6,
+    "runaway_hit": 10
+  },
+  "harness_cell_counts": {
+    "codex": 144,
+    "claude-code": 36
+  },
+  "maps_concentration": {
+    "sessions_maps": 14,
+    "sessions_total": 22,
+    "cells_maps": 36,
+    "cells_total": 180
+  },
+  "session_rollup": {
+    "long_sessions_hit": 1,
+    "long_sessions_miss_or_outside": 2,
+    "sessions_with_any_near_done_fp_cell": 0
+  },
+  "luna_used": false,
+  "paths": {
+    "batch": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-001",
+    "mirror": "/tmp/2026-10-02-interception-trials-batch-001",
+    "results": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-001/results.jsonl",
+    "protocol": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-001/PROTOCOL.md"
+  },
+  "remaining_grid_note": "Full cartesian would be 4\u00d76\u00d74=96 per checkpoint; batch-001 used 12 stratified combos \u00d7 selected cps.",
+  "pack_errors_n": 0
+}

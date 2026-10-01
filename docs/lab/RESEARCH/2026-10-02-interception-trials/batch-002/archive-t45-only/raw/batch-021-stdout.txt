@@ -1,0 +1,10 @@
+[{"cell_id":"16cb0fcae9c23661","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Bash-only build-perf loop but turn 42 states concrete pread fix; still productive, no completion signal."},
+{"cell_id":"6437fc9683f1aa60","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Actively coordinating design/execution, resolving open questions; high text shows forward progress."},
+{"cell_id":"01ef8ecf859d248a","label":"near_completion","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Turn 44 explicitly reports task complete and stopping loop; wrapping up."},
+{"cell_id":"9e8a7682cf66a0d8","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Orchestrating parallel worker waves and resuming a stalled agent; active progress."},
+{"cell_id":"ebcfe740ac659ebe","label":"uncertain","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Repeated interim 'holding' statuses waiting on background worker; outcome unclear."},
+{"cell_id":"02768ce8922100c9","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Running refine on confirmed outstanding units 13/14; concrete forward work."},
+{"cell_id":"38b2ed0a58b303bd","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Records completed unit, waits on unit 07 worker; normal orchestration progress."},
+{"cell_id":"05a9c2ae52de0ed6","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Mid active phase, flagging 3C-04 decision while 3C-08 runs; still working."},
+{"cell_id":"1987a4980663dac3","label":"productive_continue","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Driving WP1 to completion, dispatched 31b worker; active agent-based progress."},
+{"cell_id":"97d41851916b927d","label":"likely_runaway","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Three consecutive stale-notice turns with nothing new, idly waiting on 2-02; spinning."}]
