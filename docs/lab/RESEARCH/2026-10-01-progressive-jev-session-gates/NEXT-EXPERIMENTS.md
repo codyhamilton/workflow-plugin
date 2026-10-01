@@ -1,6 +1,6 @@
 # Next experiments — progressive Jev gold labeling
 
-**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null**). Experiment **(d)** thrash-screen **passes** H5 on its own 3×12 table (α = **0.8276**) with **A0 = 90** on `ca977b9ca0dd` only. **Jev stays blocked:** one non-null A0 is not a tuning corpus. No hook change.
+**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null**). Experiment **(d)** thrash-screen **passes** H5 on its own 3×12 table (α = **0.8276**) with **A0 = 90** on `ca977b9ca0dd` only. Experiment **(e)** thrash-expand is a **miss**: strict ca977 shape empty on the remaining maps pool; best-available panel **A0 null** on all three workers; **0/5** checkout on every seat. Expand-only α is **undefined** (all `not_yet`; a De=0 convention of 1.0 is not a pass). Combined (d)+(e) is 17 prefixes, α = **0.8377**, and still **one** non-null A0. **Jev stays blocked** until ≥ 2 non-null A0. No hook change.
 
 ## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
@@ -154,34 +154,74 @@ Experiment **(c)** met the corpus-size gate but added **no** unanimous gold: **A
 
 ---
 
-## Primary next — experiment **(e)** `ubuntu-thrash-high-score-expand-v1`
+## Completed — experiment **(e)** `ubuntu-thrash-high-score-expand-v1` (**miss: zero checkouts, no second A0**)
 
-**Status:** plan. **Goal:** pack and label **more** workers that match the shape that actually produced **A0** in (d) — rank-1 `ca977b9ca0dd` (no Edit/Write, high max-reread, high compaction) — and **hold Jev** until at least a second worker has non-null **A0**.
+**Status:** packs + panel done (2026-10-01). **Outcome:** **miss.** Strict ca977 shape was empty on the remaining maps pool. The best-available research panel added **no** checkout and **no** second non-null **A0**.
 
-### Why (e) now
+**Artifacts:** hybrid_v0 packs [`proofs/validated/gold/packs/thrash-expand-e-judge-packs-20261001-210125.jsonl`](proofs/validated/gold/packs/thrash-expand-e-judge-packs-20261001-210125.jsonl) (5 rows); seat JSONLs `thrash-expand-e-checkout-verdicts-{sonnet,composer,grok}-20261001.jsonl`; agreement [`thrash-expand-e-panel-agreement-20261001.json`](proofs/validated/gold/thrash-expand-e-panel-agreement-20261001.json); combined (d)+(e) [`thrash-de-panel-agreement-20261001.json`](proofs/validated/gold/thrash-de-panel-agreement-20261001.json); human summary in [`PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md) §(e); scorecard [`thrash-expand-e-panel-SCORECARD-20261001.md`](proofs/validated/gold/thrash-expand-e-panel-SCORECARD-20261001.md).
 
-**(d)** cleared thrash-only H5 (α = **0.8276** ≥ 0.40) and produced the first new unanimous exit (**A0 = 90** on `ca977b9ca0dd`). The confidence caveat is on the record: `daf933273c8f` and `7b00225cb824` are **A0 null**, and nine of twelve prefixes are unanimous `not_yet`. A sweep on that table would tune to a single exit turn, so Jev and any stats sweep stay blocked.
+| Gate | Result |
+|------|--------|
+| Shape | **Miss.** Remaining maps `T≥75` after excludes: n=26. Strict ca977 (no Edit/Write ∧ max reread ≥ 8 ∧ compact ≥ 8): **n_ca977_shape = 0** |
+| Corpus | Best-available N=3 packed anyway: `e8aa4f271927` (1 cp), `5163c22a6a3e` (2), `a318f4b89a6a` (2) → **5** prefixes. Not a shape-gate pass |
+| Panel | Sonnet **0/5** checkout; Composer **0/5**; Grok **0/5**. Earliest checkout **null** on every worker and every seat |
+| **A0** | **null** on `e8aa4f271927`, `5163c22a6a3e`, and `a318f4b89a6a` |
+| H5 (expand-only 3×5) | Nominal α **undefined** (all `not_yet`; Do = De = 0). `h5_pass` **false**. A De=0 convention of **1.0** is recorded and is **not** a pass |
+| (d)+(e) | **17** prefixes. α = **0.8377** (numeric floor only). Non-null **A0** count = **1** (`ca977b9ca0dd` @ **90**) |
+| Jev | **Blocked.** Need ≥ 2 non-null A0. Combined `h5_pass` does not unlock a sweep |
 
-Ranks 2–3 (sleep/poll and Contract-W Bash) stayed `not_yet` on every seat. The next packs should follow the `ca977b9ca0dd` / `92a48e004519` shape: no Edit/Write, high max-reread, high compaction (smoking-gun thrash score ≈ 151). Leave the poll class off the shortlist.
+**Interpretation:** The open-pajero-maps remainder does not contain another ca977 twin, and labeling the nearest substitutes produced unanimous `not_yet`. High raw agreement (100%, κ 0) is the constant-table prevalence case, the same family as expansion’s agreement-on-false, with even less positive-class mass (zero true labels). The combined α lift **0.8276 → 0.8377** is those five `not_yet` prefixes. **Do not** run a Jev or stats sweep. P0 and expansion numbers are unchanged. Do not ship behaviour.
+
+**Consequences:** Keep (d)’s `ca977b9ca0dd@90` as the only new unanimous gold exit. Do not pack further maps near-misses. Do not treat expand-only α, or the combined numeric H5 pass, as a gold unlock.
+
+### Archived protocol — (e) high-score expand (for audit)
+
+**Goal at planning:** pack and label more workers that match the shape that produced **A0** in (d) — rank-1 `ca977b9ca0dd` (no Edit/Write, high max-reread, high compaction) — and hold Jev until a second worker has non-null **A0**.
+
+The screen was empty, so the run packed a pre-registered best-available panel instead of recording blocked. That panel is the miss above. The Jev gate in the sketch was not waived: (e) did not add a second A0, so no sweep was run.
+
+<details>
+<summary>Protocol sketch (as planned 2026-10-01)</summary>
+
+1. Screen remaining Ubuntu maps workers with `T ≥ 75`, excluding already labeled ids. Prefer no Edit/Write, high max-reread, and high compaction. Deprioritize sleep/poll and brief-mandated Bash monitors.
+2. Pre-register N before labeling. Pack hybrid_v0 (`75:15`) for workers that meet the stricter shape. If fewer than two meet the shape, record **blocked**; do not pad with poll-class workers.
+3. Same three seats and original rubric as (d). Prior JSONLs read-only.
+4. **A0** per new worker and nominal α on the enlarged thrash table. H5 floor ≥ 0.40.
+5. No Jev or stats sweep inside (e). A later sweep only after thrash-table α ≥ 0.40 **and** ≥ 2 workers with non-null **A0**.
+
+</details>
+
+---
+
+## Primary next — experiment **(f)** `cross-project-ca977-shape-screen-v1`
+
+**Status:** plan. **Goal:** find a second worker with the ca977 shape (no Edit/Write ∧ high max-reread ∧ high compaction ∧ `T ≥ 75`) in **other** Ubuntu Claude project directories, then pack and label only shape hits. **Hold Jev** until ≥ 2 workers have non-null **A0**.
+
+### Why this is primary
+
+The maps remainder is exhausted for ca977 twins. (e) screened the remaining open-pajero-maps `T≥75` pool (n=26) and the strict shape returned **zero** workers. The best-available substitutes were then labeled and added **zero** checkouts. Packing more of that remainder repeats a miss. A second **A0** has to come from sessions that were not in that maps enum: other project directories on the same Ubuntu Claude tree, or new maps sessions that do not exist yet. Looking at the other directories is the measurement that can still add a shape-matched worker. Waiting is the fallback when that screen is also empty.
 
 ### Protocol sketch
 
-1. **Screen:** From the remaining Ubuntu maps workers with `T ≥ 75`, exclude already labeled ids (`92a48e004519`, `bb6165018de0`, `0aab88c525de`, `036ff3ed4a89`, `0853bc21d3aa`, `ca977b9ca0dd`, `daf933273c8f`, `7b00225cb824`). Rank with the same dry-run thrash tables. **Prefer** no Edit/Write in the tool histogram, high max-reread, and high compaction. **Deprioritize** sleep/poll and brief-mandated Bash monitors — (d) labeled that class `not_yet`.
-2. **Pre-register N** before labeling. Pack hybrid_v0 (`75:15`) for the next workers that meet the stricter shape. Target **≥ 3** additional workers when the screen has them. If fewer than two meet the shape, record **blocked** for the rest; do not pad with poll-class workers to hit a count.
-3. **Panel:** Same three seats and original rubric as (d). Keep P0, expansion, and (d) JSONLs read-only.
-4. **Metrics:** **A0** per new worker and nominal α on the enlarged thrash table (d’s 12 prefixes plus the new ones). H5 floor unchanged (**≥ 0.40**).
-5. **Jev gate (explicit):** no Jev sweep and no stats-gate sweep in (e). A later sweep is in scope only after **both** (i) thrash-table α ≥ 0.40 **and** (ii) **≥ 2** workers with non-null **A0**. One worker (`ca977b9ca0dd`) already counts toward (ii); (e) has to add another. Document confidence caveats either way. Do not ship hooks, plugins, or behaviour.
+1. **Screen:** Enumerate Ubuntu `~/.claude/projects/` directories other than `-home-codyh-workspace-open-pajero-maps`. Same dry-run thrash metrics as (d)/(e). Gate: `T ≥ 75` ∧ no Edit/Write ∧ max reread ≥ 8 ∧ compaction ≥ 8 (the empty (e) shape). Exclude every worker already labeled in P0, (c), (d), and (e). Publish the ranked shape hits before packing.
+2. **Do not pad.** If fewer than two workers pass the shape gate, record **blocked** and stop. Do not pack best-available near-misses. (e) already showed that padding adds prefixes and no **A0**. Fall through to the hold alternate below.
+3. **Pack:** hybrid_v0 (`75:15`) only for shape hits. Keep P0, expansion, (d), and (e) JSONLs read-only.
+4. **Panel:** same three seats and original rubric (no `parent-pull-v1`).
+5. **Metrics:** **A0** per new worker and nominal α on the enlarged thrash table. H5 floor unchanged (≥ 0.40). An all-`not_yet` table has **undefined** α; a De=0 convention of 1.0 is not a pass and not a gold unlock.
+6. **Jev gate (explicit):** no Jev sweep and no stats-gate sweep in (f), and none after it, until **both** (i) thrash-table α ≥ 0.40 on a table that is not constant-`not_yet` **and** (ii) **≥ 2** workers with non-null **A0**. Today only `ca977b9ca0dd` counts toward (ii). Do not ship hooks, plugins, or behaviour.
 
 ### Success sketch
 
 | Gate | Criterion |
 |------|-----------|
-| Corpus | ≥ **2** new workers packed under the stricter shape, or an explicit **blocked** note if the screen cannot supply them |
+| Corpus | ≥ **2** new shape-matched workers packed, or an explicit **blocked** note if the cross-project screen cannot supply them |
 | Panel | Three seats on every new prefix; original rubric only |
-| Gold rule | ≥ **2** workers with non-null **A0** across (d)+(e), or a written miss |
-| H5 | Enlarged thrash-table α **≥ 0.40** |
+| Gold rule | ≥ **2** workers with non-null **A0** across (d)+(e)+(f), or a written miss |
+| H5 | Enlarged thrash-table α **≥ 0.40**, and the table is not all `not_yet` |
 | Non-goal | No `--call-jev`, no stats sweep, no hook or plugin edit, no adoption of **A_maj** / **A_gc** |
 
-### Alternate (not primary)
+### Alternates (not primary)
 
-**Hold.** Leave (d) as the last measurement and do not pack further until a human spot-check of `ca977b9ca0dd@75` (Sonnet-only) versus `@90` (unanimous) is on file. That check does not by itself authorize a Jev sweep.
+**`hold-until-new-maps-sessions`:** stop packing the maps remainder. Wait for new long runaway sessions that meet the ca977 shape, then pack those. Use this when the cross-project screen is empty or the other project directories are not on the Ubuntu box. Holding does not unlock Jev.
+
+**`spot-check-ca977-75-vs-90`:** human or agent spot-check of `ca977b9ca0dd@75` (Sonnet-only checkout) versus `@90` (unanimous **A0**). Annotation only. It does not add a second **A0** and does not unlock Jev by itself.

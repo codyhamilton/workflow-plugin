@@ -55,6 +55,10 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 | `thrash-screen-checkout-verdicts-*-20261001.jsonl` | Experiment **(d)** three-seat labels (12 cps each) |
 | `thrash-screen-panel-agreement-20261001.json` | **(d)** A0, α, pairwise metrics |
 | `thrash-screen-panel-SCORECARD-20261001.md` | **(d)** gate table (H5 pass; Jev still blocked) |
+| `thrash-expand-e-checkout-verdicts-*-20261001.jsonl` | Experiment **(e)** three-seat labels (5 cps each) |
+| `thrash-expand-e-panel-agreement-20261001.json` | **(e)** A0 null × 3; α undefined (all `not_yet`) |
+| `thrash-de-panel-agreement-20261001.json` | **(d)+(e)** 17 prefixes; still one A0 (`ca977b9ca0dd` @ 90) |
+| `thrash-expand-e-panel-SCORECARD-20261001.md` | **(e)** gate table (miss; Jev still blocked) |
 
 ## Headline result (three-seat panel)
 
@@ -65,6 +69,7 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 - **A_maj** and **A_gc** recomputed from the signed JSONL are both **180** on `92a48e004519` and **null** on `bb6165018de0` ([`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json)). They are documented alternates, not the fit target.
 - Experiment **(b)** Sonnet re-label under `parent-pull-v1` **failed** (hold-out checkout at `92a48e@255`; checkout on all Grok-only 105–165). Relabel JSONL is **not** gold.
 - Experiment **(c)** expansion panel **complete** — **A0 null** on `0aab88c525de`, `036ff3ed4a89`, `0853bc21d3aa`; expansion-only α **0.0000** (3×20); see [`expansion-panel-agreement-20261001.json`](expansion-panel-agreement-20261001.json) and [`PANEL-FINDINGS-20261001.md`](PANEL-FINDINGS-20261001.md) §(c).
-- Experiment **(d)** thrash-screen panel **complete** — **A0 = 90** on `ca977b9ca0dd` only (**null** on `daf933273c8f` and `7b00225cb824`); thrash-only α **0.8276** (3×12) **passes** H5. Jev stays blocked (single A0). See [`thrash-screen-panel-agreement-20261001.json`](thrash-screen-panel-agreement-20261001.json) and [`PANEL-FINDINGS-20261001.md`](PANEL-FINDINGS-20261001.md) §(d). Next: **(e)** — [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
+- Experiment **(d)** thrash-screen panel **complete** — **A0 = 90** on `ca977b9ca0dd` only (**null** on `daf933273c8f` and `7b00225cb824`); thrash-only α **0.8276** (3×12) **passes** H5. Jev stays blocked (single A0). See [`thrash-screen-panel-agreement-20261001.json`](thrash-screen-panel-agreement-20261001.json) and [`PANEL-FINDINGS-20261001.md`](PANEL-FINDINGS-20261001.md) §(d).
+- Experiment **(e)** thrash-expand panel **complete — miss.** Strict ca977 shape empty on the remaining maps pool. **A0 null** on `e8aa4f271927`, `5163c22a6a3e`, and `a318f4b89a6a` (0/5 checkout, every seat). Expand-only α is **undefined** (all `not_yet`; a 1.0 De=0 convention is not a pass). Combined (d)+(e) α **0.8377** on 17 prefixes still has **one** non-null A0. Jev stays blocked. See [`thrash-expand-e-panel-agreement-20261001.json`](thrash-expand-e-panel-agreement-20261001.json) and [`PANEL-FINDINGS-20261001.md`](PANEL-FINDINGS-20261001.md) §(e). Next: **(f)** — [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
 
 No `--call-jev` / `TYPESAFE_API_KEY` was used for labeling or this aggregation.
