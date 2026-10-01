@@ -1,10 +1,12 @@
 # Hypotheses — progressive Jev session gates
 
-**Status:** pre-registered for the first replay. **Confidence: not high.** P0 three-seat gold panel landed 2026-10-01: judge floor met (Sonnet + Composer + Grok), but **A0 is null** on both smoking guns and pooled Krippendorff α = **0.1189** (< H5 floor 0.40) — **H5 fails**; stop before interpreting H1–H4 / H6–H7 for tuning. See [`proofs/validated/gold/PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md). Other hypotheses remain untested until Jev replay exists.
+**Status:** pre-registered for the first replay. **Confidence: not high.** P0 three-seat gold panel landed 2026-10-01: judge floor met (Sonnet + Composer + Grok), but **A0 is null** on both smoking guns and pooled Krippendorff α = **0.1189** (< H5 floor 0.40) — **H5 fails**; stop before interpreting H1–H4 / H6–H7 for tuning. See [`proofs/validated/gold/PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md).
+
+Alternate targets from the same signed JSONL, documented and **not** adopted as the fit rule: **A_maj** (2 of 3) and **A_gc** (Grok ∩ Composer) are both **180** on `92a48e004519` and **null** on `bb6165018de0`. They match at all 21 checkpoints because Sonnet is checkout on 0/21. Majority checkout is only cps 180, 195, and 210. File: [`proofs/validated/gold/p0-alt-gold-targets-20261001.json`](proofs/validated/gold/p0-alt-gold-targets-20261001.json). The next measurement is the Sonnet re-label in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md), which is the H5 consequence (revise the rubric, re-label). It is not a parameter sweep. Other hypotheses remain untested.
 
 Definitions: [`TERMS.md`](TERMS.md). Data plan: [`TUNING-PLAN.md`](TUNING-PLAN.md). Citations: [`LITERATURE.md`](LITERATURE.md).
 
-All comparisons use gold rule `A0` (earliest unanimous checkout), workers with `T >= 75` and a powered panel, and the length-bin table from TERMS §8. The smoking-gun slice is `92a48e004519` and `bb6165018de0` when their JSONLs are in the manifest. Until those files exist, every hypothesis is blocked, not falsified.
+All comparisons use gold rule `A0` (earliest unanimous checkout), workers with `T >= 75` and a powered panel, and the length-bin table from TERMS §8. The smoking-gun slice is `92a48e004519` and `bb6165018de0`; both are in the manifest. H5 is falsified. H1–H4 and H6–H7 stay untested under that stop.
 
 ## H1 — Progressive checkpoints beat the single-shot baseline
 
@@ -98,7 +100,7 @@ Checkpoints after `gate_exit` are still scored for H7. The counterfactual stop d
 When the replay exists, publish in this order, and stop at the first failure of the stop rules:
 
 1. Corpus manifest counts (blocked today).
-2. Alpha and spread (H5). Stop if H5 fails.
+2. Alpha and spread (H5). Stop if H5 fails. On the 2026-10-01 panel, H5 failed (α = 0.1189). The registered next measurement is the rubric re-label in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md). `A_maj` / `A_gc` are recorded there as alternates. They do not replace `A0` in the comparisons below.
 3. Baseline `B` and baseline `C` against `A0`.
 4. `P0` against `B` and `C`, with length bins (H1, H6).
 5. Snapshot ablation (H2) and question ablation (H3, H4).

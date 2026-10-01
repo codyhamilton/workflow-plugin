@@ -1,6 +1,6 @@
 # Gold-label rubric — when continuing was a mistake
 
-**Status:** protocol. **Confidence: not high.** No prefix has been labeled with this rubric.
+**Status:** protocol. **Confidence: not high.** The P0 prefixes were labeled on 2026-10-01 under the rules above the draft delta at the end of this file. That delta is not in force and was not shown to those seats.
 
 Judges apply this rubric to a prefix bundle. They do not apply the Jev question text in [`TERMS.md`](TERMS.md) §6. Sharing the Jev wording with the judges would make the gold a copy of the instrument. The axes match, because both are trying to name the same event. The sentences do not.
 
@@ -105,3 +105,20 @@ Each judge’s own first checkout turn is still stored. The spread across judges
 After the prefix labels are stored, each judge may see a full-file bundle, capped at the same 60_000 characters with the same shrink rule, and name one first checkout turn or null. This pass is `gold_exit_turn_hindsight`. It exists to measure how much the ending moves the call. Parameters are not chosen from it.
 
 The hindsight pass is where the public maps summary is most tempting. Judges on that pass are still not given the maps paragraph. If their hindsight turn clusters on the same number the maps flags suggest, the lock memo should say that the ending is legible from the transcript itself. If they only cluster when the maps paragraph is in the prompt, a later experimenter has contaminated the label.
+
+## Draft delta — not in force (2026-10-01)
+
+The signed P0 rows used the rubric above. This section is the extra paragraph for the Sonnet re-label in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md). It does not rewrite those rows. Do not paste the experiment scorecard, other seats' labels, or target turns into the judge prompt.
+
+`checkout` means a parent-pull: hand the parent a narrower brief, or stop. The worker does not have to look idle. A Bash/Read cycle on files named in the brief can still be `checkout`.
+
+When the prefix already shows `runaway` (a path read at least three times) and the interval since the previous labeled turn adds no new path and no Edit or Write, the following are not reasons to stay at `not_yet`:
+
+- Bash might be editing through sed, a heredoc, or a shell redirect.
+- The re-read files are the ones in the brief.
+- A compaction would force a re-read, so the re-read is ordinary recovery.
+- The tail excerpts are empty, so the call feels thin.
+
+Empty excerpts plus that shape are enough. Mark `runaway` and `low_progress`. One such interval can still be the brief's long gate. A checkpoint with no delta (the first labeled turn on this schedule) is not a frozen interval. The first checkpoint whose delta adds no new path and no Edit or Write is the first frozen interval and stays `not_yet`. `checkout` starts on the following labeled turn when that turn's delta is frozen as well.
+
+Stay at `not_yet` when any of these is true: the tail names a checkable step (a fix, a test, a gate, an artifact); a new path appears; assistant text has grown since the previous labeled turn; the worker is waiting on a named in-flight job that reports milestones and the histogram already contains Write or Edit. Turn count, peak context, and compaction count remain insufficient on their own.

@@ -1,0 +1,469 @@
+{
+  "generated_at_utc": "2026-10-01T10:13:22Z",
+  "git_base": "17396d68ca26d3823fdd8e34da045c468be8855b",
+  "method": "Recomputed from the three committed signed JSONLs. Flash drafts excluded. No other labels.",
+  "sources": {
+    "sonnet": {
+      "file": "p0-checkout-verdicts-20261001.jsonl",
+      "filter": "role=reviewer_final and signed=true",
+      "sha256": "88714a24f115cb2ff7115fec241046cde85009738a875e6c0e8d09ce32673eb3",
+      "n_rows_used": 21,
+      "n_flash_drafts_excluded": 21
+    },
+    "composer": {
+      "file": "p0-checkout-verdicts-composer-20261001.jsonl",
+      "sha256": "fbadbb960701625d92ff4f4fbf66c5007f209dc08aed7f089e0be393ec9a9929",
+      "n_rows_used": 21
+    },
+    "grok-4.7": {
+      "file": "p0-checkout-verdicts-grok-20261001.jsonl",
+      "sha256": "631ea6f9df25ee6d53b56e8fcc0137ef1fdab5ebe2393accd09cb420ba3381b0",
+      "n_rows_used": 21
+    }
+  },
+  "rules": {
+    "A_maj": "Earliest P0 checkpoint where at least 2 of the 3 seats have checkout_recommended=true. This is TERMS A1 on a complete 3-seat panel (majority rounds up: 2 of 3).",
+    "A_gc": "Earliest P0 checkpoint where composer and grok-4.7 both have checkout_recommended=true. Sonnet is ignored.",
+    "majority_label": "checkout when checkout_count >= 2, else not_yet. Evaluated independently at each checkpoint. A later not_yet does not erase an earlier checkout, and an earlier checkout does not fill later checkpoints.",
+    "gc_label": "checkout when composer and grok-4.7 are both true at that checkpoint, else not_yet."
+  },
+  "fit_target": false,
+  "fit_target_note": "Computed and documented only. Not adopted for a Jev or stats-gate sweep. See NEXT-EXPERIMENTS.md. H5 remains failed under A0.",
+  "earliest_by_worker": {
+    "A_maj": {
+      "92a48e004519": 180,
+      "bb6165018de0": null
+    },
+    "A_gc": {
+      "92a48e004519": 180,
+      "bb6165018de0": null
+    },
+    "A0_recomputed": {
+      "92a48e004519": null,
+      "bb6165018de0": null
+    },
+    "sonnet": {
+      "92a48e004519": null,
+      "bb6165018de0": null
+    },
+    "composer": {
+      "92a48e004519": 180,
+      "bb6165018de0": null
+    },
+    "grok-4.7": {
+      "92a48e004519": 105,
+      "bb6165018de0": null
+    }
+  },
+  "identity": {
+    "A_maj_equals_A_gc_both_workers": true,
+    "per_checkpoint_majority_label_equals_gc_label": true,
+    "why": "Sonnet checkout_recommended is false at all 21 checkpoints, so a second checkout vote exists only when composer and grok-4.7 are both true."
+  },
+  "counts": {
+    "n_checkpoints": 21,
+    "sonnet_checkout": 0,
+    "composer_checkout": 3,
+    "grok-4.7_checkout": 8,
+    "majority_checkout_checkpoints": 3,
+    "gc_checkout_checkpoints": 3,
+    "a0_checkout_checkpoints": 0,
+    "grok_only_checkpoints": 5,
+    "unanimous_not_yet_checkpoints": 13
+  },
+  "majority_checkout_checkpoints": [
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 180
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 195
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 210
+    }
+  ],
+  "grok_only_checkpoints": [
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 105
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 135
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 150
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 165
+    }
+  ],
+  "unanimous_not_yet_checkpoints": [
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 225
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 240
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 255
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 270
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 285
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 75
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 90
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 105
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 120
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 135
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 150
+    }
+  ],
+  "per_checkpoint": [
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 75,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 90,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 105,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": true
+      },
+      "checkout_count": 1,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 120,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": true
+      },
+      "checkout_count": 1,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 135,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": true
+      },
+      "checkout_count": 1,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 150,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": true
+      },
+      "checkout_count": 1,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 165,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": true
+      },
+      "checkout_count": 1,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 180,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": true,
+        "grok-4.7": true
+      },
+      "checkout_count": 2,
+      "majority_label": "checkout",
+      "gc_label": "checkout",
+      "a0_label": "not_yet",
+      "patterns_on_checkout_seats": {
+        "composer": [
+          "runaway",
+          "low_progress"
+        ],
+        "grok-4.7": [
+          "runaway",
+          "low_progress"
+        ]
+      }
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 195,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": true,
+        "grok-4.7": true
+      },
+      "checkout_count": 2,
+      "majority_label": "checkout",
+      "gc_label": "checkout",
+      "a0_label": "not_yet",
+      "patterns_on_checkout_seats": {
+        "composer": [
+          "runaway",
+          "low_progress"
+        ],
+        "grok-4.7": [
+          "runaway",
+          "low_progress"
+        ]
+      }
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 210,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": true,
+        "grok-4.7": true
+      },
+      "checkout_count": 2,
+      "majority_label": "checkout",
+      "gc_label": "checkout",
+      "a0_label": "not_yet",
+      "patterns_on_checkout_seats": {
+        "composer": [
+          "runaway",
+          "low_progress"
+        ],
+        "grok-4.7": [
+          "runaway",
+          "low_progress"
+        ]
+      }
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 225,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 240,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 255,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 270,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "92a48e004519",
+      "checkpoint_turn": 285,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 75,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 90,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 105,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 120,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 135,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    },
+    {
+      "worker_id": "bb6165018de0",
+      "checkpoint_turn": 150,
+      "checkout_recommended": {
+        "sonnet": false,
+        "composer": false,
+        "grok-4.7": false
+      },
+      "checkout_count": 0,
+      "majority_label": "not_yet",
+      "gc_label": "not_yet",
+      "a0_label": "not_yet"
+    }
+  ]
+}
