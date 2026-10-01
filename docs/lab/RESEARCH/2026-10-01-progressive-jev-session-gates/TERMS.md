@@ -45,7 +45,7 @@ The same analysis runs at every checkpoint. “Same” means the same question i
 
 ### Repeated tests
 
-A transcript that reaches 285 turns is judged at 15 default checkpoints. A transcript that ends at 80 turns is judged once. Under a fixed per-checkpoint error rate, the long transcript has more chances to receive a checkout. That is the mechanism behind “harder to run away,” and it is also a false-early risk. Metrics are stratified by `T` for that reason (§8). The v0 bar does not rise with `k`. A rising `confidence_min` is an open axis and is not in the default grid.
+A transcript that reaches 285 turns is judged at 15 default checkpoints. A transcript that ends at 80 turns is judged once. Under a fixed per-checkpoint error rate, the long transcript has more chances to receive a checkout. That is the mechanism behind “harder to run away,” and it is also a false-early risk. Metrics are stratified by `T` for that reason (§8). The v0 bar does not rise with `k`. A **decaying** `confidence_min` across rounds is Cody’s live-design intent (§12); a rising bar is still an open contrast axis. Neither is in the default grid.
 
 ### What 75 is, and what it is not
 
@@ -419,6 +419,36 @@ Each seat, given hybrid_v0 packs for a worker, answers:
 5. **Recommended exit + earliness:** exit turn under the shape rule above, and earliness vs ideal.
 
 Do not require three seats to name the same exit turn. Prefer agreement notes on (1), (3), and (4).
+
+## 12. Progressive revalidation and decaying confidence bar (design — not in P0 grid)
+
+**Status:** Cody design fold 2026-10-01. **Workflow System Manager** orchestration intent only. **Not shipped.** Does not change `P0`, the sweep grid, or hook behaviour until a follow-on experiment clears (see [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) **`progressive-decay-bar-v1`**).
+
+Each successive ~15-turn revalidation round (same `interval` as §2) gives the judge more prefix to **accumulate stop-signals** — pattern scores in §6, plus shape and early-signal agreement when §11 seats exist. Across rounds the policy **may lower `confidence_min`** required for `R(t)` to fire: a **decaying confidence bar**.
+
+Two exit paths at checkpoint `c` with bar `t_k` on round index `k` (0 at the first scheduled checkpoint that runs the test):
+
+1. **Leap:** `checkout_now == checkout` with `checkout_confidence >= t_k` when the snapshot (and, when available, multi-model shape/signal notes) support **near-done** — high agreement on early signals, shape, or inflections, not merely one noisy score. Clears the **current** bar early without waiting for weaker signals to stack.
+2. **Accumulate:** Checkpoints where stop-signals keep appearing but confidence stays below `t_k`. Each round lowers `t_k` (decay schedule is harness work; pre-register before any live run). Guarantees counterfactual exit within a few rounds if stop-signals persist, without a turn cap that bypasses Jev.
+
+The offline sweep still uses fixed `confidence_min = 3` (§6, §9). §12 is the intended live policy once shape-signal agreement land; harness seats stay separate from WSM docs.
+
+**Gold and agreement weight:** Multi-model agreement on **early signals**, **shape**, and **inflections** (§11) matters more than exact exit-turn match when interpreting leap vs accumulate or tuning decay. Exit-turn spread across seats is **secondary**, not a hard fail — same weighting as `shape-signal-panel-v1`.
+
+## 13. Validation-phase handoff (design — not shipped)
+
+**Status:** Cody design fold 2026-10-01. WSM-owned. No hook bytes, no `--call-jev`, in this fold.
+
+At **progressive validation checks** — nominally ~**50**, **60**, and **75** `api_turn`, then continuing on the §2 schedule — ask Jev (or an equivalent soft judge): is the agent **already in validation**?
+
+**Validation** means the worker is in a reactive read/fix/test loop (CI, lint, failing tests) rather than forward build or delivery against `brief_anchor`.
+
+| Answer | Preferred action |
+|--------|------------------|
+| **Not** in validation | **Steer**; do not hard-exit the builder. Prefer Claude/Cursor hook `additionalContext` (or equivalent parent steer): stop before running tests; wrap build work; hand validation to a **new agent**. Rationale: validation handoff is an ideal **inflection** (§11); build context decays once the loop is reactive read/fix. |
+| **Already** in validation | Use §12 **leap** / **accumulate** and the decaying bar. Do **not** invent a third hard-exit without replay evidence. |
+
+The 50/60/75 anchors are for **phase detection and steer** only. They do not replace `session-checkout` gold labels or the P0 `(75, 15)` grid until measured separately. Paired hold: [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) **`validation-handoff-steer-v1`**.
 
 ## 10. Out of scope for these terms
 

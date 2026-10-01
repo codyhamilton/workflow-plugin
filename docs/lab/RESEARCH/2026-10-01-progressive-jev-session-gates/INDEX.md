@@ -34,11 +34,11 @@ This pack completes the definitions, the citations, and the proof plan. A dry-ru
 
 | File | Role |
 |------|------|
-| [`TERMS.md`](TERMS.md) | Definitions: turn, schedule, continue vs checkout, fail-open, snapshot modes, v0 questions, gold, metrics |
+| [`TERMS.md`](TERMS.md) | Definitions: turn, schedule, continue vs checkout, fail-open, snapshot modes, v0 questions, gold, metrics; §11 shape-signal; §12–§13 WSM progressive decay + validation handoff (design only) |
 | [`HYPOTHESIS.md`](HYPOTHESIS.md) | What would falsify the progressive gate, the hybrid snapshot, and the v0 questions |
 | [`TUNING-PLAN.md`](TUNING-PLAN.md) | Corpus, multi-model gold, aggregation, param grid, staged calls, lock rule |
 | [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) | What “pull the exit hatch” means, with maps examples. Draft delta at the end is not in force |
-| [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | **(b)** fail recorded; primary next **(c)** `corpus-expand-hybrid-panel-original`. A_maj / A_gc not adopted |
+| [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | **(b)** fail; **(c)–(f)** recorded; primary **`shape-signal-panel-v1`**; **hold** **`progressive-decay-bar-v1`** / **`validation-handoff-steer-v1`** until shape agreement lands |
 | [`LITERATURE.md`](LITERATURE.md) | Prior art and the limit of each citation |
 | [`proofs/README.md`](proofs/README.md) | Offline harness plan and the files that must exist before any recommendation |
 
