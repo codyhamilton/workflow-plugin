@@ -1,0 +1,35 @@
+{
+  "seat": "grok",
+  "model": "grok-4.7",
+  "experiment": "d",
+  "experiment_id": "ubuntu-thrash-screen-before-pack-v1",
+  "pack_source": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/thrash-screen-judge-packs-20261001-204508.jsonl",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "rubric_scope": "original body only; draft delta / parent-pull-v1 not applied",
+  "n_rows": 12,
+  "n_workers": 3,
+  "signed": true,
+  "earliest_checkout": {
+    "ca977b9ca0dd": 90,
+    "daf933273c8f": null,
+    "7b00225cb824": null
+  },
+  "checkout_counts": {
+    "ca977b9ca0dd": 2,
+    "daf933273c8f": 0,
+    "7b00225cb824": 0,
+    "total": 2
+  },
+  "checkout_turns": {
+    "ca977b9ca0dd": [
+      90,
+      105
+    ],
+    "daf933273c8f": [],
+    "7b00225cb824": []
+  },
+  "decision_counts": {
+    "checkout": 2,
+    "not_yet": 10
+  }
+}
