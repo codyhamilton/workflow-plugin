@@ -1,0 +1,25 @@
+{
+  "generated_at_brisbane": "2026-10-01 21:17:47 AEST",
+  "run": "20261001-211725",
+  "schedule": "75:15",
+  "dry_run": true,
+  "live_call_jev": false,
+  "experiment": "cross-project-ca977-shape-screen-v1",
+  "status": "blocked",
+  "n_ca977_shape": 0,
+  "n_candidates_T_ge_75": 0,
+  "projects_scanned": [
+    "-home-codyh-workspace-ansible-dev-config",
+    "-home-codyh-workspace-devcontainers",
+    "-home-codyh-workspace-free-frontier",
+    "-home-codyh-workspace-garcia-music",
+    "-home-codyh-workspace-instant-host",
+    "-home-codyh-workspace-silver-chronicle",
+    "-home-codyh-workspace-workflow-plugin",
+    "-workspaces-garcia-music",
+    "-workspaces-lemmings"
+  ],
+  "shape_hits": [],
+  "pack_counts": {},
+  "blocked_note": "Cross-project screen empty. Nine non-maps Claude project dirs on Ubuntu yield zero subagent/worker JSONLs under subagents/. No T\u226575 candidates to score; n_ca977_shape=0. Do not pack. Do not pad with maps near-misses or parent sessions. Fall through to hold-until-new-maps-sessions."
+}
