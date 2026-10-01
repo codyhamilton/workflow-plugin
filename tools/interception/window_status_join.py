@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,25 @@ WINDOW_STATUSES = (
     "unidentified",
 )
 CHECKPOINT_VALUES = {"yes", "no", "ambiguous"}
+FIXED_SCHEDULE = {"45", "60", "75", "90", "105", "120"}
+TERMINATION_CAUSES = {
+    "unknown",
+    "natural_completion",
+    "user_stop",
+    "human_steer",
+    "cap_or_compaction",
+    "crash_or_abort",
+    "other",
+}
+PATTERN_TAGS = {
+    "closing_stage",
+    "productive_mid",
+    "thrash",
+    "low_progress",
+    "scope_drift",
+    "post_boundary",
+    "natural_completion",
+}
 
 
 class JoinError(ValueError):
@@ -59,6 +79,10 @@ def validate_checkpoint_map(value: Any, location: str) -> None:
     for checkpoint, outcome in value.items():
         if not isinstance(checkpoint, str) or not checkpoint.isdigit():
             raise JoinError(f"{location}: checkpoint keys must be decimal strings")
+        if checkpoint not in FIXED_SCHEDULE:
+            raise JoinError(
+                f"{location}: checkpoint {checkpoint} is outside the fixed schedule"
+            )
         if outcome not in CHECKPOINT_VALUES:
             raise JoinError(
                 f"{location}.{checkpoint}: expected one of {sorted(CHECKPOINT_VALUES)}"
@@ -79,6 +103,39 @@ def index_labels(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         if status not in {"not_labeled", "labeled", "excluded"}:
             raise JoinError(f"{location}: invalid label_status {status!r}")
         if status == "labeled":
+            for field in ("labeler", "labeled_at", "protocol_rev", "rationale"):
+                if not isinstance(label.get(field), str) or not label[field].strip():
+                    raise JoinError(f"{location}.{field}: must be a non-empty string")
+            try:
+                datetime.fromisoformat(label["labeled_at"])
+            except ValueError as exc:
+                raise JoinError(
+                    f"{location}.labeled_at: must be an ISO date or datetime"
+                ) from exc
+            if label.get("termination_cause") not in TERMINATION_CAUSES:
+                raise JoinError(
+                    f"{location}.termination_cause: expected one of "
+                    f"{sorted(TERMINATION_CAUSES)}"
+                )
+            steer_count = label.get("human_steer_count")
+            if steer_count is not None and (
+                not isinstance(steer_count, int)
+                or isinstance(steer_count, bool)
+                or steer_count < 0
+            ):
+                raise JoinError(
+                    f"{location}.human_steer_count: expected a non-negative int or null"
+                )
+            pattern_tags = label.get("pattern_tags")
+            if not isinstance(pattern_tags, list) or any(
+                tag not in PATTERN_TAGS for tag in pattern_tags
+            ):
+                raise JoinError(
+                    f"{location}.pattern_tags: expected a list drawn from "
+                    f"{sorted(PATTERN_TAGS)}"
+                )
+            if len(label["rationale"].split()) > 200:
+                raise JoinError(f"{location}.rationale: exceeds 200 words")
             validate_window(label.get("ideal_steer_window"), f"{location}.ideal_steer_window")
             validate_checkpoint_map(
                 label.get("near_done_at_checkpoint"),
@@ -88,6 +145,12 @@ def index_labels(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
                 label.get("runaway_like_at_checkpoint"),
                 f"{location}.runaway_like_at_checkpoint",
             )
+            if set(label["near_done_at_checkpoint"]) != set(
+                label["runaway_like_at_checkpoint"]
+            ):
+                raise JoinError(
+                    f"{location}: near-done and runaway-like checkpoint keys differ"
+                )
             overrides = label.get("ideal_steer_window_by_cp", {})
             if not isinstance(overrides, dict):
                 raise JoinError(f"{location}.ideal_steer_window_by_cp: expected an object")
@@ -171,6 +234,16 @@ def derive_rows(
                 key = str(checkpoint)
                 near_done = label["near_done_at_checkpoint"].get(key)
                 runaway_like = label["runaway_like_at_checkpoint"].get(key)
+        if label is None:
+            join_eligibility = "session_unlabeled"
+        elif label_status == "excluded":
+            join_eligibility = "label_excluded"
+        elif label_status != "labeled":
+            join_eligibility = "session_not_labeled"
+        elif near_done is None or runaway_like is None:
+            join_eligibility = "checkpoint_unlabeled"
+        else:
+            join_eligibility = "label_join_exact"
 
         derived.append(
             {
@@ -191,6 +264,7 @@ def derive_rows(
                 "checkpoint_outcomes_complete": (
                     near_done is not None and runaway_like is not None
                 ),
+                "label_join_eligibility": join_eligibility,
                 "label_status": label_status,
                 "protocol_rev": protocol_rev,
             }
@@ -220,6 +294,12 @@ def summarize(
         status: unique_statuses.get(status, 0) for status in WINDOW_STATUSES
     }
     complete = sum(row["checkpoint_outcomes_complete"] for row in derived)
+    eligibility = Counter(row["label_join_eligibility"] for row in derived)
+    checkpoint_eligibility = {
+        (row["session_id"], row["checkpoint"]): row["label_join_eligibility"]
+        for row in derived
+    }
+    unique_eligibility = Counter(checkpoint_eligibility.values())
     cell_ids = Counter(
         row["cell_id"] for row in results if isinstance(row.get("cell_id"), str)
     )
@@ -267,6 +347,10 @@ def summarize(
         "labeled_sessions_without_result": sorted(labeled_sessions - result_sessions),
         "window_status_rows": status_counts,
         "window_status_session_checkpoints": unique_status_counts,
+        "label_join_eligibility_rows": dict(sorted(eligibility.items())),
+        "label_join_eligibility_session_checkpoints": dict(
+            sorted(unique_eligibility.items())
+        ),
         "checkpoint_outcomes_complete_rows": complete,
         "checkpoint_outcomes_missing_rows": len(derived) - complete,
         "finite_window_sessions": windows,

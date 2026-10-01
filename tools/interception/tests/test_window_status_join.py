@@ -15,11 +15,17 @@ def label(window="none", *, overrides=None):
     return {
         "session_id": "session-1",
         "label_status": "labeled",
+        "labeler": "human-test",
+        "labeled_at": "2026-10-02T00:00:00+00:00",
         "protocol_rev": "outcome-sheet-v1",
+        "termination_cause": "unknown",
+        "human_steer_count": None,
         "ideal_steer_window": window,
         "ideal_steer_window_by_cp": overrides or {},
         "near_done_at_checkpoint": {"60": "no"},
         "runaway_like_at_checkpoint": {"60": "yes"},
+        "pattern_tags": ["low_progress"],
+        "rationale": "Turns 55-60 show a low-progress interval.",
         "independence": {
             "used_flash_rating": False,
             "used_flash_fire": False,
@@ -60,6 +66,7 @@ class WindowStatusJoinTests(unittest.TestCase):
         self.assertIsNone(derived["near_done"])
         self.assertIsNone(derived["runaway_like"])
         self.assertFalse(derived["checkpoint_outcomes_complete"])
+        self.assertEqual(derived["label_join_eligibility"], "checkpoint_unlabeled")
 
     def test_preserves_duplicate_source_cells_with_unique_derived_ids(self):
         row = {"cell_id": "cell-1", "session_id": "session-1", "checkpoint": 60}
@@ -75,11 +82,18 @@ class WindowStatusJoinTests(unittest.TestCase):
         self.assertEqual(summary["unique_cell_ids"], 1)
         self.assertEqual(summary["duplicate_cell_ids"], ["cell-1"])
         self.assertEqual(summary["duplicate_cell_id_extra_rows"], 1)
+        self.assertEqual(summary["label_join_eligibility_rows"], {"label_join_exact": 2})
 
     def test_rejects_leakage_attestation(self):
         outcome_label = label()
         outcome_label["independence"]["used_flash_fire"] = True
         with self.assertRaisesRegex(JOIN.JoinError, "attestations must be false"):
+            JOIN.index_labels([outcome_label])
+
+    def test_rejects_mismatched_checkpoint_maps(self):
+        outcome_label = label()
+        outcome_label["runaway_like_at_checkpoint"] = {"45": "no"}
+        with self.assertRaisesRegex(JOIN.JoinError, "checkpoint keys differ"):
             JOIN.index_labels([outcome_label])
 
 

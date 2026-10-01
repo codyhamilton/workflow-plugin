@@ -38,8 +38,10 @@ FP/miss metric.
 Join on exact `session_id`, then classify each result checkpoint `t` from the
 label's window:
 
-1. Require a unique sidecar row with `label_status=labeled` and all three
-   independence attestations set to `false`.
+1. Require a unique sidecar row with the complete `outcome-sheet-v1` schema:
+   valid label/termination enums, matching fixed-schedule checkpoint maps,
+   allowed pattern tags, a ≤200-word rationale, and all three independence
+   attestations set to `false`.
 2. Select `ideal_steer_window_by_cp[str(t)]` when present; otherwise use the
    session-level `ideal_steer_window`. The session-level value is the protocol's
    default, not a missing value.
@@ -61,6 +63,18 @@ label's window:
 first can coexist with another checkpoint that is inside a finite window; the
 second is a session-level negative control. Missing data remains
 `unidentified`, never `no_steer_window`.
+
+The derived row also carries an orthogonal `label_join_eligibility`:
+
+| Eligibility | Meaning |
+|---|---|
+| `label_join_exact` | Session label and both checkpoint outcome fields exist at exact `t` |
+| `session_unlabeled` | No sidecar row exists for the result session |
+| `checkpoint_unlabeled` | The session window is known, but near-done/runaway labels do not exist at exact `t` |
+| `session_not_labeled` | A sidecar row exists with `label_status=not_labeled` |
+| `label_excluded` | A sidecar row explicitly excludes the session |
+
+No nearest-checkpoint interpolation is allowed.
 
 The source labels were adjudicated from blind transcript digests under
 `outcome-sheet-v1`; their rationales cite turns and artifact facts. The join
@@ -96,6 +110,10 @@ from looking like independent evidence.
 Each status cell is `unique / rows`. This table makes no claim about model
 quality. It shows that the original 240-row join is mechanically complete,
 while the scenario join is not.
+
+Eligibility makes the incomplete scenario rows explicit: 2,600 are
+`label_join_exact`, 1,400 are `checkpoint_unlabeled`, and 4,200 are
+`session_unlabeled`. All 240 Wave-0 rows are `label_join_exact`.
 
 Wave-0 has 236 unique `cell_id` values across 240 rows. Four IDs each occur
 twice, and each pair is byte-for-byte identical at the parsed-object level.
@@ -144,7 +162,11 @@ near-done/runaway checkpoint labels remain separate axes.
 6. **Row identity:** `cell_id` is not unique in Wave-0 (four exact duplicate
    pairs). A full join must use source-row identity while deriving, then apply
    an explicit provenance-preserving deduplication rule.
-7. **Scoreboard aggregation:** after coverage closes, meter generation still
+7. **Metadata drift:** `grid.json` reports 22 sessions and 21 at risk at turn
+   45, while the empirical Wave-0 result file contains 20 sessions, all at turn
+   45. Derived denominators must come from validated joined rows until that
+   metadata discrepancy is annotated or corrected.
+8. **Scoreboard aggregation:** after coverage closes, meter generation still
    needs session-clustered denominators and explicit handling for `ambiguous`,
    `excluded`, censoring, and repeated cells. Cell-level counts are not
    independent trials.
