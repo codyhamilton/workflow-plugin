@@ -78,3 +78,82 @@ TYPESAFE_API_KEY=... python3 run_typesafe_scenario_corpus_sweep.py
 - Only claude-code sessions can exercise GROWTH states until opencode/codex/cursor builders emit a `tail`. That is the real fix for the coverage gap and is out of scope here.
 - No new TypeSafe results are included. The refill needs a key and spend; the tooling above is ready for it.
 - The `window_status` caveat from #106 still applies to any fire-rate interpretation.
+
+## Sol analysis overlay: rank evidence-compatible pairs
+
+Machine-readable ranking: [`GROWTH-RANKING.json`](GROWTH-RANKING.json).
+
+### Reset the #107 result interpretation
+
+All 2,312 pre-fill GROWTH rows are stale for state-shape analysis. Their
+questions were judged with an empty `markers`, `phase_hints`, or `recent`
+field. This includes the 41/41 fire result for
+`state.markers_focus|q.silent_stall`: it is a wording response under an empty
+state, not evidence that `markers_focus` works. Keep the rows for provenance,
+but exclude them from ranking and refill meters as the implementation does.
+
+The filled fields are also three representations of one evidence lineage:
+`tail` plus thin `cumulative` / `delta_since_prior` data. A contrast among
+them tests representation, not three independent signal sources.
+
+### Eligibility intersects labels at nine pairs
+
+Reusing the #106 join implementation on the 41 representative
+`(session_id, checkpoint)` pairs gives:
+
+| GROWTH-state-eligible claude-code pairs | Count | Later use |
+|---|---:|---|
+| `label_join_exact` | **9** | Labeled-ready, exact checkpoint only |
+| `checkpoint_unlabeled` | 4 | Response distribution only |
+| `session_unlabeled` | 3 | Response distribution only |
+| **Eligible** | **16** | Non-empty GROWTH state |
+
+The other 25 sessions remain state-ineligible because their lite snapshot has
+no `tail`. Do not convert those 25 into empty-state cells, and do not copy a
+nearby checkpoint label onto the four checkpoint-unlabeled pairs.
+
+### Preferred pairings before the 102-scenario cartesian
+
+The question must ask about evidence its selected state actually exposes.
+Twelve pairings cover the twelve GROWTH questions once:
+
+| Priority | state selection | question formats | Why this state |
+|---|---|---|---|
+| P0 | `markers_focus` | `dependency_wait`, `context_thrash_compact`, `idle_tool_spin` | Direct wait-term, compaction, silent-tool, and repeated-tool markers |
+| P0 | `recent_delta_brief` | `brief_abandon`, `docs_only_drift`, `scope_creep_silent` | Only GROWTH state containing both the brief and recent records |
+| P1 | `recent_delta_brief` | `edit_churn`, `bash_retry_storm`, `parallel_agent_thrash`, `speculative_rewrite`, `deliverable_orphan` | Recent tool/text evidence plus interval delta; limitations remain explicit in the ranking JSON |
+| P1 | `markers_focus` | `test_flake_loop` | Tail-window verification/error counts and repetition marker |
+
+`phase_hints_focus` is useful as a later representation contrast, but it is
+not the best first state for any current question: it has coarse tool-class
+mix and no brief, path identity, command outcome, or artifact result.
+
+Run the twelve preferred pairs first: **108 exact-labeled-ready cells/driver**
+(12×9), or 192 state-valid cells/driver when the seven not-exact pairs are
+retained only for response-distribution diagnostics. Hold the other 90
+GROWTH-state pairings until this pass reports non-empty state occupancy and
+parse completeness by scenario. This is a spend/ranking rule, not a code
+change to the #108 runner.
+
+### Snapshot-builder boundary
+
+The gate is the correct current behavior. A future harness-native fill should
+add a prefix-only tail with the same minimum contract:
+
+- ordered turn or event identifier;
+- clipped, secret-redacted assistant excerpt;
+- ordered tool names for that event;
+- no final length, survival, progress fraction, result fire/rating, or outcome
+  label.
+
+Do not fabricate tail text from `api_turns`, role histograms, titles, or final
+session metadata. Until a harness builder can emit that contract, keep its
+GROWTH cells gated.
+
+### What “more informative fire” means here
+
+The objective is not a higher fire rate. It is a non-degenerate response tied
+to evidence the state contains, with explicit defer/abstain counterevidence.
+The #105 baseline (175/200 zero-fire, with 66/116 fires from
+`q.silent_stall`) shows why wording-only fire is not enough. No ranking should
+advance to an FP/miss claim until the exact-label gates are satisfied.

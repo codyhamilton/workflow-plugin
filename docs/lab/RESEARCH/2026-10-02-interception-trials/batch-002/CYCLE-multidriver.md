@@ -20,6 +20,12 @@
 | luna-b | Luna | 180 | 35 | 0 | 0 | competing b-wave |
 | flash/luna-vol1 | Flash+Luna | 800+200 tgt | TBD | TBD | TBD | streaming |
 
+WSM separately reported **Flash vol2 `parse_miss=10`**. Vol2 meter/raw
+artifacts are not landed, so the cause is not identifiable from repository
+evidence; see the bounded
+[`FLASH-VOL2-PARSE-MISS.md`](FLASH-VOL2-PARSE-MISS.md) glance. Ten misses match
+one Flash batch size but do not prove that one entire batch failed.
+
 **Committed row-level TypeSafe lever cells:** 5420 (`typesafe`, `typesafe-h25`,
 `typesafe-k1`, `typesafe-k2`). `typesafe-k4` adds 1500 meter-reported cells but
 has no committed row-level join keys.

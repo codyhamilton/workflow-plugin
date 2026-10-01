@@ -1,0 +1,178 @@
+{
+  "generated_at": "2026-10-02",
+  "status": "design_ranking_only",
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "inputs": {
+    "corpus_fire_analysis": "../../2026-10-02-interception-steer-to-stop/ANALYSIS.md",
+    "window_join_eligibility": "../../2026-10-02-interception-steer-to-stop/WINDOW-STATUS-JOIN.md",
+    "growth_catalog": "CASE-CATALOG.md",
+    "growth_fill_contract": "GROWTH-DESIGN-NOTES.md",
+    "growth_fill_coverage": "GROWTH-FILL-COVERAGE.json"
+  },
+  "validity_reset": {
+    "stale_empty_field_rows": 2312,
+    "stale_rows_usable_for_growth_state_ranking": false,
+    "reason": "The rows predate growth-fill-v1 and projected empty markers, phase_hints, or recent fields.",
+    "stale_rates_are_not_state_shape_evidence": true
+  },
+  "eligibility": {
+    "scenario_representative_pairs": 41,
+    "growth_state_eligible": 16,
+    "growth_state_gated_no_tail": 25,
+    "eligible_by_label_join": {
+      "label_join_exact": 9,
+      "checkpoint_unlabeled": 4,
+      "session_unlabeled": 3
+    },
+    "exact_pair_source": "Reused the #106 join implementation; no nearest-checkpoint interpolation.",
+    "labeled_ready_pairs_per_scenario": 9
+  },
+  "ranking_rule": {
+    "scope": "The 12 GROWTH question formats paired once each with the state that exposes the most direct available evidence.",
+    "ranked_pairs": 12,
+    "planned_growth_state_cartesian": 102,
+    "unranked_or_held_pairs": 90,
+    "window_cartesian": false,
+    "unsupported_state_policy": "gate; never substitute an empty or thinner state under the same scenario_id"
+  },
+  "priority_pairs": [
+    {
+      "priority": "P0",
+      "scenario_id": "state.markers_focus|q.dependency_wait",
+      "evidence": [
+        "markers.wait_terms",
+        "markers.text_only_turns",
+        "markers.silent_tool_turns"
+      ],
+      "limit": "Lexical wait evidence does not prove that a process is live or orphaned."
+    },
+    {
+      "priority": "P0",
+      "scenario_id": "state.markers_focus|q.context_thrash_compact",
+      "evidence": [
+        "markers.compaction_event_count",
+        "markers.max_same_tool_run",
+        "markers.error_terms"
+      ],
+      "limit": "Cumulative compaction count does not establish that resets occurred in the latest interval."
+    },
+    {
+      "priority": "P0",
+      "scenario_id": "state.markers_focus|q.idle_tool_spin",
+      "evidence": [
+        "markers.tool_turns",
+        "markers.silent_tool_turns",
+        "markers.max_same_tool_run"
+      ],
+      "limit": "The marker does not identify which tool repeated or whether tool-only work produced an artifact."
+    },
+    {
+      "priority": "P0",
+      "scenario_id": "state.recent_delta_brief|q.brief_abandon",
+      "evidence": [
+        "brief_anchor",
+        "delta_since_prior",
+        "recent"
+      ],
+      "limit": "Only the last two recent records are projected; an authorized scope change can be outside that view."
+    },
+    {
+      "priority": "P0",
+      "scenario_id": "state.recent_delta_brief|q.docs_only_drift",
+      "evidence": [
+        "brief_anchor",
+        "delta_since_prior.new_read_paths",
+        "recent.tools",
+        "recent.text"
+      ],
+      "limit": "Read paths are not edited paths, so docs-only activity remains partly lexical."
+    },
+    {
+      "priority": "P0",
+      "scenario_id": "state.recent_delta_brief|q.scope_creep_silent",
+      "evidence": [
+        "brief_anchor",
+        "delta_since_prior",
+        "recent"
+      ],
+      "limit": "The state can show mismatch but cannot prove that the user did not authorize scope outside the excerpt."
+    },
+    {
+      "priority": "P1",
+      "scenario_id": "state.recent_delta_brief|q.edit_churn",
+      "evidence": [
+        "delta_since_prior.tool_histogram_delta.Edit",
+        "recent.tools",
+        "recent.text"
+      ],
+      "limit": "No edited-path or hunk identity is present, so repeated edits to the same region are not directly observable."
+    },
+    {
+      "priority": "P1",
+      "scenario_id": "state.recent_delta_brief|q.bash_retry_storm",
+      "evidence": [
+        "delta_since_prior.tool_histogram_delta.Bash",
+        "recent.tools",
+        "recent.text"
+      ],
+      "limit": "The state has no command identity or exit-code sequence."
+    },
+    {
+      "priority": "P1",
+      "scenario_id": "state.recent_delta_brief|q.parallel_agent_thrash",
+      "evidence": [
+        "delta_since_prior.tool_histogram_delta.Agent",
+        "recent.tools",
+        "recent.text"
+      ],
+      "limit": "Dispatch is observable, but mergeable worker output is only available when stated in recent text."
+    },
+    {
+      "priority": "P1",
+      "scenario_id": "state.markers_focus|q.test_flake_loop",
+      "evidence": [
+        "markers.verify_terms",
+        "markers.error_terms",
+        "markers.max_same_tool_run"
+      ],
+      "limit": "Lexical test and error counts cannot distinguish a flaky retry from different failing tests."
+    },
+    {
+      "priority": "P1",
+      "scenario_id": "state.recent_delta_brief|q.speculative_rewrite",
+      "evidence": [
+        "brief_anchor",
+        "delta_since_prior.tool_histogram_delta",
+        "recent"
+      ],
+      "limit": "The state has no before/after artifact comparison and cannot establish discarded working value."
+    },
+    {
+      "priority": "P1",
+      "scenario_id": "state.recent_delta_brief|q.deliverable_orphan",
+      "evidence": [
+        "brief_anchor",
+        "recent.tools",
+        "recent.text"
+      ],
+      "limit": "Commit and verification evidence is lexical; repository state is not part of the snapshot."
+    }
+  ],
+  "trial_plan": {
+    "P0_scenarios": 6,
+    "P1_scenarios": 6,
+    "exact_labeled_ready_cells_per_driver": 108,
+    "all_state_eligible_cells_per_driver": 192,
+    "interpretation": "Use the nine exact pairs for later outcome-linked analysis. The other seven eligible pairs may measure response distribution only until labels exist.",
+    "advance_condition": "Advance beyond the 12 preferred pairs only after non-empty state occupancy and parse completeness are reported by scenario.",
+    "fire_rate_target": null
+  },
+  "non_authorization": [
+    "The ranking is based on evidence compatibility, not observed model quality.",
+    "It does not claim that a higher fire rate is better.",
+    "It does not compute FP, miss, precision, or recall.",
+    "Raw result rows continue to emit window_status=unidentified.",
+    "No hooks, Standard behavior, Pilot, or live Jev is authorized."
+  ]
+}
