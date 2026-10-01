@@ -1,6 +1,6 @@
 # Proofs — offline replay plan
 
-**Status: harness dry-run only.** No gold labels, no live Jev cache, no sweep, no lock memo. **Confidence: not high.**
+**Status: harness dry-run for Jev; P0 gold panel landed.** No live Jev cache, no sweep, no lock memo. **H5 failed** (α 0.1189, A0 null). Alternate targets are documented and are not a fit. **Confidence: not high.**
 
 This directory has a replay harness and the stage contract below. The harness indexes assistant turns, builds `hybrid_v0` state, and can dry-run checkpoint rows. It calls Jev only with `--call-jev` when `TYPESAFE_API_KEY` is set. A green `run_proofs.sh` checks the schedule and the 12_000-character guard. It does not test H1–H7.
 

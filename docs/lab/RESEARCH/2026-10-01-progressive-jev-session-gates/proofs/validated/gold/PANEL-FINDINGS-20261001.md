@@ -50,3 +50,7 @@ High raw agreement on `bb6165018de0` is trivial (all `not_yet`). The smoking gun
 - Revise [`GOLD-LABEL-RUBRIC.md`](../../../../GOLD-LABEL-RUBRIC.md) or judge packs if Sonnet’s fail-open stance is miscalibrated vs Grok/Composer on hidden Bash output.
 - Re-label or add human spot-check on `92a48e@105–180` before any non-`A0` gold rule is used in a lock memo.
 - Jev replay / sweep remains blocked on H5 until agreement improves or the design explicitly adopts an alternate gold rule.
+
+## Follow-on (same day)
+
+`A_maj` and `A_gc` are computed in [`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json): both **180** on `92a48e004519` and **null** on `bb6165018de0`, identical at all 21 checkpoints. They are not adopted as the fit target. The chosen next measurement is the Sonnet re-label in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). A0 and α in this file are unchanged. Confidence remains **not high**.
