@@ -70,4 +70,42 @@ Independent Sonnet 5.5 judgments on the same 21 hybrid_v0 pack rows, rubric revi
 
 **α hint if seat swapped (CHM):** nominal 3×21 α ≈ **0.5674** with this relabel seat — still **does not** override over-fire discard.
 
-**Next measurement:** experiment **(c)** `corpus-expand-hybrid-panel-original` in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). A0 and α in the P0 table above are unchanged. Confidence remains **not high**.
+**Next measurement (was):** experiment **(c)** — now complete; see §(c) below. Primary next: **(d)** `ubuntu-thrash-screen-before-pack-v1` in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). P0 A0/α in the table above are unchanged. Confidence remains **not high**.
+
+---
+
+## Experiment (c) — expansion panel `corpus-expand-hybrid-panel-original` (2026-10-01)
+
+**Panel:** Sonnet 5.5 (`gold_seat`), Composer 2.5, Grok 4.7 high on **hybrid_v0** expansion packs (`expansion-judge-packs-20261001-202909.jsonl`). **Original rubric only** (no `parent-pull-v1`).  
+**Schedule:** `75:15` on **`0aab88c525de`** (8 cps), **`036ff3ed4a89`** (6 cps), **`0853bc21d3aa`** (6 cps) → **20** pooled prefixes.  
+**Machine-readable:** [`expansion-panel-agreement-20261001.json`](expansion-panel-agreement-20261001.json). Seat JSONLs: `expansion-checkout-verdicts-{sonnet,composer,grok}-20261001.jsonl`.
+
+### Hard result — gold rule `A0` is null on all three expansion workers
+
+| Worker | A0 | Earliest checkout by seat (Sonnet / Composer / Grok) |
+|--------|-----|------------------------------------------------------|
+| `0aab88c525de` | **null** | null / null / null |
+| `036ff3ed4a89` | **null** | null / **135** / null |
+| `0853bc21d3aa` | **null** | null / null / null |
+
+Composer alone recommends checkout once (`036ff3ed4a89@135`; runaway + low_progress in rationale). Sonnet and Grok stay `not_yet` there and everywhere else. No prefix has all three seats on `checkout_recommended=true`.
+
+### Reliability (H5 floor) — expansion-only 3×20
+
+| Metric | Value | H5 floor (≥ 0.40) |
+|--------|-------|-------------------|
+| Krippendorff α (nominal, binary checkout, 3×20) | **0.0000** | **Fail** |
+| Cohen κ sonnet ↔ composer | 0.0000 | — |
+| Cohen κ sonnet ↔ grok | 0.0000 | — |
+| Cohen κ composer ↔ grok | 0.0000 | — |
+
+**Pairwise % agreement** (same/different checkout bit at each cp): sonnet↔composer **95.0%**, sonnet↔grok **100%**, composer↔grok **95.0%**. High agreement reflects shared `not_yet` on 19/20 prefixes; κ ≈ 0 is the prevalence paradox, not “moderate” pairwise reliability.
+
+**Checkout-positive counts (20 cps):** Sonnet **0**, Composer **1**, Grok **0** → **1** total true label across 60 seat-rows.
+
+### Implications
+
+1. **H5 not passed for usable gold** — even though most prefixes agree on `not_yet`, **A0** is null on every expansion worker, so there is still no unanimous gold exit to tune against.
+2. **Do not interpret high raw agreement as H5 pass** — agreement-on-false inflates apparent consensus while leaving **A0** empty; expansion α **0.0000** with a single positive seat-label is below the 0.40 floor.
+3. **No Jev sweep** — same stop rule as P0. Pooled P0+expansion diagnostic α ≈ **0.1757** (41 cps) also fails H5 and does not create any new **A0**.
+4. **Next measurement:** experiment **(d)** `ubuntu-thrash-screen-before-pack-v1` — screen Ubuntu workers for thrash/runaway-like sessions before packing, instead of random long `T ≥ 75` workers ([`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md)).
