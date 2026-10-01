@@ -95,6 +95,27 @@ Progress metric is **`n_distinct_scenarios` (200)**, not raw cell count (8200 = 
 
 **Interpretation (diagnostic, not policy):** TypeSafe deferral is the default; high fire rates cluster on **stall/thrash-shaped question text**, especially with `tail_focus` / `delta_only` state builders. That is lever sensitivity, not validated near-done/runaway accuracy — labels are not joined at scenario checkpoints.
 
+**Post-#108 missing-evidence audit:** the aggregate above materially
+overstates state evidence. All 25 non-Claude-Code representative snapshots
+(20 OpenCode, 3 Codex, 2 Cursor) lack both `tail` and
+`delta_since_prior`. Nevertheless, all 25 fire for
+`tail_focus × silent_stall` (empty `tail=[]`) and all 25 fire for
+`delta_only × silent_stall` (empty `delta_since_prior={}`). Those empty-state
+cells account for **50/66 (75.8%)** of all `silent_stall` fires and **50/116
+(43.1%)** of all fires in the 200×41 sweep. Among the 16 Claude-Code
+snapshots, `delta_only × silent_stall` fires 0/16 and
+`tail_focus × silent_stall` fires 8/16. The question wording therefore drives
+most of the headline concentration; only the latter eight cells support a
+rich-tail sensitivity hypothesis.
+
+`state.window_delta_tools` has a separate schema mismatch: all four projected
+delta values are null at all 41 representative snapshots. The runner requests
+`tool_histogram`, but rich snapshots expose `tool_histogram_delta`; its other
+requested numeric delta keys are absent. Its **0/1,148** result is not evidence
+for a useful negative state selector. Future comparisons must report
+state-field eligibility/missingness and gate unsupported cells, as the
+post-#107 GROWTH fill does.
+
 ### 2b. Wave-0 Flash lever slice (240 cells, 20 labeled sessions)
 
 Only **four** of twelve planned combos ran (240-cell cap); eight combos in [`grid.json`](../2026-10-02-interception-trials/batch-002/grid.json) never executed ([`analysis/wave0-lever-combos.json`](analysis/wave0-lever-combos.json)):

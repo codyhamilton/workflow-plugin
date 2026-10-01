@@ -96,6 +96,16 @@ The filled fields are also three representations of one evidence lineage:
 `tail` plus thin `cumulative` / `delta_since_prior` data. A contrast among
 them tests representation, not three independent signal sources.
 
+The missing-state problem also predates GROWTH. The 25 tail-less/delta-less
+non-Claude-Code sessions all fire for both `tail_focus|q.silent_stall` and
+`delta_only|q.silent_stall`: **50 empty-state fires**, equal to 75.8% of all
+`silent_stall` fires and 43.1% of all fires in the original 200×41 sweep.
+`window_delta_tools` is all-null at all 41 representative snapshots because it
+requests delta keys the snapshots do not emit. See the post-#108 caveat in
+[`ANALYSIS.md`](../../2026-10-02-interception-steer-to-stop/ANALYSIS.md).
+Eligibility gating is therefore required for old and new state shapes; an
+empty container is not observed negative evidence.
+
 ### Eligibility intersects labels at nine pairs
 
 Reusing the #106 join implementation on the 41 representative
@@ -153,7 +163,8 @@ GROWTH cells gated.
 ### What “more informative fire” means here
 
 The objective is not a higher fire rate. It is a non-degenerate response tied
-to evidence the state contains, with explicit defer/abstain counterevidence.
+to evidence the state contains, with explicit defer counterevidence (and an
+abstention path where a future response class supports it).
 The #105 baseline (175/200 zero-fire, with 66/116 fires from
 `q.silent_stall`) shows why wording-only fire is not enough. No ranking should
 advance to an FP/miss claim until the exact-label gates are satisfied.

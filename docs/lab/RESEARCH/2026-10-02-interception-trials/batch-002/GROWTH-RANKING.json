@@ -14,7 +14,15 @@
     "stale_empty_field_rows": 2312,
     "stale_rows_usable_for_growth_state_ranking": false,
     "reason": "The rows predate growth-fill-v1 and projected empty markers, phase_hints, or recent fields.",
-    "stale_rates_are_not_state_shape_evidence": true
+    "stale_rates_are_not_state_shape_evidence": true,
+    "baseline_missing_state_audit": {
+      "non_claude_sessions_without_tail_or_delta": 25,
+      "empty_tail_focus_silent_stall_fires": 25,
+      "empty_delta_only_silent_stall_fires": 25,
+      "empty_state_share_of_silent_stall_fires": "50/66",
+      "empty_state_share_of_all_baseline_fires": "50/116",
+      "window_delta_tools_all_null_representative_states": 41
+    }
   },
   "eligibility": {
     "scenario_representative_pairs": 41,
