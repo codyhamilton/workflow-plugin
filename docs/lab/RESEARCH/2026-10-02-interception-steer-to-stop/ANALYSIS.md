@@ -7,6 +7,12 @@
 
 **Sibling outputs:** [`analysis/ARTIFACT-INVENTORY.json`](analysis/ARTIFACT-INVENTORY.json) · [`analysis/scenario-fire-rankings.json`](analysis/scenario-fire-rankings.json) · [`analysis/PROVISIONAL-join-summary.json`](analysis/PROVISIONAL-join-summary.json) · [`analysis/PROVISIONAL-join-wave0-flash.jsonl`](analysis/PROVISIONAL-join-wave0-flash.jsonl)
 
+**Window-status refinement:** [`WINDOW-STATUS-JOIN.md`](WINDOW-STATUS-JOIN.md)
+derives explicit `inside` / `outside` / `none` / `ambiguous` / `unidentified`
+states from the outcome sidecar, separates window identity from checkpoint
+outcome coverage, and documents the remaining full-join gates. It adds no
+FP/miss metric.
+
 ---
 
 ## 1. What exists on disk (inventory)
