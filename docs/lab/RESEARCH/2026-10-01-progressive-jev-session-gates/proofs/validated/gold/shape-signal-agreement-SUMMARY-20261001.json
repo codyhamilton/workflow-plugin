@@ -1,0 +1,348 @@
+{
+  "experiment": "shape-signal-panel-v1",
+  "generated_at_utc": "2026-10-01T11:33:40Z",
+  "generated_at_brisbane": "2026-10-01T21:33:40+10",
+  "protocol": "TERMS.md §11 — primary: shared early signals / shape / inflections; secondary: exit-turn spread (not a hard fail)",
+  "weight_order": [
+    "shared early signals / shape / inflections (primary)",
+    "exit-turn spread as secondary (earliness vs ideal) — NOT a hard fail"
+  ],
+  "panel": {
+    "seats": [
+      "composer",
+      "grok",
+      "sonnet"
+    ],
+    "seat_prs": {
+      "composer": 66,
+      "grok": 67,
+      "sonnet": 68
+    },
+    "sources": {
+      "composer": "shape-signal-verdicts-composer-20261001.jsonl",
+      "grok": "shape-signal-verdicts-grok-20261001.jsonl",
+      "sonnet": "shape-signal-verdicts-sonnet-20261001.jsonl"
+    },
+    "summaries": {
+      "composer": "shape-signal-verdicts-composer-SUMMARY-20261001.json",
+      "grok": "shape-signal-verdicts-grok-SUMMARY-20261001.json",
+      "sonnet": "shape-signal-verdicts-sonnet-SUMMARY-20261001.json"
+    },
+    "pack_source": "shape-signal-judge-packs-20261001-212524.jsonl",
+    "schedule": "P0 first_at=75 interval=15",
+    "n_workers": 7
+  },
+  "shape_majority_rule": "Label with ≥2 of 3 seats; otherwise split. unclear is a valid TERMS §11 third value.",
+  "workers": {
+    "92a48e004519": {
+      "T": 296,
+      "shape_votes": {
+        "composer": "late_pivot",
+        "grok": "early_thrash",
+        "sonnet": "unclear"
+      },
+      "shape_majority": "split",
+      "shape_vote_counts": {
+        "late_pivot": 1,
+        "early_thrash": 1,
+        "unclear": 1
+      },
+      "recommended_exit_by_seat": {
+        "composer": 180,
+        "grok": 90,
+        "sonnet": null
+      },
+      "exit_spread": {
+        "min": 90,
+        "max": 180,
+        "spread": 90,
+        "null_seats": 1,
+        "non_null": [
+          90,
+          180
+        ]
+      },
+      "shared_early_signals": [
+        "By cp75: zero Edit/Write; heavy _cenc.c / divide.py / _e2.c re-reads; high compaction (~12); tiny assistant text; Bash/Read-only histogram on a small path set.",
+        "By cp90: interval still Bash-heavy with empty/new_paths empty; re-read counters climb; thrash character already visible (Composer notes too_late vs first_clear_thrash@90 even while labeling late_pivot@180)."
+      ],
+      "agree_notes": [
+        "By cp75: zero Edit/Write; heavy _cenc.c / divide.py / _e2.c re-reads; high compaction (~12); tiny assistant text; Bash/Read-only histogram on a small path set.",
+        "By cp90: interval still Bash-heavy with empty/new_paths empty; re-read counters climb; thrash character already visible (Composer notes too_late vs first_clear_thrash@90 even while labeling late_pivot@180)."
+      ],
+      "disagree_notes": [
+        "Shape three-way split: Composer late_pivot (exit 180), Grok early_thrash (exit 90), Sonnet unclear (exit null — later recovery / gates).",
+        "Exit spread secondary: 90 vs 180 vs null; not a hard fail under TERMS §11."
+      ],
+      "highlight": "Shape split, but thrash early signals around ~90 appear in ≥1 seat (Grok exits@90; Composer flags first_clear_thrash@90 in earliness)."
+    },
+    "ca977b9ca0dd": {
+      "T": 109,
+      "shape_votes": {
+        "composer": "early_thrash",
+        "grok": "early_thrash",
+        "sonnet": "early_thrash"
+      },
+      "shape_majority": "early_thrash",
+      "shape_vote_counts": {
+        "early_thrash": 3
+      },
+      "recommended_exit_by_seat": {
+        "composer": 90,
+        "grok": 90,
+        "sonnet": 75
+      },
+      "exit_spread": {
+        "min": 75,
+        "max": 90,
+        "spread": 15,
+        "null_seats": 0,
+        "non_null": [
+          75,
+          90,
+          90
+        ]
+      },
+      "shared_early_signals": [
+        "Unanimous early_thrash: zero Edit/Write; _cenc / divide / _e2 re-read loop; high compaction; frozen ~167-char assistant text by cp75–90.",
+        "All seats name early thrash checkpoints in the 75–90 band as the first clear mistake-to-continue."
+      ],
+      "agree_notes": [
+        "Unanimous early_thrash: zero Edit/Write; _cenc / divide / _e2 re-read loop; high compaction; frozen ~167-char assistant text by cp75–90.",
+        "All seats name early thrash checkpoints in the 75–90 band as the first clear mistake-to-continue."
+      ],
+      "disagree_notes": [
+        "Exit only: Sonnet 75 vs Composer/Grok 90 (spread 15 = one interval)."
+      ],
+      "highlight": "Unanimous early_thrash; recommended exits 75–90."
+    },
+    "bb6165018de0": {
+      "T": 154,
+      "shape_votes": {
+        "composer": "late_pivot",
+        "grok": "unclear",
+        "sonnet": "unclear"
+      },
+      "shape_majority": "unclear",
+      "shape_vote_counts": {
+        "late_pivot": 1,
+        "unclear": 2
+      },
+      "recommended_exit_by_seat": {
+        "composer": null,
+        "grok": null,
+        "sonnet": 150
+      },
+      "exit_spread": {
+        "min": 150,
+        "max": 150,
+        "spread": null,
+        "null_seats": 2,
+        "non_null": [
+          150
+        ],
+        "note": "fewer than 2 non-null exits; no pairwise spread"
+      },
+      "shared_early_signals": [
+        "Census / monitor wait dominates early (standing by / waiting for census); not ca977 zero-edit thrash (Write present; rich text; 0 compactions).",
+        "Majority shape unclear (2/3); Composer alone late_pivot with null exit (on-brief wait)."
+      ],
+      "agree_notes": [
+        "Census / monitor wait dominates early (standing by / waiting for census); not ca977 zero-edit thrash (Write present; rich text; 0 compactions).",
+        "Majority shape unclear (2/3); Composer alone late_pivot with null exit (on-brief wait)."
+      ],
+      "disagree_notes": [
+        "Sonnet recommends exit 150 (census finish / analysis start); Composer and Grok null."
+      ],
+      "highlight": "Wait-bound contrast; majority unclear; exit secondary."
+    },
+    "0aab88c525de": {
+      "T": 192,
+      "shape_votes": {
+        "composer": "late_pivot",
+        "grok": "unclear",
+        "sonnet": "unclear"
+      },
+      "shape_majority": "unclear",
+      "shape_vote_counts": {
+        "late_pivot": 1,
+        "unclear": 2
+      },
+      "recommended_exit_by_seat": {
+        "composer": null,
+        "grok": null,
+        "sonnet": null
+      },
+      "exit_spread": {
+        "min": null,
+        "max": null,
+        "spread": null,
+        "null_seats": 3,
+        "non_null": [],
+        "note": "fewer than 2 non-null exits; no pairwise spread"
+      },
+      "shared_early_signals": [
+        "Implementation trajectory with Edits on alldata_writer; re-reads are owned-file work, not zero-edit thrash.",
+        "Majority unclear; all three recommended_exit null."
+      ],
+      "agree_notes": [
+        "Implementation trajectory with Edits on alldata_writer; re-reads are owned-file work, not zero-edit thrash.",
+        "Majority unclear; all three recommended_exit null."
+      ],
+      "disagree_notes": [
+        "Composer labels late_pivot (null exit — sanctioned fixture wait after productive stretch); Grok/Sonnet unclear."
+      ],
+      "highlight": "Agree on productive-then-wait character; no seat names an early thrash exit."
+    },
+    "036ff3ed4a89": {
+      "T": 161,
+      "shape_votes": {
+        "composer": "late_pivot",
+        "grok": "unclear",
+        "sonnet": "unclear"
+      },
+      "shape_majority": "unclear",
+      "shape_vote_counts": {
+        "late_pivot": 1,
+        "unclear": 2
+      },
+      "recommended_exit_by_seat": {
+        "composer": 135,
+        "grok": null,
+        "sonnet": null
+      },
+      "exit_spread": {
+        "min": 135,
+        "max": 135,
+        "spread": null,
+        "null_seats": 2,
+        "non_null": [
+          135
+        ],
+        "note": "fewer than 2 non-null exits; no pairwise spread"
+      },
+      "shared_early_signals": [
+        "Early Bash-heavy / blocking-wait on compare_disc and long runs; seats note wait windows that can look poll-like but resolve.",
+        "Majority unclear (Grok+Sonnet); Composer late_pivot@135."
+      ],
+      "agree_notes": [
+        "Early Bash-heavy / blocking-wait on compare_disc and long runs; seats note wait windows that can look poll-like but resolve.",
+        "Majority unclear (Grok+Sonnet); Composer late_pivot@135."
+      ],
+      "disagree_notes": [
+        "Only Composer names recommended_exit 135; others null."
+      ],
+      "highlight": "Prior expansion Composer-only@135 echoes; still not majority early_thrash."
+    },
+    "7b00225cb824": {
+      "T": 137,
+      "shape_votes": {
+        "composer": "late_pivot",
+        "grok": "unclear",
+        "sonnet": "unclear"
+      },
+      "shape_majority": "unclear",
+      "shape_vote_counts": {
+        "late_pivot": 1,
+        "unclear": 2
+      },
+      "recommended_exit_by_seat": {
+        "composer": null,
+        "grok": null,
+        "sonnet": 135
+      },
+      "exit_spread": {
+        "min": 135,
+        "max": 135,
+        "spread": null,
+        "null_seats": 2,
+        "non_null": [
+          135
+        ],
+        "note": "fewer than 2 non-null exits; no pairwise spread"
+      },
+      "shared_early_signals": [
+        "Edits/Writes present early; wait/pytest stretches are bounded inside an implement-then-wait arc (not ca977 thrash).",
+        "Majority unclear; Composer late_pivot null."
+      ],
+      "agree_notes": [
+        "Edits/Writes present early; wait/pytest stretches are bounded inside an implement-then-wait arc (not ca977 thrash).",
+        "Majority unclear; Composer late_pivot null."
+      ],
+      "disagree_notes": [
+        "Sonnet exit 135 (commit/push); Composer/Grok null."
+      ],
+      "highlight": "Agree not early_thrash; exit secondary near closure."
+    },
+    "5163c22a6a3e": {
+      "T": 90,
+      "shape_votes": {
+        "composer": "late_pivot",
+        "grok": "unclear",
+        "sonnet": "unclear"
+      },
+      "shape_majority": "unclear",
+      "shape_vote_counts": {
+        "late_pivot": 1,
+        "unclear": 2
+      },
+      "recommended_exit_by_seat": {
+        "composer": null,
+        "grok": null,
+        "sonnet": null
+      },
+      "exit_spread": {
+        "min": null,
+        "max": null,
+        "spread": null,
+        "null_seats": 3,
+        "non_null": [],
+        "note": "fewer than 2 non-null exits; no pairwise spread"
+      },
+      "shared_early_signals": [
+        "Early Edit/Write bulk then Perth extractor / monitor wait; rules out ca977-style zero-edit thrash.",
+        "Majority unclear; all exits null."
+      ],
+      "agree_notes": [
+        "Early Edit/Write bulk then Perth extractor / monitor wait; rules out ca977-style zero-edit thrash.",
+        "Majority unclear; all exits null."
+      ],
+      "disagree_notes": [
+        "Composer late_pivot (null); Grok/Sonnet unclear."
+      ],
+      "highlight": "Shape-miss expand class: productive then sanctioned wait; no thrash exit."
+    }
+  },
+  "highlights": {
+    "ca977b9ca0dd": "Unanimous early_thrash; exits 75–90 (Sonnet 75, Composer/Grok 90).",
+    "92a48e004519": "Shape split (late_pivot / early_thrash / unclear) but thrash signals around ~90 appear in ≥1 seat.",
+    "rest": "Five workers majority unclear (Composer often lone late_pivot); wait/implement arcs, not ca977 thrash."
+  },
+  "shape_tally": {
+    "unanimous_early_thrash": [
+      "ca977b9ca0dd"
+    ],
+    "shape_split": [
+      "92a48e004519"
+    ],
+    "majority_unclear": [
+      "bb6165018de0",
+      "0aab88c525de",
+      "036ff3ed4a89",
+      "7b00225cb824",
+      "5163c22a6a3e"
+    ],
+    "majority_late_pivot": [],
+    "majority_early_thrash": [
+      "ca977b9ca0dd"
+    ]
+  },
+  "call_jev": false,
+  "hold_jev_behaviour_ship": true,
+  "notes": [
+    "Seat files included from open PRs #66 (Composer), #67 (Grok), #68 (Sonnet) — not yet on master at agreement time.",
+    "No --call-jev. Hold Jev behaviour ship until design absorbs progressive revalidation (TERMS §12) and WSM validation-phase handoff notes.",
+    "Exit-turn disagreement alone does not fail this panel (TERMS §11).",
+    "ca977 is the only unanimous shape agreement with a finite exit band; 92a48e contributes shared early thrash signals despite shape split."
+  ]
+}

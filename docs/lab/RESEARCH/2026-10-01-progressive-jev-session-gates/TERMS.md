@@ -1,6 +1,6 @@
 # Terms — progressive Jev session gates
 
-**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 added for `shape-signal-panel-v1` (2026-10-01).
+**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 for `shape-signal-panel-v1`; §§12–13 WSM progressive revalidation + validation-phase handoff (Cody design fold 2026-10-01).
 
 These terms are the contract for [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md), [`TUNING-PLAN.md`](TUNING-PLAN.md), and [`proofs/README.md`](proofs/README.md). If a later harness uses a different meaning, it is a different study.
 
@@ -431,7 +431,7 @@ Two exit paths at checkpoint `c` with bar `t_k` on round index `k` (0 at the fir
 1. **Leap:** `checkout_now == checkout` with `checkout_confidence >= t_k` when the snapshot (and, when available, multi-model shape/signal notes) support **near-done** — high agreement on early signals, shape, or inflections, not merely one noisy score. Clears the **current** bar early without waiting for weaker signals to stack.
 2. **Accumulate:** Checkpoints where stop-signals keep appearing but confidence stays below `t_k`. Each round lowers `t_k` (decay schedule is harness work; pre-register before any live run). Guarantees counterfactual exit within a few rounds if stop-signals persist, without a turn cap that bypasses Jev.
 
-The offline sweep still uses fixed `confidence_min = 3` (§6, §9). §12 is the intended live policy once shape-signal agreement land; harness seats stay separate from WSM docs.
+The offline sweep still uses fixed `confidence_min = 3` (§6, §9). §12 is the intended live policy once shape-signal agreement lands; harness seats stay separate from WSM docs. Agreement SUMMARY for `shape-signal-panel-v1` is now at [`proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md) (ca977 unanimous early_thrash; 92a48e shape split with ~90 thrash signals). **Still not shipped** — no `--call-jev`, no hook behaviour from this fold alone.
 
 **Gold and agreement weight:** Multi-model agreement on **early signals**, **shape**, and **inflections** (§11) matters more than exact exit-turn match when interpreting leap vs accumulate or tuning decay. Exit-turn spread across seats is **secondary**, not a hard fail — same weighting as `shape-signal-panel-v1`.
 
