@@ -1,0 +1,83 @@
+{
+  "generated_for": "experiment (d) ubuntu-thrash-screen-before-pack-v1",
+  "panel": {
+    "seats": [
+      "sonnet",
+      "composer",
+      "grok"
+    ],
+    "sources": {
+      "sonnet": "thrash-screen-checkout-verdicts-sonnet-20261001.jsonl",
+      "composer": "thrash-screen-checkout-verdicts-composer-20261001.jsonl",
+      "grok": "thrash-screen-checkout-verdicts-grok-20261001.jsonl"
+    },
+    "schedule": "P0 first_at=75 interval=15",
+    "pack_source": "thrash-screen-judge-packs-20261001-204508.jsonl"
+  },
+  "n_checkpoints": 12,
+  "workers": {
+    "7b00225cb824": 5,
+    "ca977b9ca0dd": 3,
+    "daf933273c8f": 4
+  },
+  "earliest_checkout_recommended_by_seat": {
+    "sonnet": {
+      "7b00225cb824": null,
+      "ca977b9ca0dd": 75,
+      "daf933273c8f": null
+    },
+    "composer": {
+      "7b00225cb824": null,
+      "ca977b9ca0dd": 90,
+      "daf933273c8f": null
+    },
+    "grok": {
+      "7b00225cb824": null,
+      "ca977b9ca0dd": 90,
+      "daf933273c8f": null
+    }
+  },
+  "a0_unanimous_checkout": {
+    "rule": "Earliest checkpoint turn c where sonnet, composer, and grok all have checkout_recommended=true at that prefix",
+    "by_worker": {
+      "7b00225cb824": null,
+      "ca977b9ca0dd": 90,
+      "daf933273c8f": null
+    }
+  },
+  "krippendorff_alpha": {
+    "scale": "nominal",
+    "variable": "checkout_recommended (binary)",
+    "coders": 3,
+    "units": 12,
+    "value": 0.8276,
+    "h5_floor": 0.4,
+    "h5_pass": true,
+    "alpha_method": "krippendorff"
+  },
+  "checkout_positive_counts": {
+    "sonnet": 3,
+    "composer": 2,
+    "grok": 2,
+    "total_true_labels": 7
+  },
+  "pairwise_agreement": {
+    "sonnet_vs_composer": {
+      "overall_pct": 91.67,
+      "cohen_kappa": 0.75
+    },
+    "sonnet_vs_grok": {
+      "overall_pct": 91.67,
+      "cohen_kappa": 0.75
+    },
+    "composer_vs_grok": {
+      "overall_pct": 100.0,
+      "cohen_kappa": 1.0
+    }
+  },
+  "notes": [
+    "Thrash-screen workers: ca977b9ca0dd (3 cps), daf933273c8f (4), 7b00225cb824 (5); 12 pooled prefixes.",
+    "A0 is 90 on ca977b9ca0dd (Sonnet alone at 75; unanimous from 90) and null on daf933273c8f and 7b00225cb824.",
+    "H5 passes on thrash-only nominal alpha (>= 0.40) with only one non-null A0. Jev/stats sweep stays blocked on that single-A0 caveat. No behaviour change."
+  ]
+}
