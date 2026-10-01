@@ -41,6 +41,7 @@ This pack completes the definitions, the citations, and the proof plan. A dry-ru
 | [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | **(b)** fail; **(c)–(f)** recorded; **`shape-signal-panel-v1`** seats done; primary packs **`shape-qual-full-maps-v1`** (34 T≥75, seats held); **hold** decay/handoff harness |
 | [`LITERATURE.md`](LITERATURE.md) | Prior art and the limit of each citation |
 | [`proofs/README.md`](proofs/README.md) | Offline harness plan and the files that must exist before any recommendation |
+| [`ADVERSARIAL-progressive-decay-bar-v0.md`](ADVERSARIAL-progressive-decay-bar-v0.md) | WSM adversarial pack (design-grounded); D0 comparison, proposed D1 — not shipped |
 
 ## How this sits on the resolved paper
 
