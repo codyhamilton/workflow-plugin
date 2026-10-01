@@ -1,0 +1,16 @@
+{
+  "experiment": "ubuntu-thrash-screen-before-pack-v1",
+  "seat": "composer",
+  "model": "composer-2.5",
+  "pack_source": "thrash-screen-judge-packs-20261001-204508.jsonl",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md (original only; no parent-pull-v1)",
+  "rows": 12,
+  "checkout_recommended_count": 2,
+  "not_yet_count": 10,
+  "earliest_checkout_recommended_turn": {
+    "ca977b9ca0dd": 90,
+    "daf933273c8f": null,
+    "7b00225cb824": null
+  },
+  "note": "Experiment (d) thrash-screen panel Composer seat; prefix-causal labels on hybrid_v0 packs only. No --call-jev."
+}
