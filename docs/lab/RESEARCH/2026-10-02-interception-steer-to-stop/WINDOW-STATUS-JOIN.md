@@ -115,6 +115,15 @@ Eligibility makes the incomplete scenario rows explicit: 2,600 are
 `label_join_exact`, 1,400 are `checkpoint_unlabeled`, and 4,200 are
 `session_unlabeled`. All 240 Wave-0 rows are `label_join_exact`.
 
+The TypeSafe lever-wave follow-up applies the same eligibility contract across
+four committed `Wave-0-multi` streams. All **5420/5420** rows, **20/20**
+sessions, and **67/67** unique `(session_id, checkpoint)` keys are
+`label_join_exact`; no committed lever row remains unlabeled. The separate
+`typesafe-k4` meters report 1500 cells but have no committed `results.jsonl`,
+so their row-level join coverage is unknown rather than inferred. See
+[`../2026-10-02-interception-trials/batch-002/typesafe-outcome-join/COVERAGE.md`](../2026-10-02-interception-trials/batch-002/typesafe-outcome-join/COVERAGE.md).
+This is a coverage result, not an FP/miss board.
+
 Wave-0 has 236 unique `cell_id` values across 240 rows. Four IDs each occur
 twice, and each pair is byte-for-byte identical at the parsed-object level.
 The status derivation preserves all source rows and reports the collision; a

@@ -17,6 +17,14 @@ LLM agreement is not gold. Flash may be **policy-under-test** or **variant drive
 
 **Corpus analysis — landed (docs).** [`../2026-10-02-interception-steer-to-stop/ANALYSIS.md`](../2026-10-02-interception-steer-to-stop/ANALYSIS.md) inventories batch-002 streams (incl. **200×41** TypeSafe scenario sweep #104), exploratory fire/rating tables, and **PROVISIONAL** outcome join ([`analysis/PROVISIONAL-join-wave0-flash.jsonl`](../2026-10-02-interception-steer-to-stop/analysis/PROVISIONAL-join-wave0-flash.jsonl)). Re-run: `batch-002/analyze_corpus.py`.
 
+**TypeSafe lever join — landed (derived evidence).**
+[`batch-002/typesafe-outcome-join/COVERAGE.md`](batch-002/typesafe-outcome-join/COVERAGE.md)
+joins 5420/5420 committed lever rows (20/20 sessions; 67/67 unique
+session-checkpoint keys) to the existing sidecar. No committed lever row is
+unlabeled. `typesafe-k4` is meter-only (1500 reported cells, no committed
+`results.jsonl`) and remains unmeasurable at row level. Soft HOLD; no FP/miss
+board or product claim.
+
 ## Rules
 
 1. No row is score-ready while any post-checkpoint field appears in state or prompt (leakage audit required).

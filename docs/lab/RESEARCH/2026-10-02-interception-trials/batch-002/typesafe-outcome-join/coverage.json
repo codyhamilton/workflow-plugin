@@ -1,0 +1,116 @@
+{
+  "coverage_fraction": 1.0,
+  "excluded_result_streams": [
+    {
+      "reason": "review-check axis, not an interception lever wave",
+      "result_rows": 1744,
+      "source_result": "typesafe-review-check/results.jsonl",
+      "stream": "typesafe-review-check"
+    },
+    {
+      "reason": "scenario corpus, not a lever wave; coverage is tracked in WINDOW-STATUS-JOIN.md",
+      "result_rows": 13792,
+      "source_result": "typesafe-scenario-sweep/results.jsonl",
+      "stream": "typesafe-scenario-sweep"
+    }
+  ],
+  "join_key": [
+    "session_id",
+    "checkpoint"
+  ],
+  "joined_rows": 5420,
+  "joined_session_checkpoints": 67,
+  "label_join_eligibility_rows": {
+    "checkpoint_unlabeled": 0,
+    "label_excluded": 0,
+    "label_join_exact": 5420,
+    "session_not_labeled": 0,
+    "session_unlabeled": 0
+  },
+  "label_join_eligibility_session_checkpoints": {
+    "checkpoint_unlabeled": 0,
+    "label_excluded": 0,
+    "label_join_exact": 67,
+    "session_not_labeled": 0,
+    "session_unlabeled": 0
+  },
+  "label_source": "outcome-labels.jsonl",
+  "labeled_result_sessions": 20,
+  "meter_only_reported_cells": 1500,
+  "meter_only_streams": [
+    {
+      "meters": "typesafe-k4/meters.json",
+      "reason": "results.jsonl is not committed, so session_id + checkpoint join coverage cannot be measured",
+      "reported_cells": 1500,
+      "stream": "typesafe-k4"
+    }
+  ],
+  "metrics_computed": false,
+  "not_scoreboard": true,
+  "result_rows": 5420,
+  "result_sessions": 20,
+  "result_sessions_without_label": [],
+  "scope": "committed TypeSafe Wave-0-multi lever-wave result rows",
+  "sidecar_label_rows": 20,
+  "soft_standard_hold": true,
+  "source_results_mutated": false,
+  "streams": [
+    {
+      "coverage_fraction": 1.0,
+      "joined_rows": 180,
+      "result_rows": 180,
+      "result_sessions": 20,
+      "source_result": "typesafe/results.jsonl",
+      "stream": "typesafe",
+      "unique_session_checkpoints": 67,
+      "unjoined_rows": 0
+    },
+    {
+      "coverage_fraction": 1.0,
+      "joined_rows": 240,
+      "result_rows": 240,
+      "result_sessions": 10,
+      "source_result": "typesafe-h25/results.jsonl",
+      "stream": "typesafe-h25",
+      "unique_session_checkpoints": 10,
+      "unjoined_rows": 0
+    },
+    {
+      "coverage_fraction": 1.0,
+      "joined_rows": 2500,
+      "result_rows": 2500,
+      "result_sessions": 3,
+      "source_result": "typesafe-k1/results.jsonl",
+      "stream": "typesafe-k1",
+      "unique_session_checkpoints": 3,
+      "unjoined_rows": 0
+    },
+    {
+      "coverage_fraction": 1.0,
+      "joined_rows": 2500,
+      "result_rows": 2500,
+      "result_sessions": 3,
+      "source_result": "typesafe-k2/results.jsonl",
+      "stream": "typesafe-k2",
+      "unique_session_checkpoints": 3,
+      "unjoined_rows": 0
+    }
+  ],
+  "unique_session_checkpoints": 67,
+  "unjoined_rows": 0,
+  "unjoined_session_checkpoints": [],
+  "window_status_rows": {
+    "ambiguous": 0,
+    "inside_steer_window": 12,
+    "no_steer_window": 5357,
+    "outside_steer_window": 51,
+    "unidentified": 0
+  },
+  "window_status_session_checkpoints": {
+    "ambiguous": 0,
+    "inside_steer_window": 4,
+    "no_steer_window": 52,
+    "outside_steer_window": 11,
+    "unidentified": 0
+  }
+}
