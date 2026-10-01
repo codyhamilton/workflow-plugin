@@ -1,6 +1,6 @@
 # Terms — progressive Jev session gates
 
-**Status:** definitions for an offline study. **Confidence: not high.** Nothing here has been replayed on a real JSONL.
+**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 added for `shape-signal-panel-v1` (2026-10-01).
 
 These terms are the contract for [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md), [`TUNING-PLAN.md`](TUNING-PLAN.md), and [`proofs/README.md`](proofs/README.md). If a later harness uses a different meaning, it is a different study.
 
@@ -392,6 +392,33 @@ The negative control is a separate assertion: under every cell with `first_at >=
 ```
 
 `P0` is what the hypotheses name as the proposed design. Beating `B` at `P0` is H1’s primary comparison. The grid exists because `P0` is expected to move if the numbers say so. Moving it inside this document, before the numbers, is not allowed.
+
+## 11. Shape-signal vocabulary (`shape-signal-panel-v1`)
+
+Added 2026-10-01 for experiment **`shape-signal-panel-v1`**. These terms do **not** replace `gold_exit_turn` under `A0` (§7). They are the seat contract when the study asks for shape and early-signal agreement instead of three-model exact exit agreement.
+
+**Gold protocol note.** Unanimous A0 / “≥ 2 non-null A0” is **not** the hard gate for this experiment. Multi-model agreement on **early signals**, **shape**, and **inflections** is worth more than exact exit-turn match. Exit-turn spread across seats is a **secondary metric**, not a hard fail.
+
+| Term | Definition |
+|------|------------|
+| `late_pivot` | Session shape: the worker shows usable progress for a long stretch, then a clear change of fortune (stall, thrash, drift, or brief abandonment) after which continuing is a mistake. The recommended exit is near that **pivot**, not at the first minor wobble. |
+| `early_thrash` | Session shape: repeated thrash, low progress, or runaway wait/poll is already the dominant pattern **early** (often by the first or second `75:15` checkpoint). Extending the run does not recover a productive trajectory. |
+| `early_signal` | A concrete, **turn-anchored** observation in `prefix(c)` (tool histogram skew, re-read loop, compaction surge, sleep/poll burst, brief abandonment in the tail, frozen progress) that foreshadows the eventual shape/outcome. Must cite turns ≤ `c` present in the judge pack. |
+| `inflection` | A turn **range** (e.g. 120–150) where the trajectory’s character changes: what was true before the range is no longer true after. Seats name the range **and** what changed (not only a single turn number). |
+| `recommended_exit` | The seat’s best checkout turn under the shape rule: for `late_pivot`, near the pivot; for `early_thrash`, at the **first clear thrash** checkpoint where continuing is already a mistake. May differ across models; spread is secondary. |
+| `earliness` | How early `recommended_exit` is relative to an ideal: for `late_pivot`, distance before/after the pivot; for `early_thrash`, distance after the first clear thrash. Report qualitatively (too early / on time / too late) with turn anchors when possible. |
+
+### Per-seat questions (shape-signal panel)
+
+Each seat, given hybrid_v0 packs for a worker, answers:
+
+1. **Shape:** `late_pivot` or `early_thrash` (or `unclear` with why).
+2. **Why T is large:** what kept the transcript long (productive work, thrash, wait/poll, census, compaction churn, …), turn-anchored.
+3. **Inflection points:** turn ranges + what changed.
+4. **Early signals:** concrete foreshadowing of the outcome, turn-anchored, only from evidence ≤ each cited checkpoint.
+5. **Recommended exit + earliness:** exit turn under the shape rule above, and earliness vs ideal.
+
+Do not require three seats to name the same exit turn. Prefer agreement notes on (1), (3), and (4).
 
 ## 10. Out of scope for these terms
 

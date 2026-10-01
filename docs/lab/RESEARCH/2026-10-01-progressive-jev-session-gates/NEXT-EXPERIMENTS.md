@@ -1,6 +1,8 @@
 # Next experiments — progressive Jev gold labeling
 
-**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null**). Experiment **(d)** thrash-screen **passes** H5 on its own 3×12 table (α = **0.8276**) with **A0 = 90** on `ca977b9ca0dd` only. Experiment **(e)** thrash-expand is a **miss**: strict ca977 shape empty on the remaining maps pool; best-available panel **A0 null** on all three workers; **0/5** checkout on every seat. Expand-only α is **undefined** (all `not_yet`; a De=0 convention of 1.0 is not a pass). Combined (d)+(e) is 17 prefixes, α = **0.8377**, and still **one** non-null A0. **Jev stays blocked** until ≥ 2 non-null A0. No hook change.
+**Confidence: not high.** H5 failed on P0 (α = 0.1189, **A0 null**) and on experiment **(c)** expansion (α = **0.0000** on 3×20, **A0 null**). Experiment **(d)** thrash-screen **passes** H5 on its own 3×12 table (α = **0.8276**) with **A0 = 90** on `ca977b9ca0dd` only. Experiment **(e)** thrash-expand is a **miss**: strict ca977 shape empty on the remaining maps pool; best-available panel **A0 null** on all three workers; **0/5** checkout on every seat. Expand-only α is **undefined** (all `not_yet`; a De=0 convention of 1.0 is not a pass). Combined (d)+(e) is 17 prefixes, α = **0.8377**, and still **one** non-null A0. Experiment **(f)** cross-project ca977 screen is **blocked** (empty). **No hook change.**
+
+**Gold protocol update (Cody 2026-10-01):** experiment **`shape-signal-panel-v1`** **supersedes** the unanimous A0 / ≥2 A0 gate as the primary next measurement. Do **not** require three-model exact exit agreement. Multi-model agreement on early signals / shape / inflections is primary; exit-turn spread is secondary. **Hold Jev behaviour ship** and do **not** `--call-jev` until signal-agreement notes exist on several workers. Definitions: [`TERMS.md`](TERMS.md) §11.
 
 ## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
@@ -193,13 +195,13 @@ The screen was empty, so the run packed a pre-registered best-available panel in
 
 ---
 
-## Primary next — experiment **(f)** `cross-project-ca977-shape-screen-v1` (**blocked: empty cross-project screen**)
+## Completed — experiment **(f)** `cross-project-ca977-shape-screen-v1` (**blocked: empty cross-project screen**)
 
-**Status:** **blocked** (2026-10-01). **Goal (unchanged):** find a second worker with the ca977 shape (no Edit/Write ∧ high max-reread ∧ high compaction ∧ `T ≥ 75`) in **other** Ubuntu Claude project directories, then pack and label only shape hits. **Hold Jev** until ≥ 2 workers have non-null **A0**.
+**Status:** **blocked** (2026-10-01). **Goal (as run):** find a second worker with the ca977 shape (no Edit/Write ∧ high max-reread ∧ high compaction ∧ `T ≥ 75`) in **other** Ubuntu Claude project directories, then pack and label only shape hits. The ≥2 A0 Jev gate here is **superseded** by `shape-signal-panel-v1` (signal/shape agreement primary).
 
 **Screen result:** nine non-maps `~/.claude/projects/` dirs on Ubuntu → **0** subagent/worker JSONLs → **0** T≥75 candidates → **n_ca977_shape = 0**. No packs. No panel. Artifacts: [`proofs/validated/ubuntu-raw/SUMMARY-ubuntu-raw-cross-project-ca977-f-20261001-211725.json`](proofs/validated/ubuntu-raw/SUMMARY-ubuntu-raw-cross-project-ca977-f-20261001-211725.json), [`proofs/validated/gold/packs/SUMMARY-cross-project-ca977-f-20261001-211725.md`](proofs/validated/gold/packs/SUMMARY-cross-project-ca977-f-20261001-211725.md). Fall through to **`hold-until-new-maps-sessions`**. Holding does not unlock Jev.
 
-### Why this is primary
+### Why this was primary (superseded by `shape-signal-panel-v1`)
 
 The maps remainder is exhausted for ca977 twins. (e) screened the remaining open-pajero-maps `T≥75` pool (n=26) and the strict shape returned **zero** workers. The best-available substitutes were then labeled and added **zero** checkouts. Packing more of that remainder repeats a miss. A second **A0** has to come from sessions that were not in that maps enum: other project directories on the same Ubuntu Claude tree, or new maps sessions that do not exist yet. Looking at the other directories is the measurement that can still add a shape-matched worker. Waiting is the fallback when that screen is also empty.
 
@@ -227,3 +229,69 @@ The maps remainder is exhausted for ca977 twins. (e) screened the remaining open
 **`hold-until-new-maps-sessions`:** stop packing the maps remainder. Wait for new long runaway sessions that meet the ca977 shape, then pack those. Use this when the cross-project screen is empty or the other project directories are not on the Ubuntu box. Holding does not unlock Jev.
 
 **`spot-check-ca977-75-vs-90`:** human or agent spot-check of `ca977b9ca0dd@75` (Sonnet-only checkout) versus `@90` (unanimous **A0**). Annotation only. It does not add a second **A0** and does not unlock Jev by itself.
+
+---
+
+## Primary next — experiment **`shape-signal-panel-v1`** (NEW gold protocol — Phase 1 packs landed; panel held)
+
+**Status:** Phase 1 **done** (2026-10-01) — docs + packs only. **Panel held** (no seats in Phase 1). **Supersedes** unanimous A0 / ≥2 A0 as the hard gate.
+
+**Why now.** (e) and (f) exhausted ca977-twin hunting. Exact exit-turn unanimity kept Jev blocked on a single A0 and discarded useful disagreement. This experiment asks seats for **shape** and **early signals** first, then a recommended exit. Agreement on signals/shape/inflections is the unlock path; exit-turn spread is secondary.
+
+### Per-seat questions
+
+1. **Shape:** `late_pivot` vs `early_thrash` (see [`TERMS.md`](TERMS.md) §11).
+2. **Why T is large:** turn-anchored account of what kept the session long.
+3. **Inflection points:** turn ranges + what changed.
+4. **Early signals:** concrete foreshadowing of the outcome, turn-anchored in the pack.
+5. **Recommended exit + earliness:** pivot for `late_pivot`; first clear thrash for `early_thrash`; earliness vs that ideal.
+
+### Agreement worth
+
+| Primary (score) | Secondary (report, not hard fail) |
+|-----------------|-----------------------------------|
+| Multi-model agreement on **early signals**, **shape**, and **inflections** | Exact exit-turn match / exit-turn spread |
+
+Do **not** fail the panel solely because seats disagree on the exit turn.
+
+### Pool / shortlist (Phase 1)
+
+Reopen Maps `T≥75` including prior A0-null and shape-miss workers. Prefer **diverse** shapes. Include the ~300T runaway. **No padding.** Prefer workers that already have hybrid_v0 packs under [`proofs/validated/gold/packs/`](proofs/validated/gold/packs/) — **reuse**; build new packs only for gaps.
+
+| Rank | Worker | T | Pack | Diversity role |
+|-----:|--------|--:|------|----------------|
+| 1 | `92a48e004519` | 296 | reuse `…-194107` | ~300T runaway / P0 A0-null |
+| 2 | `ca977b9ca0dd` | 109 | reuse `…-204508` | prior A0 hit; early_thrash candidate |
+| 3 | `bb6165018de0` | 154 | reuse `…-194107` | P0 null contrast |
+| 4 | `0aab88c525de` | 192 | reuse `…-202909` | expansion A0-null long |
+| 5 | `036ff3ed4a89` | 161 | reuse `…-202909` | expansion partial disagreement |
+| 6 | `7b00225cb824` | 137 | reuse `…-204508` | thrash null sleep/poll |
+| 7 | `5163c22a6a3e` | 90 | reuse `…-210125` | shape-miss expand null |
+
+**Artifacts (Phase 1):** [`proofs/validated/gold/packs/shape-signal-judge-packs-20261001-212524.jsonl`](proofs/validated/gold/packs/shape-signal-judge-packs-20261001-212524.jsonl) (45 rows); ranking [`SUMMARY-shape-signal-20261001-212524.md`](proofs/validated/gold/packs/SUMMARY-shape-signal-20261001-212524.md). Leak-scan PASS. No new per-worker packs (all reuse).
+
+### Protocol sketch (later phases)
+
+1. **Phase 1 (this task):** TERMS §11 + NEXT-EXPERIMENTS + combined packs + SUMMARY. Branch/PR. **Hold panel.**
+2. **Phase 2+ (not this task):** three seats on the shortlist packs; collect shape/signal/inflection/exit answers; publish agreement notes. Original rubric patterns still available; do not revive `parent-pull-v1` without a new experiment.
+3. **Jev:** no `--call-jev` and no behaviour ship until signal-agreement notes exist on **several** workers.
+
+### Success sketch
+
+| Gate | Criterion |
+|------|-----------|
+| Corpus | ≥ **5** diverse Maps `T≥75` workers with hybrid_v0 packs (Phase 1: **7**, all reuse) |
+| Panel | Seats answer the five questions; primary score = signal/shape/inflection agreement |
+| Exit | Exit-turn spread reported; not a hard fail if spread is large |
+| Non-goal | No `--call-jev`, no stats sweep, no hook/plugin edit, no `parent-pull-v1`, no padding |
+
+<details>
+<summary>Stop rules (shape-signal-panel-v1)</summary>
+
+1. **No exact-exit hard fail.** Do not discard the panel solely for exit-turn disagreement.
+2. **No Jev early.** Do not `--call-jev` or ship behaviour before signal-agreement notes on several workers.
+3. **No padding.** Do not add near-duplicate poll-class workers to inflate N.
+4. **No parent-pull.** Do not include the draft parent-pull delta in seat prompts.
+5. **Phase hold.** Phase 1 must not run seats.
+
+</details>

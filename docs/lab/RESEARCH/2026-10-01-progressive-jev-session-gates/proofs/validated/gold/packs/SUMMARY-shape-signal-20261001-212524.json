@@ -1,0 +1,164 @@
+{
+  "generated_at_brisbane": "2026-10-01 21:25:33 AEST",
+  "run": "20261001-212524",
+  "experiment": "shape-signal-panel-v1",
+  "phase": "1_docs_packs_only",
+  "panel_status": "held",
+  "schedule": "75:15",
+  "snapshot_mode": "hybrid_v0",
+  "live_call_jev": false,
+  "gold_protocol_note": "Supersedes unanimous A0 / >=2 A0 gate. Multi-model agreement on early signals / shape / inflections is primary; exit-turn spread is secondary metric not hard fail.",
+  "n_workers": 7,
+  "n_pack_rows": 45,
+  "pack_source": "all_reuse",
+  "new_packs_built": 0,
+  "shortlist": [
+    {
+      "rank": 1,
+      "worker_id": "92a48e004519",
+      "T": 296,
+      "n_checkpoints": 15,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255,
+        270,
+        285
+      ],
+      "pack_source": "reuse",
+      "source_file": "92a48e004519-judge-packs-20261001-194107.jsonl",
+      "diversity_role": "runaway_~300T",
+      "why": "P0 smoking gun / ~296T runaway; prior A0 null"
+    },
+    {
+      "rank": 2,
+      "worker_id": "ca977b9ca0dd",
+      "T": 109,
+      "n_checkpoints": 3,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ],
+      "pack_source": "reuse",
+      "source_file": "ca977b9ca0dd-judge-packs-20261001-204508.jsonl",
+      "diversity_role": "prior_A0_hit",
+      "why": "thrash-screen (d) A0=90 hit; early_thrash candidate"
+    },
+    {
+      "rank": 3,
+      "worker_id": "bb6165018de0",
+      "T": 154,
+      "n_checkpoints": 6,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ],
+      "pack_source": "reuse",
+      "source_file": "bb6165018de0-judge-packs-20261001-194107.jsonl",
+      "diversity_role": "P0_null_contrast",
+      "why": "P0 hold-out / census-wait; A0 null; possible late_pivot or healthy long"
+    },
+    {
+      "rank": 4,
+      "worker_id": "0aab88c525de",
+      "T": 192,
+      "n_checkpoints": 8,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180
+      ],
+      "pack_source": "reuse",
+      "source_file": "0aab88c525de-judge-packs-20261001-202909.jsonl",
+      "diversity_role": "expansion_null_long",
+      "why": "expansion (c) A0 null; long census-wait class"
+    },
+    {
+      "rank": 5,
+      "worker_id": "036ff3ed4a89",
+      "T": 161,
+      "n_checkpoints": 6,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ],
+      "pack_source": "reuse",
+      "source_file": "036ff3ed4a89-judge-packs-20261001-202909.jsonl",
+      "diversity_role": "expansion_null_partial",
+      "why": "expansion (c) A0 null; Composer-only @135 (disagreement mass)"
+    },
+    {
+      "rank": 6,
+      "worker_id": "7b00225cb824",
+      "T": 137,
+      "n_checkpoints": 5,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135
+      ],
+      "pack_source": "reuse",
+      "source_file": "7b00225cb824-judge-packs-20261001-204508.jsonl",
+      "diversity_role": "thrash_null_sleep_poll",
+      "why": "thrash-screen (d) A0 null; sleep/poll runaway class"
+    },
+    {
+      "rank": 7,
+      "worker_id": "5163c22a6a3e",
+      "T": 90,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_source": "reuse",
+      "source_file": "5163c22a6a3e-judge-packs-20261001-210125.jsonl",
+      "diversity_role": "shape_miss_expand",
+      "why": "thrash-expand (e) shape-miss; A0 null"
+    }
+  ],
+  "combined_pack": "shape-signal-judge-packs-20261001-212524.jsonl",
+  "leak_scan": {
+    "needles": [
+      "/home/",
+      "codyh",
+      "/media/",
+      "/mnt/",
+      "sk-ant"
+    ],
+    "result": "PASS"
+  },
+  "non_goals": [
+    "no seats this phase",
+    "no --call-jev",
+    "no parent-pull-v1",
+    "no Jev behaviour ship",
+    "no padding"
+  ]
+}
