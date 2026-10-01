@@ -47,6 +47,8 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 | `p0-checkout-verdicts-SUMMARY-20261001.json` | Two-seat summary (pre-panel); see panel JSON for A0 |
 | `p0-panel-agreement-20261001.json` | Three-seat A0, pairwise agreement, α |
 | `p0-alt-gold-targets-20261001.json` | A_maj and A_gc from the signed JSONL. Both 180 / null. Not a fit target |
+| `p0-checkout-verdicts-sonnet-relabel-20261001.jsonl` | Experiment **(b)** `parent-pull-v1` Sonnet seat — **discarded as gold** (over-fire @255) |
+| `p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json` | (b) scorecard + CHM α hint ≈ 0.57 — **not** adopted |
 | `PANEL-FINDINGS-20261001.md` | Human-readable panel result |
 
 ## Headline result (three-seat panel)
@@ -55,6 +57,7 @@ gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.j
 - Grok earliest checkout on `92a48e004519`: **105**; Composer: **180**; Sonnet: **null**.
 - **A0** (unanimous checkout): **null** on both workers — no cp where all three seats agree checkout.
 - Krippendorff α = **0.1189** (< H5 floor 0.40). Confidence remains **not high**; panel count meets floor but gold exit does not.
-- **A_maj** and **A_gc** recomputed from the signed JSONL are both **180** on `92a48e004519` and **null** on `bb6165018de0` ([`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json)). They are documented alternates, not the fit target. Next measurement: [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
+- **A_maj** and **A_gc** recomputed from the signed JSONL are both **180** on `92a48e004519` and **null** on `bb6165018de0` ([`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json)). They are documented alternates, not the fit target.
+- Experiment **(b)** Sonnet re-label under `parent-pull-v1` **failed** (hold-out checkout at `92a48e@255`; checkout on all Grok-only 105–165). Relabel JSONL is **not** gold. Next: **(c)** `corpus-expand-hybrid-panel-original` — [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
 
 No `--call-jev` / `TYPESAFE_API_KEY` was used for labeling or this aggregation.

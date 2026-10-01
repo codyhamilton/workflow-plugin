@@ -1,91 +1,96 @@
-# Next experiment — after H5 failed
+# Next experiments — progressive Jev gold labeling
 
-**Status:** plan. **Confidence: not high.** H5 failed. No Jev sweep, no hook change, no Sonnet re-label in this revision.
+**Confidence: not high.** H5 failed on the P0 panel (α = 0.1189, **A0 null**). No Jev sweep, no hook change.
 
-**Primary experiment:** **(b)** re-label the Sonnet seat on the same 21 P0 prefixes after the draft rubric delta. Success is a new 3×21 table that can make `A0` non-null on `92a48e004519` without checkout on the unanimous `not_yet` prefixes.
+## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
-Alternate targets already computed from the signed JSONL: [`proofs/validated/gold/p0-alt-gold-targets-20261001.json`](proofs/validated/gold/p0-alt-gold-targets-20261001.json). They are recorded. They are not the fit target.
+**Status:** done. **Outcome:** scorecard **fail** — stop rule **1 (over-fire)**.  
+**Artifacts (research only, not gold):** [`proofs/validated/gold/p0-checkout-verdicts-sonnet-relabel-20261001.jsonl`](proofs/validated/gold/p0-checkout-verdicts-sonnet-relabel-20261001.jsonl), [`p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json`](proofs/validated/gold/p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json). Merged via PR #46.
 
-## Hard numbers this choice uses
+| Scorecard row | Result |
+|---------------|--------|
+| Rule 1 — checkout at `92a48e004519` **180, 195, 210** | **Pass** (all three true) |
+| Rule 2 — **0** Sonnet checkouts on **13** hold-out prefixes | **Fail** — **1** hold-out checkout at **`92a48e004519@255`** |
+| Rule 3 — α ≥ 0.40 | Not evaluated as pass (rules 1–2 did not both pass) |
 
-Sources: the three signed JSONLs, [`p0-panel-agreement-20261001.json`](proofs/validated/gold/p0-panel-agreement-20261001.json), the alt-targets file, and the committed ubuntu-raw thrash table `SUMMARY-ubuntu-raw-dry-run-20261001-194107.json`. Flash drafts are excluded (21 draft rows, 0 used).
+**Reported (non-failing):** Sonnet checkout on all five Grok-only cps **105–165** on `92a48e004519` (5/5). Total Sonnet checkouts on that worker: **9** (105–210 plus **255**).
 
-| Fact | Number |
-|------|--------|
-| Prefixes | 21 (15 on `92a48e004519`, 6 on `bb6165018de0`) |
-| Sonnet `checkout_recommended` | **0 / 21** |
-| Composer checkout cps | **3** (180, 195, 210), all on `92a48e004519` |
-| Grok checkout cps | **8** (105–210), all on `92a48e004519` |
-| A0, both workers | **null** |
-| Krippendorff α (nominal, 3×21) | **0.1189** (H5 floor 0.40) |
-| Cohen κ, Composer ↔ Grok | **0.4262** |
-| Cohen κ, Sonnet ↔ either other seat | **0** |
-| **A_maj** (2 of 3) earliest | **180** / **null** |
-| **A_gc** (Grok ∩ Composer) earliest | **180** / **null** |
-| Checkpoints where `majority_label` = `gc_label` | **21 / 21** |
-| Majority-checkout checkpoints | **3 / 21** |
-| Grok-only checkpoints (105, 120, 135, 150, 165) | **5** |
-| Unanimous `not_yet` | **13** (7 on `92a48e004519`, 6 on `bb6165018de0`) |
-| Ubuntu-raw Jev `missing_rate` on both guns | **1.0** (`decision=missing`, `reason=dry_run`) |
+**Consequences (stop rule 1):**
 
-`A_maj` equals `A_gc` on both workers, and the per-checkpoint labels match at all 21 rows, because Sonnet never supplies a second vote. Majority is Grok and Composer both saying checkout. That happens only at 180, 195, and 210. At 225, 240, 255, 270, and 285 both of those seats return to `not_yet`, together with Sonnet.
+1. Discard the `parent-pull-v1` / `sonnet-relabel` rows as gold. They do **not** replace signed `p0-checkout-verdicts-20261001.jsonl` (`reviewer_final`).
+2. Do **not** start a Jev or stats-gate sweep.
+3. Do **not** adopt **A_maj** or **A_gc** as the fit target ([`p0-alt-gold-targets-20261001.json`](proofs/validated/gold/p0-alt-gold-targets-20261001.json)).
+4. Leave the draft rubric delta at the bottom of [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) **not in force**. Do not schedule a second Sonnet run with the same paragraph (stop rule 2 in the archived protocol below).
 
-The thrash table shows why that return is the same shape as the labels, not a flicker:
+**CHM hint (not a pass):** If this seat were substituted into the 3×21 panel, nominal Krippendorff α would rise to about **0.5674** ([`panel_recompute_hint_for_WSM`](proofs/validated/gold/p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json)). That α hint does **not** override stop rule 1: one hold-out checkout still discards the run as gold regardless of α.
 
-| `92a48e004519` cps | `assistant_text_chars` | `new_read_paths` | Edit/Write in histogram | Re-read tops |
-|--------------------|------------------------|------------------|-------------------------|--------------|
-| 75–210 | **36** at every cp | **[]** on every delta from 90 through 210 | none (Bash/Read only) | `_cenc.c` 10→26, `divide.py` 7→20, `_e2.c` 6→16 |
-| 225 | 68 | first new path, `parts/p1.c` | none | climb stops |
-| 240, 255, 270, 285 | 195, 235, 365, 562 | [] | none | frozen at 26 / 20 / 16 |
+Signed P0 panel numbers in [`PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md) are unchanged (**A0 null**, α **0.1189**).
 
-`bb6165018de0` is the other shape: assistant text **2174** already at cp 75, a Write in the histogram, the spec PDF at 3 reads, compactions 0 until cp 135. All three seats stay `not_yet` on all 6 cps. The signed Sonnet rationales on `92a48e004519` through cp 210 correct every Flash checkout with the same three vetoes: Bash may hide an edit, re-reads of brief files after compaction are ordinary, empty excerpts are thin evidence. From cp 240 the same seat cites named cleanup (grep gate, ctest, struct rewrite, brief amendment), which is where Composer and Grok are also `not_yet`.
+### Archived protocol — (b) Sonnet re-label under `parent-pull-v1` (for audit)
 
-## Why (b) is the primary measurement
+Primary measurement after H5: re-label the Sonnet seat on the same 21 P0 prefixes with the draft parent-pull delta. Inputs were hybrid_v0 packs (`p0-judge-packs-20261001-194107.jsonl`), not the gitignored gold-bundle JSONL.
 
-H5's pre-registered consequence is to revise the rubric or the bundle and re-label, and to leave H1–H4 and H6–H7 uninterpreted ([`HYPOTHESIS.md`](HYPOTHESIS.md)). The 0/21 Sonnet column is the whole of the A0 null and almost the whole of α = 0.1189. Composer and Grok already clear a pairwise 0.40 on the packs (κ = 0.4262). The missing measurement is whether one paragraph moves Sonnet onto the three checkpoints where a second vote already exists, and off the 13 checkpoints where every seat said `not_yet`.
-
-**(a) stays deferred.** Adopting `A_maj` or `A_gc` as a fit target adopts one number twice: both earliest exits are 180 and null, and both per-cp labels agree 21/21. The positive set is 3 checkpoints on one worker. Earliest-exit scoring would then treat cps 225–285 as after gold, while `majority_label` at those five checkpoints is `not_yet` and the thrash stats have left the frozen window (text 36→68 and the first new path at 225; text 562 by 285). Ubuntu-raw has no Jev decision to score (`missing_rate` 1.0 on both guns). A stats-gate sweep against that island would be a fit on n = 1 positive worker, which is the fit H5 forbids.
-
-**(c) stays the follow-on after a pass, not the next run.** The reliability failure on these 21 rows is one constant seat, and the corpus for a label already exists. TUNING-PLAN still marks H1 underpowered while the only `T >= 75` gold rows are these two workers. That constraint blocks a sweep after (b) passes. It does not block re-labeling the 21 prefixes already in git.
-
-## Protocol
-
-1. Fresh Sonnet session. Prompt is the current [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) body plus the draft delta at the bottom of that file. Omit this scorecard, worker nicknames, other seats' labels and rationales, and the sentences in the rubric that state 296, 154, or 130k (the split already required by [`TUNING-PLAN.md`](TUNING-PLAN.md)).
-2. Same 21 prefixes, same schedule `75:15`. Input bundle is the gold-bundle family Sonnet already signed (`*-gold-bundles-20261001-194107.jsonl`, gitignored under `proofs/validated/ubuntu-raw/`). Hold that bundle fixed. The hybrid_v0 packs are a different factor: at cp 255 the pack tail has 0 nonempty excerpts, while the signed Sonnet rationale cites named cleanup across turns 236–255.
-3. If that gold-bundle file is not on the machine, record **blocked**. Do not substitute the packs in the same run.
-4. Write a new JSONL. Leave `p0-checkout-verdicts-20261001.jsonl` untouched. Flash stays excluded. Composer and Grok rows stay the committed ones.
-5. Recompute A0, the 3×21 nominal Krippendorff α (same binary `checkout_recommended` setup as the panel file: 3 coders, 21 units), and the Sonnet positive set. No `--call-jev`. No hook, `settings.json`, or `install.sh` edit.
-
-A `checkout` with an empty pattern list is invalid and dropped, per the existing rubric. A dropped label on a required checkpoint counts as a miss.
-
-## Scorecard
+<details>
+<summary>Scorecard and stop rules (as run 2026-10-01)</summary>
 
 | Set | Checkpoints | Rule |
 |-----|-------------|------|
-| Required Sonnet checkout | `92a48e004519` at **180, 195, 210** | All three true. Composer is true only here, and Grok is already true, so this is where A0 can leave null |
-| Hold-out, Sonnet stays `not_yet` | `92a48e004519` at **75, 90, 225, 240, 255, 270, 285** (7) and `bb6165018de0` at **75, 90, 105, 120, 135, 150** (6) | **13** prefixes. Zero Sonnet checkouts |
-| Reported either way | `92a48e004519` at **105, 120, 135, 150, 165** | The 5 Grok-only cps. Publish the count. It does not pass or fail on its own |
+| Required Sonnet checkout | `92a48e004519` at **180, 195, 210** | All three true |
+| Hold-out, Sonnet stays `not_yet` | `92a48e004519` at **75, 90, 225, 240, 255, 270, 285** (7) and `bb6165018de0` at **75…150** (6) | **13** prefixes, zero Sonnet checkouts |
+| Reported either way | `92a48e004519` at **105, 120, 135, 150, 165** | Grok-only cps; publish count only |
 
-**Pass** when all three hold:
+Stop rules included: over-fire on hold-out → discard as gold; no second identical Sonnet run; island miss at 180/195/210; α &lt; 0.40; blocked bundle; no behaviour ship.
 
-1. Sonnet `checkout_recommended=true` at 180, 195, and 210.
-2. Sonnet checkout count on the 13 hold-out prefixes is **0**.
-3. Recomputed α **≥ 0.40**.
+</details>
 
-On a pass, A0 for `92a48e004519` is **180** (the earliest required cp; Grok and Composer are already true there). A0 for `bb6165018de0` stays **null**. Confidence stays **not high**. H1 stays underpowered at n = 2.
+---
 
-## Stop rules
+## Primary next — experiment **(c)** `corpus-expand-hybrid-panel-original`
 
-1. **Over-fire.** One or more Sonnet checkouts on the 13 hold-out prefixes. Discard the new rows as gold. Do not start a Jev or stats sweep. Do not adopt `A_maj`.
-2. **No bite.** Sonnet remains 0/21. Do not paste the same paragraph into a second Sonnet run. The next change, if any, is a bundle change (a Bash-argument excerpt), and that is a separate experiment.
-3. **Island missed.** Sonnet is false at any of 180, 195, 210. A0 stays null. Do not sweep, including when Sonnet did checkout on some of 105–165 and α rose.
-4. **α still under the floor.** New α < 0.40. H5 remains failed. H1–H4 and H6–H7 stay uninterpreted.
-5. **Pass, then corpus.** After a pass, label **at least two more** `T >= 75` sessions under the same revised rubric before any fit. Pooled α on the enlarged panel must still be ≥ 0.40. Until that lands, do not run the Jev/stats sweep in (a).
-6. **Blocked bundle.** Gold-bundle JSONL absent. Status is blocked, not a failed rubric. Packs stay out of this run.
-7. **No behaviour ship.** This experiment does not install a hook, edit plugin code, or call Jev.
+**Status:** plan. **Goal:** enlarge the labeled corpus under the **original** rubric (body of [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) **without** the draft parent-pull delta), then re-run the **three-seat** panel (Sonnet signed final + Composer + Grok) on **hybrid_v0** judge packs. This addresses H5 underpowering and the n = 2 smoking-gun island; it is **not** a Jev tuning sweep.
 
-## Draft rubric delta
+### Why (c) now
 
-Judge-facing text, canonical in [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) under “Draft delta — not in force (2026-10-01)”. Short form the re-label must match:
+Experiment **(b)** showed that tightening Sonnet with `parent-pull-v1` on packs **over-fires** (hold-out @255 plus checkout on all Grok-only 105–165). Rubric revision on the same two workers is blocked until the panel has more sessions. [`TUNING-PLAN.md`](TUNING-PLAN.md) already requires **≥ 2** additional `T >= 75` gold workers before interpreting H1; only `92a48e004519` and `bb6165018de0` are labeled today.
 
-`checkout` is a parent-pull even when the worker still looks busy. If `runaway` is already in the prefix (a path read ≥ 3 times) and the latest interval adds no new path and no Edit/Write, do not treat hidden Bash edits, on-brief re-reads, post-compaction recovery, or empty excerpts as a veto. Mark `runaway` and `low_progress`. The first labeled turn has no delta and is not a frozen interval. The first checkpoint whose delta is frozen (no new path, no Edit or Write) stays `not_yet`. `checkout` starts on the next labeled turn when that turn's delta is frozen too. Stay at `not_yet` when the tail names a checkable step, a new path appears, assistant text has grown, or the worker is waiting on a named job that reports milestones and the histogram already has Write or Edit. Turn count, peak, and compaction count stay insufficient alone.
+**(a)** (adopt `A_maj` / `A_gc`) stays **not chosen** — same as before (b): fit on n = 1 positive worker, and stop rule 1 forbids adoption after (b)’s fail.
+
+### Corpus expansion (step 1)
+
+Build commit-safe **hybrid_v0** packs (`N=8`, excerpt 400) for **at least two** additional open-pajero-maps workers with **T ≥ 75**, same schedule **`75:15`**, using [`proofs/build_gold_judge_packs.py`](proofs/build_gold_judge_packs.py) against gitignored ubuntu-raw gold-bundles (or mounted transcripts). Redacted fixtures already in repo:
+
+| short_id | T | Fixture (redacted) | Priority |
+|----------|--:|--------------------|----------|
+| `0aab88c525de` | 192 | [`maps-5h-workers/0aab88c525de.jsonl`](../../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/0aab88c525de.jsonl) | **P1** |
+| `036ff3ed4a89` | 161 | [`maps-5h-workers/036ff3ed4a89.jsonl`](../../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/036ff3ed4a89.jsonl) | **P1** |
+| `0853bc21d3aa` | 155 | redact from Ubuntu when present (not in fixtures manifest yet) | optional third |
+
+Keep existing P0 packs under [`proofs/validated/gold/packs/`](proofs/validated/gold/packs/). Emit per-worker `*-judge-packs-*.jsonl` plus an updated combined manifest in `packs/` (new date stamp). Document checkpoint counts per worker in a short `packs/README` addendum.
+
+**Blocked:** if ubuntu-raw gold-bundles are absent for a chosen worker, record **blocked** for that worker; do not substitute unredacted paths in cloud seats.
+
+### Panel (step 2)
+
+1. **Rubric:** [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) **original** text only — **omit** the “Draft delta — not in force” section and any `parent-pull-v1` wording.
+2. **Seats:** same three as P0 — Sonnet 5.5 (`reviewer_final` chain or independent seat), Composer 2.5, Grok 4.7 high — each row from hybrid_v0 packs only ([`packs/README.md`](proofs/validated/gold/packs/README.md)).
+3. **Schedule:** `first_at=75`, `interval=15` on every expanded worker; retain the 21 P0 rows in the pooled agreement file (do not overwrite signed P0 Sonnet JSONL with (b) relabel rows).
+4. **Metrics:** recompute **A0**, pairwise κ, and pooled nominal α on the **enlarged** 3×N table. H5 floor remains **α ≥ 0.40** on the pooled panel.
+5. **Explicit non-goals:** no `--call-jev`; no stats-gate sweep; no hook or plugin edits; do not adopt **A_maj** / **A_gc** unless pre-registered in a separate decision.
+
+### Success sketch (pre-registration light)
+
+| Gate | Criterion |
+|------|-----------|
+| Corpus | ≥ **2** new workers with full `75:15` pack rows committed under `packs/` |
+| Panel | Three independent seats on all new checkpoints |
+| H5 | Pooled α **≥ 0.40** on the combined P0 + new workers |
+| Gold rule | Report **A0** per worker; unanimous exit may still be null on some workers |
+
+Failure to clear α after expansion does **not** authorize a return to `parent-pull-v1` without a new explicit experiment. Confidence stays **not high** until (c) completes and is read against [`HYPOTHESIS.md`](HYPOTHESIS.md).
+
+### Stop rules (c)
+
+1. **Under-corpus.** Fewer than two new workers labeled → status **blocked**, not a rubric pass/fail.
+2. **Rubric leak.** Any seat prompt includes the parent-pull draft, other seats’ labels, or target turns → discard that worker’s panel and re-run.
+3. **No Jev.** Do not interpret H1–H4 / H6–H7 from Jev dry-run or live cache until H5 clears on the enlarged gold table.
+4. **(b) rows.** Never promote `p0-checkout-verdicts-sonnet-relabel-*.jsonl` to gold.
