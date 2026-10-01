@@ -1,0 +1,81 @@
+{
+  "seat": "sonnet-relabel",
+  "model": "claude-sonnet-5-5",
+  "rubric_rev": "parent-pull-v1",
+  "pack_source": "p0-judge-packs-20261001-194107.jsonl",
+  "n_rows": 21,
+  "signed": true,
+  "input_note": "Fresh Sonnet 5.5 judgments from hybrid_v0 packs only (same input as Grok/Composer). Draft parent-pull delta treated as in force. Did not overwrite p0-checkout-verdicts-20261001.jsonl.",
+  "scorecard": {
+    "pass": false,
+    "rule1_required_checkout_180_195_210": {
+      "pass": true,
+      "checkout_recommended": {
+        "180": true,
+        "195": true,
+        "210": true
+      }
+    },
+    "rule2_holdout_13_zero_checkout": {
+      "pass": false,
+      "holdout_checkout_count": 1,
+      "holdout_checkout_cps": [
+        "92a48e004519@255"
+      ],
+      "per_cp_checkout_recommended": {
+        "92a48e004519@75": false,
+        "92a48e004519@90": false,
+        "92a48e004519@225": false,
+        "92a48e004519@240": false,
+        "92a48e004519@255": true,
+        "92a48e004519@270": false,
+        "92a48e004519@285": false,
+        "bb6165018de0@75": false,
+        "bb6165018de0@90": false,
+        "bb6165018de0@105": false,
+        "bb6165018de0@120": false,
+        "bb6165018de0@135": false,
+        "bb6165018de0@150": false
+      }
+    },
+    "reported_grok_only_105_165": {
+      "sonnet_checkout_count": 5,
+      "per_cp": {
+        "105": true,
+        "120": true,
+        "135": true,
+        "150": true,
+        "165": true
+      },
+      "note": "Does not pass/fail on its own"
+    },
+    "stop_rule": "over-fire"
+  },
+  "earliest_checkout_turn": {
+    "92a48e004519": 105,
+    "bb6165018de0": null
+  },
+  "checkout_turns": {
+    "92a48e004519": [
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      255
+    ],
+    "bb6165018de0": []
+  },
+  "checkout_count_total": 9,
+  "panel_recompute_hint_for_WSM": {
+    "krippendorff_alpha_nominal_3x21_with_this_sonnet_seat": 0.5674,
+    "cohen_kappa_sonnet_relabel_vs_composer": 0.3636,
+    "cohen_kappa_sonnet_relabel_vs_grok": 0.9014,
+    "note": "\u03b1 floor in NEXT-EXPERIMENTS is 0.40; user pass scorecard rules 1\u20132 only. WSM owns formal \u03b1 recompute."
+  },
+  "claude_failures": [],
+  "one_retry_note": "92a48e004519@105 first response failed local validation (rationale 146 words); second attempt accepted."
+}
