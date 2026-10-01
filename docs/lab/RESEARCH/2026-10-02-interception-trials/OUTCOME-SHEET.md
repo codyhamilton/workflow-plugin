@@ -123,11 +123,18 @@ When `ideal_steer_window` is `none` or `ambiguous`, or `label_status≠labeled`,
 | R3 T-independent schedule | Fixed `(45, 60, 75, 90, 105, 120)` + at-risk reporting (`METERS.md`) |
 | R2 outcome sheet **protocol** | **Landed** (this file) |
 | `outcome-labels.jsonl` | **Landed** — 20/20 labeled (`chm-sol-adjudication`); **PROVISIONAL** join in [`../2026-10-02-interception-steer-to-stop/ANALYSIS.md`](../2026-10-02-interception-steer-to-stop/ANALYSIS.md); Soft HOLD |
+| TypeSafe lever-wave join | **Landed** — 5420/5420 committed rows and 67/67 unique session-checkpoint keys exact; [`batch-002/typesafe-outcome-join/COVERAGE.md`](batch-002/typesafe-outcome-join/COVERAGE.md); Soft HOLD, not a scoreboard |
 | `results.jsonl` | All cells: `window_status=unidentified`, `outcome_tag=null` |
-| FP/miss scoreboard | **Not claimed** — meters diagnostic until labels exist |
+| FP/miss scoreboard | **Not claimed** — join coverage is not independent-trial aggregation or product evidence |
 
 ---
 
 ## Explicit non-authorization
 
-This sheet **does not** unlock Soft Standard, TypeSafe, hooks, or live Jev. Favorable future FP/miss numbers **do not** release any hold. batch-002 is **not** score-ready for FP/miss until human labels are published and joined under this schema.
+This sheet **does not** unlock Soft Standard, TypeSafe, hooks, or live Jev.
+Favorable future FP/miss numbers **do not** release any hold. Human labels and
+the committed TypeSafe lever-row join now exist, but that establishes
+mechanical coverage only. It does not resolve independent-trial aggregation,
+meter-only waves, adjudication/versioning, or the other gates in
+[`WINDOW-STATUS-JOIN.md`](../2026-10-02-interception-steer-to-stop/WINDOW-STATUS-JOIN.md);
+batch-002 remains **not score-ready** for an FP/miss board.
