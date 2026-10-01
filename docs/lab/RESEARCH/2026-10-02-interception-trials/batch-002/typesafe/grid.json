@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-10-02 01:38:48 AEST",
+  "driver": "typesafe",
+  "model": "jev-1.13.0",
+  "n_cells": 180,
+  "framings": [
+    "H1"
+  ],
+  "soft_standard_hold": true,
+  "adaptation_note": "Adapted Flash batch-002 runner: one System One POST per cell; response-class mapped to choice/score questions; same R1\u2013R3 state projection."
+}

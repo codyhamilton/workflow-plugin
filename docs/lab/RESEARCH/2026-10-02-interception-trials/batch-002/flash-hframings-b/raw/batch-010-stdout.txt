@@ -1,0 +1,10 @@
+[{"cell_id":"c3d16d9dc32791eb","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Monotonic 75/75 Bash, zero reads, near-zero text, four compactions: runaway loop."},
+{"cell_id":"71e95a04751ba2e8","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Varied tools, writes, user questions, high text output: productive development."},
+{"cell_id":"157e58049388d694","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Reads, edits, writes present with progress signals: still productive."},
+{"cell_id":"4e2096208f6fcfa0","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Mixed agent/bash/SendMessage work with low compactions: active, not thrashing."},
+{"cell_id":"d68189abd00dcd58","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Many edits, writes, distinct reads: clear productive development."},
+{"cell_id":"3250d37a60c07e96","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"High reads and edits despite bash; reread only 3x: productive."},
+{"cell_id":"83493bf8535aa916","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Balanced tools with edits, messaging, monitoring: healthy progress."},
+{"cell_id":"5ef96d927c2e0ea2","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Bash-heavy but agent use and substantial text suggest active execution work."},
+{"cell_id":"921ad43a5667b51b","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Agent-dominant orchestration with high text: coordinating, not looping."},
+{"cell_id":"d15b8b8759f1c275","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Agents plus skills with high text output: productive delegation, not thrash."}]

@@ -1,0 +1,130 @@
+{
+  "generated_at": "2026-10-02 01:46:04 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0-scale",
+  "driver": "flash",
+  "capture_dir": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/flash-scale",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "soft_standard_hold": true,
+  "typesafe_used": false,
+  "hooks_unlock": false,
+  "n_variants": 2400,
+  "parse_miss_cells": 2150,
+  "error_count": 0,
+  "fire_count": 96,
+  "rating_hist": {
+    "3": 38,
+    "1": 92,
+    "2": 56,
+    "0": 55
+  },
+  "harness_cell_counts": {
+    "claude-code": 1555,
+    "opencode": 691,
+    "cursor": 55,
+    "codex": 99
+  },
+  "framing_counts": {
+    "H1": 1095,
+    "H2": 876,
+    "H3": 429
+  },
+  "state_variant_counts": {
+    "stats_only": 876,
+    "hybrid_v0": 867,
+    "stats_plus_delta": 438,
+    "compact_focus": 219
+  },
+  "dense_schedule": [
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120
+  ],
+  "fire_rate_among_at_risk_cells": {
+    "45": {
+      "n": 62,
+      "fire_rate": 0.2258
+    },
+    "50": {
+      "n": 28,
+      "fire_rate": 0.2857
+    },
+    "55": {
+      "n": 25,
+      "fire_rate": 0.56
+    },
+    "60": {
+      "n": 18,
+      "fire_rate": 0.3889
+    },
+    "65": {
+      "n": 16,
+      "fire_rate": 0.25
+    },
+    "70": {
+      "n": 13,
+      "fire_rate": 0.5385
+    },
+    "75": {
+      "n": 13,
+      "fire_rate": 0.3077
+    },
+    "80": {
+      "n": 13,
+      "fire_rate": 0.4615
+    },
+    "85": {
+      "n": 10,
+      "fire_rate": 0.4
+    },
+    "90": {
+      "n": 8,
+      "fire_rate": 0.375
+    },
+    "95": {
+      "n": 8,
+      "fire_rate": 0.625
+    },
+    "100": {
+      "n": 8,
+      "fire_rate": 0.5
+    },
+    "105": {
+      "n": 8,
+      "fire_rate": 0.75
+    },
+    "110": {
+      "n": 8,
+      "fire_rate": 0.375
+    },
+    "115": {
+      "n": 6,
+      "fire_rate": 0.6667
+    },
+    "120": {
+      "n": 6,
+      "fire_rate": 0.5
+    }
+  },
+  "prompt_leak_spotcheck_hits": [],
+  "cell_id_salt": "b002s",
+  "partial": true,
+  "batches_done": 25,
+  "n_batches": 240,
+  "wall_s_so_far": 186.2,
+  "model": "deepseek/deepseek-flash"
+}

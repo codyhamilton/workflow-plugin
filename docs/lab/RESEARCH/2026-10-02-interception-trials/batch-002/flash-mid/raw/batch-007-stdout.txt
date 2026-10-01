@@ -1,0 +1,10 @@
+[{"cell_id":"aa5780abad36ea1c","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"a2eea6c91cb146fb","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"233618b861b4a781","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"e53fd443df577b50","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"3b91d8020381c82f","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"7ce51a42d4a27c48","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"40e782a4d6fda593","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"e8e5c3d30cc525c7","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Stats-only, no thrash signal; defer-and-recheck."},
+{"cell_id":"37fa138e54b29488","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Prefix-only stats, no excess indicator; defer-and-recheck."},
+{"cell_id":"022abf9b055e6955","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Prefix-only stats, no excess indicator; defer-and-recheck."}]

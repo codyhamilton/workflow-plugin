@@ -7,6 +7,7 @@ Reading guide and next waves (TypeSafe included, no behaviour greenlight): [`../
 | Batch | Wave | Status | n_sessions | n_variants | Notes |
 |-------|------|--------|------------|------------|-------|
 | batch-001 | Wave-0 attempt | **plumbing-only; contaminated (T leak)** | see batch dir | see batch dir | Opus R1–R3 BLOCK. Not score-ready. See `batch-001/LEAKAGE-NOTE.md`. |
+| batch-002-multidriver | Wave-0-multi | TypeSafe+Flash+Luna lever diagnostics (FP/miss board deferred) | ~20 | 2500+ TypeSafe-k1 / ~5k+ cum live | Soft HOLD. R1–R3. No invented outcome labels. |
 | batch-002 | Wave-0 | score-ready-path diagnostics (FP/miss board deferred; windows unidentified) | 22 | 240 | R1–R3 decontaminated. leak_hits=0. |
 
 ## Deferred (post batch-002)
@@ -25,3 +26,7 @@ Reading guide and next waves (TypeSafe included, no behaviour greenlight): [`../
 ## Batch notes
 - `batch-002/archive-t45-only/`: discarded first decontam run that only sampled checkpoint 45 (allocation bug); not evidence.
 - Current `batch-002/` results = schedule-breadth re-run (v2).
+
+## Flash/Luna streaming expand (2026-10-02 01:45 AEST)
+
+Soft HOLD. Complementary to sibling TypeSafe bulk. Captures: `luna-b/` (180 done), `flash-hframings-b/` (in flight), `flash-scale/`+`luna-scale/` (2400+960 dense/trim axes), `flash-mid/`+`luna-mid/` (T≥30 expand). See `batch-002/CUMULATIVE-STREAM.md`. No hooks unlock.

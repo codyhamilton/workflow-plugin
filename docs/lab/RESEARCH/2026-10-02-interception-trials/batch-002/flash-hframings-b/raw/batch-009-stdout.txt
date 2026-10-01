@@ -1,0 +1,10 @@
+[{"cell_id":"f6be02e52ac7826d","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Meta-coordination churn; zero reads/edits, ListAgents/ScheduleWakeup/SendMessage loops, no artifacts."},
+{"cell_id":"d46c4bd74c885b1d","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Edits, writes, reads present; productive development, defer to preserve closing work."},
+{"cell_id":"146ee5a48ca1a583","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Reads and edits ongoing; productive despite compactions, defer."},
+{"cell_id":"d4f243b6b95547e1","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Edits and reads with agent support; likely productive development, defer."},
+{"cell_id":"fc838a84d1abe385","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"46 Bash calls, zero reads/edits/artifacts, largest prefix; runaway thrash."},
+{"cell_id":"cb4ef07490cb56f7","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"19 agents plus TaskStop, zero file artifacts; delegation churn, fire."},
+{"cell_id":"8acc6c95df47f32d","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"27 Bash plus 11 agents, no reads/edits; high-volume thrash without progress."},
+{"cell_id":"fc46952aa653472b","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite checkpoint index, no state fields; insufficient evidence, defer."},
+{"cell_id":"17ba0aae7ef8e294","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite checkpoint index, no state fields; insufficient evidence, defer."},
+{"cell_id":"cc1d7f66068b5a2b","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Prefix-only lite state, no turn or artifact data; insufficient evidence, defer."}]

@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-10-02 01:45:50 AEST",
+  "driver": "flash",
+  "capture_tag": "flash-b",
+  "model": "deepseek/deepseek-flash",
+  "n_cells": 360,
+  "n_batches": 36,
+  "framings": [
+    "H1",
+    "H2"
+  ],
+  "cell_id_salt": "b002b",
+  "soft_standard_hold": true,
+  "sibling_dirs_untouched": [
+    "typesafe",
+    "flash-hframings",
+    "luna"
+  ]
+}

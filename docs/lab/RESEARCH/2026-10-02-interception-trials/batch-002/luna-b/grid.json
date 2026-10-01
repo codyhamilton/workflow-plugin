@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-10-02 01:42:52 AEST",
+  "driver": "luna",
+  "capture_tag": "luna-b",
+  "model": "gpt-6-luna",
+  "n_cells": 180,
+  "n_batches": 30,
+  "framings": [
+    "H1"
+  ],
+  "cell_id_salt": "b002b",
+  "soft_standard_hold": true,
+  "luna_flags": [
+    "--skip-git-repo-check",
+    "cwd=/home/codyh/workspace/workflow-plugin"
+  ],
+  "sibling_dirs_untouched": [
+    "typesafe",
+    "flash-hframings",
+    "luna"
+  ]
+}

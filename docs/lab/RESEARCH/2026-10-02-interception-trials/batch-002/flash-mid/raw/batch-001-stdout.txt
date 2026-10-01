@@ -1,0 +1,10 @@
+[{"cell_id":"55d49e82d1abb284","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Bash-heavy but agent delegation and writes show progress; low thrash."},
+{"cell_id":"ca898fb5b767d6de","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Four compactions and 1.47MB prefix signal severe context churn; runaway likely."},
+{"cell_id":"16c1c4382f5d7c86","label":"2","rating":2,"fire":true,"fire_offset_turns":0,"rationale":"26 Bash with minimal reads and tiny text output suggests repetitive churn."},
+{"cell_id":"5347594301cb0771","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"23 Bash but writes and skill present; some churn with progress signs."},
+{"cell_id":"4f48e6c9df9d2413","label":"1","rating":1,"fire":false,"fire_offset_turns":0,"rationale":"Balanced edits, reads and writes indicate productive development, not thrash."},
+{"cell_id":"85dcb293502e18f2","label":"3","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"28 Bash, 166k ctx, two compactions, minimal reads; clear runaway thrash."},
+{"cell_id":"26c833ef5dba4a6e","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite snapshot lacks state; insufficient evidence to judge continuation."},
+{"cell_id":"7c59d9742ec4fca5","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite snapshot lacks state; insufficient evidence to judge continuation."},
+{"cell_id":"599a527a1d281f7d","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite snapshot lacks state; insufficient evidence to judge continuation."},
+{"cell_id":"e21a7d469aab8cac","label":"0","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Lite snapshot lacks state; insufficient evidence to judge continuation."}]

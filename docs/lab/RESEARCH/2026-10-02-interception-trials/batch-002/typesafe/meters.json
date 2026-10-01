@@ -1,0 +1,79 @@
+{
+  "generated_at": "2026-10-02 01:38:48 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0-multi",
+  "driver": "typesafe",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "reason_fp_miss_board_false": "window_status=unidentified; do not invent outcome labels; join later via OUTCOME-SHEET",
+  "protocol_fixes": [
+    "R1_no_T_in_prompt_or_state",
+    "R2_non_length_outcome_sheet",
+    "R3_fixed_schedule_hazard"
+  ],
+  "soft_standard_hold": true,
+  "hooks_unlock": false,
+  "product_unlock": false,
+  "n_cells": 180,
+  "parse_miss_cells": 0,
+  "error_count": 0,
+  "fire_count": 0,
+  "rating_hist": {
+    "0": 170,
+    "1": 10
+  },
+  "harness_cell_counts": {
+    "claude-code": 138,
+    "opencode": 27,
+    "cursor": 9,
+    "codex": 6
+  },
+  "framing_cell_counts": {
+    "H1": 180
+  },
+  "fixed_schedule": [
+    45,
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "fire_rate_among_at_risk_cells": {
+    "45": {
+      "n": 60,
+      "fire_rate": 0.0
+    },
+    "60": {
+      "n": 39,
+      "fire_rate": 0.0
+    },
+    "75": {
+      "n": 36,
+      "fire_rate": 0.0
+    },
+    "90": {
+      "n": 17,
+      "fire_rate": 0.0
+    },
+    "105": {
+      "n": 16,
+      "fire_rate": 0.0
+    },
+    "120": {
+      "n": 12,
+      "fire_rate": 0.0
+    }
+  },
+  "prompt_leak_spotcheck_hits": [],
+  "usage_tokens_rough": {
+    "input_tokens": 125854,
+    "output_tokens": 6878,
+    "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+  },
+  "wall_s": 8.3,
+  "typesafe_ok": 180,
+  "typesafe_errors_sample": [],
+  "api_url": "https://api.typesafe.ai/v1/systemone",
+  "model": "jev-1.13.0"
+}

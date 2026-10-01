@@ -1,0 +1,8 @@
+[
+  {"cell_id":"294402cde7768c7e","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Active documentation work is progressing; known source conflicts are explicitly tracked for follow-up."},
+  {"cell_id":"ab03c3b4f92bb01b","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Agents are advancing implementation and verification; the stalled worker was replaced with a fresh one."},
+  {"cell_id":"e92a9d8688b9dca8","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Tests pass and the work is at a concrete push/closing step."},
+  {"cell_id":"c089e0153e778174","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"A brief is implemented and being recorded; verification is still underway."},
+  {"cell_id":"fb27cd02bac2209e","label":"defer","rating":0,"fire":false,"fire_offset_turns":0,"rationale":"Units continue landing with test and plan updates; no current sign of runaway thrash."},
+  {"cell_id":"5559d7660df903f9","label":"fire","rating":3,"fire":true,"fire_offset_turns":0,"rationale":"Several turns revisit the same logging interpretation after correction, suggesting unproductive analytical thrash."}
+]

@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-10-02 01:41:10 AEST",
+  "driver": "flash",
+  "model": "deepseek/deepseek-flash",
+  "n_cells": 240,
+  "n_batches": 24,
+  "framings": [
+    "H1"
+  ],
+  "soft_standard_hold": true
+}
