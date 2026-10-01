@@ -119,3 +119,19 @@ Best-available ca977-shaped shortlist after empty strict pool (no Edit/Write ∧
 | `a318f4b89a6a` | 95 | 2 | `a318f4b89a6a-judge-packs-20261001-210125.jsonl` |
 
 Combined: `thrash-expand-e-judge-packs-20261001-210125.jsonl` (5 rows). Ranking: `SUMMARY-thrash-expand-e-20261001-210125.md`.
+
+## Shape-signal panel (v1) — `shape-signal-panel-v1` (`20261001-212524`)
+
+Phase 1: docs + packs only. **Panel held.** Gold protocol supersedes unanimous A0 / ≥2 A0 gate (see research [`TERMS.md`](../../../../TERMS.md) §11 and [`NEXT-EXPERIMENTS.md`](../../../../NEXT-EXPERIMENTS.md)). All shortlist packs **reused** (no new build).
+
+| Worker | T | Cps | Source pack |
+|--------|--:|----:|-------------|
+| `92a48e004519` | 296 | 15 | `92a48e004519-judge-packs-20261001-194107.jsonl` |
+| `ca977b9ca0dd` | 109 | 3 | `ca977b9ca0dd-judge-packs-20261001-204508.jsonl` |
+| `bb6165018de0` | 154 | 6 | `bb6165018de0-judge-packs-20261001-194107.jsonl` |
+| `0aab88c525de` | 192 | 8 | `0aab88c525de-judge-packs-20261001-202909.jsonl` |
+| `036ff3ed4a89` | 161 | 6 | `036ff3ed4a89-judge-packs-20261001-202909.jsonl` |
+| `7b00225cb824` | 137 | 5 | `7b00225cb824-judge-packs-20261001-204508.jsonl` |
+| `5163c22a6a3e` | 90 | 2 | `5163c22a6a3e-judge-packs-20261001-210125.jsonl` |
+
+Combined: `shape-signal-judge-packs-20261001-212524.jsonl` (45 rows). Ranking: `SUMMARY-shape-signal-20261001-212524.md`. Leak-scan PASS. No `--call-jev`.
