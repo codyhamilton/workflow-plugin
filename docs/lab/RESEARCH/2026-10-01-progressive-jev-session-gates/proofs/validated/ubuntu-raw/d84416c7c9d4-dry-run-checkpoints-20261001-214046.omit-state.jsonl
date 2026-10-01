@@ -1,0 +1,1 @@
+{"worker_id": "d84416c7c9d4", "checkpoint_turn": 75, "snapshot_mode": "hybrid_v0", "snapshot_params": {"N": 8, "excerpt": 400}, "question_set": "Y_full", "shrink_steps": [], "state_chars": 1630, "request_chars": 3679, "gold_bundle_chars": 3778, "gold_bundle_status": "ok", "decision": "missing", "fires": false, "reason": "dry_run", "ungrounded_choice": false, "answers": null}

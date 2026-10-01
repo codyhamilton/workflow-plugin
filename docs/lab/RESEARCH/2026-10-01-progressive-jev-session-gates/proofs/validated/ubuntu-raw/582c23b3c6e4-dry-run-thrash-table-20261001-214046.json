@@ -1,0 +1,22 @@
+[
+  {
+    "worker_id": "582c23b3c6e4",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 146904,
+    "tool_histogram": {
+      "Bash": 77
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 0,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 7456,
+    "delta_since_prior": {},
+    "state_chars": 1792,
+    "gold_bundle_chars": 3089,
+    "gold_bundle_status": "ok"
+  }
+]

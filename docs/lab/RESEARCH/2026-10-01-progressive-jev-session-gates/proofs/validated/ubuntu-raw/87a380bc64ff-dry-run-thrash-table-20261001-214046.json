@@ -1,0 +1,34 @@
+[
+  {
+    "worker_id": "87a380bc64ff",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 105811,
+    "tool_histogram": {
+      "Bash": 56,
+      "Read": 9,
+      "Monitor": 6,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/build_alldata.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/kiwiw/overlap.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 4,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 2284,
+    "delta_since_prior": {},
+    "state_chars": 1855,
+    "gold_bundle_chars": 3823,
+    "gold_bundle_status": "ok"
+  }
+]

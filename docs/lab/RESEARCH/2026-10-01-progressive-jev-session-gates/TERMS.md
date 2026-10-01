@@ -1,6 +1,6 @@
 # Terms — progressive Jev session gates
 
-**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 for `shape-signal-panel-v1`; §§12–13 WSM progressive revalidation + validation-phase handoff (Cody design fold 2026-10-01).
+**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 for `shape-signal-panel-v1`; §§12–13 WSM progressive revalidation + validation-phase handoff (Cody design fold 2026-10-01); §14 for `shape-qual-full-maps-v1` (full T≥75 Maps qual + early-signal ≤~120T).
 
 These terms are the contract for [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md), [`TUNING-PLAN.md`](TUNING-PLAN.md), and [`proofs/README.md`](proofs/README.md). If a later harness uses a different meaning, it is a different study.
 
@@ -403,7 +403,7 @@ Added 2026-10-01 for experiment **`shape-signal-panel-v1`**. These terms do **no
 |------|------------|
 | `late_pivot` | Session shape: the worker shows usable progress for a long stretch, then a clear change of fortune (stall, thrash, drift, or brief abandonment) after which continuing is a mistake. The recommended exit is near that **pivot**, not at the first minor wobble. |
 | `early_thrash` | Session shape: repeated thrash, low progress, or runaway wait/poll is already the dominant pattern **early** (often by the first or second `75:15` checkpoint). Extending the run does not recover a productive trajectory. |
-| `early_signal` | A concrete, **turn-anchored** observation in `prefix(c)` (tool histogram skew, re-read loop, compaction surge, sleep/poll burst, brief abandonment in the tail, frozen progress) that foreshadows the eventual shape/outcome. Must cite turns ≤ `c` present in the judge pack. |
+| `early_signal` | A concrete, **turn-anchored** observation in `prefix(c)` (tool histogram skew, re-read loop, compaction surge, sleep/poll burst, brief abandonment in the tail, frozen progress) that foreshadows the eventual shape/outcome. Must cite turns ≤ `c` present in the judge pack. **Hard window (Cody / WSM):** predictive `early_signals` MUST fall in the **first ~120 turns**. Anything later is **outcome**, not early foreshadowing — do not credit mid/late-run symptoms as early signals (see §14). |
 | `inflection` | A turn **range** (e.g. 120–150) where the trajectory’s character changes: what was true before the range is no longer true after. Seats name the range **and** what changed (not only a single turn number). |
 | `recommended_exit` | The seat’s best checkout turn under the shape rule: for `late_pivot`, near the pivot; for `early_thrash`, at the **first clear thrash** checkpoint where continuing is already a mistake. May differ across models; spread is secondary. |
 | `earliness` | How early `recommended_exit` is relative to an ideal: for `late_pivot`, distance before/after the pivot; for `early_thrash`, distance after the first clear thrash. Report qualitatively (too early / on time / too late) with turn anchors when possible. |
@@ -415,7 +415,7 @@ Each seat, given hybrid_v0 packs for a worker, answers:
 1. **Shape:** `late_pivot` or `early_thrash` (or `unclear` with why).
 2. **Why T is large:** what kept the transcript long (productive work, thrash, wait/poll, census, compaction churn, …), turn-anchored.
 3. **Inflection points:** turn ranges + what changed.
-4. **Early signals:** concrete foreshadowing of the outcome, turn-anchored, only from evidence ≤ each cited checkpoint.
+4. **Early signals:** concrete foreshadowing of the outcome, turn-anchored, only from evidence ≤ each cited checkpoint **and ≤ ~120T** (later symptoms are outcome, not early).
 5. **Recommended exit + earliness:** exit turn under the shape rule above, and earliness vs ideal.
 
 Do not require three seats to name the same exit turn. Prefer agreement notes on (1), (3), and (4).
@@ -449,6 +449,33 @@ At **progressive validation checks** — nominally ~**50**, **60**, and **75** `
 | **Already** in validation | Use §12 **leap** / **accumulate** and the decaying bar. Do **not** invent a third hard-exit without replay evidence. |
 
 The 50/60/75 anchors are for **phase detection and steer** only. They do not replace `session-checkout` gold labels or the P0 `(75, 15)` grid until measured separately. Paired hold: [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) **`validation-handoff-steer-v1`**.
+
+
+## 14. Full Maps qualitative shape (`shape-qual-full-maps-v1`)
+
+Added 2026-10-01 for experiment **`shape-qual-full-maps-v1`**. Expands qualitative shape labeling from the 7-worker `shape-signal-panel-v1` shortlist to **ALL** open-pajero-maps Claude workers with **T ≥ 75** (inventory **n = 34**; no excludes for already labeled). Vocabulary in §11 still applies; this section adds the full-corpus seat contract and the early-signal window.
+
+**Early-signal hard window (Cody / WSM constraint):**
+
+| Rule | Detail |
+|------|--------|
+| Window | `early_signals` MUST be evidenced in the **first ~120 turns** (`api_turn` ≤ ~120) |
+| Later | Observations after ~120T are **outcome / mid-late symptoms**, not predictive early foreshadowing |
+| Pack note | Judge packs may include checkpoints past 120 (schedule `75:15` through T). Seats may describe phases and narrative shape across the full prefix, but **must not** list post-~120 symptoms under `early_signals` |
+
+**Per-seat questions (qualitative — supersede shortlist-only prompts for this experiment):**
+
+1. **Narrative shape:** How the run looked (free prose + optional §11 labels `late_pivot` / `early_thrash` / `unclear`).
+2. **Phases contained:** Ordered phases (e.g. productive build → validation pivot; early thrash; wait/implement; census; sleep/poll). Turn-anchor each phase.
+3. **Early signals (≤ ~120T):** Turn-anchored foreshadowing of how it played out; **only** evidence from turns ≤ ~120. Do not credit mid/late-run symptoms as early.
+
+**Secondary (report, not optimize / not hard fail):** recommended exit turn and earliness. Do **not** optimize for `A0` or exit-turn agreement.
+
+**Agreement weights:** shared **early signals (≤~120)** + **phases / narrative shape** first ≫ exact exit turn.
+
+**Seats:** Composer / Sonnet / Grok. **No** `--call-jev`. Hold Jev behaviour ship.
+
+**Pack schema note:** hybrid_v0 (`N=8`, excerpt 400) omit-state safe packs under [`proofs/validated/gold/packs/`](proofs/validated/gold/packs/). Combined inventory [`INVENTORY-shape-qual-full-maps-v1-20261001-214046.json`](proofs/validated/gold/packs/INVENTORY-shape-qual-full-maps-v1-20261001-214046.json). Reuse prior packs where present; gap packs from run `20261001-214046`. `pack_meta.early_signal_window` on combined rows restates the ≤~120 rule for seat scaffolding.
 
 ## 10. Out of scope for these terms
 

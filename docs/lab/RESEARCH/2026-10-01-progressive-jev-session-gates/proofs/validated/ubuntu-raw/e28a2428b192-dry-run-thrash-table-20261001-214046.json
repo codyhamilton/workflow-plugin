@@ -1,0 +1,49 @@
+[
+  {
+    "worker_id": "e28a2428b192",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 144331,
+    "tool_histogram": {
+      "Bash": 75,
+      "Write": 2
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 0,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 0,
+    "delta_since_prior": {},
+    "state_chars": 1405,
+    "gold_bundle_chars": 2391,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "e28a2428b192",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 146620,
+    "tool_histogram": {
+      "Bash": 90,
+      "Write": 2
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 0,
+    "compaction_event_count": 4,
+    "assistant_text_chars": 101,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 15
+      }
+    },
+    "state_chars": 1517,
+    "gold_bundle_chars": 2494,
+    "gold_bundle_status": "ok"
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "worker_id": "0677f597286e",
+  "agent_id": "a72320677f597286e",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/af9b5cb1-edc5-4155-b521-a56bad1c7f13/subagents/agent-a72320677f597286e.jsonl",
+  "sha256": "7fb375b5fe34a3f0d6adc71993acf67832c15e08f8bb7248652f5fcdf1b6c24a",
+  "bytes": 1435200,
+  "T": 93,
+  "tool_assistant_turns": 90,
+  "peak_ctx_tokens": 126023,
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "checkpoints": [
+    75,
+    90
+  ],
+  "n_checkpoints": 2,
+  "dry_run": true,
+  "schema_budget_p0": {
+    "snapshot_mode": "hybrid_v0",
+    "n_checkpoints": 2,
+    "state_chars_max": 2495,
+    "state_chars_median": 2390.0,
+    "n_over_budget": 0,
+    "gold_bundle_chars_max": 5222
+  }
+}

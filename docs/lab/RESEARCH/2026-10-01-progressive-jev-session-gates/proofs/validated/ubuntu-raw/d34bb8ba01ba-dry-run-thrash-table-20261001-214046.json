@@ -1,0 +1,133 @@
+[
+  {
+    "worker_id": "d34bb8ba01ba",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 145729,
+    "tool_histogram": {
+      "Bash": 34,
+      "Read": 22,
+      "Edit": 18,
+      "Write": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/harness/walk.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/road_density_census.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/overlay_test.py",
+        "count": 3
+      }
+    ],
+    "distinct_read_paths": 12,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 1748,
+    "delta_since_prior": {},
+    "state_chars": 2150,
+    "gold_bundle_chars": 3754,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "d34bb8ba01ba",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 145729,
+    "tool_histogram": {
+      "Bash": 45,
+      "Read": 24,
+      "Edit": 20,
+      "Write": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/harness/walk.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/overlay_test.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/road_density_census.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 13,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 1748,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/parser/tests/test_harness_walk.py"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 11,
+        "Edit": 2,
+        "Read": 2
+      }
+    },
+    "state_chars": 1866,
+    "gold_bundle_chars": 3250,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "d34bb8ba01ba",
+    "checkpoint_turn": 105,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 105,
+    "peak_ctx_tokens": 145729,
+    "tool_histogram": {
+      "Bash": 53,
+      "Read": 27,
+      "Edit": 20,
+      "Write": 2,
+      "Monitor": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/harness/walk.py",
+        "count": 5
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/overlay_test.py",
+        "count": 4
+      },
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/tools/road_density_census.py",
+        "count": 4
+      }
+    ],
+    "distinct_read_paths": 15,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 2262,
+    "delta_since_prior": {
+      "new_read_paths": [
+        "/home/codyh/workspace/open-pajero-maps/parser/tests/test_harness_core.py",
+        "/home/codyh/workspace/open-pajero-maps/parser/tests/test_road_density_census.py"
+      ],
+      "tool_histogram_delta": {
+        "Bash": 8,
+        "Read": 3,
+        "Monitor": 1,
+        "ToolSearch": 1,
+        "Write": 1
+      }
+    },
+    "state_chars": 2267,
+    "gold_bundle_chars": 3257,
+    "gold_bundle_status": "ok"
+  }
+]

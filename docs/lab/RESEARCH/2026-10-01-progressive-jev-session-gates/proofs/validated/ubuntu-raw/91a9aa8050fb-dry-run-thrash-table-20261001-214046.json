@@ -1,0 +1,27 @@
+[
+  {
+    "worker_id": "91a9aa8050fb",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 128661,
+    "tool_histogram": {
+      "Bash": 50,
+      "Read": 12,
+      "Monitor": 5,
+      "Write": 4,
+      "Edit": 3,
+      "ToolSearch": 1
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 10,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 4668,
+    "delta_since_prior": {},
+    "state_chars": 2362,
+    "gold_bundle_chars": 4319,
+    "gold_bundle_status": "ok"
+  }
+]

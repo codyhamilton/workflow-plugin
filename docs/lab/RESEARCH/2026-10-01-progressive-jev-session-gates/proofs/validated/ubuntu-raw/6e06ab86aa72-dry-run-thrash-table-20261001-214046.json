@@ -1,0 +1,113 @@
+[
+  {
+    "worker_id": "6e06ab86aa72",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 116057,
+    "tool_histogram": {
+      "Bash": 70,
+      "Read": 2,
+      "Write": 2,
+      "ToolSearch": 1
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 2,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 3045,
+    "delta_since_prior": {},
+    "state_chars": 1565,
+    "gold_bundle_chars": 3082,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "6e06ab86aa72",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 131081,
+    "tool_histogram": {
+      "Bash": 84,
+      "Read": 2,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 2,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 3599,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 14,
+        "Edit": 1
+      }
+    },
+    "state_chars": 1921,
+    "gold_bundle_chars": 3360,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "6e06ab86aa72",
+    "checkpoint_turn": 105,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 105,
+    "peak_ctx_tokens": 135707,
+    "tool_histogram": {
+      "Bash": 99,
+      "Read": 2,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 2,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 4519,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 15
+      }
+    },
+    "state_chars": 2104,
+    "gold_bundle_chars": 3917,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "6e06ab86aa72",
+    "checkpoint_turn": 120,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 120,
+    "peak_ctx_tokens": 141754,
+    "tool_histogram": {
+      "Bash": 112,
+      "Read": 2,
+      "Write": 2,
+      "Edit": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [],
+    "distinct_read_paths": 2,
+    "compaction_event_count": 0,
+    "assistant_text_chars": 5509,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 13
+      }
+    },
+    "state_chars": 2138,
+    "gold_bundle_chars": 4357,
+    "gold_bundle_status": "ok"
+  }
+]

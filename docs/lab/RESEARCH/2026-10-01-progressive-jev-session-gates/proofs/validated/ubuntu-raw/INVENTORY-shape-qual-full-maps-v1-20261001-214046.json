@@ -1,0 +1,500 @@
+{
+  "experiment": "shape-qual-full-maps-v1",
+  "generated_at_brisbane": "2026-10-01 21:41:33 AEST",
+  "source": "open-pajero-maps Claude subagent JSONLs under ~/.claude/projects/-home-codyh-workspace-open-pajero-maps/",
+  "counting": "unique message.id on type=assistant via turn_index.index_transcript; T\u226575",
+  "n_enum_candidates_Tge75": 34,
+  "n_reuse": 11,
+  "n_gap_filled": 23,
+  "n_total_pack_rows": 104,
+  "schedule": "75:15",
+  "snapshot_mode": "hybrid_v0",
+  "early_signal_constraint": {
+    "rule": "early_signals MUST be in the first ~120 turns",
+    "rationale": "Anything later is outcome, not a predictive signal. Do not credit mid/late-run symptoms as early foreshadowing.",
+    "field": "early_signals",
+    "max_turn_approx": 120
+  },
+  "excludes": [],
+  "note": "Supersedes shape-signal-panel-v1 7-worker shortlist. Includes already-labeled workers. No --call-jev. Seats held.",
+  "workers": [
+    {
+      "rank": 1,
+      "worker_id": "92a48e004519",
+      "T": 296,
+      "n_checkpoints": 15,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255,
+        270,
+        285
+      ],
+      "pack_status": "reuse",
+      "pack_file": "92a48e004519-judge-packs-20261001-194107.jsonl",
+      "prior_wave": "smoking_gun / P0 / shape-signal"
+    },
+    {
+      "rank": 2,
+      "worker_id": "0aab88c525de",
+      "T": 192,
+      "n_checkpoints": 8,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180
+      ],
+      "pack_status": "reuse",
+      "pack_file": "0aab88c525de-judge-packs-20261001-202909.jsonl",
+      "prior_wave": "expansion"
+    },
+    {
+      "rank": 3,
+      "worker_id": "036ff3ed4a89",
+      "T": 161,
+      "n_checkpoints": 6,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ],
+      "pack_status": "reuse",
+      "pack_file": "036ff3ed4a89-judge-packs-20261001-202909.jsonl",
+      "prior_wave": "expansion"
+    },
+    {
+      "rank": 4,
+      "worker_id": "0853bc21d3aa",
+      "T": 155,
+      "n_checkpoints": 6,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ],
+      "pack_status": "reuse",
+      "pack_file": "0853bc21d3aa-judge-packs-20261001-202909.jsonl",
+      "prior_wave": "expansion"
+    },
+    {
+      "rank": 5,
+      "worker_id": "bb6165018de0",
+      "T": 154,
+      "n_checkpoints": 6,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135,
+        150
+      ],
+      "pack_status": "reuse",
+      "pack_file": "bb6165018de0-judge-packs-20261001-194107.jsonl",
+      "prior_wave": "smoking_gun / P0 / shape-signal"
+    },
+    {
+      "rank": 6,
+      "worker_id": "7b00225cb824",
+      "T": 137,
+      "n_checkpoints": 5,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120,
+        135
+      ],
+      "pack_status": "reuse",
+      "pack_file": "7b00225cb824-judge-packs-20261001-204508.jsonl",
+      "prior_wave": "thrash-screen (d)"
+    },
+    {
+      "rank": 7,
+      "worker_id": "89608cc68603",
+      "T": 125,
+      "n_checkpoints": 4,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "89608cc68603-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 8,
+      "worker_id": "6e06ab86aa72",
+      "T": 123,
+      "n_checkpoints": 4,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "6e06ab86aa72-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 9,
+      "worker_id": "daf933273c8f",
+      "T": 122,
+      "n_checkpoints": 4,
+      "checkpoints": [
+        75,
+        90,
+        105,
+        120
+      ],
+      "pack_status": "reuse",
+      "pack_file": "daf933273c8f-judge-packs-20261001-204508.jsonl",
+      "prior_wave": "thrash-screen (d)"
+    },
+    {
+      "rank": 10,
+      "worker_id": "5a152464f6e5",
+      "T": 119,
+      "n_checkpoints": 3,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "5a152464f6e5-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 11,
+      "worker_id": "d34bb8ba01ba",
+      "T": 116,
+      "n_checkpoints": 3,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "d34bb8ba01ba-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 12,
+      "worker_id": "ca977b9ca0dd",
+      "T": 109,
+      "n_checkpoints": 3,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ],
+      "pack_status": "reuse",
+      "pack_file": "ca977b9ca0dd-judge-packs-20261001-204508.jsonl",
+      "prior_wave": "thrash-screen (d) A0 / shape-signal"
+    },
+    {
+      "rank": 13,
+      "worker_id": "52ea24516a6e",
+      "T": 107,
+      "n_checkpoints": 3,
+      "checkpoints": [
+        75,
+        90,
+        105
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "52ea24516a6e-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 14,
+      "worker_id": "e28a2428b192",
+      "T": 102,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "e28a2428b192-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 15,
+      "worker_id": "7c99c180742e",
+      "T": 100,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "7c99c180742e-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 16,
+      "worker_id": "7af2854bba92",
+      "T": 99,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "7af2854bba92-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 17,
+      "worker_id": "8e36f8e80baa",
+      "T": 97,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "8e36f8e80baa-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 18,
+      "worker_id": "79a557b56a6e",
+      "T": 95,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "79a557b56a6e-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 19,
+      "worker_id": "a318f4b89a6a",
+      "T": 95,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "reuse",
+      "pack_file": "a318f4b89a6a-judge-packs-20261001-210125.jsonl",
+      "prior_wave": "thrash-expand (e)"
+    },
+    {
+      "rank": 20,
+      "worker_id": "16a958631580",
+      "T": 94,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "16a958631580-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 21,
+      "worker_id": "de5b76cc68a6",
+      "T": 94,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "de5b76cc68a6-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 22,
+      "worker_id": "0677f597286e",
+      "T": 93,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "0677f597286e-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 23,
+      "worker_id": "15f24c7ba18c",
+      "T": 93,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "15f24c7ba18c-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 24,
+      "worker_id": "9b156dbab5d9",
+      "T": 93,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "9b156dbab5d9-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 25,
+      "worker_id": "a3cc4da7e21c",
+      "T": 91,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "a3cc4da7e21c-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 26,
+      "worker_id": "5163c22a6a3e",
+      "T": 90,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "pack_status": "reuse",
+      "pack_file": "5163c22a6a3e-judge-packs-20261001-210125.jsonl",
+      "prior_wave": "thrash-expand (e) / shape-signal"
+    },
+    {
+      "rank": 27,
+      "worker_id": "87a380bc64ff",
+      "T": 89,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "87a380bc64ff-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack (poll/monitor class)"
+    },
+    {
+      "rank": 28,
+      "worker_id": "91a9aa8050fb",
+      "T": 86,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "91a9aa8050fb-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 29,
+      "worker_id": "07357f196666",
+      "T": 83,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "07357f196666-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 30,
+      "worker_id": "d84416c7c9d4",
+      "T": 81,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "d84416c7c9d4-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 31,
+      "worker_id": "582c23b3c6e4",
+      "T": 77,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "582c23b3c6e4-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 32,
+      "worker_id": "074c8cf22927",
+      "T": 76,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "074c8cf22927-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 33,
+      "worker_id": "9da2f589b11b",
+      "T": 76,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "gap_filled",
+      "pack_file": "9da2f589b11b-judge-packs-20261001-214046.jsonl",
+      "prior_wave": "new pack"
+    },
+    {
+      "rank": 34,
+      "worker_id": "e8aa4f271927",
+      "T": 76,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ],
+      "pack_status": "reuse",
+      "pack_file": "e8aa4f271927-judge-packs-20261001-210125.jsonl",
+      "prior_wave": "thrash-expand (e)"
+    }
+  ]
+}

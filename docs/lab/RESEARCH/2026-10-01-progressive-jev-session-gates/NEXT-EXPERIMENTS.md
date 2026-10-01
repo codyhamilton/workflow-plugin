@@ -303,6 +303,69 @@ Reopen Maps `T≥75` including prior A0-null and shape-miss workers. Prefer **di
 
 ---
 
+## Primary next — experiment **`shape-qual-full-maps-v1`** (packs done; seats held)
+
+**Status:** Phase 1 (inventory + packs + TERMS) **done** (2026-10-01). **Phase 2 seats not launched in the packs PR** — ready-for-seats. Supersedes the 7-worker `shape-signal-panel-v1` shortlist-only pass.
+
+**Goal:** Expand qualitative shape analysis to **ALL** Maps open-pajero-maps Claude workers with **T ≥ 75** (**n = 34** exact), including ones already labeled. Seats answer narrative shape, phases, and **early signals ≤ ~120T**; exit turn / earliness secondary. No `--call-jev`. Hold Jev behaviour ship.
+
+### Early-signal constraint (Cody / WSM)
+
+`early_signals` MUST be in the **first ~120 turns**. Anything later is **outcome**, not a predictive signal. Do not credit mid/late-run symptoms as early foreshadowing. See [`TERMS.md`](TERMS.md) §14 (and §11 `early_signal` row).
+
+### Per-seat questions
+
+1. **Narrative shape** — how the run looked.
+2. **Phases contained** — e.g. productive build → validation pivot; early thrash; wait/implement; etc. (turn-anchored).
+3. **Early signals (≤ ~120T)** — turn-anchored foreshadowing of how it played out.
+
+Exit / earliness: **secondary** — do not optimize for A0 or exit agreement.
+
+### Agreement worth
+
+| Primary (score) | Secondary (report, not hard fail) |
+|-----------------|-----------------------------------|
+| Shared **early signals (≤~120)** + **phases / narrative shape** | Exact exit-turn match / exit-turn spread |
+
+### Corpus / coverage (Phase 1)
+
+| Gate | Result |
+|------|--------|
+| Inventory | **34** unique open-pajero-maps workers with T≥75 ([`INVENTORY-shape-qual-full-maps-v1-20261001-214046.json`](proofs/validated/gold/packs/INVENTORY-shape-qual-full-maps-v1-20261001-214046.json)) |
+| Reuse | **11** prior hybrid_v0 packs (P0 / expansion / thrash-screen / thrash-expand / shape-signal) |
+| Gap filled | **23** new hybrid_v0 packs, run `20261001-214046` |
+| Combined | [`shape-qual-full-maps-v1-judge-packs-20261001-214046.jsonl`](proofs/validated/gold/packs/shape-qual-full-maps-v1-judge-packs-20261001-214046.jsonl) (**104** rows) |
+| Leak-scan | PASS on gap packs |
+
+### Protocol sketch
+
+1. **Phase 1 (this PR):** inventory + reuse/gap packs + TERMS §14 + NEXT. **Hold seats.**
+2. **Phase 2:** three seats (Composer / Sonnet / Grok) on the full 34-worker combined packs; collect shape / phases / early≤120 answers.
+3. **Agreement:** publish agreement SUMMARY weighted on early signals + phases/shape; report exit spread secondarily.
+4. **Jev:** no `--call-jev` and no behaviour ship from this fold alone.
+
+### Success sketch
+
+| Gate | Criterion |
+|------|-----------|
+| Corpus | Exact T≥75 Maps enum packed (34) with hybrid_v0; reuse where present |
+| Panel | Seats answer the three qualitative questions; early signals capped ≤~120T |
+| Exit | Exit-turn spread reported; not a hard fail |
+| Non-goal | No `--call-jev`, no stats sweep, no hook/plugin edit, no shortlist padding excludes |
+
+<details>
+<summary>Stop rules (shape-qual-full-maps-v1)</summary>
+
+1. **Early ≤120 only.** Do not accept mid/late symptoms as `early_signals`.
+2. **No exact-exit hard fail.** Do not discard the panel solely for exit-turn disagreement.
+3. **No Jev early.** Do not `--call-jev` or ship behaviour from this packs PR.
+4. **No excludes for labeled.** Full T≥75 pool, including prior A0-null / shape-miss / shortlist workers.
+5. **Phase hold (Phase 1).** Packs PR must not run seats.
+
+</details>
+
+---
+
 ## Primary next — **`progressive-decay-bar-v1`** and **`validation-handoff-steer-v1`** (WSM design fold — no harness yet)
 
 **Status:** **plan/hold** (2026-10-01). **Owner:** Workflow System Manager (orchestration docs). **Shape-signal unlock prerequisite met** — Phase 2 seats (PRs #66/#67/#68) + agreement SUMMARY ([`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md)). Still **no harness work** and **no `--call-jev`** until a decay schedule is pre-registered and reviewed. Definitions: [`TERMS.md`](TERMS.md) §12–§13.
