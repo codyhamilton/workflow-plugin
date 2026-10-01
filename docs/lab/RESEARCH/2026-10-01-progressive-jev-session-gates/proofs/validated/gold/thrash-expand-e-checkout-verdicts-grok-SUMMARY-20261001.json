@@ -1,0 +1,32 @@
+{
+  "seat": "grok",
+  "model": "grok-4.7",
+  "experiment": "e",
+  "experiment_id": "ubuntu-thrash-high-score-expand-v1",
+  "pack_source": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/thrash-expand-e-judge-packs-20261001-210125.jsonl",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "rubric_scope": "original body only; draft delta / parent-pull-v1 not applied",
+  "n_rows": 5,
+  "n_workers": 3,
+  "signed": true,
+  "earliest_checkout": {
+    "e8aa4f271927": null,
+    "5163c22a6a3e": null,
+    "a318f4b89a6a": null
+  },
+  "checkout_counts": {
+    "e8aa4f271927": 0,
+    "5163c22a6a3e": 0,
+    "a318f4b89a6a": 0,
+    "total": 0
+  },
+  "checkout_turns": {
+    "e8aa4f271927": [],
+    "5163c22a6a3e": [],
+    "a318f4b89a6a": []
+  },
+  "decision_counts": {
+    "checkout": 0,
+    "not_yet": 5
+  }
+}
