@@ -36,3 +36,11 @@ Expected: unittest OK, simulation JSON printed, hook probe writes non-empty temp
 Host `codyh-ubuntu`, checkout `112ccfe` (master after PR #24). OpenCode 1.18.33 with `deepseek/deepseek-flash`: `run_proofs.sh` exit 0, gate simulation checks true, unittest 6/6, fixture wrote one `kind=post_tool_batch` row with `handoff_signal` and `jev_eligible`.
 
 OpenCode does not fire Claude `PostToolBatch` command hooks (per-tool `execute` before/after only). Live `.jev-signal-log.jsonl` was skipped there. Live PostToolBatch logging is Claude Code, or a custom OpenCode plugin that aggregates `tool.execute.after` into `process_hook_input`. This fixture probe is the validated LCD stand-in. Folded into the resolved white paper; not a further research item.
+
+## Maps 5h worker fixtures (progressive Jev / PR #35)
+
+Redacted commit-friendly subagent JSONLs (smoking guns + control + extras):
+
+[`fixtures/maps-5h-workers/MANIFEST.md`](fixtures/maps-5h-workers/MANIFEST.md)
+
+Cloud agents should use these copies (not `/home/codyh/.claude/...` paths).

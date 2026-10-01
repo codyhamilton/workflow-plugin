@@ -1,0 +1,104 @@
+{
+  "repo_relative": "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers",
+  "ideal_band_api_turns": [
+    50,
+    75
+  ],
+  "counting": {
+    "api_turns": "unique message.id on type=assistant",
+    "peak_ctx": "max(input_tokens+cache_read_input_tokens+cache_creation_input_tokens)"
+  },
+  "workers": [
+    {
+      "short_id": "92a48e004519",
+      "band": "smoking_gun_over75",
+      "role": "smoking gun (296 API turns)",
+      "api_turns": 296,
+      "peak_ctx": 129961,
+      "fixture_name": "92a48e004519.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/subagents/agent-a23c692a48e004519.jsonl",
+      "agent_file": "agent-a23c692a48e004519.jsonl",
+      "parent": "d006f5a0-267f-402e-bed7-b13d1a65a961",
+      "source_bytes": 12674034,
+      "redacted_bytes": 743285
+    },
+    {
+      "short_id": "bb6165018de0",
+      "band": "smoking_gun_over75",
+      "role": "smoking gun (154 API turns)",
+      "api_turns": 154,
+      "peak_ctx": 146781,
+      "fixture_name": "bb6165018de0.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/bd4f6c0d-5061-4e77-9a4c-2e083814b952/subagents/agent-ad325bb6165018de0.jsonl",
+      "agent_file": "agent-ad325bb6165018de0.jsonl",
+      "parent": "bd4f6c0d-5061-4e77-9a4c-2e083814b952",
+      "source_bytes": 3602690,
+      "redacted_bytes": 314194
+    },
+    {
+      "short_id": "6c87c96bd9bb",
+      "band": "control_inband_50_75",
+      "role": "control / refine-phase in-band",
+      "api_turns": 70,
+      "peak_ctx": 125993,
+      "fixture_name": "6c87c96bd9bb.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/af9b5cb1-edc5-4155-b521-a56bad1c7f13/subagents/agent-a95386c87c96bd9bb.jsonl",
+      "agent_file": "agent-a95386c87c96bd9bb.jsonl",
+      "parent": "af9b5cb1-edc5-4155-b521-a56bad1c7f13",
+      "source_bytes": 2059935,
+      "redacted_bytes": 163060
+    },
+    {
+      "short_id": "0aab88c525de",
+      "band": "over75",
+      "role": "additional 75+ worker",
+      "api_turns": 192,
+      "peak_ctx": 166836,
+      "fixture_name": "0aab88c525de.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/a59a5415-458e-41ab-b2d7-499377c18811/subagents/agent-a4a960aab88c525de.jsonl",
+      "agent_file": "agent-a4a960aab88c525de.jsonl",
+      "parent": "a59a5415-458e-41ab-b2d7-499377c18811",
+      "source_bytes": 2860607,
+      "redacted_bytes": 415572
+    },
+    {
+      "short_id": "036ff3ed4a89",
+      "band": "over75",
+      "role": "additional 75+ worker",
+      "api_turns": 161,
+      "peak_ctx": 156769,
+      "fixture_name": "036ff3ed4a89.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/670245db-d72a-4875-86cf-4f4b98803720/subagents/agent-a8024036ff3ed4a89.jsonl",
+      "agent_file": "agent-a8024036ff3ed4a89.jsonl",
+      "parent": "670245db-d72a-4875-86cf-4f4b98803720",
+      "source_bytes": 1151433,
+      "redacted_bytes": 321250
+    },
+    {
+      "short_id": "3ff8479be14a",
+      "band": "inband_50_75",
+      "role": "additional in-band",
+      "api_turns": 68,
+      "peak_ctx": 124156,
+      "fixture_name": "3ff8479be14a.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/a59a5415-458e-41ab-b2d7-499377c18811/subagents/agent-a9dfa3ff8479be14a.jsonl",
+      "agent_file": "agent-a9dfa3ff8479be14a.jsonl",
+      "parent": "a59a5415-458e-41ab-b2d7-499377c18811",
+      "source_bytes": 705179,
+      "redacted_bytes": 147513
+    },
+    {
+      "short_id": "6135cffdf32a",
+      "band": "inband_50_75",
+      "role": "additional in-band",
+      "api_turns": 68,
+      "peak_ctx": 106679,
+      "fixture_name": "6135cffdf32a.jsonl",
+      "source_path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/bd4f6c0d-5061-4e77-9a4c-2e083814b952/subagents/agent-a1f166135cffdf32a.jsonl",
+      "agent_file": "agent-a1f166135cffdf32a.jsonl",
+      "parent": "bd4f6c0d-5061-4e77-9a4c-2e083814b952",
+      "source_bytes": 918895,
+      "redacted_bytes": 158579
+    }
+  ]
+}
