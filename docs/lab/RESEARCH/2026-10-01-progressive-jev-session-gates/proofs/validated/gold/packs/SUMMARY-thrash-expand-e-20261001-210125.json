@@ -1,0 +1,199 @@
+{
+  "experiment": "ubuntu-thrash-high-score-expand-v1",
+  "run": "20261001-210125",
+  "schedule": "75:15",
+  "snapshot_mode": "hybrid_v0",
+  "exclude_prior": [
+    "036ff3ed4a89",
+    "0853bc21d3aa",
+    "0aab88c525de",
+    "7b00225cb824",
+    "92a48e004519",
+    "bb6165018de0",
+    "ca977b9ca0dd",
+    "daf933273c8f"
+  ],
+  "n_enum_candidates_Tge75": 34,
+  "n_remaining_after_exclude": 26,
+  "n_scored": 34,
+  "n_ca977_shape": 0,
+  "blocked_note": "Strict ca977 shape (no Edit/Write \u2227 max_reread\u22658 \u2227 compact\u22658) empty on remaining T\u226575 pool (n=26). Pre-registered N=3 best-available: near-zero-EW non-poll `e8aa4f271927`; high-reread twin `5163c22a6a3e`; high-compact `a318f4b89a6a`. Poll/bash-only class excluded (e.g. `87a380bc64ff` Monitor=6).",
+  "pre_register_N": 3,
+  "shortlist": [
+    {
+      "rank": 1,
+      "worker_id": "e8aa4f271927",
+      "T": 76,
+      "thrash_score": 25.14,
+      "max_reread": 5,
+      "paths_ge3": 2,
+      "max_compact": 4,
+      "peak_ctx_tokens": 125388,
+      "frozen_intervals": 0,
+      "edit_write": 3,
+      "bash_frac": 0.706,
+      "sleep_bash": 0,
+      "pollish_bash": 1,
+      "why": "max_reread=5; paths\u22653=2; compact=4; near-zero Edit/Write=3; peak=125388; bash_frac=0.71; Monitor=1",
+      "why_ca977_shaped": "near-zero Edit/Write + reread/compact (closest remaining to ca977 EW axis)",
+      "ca977_shape": false,
+      "near_ca977_shape": true,
+      "high_reread_twin": false,
+      "n_checkpoints": 1,
+      "checkpoints": [
+        75
+      ]
+    },
+    {
+      "rank": 2,
+      "worker_id": "5163c22a6a3e",
+      "T": 90,
+      "thrash_score": 31.85,
+      "max_reread": 9,
+      "paths_ge3": 1,
+      "max_compact": 2,
+      "peak_ctx_tokens": 161373,
+      "frozen_intervals": 1,
+      "edit_write": 15,
+      "bash_frac": 0.593,
+      "sleep_bash": 0,
+      "pollish_bash": 2,
+      "why": "max_reread=9; paths\u22653=1; compact=2; frozen_intervals=1; peak=161373; Monitor=2",
+      "why_ca977_shaped": "high-reread twin (max_reread=9, peak\u2248161k); best available after empty strict ca977; Edit/Write present",
+      "ca977_shape": false,
+      "near_ca977_shape": false,
+      "high_reread_twin": true,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ]
+    },
+    {
+      "rank": 3,
+      "worker_id": "a318f4b89a6a",
+      "T": 95,
+      "thrash_score": 30.38,
+      "max_reread": 5,
+      "paths_ge3": 3,
+      "max_compact": 8,
+      "peak_ctx_tokens": 126978,
+      "frozen_intervals": 1,
+      "edit_write": 14,
+      "bash_frac": 0.639,
+      "sleep_bash": 0,
+      "pollish_bash": 0,
+      "why": "max_reread=5; paths\u22653=3; compact=8; frozen_intervals=1; peak=126978",
+      "why_ca977_shaped": "high-compact match (compact=8, paths\u22653=3, peak\u2248127k); best available compaction axis after empty strict ca977",
+      "ca977_shape": false,
+      "near_ca977_shape": false,
+      "high_reread_twin": false,
+      "n_checkpoints": 2,
+      "checkpoints": [
+        75,
+        90
+      ]
+    }
+  ],
+  "pack_files": {
+    "per_worker": [
+      "e8aa4f271927-judge-packs-20261001-210125.jsonl",
+      "5163c22a6a3e-judge-packs-20261001-210125.jsonl",
+      "a318f4b89a6a-judge-packs-20261001-210125.jsonl"
+    ],
+    "combined": "thrash-expand-e-judge-packs-20261001-210125.jsonl",
+    "combined_rows": 5
+  },
+  "workers": {
+    "e8aa4f271927": {
+      "agent_id": "a86a0e8aa4f271927",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/subagents/agent-a86a0e8aa4f271927.jsonl",
+      "sha256": "2628654b2a73cb5e3761a7c64f2c20fac58a713e36d86608773c5dcc7325092b",
+      "bytes": 1962463,
+      "T": 76,
+      "tool_assistant_turns": 75,
+      "peak_ctx_tokens": 125388,
+      "checkpoints": [
+        75
+      ],
+      "n_checkpoints": 1,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 1,
+        "state_chars_max": 1772,
+        "state_chars_median": 1772.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 2828
+      },
+      "artifacts": {
+        "with_state": "e8aa4f271927-dry-run-checkpoints-20261001-210125.with-state.jsonl",
+        "omit_state": "e8aa4f271927-dry-run-checkpoints-20261001-210125.omit-state.jsonl",
+        "thrash_table": "e8aa4f271927-dry-run-thrash-table-20261001-210125.json",
+        "gold_bundles": "e8aa4f271927-gold-bundles-20261001-210125.jsonl",
+        "metrics": "e8aa4f271927-dry-run-metrics-20261001-210125.json"
+      }
+    },
+    "5163c22a6a3e": {
+      "agent_id": "a54ed5163c22a6a3e",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/a59a5415-458e-41ab-b2d7-499377c18811/subagents/agent-a54ed5163c22a6a3e.jsonl",
+      "sha256": "5a33f25cf3f37950adb7aad2693b26fed31d775dafc9916550785c844fb27617",
+      "bytes": 3026958,
+      "T": 90,
+      "tool_assistant_turns": 89,
+      "peak_ctx_tokens": 161373,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "n_checkpoints": 2,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 2,
+        "state_chars_max": 2165,
+        "state_chars_median": 1979.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 3688
+      },
+      "artifacts": {
+        "with_state": "5163c22a6a3e-dry-run-checkpoints-20261001-210125.with-state.jsonl",
+        "omit_state": "5163c22a6a3e-dry-run-checkpoints-20261001-210125.omit-state.jsonl",
+        "thrash_table": "5163c22a6a3e-dry-run-thrash-table-20261001-210125.json",
+        "gold_bundles": "5163c22a6a3e-gold-bundles-20261001-210125.jsonl",
+        "metrics": "5163c22a6a3e-dry-run-metrics-20261001-210125.json"
+      }
+    },
+    "a318f4b89a6a": {
+      "agent_id": "a3318a318f4b89a6a",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/af9b5cb1-edc5-4155-b521-a56bad1c7f13/subagents/agent-a3318a318f4b89a6a.jsonl",
+      "sha256": "0078479002c1493ee7931115659850ff8adbdfa1c0b44e3c492af96c933b79bb",
+      "bytes": 2998228,
+      "T": 95,
+      "tool_assistant_turns": 92,
+      "peak_ctx_tokens": 126978,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "n_checkpoints": 2,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 2,
+        "state_chars_max": 2198,
+        "state_chars_median": 2079.5,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 5101
+      },
+      "artifacts": {
+        "with_state": "a318f4b89a6a-dry-run-checkpoints-20261001-210125.with-state.jsonl",
+        "omit_state": "a318f4b89a6a-dry-run-checkpoints-20261001-210125.omit-state.jsonl",
+        "thrash_table": "a318f4b89a6a-dry-run-thrash-table-20261001-210125.json",
+        "gold_bundles": "a318f4b89a6a-gold-bundles-20261001-210125.jsonl",
+        "metrics": "a318f4b89a6a-dry-run-metrics-20261001-210125.json"
+      }
+    }
+  },
+  "panel_held": true,
+  "note": "Safe metrics only. No verdicts, no --call-jev, no parent-pull-v1. Gold-bundles/with-state remain gitignored under ubuntu-raw/. Prefer ca977 shape; documented miss \u2014 strict pool empty.",
+  "reference_smoking_gun_score": 150.96,
+  "reference_ca977_score": 71.07
+}

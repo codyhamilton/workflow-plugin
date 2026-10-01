@@ -1,0 +1,68 @@
+[
+  {
+    "worker_id": "5163c22a6a3e",
+    "checkpoint_turn": 75,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 75,
+    "peak_ctx_tokens": 161373,
+    "tool_histogram": {
+      "Bash": 41,
+      "Read": 19,
+      "Edit": 8,
+      "Write": 7,
+      "Monitor": 1,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 9
+      }
+    ],
+    "distinct_read_paths": 10,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 1884,
+    "delta_since_prior": {},
+    "state_chars": 1793,
+    "gold_bundle_chars": 3688,
+    "gold_bundle_status": "ok"
+  },
+  {
+    "worker_id": "5163c22a6a3e",
+    "checkpoint_turn": 90,
+    "decision": "missing",
+    "fires": false,
+    "reason": "dry_run",
+    "api_turns": 90,
+    "peak_ctx_tokens": 161373,
+    "tool_histogram": {
+      "Bash": 54,
+      "Read": 19,
+      "Edit": 8,
+      "Write": 7,
+      "Monitor": 2,
+      "ToolSearch": 1
+    },
+    "reread_paths": [
+      {
+        "path": "/home/codyh/workspace/open-pajero-maps/parser/osm_to_parcel_geometry.py",
+        "count": 9
+      }
+    ],
+    "distinct_read_paths": 10,
+    "compaction_event_count": 2,
+    "assistant_text_chars": 2618,
+    "delta_since_prior": {
+      "new_read_paths": [],
+      "tool_histogram_delta": {
+        "Bash": 13,
+        "Monitor": 1
+      }
+    },
+    "state_chars": 2165,
+    "gold_bundle_chars": 3572,
+    "gold_bundle_status": "ok"
+  }
+]
