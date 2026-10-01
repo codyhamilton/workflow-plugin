@@ -1,0 +1,89 @@
+{
+  "generated_for": "experiment (e) ubuntu-thrash-high-score-expand-v1",
+  "panel": {
+    "seats": [
+      "sonnet",
+      "composer",
+      "grok"
+    ],
+    "sources": {
+      "sonnet": "thrash-expand-e-checkout-verdicts-sonnet-20261001.jsonl",
+      "composer": "thrash-expand-e-checkout-verdicts-composer-20261001.jsonl",
+      "grok": "thrash-expand-e-checkout-verdicts-grok-20261001.jsonl"
+    },
+    "schedule": "P0 first_at=75 interval=15",
+    "pack_source": "thrash-expand-e-judge-packs-20261001-210125.jsonl"
+  },
+  "n_checkpoints": 5,
+  "workers": {
+    "5163c22a6a3e": 2,
+    "a318f4b89a6a": 2,
+    "e8aa4f271927": 1
+  },
+  "earliest_checkout_recommended_by_seat": {
+    "sonnet": {
+      "5163c22a6a3e": null,
+      "a318f4b89a6a": null,
+      "e8aa4f271927": null
+    },
+    "composer": {
+      "5163c22a6a3e": null,
+      "a318f4b89a6a": null,
+      "e8aa4f271927": null
+    },
+    "grok": {
+      "5163c22a6a3e": null,
+      "a318f4b89a6a": null,
+      "e8aa4f271927": null
+    }
+  },
+  "a0_unanimous_checkout": {
+    "rule": "Earliest checkpoint turn c where sonnet, composer, and grok all have checkout_recommended=true at that prefix",
+    "by_worker": {
+      "5163c22a6a3e": null,
+      "a318f4b89a6a": null,
+      "e8aa4f271927": null
+    }
+  },
+  "krippendorff_alpha": {
+    "scale": "nominal",
+    "variable": "checkout_recommended (binary)",
+    "coders": 3,
+    "units": 5,
+    "value": null,
+    "h5_floor": 0.4,
+    "h5_pass": false,
+    "alpha_method": "krippendorff",
+    "defined": false,
+    "undefined_reason": "all_not_yet",
+    "stdlib_de_eq_0_convention": 1.0,
+    "note": "Nominal alpha is undefined when every label is the same category (Do = De = 0). krippendorff.alpha raises ValueError ('There has to be more than one value in the domain.'). The stdlib de==0 branch would return 1.0; that convention is recorded as stdlib_de_eq_0_convention and is not an H5 pass, not a gold unlock, and not a Jev gate."
+  },
+  "checkout_positive_counts": {
+    "sonnet": 0,
+    "composer": 0,
+    "grok": 0,
+    "total_true_labels": 0
+  },
+  "pairwise_agreement": {
+    "sonnet_vs_composer": {
+      "overall_pct": 100.0,
+      "cohen_kappa": 0.0
+    },
+    "sonnet_vs_grok": {
+      "overall_pct": 100.0,
+      "cohen_kappa": 0.0
+    },
+    "composer_vs_grok": {
+      "overall_pct": 100.0,
+      "cohen_kappa": 0.0
+    }
+  },
+  "notes": [
+    "Thrash-expand (e) workers: e8aa4f271927 (1 cp), 5163c22a6a3e (2), a318f4b89a6a (2); 5 pooled prefixes.",
+    "Strict ca977 shape (no Edit/Write AND max_reread>=8 AND compact>=8) was empty on the remaining open-pajero-maps T>=75 pool (n=26). These three workers are the pre-registered best-available research panel, not a shape-gate pass.",
+    "A0 is null on e8aa4f271927, 5163c22a6a3e, and a318f4b89a6a. Earliest checkout is null on every seat (0/5 checkout_recommended).",
+    "Nominal alpha is undefined on an all-not_yet table (Do = De = 0). krippendorff.alpha raises ValueError (domain must contain more than one value). The stdlib de==0 branch would return 1.0; that convention is not the reported value, is not an H5 pass, and does not unlock gold or Jev.",
+    "Experiment (e) adds zero checkouts and zero non-null A0. Jev/stats sweep stays blocked until >=2 workers have non-null A0. No behaviour change."
+  ]
+}

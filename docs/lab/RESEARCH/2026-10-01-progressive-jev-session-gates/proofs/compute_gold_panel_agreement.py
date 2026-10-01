@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
 """Compute A0 and Krippendorff nominal alpha for three-seat gold checkout panels.
 
-Lab analysis only — not wired into run_proofs.sh. Uses the `krippendorff` package when
-installed; otherwise a stdlib binary nominal implementation (same coincidence-matrix
-definition for complete 3-coder units).
+Lab analysis only — not wired into run_proofs.sh. Published alphas use the
+`krippendorff` package. If that package is missing, a stdlib binary nominal
+fallback runs; it is not bit-identical to the package on non-constant tables,
+so regenerate published JSON only with `krippendorff` installed.
 
 `--panel expansion` (default) scores the corpus-expand seat files. `--panel thrash`
-scores the experiment (d) thrash-screen seat files. Seat filenames can be overridden
-with `--sonnet-file`, `--composer-file`, and `--grok-file`.
+scores the experiment (d) thrash-screen seat files. `--panel expand-e` scores the
+experiment (e) thrash-expand seat files. `--panel thrash-de` pools (d) and (e)
+(17 prefixes). Seat filenames can be overridden with `--sonnet-file`,
+`--composer-file`, and `--grok-file`.
+
+An all-`not_yet` table has Do = De = 0. Nominal α is undefined there (the
+`krippendorff` package raises ValueError; a de==0 convention of 1.0 is not an
+H5 pass and does not unlock gold).
 """
 
 from __future__ import annotations
@@ -58,6 +65,53 @@ PANELS: dict[str, dict[str, Any]] = {
             "H5 passes on thrash-only nominal alpha (>= 0.40) with only one non-null A0. Jev/stats sweep stays blocked on that single-A0 caveat. No behaviour change.",
         ],
     },
+    "expand-e": {
+        "generated_for": "experiment (e) ubuntu-thrash-high-score-expand-v1",
+        "schedule": "P0 first_at=75 interval=15",
+        "pack_source": "thrash-expand-e-judge-packs-20261001-210125.jsonl",
+        "seat_files": {
+            "sonnet": "thrash-expand-e-checkout-verdicts-sonnet-20261001.jsonl",
+            "composer": "thrash-expand-e-checkout-verdicts-composer-20261001.jsonl",
+            "grok": "thrash-expand-e-checkout-verdicts-grok-20261001.jsonl",
+        },
+        "out": GOLD / "thrash-expand-e-panel-agreement-20261001.json",
+        "notes": [
+            "Thrash-expand (e) workers: e8aa4f271927 (1 cp), 5163c22a6a3e (2), a318f4b89a6a (2); 5 pooled prefixes.",
+            "Strict ca977 shape (no Edit/Write AND max_reread>=8 AND compact>=8) was empty on the remaining open-pajero-maps T>=75 pool (n=26). These three workers are the pre-registered best-available research panel, not a shape-gate pass.",
+            "A0 is null on e8aa4f271927, 5163c22a6a3e, and a318f4b89a6a. Earliest checkout is null on every seat (0/5 checkout_recommended).",
+            "Nominal alpha is undefined on an all-not_yet table (Do = De = 0). krippendorff.alpha raises ValueError (domain must contain more than one value). The stdlib de==0 branch would return 1.0; that convention is not the reported value, is not an H5 pass, and does not unlock gold or Jev.",
+            "Experiment (e) adds zero checkouts and zero non-null A0. Jev/stats sweep stays blocked until >=2 workers have non-null A0. No behaviour change.",
+        ],
+    },
+    "thrash-de": {
+        "generated_for": "experiments (d)+(e) thrash-screen plus thrash-expand",
+        "schedule": "P0 first_at=75 interval=15",
+        "pack_source": [
+            "thrash-screen-judge-packs-20261001-204508.jsonl",
+            "thrash-expand-e-judge-packs-20261001-210125.jsonl",
+        ],
+        "seat_files": {
+            "sonnet": [
+                "thrash-screen-checkout-verdicts-sonnet-20261001.jsonl",
+                "thrash-expand-e-checkout-verdicts-sonnet-20261001.jsonl",
+            ],
+            "composer": [
+                "thrash-screen-checkout-verdicts-composer-20261001.jsonl",
+                "thrash-expand-e-checkout-verdicts-composer-20261001.jsonl",
+            ],
+            "grok": [
+                "thrash-screen-checkout-verdicts-grok-20261001.jsonl",
+                "thrash-expand-e-checkout-verdicts-grok-20261001.jsonl",
+            ],
+        },
+        "out": GOLD / "thrash-de-panel-agreement-20261001.json",
+        "notes": [
+            "Pooled thrash table: (d) 12 prefixes plus (e) 5 prefixes = 17. Workers do not overlap.",
+            "Non-null A0 remains one worker: ca977b9ca0dd at 90. (e) workers e8aa4f271927, 5163c22a6a3e, and a318f4b89a6a are A0 null (0/5 checkout on every seat).",
+            "Combined nominal alpha is 0.8377 (numeric H5 floor passes). The lift from (d)'s 0.8276 is five unanimous not_yet prefixes, not a new checkout. It does not replace P0 or expansion alpha. h5_pass on this table is not a gold unlock: non-null A0 count is still 1, so Jev and any stats sweep stay blocked.",
+            "All-not_yet prefixes from (e) must not be read as a second gold exit. No behaviour change.",
+        ],
+    },
 }
 
 # Backward-compatible alias for the expansion seat map.
@@ -90,8 +144,14 @@ def build_matrix(
     by_unit: dict[tuple[str, int], dict[str, int]] = defaultdict(dict)
     for seat in seat_order:
         for row in seat_rows[seat]:
-            by_unit[_unit_key(row)][seat] = int(row["checkout_recommended"])
+            key = _unit_key(row)
+            if seat in by_unit[key]:
+                raise SystemExit(f"duplicate unit {key} for seat {seat}")
+            by_unit[key][seat] = int(row["checkout_recommended"])
     keys = sorted(by_unit.keys())
+    incomplete = [k for k in keys if any(s not in by_unit[k] for s in seat_order)]
+    if incomplete:
+        raise SystemExit(f"units missing a seat: {incomplete[:5]}")
     matrix = [[by_unit[k][s] for s in seat_order] for k in keys]
     return keys, matrix
 
@@ -163,12 +223,19 @@ def krippendorff_alpha_nominal_binary(matrix: list[list[int]]) -> float:
         import numpy as np
 
         arr = np.array(matrix, dtype=float)
-        return float(
-            krippendorff.alpha(
-                reliability_data=arr.T,
-                level_of_measurement="nominal",
+        try:
+            return float(
+                krippendorff.alpha(
+                    reliability_data=arr.T,
+                    level_of_measurement="nominal",
+                )
             )
-        )
+        except ValueError as exc:
+            # Single-category tables: "There has to be more than one value in the domain."
+            # Do = De = 0, so nominal alpha is undefined. Do not coerce that to 1.0.
+            if "more than one value" in str(exc):
+                return float("nan")
+            raise
     except ImportError:
         pass
 
@@ -210,7 +277,9 @@ def krippendorff_alpha_nominal_binary(matrix: list[list[int]]) -> float:
     do = sum(o[i][j] * d_nominal[i][j] for i in range(2) for j in range(2))
     de = sum(e[i][j] * d_nominal[i][j] for i in range(2) for j in range(2))
     if de == 0:
-        return 1.0
+        # Do = De = 0 (every label is the same category). Alpha is undefined.
+        # A 1.0 convention is not returned; callers must not treat it as H5.
+        return float("nan")
     return 1.0 - do / de
 
 
@@ -239,32 +308,83 @@ def _resolve_seat_path(name_or_path: str) -> Path:
     return GOLD / name_or_path
 
 
+def _as_file_list(spec: str | list[str]) -> list[str]:
+    if isinstance(spec, str):
+        return [spec]
+    return list(spec)
+
+
+def _load_seat_rows(spec: str | list[str]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for name in _as_file_list(spec):
+        rows.extend(_load_jsonl(_resolve_seat_path(name)))
+    return rows
+
+
+def _source_names(spec: str | list[str]) -> str | list[str]:
+    names = [Path(name).name for name in _as_file_list(spec)]
+    if len(names) == 1:
+        return names[0]
+    return names
+
+
+def _alpha_block(matrix: list[list[int]], units: int) -> dict[str, Any]:
+    """Nominal alpha. A constant table is undefined, not H5-pass at 1.0."""
+    alpha = krippendorff_alpha_nominal_binary(matrix)
+    defined = alpha == alpha  # False for NaN
+    block: dict[str, Any] = {
+        "scale": "nominal",
+        "variable": "checkout_recommended (binary)",
+        "coders": 3,
+        "units": units,
+        "value": None if not defined else round(alpha, 4),
+        "h5_floor": 0.4,
+        "h5_pass": False if not defined else bool(alpha >= 0.4),
+        "alpha_method": "krippendorff",
+    }
+    if defined:
+        return block
+    positives = sum(v for row in matrix for v in row)
+    block["defined"] = False
+    block["undefined_reason"] = "all_not_yet" if positives == 0 else "constant_label"
+    block["stdlib_de_eq_0_convention"] = 1.0
+    block["note"] = (
+        "Nominal alpha is undefined when every label is the same category "
+        "(Do = De = 0). krippendorff.alpha raises ValueError "
+        "('There has to be more than one value in the domain.'). "
+        "The stdlib de==0 branch would return 1.0; that convention is recorded "
+        "as stdlib_de_eq_0_convention and is not an H5 pass, not a gold unlock, "
+        "and not a Jev gate."
+    )
+    return block
+
+
 def panel_report(
     panel: str = "expansion",
-    seat_files: dict[str, str] | None = None,
+    seat_files: dict[str, str | list[str]] | None = None,
 ) -> dict[str, Any]:
     """Build the agreement report for a named panel.
 
     `seat_files` overrides the panel's default JSONL names (values are gold-dir
-    filenames or filesystem paths). Seat order stays sonnet, composer, grok.
+    filenames, filesystem paths, or a list of those to concatenate). Seat order
+    stays sonnet, composer, grok.
     """
     if panel not in PANELS:
         known = ", ".join(sorted(PANELS))
         raise SystemExit(f"unknown panel {panel!r}; choose from {known}")
     spec = PANELS[panel]
-    files = dict(spec["seat_files"])
+    files: dict[str, str | list[str]] = dict(spec["seat_files"])
     if seat_files:
         files.update(seat_files)
     seat_order = SEAT_ORDER
-    seat_rows = {seat: _load_jsonl(_resolve_seat_path(files[seat])) for seat in seat_order}
+    seat_rows = {seat: _load_seat_rows(files[seat]) for seat in seat_order}
     keys, matrix = build_matrix(seat_rows, seat_order)
-    alpha = krippendorff_alpha_nominal_binary(matrix)
     pos = checkout_positive_counts(keys, matrix, seat_order)
     workers = sorted({k[0] for k in keys})
     worker_cps = {w: sum(1 for k in keys if k[0] == w) for w in workers}
     panel_block: dict[str, Any] = {
         "seats": list(seat_order),
-        "sources": {s: Path(files[s]).name for s in seat_order},
+        "sources": {s: _source_names(files[s]) for s in seat_order},
         "schedule": spec["schedule"],
     }
     if spec.get("pack_source"):
@@ -279,16 +399,7 @@ def panel_report(
             "rule": "Earliest checkpoint turn c where sonnet, composer, and grok all have checkout_recommended=true at that prefix",
             "by_worker": a0_unanimous(keys, matrix),
         },
-        "krippendorff_alpha": {
-            "scale": "nominal",
-            "variable": "checkout_recommended (binary)",
-            "coders": 3,
-            "units": len(keys),
-            "value": round(alpha, 4),
-            "h5_floor": 0.4,
-            "h5_pass": bool(alpha >= 0.4),
-            "alpha_method": "krippendorff",
-        },
+        "krippendorff_alpha": _alpha_block(matrix, len(keys)),
         "checkout_positive_counts": {**pos, "total_true_labels": sum(pos.values())},
         "pairwise_agreement": pairwise_metrics(keys, matrix, seat_order),
         "notes": list(spec["notes"]),
@@ -305,7 +416,11 @@ def main() -> None:
         "--panel",
         choices=sorted(PANELS),
         default="expansion",
-        help="Which gold panel to score (default: expansion). 'thrash' is experiment (d).",
+        help=(
+            "Which gold panel to score (default: expansion). "
+            "'thrash' is experiment (d); 'expand-e' is experiment (e); "
+            "'thrash-de' pools (d) and (e)."
+        ),
     )
     parser.add_argument("--sonnet-file", help="Override the sonnet seat JSONL (filename or path)")
     parser.add_argument("--composer-file", help="Override the composer seat JSONL (filename or path)")
@@ -327,7 +442,8 @@ def main() -> None:
     out = args.out if args.out is not None else PANELS[args.panel]["out"]
     out.write_text(json.dumps(report, indent=2) + "\n")
     if args.print_alpha:
-        print(report["krippendorff_alpha"]["value"])
+        value = report["krippendorff_alpha"]["value"]
+        print("undefined" if value is None else value)
 
 
 if __name__ == "__main__":

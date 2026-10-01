@@ -70,7 +70,7 @@ Independent Sonnet 5.5 judgments on the same 21 hybrid_v0 pack rows, rubric revi
 
 **α hint if seat swapped (CHM):** nominal 3×21 α ≈ **0.5674** with this relabel seat — still **does not** override over-fire discard.
 
-**Next measurement (was):** experiment **(c)** — now complete; see §(c). Experiment **(d)** is also complete; see §(d). Primary next: **(e)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). P0 A0/α in the table above are unchanged. Confidence remains **not high**.
+**Next measurement (was):** experiment **(c)** — now complete; see §(c). Experiments **(d)** and **(e)** are also complete; see §(d) and §(e). **(e)** added no checkout. Primary next: **(f)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). P0 A0/α in the table above are unchanged. Confidence remains **not high**.
 
 ---
 
@@ -108,7 +108,7 @@ Composer alone recommends checkout once (`036ff3ed4a89@135`; runaway + low_progr
 1. **H5 not passed for usable gold** — even though most prefixes agree on `not_yet`, **A0** is null on every expansion worker, so there is still no unanimous gold exit to tune against.
 2. **Do not interpret high raw agreement as H5 pass** — agreement-on-false inflates apparent consensus while leaving **A0** empty; expansion α **0.0000** with a single positive seat-label is below the 0.40 floor.
 3. **No Jev sweep** — same stop rule as P0. Pooled P0+expansion diagnostic α ≈ **0.1757** (41 cps) also fails H5 and does not create any new **A0**.
-4. **Next measurement (was):** experiment **(d)** — now complete; see §(d). Primary next is **(e)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
+4. **Next measurement (was):** experiment **(d)** — now complete; see §(d). Experiment **(e)** is also complete as a miss (no second **A0**); see §(e). Primary next is **(f)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md).
 
 ---
 
@@ -150,4 +150,66 @@ Same nominal Krippendorff implementation as §(c) (`krippendorff` package; `alph
 1. **H5 passes on the thrash-only table.** α **0.8276** ≥ 0.40. Unlike expansion, this is not agreement-on-false: Composer and Grok agree on both checkout prefixes, and Sonnet agrees with them at 90 and 105. κ **0.75** / **1.0** is positive-class agreement, not a prevalence artifact of a single stray checkout.
 2. **The corpus is still one gold exit.** Non-null **A0** exists for `ca977b9ca0dd` only. Nine of twelve prefixes are unanimous `not_yet`. A fit against **A0** would be n = 1 worker (turn 90).
 3. **Jev remains blocked.** Thrash-only α clears the floor, and the caveat that blocks a sweep is the single non-null **A0**. Do not run a Jev or stats-gate sweep on this panel. No hook or plugin change. Confidence stays **not high**.
-4. **The screen was directional and thin.** Rank 1 (`ca977b9ca0dd`: no Edit/Write, max reread 14, 16 compactions) is the only checkout. Ranks 2–3 (sleep/poll and Contract-W Bash) produced none. Next measurement is a stricter high-score shortlist — experiment **(e)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md) — not a Jev grid.
+4. **The screen was directional and thin.** Rank 1 (`ca977b9ca0dd`: no Edit/Write, max reread 14, 16 compactions) is the only checkout. Ranks 2–3 (sleep/poll and Contract-W Bash) produced none. The follow-on stricter shortlist — experiment **(e)** — is complete as a miss; see §(e). Primary next is **(f)** in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md), not a Jev grid.
+
+---
+
+## Experiment (e) — thrash-expand panel `ubuntu-thrash-high-score-expand-v1` (**miss**, 2026-10-01)
+
+**Panel:** Sonnet 5.5 (`gold_seat`), Composer 2.5, Grok 4.7 high on **hybrid_v0** thrash-expand packs (`packs/thrash-expand-e-judge-packs-20261001-210125.jsonl`, 5 rows). **Original rubric only** (no `parent-pull-v1`).  
+**Schedule:** `75:15` on **`e8aa4f271927`** (1 cp), **`5163c22a6a3e`** (2 cps), **`a318f4b89a6a`** (2 cps) → **5** pooled prefixes.  
+**Machine-readable:** [`thrash-expand-e-panel-agreement-20261001.json`](thrash-expand-e-panel-agreement-20261001.json). Combined (d)+(e): [`thrash-de-panel-agreement-20261001.json`](thrash-de-panel-agreement-20261001.json). Seat JSONLs: `thrash-expand-e-checkout-verdicts-{sonnet,composer,grok}-20261001.jsonl`. Gate table: [`thrash-expand-e-panel-SCORECARD-20261001.md`](thrash-expand-e-panel-SCORECARD-20261001.md).
+
+Numbers below were recomputed from the seat JSONLs (`checkout_recommended`), not copied from the seat SUMMARY files. Those summaries match (earliest checkout **null** on every worker, **0/5** on every seat).
+
+### Shape miss — this was a best-available research panel
+
+The (e) screen of remaining open-pajero-maps workers with `T≥75` (n=26 after excludes) found **zero** workers in the strict ca977 shape: no Edit/Write ∧ max reread ≥ 8 ∧ compaction ≥ 8 (`n_ca977_shape = 0` in [`packs/SUMMARY-thrash-expand-e-20261001-210125.json`](packs/SUMMARY-thrash-expand-e-20261001-210125.json)). The three packed workers were the pre-registered best-available substitutes, not a shape-gate pass:
+
+| Rank | Worker | Why packed | Shape |
+|-----:|--------|------------|-------|
+| 1 | `e8aa4f271927` | near-zero Edit/Write (3), max reread 5, compact 4 | not ca977 |
+| 2 | `5163c22a6a3e` | high-reread twin (max reread 9); Edit/Write 15, compact 2 | not ca977 |
+| 3 | `a318f4b89a6a` | high-compact (compact 8); Edit/Write 14, max reread 5 | not ca977 |
+
+### Hard result — gold rule `A0` is null on all three
+
+| Worker | A0 | Earliest checkout by seat (Sonnet / Composer / Grok) | Checkout turns |
+|--------|-----|------------------------------------------------------|----------------|
+| `e8aa4f271927` | **null** | null / null / null | none (1 cp) |
+| `5163c22a6a3e` | **null** | null / null / null | none (2 cps) |
+| `a318f4b89a6a` | **null** | null / null / null | none (2 cps) |
+
+No prefix has `checkout_recommended=true` on any seat. **(e) added zero checkouts.**
+
+### Reliability — expand-only 3×5 is all `not_yet`
+
+| Metric | Value | H5 floor (≥ 0.40) |
+|--------|-------|-------------------|
+| Krippendorff α (nominal, binary checkout, 3×5) | **undefined** | **Not a pass** |
+| Cohen κ (all three pairs) | 0.0000 | — |
+| Pairwise % agreement | **100%** | — |
+
+**Checkout-positive counts (5 cps):** Sonnet **0/5**, Composer **0/5**, Grok **0/5** → **0** true labels across 15 seat-rows.
+
+α is undefined because every label is `not_yet` (observed disagreement and expected disagreement are both zero). `krippendorff.alpha` raises `ValueError` (`There has to be more than one value in the domain.`). A stdlib `De = 0` convention would return **1.0**; that number is recorded as `stdlib_de_eq_0_convention` and is **not** the reported value. **Do not read 1.0, or 100% agreement, as an H5 pass or a gold unlock.** Cohen κ is 0 because chance agreement is already 1 on a constant table.
+
+Same `krippendorff` package as §(c) and §(d) (`alpha_method=krippendorff`). This table does not replace P0 α **0.1189**, expansion α **0.0000**, or thrash-only α **0.8276**.
+
+### Combined (d)+(e) — still one A0
+
+| | (d) alone | (e) alone | (d)+(e) |
+|--|-----------|-----------|---------|
+| Prefixes | 12 | 5 | **17** |
+| Non-null A0 | `ca977b9ca0dd` **@90** | none | **`ca977b9ca0dd` @90 only** |
+| True labels | 7 | 0 | **7** (all on `ca977b9ca0dd`) |
+| Nominal α | **0.8276** | **undefined** | **0.8377** |
+
+The combined table’s α **0.8377** clears the numeric H5 floor. The lift from **0.8276** is five unanimous `not_yet` prefixes, not a new checkout. Pairwise on the 17: sonnet↔composer **94.12%** (κ **0.7671**), sonnet↔grok **94.12%** (κ **0.7671**), composer↔grok **100%** (κ **1.0**). The only mismatched prefix is still `ca977b9ca0dd@75`. **`h5_pass` on the combined file is not a gold unlock.**
+
+### Implications
+
+1. **(e) is a miss.** The maps remainder had no ca977 twin, and the best-available panel produced no checkout and no second **A0**.
+2. **Jev remains blocked.** Non-null **A0** count across (d)+(e) is **1**. Do not run a Jev or stats-gate sweep until **≥ 2** workers have non-null **A0**. No hook or plugin change. Confidence stays **not high**.
+3. **Do not pack more maps near-misses** to chase a second exit. (e) already labeled that class.
+4. **Next measurement:** experiment **(f)** `cross-project-ca977-shape-screen-v1` in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md) — screen other Ubuntu Claude project directories for the same shape. If that screen is empty, hold. A spot-check of `ca977b9ca0dd@75` versus `@90` does not unlock Jev.

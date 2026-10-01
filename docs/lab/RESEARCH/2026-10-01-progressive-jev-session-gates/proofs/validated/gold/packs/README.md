@@ -110,7 +110,7 @@ python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_
 
 ## Thrash-expand (e) — `ubuntu-thrash-high-score-expand-v1` (`20261001-210125`)
 
-Best-available ca977-shaped shortlist after empty strict pool (no Edit/Write ∧ max_reread≥8 ∧ compact≥8 on remaining T≥75). Schedule `75:15`. hybrid_v0 (`N=8`, excerpt 400). Panel **held**.
+Best-available ca977-shaped shortlist after empty strict pool (no Edit/Write ∧ max_reread≥8 ∧ compact≥8 on remaining T≥75). Schedule `75:15`. hybrid_v0 (`N=8`, excerpt 400). Panel **closed as a miss** (0/5 checkout, A0 null × 3): [`../thrash-expand-e-panel-agreement-20261001.json`](../thrash-expand-e-panel-agreement-20261001.json).
 
 | Worker | T | Cps | Pack |
 |--------|--:|----:|------|
