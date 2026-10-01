@@ -39,12 +39,16 @@ Raw Ubuntu JSONL: set `WORKFLOW_PROGRESSIVE_CORPUS` to a directory of `{worker_i
 | Script | Output |
 |--------|--------|
 | `run_pilot_dry_twin.py` | `capture/pilot-field-proof/jev/dry-twin/`, `validated/pilot-field-proof/dry_twin_batch_log.json` |
+| `run_pilot_live_jev.py` | `capture/pilot-field-proof/jev/live/` (`--confirm-live`, `TYPESAFE_API_KEY`; optional `--limit N`) |
 | `run_local_swarm_pilot.py` | `capture/pilot-field-proof/local-swarm/` (add `--live-local` on Ubuntu) |
 
 ```bash
 cd docs/lab/RESEARCH/2026-10-01-session-analysis-open-field/proofs
 python3 run_pilot_dry_twin.py
 python3 run_local_swarm_pilot.py
+# Live Jev (Ubuntu harness only; needs key):
+# export TYPESAFE_API_KEY=…
+# python3 run_pilot_live_jev.py --confirm-live
 ```
 
 Local swarm runbook: [`pilot/RUNBOOK-local-swarm.md`](pilot/RUNBOOK-local-swarm.md).

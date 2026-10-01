@@ -66,6 +66,7 @@ Logs must **never** contain `TYPESAFE_API_KEY`.
 | Script | Output |
 |--------|--------|
 | `run_pilot_dry_twin.py` | `jev/dry-twin/*`, `framing_hashes.json`, `jev_cell_plan.json` |
+| `run_pilot_live_jev.py` | `jev/live/*` (`--confirm-live`, non-empty `TYPESAFE_API_KEY`) |
 | `run_local_swarm_pilot.py` | `local-swarm/*`, `local_swarm_plan.json` |
 
-Live Jev capture on Ubuntu uses the same paths under `jev/live/` after registration is committed and dry-twin `gate_pass` is logged.
+Live Jev capture on Ubuntu uses the same paths under `jev/live/` after registration is committed, dry-twin `gate_pass` is logged, and `run_pilot_live_jev.py --confirm-live` completes.

@@ -105,5 +105,5 @@ Layout: [`proofs/capture/README.md`](../proofs/capture/README.md). Dry-twin path
 2. `pip install -r proofs/requirements-lab.txt`  
 3. `python3 proofs/run_pilot_dry_twin.py` — must show `gate_pass: true` (already committed from cloud).  
 4. `python3 proofs/run_local_swarm_pilot.py --live-local` with `WORKFLOW_LOCAL_LLM_URL` → `capture/.../local-swarm/completions.jsonl`.  
-5. Re-run dry-twin with `live` + `confirm_live` writing to `capture/pilot-field-proof/jev/live/` (script extension or cheap-analysis batch driver on harness).  
+5. `python3 proofs/run_pilot_live_jev.py --confirm-live` (optional `--limit N` smoke) → `capture/pilot-field-proof/jev/live/`.  
 6. Close cycle in [`CYCLE-LOG.md`](CYCLE-LOG.md) with call counts and kill evaluation.
