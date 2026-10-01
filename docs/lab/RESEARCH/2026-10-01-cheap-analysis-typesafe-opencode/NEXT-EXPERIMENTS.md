@@ -6,6 +6,8 @@ A failed gate stops the spikes that depend on it. It does not stop an independen
 
 ## 0 — Segment inventory, no network
 
+**Status (2026-10-01):** complete — [`proofs/spike-0/SPIKE-RESULT.md`](proofs/spike-0/SPIKE-RESULT.md), runner [`proofs/run_spike_0.py`](proofs/run_spike_0.py).
+
 **Does:** Walk the four `T ≥ 75` fixtures plus `6c87c96bd9bb`, and the committed judge packs, and write a JSONL of segment rows. This is the segment strip: one row per window, not a new turn counter.
 
 **Columns:** `worker_id`, `T`, `early_window_end`, `window_id`, `grid`, `start`, `end`, `evidence_class`, `excerpt_nonempty`, `reread_present`, `max_reread_count`, `compaction_event_count`, `source_path`.
@@ -16,6 +18,8 @@ A failed gate stops the spikes that depend on it. It does not stop an independen
 
 ## 1 — Schema dry-run under the state guard
 
+**Status (2026-10-01):** complete — [`proofs/spike-1/SPIKE-RESULT.md`](proofs/spike-1/SPIKE-RESULT.md), runner [`proofs/run_spike_1.py`](proofs/run_spike_1.py). No raw prose mount in CI; `phase-sketch-v0` on `stats_only` refused with `prose_required` as expected.
+
 **Does:** Emit request JSON for `shape-v0`, `phase-sketch-v0`, and `early-signal-v0` on one `stats_only` segment and, if raw JSONL is mounted, one `prose` segment. The `stats_only` requests may ask only the mechanical `reread_cluster` question plus the reported compaction count. They must not include `no_checkable_step`, `anchor_divergence`, or `compaction_cycle` as questions a model is graded on. Emit one `session-checkout` / `Y_full` request from the existing builder and diff the question text against `session_checkout.py`. Emit one deliberately edited instruction and show that its stored `framing_id` hash differs and that an unregistered question blob returns `unregistered_framing`.
 
 **Done when:** Every state JSON is ≤ 12_000 characters or the row says `unlabelable` with the length. The `Y_full` question text matches the builder byte for byte. The edited instruction does not use framing id `Y_full`. A prose-only schema pointed at the `stats_only` segment returns `reason: prose_required` and does not build a request that pretends the excerpts exist.
@@ -23,6 +27,8 @@ A failed gate stops the spikes that depend on it. It does not stop an independen
 **Gate:** A schema that only fits by dropping the cumulative re-read block is ineligible for the stats corpus. Do not shrink that block away to make a prose tail fit.
 
 ## 2 — Batch dry-run, dedupe, caps
+
+**Status (2026-10-01):** complete — [`proofs/spike-2/SPIKE-RESULT.md`](proofs/spike-2/SPIKE-RESULT.md), runner [`proofs/run_spike_2.py`](proofs/run_spike_2.py). Zero live POSTs; dummy `TYPESAFE_API_KEY` absent from artifacts.
 
 **Does:** Cross two framings, the `early_120` window, and the grid points from spike 0, for `early-signal-v0`, dry-run. Repeat one cell on purpose. Request `max_calls` 1 on a second invocation that would have POSTed more than one cell if `live` were set; in dry-run, confirm the cap counter ignores dry-run rows (the invocation is not rejected for size) and that a live-shaped request with `max_calls` 1 marks the extra would-POST cells `decision: missing`, `reason: cap`, without opening a socket.
 
