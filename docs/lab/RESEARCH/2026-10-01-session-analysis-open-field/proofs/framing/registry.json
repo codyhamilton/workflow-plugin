@@ -17,13 +17,6 @@
     },
     {
       "schema_id": "early-signal-v0",
-      "slug": "tournament-monitor-called-out",
-      "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-      "questions_sha256": "77ace2e03f04a9daf622faa0e49da54a620af1c0cf7b94be89e45fd9720e7db6",
-      "registered": true
-    },
-    {
-      "schema_id": "early-signal-v0",
       "slug": "tournament-no-story-beyond-counts",
       "framing_id": "tournament-no-story-beyond-counts#73c15b9e84f49e30",
       "questions_sha256": "73c15b9e84f49e3003a470fd32f0f77658536e2d3710f04cfe5d0821f2b818e7",

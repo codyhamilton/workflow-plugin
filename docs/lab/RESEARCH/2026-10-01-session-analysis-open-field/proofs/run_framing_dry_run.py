@@ -32,7 +32,6 @@ DUMMY_KEY = "typesafe-dummy-key-open-field-phase-1b-not-real"
 TOURNAMENT_FRAMINGS = (
     "tournament-binary-foreshadow",
     "tournament-likert-collapsed",
-    "tournament-monitor-called-out",
     "tournament-no-story-beyond-counts",
 )
 SEARCH_POOL_SLUGS = tuple(OPEN_FIELD_FRAMING_SLUGS.keys())
@@ -89,13 +88,13 @@ def main() -> int:
     _ = unregistered_framing_demo()  # documented example blob; not in registry
 
     baseline_arm_slots = 8
-    search_arm_slots = 24
+    search_arm_slots = 18
     split_doc = {
         "frozen_card_search_budget_split": {
             "baseline_arm_calls": baseline_arm_slots,
             "search_arm_calls": search_arm_slots,
             "baseline_draw": "random slug from registry pool (≥8 blobs)",
-            "search_arm_default": "6 workers × 4 tournament framings (24 cells)",
+            "search_arm_default": "6 workers × 3 tournament framings (18 cells)",
             "hold_out_workers": "26 workers not in STRATIFIED_EIGHT",
         },
         "pool_slugs": list(SEARCH_POOL_SLUGS),
@@ -108,8 +107,8 @@ def main() -> int:
     expected_unique = len(TOURNAMENT_FRAMINGS) * len(segments)
     checks = {
         "dry_run_decisions": all(c.get("decision") == "dry_run" for c in dry["cells"]),
-        "cartesian_32_unique_plus_dedupe_row": dry["unique_cell_count"] == 32
-        and len(dry["cells"]) == 33,
+        "cartesian_24_unique_plus_dedupe_row": dry["unique_cell_count"] == 24
+        and len(dry["cells"]) == 25,
         "cartesian_unique_count": dry["unique_cell_count"] == expected_unique,
         "duplicate_input_once": sum(1 for c in dry["cells"] if c.get("reason") == "duplicate_input") == 1,
         "duplicate_post_rate_zero": dry["duplicate_post_rate"] == 0.0,

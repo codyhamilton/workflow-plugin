@@ -2,7 +2,7 @@
   "registration_id": "pilot-field-proof-wave-001",
   "model": "jev-1.13.0",
   "schema_id": "early-signal-v0",
-  "max_calls": 96,
+  "max_calls": 88,
   "budget_tokens": 400000,
   "live_posts": 0,
   "mode": "dry-twin",
@@ -19,7 +19,6 @@
   "framing_slugs": [
     "tournament-binary-foreshadow",
     "tournament-likert-collapsed",
-    "tournament-monitor-called-out",
     "tournament-no-story-beyond-counts",
     "pool-likert-foreshadow",
     "pool-echo-guard-reread",
@@ -50,16 +49,6 @@
         "decision": "dry_run",
         "reason": null,
         "cache_key": "4c18f24bd24bb0ffabd81a4266edc5bd20003057f1a13dc8e23b55217852afac",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "ca977b9ca0dd:stats_card:105",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "34d88fba750c51089895fc37648ac512924aab64a769c87d40595bd2d8d312ea",
         "deduped": false
       },
       {
@@ -174,16 +163,6 @@
       },
       {
         "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "92a48e004519:stats_card:120",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "05afb661ba98544a23d30b57384cb5f1a46236e48c7a2032b810e7046e3be883",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
         "framing_id": "tournament-no-story-beyond-counts#73c15b9e84f49e30",
         "segment_id": "92a48e004519:stats_card:120",
         "schema_id": "early-signal-v0",
@@ -290,16 +269,6 @@
         "decision": "dry_run",
         "reason": null,
         "cache_key": "ccf70ab96dc05854cf32ecea79e301e0df86b5f5f5d1284296e8b5986dbdc3d0",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "87a380bc64ff:stats_card:75",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "9903a28486c994ad71c7df919865d0699d8cc86a0c6ce1b868f3ae57acf597cc",
         "deduped": false
       },
       {
@@ -414,16 +383,6 @@
       },
       {
         "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "bb6165018de0:stats_card:120",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "28cad29283d2aca8f2aa578da0e3f86ff15074f1f121e912f944c89de29f0d58",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
         "framing_id": "tournament-no-story-beyond-counts#73c15b9e84f49e30",
         "segment_id": "bb6165018de0:stats_card:120",
         "schema_id": "early-signal-v0",
@@ -530,16 +489,6 @@
         "decision": "dry_run",
         "reason": null,
         "cache_key": "e98f646c6ac2d02856a943a83ee01f9bedadab93484791e894cb0107be5467fe",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "15f24c7ba18c:stats_card:90",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "5affa75f4508792ece69e96fac51bc3cb618c6734be5261d5296a14d5500d074",
         "deduped": false
       },
       {
@@ -654,16 +603,6 @@
       },
       {
         "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "0677f597286e:stats_card:90",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "83c287c1d082eea97e0e44fa59d4add978649f982a9f64a4ac98ad99729ae65e",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
         "framing_id": "tournament-no-story-beyond-counts#73c15b9e84f49e30",
         "segment_id": "0677f597286e:stats_card:90",
         "schema_id": "early-signal-v0",
@@ -770,16 +709,6 @@
         "decision": "dry_run",
         "reason": null,
         "cache_key": "4fbf932c8cf44bb4acbbdfeea02b80d4e94a37d2fcbdbd6154c6b854f5d23e60",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "074c8cf22927:stats_card:75",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "13f2dd0a1395fa6e2c22c85768b6f6dc84186969dd9f17e6d32021f628d46971",
         "deduped": false
       },
       {
@@ -894,16 +823,6 @@
       },
       {
         "model_tier": "typesafe",
-        "framing_id": "tournament-monitor-called-out#77ace2e03f04a9da",
-        "segment_id": "07357f196666:stats_card:75",
-        "schema_id": "early-signal-v0",
-        "decision": "dry_run",
-        "reason": null,
-        "cache_key": "e0a07a825daeb791235e8a1ecf9b7da8a75b657e9842408637f3e9d92b0bc54f",
-        "deduped": false
-      },
-      {
-        "model_tier": "typesafe",
         "framing_id": "tournament-no-story-beyond-counts#73c15b9e84f49e30",
         "segment_id": "07357f196666:stats_card:75",
         "schema_id": "early-signal-v0",
@@ -997,17 +916,17 @@
     "duplicate_post_rate": 0.0,
     "capped": 0,
     "rejected": false,
-    "unique_cell_count": 96,
-    "input_cell_count": 96
+    "unique_cell_count": 88,
+    "input_cell_count": 88
   },
   "checks": {
-    "cell_plan_96": true,
-    "registry_12_framings": true,
+    "cell_plan_max_calls": true,
+    "registry_framing_count": true,
     "dry_twin_all_dry_run": true,
-    "batch_unique_96": true,
+    "batch_unique_max_calls": true,
     "batch_not_rejected": true,
     "budget_tokens_set": true,
-    "shaped_would_post_96": true,
+    "shaped_would_post_max_calls": true,
     "no_api_key_leak": true,
     "all_pass": true,
     "grep_dummy_key_absent": true

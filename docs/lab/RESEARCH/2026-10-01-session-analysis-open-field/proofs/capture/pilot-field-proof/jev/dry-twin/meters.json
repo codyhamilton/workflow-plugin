@@ -1,9 +1,9 @@
 {
-  "ts": "2026-10-01T13:03:59+00:00",
+  "ts": "2026-10-01T13:35:13+00:00",
   "registration_id": "pilot-field-proof-wave-001",
   "mode": "dry-twin",
   "jev_posts": 0,
-  "jev_would_post": 96,
+  "jev_would_post": 88,
   "input_tokens_observed": 0,
   "input_tokens_budget": 400000,
   "input_tokens_assumed_mid_per_post": 2000,

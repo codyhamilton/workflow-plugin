@@ -10,9 +10,9 @@
 
 | Stream | Id | Role in Pilot |
 |--------|-----|----------------|
-| **A** | `segment-swarm-arbiter` | Local `:8080` segment labels (~24 cells); Flash arbiter ≤ **4** on conflict only |
-| **B** | `stats-jev-tournament` | **96** Jev POSTs on frozen **stats_card**, `early-signal-v0` |
-| **D** | `frozen-card-search` | Same wave: **8** baseline + **24** search + **64** matrix fill (see cell plan) |
+| **A** | `segment-swarm-arbiter` | **Luna** default segment labels (~18 cells); Flash optional; local `:8080` legacy; Flash arbiter ≤ **4** on conflict only |
+| **B** | `stats-jev-tournament` | **88** Jev POSTs on frozen **stats_card**, `early-signal-v0` |
+| **D** | `frozen-card-search` | Same wave: **8** baseline + **18** search + **62** matrix fill (see cell plan) |
 
 Workstream **C** (`summary-then-judge`): optional **8** Flash cards only if mount probe passes on Ubuntu; **0** Jev on summary cards in Pilot. Not blocking A/B.
 
@@ -37,9 +37,9 @@ Hold-out **26** untouched. Same draw as [`paths.py`](../proofs/lib/paths.py) `ST
 - **Manifest:** [`proofs/manifests/card_hash_manifest.json`](../proofs/manifests/card_hash_manifest.json)  
 - **Schema:** `early-signal-v0`, `hide_outcome_suffix: true`  
 
-## Framing pool (12 registered hashes)
+## Framing pool (11 registered hashes)
 
-All slugs in [`proofs/framing/registry.json`](../proofs/framing/registry.json) after dry-twin regen (12 rows). Tournament quartet plus eight pool / spike slugs including `pool-thrash-card-anchor` and `pool-residual-baseline`.
+All slugs in [`proofs/framing/registry.json`](../proofs/framing/registry.json) after dry-twin regen (**11** rows). Tournament **trio** (dropped `tournament-monitor-called-out` — KILL: poll FP with thrash; keep `tournament-binary-foreshadow`) plus eight pool / spike slugs including `pool-thrash-card-anchor` and `pool-residual-baseline`.
 
 Question blobs whose hash is **not** in that registry must return `unregistered_framing` and must not POST.
 
@@ -47,21 +47,21 @@ Question blobs whose hash is **not** in that registry must return `unregistered_
 
 | Field | Value |
 |-------|------:|
-| `max_calls` | **96** (single wave; ≤ **256** cap per `analysis.batch_trial`) |
-| `budget_tokens` | **400_000** input tokens (covers mid **2k** × 96 ≈ 192k; high **4k** × 96 ≈ 384k) |
+| `max_calls` | **88** (single wave; ≤ **256** cap per `analysis.batch_trial`) |
+| `budget_tokens` | **400_000** input tokens (covers mid **2k** × 88 ≈ 176k; high **4k** × 88 ≈ 352k) |
 | Jev USD mid (direct $0.042/M) | ~$0.008 |
 | Local completions (A) | **~24** planned ([`local_swarm_plan.json`](../proofs/capture/pilot-field-proof/local_swarm_plan.json)) |
 | Flash (C, optional) | 0–8 summaries + ≤ **4** arbiter |
 
-## Jev cell plan (96)
+## Jev cell plan (88)
 
 Committed machine-readable plan: [`proofs/capture/pilot-field-proof/jev_cell_plan.json`](../proofs/capture/pilot-field-proof/jev_cell_plan.json).
 
 | Arm | POSTs | Rule |
 |-----|------:|------|
 | **Baseline** | **8** | Reproducible random slug draw per baseline cell (seed `pilot-field-proof-wave-001-baseline-v1`) |
-| **Search** | **24** | First **6** stratified workers × **4** tournament framings |
-| **Matrix fill** | **64** | Remaining worker × framing pairs to complete **8 × 12** |
+| **Search** | **18** | First **6** stratified workers × **3** tournament framings |
+| **Matrix fill** | **62** | Remaining worker × framing pairs to complete **8 × 11** |
 
 ## Kill criteria (copied — do not paraphrase)
 
@@ -103,7 +103,7 @@ Layout: [`proofs/capture/README.md`](../proofs/capture/README.md). Dry-twin path
 
 1. `export TYPESAFE_API_KEY=…` on harness (confirm direct vs gateway pricing on console).
 2. `pip install -r proofs/requirements-lab.txt`  
-3. `python3 proofs/run_pilot_dry_twin.py` — must show `gate_pass: true` (already committed from cloud).  
-4. `python3 proofs/run_local_swarm_pilot.py --live-local` with `WORKFLOW_LOCAL_LLM_URL` → `capture/.../local-swarm/completions.jsonl`.  
-5. `python3 proofs/run_pilot_live_jev.py --confirm-live` (optional `--limit N` smoke) → `capture/pilot-field-proof/jev/live/`.  
+3. `python3 proofs/run_pilot_dry_twin.py` — must show `gate_pass: true` (88 cells on pruned pool).  
+4. `python3 proofs/run_local_swarm_pilot.py --live` on Ubuntu (default **Luna** / `gpt-6-luna`) → `capture/.../local-swarm/completions.jsonl`. Optional Flash: `--provider flash --live`. Legacy local: `--provider local --live`.  
+5. `python3 proofs/run_pilot_live_jev.py --confirm-live` (optional `--limit N` smoke) → `capture/pilot-field-proof/jev/live/` on harness (88 cells after prune).  
 6. Close cycle in [`CYCLE-LOG.md`](CYCLE-LOG.md) with call counts and kill evaluation.

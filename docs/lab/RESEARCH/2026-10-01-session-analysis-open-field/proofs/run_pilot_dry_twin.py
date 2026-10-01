@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pilot field-proof — Jev dry-twin (96 cells, capture layout, 0 live POSTs)."""
+"""Pilot field-proof — Jev dry-twin (88 cells, capture layout, 0 live POSTs)."""
 
 from __future__ import annotations
 
@@ -140,13 +140,13 @@ def main() -> int:
     leak = DUMMY_KEY in combined
 
     checks = {
-        "cell_plan_96": len(plan["cells"]) == MAX_CALLS,
-        "registry_12_framings": len(registry) == 12,
+        "cell_plan_max_calls": len(plan["cells"]) == MAX_CALLS,
+        "registry_framing_count": len(registry) == len(PILOT_POOL_SLUGS),
         "dry_twin_all_dry_run": all(r["decision"] == "dry_run" for r in request_rows),
-        "batch_unique_96": dry_batch.get("unique_cell_count") == MAX_CALLS,
+        "batch_unique_max_calls": dry_batch.get("unique_cell_count") == MAX_CALLS,
         "batch_not_rejected": not dry_batch.get("rejected"),
         "budget_tokens_set": BUDGET_TOKENS >= 200_000,
-        "shaped_would_post_96": shaped.get("posts") == MAX_CALLS,
+        "shaped_would_post_max_calls": shaped.get("posts") == MAX_CALLS,
         "no_api_key_leak": not leak,
     }
     checks["all_pass"] = all(checks.values())

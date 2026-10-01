@@ -10,16 +10,17 @@ from paths import STRATIFIED_EIGHT
 REGISTRATION_ID = "pilot-field-proof-wave-001"
 MODEL_PIN = "jev-1.13.0"
 SCHEMA_ID = "early-signal-v0"
-MAX_CALLS = 96
+MAX_CALLS = 88
 BUDGET_TOKENS = 400_000
 TOKEN_ASSUMPTION_MID = 2_000
 
 TOURNAMENT_FRAMINGS = (
     "tournament-binary-foreshadow",
     "tournament-likert-collapsed",
-    "tournament-monitor-called-out",
     "tournament-no-story-beyond-counts",
 )
+
+# KILL (pilot): tournament-monitor-called-out — poll FP with thrash; not in registry.
 
 PILOT_POOL_SLUGS = (
     *TOURNAMENT_FRAMINGS,
@@ -73,7 +74,7 @@ def _baseline_pairs(cartesian: list[dict[str, str]], reserved: set[tuple[str, st
 
 
 def pilot_jev_cell_plan() -> dict[str, Any]:
-    """96-cell plan: full 8×12 matrix; arms 8 baseline + 24 search + 64 matrix fill."""
+    """88-cell plan: full 8×11 matrix; arms 8 baseline + 18 search + 62 matrix fill."""
     cartesian = _full_cartesian()
     assert len(cartesian) == MAX_CALLS
 

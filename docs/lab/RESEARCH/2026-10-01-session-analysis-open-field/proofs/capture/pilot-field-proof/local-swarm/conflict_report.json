@@ -1,9 +1,10 @@
 {
   "registration_id": "pilot-field-proof-wave-001",
   "status": "registered_awaiting_live",
+  "swarm_provider": "luna",
   "cell_count": 18,
   "flash_arbiter_cap": 4,
   "conflict_workers": [],
   "parse_fail_workers": [],
-  "note": "Conflict detection runs after live local completions on Ubuntu harness."
+  "note": "Conflict detection runs after live completions on Ubuntu harness. Default pilot provider is Luna; Flash is optional when OpenCode seat recovers."
 }
