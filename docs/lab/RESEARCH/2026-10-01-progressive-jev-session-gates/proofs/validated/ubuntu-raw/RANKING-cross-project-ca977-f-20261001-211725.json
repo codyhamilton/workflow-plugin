@@ -1,0 +1,79 @@
+{
+  "screen": "cross-project-ca977-shape-screen-v1",
+  "experiment": "cross-project-ca977-shape-screen-v1",
+  "status": "blocked",
+  "schedule": "75:15",
+  "run": "20261001-211725",
+  "generated_at_brisbane": "2026-10-01 21:17:47 AEST",
+  "dry_run": true,
+  "live_call_jev": false,
+  "shape_gate": {
+    "T_min": 75,
+    "edit_write": 0,
+    "max_reread_min": 8,
+    "compact_min": 8,
+    "rule": "no Edit/Write \u2227 max_reread\u22658 \u2227 compact\u22658 \u2227 T\u226575"
+  },
+  "projects_scanned": [
+    "-home-codyh-workspace-ansible-dev-config",
+    "-home-codyh-workspace-devcontainers",
+    "-home-codyh-workspace-free-frontier",
+    "-home-codyh-workspace-garcia-music",
+    "-home-codyh-workspace-instant-host",
+    "-home-codyh-workspace-silver-chronicle",
+    "-home-codyh-workspace-workflow-plugin",
+    "-workspaces-garcia-music",
+    "-workspaces-lemmings"
+  ],
+  "projects_excluded": [
+    "-home-codyh-workspace-open-pajero-maps",
+    "-home-codyh-workspace-open-pajero-maps--claude-worktrees-brief-34-ceiling-only",
+    "-tmp-expansion-panel",
+    "-tmp-thrash-screen-panel-sonnet"
+  ],
+  "exclude_already_labeled": [
+    "92a48e004519",
+    "bb6165018de0",
+    "0aab88c525de",
+    "036ff3ed4a89",
+    "0853bc21d3aa",
+    "ca977b9ca0dd",
+    "daf933273c8f",
+    "7b00225cb824",
+    "e8aa4f271927",
+    "5163c22a6a3e",
+    "a318f4b89a6a"
+  ],
+  "n_projects_scanned": 9,
+  "n_subagent_jsonls": 0,
+  "n_candidates_T_ge_75": 0,
+  "n_remaining_after_exclude": 0,
+  "n_scored": 0,
+  "n_ca977_shape": 0,
+  "n_near_misses": 0,
+  "shape_hits": [],
+  "ranked_near_misses": [],
+  "parent_session_note": {
+    "project": "-home-codyh-workspace-workflow-plugin",
+    "n_parent_jsonls": 79,
+    "T_histogram": {
+      "1": 79
+    },
+    "T_ge_75": 0,
+    "note": "Parent session JSONLs are not subagent/worker transcripts; indexed T=1 for all 79. Not scored for thrash shape."
+  },
+  "excluded_alias_note": {
+    "project": "-home-codyh-workspace-open-pajero-maps--claude-worktrees-brief-34-ceiling-only",
+    "n_agent_jsonls": 21,
+    "T_ge_75": 0,
+    "note": "open-pajero-maps worktree alias excluded by protocol; no T\u226575 agents present anyway."
+  },
+  "excluded_maps_note": {
+    "project": "-home-codyh-workspace-open-pajero-maps",
+    "T_ge_75": 34,
+    "note": "Maps pool excluded by design after (e) exhausted ca977 twins (n_ca977_shape=0 on remaining n=26)."
+  },
+  "blocked_note": "Cross-project screen empty. Nine non-maps Claude project dirs on Ubuntu yield zero subagent/worker JSONLs under subagents/. No T\u226575 candidates to score; n_ca977_shape=0. Do not pack. Do not pad with maps near-misses or parent sessions. Fall through to hold-until-new-maps-sessions.",
+  "packs_built": false,
+  "panel": "held"
+}

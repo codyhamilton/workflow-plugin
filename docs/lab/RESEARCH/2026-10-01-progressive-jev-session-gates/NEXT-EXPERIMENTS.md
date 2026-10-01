@@ -193,9 +193,11 @@ The screen was empty, so the run packed a pre-registered best-available panel in
 
 ---
 
-## Primary next — experiment **(f)** `cross-project-ca977-shape-screen-v1`
+## Primary next — experiment **(f)** `cross-project-ca977-shape-screen-v1` (**blocked: empty cross-project screen**)
 
-**Status:** plan. **Goal:** find a second worker with the ca977 shape (no Edit/Write ∧ high max-reread ∧ high compaction ∧ `T ≥ 75`) in **other** Ubuntu Claude project directories, then pack and label only shape hits. **Hold Jev** until ≥ 2 workers have non-null **A0**.
+**Status:** **blocked** (2026-10-01). **Goal (unchanged):** find a second worker with the ca977 shape (no Edit/Write ∧ high max-reread ∧ high compaction ∧ `T ≥ 75`) in **other** Ubuntu Claude project directories, then pack and label only shape hits. **Hold Jev** until ≥ 2 workers have non-null **A0**.
+
+**Screen result:** nine non-maps `~/.claude/projects/` dirs on Ubuntu → **0** subagent/worker JSONLs → **0** T≥75 candidates → **n_ca977_shape = 0**. No packs. No panel. Artifacts: [`proofs/validated/ubuntu-raw/SUMMARY-ubuntu-raw-cross-project-ca977-f-20261001-211725.json`](proofs/validated/ubuntu-raw/SUMMARY-ubuntu-raw-cross-project-ca977-f-20261001-211725.json), [`proofs/validated/gold/packs/SUMMARY-cross-project-ca977-f-20261001-211725.md`](proofs/validated/gold/packs/SUMMARY-cross-project-ca977-f-20261001-211725.md). Fall through to **`hold-until-new-maps-sessions`**. Holding does not unlock Jev.
 
 ### Why this is primary
 
