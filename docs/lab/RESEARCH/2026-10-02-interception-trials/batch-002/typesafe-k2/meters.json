@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-10-02 01:44:29 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0-multi",
+  "driver": "typesafe",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "reason_fp_miss_board_false": "window_status=unidentified; do not invent outcome labels; join later via OUTCOME-SHEET",
+  "protocol_fixes": [
+    "R1_no_T_in_prompt_or_state",
+    "R2_non_length_outcome_sheet",
+    "R3_fixed_schedule_hazard"
+  ],
+  "soft_standard_hold": true,
+  "hooks_unlock": false,
+  "product_unlock": false,
+  "n_cells": 2500,
+  "parse_miss_cells": 0,
+  "error_count": 0,
+  "fire_count": 32,
+  "rating_hist": {
+    "0": 1957,
+    "1": 511,
+    "3": 2,
+    "2": 30
+  },
+  "harness_cell_counts": {
+    "claude-code": 2500
+  },
+  "framing_cell_counts": {
+    "H1": 504,
+    "H2": 504,
+    "H3": 504,
+    "H4": 504,
+    "H5": 484
+  },
+  "fixed_schedule": [
+    45,
+    52,
+    60,
+    67,
+    75,
+    82,
+    90,
+    97,
+    105,
+    112,
+    120
+  ],
+  "fire_rate_among_at_risk_cells": {
+    "45": {
+      "n": 2500,
+      "fire_rate": 0.0128
+    },
+    "52": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "60": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "67": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "75": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "82": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "90": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "97": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "105": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "112": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "120": {
+      "n": 0,
+      "fire_rate": null
+    }
+  },
+  "prompt_leak_spotcheck_hits": [],
+  "usage_tokens_rough": {
+    "input_tokens": 1843736,
+    "output_tokens": 142171,
+    "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+  },
+  "wall_s": 58.7,
+  "typesafe_ok": 2500,
+  "typesafe_errors_sample": [],
+  "api_url": "https://api.typesafe.ai/v1/systemone",
+  "model": "jev-1.13.0"
+}

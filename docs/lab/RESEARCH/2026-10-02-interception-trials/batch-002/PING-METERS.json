@@ -1,0 +1,201 @@
+{
+  "flash-hframings": {
+    "n_cells": 240,
+    "fire_count": 46,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 240
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 151.1
+  },
+  "flash-scale": {
+    "n_cells": 2400,
+    "fire_count": 37,
+    "parse_miss_cells": 2300,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": null
+  },
+  "luna": {
+    "n_cells": 72,
+    "fire_count": 0,
+    "parse_miss_cells": 72,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 72
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 1.1
+  },
+  "luna-b": {
+    "n_cells": 180,
+    "fire_count": 35,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": 182.1
+  },
+  "luna-h25": {
+    "n_cells": 72,
+    "fire_count": 5,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 24,
+      "H2": 12,
+      "H3": 12,
+      "H4": 12,
+      "H5": 12
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 73.1
+  },
+  "luna-scale": {
+    "n_cells": 960,
+    "fire_count": 5,
+    "parse_miss_cells": 930,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": null
+  },
+  "typesafe": {
+    "n_cells": 180,
+    "fire_count": 0,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 180
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 125854,
+      "output_tokens": 6878,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 8.3
+  },
+  "typesafe-h25": {
+    "n_cells": 240,
+    "fire_count": 7,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 80,
+      "H2": 40,
+      "H3": 40,
+      "H4": 40,
+      "H5": 40
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 176997,
+      "output_tokens": 11760,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 11.2
+  },
+  "typesafe-k1": {
+    "n_cells": 2500,
+    "fire_count": 35,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 504,
+      "H2": 504,
+      "H3": 504,
+      "H4": 504,
+      "H5": 484
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 1843736,
+      "output_tokens": 142172,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 59.3
+  },
+  "typesafe-k2": {
+    "n_cells": 2500,
+    "fire_count": 32,
+    "parse_miss_cells": 0,
+    "error_count": 0,
+    "leak_hits": 0,
+    "framing_cell_counts": {
+      "H1": 504,
+      "H2": 504,
+      "H3": 504,
+      "H4": 504,
+      "H5": 484
+    },
+    "usage_tokens_rough": {
+      "input_tokens": 1843736,
+      "output_tokens": 142171,
+      "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+    },
+    "wall_s": 58.7
+  },
+  "typesafe-phase-gate": {
+    "n_cells": 196,
+    "fire_count": null,
+    "parse_miss_cells": null,
+    "error_count": null,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": null
+  },
+  "typesafe-review-check": {
+    "n_cells": 0,
+    "fire_count": null,
+    "parse_miss_cells": null,
+    "error_count": null,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": null
+  },
+  "typesafe-scale": {
+    "n_cells": 2971,
+    "fire_count": null,
+    "parse_miss_cells": null,
+    "error_count": null,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": null
+  },
+  "typesafe-scale-rr": {
+    "n_cells": 180,
+    "fire_count": null,
+    "parse_miss_cells": null,
+    "error_count": null,
+    "leak_hits": 0,
+    "framing_cell_counts": null,
+    "usage_tokens_rough": null,
+    "wall_s": null
+  },
+  "_cumulative_live_n_cells": 12691
+}

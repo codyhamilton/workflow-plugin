@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-10-02 01:43:18 AEST",
+  "wave": "typesafe-k1",
+  "soft_standard_hold": true,
+  "n_cells": 2500,
+  "fire_count": 35,
+  "parse_miss_cells": 0,
+  "error_count": 0,
+  "leak_hits": 0,
+  "framing_cell_counts": {
+    "H1": 504,
+    "H2": 504,
+    "H3": 504,
+    "H4": 504,
+    "H5": 484
+  },
+  "usage_tokens_rough": {
+    "input_tokens": 1843736,
+    "output_tokens": 142172,
+    "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+  },
+  "wall_s": 59.3,
+  "n_packs": 20,
+  "schedule": [
+    45,
+    52,
+    60,
+    67,
+    75,
+    82,
+    90,
+    97,
+    105,
+    112,
+    120
+  ]
+}
