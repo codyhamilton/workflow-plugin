@@ -1,0 +1,80 @@
+# GROWTH-DESIGN-NOTES — field fill for GROWTH state-selections (Soft HOLD)
+
+**Soft Standard HOLD** — measured-corpus tooling only. No hooks, no Soft Standard unlock, no FP/miss product claims (`window_status` still unidentified). Nothing here needs `:8080`.
+
+Follow-on to #107 (merged; not amended). Analysis seat (Sol catalog `bc-cca7ac7f`) may layer ranking on top; this note covers the implementation only.
+
+## Problem
+
+#107 added three GROWTH state-selections to the scenario sweep:
+
+| state | field it projects |
+|-------|-------------------|
+| `markers_focus` | `markers` |
+| `phase_hints_focus` | `phase_hints` |
+| `recent_delta_brief` | `recent` |
+
+No batch-002 snapshot builder ever emitted those keys. Across all 606 checkpoints in `snapshots/`, `snapshots-dense/` and `snapshots-mid/`, `markers`, `phase_hints` and `recent` are present **0** times. `project()` used `full.get(field) or {}` / `[]`, so the judge saw empty fields.
+
+Consequences in the landed #107 results (`typesafe-scenario-sweep/results.jsonl`):
+
+- 2,312 growth-state rows (1,328 `markers_focus`, 492 `phase_hints_focus`, 492 `recent_delta_brief`) judged empty fields. Their fire rates (0.0–0.07) are not evidence about those state shapes.
+- `cell_id` did not encode state content, so a plain re-run would have skipped them as already done.
+
+## What the snapshots do carry
+
+| harness | checkpoints | `tail` | `cumulative.tool_histogram` | `delta_since_prior` |
+|---------|-------------|--------|-----------------------------|---------------------|
+| claude-code | 383 | yes (8 turns: `turn`, `excerpt`, `tool_names`) | yes | yes |
+| opencode / codex / cursor | 223 | no (lite prefix, counters or role histogram only) | no | no |
+
+## Fix
+
+`growth_fill.py` derives the three fields deterministically, offline, from `tail` + `cumulative` + `delta_since_prior` only. No schedule, session-length or progress inputs, so nothing leaks beyond what `tail_focus` already shows.
+
+- `markers`: counts over the tail window (`tail_turns`, `tool_turns`, `silent_tool_turns`, `text_only_turns`, `max_same_tool_run`), lexical term counts (`error_terms`, `verify_terms`, `delivery_terms`, `wait_terms`), plus `compaction_event_count`, `reread_path_count`, `delta_new_read_paths`.
+- `phase_hints`: tool-class mix (explore / edit / exec / orchestrate / user / other) for the tail and cumulatively, dominant class for each, `tail_has_edit`, `closing_language`. Marked `heuristic, not a label`.
+- `recent`: last 4 tail turns as `{turn, tools, text[:160]}`. `recent_delta_brief` still projects the last 2, as designed in #107.
+
+A native field on a snapshot, if a future builder emits one, wins over the derived value.
+
+### Eligibility gate
+
+Lite-prefix packs have no `tail`, so nothing honest can be derived. `project()` raises `GrowthIneligible` and `build_cells()` skips the cell and counts it in `cells_plan.json` (`growth_cells_gated_no_tail`). Empty fields are never sent to the judge.
+
+Effect at the sweep's representative (mid) checkpoint, 41 sessions (`GROWTH-FILL-COVERAGE.json`):
+
+| | sessions |
+|---|---|
+| eligible (claude-code) | 16 |
+| gated, no tail | 25 (opencode 20, codex 3, cursor 2) |
+
+All 16 eligible sessions get non-empty `markers`, `phase_hints` and `recent`. **GROWTH scenarios are therefore 102 scenarios × 16 sessions, not × 41.** Do not report the growth block under the "× 41" headline. Planned at MAX=320: 10,570 cells total, 1,632 of them growth.
+
+### Versioning and stale rows
+
+- Growth cells now hash `growth-fill-v1` into `cell_id` and carry a `state_fill` field, so they are not deduped against the old empty-field rows.
+- Old rows stay in `results.jsonl` (history, unmodified). `main()` excludes growth rows without `state_fill` from `meters.json` and records `stale_growth_rows_excluded`.
+- Bump `FILL_VERSION` in `growth_fill.py` whenever the derivation changes; that re-runs growth cells only.
+
+## How-to
+
+```bash
+cd docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002
+
+# offline checks (no network, no key)
+WF_REPO=$(git rev-parse --show-toplevel) python3 test_growth_fill.py   # derivation, gate, sweep wiring
+python3 growth_fill.py                                                 # rewrites GROWTH-FILL-COVERAGE.json
+
+# re-run growth cells only (needs TYPESAFE_API_KEY; old rows are not re-sent)
+TYPESAFE_API_KEY=... python3 run_typesafe_scenario_corpus_sweep.py
+```
+
+`WF_REPO` overrides the hardcoded lab-machine repo path in the sweep runner and `run_batch002_flash_luna_scale.py`. Unset, behavior is unchanged.
+
+## Limits
+
+- Lexical and tool-class heuristics, not ground truth. They give the judge something concrete to read; they do not establish that these states are good predictors.
+- Only claude-code sessions can exercise GROWTH states until opencode/codex/cursor builders emit a `tail`. That is the real fix for the coverage gap and is out of scope here.
+- No new TypeSafe results are included. The refill needs a key and spend; the tooling above is ready for it.
+- The `window_status` caveat from #106 still applies to any fire-rate interpretation.
