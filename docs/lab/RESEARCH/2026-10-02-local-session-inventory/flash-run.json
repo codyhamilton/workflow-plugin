@@ -1,0 +1,13 @@
+{
+  "command": "opencode run --model deepseek/deepseek-flash --format default '<prompt with stats-compact.json>' </dev/null",
+  "model": "deepseek/deepseek-flash",
+  "prefer_over": "luna",
+  "stdin": "closed",
+  "cwd": "/tmp/2026-10-02-local-session-inventory",
+  "exit_code": 0,
+  "succeeded": true,
+  "retries": 0,
+  "stdout_bytes": 8636,
+  "prompt_bytes": 63069,
+  "note": "Did not kill long-lived OpenCode TUI on pts/5 (silver-chronicle). Soft Standard HOLD."
+}
