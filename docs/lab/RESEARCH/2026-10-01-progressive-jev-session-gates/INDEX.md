@@ -25,9 +25,9 @@ This pack completes the definitions, the citations, and the proof plan. A dry-ru
 | Hypotheses falsifiable before looking at outcomes | Yes, in [`HYPOTHESIS.md`](HYPOTHESIS.md) |
 | Gold protocol and rubric written | Yes, [`TUNING-PLAN.md`](TUNING-PLAN.md), [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) |
 | Public studies cited with what transfers | Yes, [`LITERATURE.md`](LITERATURE.md) |
-| JSONL corpus in hand | Redacted maps fixtures, not the raw Ubuntu JSONLs. Default path: [`../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/`](../2026-09-30-jev-cheap-judgement-signals/proofs/fixtures/maps-5h-workers/MANIFEST.md). Harness dry-run only; no gold labels |
-| Gold labels | No |
-| Jev replay metrics | No |
+| JSONL corpus in hand | Ubuntu raw + redacted fixtures; manifest under [`proofs/validated/corpus_manifest.json`](proofs/validated/corpus_manifest.json) |
+| Gold labels | P0 panel on 21 cps (two smoking guns); **A0 null**; α **0.1189** — see [`proofs/validated/gold/PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md) |
+| Jev replay metrics | No live Jev cache / sweep yet |
 | Design high-confidence | **No** |
 
 ## Map

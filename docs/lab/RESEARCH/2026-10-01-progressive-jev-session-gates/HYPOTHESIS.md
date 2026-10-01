@@ -1,6 +1,6 @@
 # Hypotheses — progressive Jev session gates
 
-**Status:** pre-registered for the first replay. **Confidence: not high.** No hypothesis below has been tested. A pass on one cell is not a licence to skip the reliability floor in H5.
+**Status:** pre-registered for the first replay. **Confidence: not high.** P0 three-seat gold panel landed 2026-10-01: judge floor met (Sonnet + Composer + Grok), but **A0 is null** on both smoking guns and pooled Krippendorff α = **0.1189** (< H5 floor 0.40) — **H5 fails**; stop before interpreting H1–H4 / H6–H7 for tuning. See [`proofs/validated/gold/PANEL-FINDINGS-20261001.md`](proofs/validated/gold/PANEL-FINDINGS-20261001.md). Other hypotheses remain untested until Jev replay exists.
 
 Definitions: [`TERMS.md`](TERMS.md). Data plan: [`TUNING-PLAN.md`](TUNING-PLAN.md). Citations: [`LITERATURE.md`](LITERATURE.md).
 
