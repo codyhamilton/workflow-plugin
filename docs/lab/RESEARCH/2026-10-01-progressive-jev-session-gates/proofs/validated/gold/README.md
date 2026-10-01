@@ -30,6 +30,12 @@ Turn count alone must not drive checkout. Patterns: `runaway`, `low_progress`, `
 3. Only `role=reviewer_final` rows with `signed=true` count as signed labels for downstream use.
 4. Optional Grok/Composer: **skipped** (no credentials on this machine without new secrets).
 
+## Safe packs for cloud seats (3–4)
+
+See [`packs/`](packs/) — hybrid_v0 redacted judge packs (`N=8`, excerpt 400) derived from
+gitignored gold-bundles. WSM points Grok / Composer at `packs/p0-judge-packs-*.jsonl`
+(or per-worker files). No raw Ubuntu paths.
+
 ## Files
 
 | File | Contents |
