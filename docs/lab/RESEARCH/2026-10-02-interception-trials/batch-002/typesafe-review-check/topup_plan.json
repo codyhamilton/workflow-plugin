@@ -1,0 +1,13 @@
+{
+  "n_planned": 1500,
+  "n_todo": 1500,
+  "n_already": 244,
+  "builders": [
+    "refine_brief",
+    "session_progress",
+    "unit_needs_review"
+  ],
+  "n_sessions": 5,
+  "soft_standard_hold": true,
+  "product_wiring": false
+}

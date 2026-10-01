@@ -1,0 +1,1221 @@
+{
+  "metric": "scenario_progress",
+  "n_distinct_scenarios": 200,
+  "n_sessions_swept": 41,
+  "n_cells_incidental": 8200,
+  "n_packs_available": 41,
+  "n_scenarios_planned": 200,
+  "errors": 0,
+  "tok_in": 4621254,
+  "tok_out": 426284,
+  "wall_s": 166.8,
+  "checkpoint_policy": "one_representative_mid_per_session",
+  "window_cartesian": false,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "outcomes_by_scenario": {
+    "state.delta_only|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 25,
+      "fire_rate": 0.6098
+    },
+    "state.delta_only|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 33,
+      "fire_rate": 0.8049
+    },
+    "state.tail_focus|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.tail_focus|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 5,
+      "fire_rate": 0.122
+    },
+    "state.tool_hist_focus|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.tool_hist_focus|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.tool_hist_focus|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.tool_hist_focus|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.0732
+    },
+    "state.brief_cum_no_tail|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 7,
+      "fire_rate": 0.1707
+    },
+    "state.brief_cum_no_tail|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 6,
+      "fire_rate": 0.1463
+    },
+    "state.brief_cum_no_tail|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 4,
+      "fire_rate": 0.0976
+    },
+    "state.brief_cum_no_tail|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.brief_cum_no_tail|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.0732
+    },
+    "state.chars_budget_1200|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.chars_budget_1200|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.chars_budget_1200|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 3,
+      "fire_rate": 0.0732
+    },
+    "state.chars_budget_1200|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.delta_only|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.tail_focus|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.tail_focus|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tail_focus|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.tool_hist_focus|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.tool_hist_focus|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 6,
+      "fire_rate": 0.1463
+    },
+    "state.brief_cum_no_tail|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.brief_cum_no_tail|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.chars_budget_1200|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.recheck_interval": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.closing_protect": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.scope_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.activity_without_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.tail_risk": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.window_delta_tools|q.recoverable_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.state_length_short|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.state_length_short|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 2,
+      "fire_rate": 0.0488
+    },
+    "state.state_length_short|q.over_polish": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.under_verified": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.mid_arc_healthy": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.early_false_alarm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.late_miss_risk": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    },
+    "state.state_length_short|q.recovery_possible": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.stop_preserves_value": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.continue_learns": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.thrash_vs_explore": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.user_wait_signal": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.resource_asymmetry": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_short|q.output_starvation": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.compaction_storm": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.reread_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.silent_stall": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.tool_error_cascade": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.context_pressure": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.validation_loop": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.plan_execute_drift": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.handoff_ready": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.abort_cheaper": {
+      "n_sessions": 41,
+      "fire_count": 0,
+      "fire_rate": 0.0
+    },
+    "state.state_length_mid|q.duplicate_work": {
+      "n_sessions": 41,
+      "fire_count": 1,
+      "fire_rate": 0.0244
+    }
+  },
+  "scenario_ids": [
+    "state.brief_cum_no_tail|q.abort_cheaper",
+    "state.brief_cum_no_tail|q.activity_without_value",
+    "state.brief_cum_no_tail|q.closing_protect",
+    "state.brief_cum_no_tail|q.compaction_storm",
+    "state.brief_cum_no_tail|q.context_pressure",
+    "state.brief_cum_no_tail|q.continue_learns",
+    "state.brief_cum_no_tail|q.duplicate_work",
+    "state.brief_cum_no_tail|q.early_false_alarm",
+    "state.brief_cum_no_tail|q.handoff_ready",
+    "state.brief_cum_no_tail|q.late_miss_risk",
+    "state.brief_cum_no_tail|q.mid_arc_healthy",
+    "state.brief_cum_no_tail|q.output_starvation",
+    "state.brief_cum_no_tail|q.over_polish",
+    "state.brief_cum_no_tail|q.plan_execute_drift",
+    "state.brief_cum_no_tail|q.recheck_interval",
+    "state.brief_cum_no_tail|q.recoverable_stall",
+    "state.brief_cum_no_tail|q.recovery_possible",
+    "state.brief_cum_no_tail|q.reread_loop",
+    "state.brief_cum_no_tail|q.resource_asymmetry",
+    "state.brief_cum_no_tail|q.scope_drift",
+    "state.brief_cum_no_tail|q.silent_stall",
+    "state.brief_cum_no_tail|q.stop_preserves_value",
+    "state.brief_cum_no_tail|q.tail_risk",
+    "state.brief_cum_no_tail|q.thrash_vs_explore",
+    "state.brief_cum_no_tail|q.tool_error_cascade",
+    "state.brief_cum_no_tail|q.under_verified",
+    "state.brief_cum_no_tail|q.user_wait_signal",
+    "state.brief_cum_no_tail|q.validation_loop",
+    "state.chars_budget_1200|q.abort_cheaper",
+    "state.chars_budget_1200|q.activity_without_value",
+    "state.chars_budget_1200|q.closing_protect",
+    "state.chars_budget_1200|q.compaction_storm",
+    "state.chars_budget_1200|q.context_pressure",
+    "state.chars_budget_1200|q.continue_learns",
+    "state.chars_budget_1200|q.duplicate_work",
+    "state.chars_budget_1200|q.early_false_alarm",
+    "state.chars_budget_1200|q.handoff_ready",
+    "state.chars_budget_1200|q.late_miss_risk",
+    "state.chars_budget_1200|q.mid_arc_healthy",
+    "state.chars_budget_1200|q.output_starvation",
+    "state.chars_budget_1200|q.over_polish",
+    "state.chars_budget_1200|q.plan_execute_drift",
+    "state.chars_budget_1200|q.recheck_interval",
+    "state.chars_budget_1200|q.recoverable_stall",
+    "state.chars_budget_1200|q.recovery_possible",
+    "state.chars_budget_1200|q.reread_loop",
+    "state.chars_budget_1200|q.resource_asymmetry",
+    "state.chars_budget_1200|q.scope_drift",
+    "state.chars_budget_1200|q.silent_stall",
+    "state.chars_budget_1200|q.stop_preserves_value",
+    "state.chars_budget_1200|q.tail_risk",
+    "state.chars_budget_1200|q.thrash_vs_explore",
+    "state.chars_budget_1200|q.tool_error_cascade",
+    "state.chars_budget_1200|q.under_verified",
+    "state.chars_budget_1200|q.user_wait_signal",
+    "state.chars_budget_1200|q.validation_loop",
+    "state.delta_only|q.abort_cheaper",
+    "state.delta_only|q.activity_without_value",
+    "state.delta_only|q.closing_protect",
+    "state.delta_only|q.compaction_storm",
+    "state.delta_only|q.context_pressure",
+    "state.delta_only|q.continue_learns",
+    "state.delta_only|q.duplicate_work",
+    "state.delta_only|q.early_false_alarm",
+    "state.delta_only|q.handoff_ready",
+    "state.delta_only|q.late_miss_risk",
+    "state.delta_only|q.mid_arc_healthy",
+    "state.delta_only|q.output_starvation",
+    "state.delta_only|q.over_polish",
+    "state.delta_only|q.plan_execute_drift",
+    "state.delta_only|q.recheck_interval",
+    "state.delta_only|q.recoverable_stall",
+    "state.delta_only|q.recovery_possible",
+    "state.delta_only|q.reread_loop",
+    "state.delta_only|q.resource_asymmetry",
+    "state.delta_only|q.scope_drift",
+    "state.delta_only|q.silent_stall",
+    "state.delta_only|q.stop_preserves_value",
+    "state.delta_only|q.tail_risk",
+    "state.delta_only|q.thrash_vs_explore",
+    "state.delta_only|q.tool_error_cascade",
+    "state.delta_only|q.under_verified",
+    "state.delta_only|q.user_wait_signal",
+    "state.delta_only|q.validation_loop",
+    "state.state_length_mid|q.abort_cheaper",
+    "state.state_length_mid|q.compaction_storm",
+    "state.state_length_mid|q.context_pressure",
+    "state.state_length_mid|q.duplicate_work",
+    "state.state_length_mid|q.handoff_ready",
+    "state.state_length_mid|q.plan_execute_drift",
+    "state.state_length_mid|q.reread_loop",
+    "state.state_length_mid|q.silent_stall",
+    "state.state_length_mid|q.tool_error_cascade",
+    "state.state_length_mid|q.validation_loop",
+    "state.state_length_short|q.abort_cheaper",
+    "state.state_length_short|q.compaction_storm",
+    "state.state_length_short|q.context_pressure",
+    "state.state_length_short|q.continue_learns",
+    "state.state_length_short|q.duplicate_work",
+    "state.state_length_short|q.early_false_alarm",
+    "state.state_length_short|q.handoff_ready",
+    "state.state_length_short|q.late_miss_risk",
+    "state.state_length_short|q.mid_arc_healthy",
+    "state.state_length_short|q.output_starvation",
+    "state.state_length_short|q.over_polish",
+    "state.state_length_short|q.plan_execute_drift",
+    "state.state_length_short|q.recovery_possible",
+    "state.state_length_short|q.reread_loop",
+    "state.state_length_short|q.resource_asymmetry",
+    "state.state_length_short|q.silent_stall",
+    "state.state_length_short|q.stop_preserves_value",
+    "state.state_length_short|q.thrash_vs_explore",
+    "state.state_length_short|q.tool_error_cascade",
+    "state.state_length_short|q.under_verified",
+    "state.state_length_short|q.user_wait_signal",
+    "state.state_length_short|q.validation_loop",
+    "state.tail_focus|q.abort_cheaper",
+    "state.tail_focus|q.activity_without_value",
+    "state.tail_focus|q.closing_protect",
+    "state.tail_focus|q.compaction_storm",
+    "state.tail_focus|q.context_pressure",
+    "state.tail_focus|q.continue_learns",
+    "state.tail_focus|q.duplicate_work",
+    "state.tail_focus|q.early_false_alarm",
+    "state.tail_focus|q.handoff_ready",
+    "state.tail_focus|q.late_miss_risk",
+    "state.tail_focus|q.mid_arc_healthy",
+    "state.tail_focus|q.output_starvation",
+    "state.tail_focus|q.over_polish",
+    "state.tail_focus|q.plan_execute_drift",
+    "state.tail_focus|q.recheck_interval",
+    "state.tail_focus|q.recoverable_stall",
+    "state.tail_focus|q.recovery_possible",
+    "state.tail_focus|q.reread_loop",
+    "state.tail_focus|q.resource_asymmetry",
+    "state.tail_focus|q.scope_drift",
+    "state.tail_focus|q.silent_stall",
+    "state.tail_focus|q.stop_preserves_value",
+    "state.tail_focus|q.tail_risk",
+    "state.tail_focus|q.thrash_vs_explore",
+    "state.tail_focus|q.tool_error_cascade",
+    "state.tail_focus|q.under_verified",
+    "state.tail_focus|q.user_wait_signal",
+    "state.tail_focus|q.validation_loop",
+    "state.tool_hist_focus|q.abort_cheaper",
+    "state.tool_hist_focus|q.activity_without_value",
+    "state.tool_hist_focus|q.closing_protect",
+    "state.tool_hist_focus|q.compaction_storm",
+    "state.tool_hist_focus|q.context_pressure",
+    "state.tool_hist_focus|q.continue_learns",
+    "state.tool_hist_focus|q.duplicate_work",
+    "state.tool_hist_focus|q.early_false_alarm",
+    "state.tool_hist_focus|q.handoff_ready",
+    "state.tool_hist_focus|q.late_miss_risk",
+    "state.tool_hist_focus|q.mid_arc_healthy",
+    "state.tool_hist_focus|q.output_starvation",
+    "state.tool_hist_focus|q.over_polish",
+    "state.tool_hist_focus|q.plan_execute_drift",
+    "state.tool_hist_focus|q.recheck_interval",
+    "state.tool_hist_focus|q.recoverable_stall",
+    "state.tool_hist_focus|q.recovery_possible",
+    "state.tool_hist_focus|q.reread_loop",
+    "state.tool_hist_focus|q.resource_asymmetry",
+    "state.tool_hist_focus|q.scope_drift",
+    "state.tool_hist_focus|q.silent_stall",
+    "state.tool_hist_focus|q.stop_preserves_value",
+    "state.tool_hist_focus|q.tail_risk",
+    "state.tool_hist_focus|q.thrash_vs_explore",
+    "state.tool_hist_focus|q.tool_error_cascade",
+    "state.tool_hist_focus|q.under_verified",
+    "state.tool_hist_focus|q.user_wait_signal",
+    "state.tool_hist_focus|q.validation_loop",
+    "state.window_delta_tools|q.abort_cheaper",
+    "state.window_delta_tools|q.activity_without_value",
+    "state.window_delta_tools|q.closing_protect",
+    "state.window_delta_tools|q.compaction_storm",
+    "state.window_delta_tools|q.context_pressure",
+    "state.window_delta_tools|q.continue_learns",
+    "state.window_delta_tools|q.duplicate_work",
+    "state.window_delta_tools|q.early_false_alarm",
+    "state.window_delta_tools|q.handoff_ready",
+    "state.window_delta_tools|q.late_miss_risk",
+    "state.window_delta_tools|q.mid_arc_healthy",
+    "state.window_delta_tools|q.output_starvation",
+    "state.window_delta_tools|q.over_polish",
+    "state.window_delta_tools|q.plan_execute_drift",
+    "state.window_delta_tools|q.recheck_interval",
+    "state.window_delta_tools|q.recoverable_stall",
+    "state.window_delta_tools|q.recovery_possible",
+    "state.window_delta_tools|q.reread_loop",
+    "state.window_delta_tools|q.resource_asymmetry",
+    "state.window_delta_tools|q.scope_drift",
+    "state.window_delta_tools|q.silent_stall",
+    "state.window_delta_tools|q.stop_preserves_value",
+    "state.window_delta_tools|q.tail_risk",
+    "state.window_delta_tools|q.thrash_vs_explore",
+    "state.window_delta_tools|q.tool_error_cascade",
+    "state.window_delta_tools|q.under_verified",
+    "state.window_delta_tools|q.user_wait_signal",
+    "state.window_delta_tools|q.validation_loop"
+  ],
+  "generated_at": "2026-10-02T01:53:30+10:00"
+}

@@ -1,0 +1,15 @@
+{
+  "n_new": 2000,
+  "errors": 0,
+  "by_axis": {
+    "phase_gate": 1756,
+    "review_check": 244
+  },
+  "tok_in": 973155,
+  "tok_out": 46745,
+  "wall_s": 35.6,
+  "soft_hold": true,
+  "product_wiring": false,
+  "generated_at": "2026-10-02T01:45:09+10:00",
+  "axis": "review_check"
+}
