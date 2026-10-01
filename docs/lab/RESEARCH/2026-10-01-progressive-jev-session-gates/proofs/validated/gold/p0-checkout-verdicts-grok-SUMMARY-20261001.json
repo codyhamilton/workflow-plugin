@@ -1,0 +1,25 @@
+{
+  "seat": "grok-4.7",
+  "model": "grok-4.7",
+  "pack_source": "p0-judge-packs-20261001-194107.jsonl",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "n_rows": 21,
+  "signed": true,
+  "earliest_checkout_turn": {
+    "92a48e004519": 105,
+    "bb6165018de0": null
+  },
+  "checkout_turns": {
+    "92a48e004519": [
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210
+    ],
+    "bb6165018de0": []
+  }
+}
