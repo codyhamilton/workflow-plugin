@@ -53,4 +53,21 @@ High raw agreement on `bb6165018de0` is trivial (all `not_yet`). The smoking gun
 
 ## Follow-on (same day)
 
-`A_maj` and `A_gc` are computed in [`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json): both **180** on `92a48e004519` and **null** on `bb6165018de0`, identical at all 21 checkpoints. They are not adopted as the fit target. The chosen next measurement is the Sonnet re-label in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). A0 and α in this file are unchanged. Confidence remains **not high**.
+`A_maj` and `A_gc` are computed in [`p0-alt-gold-targets-20261001.json`](p0-alt-gold-targets-20261001.json): both **180** on `92a48e004519` and **null** on `bb6165018de0`, identical at all 21 checkpoints. They are not adopted as the fit target.
+
+## Experiment (b) — Sonnet re-label `parent-pull-v1` (**FAIL**, 2026-10-01)
+
+Independent Sonnet 5.5 judgments on the same 21 hybrid_v0 pack rows, rubric revision **`parent-pull-v1`**, artifacts [`p0-checkout-verdicts-sonnet-relabel-20261001.jsonl`](p0-checkout-verdicts-sonnet-relabel-20261001.jsonl) and [`p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json`](p0-checkout-verdicts-sonnet-relabel-SUMMARY-20261001.json).
+
+| Outcome | Detail |
+|---------|--------|
+| Scorecard | **Fail** — stop rule **over-fire** |
+| Hold-out | **1** checkout on required hold-out prefix **`92a48e004519@255`** (rule 2) |
+| Island cps 180/195/210 | All **checkout** (rule 1 satisfied) |
+| Grok-only 105–165 | Sonnet **checkout on all 5** (reported only) |
+
+**Not gold:** discard these rows; signed P0 Sonnet finals in `p0-checkout-verdicts-20261001.jsonl` stand. Do **not** adopt **A_maj** / **A_gc**. No Jev sweep.
+
+**α hint if seat swapped (CHM):** nominal 3×21 α ≈ **0.5674** with this relabel seat — still **does not** override over-fire discard.
+
+**Next measurement:** experiment **(c)** `corpus-expand-hybrid-panel-original` in [`../../../NEXT-EXPERIMENTS.md`](../../../NEXT-EXPERIMENTS.md). A0 and α in the P0 table above are unchanged. Confidence remains **not high**.

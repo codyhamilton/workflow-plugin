@@ -26,7 +26,7 @@ This pack completes the definitions, the citations, and the proof plan. A dry-ru
 | Gold protocol and rubric written | Yes, [`TUNING-PLAN.md`](TUNING-PLAN.md), [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) |
 | Public studies cited with what transfers | Yes, [`LITERATURE.md`](LITERATURE.md) |
 | JSONL corpus in hand | Ubuntu raw + redacted fixtures; manifest under [`proofs/validated/corpus_manifest.json`](proofs/validated/corpus_manifest.json) |
-| Gold labels | P0 panel on 21 cps (two smoking guns); **A0 null**; α **0.1189**; **H5 failed**. Alternates **A_maj = A_gc = 180 / null**, not a fit target — [`proofs/validated/gold/p0-alt-gold-targets-20261001.json`](proofs/validated/gold/p0-alt-gold-targets-20261001.json), [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) |
+| Gold labels | P0 panel on 21 cps (two smoking guns); **A0 null**; α **0.1189**; **H5 failed**. **(b)** `parent-pull-v1` Sonnet re-label **failed** (discarded). Next **(c)** corpus + original-rubric panel — [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) |
 | Jev replay metrics | No live Jev cache / sweep yet |
 | Design high-confidence | **No** |
 
@@ -38,7 +38,7 @@ This pack completes the definitions, the citations, and the proof plan. A dry-ru
 | [`HYPOTHESIS.md`](HYPOTHESIS.md) | What would falsify the progressive gate, the hybrid snapshot, and the v0 questions |
 | [`TUNING-PLAN.md`](TUNING-PLAN.md) | Corpus, multi-model gold, aggregation, param grid, staged calls, lock rule |
 | [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) | What “pull the exit hatch” means, with maps examples. Draft delta at the end is not in force |
-| [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | Primary next measurement after H5: Sonnet re-label. A_maj / A_gc documented, not adopted |
+| [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | **(b)** fail recorded; primary next **(c)** `corpus-expand-hybrid-panel-original`. A_maj / A_gc not adopted |
 | [`LITERATURE.md`](LITERATURE.md) | Prior art and the limit of each citation |
 | [`proofs/README.md`](proofs/README.md) | Offline harness plan and the files that must exist before any recommendation |
 
@@ -60,7 +60,7 @@ Stages, in order. Details and output schemas: [`proofs/README.md`](proofs/README
 
 1. **Manifest.** Count JSONLs with at least 75 assistant turns. Record sha256, turn count, bytes. Priority rows: `92a48e004519` (296), `bb6165018de0` (154). Negative control, not in the corpus: `6c87c96bd9bb` (70).
 2. **Schema budget.** Build each snapshot mode at each labeled prefix and record state-JSON length. A mode that cannot shrink under 12_000 characters is ineligible.
-3. **Gold.** Independent prefix judgements from Grok 4.7 high, Claude Sonnet, Claude Opus, and Composer when available. Agreement first. The P0 three-seat panel is below the floor (H5 failed, A0 null). Next is the rubric re-label in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md), not a Jev sweep. `A_maj` and `A_gc` are computed in `proofs/validated/gold/p0-alt-gold-targets-20261001.json` and are not the fit rule.
+3. **Gold.** Independent prefix judgements from Grok 4.7 high, Claude Sonnet, Claude Opus, and Composer when available. Agreement first. The P0 three-seat panel is below the floor (H5 failed, A0 null). Experiment **(b)** re-label failed; next is corpus expansion + original-rubric panel **(c)** in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md), not a Jev sweep. `A_maj` and `A_gc` are computed in `proofs/validated/gold/p0-alt-gold-targets-20261001.json` and are not the fit rule.
 4. **Jev cache.** Call Jev, or record a dry-run when the key is absent. A dry-run can check the schema. It cannot score hypotheses H1–H4 or H6–H7.
 5. **Sweep.** Apply schedule, confidence, and fail-open policy to the cache. Emit overshoot, false early, false late, `max_allowed_turns`, stratified by length.
 6. **Lock memo.** Only after (3) and (5). Until then the proposal stays `status: researching`.

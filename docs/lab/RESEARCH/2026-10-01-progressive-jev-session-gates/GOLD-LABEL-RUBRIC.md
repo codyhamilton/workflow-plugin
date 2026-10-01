@@ -108,7 +108,7 @@ The hindsight pass is where the public maps summary is most tempting. Judges on 
 
 ## Draft delta — not in force (2026-10-01)
 
-The signed P0 rows used the rubric above. This section is the extra paragraph for the Sonnet re-label in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md). It does not rewrite those rows. Do not paste the experiment scorecard, other seats' labels, or target turns into the judge prompt.
+The signed P0 rows used the rubric above. This section was the extra paragraph for experiment **(b)** Sonnet re-label (`parent-pull-v1`) in [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md). **(b) failed** (over-fire); these rows were **discarded as gold**. The section stays **not in force**. Next labeling uses the original rubric only (**(c)** `corpus-expand-hybrid-panel-original`). Do not paste the experiment scorecard, other seats' labels, or target turns into the judge prompt.
 
 `checkout` means a parent-pull: hand the parent a narrower brief, or stop. The worker does not have to look idle. A Bash/Read cycle on files named in the brief can still be `checkout`.
 
