@@ -1,0 +1,46 @@
+{
+  "seat": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "rubric_note": "ORIGINAL rubric only; Parent-pull draft delta NOT in force; rubric_rev omitted (original-seat convention).",
+  "pack_source": "thrash-expand-e-judge-packs-20261001-210125.jsonl",
+  "n_rows": 5,
+  "signed": true,
+  "via": "claude -p --model sonnet",
+  "earliest_checkout_turn": {
+    "e8aa4f271927": null,
+    "5163c22a6a3e": null,
+    "a318f4b89a6a": null
+  },
+  "checkout_turns": {
+    "e8aa4f271927": [],
+    "5163c22a6a3e": [],
+    "a318f4b89a6a": []
+  },
+  "checkout_counts": {
+    "e8aa4f271927": 0,
+    "5163c22a6a3e": 0,
+    "a318f4b89a6a": 0
+  },
+  "workers_labeled": {
+    "5163c22a6a3e": {
+      "checkpoints": [
+        75,
+        90
+      ]
+    },
+    "a318f4b89a6a": {
+      "checkpoints": [
+        75,
+        90
+      ]
+    },
+    "e8aa4f271927": {
+      "checkpoints": [
+        75
+      ]
+    }
+  },
+  "note": "Independent thrash-expand-e panel gold seat (best-available research panel; strict ca977 shape empty on remaining T\u226575 pool). Fresh judgments from hybrid_v0 packs only. Did not overwrite other seats. No --call-jev.",
+  "failures": []
+}
