@@ -10,6 +10,7 @@
     "07357f196666"
   ],
   "expected_local_completions_mid": 24,
+  "note": "Actual cell_count depends on pack checkpoints \u2264 120 per worker",
   "cell_count": 18,
   "flash_arbiter_cap": 4,
   "kill_conflict_workers_gt": 4,

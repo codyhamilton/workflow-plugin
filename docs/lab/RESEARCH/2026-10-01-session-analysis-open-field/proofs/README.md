@@ -40,7 +40,7 @@ Raw Ubuntu JSONL: set `WORKFLOW_PROGRESSIVE_CORPUS` to a directory of `{worker_i
 |--------|--------|
 | `run_pilot_dry_twin.py` | `capture/pilot-field-proof/jev/dry-twin/`, `validated/pilot-field-proof/dry_twin_batch_log.json` |
 | `run_pilot_live_jev.py` | `capture/pilot-field-proof/jev/live/` (`--confirm-live`, `TYPESAFE_API_KEY`; optional `--limit N`) |
-| `run_local_swarm_pilot.py` | `capture/pilot-field-proof/local-swarm/` (add `--live-local` on Ubuntu) |
+| `run_local_swarm_pilot.py` | `capture/pilot-field-proof/local-swarm/` (`--live` on Ubuntu; default provider **Luna**) |
 
 ```bash
 cd docs/lab/RESEARCH/2026-10-01-session-analysis-open-field/proofs

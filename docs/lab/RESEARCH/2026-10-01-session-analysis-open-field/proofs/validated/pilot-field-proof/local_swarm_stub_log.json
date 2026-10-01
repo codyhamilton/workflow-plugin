@@ -11,6 +11,7 @@
       "07357f196666"
     ],
     "expected_local_completions_mid": 24,
+    "note": "Actual cell_count depends on pack checkpoints \u2264 120 per worker",
     "cell_count": 18,
     "flash_arbiter_cap": 4,
     "kill_conflict_workers_gt": 4,
@@ -236,10 +237,12 @@
   "conflict_report": {
     "registration_id": "pilot-field-proof-wave-001",
     "status": "registered_awaiting_live",
+    "swarm_provider": "luna",
     "cell_count": 18,
     "flash_arbiter_cap": 4,
     "conflict_workers": [],
     "parse_fail_workers": [],
-    "note": "Conflict detection runs after live local completions on Ubuntu harness."
-  }
+    "note": "Conflict detection runs after live completions on Ubuntu harness. Default pilot provider is Luna; Flash is optional when OpenCode seat recovers."
+  },
+  "provider": "luna"
 }

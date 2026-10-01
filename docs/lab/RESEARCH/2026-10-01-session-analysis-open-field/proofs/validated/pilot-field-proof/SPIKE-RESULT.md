@@ -7,12 +7,12 @@
 
 | Check | Outcome |
 |-------|---------|
-| 96-cell plan matches 8×12 matrix | pass |
-| 12 registered framing hashes | pass |
+| 88-cell plan matches 8×11 matrix | pass |
+| 11 registered framing hashes (pruned `tournament-monitor-called-out`) | pass |
 | Dry-twin requests all `decision: dry_run` | pass |
-| `batch_trial` unique cells = 96, not rejected | pass |
+| `batch_trial` unique cells = 88, not rejected | pass |
 | `budget_tokens` ≥ 200k | pass (400k) |
-| Live-shaped batch `posts` = 96 with dummy key (no socket) | pass |
+| Live-shaped batch `posts` = 88 with dummy key (no socket) | pass |
 | Dummy API key absent from committed JSON | pass |
 
 ## Artifacts
@@ -23,4 +23,5 @@
 ## Not done here
 
 - Live `--call-jev` / TypeSafe POSTs (deferred to Ubuntu harness with committed registration).
+- Luna live swarm (`run_local_swarm_pilot.py --live`) on Ubuntu harness.
 - Flash workstream C (mount `prose_required` on cloud).

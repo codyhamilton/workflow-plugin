@@ -46,16 +46,6 @@ def _binary_foreshadow_ids() -> dict[str, Any]:
     }
 
 
-def _monitor_called_out() -> dict[str, Any]:
-    return {
-        **questions_early_signal_stats(),
-        "monitor_present": _bool_q(
-            "Is Monitor count ≥ 1 in cumulative.tool_histogram at this checkpoint?"
-        ),
-        "thrash_bundle": _bool_q("Compaction rising with flat assistant_text_chars and no Edit/Write?"),
-    }
-
-
 def _no_story_beyond_counts() -> dict[str, Any]:
     scope = (
         "Answer only from printed cumulative fields; do not infer a story beyond the counts. "
@@ -122,7 +112,6 @@ def _residual_baseline() -> dict[str, Any]:
 OPEN_FIELD_FRAMING_SLUGS: dict[str, dict[str, Any]] = {
     "tournament-binary-foreshadow": _binary_foreshadow_ids(),
     "tournament-likert-collapsed": _compact_likert_collapsed(),
-    "tournament-monitor-called-out": _monitor_called_out(),
     "tournament-no-story-beyond-counts": _no_story_beyond_counts(),
     "pool-likert-foreshadow": _likert_foreshadow(),
     "pool-echo-guard-reread": _echo_guard_reread(),
