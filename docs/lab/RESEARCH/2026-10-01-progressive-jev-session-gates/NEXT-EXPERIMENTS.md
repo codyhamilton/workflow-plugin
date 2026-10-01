@@ -368,7 +368,7 @@ Exit / earliness: **secondary** — do not optimize for A0 or exit agreement.
 
 ## Primary next — **`progressive-decay-bar-v1`** and **`validation-handoff-steer-v1`** (WSM design fold — no harness yet)
 
-**Status:** **plan/hold** (2026-10-01). **Owner:** Workflow System Manager (orchestration docs). **Shape-signal unlock prerequisite met** — Phase 2 seats (PRs #66/#67/#68) + agreement SUMMARY ([`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md)). Still **no harness work** and **no `--call-jev`** until a decay schedule is pre-registered and reviewed. Definitions: [`TERMS.md`](TERMS.md) §12–§13.
+**Status:** **plan/hold** (2026-10-01). **Owner:** Workflow System Manager (orchestration docs). **Shape-signal unlock prerequisite met** — Phase 2 seats (PRs #66/#67/#68) + agreement SUMMARY ([`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md)). **Decay schedule + handoff steer (design v0):** [`DESIGN-progressive-decay-bar-v0.md`](DESIGN-progressive-decay-bar-v0.md) — pre-registers **D0** (`k0@75 t=3` … `k4+ t=1`), leap/accumulate, validation checks ~50/60/75, success-metric tables, Sol open questions. Still **no harness work** and **no `--call-jev`** until that design is reviewed and a harness PR is scoped. Definitions: [`TERMS.md`](TERMS.md) §12–§13.
 
 These two ids split Cody’s same design fold for traceability; they ship together when unlocked, not as competing primaries.
 
@@ -390,7 +390,7 @@ These two ids split Cody’s same design fold for traceability; they ship togeth
 | Gate | Criterion |
 |------|-----------|
 | Prerequisite | `shape-signal-panel-v1` Phase 2+ **done** (agreement SUMMARY 2026-10-01); several workers have shared early-signal notes (`ca977` unanimous; `92a48e` thrash@~90) |
-| Docs | §12–§13 unchanged or versioned in TERMS; decay schedule written before any live `confidence_min` decay |
+| Docs | §12–§13 unchanged or versioned in TERMS; decay schedule in [`DESIGN-progressive-decay-bar-v0.md`](DESIGN-progressive-decay-bar-v0.md) reviewed before any live `confidence_min` decay |
 | Harness | Separate PR / seats — **not** this lab-docs fold |
 
 **Confidence:** stays **not high** until offline replay shows decay + handoff beats fixed `P0` on gold-relevant metrics; WSM steer remains convention until product wiring accepts it.
