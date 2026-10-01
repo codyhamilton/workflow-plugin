@@ -1,0 +1,32 @@
+{
+  "seat": "grok",
+  "model": "grok-4.7",
+  "experiment": "c",
+  "experiment_id": "corpus-expand-hybrid-panel-original",
+  "pack_source": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/expansion-judge-packs-20261001-202909.jsonl",
+  "rubric": "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/GOLD-LABEL-RUBRIC.md",
+  "rubric_scope": "original body only; draft delta / parent-pull-v1 not applied",
+  "n_rows": 20,
+  "n_workers": 3,
+  "signed": true,
+  "earliest_checkout": {
+    "0aab88c525de": null,
+    "036ff3ed4a89": null,
+    "0853bc21d3aa": null
+  },
+  "checkout_counts": {
+    "0aab88c525de": 0,
+    "036ff3ed4a89": 0,
+    "0853bc21d3aa": 0,
+    "total": 0
+  },
+  "checkout_turns": {
+    "0aab88c525de": [],
+    "036ff3ed4a89": [],
+    "0853bc21d3aa": []
+  },
+  "decision_counts": {
+    "checkout": 0,
+    "not_yet": 20
+  }
+}
