@@ -52,6 +52,9 @@ class WindowStatusJoinTests(unittest.TestCase):
         outcome_label = label([22, 164])
         row = {"cell_id": "cell-1", "session_id": "session-1", "checkpoint": 55}
         derived = JOIN.derive_rows([row], {"session-1": outcome_label})[0]
+        self.assertTrue(derived["provisional"])
+        self.assertTrue(derived["soft_standard_hold"])
+        self.assertTrue(derived["not_scoreboard"])
         self.assertEqual(derived["derived_row_id"], "cell-1@1")
         self.assertEqual(derived["window_status"], "inside_steer_window")
         self.assertIsNone(derived["near_done"])
@@ -67,6 +70,8 @@ class WindowStatusJoinTests(unittest.TestCase):
             ["cell-1@1", "cell-1@2"],
         )
         summary = JOIN.summarize(results, {"session-1": label()}, derived)
+        self.assertEqual(summary["unique_session_checkpoints"], 1)
+        self.assertEqual(summary["window_status_session_checkpoints"]["no_steer_window"], 1)
         self.assertEqual(summary["unique_cell_ids"], 1)
         self.assertEqual(summary["duplicate_cell_ids"], ["cell-1"])
         self.assertEqual(summary["duplicate_cell_id_extra_rows"], 1)

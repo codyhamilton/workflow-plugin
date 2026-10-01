@@ -174,6 +174,9 @@ def derive_rows(
 
         derived.append(
             {
+                "provisional": True,
+                "soft_standard_hold": True,
+                "not_scoreboard": True,
                 "source_row": line_number,
                 "derived_row_id": (
                     f"{cell_id}@{line_number}" if cell_id else f"row@{line_number}"
@@ -208,6 +211,14 @@ def summarize(
     }
     statuses = Counter(row["window_status"] for row in derived)
     status_counts = {status: statuses.get(status, 0) for status in WINDOW_STATUSES}
+    checkpoint_statuses = {
+        (row["session_id"], row["checkpoint"]): row["window_status"]
+        for row in derived
+    }
+    unique_statuses = Counter(checkpoint_statuses.values())
+    unique_status_counts = {
+        status: unique_statuses.get(status, 0) for status in WINDOW_STATUSES
+    }
     complete = sum(row["checkpoint_outcomes_complete"] for row in derived)
     cell_ids = Counter(
         row["cell_id"] for row in results if isinstance(row.get("cell_id"), str)
@@ -239,7 +250,11 @@ def summarize(
                 }
             )
     return {
+        "provisional": True,
+        "soft_standard_hold": True,
+        "not_scoreboard": True,
         "result_rows": len(results),
+        "unique_session_checkpoints": len(checkpoint_statuses),
         "unique_cell_ids": len(cell_ids),
         "duplicate_cell_ids": duplicate_cell_ids,
         "duplicate_cell_id_extra_rows": sum(
@@ -251,6 +266,7 @@ def summarize(
         "result_sessions_without_label": sorted(result_sessions - labeled_sessions),
         "labeled_sessions_without_result": sorted(labeled_sessions - result_sessions),
         "window_status_rows": status_counts,
+        "window_status_session_checkpoints": unique_status_counts,
         "checkpoint_outcomes_complete_rows": complete,
         "checkpoint_outcomes_missing_rows": len(derived) - complete,
         "finite_window_sessions": windows,
