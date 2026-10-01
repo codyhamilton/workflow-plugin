@@ -1,0 +1,75 @@
+{
+  "status": "exploratory_ok",
+  "concordance_index": 1.0,
+  "future_gate_concordance_le_0_70": "KILL Alternate E if held on proper gold",
+  "future_kill_would_fire": false,
+  "n_workers": 34,
+  "n_events": 2,
+  "covariates": [
+    "compaction_last_le120",
+    "edit_write_absent",
+    "reread_max"
+  ],
+  "censoring": {
+    "event_definition": "thrash_consensus; event_time = last checkpoint \u2264120",
+    "censored_definition": "event=0; duration=T (productive / no theme event)"
+  },
+  "coefficients": {
+    "coef": {
+      "compaction_last_le120": -1.5991322355280813,
+      "edit_write_absent": 32.968129557149396,
+      "reread_max": 3.379485725577165
+    },
+    "exp(coef)": {
+      "compaction_last_le120": 0.2020717926575392,
+      "edit_write_absent": 207910654390592.53,
+      "reread_max": 29.35567036022528
+    },
+    "se(coef)": {
+      "compaction_last_le120": 24.574585159288524,
+      "edit_write_absent": 423.28079255288367,
+      "reread_max": 42.85719074710416
+    },
+    "coef lower 95%": {
+      "compaction_last_le120": -49.7644340827461,
+      "edit_write_absent": -796.6469791940725,
+      "reread_max": -80.61906461731024
+    },
+    "coef upper 95%": {
+      "compaction_last_le120": 46.566169611689936,
+      "edit_write_absent": 862.5832383083713,
+      "reread_max": 87.37803606846458
+    },
+    "exp(coef) lower 95%": {
+      "compaction_last_le120": 2.441073650260266e-22,
+      "edit_write_absent": 0.0,
+      "reread_max": 9.718183618404885e-36
+    },
+    "exp(coef) upper 95%": {
+      "compaction_last_le120": 1.6727479477515118e+20,
+      "edit_write_absent": Infinity,
+      "reread_max": 8.86745317989428e+37
+    },
+    "cmp to": {
+      "compaction_last_le120": 0.0,
+      "edit_write_absent": 0.0,
+      "reread_max": 0.0
+    },
+    "z": {
+      "compaction_last_le120": -0.06507260347073052,
+      "edit_write_absent": 0.0778871381295442,
+      "reread_max": 0.07885457881547019
+    },
+    "p": {
+      "compaction_last_le120": 0.9481161934505907,
+      "edit_write_absent": 0.9379178306147349,
+      "reread_max": 0.9371482915415511
+    },
+    "-log2(p)": {
+      "compaction_last_le120": 0.0768642198959609,
+      "edit_write_absent": 0.09246655866831188,
+      "reread_max": 0.09365074119272117
+    }
+  },
+  "note": "Lab sketch only. Event = thrash_consensus theme (2 workers); all others right-censored at T. Not identified for 3 covariates; concordance is exploratory. Future gate: concordance \u2264 0.70 \u2192 kill Alternate E."
+}

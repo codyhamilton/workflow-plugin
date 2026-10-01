@@ -1,0 +1,388 @@
+{
+  "numeric_families": {
+    "compaction_last_le120": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 95.58823529411765,
+        "92a48e004519": 98.52941176470588
+      },
+      "extreme_cell_workers": [
+        "92a48e004519"
+      ],
+      "poll_label_overlap": [],
+      "spearman_vs_T": 0.2229371956417723,
+      "spearman_vs_T_without_thrash_prototypes": 0.12230893919432981
+    },
+    "compaction_delta_le120": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 95.58823529411765,
+        "92a48e004519": 98.52941176470588
+      },
+      "extreme_cell_workers": [
+        "92a48e004519"
+      ],
+      "poll_label_overlap": [],
+      "spearman_vs_T": 0.33662012334139724,
+      "spearman_vs_T_without_thrash_prototypes": 0.23354845797016147
+    },
+    "reread_max": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 98.52941176470588,
+        "92a48e004519": 95.58823529411765
+      },
+      "extreme_cell_workers": [
+        "ca977b9ca0dd"
+      ],
+      "poll_label_overlap": [],
+      "spearman_vs_T": 0.4012565725410288,
+      "spearman_vs_T_without_thrash_prototypes": 0.33387903115177703
+    },
+    "text_growth": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 3.8461538461538463,
+        "92a48e004519": 3.8461538461538463
+      },
+      "extreme_cell_workers": [
+        "036ff3ed4a89",
+        "0677f597286e",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "15f24c7ba18c",
+        "16a958631580",
+        "5163c22a6a3e",
+        "52ea24516a6e",
+        "5a152464f6e5",
+        "6e06ab86aa72",
+        "79a557b56a6e",
+        "7af2854bba92",
+        "7b00225cb824",
+        "7c99c180742e",
+        "89608cc68603",
+        "8e36f8e80baa",
+        "92a48e004519",
+        "9b156dbab5d9",
+        "a318f4b89a6a",
+        "a3cc4da7e21c",
+        "bb6165018de0",
+        "ca977b9ca0dd",
+        "d34bb8ba01ba",
+        "daf933273c8f",
+        "de5b76cc68a6",
+        "e28a2428b192"
+      ],
+      "poll_label_overlap": [
+        "15f24c7ba18c",
+        "8e36f8e80baa",
+        "bb6165018de0"
+      ],
+      "spearman_vs_T": 0.2512408929458762,
+      "spearman_vs_T_without_thrash_prototypes": 0.45015275658873033
+    },
+    "peak_ctx_first": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 27.941176470588236,
+        "92a48e004519": 39.705882352941174
+      },
+      "extreme_cell_workers": [
+        "07357f196666",
+        "074c8cf22927",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "15f24c7ba18c",
+        "16a958631580",
+        "5163c22a6a3e",
+        "52ea24516a6e",
+        "582c23b3c6e4",
+        "5a152464f6e5",
+        "7af2854bba92",
+        "7b00225cb824",
+        "7c99c180742e",
+        "8e36f8e80baa",
+        "92a48e004519",
+        "9b156dbab5d9",
+        "9da2f589b11b",
+        "d34bb8ba01ba",
+        "d84416c7c9d4",
+        "de5b76cc68a6",
+        "e28a2428b192"
+      ],
+      "poll_label_overlap": [
+        "15f24c7ba18c",
+        "8e36f8e80baa"
+      ],
+      "spearman_vs_T": 0.029051996258031176,
+      "spearman_vs_T_without_thrash_prototypes": 0.08108607337060238
+    },
+    "assistant_text_chars_last": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 10.294117647058824,
+        "92a48e004519": 1.4705882352941178
+      },
+      "extreme_cell_workers": [
+        "036ff3ed4a89",
+        "0677f597286e",
+        "074c8cf22927",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "15f24c7ba18c",
+        "16a958631580",
+        "5163c22a6a3e",
+        "52ea24516a6e",
+        "582c23b3c6e4",
+        "5a152464f6e5",
+        "6e06ab86aa72",
+        "79a557b56a6e",
+        "7af2854bba92",
+        "7b00225cb824",
+        "7c99c180742e",
+        "87a380bc64ff",
+        "89608cc68603",
+        "8e36f8e80baa",
+        "91a9aa8050fb",
+        "9b156dbab5d9",
+        "9da2f589b11b",
+        "a318f4b89a6a",
+        "a3cc4da7e21c",
+        "bb6165018de0",
+        "ca977b9ca0dd",
+        "d34bb8ba01ba",
+        "d84416c7c9d4",
+        "daf933273c8f",
+        "de5b76cc68a6",
+        "e8aa4f271927"
+      ],
+      "poll_label_overlap": [
+        "15f24c7ba18c",
+        "87a380bc64ff",
+        "8e36f8e80baa",
+        "bb6165018de0"
+      ],
+      "spearman_vs_T": 0.10183489214657243,
+      "spearman_vs_T_without_thrash_prototypes": 0.24527619931333797
+    },
+    "checkpoints_seen_le120": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 67.6470588235294,
+        "92a48e004519": 86.76470588235294
+      },
+      "extreme_cell_workers": [
+        "036ff3ed4a89",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "6e06ab86aa72",
+        "7b00225cb824",
+        "89608cc68603",
+        "92a48e004519",
+        "bb6165018de0",
+        "daf933273c8f"
+      ],
+      "poll_label_overlap": [
+        "bb6165018de0"
+      ],
+      "spearman_vs_T": 0.9555539739295621,
+      "spearman_vs_T_without_thrash_prototypes": 0.9504816414408656
+    },
+    "monitor_count_first": {
+      "thrash_consensus_percentile": {
+        "ca977b9ca0dd": 27.941176470588236,
+        "92a48e004519": 27.941176470588236
+      },
+      "extreme_cell_workers": [
+        "036ff3ed4a89",
+        "0677f597286e",
+        "07357f196666",
+        "074c8cf22927",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "15f24c7ba18c",
+        "16a958631580",
+        "5163c22a6a3e",
+        "52ea24516a6e",
+        "582c23b3c6e4",
+        "5a152464f6e5",
+        "6e06ab86aa72",
+        "79a557b56a6e",
+        "7af2854bba92",
+        "7b00225cb824",
+        "7c99c180742e",
+        "87a380bc64ff",
+        "89608cc68603",
+        "8e36f8e80baa",
+        "91a9aa8050fb",
+        "92a48e004519",
+        "9b156dbab5d9",
+        "9da2f589b11b",
+        "a318f4b89a6a",
+        "a3cc4da7e21c",
+        "bb6165018de0",
+        "ca977b9ca0dd",
+        "d34bb8ba01ba",
+        "d84416c7c9d4",
+        "daf933273c8f",
+        "de5b76cc68a6",
+        "e28a2428b192",
+        "e8aa4f271927"
+      ],
+      "poll_label_overlap": [
+        "15f24c7ba18c",
+        "87a380bc64ff",
+        "8e36f8e80baa",
+        "bb6165018de0"
+      ],
+      "spearman_vs_T": -0.2793366021642665,
+      "spearman_vs_T_without_thrash_prototypes": -0.22956321288347536
+    }
+  },
+  "boolean_families": {
+    "frozen_text": {
+      "thrash_consensus_value": true,
+      "extreme_cell_workers": [
+        "92a48e004519",
+        "ca977b9ca0dd"
+      ],
+      "poll_label_overlap": [],
+      "n_in_cell": 2
+    },
+    "no_mutation": {
+      "thrash_consensus_value": true,
+      "extreme_cell_workers": [
+        "036ff3ed4a89",
+        "582c23b3c6e4",
+        "87a380bc64ff",
+        "92a48e004519",
+        "ca977b9ca0dd",
+        "de5b76cc68a6"
+      ],
+      "poll_label_overlap": [
+        "87a380bc64ff"
+      ],
+      "n_in_cell": 6
+    },
+    "bash_read_monopoly": {
+      "thrash_consensus_value": true,
+      "extreme_cell_workers": [
+        "582c23b3c6e4",
+        "92a48e004519",
+        "ca977b9ca0dd",
+        "de5b76cc68a6"
+      ],
+      "poll_label_overlap": [],
+      "n_in_cell": 4
+    },
+    "monitor_present_first": {
+      "thrash_consensus_value": false,
+      "extreme_cell_workers": [
+        "0677f597286e",
+        "07357f196666",
+        "074c8cf22927",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "582c23b3c6e4",
+        "5a152464f6e5",
+        "6e06ab86aa72",
+        "7af2854bba92",
+        "7b00225cb824",
+        "89608cc68603",
+        "92a48e004519",
+        "9da2f589b11b",
+        "a318f4b89a6a",
+        "ca977b9ca0dd",
+        "d34bb8ba01ba",
+        "daf933273c8f",
+        "de5b76cc68a6",
+        "e28a2428b192"
+      ],
+      "poll_label_overlap": [],
+      "n_in_cell": 19
+    },
+    "mutation_present_first": {
+      "thrash_consensus_value": false,
+      "extreme_cell_workers": [
+        "036ff3ed4a89",
+        "582c23b3c6e4",
+        "87a380bc64ff",
+        "92a48e004519",
+        "ca977b9ca0dd",
+        "de5b76cc68a6"
+      ],
+      "poll_label_overlap": [
+        "87a380bc64ff"
+      ],
+      "n_in_cell": 6
+    },
+    "reread_cluster": {
+      "thrash_consensus_value": true,
+      "extreme_cell_workers": [
+        "0677f597286e",
+        "0853bc21d3aa",
+        "0aab88c525de",
+        "16a958631580",
+        "5163c22a6a3e",
+        "52ea24516a6e",
+        "5a152464f6e5",
+        "79a557b56a6e",
+        "7af2854bba92",
+        "7b00225cb824",
+        "7c99c180742e",
+        "87a380bc64ff",
+        "89608cc68603",
+        "8e36f8e80baa",
+        "92a48e004519",
+        "a318f4b89a6a",
+        "bb6165018de0",
+        "ca977b9ca0dd",
+        "d34bb8ba01ba",
+        "daf933273c8f",
+        "e8aa4f271927"
+      ],
+      "poll_label_overlap": [
+        "87a380bc64ff",
+        "8e36f8e80baa",
+        "bb6165018de0"
+      ],
+      "n_in_cell": 21
+    },
+    "thrash_screen_strict": {
+      "thrash_consensus_value": true,
+      "extreme_cell_workers": [
+        "92a48e004519",
+        "ca977b9ca0dd"
+      ],
+      "poll_label_overlap": [],
+      "n_in_cell": 2
+    }
+  },
+  "combined_thrash_screen_strict": {
+    "cell_workers": [
+      "92a48e004519",
+      "ca977b9ca0dd"
+    ],
+    "poll_label_overlap": [],
+    "kill_check": "PASS",
+    "kill_criterion": "Extreme thrash cell (thrash_screen_strict) must not contain poll-label workers"
+  },
+  "text_growth_quartiles": {
+    "n_with_text_growth": 26,
+    "q1_cut": 184.0,
+    "q3_cut": 1276.0,
+    "median_T_bottom_quartile": 102.0,
+    "median_T_top_quartile": 123.0,
+    "bottom_quartile_workers": [
+      "15f24c7ba18c",
+      "7af2854bba92",
+      "92a48e004519",
+      "ca977b9ca0dd",
+      "daf933273c8f",
+      "de5b76cc68a6",
+      "e28a2428b192"
+    ],
+    "top_quartile_workers": [
+      "0aab88c525de",
+      "52ea24516a6e",
+      "6e06ab86aa72",
+      "7b00225cb824",
+      "7c99c180742e",
+      "89608cc68603",
+      "a318f4b89a6a"
+    ]
+  }
+}
