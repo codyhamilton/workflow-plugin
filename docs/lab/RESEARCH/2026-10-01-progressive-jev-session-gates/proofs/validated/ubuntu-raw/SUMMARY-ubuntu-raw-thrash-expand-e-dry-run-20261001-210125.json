@@ -1,0 +1,101 @@
+{
+  "generated_at_brisbane": "2026-10-01 21:03:44 AEST",
+  "run": "20261001-210125",
+  "schedule": "75:15",
+  "dry_run": true,
+  "live_call_jev": false,
+  "experiment": "ubuntu-thrash-high-score-expand-v1",
+  "workers": {
+    "e8aa4f271927": {
+      "agent_id": "a86a0e8aa4f271927",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/subagents/agent-a86a0e8aa4f271927.jsonl",
+      "sha256": "2628654b2a73cb5e3761a7c64f2c20fac58a713e36d86608773c5dcc7325092b",
+      "bytes": 1962463,
+      "T": 76,
+      "tool_assistant_turns": 75,
+      "peak_ctx_tokens": 125388,
+      "checkpoints": [
+        75
+      ],
+      "n_checkpoints": 1,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 1,
+        "state_chars_max": 1772,
+        "state_chars_median": 1772.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 2828
+      },
+      "artifacts": {
+        "with_state": "e8aa4f271927-dry-run-checkpoints-20261001-210125.with-state.jsonl",
+        "omit_state": "e8aa4f271927-dry-run-checkpoints-20261001-210125.omit-state.jsonl",
+        "thrash_table": "e8aa4f271927-dry-run-thrash-table-20261001-210125.json",
+        "gold_bundles": "e8aa4f271927-gold-bundles-20261001-210125.jsonl",
+        "metrics": "e8aa4f271927-dry-run-metrics-20261001-210125.json"
+      }
+    },
+    "5163c22a6a3e": {
+      "agent_id": "a54ed5163c22a6a3e",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/a59a5415-458e-41ab-b2d7-499377c18811/subagents/agent-a54ed5163c22a6a3e.jsonl",
+      "sha256": "5a33f25cf3f37950adb7aad2693b26fed31d775dafc9916550785c844fb27617",
+      "bytes": 3026958,
+      "T": 90,
+      "tool_assistant_turns": 89,
+      "peak_ctx_tokens": 161373,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "n_checkpoints": 2,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 2,
+        "state_chars_max": 2165,
+        "state_chars_median": 1979.0,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 3688
+      },
+      "artifacts": {
+        "with_state": "5163c22a6a3e-dry-run-checkpoints-20261001-210125.with-state.jsonl",
+        "omit_state": "5163c22a6a3e-dry-run-checkpoints-20261001-210125.omit-state.jsonl",
+        "thrash_table": "5163c22a6a3e-dry-run-thrash-table-20261001-210125.json",
+        "gold_bundles": "5163c22a6a3e-gold-bundles-20261001-210125.jsonl",
+        "metrics": "5163c22a6a3e-dry-run-metrics-20261001-210125.json"
+      }
+    },
+    "a318f4b89a6a": {
+      "agent_id": "a3318a318f4b89a6a",
+      "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/af9b5cb1-edc5-4155-b521-a56bad1c7f13/subagents/agent-a3318a318f4b89a6a.jsonl",
+      "sha256": "0078479002c1493ee7931115659850ff8adbdfa1c0b44e3c492af96c933b79bb",
+      "bytes": 2998228,
+      "T": 95,
+      "tool_assistant_turns": 92,
+      "peak_ctx_tokens": 126978,
+      "checkpoints": [
+        75,
+        90
+      ],
+      "n_checkpoints": 2,
+      "schema_budget_p0": {
+        "snapshot_mode": "hybrid_v0",
+        "n_checkpoints": 2,
+        "state_chars_max": 2198,
+        "state_chars_median": 2079.5,
+        "n_over_budget": 0,
+        "gold_bundle_chars_max": 5101
+      },
+      "artifacts": {
+        "with_state": "a318f4b89a6a-dry-run-checkpoints-20261001-210125.with-state.jsonl",
+        "omit_state": "a318f4b89a6a-dry-run-checkpoints-20261001-210125.omit-state.jsonl",
+        "thrash_table": "a318f4b89a6a-dry-run-thrash-table-20261001-210125.json",
+        "gold_bundles": "a318f4b89a6a-gold-bundles-20261001-210125.jsonl",
+        "metrics": "a318f4b89a6a-dry-run-metrics-20261001-210125.json"
+      }
+    }
+  },
+  "pack_counts": {
+    "e8aa4f271927": 1,
+    "5163c22a6a3e": 2,
+    "a318f4b89a6a": 2
+  }
+}

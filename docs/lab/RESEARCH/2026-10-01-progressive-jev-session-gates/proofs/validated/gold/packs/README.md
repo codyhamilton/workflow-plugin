@@ -107,3 +107,15 @@ python3 docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/build_
 - Full 30-turn gold tails
 - Jev answers / `--call-jev` results
 - Prior seat verdicts (do not contaminate seats 3–4)
+
+## Thrash-expand (e) — `ubuntu-thrash-high-score-expand-v1` (`20261001-210125`)
+
+Best-available ca977-shaped shortlist after empty strict pool (no Edit/Write ∧ max_reread≥8 ∧ compact≥8 on remaining T≥75). Schedule `75:15`. hybrid_v0 (`N=8`, excerpt 400). Panel **held**.
+
+| Worker | T | Cps | Pack |
+|--------|--:|----:|------|
+| `e8aa4f271927` | 76 | 1 | `e8aa4f271927-judge-packs-20261001-210125.jsonl` |
+| `5163c22a6a3e` | 90 | 2 | `5163c22a6a3e-judge-packs-20261001-210125.jsonl` |
+| `a318f4b89a6a` | 95 | 2 | `a318f4b89a6a-judge-packs-20261001-210125.jsonl` |
+
+Combined: `thrash-expand-e-judge-packs-20261001-210125.jsonl` (5 rows). Ranking: `SUMMARY-thrash-expand-e-20261001-210125.md`.

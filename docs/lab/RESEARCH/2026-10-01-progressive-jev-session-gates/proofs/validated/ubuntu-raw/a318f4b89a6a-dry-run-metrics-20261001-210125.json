@@ -1,0 +1,39 @@
+{
+  "worker_id": "a318f4b89a6a",
+  "agent_id": "a3318a318f4b89a6a",
+  "path": "/home/codyh/.claude/projects/-home-codyh-workspace-open-pajero-maps/af9b5cb1-edc5-4155-b521-a56bad1c7f13/subagents/agent-a3318a318f4b89a6a.jsonl",
+  "sha256": "0078479002c1493ee7931115659850ff8adbdfa1c0b44e3c492af96c933b79bb",
+  "bytes": 2998228,
+  "T": 95,
+  "tool_assistant_turns": 92,
+  "peak_ctx_tokens": 126978,
+  "sidechain_mode": "subagent_file",
+  "schedule": {
+    "first_at": 75,
+    "interval": 15
+  },
+  "checkpoints": [
+    75,
+    90
+  ],
+  "model": "jev-1.13.0",
+  "dry_run": true,
+  "first_checkout_turn": null,
+  "max_allowed_turns": 95,
+  "worker_policy": "continue",
+  "missing_rate": 1.0,
+  "gold_exit": null,
+  "overshoot": null,
+  "false_early": null,
+  "false_late": null,
+  "on_time": null,
+  "within_one_interval": null,
+  "schema_budget_p0": {
+    "snapshot_mode": "hybrid_v0",
+    "n_checkpoints": 2,
+    "state_chars_max": 2198,
+    "state_chars_median": 2079.5,
+    "n_over_budget": 0,
+    "gold_bundle_chars_max": 5101
+  }
+}
