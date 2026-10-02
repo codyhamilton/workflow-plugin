@@ -283,19 +283,19 @@ def questions() -> dict[str, dict[str, Any]]:
             },
         },
         "why_T_large": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["why_T_large"],
         },
         "inflection_points": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["inflection_points"],
         },
         "early_signals": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["early_signals"],
         },
         "recommended_exit_earliness": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["recommended_exit_earliness"],
         },
     }
@@ -663,7 +663,10 @@ def main() -> int:
                 continue
             if row.get("cell_id"):
                 done[row["cell_id"]] = row
-    todo = [cell for cell in cells if cell["cell_id"] not in done]
+    todo = [
+        cell for cell in cells
+        if cell["cell_id"] not in done or done[cell["cell_id"]].get("error")
+    ]
     with ThreadPoolExecutor(max_workers=WORKERS) as executor, results_path.open("a") as output:
         futures = [executor.submit(post, cell, key) for cell in todo]
         for future in as_completed(futures):
