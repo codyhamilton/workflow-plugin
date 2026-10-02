@@ -119,3 +119,38 @@ Registered (author claude-r7 / flash-r7-mk; ~4,000 cells, est. $0.80, 157 sessio
   zero, replicated discovery -> dev. Master framings are judged against the R6 master AUC of 0.67.
 Gate before running: Cody sees the card (cost is small, so the run can go ahead on the same terms as R6 if he
 has not objected). Round file and specs live in the scratchpad `r7*`; archived under `~/jev-lab-data`.
+
+## Round 7 results (run: 4,008 calls, 0 errors, $0.80; 501 labelled checkpoints incl. 61 Claude)
+
+Markers were spot-checked first (32 of 32: four levels, higher-means-present, no hedging words). Scores are the
+mean over framings and states; target `adjust`; 90% session-cluster CIs (`analysis/R7_an.py`, `R7_ctl.py`).
+
+| signal | alone AUC (90% CI) | disc / dev | delta over (R6 master + turn) (90% CI) |
+|---|---|---|---|
+| ui-visual-iteration-loop (control) | 0.69 (0.63-0.75) | 0.71 / 0.65 | +0.016 to +0.049 |
+| same-file-edit-churn | 0.67 (0.60-0.73) | 0.67 / 0.64 | -0.002 to +0.034 |
+| repeated-browser-check-without-progress | 0.67 (0.60-0.72) | 0.67 / 0.64 | +0.006 to +0.047 |
+| wide-file-fanout | 0.66 (0.60-0.71) | 0.63 / 0.70 | 0.000 to +0.030 |
+| long-unattended-tool-streak | 0.66 (0.60-0.71) | 0.65 / 0.66 | +0.006 to +0.048 |
+| edit-then-revert-oscillation | 0.62 (0.56-0.68) | 0.61 / 0.62 | -0.018 to +0.012 |
+| repeated-identical-command | 0.57 (0.50-0.63) | 0.52 / 0.64 | -0.036 to +0.008 |
+| corrective-language-in-recent-prompts | 0.54 (0.49-0.59) | 0.52 / 0.60 | -0.037 to +0.007 |
+
+Findings:
+- Observable-loop signals match or beat the judgement-flavoured master signal alone (R6 master 0.66 on all 501;
+  checkpoint turn 0.60). Four of them (churn, browser-check, fanout, streak) are at 0.66-0.67 and replicate
+  discovery -> dev. They are far less correlated with each other and with the master (0.35-0.6) than the R6
+  signals were (0.6-0.8).
+- Mean of the five best observable signals: AUC 0.709 alone, and 0.708 on top of R6 master + turn (delta CI
+  +0.024 to +0.086, above zero). This is the first result that beats the master baseline with an interval above
+  zero, and it is a +0.05-0.06 lift over the best single prior signal; still modest.
+- The four new master framings did worse (0.61; per framing 0.56-0.64) than the R6 master (0.66), and adding them
+  to R6 lowers it. Reframing the master signal is not a productive direction; stop spending variants on it.
+- Weak/drop: corrective-language-in-recent-prompts (0.54) and repeated-identical-command (0.57); with Cursor
+  transcripts lacking outputs, identical-command repeats cannot show failure, which probably explains it.
+- Caveat: signals correlate 0.34-0.56 with turn index (longer sessions score higher on counts), so some lift is
+  session-length structure; the delta-over-turn rows above control for it. Held-out has not been touched.
+
+Next: (1) variants of the four replicating observable signals (thresholds, window sizes, framing) and 2-3
+more concrete loop signals; (2) do not add more judgement signals; (3) a combined score over the best 4-5 is the
+candidate for the held-out test, to be frozen only after a dev-replicated round and Cody's agreement on the freeze.
