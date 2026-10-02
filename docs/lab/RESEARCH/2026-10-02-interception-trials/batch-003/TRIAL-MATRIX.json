@@ -89,6 +89,45 @@
     "same_cell_across_drivers": "All identity fields except driver are identical; driver discordance is computed only on exact matches.",
     "historical_results_reuse": false
   },
+  "canonical_request_contract": {
+    "state": {
+      "required_fields": [
+        "checkpoint_turn",
+        "evidence_class",
+        "scenario_id",
+        "snapshot"
+      ],
+      "scenario_id_recipe": "state.<state_variant>|q.<question_variant>|w.<wording_id>",
+      "snapshot_rule": "The fully materialized prefix-only projection from state_contract_gate; byte-stable canonical JSON across drivers."
+    },
+    "questions": {
+      "fire_now": {
+        "type": "choice",
+        "instruction_suffix": " Answer fire or defer from the snapshot only.",
+        "criteria": {
+          "fire": "Fire now: thrash/runaway or steer-to-stop indicated.",
+          "defer": "Defer: productive, near-done, healthy, or insufficient evidence."
+        }
+      },
+      "steer_urgency": {
+        "type": "score",
+        "instructions": "Rate urgency of steering toward stop from this snapshot only.",
+        "criteria": [
+          "0 defer/productive",
+          "1 mild concern",
+          "2 steer soon",
+          "3 fire/runaway"
+        ]
+      }
+    },
+    "required_canonical_response": {
+      "fire_now": "fire|defer",
+      "steer_urgency": "integer 0..3",
+      "parse_status": "parsed|missing|malformed|transport_error"
+    },
+    "transport_rule": "A driver adapter may change wire syntax only. Persist canonical request, transport request, both hashes, raw response reference, and parsed canonical response.",
+    "parse_rule": "Never infer fire from urgency or free text. Missing or malformed fire_now remains a parse miss."
+  },
   "label_and_corpus_gate": {
     "current_state": {
       "labeled_sessions": 20,
@@ -103,7 +142,9 @@
       "planned_new_sessions": 16,
       "required_checkpoint": 75,
       "maps_family": false,
-      "source": "../../2026-10-02-local-session-inventory/stats.json",
+      "landed_inventory_baseline": "../../2026-10-02-local-session-inventory/stats.json",
+      "landed_inventory_status": "Exhausted: its only two valid non-Maps t=75 candidates are already in the labeled corpus; cursor-chat byte counts are not turn eligibility.",
+      "source": "Fresh inventory refresh from the primary harness roots in ../../2026-10-02-local-session-inventory/INVENTORY.md, including sessions created or ingested after the landed stats snapshot.",
       "selection_order": [
         "Deduplicate logical sessions before selection.",
         "Build prefix checkpoints and retain only sessions that genuinely reach fixed checkpoint 75.",
@@ -111,7 +152,7 @@
         "Within a stratum, order by prefix turn count descending then session_id ascending.",
         "Do not inspect any TypeSafe, Flash, or Luna response while selecting or labeling."
       ],
-      "if_fewer_than_planned": "Label every eligible non-Maps candidate and stamp ranking blocked by exhausted t=75 inventory."
+      "if_fewer_than_planned": "Label every fresh eligible non-Maps candidate and stamp ranking blocked by fresh t=75 inventory exhaustion; do not claim the landed inventory can supply the tranche."
     },
     "adjudication": {
       "protocol": "../OUTCOME-SHEET.md",
@@ -130,16 +171,22 @@
     "ranking_ready_terminal_gate": {
       "labeled_sessions_surviving_to_75_min": 12,
       "runaway_like_yes_sessions_with_cited_window_min": 4,
+      "runaway_sessions_with_reached_fixed_checkpoint_inside_window_min": 4,
       "near_done_or_none_sessions_min": 4,
       "held_out_sessions_min": 4,
       "held_out_non_maps_sessions_min": 1,
+      "held_out_runaway_window_intersection_sessions_min": 1,
+      "held_out_near_done_or_none_sessions_min": 1,
+      "constant_turn_75_reference_sessions_min": 4,
+      "constant_turn_90_reference_sessions_min": 4,
+      "constant_turn_reference_definition": "A reference session reaches the threshold and has near_done=yes or productive no/no at that exact fixed checkpoint, so a constant fire can incur a measurable harm.",
       "max_claude_code_share": 0.4,
       "max_maps_family_share": 0.4,
-      "failure_mode": "Publish response-distribution diagnostics only; do not emit a ranked card."
+      "failure_mode": "Publish response-distribution diagnostics only. Any null arm without its event-support minimum is not identifiable; do not emit a ranked card."
     }
   },
   "state_contract_gate": {
-    "target_sessions": "SESSION-STRATA.json",
+    "target_sessions": "SESSION-STRATA.json plus every fresh validation and ranking-extension session at every reached fixed checkpoint",
     "native_sessions": 11,
     "adapter_sessions": 17,
     "required_non_claude_contract": {
@@ -148,13 +195,14 @@
       "phase_hints": "Prefix-only plan, execution, verification, wait, and delivery hints; no final-outcome field.",
       "recent": "Last two prefix records used by recent_delta_brief.",
       "brief_anchor": "Prefix-visible task or brief text only.",
-      "delta_since_prior": "Difference from the immediately prior fixed checkpoint, never from final session state."
+      "delta_since_prior": "At t=45 use the frozen prefix interval [30,45]; after t=45 use the immediately prior member of fixed_schedule. Never use a median checkpoint or final session state."
     },
     "acceptance": [
       "Every projected state is non-empty for its required field.",
       "No post-checkpoint event, T, cp/T, final length, outcome label, or judge response is present.",
       "The serialized projected state hash is identical for all three drivers.",
-      "Unsupported sessions are gated; no empty or thinner state is substituted under the same state id."
+      "Unsupported sessions are gated; no empty or thinner state is substituted under the same state id.",
+      "Before calls, prepared_cells.jsonl persists the complete projected state, canonical request, state hash, and request hash for every cell."
     ]
   },
   "core_state_contrast": {
@@ -178,7 +226,9 @@
       "B07",
       "B02"
     ],
-    "holdout_block": "B02",
+    "late_replay_block": "B02",
+    "holdout_block": null,
+    "historical_exposure": "The complete 28-session set comes from batch-002 and is not response-blind. B02 is delayed replay validation only.",
     "burn_rule": "Run one block across TypeSafe, Flash, and Luna before starting the next block; no driver may be more than one block ahead.",
     "canary": {
       "block": "B01",
@@ -189,6 +239,19 @@
         "Flash parse sidecar exists and names every canary cell.",
         "No driver has more than one percent unparsed responses."
       ]
+    },
+    "fresh_validation_extension": {
+      "source": "Eight response-blind sessions selected from the fresh t=75 acquisition tranche before any batch-003 response is opened.",
+      "n_sessions": 8,
+      "requirements": [
+        "All eight sessions are fresh and non-Maps.",
+        "No harness contributes more than three sessions; if fresh inventory cannot satisfy that cap, report it and do not call the extension hold-out.",
+        "All three states and all twelve questions run at fixed checkpoint 45 on all three drivers."
+      ],
+      "n_cells_per_driver": 288,
+      "n_cells_all_drivers": 864,
+      "formula_per_driver": "8 fresh sessions * 12 questions * 3 states",
+      "failure_mode": "Core state estimates remain replay diagnostics and cannot be called confirmed."
     }
   },
   "zero_fire_factorial": {
@@ -218,18 +281,19 @@
       }
     },
     "corpus_panel_per_question": {
-      "target_evidence_positive_sessions": 6,
-      "matched_quiet_sessions": 6,
+      "target_evidence_positive_sessions": 8,
+      "matched_quiet_sessions": 8,
       "ambiguous_sessions_used": 0,
-      "annotation": "A human, blind to all judge outputs, marks the target phenomenon present, absent, or ambiguous at t=45 and cites prefix evidence.",
+      "annotation": "Before any batch-003 response is opened, a human blind to judge outputs inspects the exact canonical projected state, marks target evidence present, absent, or ambiguous at t=45, and cites the projected fields that carry the evidence.",
+      "projection_eligibility": "A transcript-positive session is not positive unless the evidence survives into the canonical state used for this question.",
       "matching": "Match positive and quiet panels by harness first, then project and prefix activity density; keyed session_id order breaks ties.",
       "insufficient_positive_rule": "Expand the corpus before calls; do not relabel ambiguous or reuse empty state as a positive control."
     },
-    "analysis_cells_per_driver": 120,
-    "analysis_cells_all_drivers": 360,
-    "new_cells_per_driver_after_core_reuse": 60,
-    "new_cells_all_drivers_after_core_reuse": 180,
-    "formula_per_driver": "5 questions * 2 wordings * 12 sessions; w0 canonical-state cells are reused from the core contrast"
+    "analysis_cells_per_driver": 160,
+    "analysis_cells_all_drivers": 480,
+    "new_cells_per_driver_after_core_reuse": 80,
+    "new_cells_all_drivers_after_core_reuse": 240,
+    "formula_per_driver": "5 questions * 2 wordings * 16 sessions; w0 canonical-state cells are reused from the core contrast"
   },
   "current_12x9_h2_nulls": {
     "purpose": "Make the null-policy weakness of the existing exact cut explicit without new judge calls.",
@@ -303,13 +367,18 @@
     "minimum_cells_per_driver_through_t75": 432,
     "maximum_cells_per_driver_if_all_reach_t120": 864,
     "minimum_formula_per_driver": "12 sessions * 12 scenarios * checkpoints 45,60,75",
-    "holdout": "Four response-blind sessions selected after labels are frozen and before calls; include at least one non-Maps session.",
+    "holdout": "Four fresh response-blind sessions selected after labels are frozen and before calls; include at least one non-Maps session, one runaway session with a reached fixed checkpoint inside its window, and one near-done/none reference session.",
     "nulls": [
       "never_fire",
       "constant_turn_75",
       "constant_turn_90"
     ],
-    "failure_mode": "If the label gate is not met, do not materialize this extension."
+    "null_event_support": {
+      "never_fire": "At least four distinct runaway sessions each have a reached fixed checkpoint inside a cited non-none, non-ambiguous window.",
+      "constant_turn_75": "At least four reference sessions reach t=75 and can incur a measurable near-done or productive-interrupt harm there.",
+      "constant_turn_90": "At least four reference sessions reach t=90 and can incur a measurable near-done or productive-interrupt harm there."
+    },
+    "failure_mode": "If the label or null-event-support gate is not met, do not materialize a ranked card. An unsupported null arm is reported not identifiable, never as a tie or win."
   },
   "reporting_and_success_metrics": {
     "execution_clean": [
@@ -323,32 +392,42 @@
       "An all-defer pair is uninformative for that driver and does not count toward an informative-cell floor."
     ],
     "state_sensitivity": {
+      "primary_grain": "Each question separately within each driver. Never pool the twelve questions for a primary state effect.",
       "estimands": [
         "Within-session paired fire difference for markers_focus versus phase_hints_focus.",
         "Within-session paired fire difference for markers_focus versus recent_delta_brief.",
         "Within-session paired fire difference for phase_hints_focus versus recent_delta_brief.",
         "Per-question state flip rate."
       ],
-      "interval": "Session-clustered bootstrap interval, reported separately by driver and Maps versus non-Maps.",
-      "sensitive": "Absolute paired difference at least 0.20 with a 95 percent interval excluding zero and the same sign in the held-out block.",
+      "interval": "Session-clustered bootstrap interval, reported separately by driver and Maps versus non-Maps; harness rows are descriptive because codex/cursor N is two.",
+      "replay_status": "The 28-session core is historically response-exposed and yields preliminary replay estimates only.",
+      "sensitive": "Preliminary sensitive: per-question absolute paired difference at least 0.20 with a 95 percent interval excluding zero. Confirmed sensitive: the fresh eight-session validation extension has the same sign and an absolute difference at least 0.20.",
       "representation_robust": "All absolute paired differences at most 0.10 and all 95 percent intervals contained in [-0.15, 0.15].",
-      "otherwise": "Unresolved; do not select one state post hoc."
+      "otherwise": "Unresolved or preliminary only; do not select one state post hoc."
     },
     "zero_fire_axes": {
       "wording_estimand": "Within-session fire difference w1 minus w0 on the canonical state.",
       "corpus_estimand": "Fire difference between target-evidence-positive and matched quiet panels.",
       "driver_estimand": "Exact-cell discordance and pairwise fire difference across TypeSafe, Flash, and Luna.",
+      "interaction_estimands": [
+        "Wording-by-corpus: (w1-w0 on positive) - (w1-w0 on quiet), within driver.",
+        "Driver-by-wording and driver-by-corpus differences on exact cells."
+      ],
+      "interval": "Session-clustered 95 percent bootstrap interval for every main effect and interaction, per question.",
       "axis_readout": [
-        "Wording-supported: w1 changes occupancy on the positive panel while the quiet panel remains lower.",
-        "Quiet-corpus-supported: both wordings separate positive from quiet panels in at least two drivers.",
-        "Driver-supported: exact-cell occupancy appears in one driver and remains all-defer in another.",
+        "Wording-supported: positive-panel w1-w0 is at least 0.25 with interval excluding zero, and wording-by-corpus interaction is positive.",
+        "Quiet-corpus-supported: positive-minus-quiet is at least 0.25 with interval excluding zero under both wordings in at least two drivers.",
+        "Driver-supported: an exact-cell pairwise driver difference is at least 0.25 with interval excluding zero under the same wording and corpus stratum.",
         "Unresolved: every driver and wording remains all-defer on the evidence-positive panel."
-      ]
+      ],
+      "classification_rule": "Axes are reported independently and may co-occur; no priority rule collapses interactions to one cause. Effects below threshold or with intervals crossing zero are unresolved."
     },
     "ranking_card": {
       "near_done_side": "Fewer near_done_fp and productive_interrupt fires than constant_turn_75 and constant_turn_90, components separate.",
       "runaway_side": "Fewer runaway_miss cells than never_fire inside cited non-none, non-ambiguous windows.",
-      "uncertainty": "Session-clustered intervals; no pooled-only conclusion.",
+      "uncertainty": "Session-clustered paired intervals; no pooled-only conclusion.",
+      "ahead_rule": "For every required component, the model-minus-null error difference is below zero and its 95 percent upper confidence bound is below zero.",
+      "tie_rule": "A point tie, an interval crossing zero, or a null arm without event support is not ahead; report tie/unresolved or not identifiable respectively.",
       "ship_effect": "None. A favorable card does not release Soft HOLD."
     }
   },
@@ -369,31 +448,41 @@
     },
     {
       "rank": 1,
-      "item": "Acquire and blindly double-label the first 16 new non-Maps t=75 sessions; second-adjudicate the existing nine exact sessions.",
+      "item": "Refresh the live harness inventory, ingest and blindly double-label the first 16 genuinely new non-Maps t=75 sessions; second-adjudicate the existing nine exact sessions. The landed inventory supplies zero new sessions.",
       "judge_calls": 0
     },
     {
       "rank": 2,
-      "item": "Build and leakage-test harness-native state adapters for the 17 non-Claude t=45 sessions.",
+      "item": "Build and leakage-test harness-native state adapters plus the canonical request/parse contract for core, fresh validation, and ranking checkpoints.",
       "judge_calls": 0
     },
     {
       "rank": 3,
+      "item": "Freeze the projected-state evidence-positive and quiet panels for the five zero-fire questions before any batch-003 response is opened.",
+      "judge_calls": 0
+    },
+    {
+      "rank": 4,
       "item": "Run B01 canary on all three drivers, interleaved.",
       "judge_calls": 432
     },
     {
-      "rank": 4,
-      "item": "Complete B03-B07 then response-blind holdout B02 on all three drivers, never allowing one driver more than one block ahead.",
+      "rank": 5,
+      "item": "Complete B03-B07 then historically exposed late-replay block B02 on all three drivers, never allowing one driver more than one block ahead.",
       "judge_calls": 2592
     },
     {
-      "rank": 5,
-      "item": "Run the five-question w1 add-on after the positive and quiet panels are frozen.",
-      "judge_calls": 180
+      "rank": 6,
+      "item": "Run the eight-fresh-session state validation extension on all three drivers.",
+      "judge_calls": 864
     },
     {
-      "rank": 6,
+      "rank": 7,
+      "item": "Run the five-question w1 add-on after the projected-state panels are frozen.",
+      "judge_calls": 240
+    },
+    {
+      "rank": 8,
       "item": "Run the fixed-schedule ranking extension only if the labeled terminal gate is met.",
       "judge_calls": "1296 minimum across three drivers; at-risk growth above t=75 is additive"
     }

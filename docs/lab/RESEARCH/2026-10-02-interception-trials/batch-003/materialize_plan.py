@@ -47,6 +47,7 @@ def snapshot_paths() -> dict[str, str]:
 def core_cells(matrix: dict, strata: dict, drivers: set[str], blocks: set[str]):
     snapshots = snapshot_paths()
     checkpoint = matrix["core_state_contrast"]["checkpoint"]
+    question_contract = matrix["canonical_request_contract"]["questions"]
     for session in strata["sessions"]:
         if session["block"] not in blocks:
             continue
@@ -75,16 +76,40 @@ def core_cells(matrix: dict, strata: dict, drivers: set[str], blocks: set[str]):
                         "state_variant": state,
                         "question_variant": question,
                         "question_text": matrix["question_text_w0"][question],
+                        "scenario_id": (
+                            f"state.{state}|q.{question}|w.w0"
+                        ),
                         "wording_id": "w0",
                         "response_class": "binary_fire",
                         "block": session["block"],
                         "holdout": session["holdout"],
+                        "validation_role": (
+                            "late_replay" if session["block"] == "B02"
+                            else "replay_core"
+                        ),
                         "harness": session["harness"],
                         "project": session["project"],
                         "maps_family": session["maps_family"],
                         "corpus_source": session["corpus_source"],
                         "state_contract": session["state_contract"],
                         "snapshot_source": snapshots[session["session_id"]],
+                        "canonical_questions": {
+                            "fire_now": {
+                                "type": question_contract["fire_now"]["type"],
+                                "instructions": (
+                                    matrix["question_text_w0"][question]
+                                    + question_contract["fire_now"][
+                                        "instruction_suffix"
+                                    ]
+                                ),
+                                "criteria": question_contract["fire_now"][
+                                    "criteria"
+                                ],
+                            },
+                            "steer_urgency": question_contract[
+                                "steer_urgency"
+                            ],
+                        },
                         "soft_standard_hold": True,
                         "product_wiring": False,
                         "window_status": "unidentified",

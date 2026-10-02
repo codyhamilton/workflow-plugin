@@ -13,7 +13,9 @@
       "No empty or synthetic state may substitute for a missing harness-native field."
     ],
     "tie_break": "Frozen IDs below; do not replace a failed session after responses are visible.",
-    "holdout_block": "B02"
+    "late_replay_block": "B02",
+    "holdout_block": null,
+    "historical_response_exposure": "All 28 sessions are landed batch-002 sessions. B02 is delayed replay validation, not an independent hold-out. Fresh hold-out sessions come from the new-corpus gate in TRIAL-MATRIX.json."
   },
   "summary": {
     "n_sessions": 28,
@@ -29,7 +31,8 @@
     "non_maps_sessions": 17,
     "claude_code_share": 0.392857,
     "maps_family_share": 0.392857,
-    "project_count": 6
+    "project_count": 6,
+    "response_blind_holdout_sessions": 0
   },
   "sessions": [
     {
@@ -80,7 +83,7 @@
       "maps_family": true,
       "corpus_source": "deterministic_30",
       "state_contract": "growth-fill-v1-native",
-      "holdout": true
+      "holdout": false
     },
     {
       "block": "B02",
@@ -90,7 +93,7 @@
       "maps_family": false,
       "corpus_source": "deterministic_30",
       "state_contract": "harness-tail-adapter-required",
-      "holdout": true
+      "holdout": false
     },
     {
       "block": "B02",
@@ -100,7 +103,7 @@
       "maps_family": false,
       "corpus_source": "deterministic_30",
       "state_contract": "harness-tail-adapter-required",
-      "holdout": true
+      "holdout": false
     },
     {
       "block": "B02",
@@ -110,7 +113,7 @@
       "maps_family": false,
       "corpus_source": "deterministic_30",
       "state_contract": "harness-tail-adapter-required",
-      "holdout": true
+      "holdout": false
     },
     {
       "block": "B03",

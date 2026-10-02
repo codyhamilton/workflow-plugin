@@ -70,9 +70,10 @@ def validate() -> dict:
     assert len({row["project"] for row in sessions}) == 6
 
     holdout = [row for row in sessions if row["holdout"]]
-    assert len(holdout) == 4
-    assert {row["block"] for row in holdout} == {"B02"}
-    assert any(not row["maps_family"] for row in holdout)
+    assert not holdout
+    assert strata["selection_rule"]["holdout_block"] is None
+    assert strata["selection_rule"]["late_replay_block"] == "B02"
+    assert sum(row["block"] == "B02" for row in sessions) == 4
 
     for row in sessions:
         snapshot = snapshots[row["session_id"]]
@@ -95,6 +96,12 @@ def validate() -> dict:
     assert core["canary"]["cells_per_driver"] == (
         4 * len(matrix["questions"]) * len(matrix["states"])
     ) == 144
+    assert core["holdout_block"] is None
+    assert core["late_replay_block"] == "B02"
+    assert core["fresh_validation_extension"]["n_cells_per_driver"] == (
+        8 * len(matrix["questions"]) * len(matrix["states"])
+    ) == 288
+    assert core["fresh_validation_extension"]["n_cells_all_drivers"] == 864
 
     zero = matrix["zero_fire_factorial"]
     panel_sessions = (
@@ -104,10 +111,10 @@ def validate() -> dict:
     assert len(zero["questions"]) == 5
     assert zero["analysis_cells_per_driver"] == (
         len(zero["questions"]) * len(zero["wordings"]) * panel_sessions
-    ) == 120
+    ) == 160
     assert zero["new_cells_per_driver_after_core_reuse"] == (
         len(zero["questions"]) * panel_sessions
-    ) == 60
+    ) == 80
 
     nulls = matrix["current_12x9_h2_nulls"]
     exact_sessions = nulls["sessions"]
@@ -159,6 +166,9 @@ def validate() -> dict:
         "zero_fire_new_cells_per_driver": zero[
             "new_cells_per_driver_after_core_reuse"
         ],
+        "fresh_validation_cells_per_driver": core[
+            "fresh_validation_extension"
+        ]["n_cells_per_driver"],
         "current_null_rows": nulls["n_derived_policy_rows"],
         "balanced_sessions": len(sessions),
         "maps_share": round(maps_count / len(sessions), 6),

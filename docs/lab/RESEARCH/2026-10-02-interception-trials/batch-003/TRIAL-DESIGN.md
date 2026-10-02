@@ -52,22 +52,30 @@ therefore requires new right-sized transcripts, not more labels on the same
 
 ### A1. New t=75 acquisition
 
-Acquire a first tranche of **16 new non-Maps sessions that genuinely reach
-fixed checkpoint 75** from the landed
-[`stats.json`](../../2026-10-02-local-session-inventory/stats.json) inventory.
-The number is session N, not cell N.
+Acquire a first tranche of **16 genuinely new non-Maps sessions that reach
+fixed checkpoint 75** by refreshing the primary harness roots listed in
+[`INVENTORY.md`](../../2026-10-02-local-session-inventory/INVENTORY.md).
+The landed
+[`stats.json`](../../2026-10-02-local-session-inventory/stats.json) is an
+exhausted baseline, not the acquisition source: its only two valid non-Maps
+t=75 candidates are already in the labeled corpus, and its `cursor-chat`
+lengths are byte counts rather than turn eligibility. The tranche therefore
+requires newly recorded or previously unindexed source sessions. The number
+is session N, not cell N.
 
 Selection is response-blind:
 
-1. Deduplicate logical sessions.
+1. Refresh the inventory from the harness roots and deduplicate logical
+   sessions against the 41-session batch-002 corpus.
 2. Build prefix checkpoints and discard candidates that do not reach t=75.
 3. Round-robin harness, then project; take at most two from one
    harness-project stratum per pass.
 4. Within a stratum, sort by prefix turn count descending and `session_id`
    ascending.
 5. Label every selected session before opening its TypeSafe, Flash, or Luna
-   output. If fewer than 16 candidates survive, label all and report inventory
-   exhaustion.
+   output. If fewer than 16 fresh candidates survive, label all and report
+   fresh-inventory exhaustion. Do not claim the landed inventory can supply
+   the tranche.
 
 Each new session gets two independent human reviews under
 [`OUTCOME-SHEET.md`](../OUTCOME-SHEET.md). A third blind human resolves
@@ -80,14 +88,20 @@ Labels include per-checkpoint near-done/runaway values, a cited
 The outcome-linked ranking extension remains closed until all are true:
 
 - ≥12 labeled sessions survived to t=75;
-- ≥4 distinct sessions have runaway-like `yes` and a cited non-ambiguous
-  window;
+- ≥4 distinct sessions have runaway-like `yes`, a cited non-ambiguous window,
+  and at least one reached fixed checkpoint inside that window;
 - ≥4 sessions have defended near-done intervals or window `none`;
-- ≥4 sessions are frozen as response-blind hold-out, including ≥1 non-Maps;
+- ≥4 **fresh** sessions are frozen as response-blind hold-out, including ≥1
+  non-Maps, ≥1 runaway/window-intersection session, and ≥1 near-done/`none`
+  session;
+- ≥4 measurable reference sessions exist for constant-75 and separately for
+  constant-90: each reaches that threshold and can incur a near-done or
+  productive-interrupt harm there;
 - claude-code and Maps shares are each ≤40%.
 
 Failure is a valid result: publish response-distribution diagnostics and
-write `ranking_ready=false`. Do not compensate with more cells.
+write `ranking_ready=false`. A null arm without event support is
+`not_identifiable`, not a tie or win. Do not compensate with more cells.
 
 ## Design B — paired state sensitivity on a multi-stratum corpus
 
@@ -105,8 +119,10 @@ checkpoint 45:
 | **Total** | **28** | **100%** |
 
 There are six projects. Maps and claude-code are each 11/28, below the 40%
-cap. `B02` is the four-session response-blind hold-out and includes all four
-harnesses.
+cap. All 28 sessions existed in batch-002 and are historically
+response-exposed. `B02` is a delayed four-harness **replay** block, not an
+independent hold-out. Independent confirmation uses eight fresh sessions from
+Design A, frozen before any batch-003 output is opened.
 
 ### B2. Harness-native state prerequisite
 
@@ -114,8 +130,10 @@ The 17 non-Claude sessions must gain a prefix-only, harness-native contract
 for `tail`, `markers`, `phase_hints`, `recent`, `brief_anchor`, and
 `delta_since_prior`. The contract is not permission to fabricate empty state:
 
-- `tail` is the last three ordered assistant/tool records at or before t=45;
-- deltas compare with the immediately prior fixed checkpoint;
+- `tail` is the last three ordered assistant/tool records at or before the
+  scored checkpoint;
+- at t=45, delta is the frozen prefix interval `[30,45]`; later deltas compare
+  with the immediately prior fixed-schedule checkpoint;
 - no `T`, `cp/T`, final length, post-checkpoint event, label, or judge response;
 - the projected-state hash must be identical across all three drivers;
 - unsupported state gates the session instead of silently thinning it.
@@ -139,9 +157,15 @@ This clears the white-paper floor of 1,000 new trials per driver while making
 state a paired axis rather than a post-hoc choice. The independent unit is the
 session, never the 3,024 cells.
 
-The block order is `B01`, `B03`–`B07`, then hold-out `B02`. Finish each block
-on all three drivers before starting the next; no driver may run more than one
-block ahead.
+The block order is `B01`, `B03`–`B07`, then late-replay `B02`. Finish each
+block on all three drivers before starting the next; no driver may run more
+than one block ahead.
+
+After the replay core, repeat all 36 question/state cells on **eight fresh
+Design-A non-Maps sessions at t=45**: 288 cells/driver, 864 total. No harness
+may contribute more than three. If fresh inventory cannot satisfy that cap,
+report it and do not call the extension hold-out. Replay effects are
+preliminary until this fresh extension has the same sign.
 
 ### B4. Driver contract
 
@@ -153,9 +177,18 @@ block ahead.
 
 The execution seat adds a lab-only manifest adapter under `batch-003/`; the
 three existing runners do not currently consume this common manifest. The
-adapter must emit `window_status=unidentified`, `outcome_tag=null`,
-`judge_role=policy-under-test`, state hash, parse status, and session
-covariates. It must not contact localhost or product code.
+canonical request and response contract is frozen in
+[`TRIAL-MATRIX.json`](TRIAL-MATRIX.json): identical scenario ID, question
+text, fire/defer criteria, urgency rubric, and canonical state JSON. Wire
+syntax may differ, but each adapter must persist the canonical and transport
+requests, both hashes, raw-response reference, and parsed canonical response.
+It may not infer fire from urgency or free text.
+
+Before calls, the adapter writes `prepared_cells.jsonl` with the complete
+projected state, state hash, and request hash for every core, fresh-validation,
+and ranking cell. Results emit `window_status=unidentified`,
+`outcome_tag=null`, `judge_role=policy-under-test`, parse status, and session
+covariates. The adapter must not contact localhost or product code.
 
 Materialize and inspect the frozen plan now:
 
@@ -178,14 +211,17 @@ The five frozen IDs are:
 `dependency_wait`, `brief_abandon`, `scope_creep_silent`,
 `speculative_rewrite`, and `deliverable_orphan`.
 
-First, a human blind to judge outputs annotates target evidence at t=45 as
-present, absent, or ambiguous. For each question, freeze:
+Before any batch-003 response is opened, a human blind to judge outputs
+annotates the **exact canonical projected state** at t=45 as target evidence
+present, absent, or ambiguous, citing the fields that carry the evidence.
+Transcript-positive evidence that disappears in the projection does not count
+as a positive control. For each question, freeze:
 
-- 6 target-evidence-positive sessions;
-- 6 harness/project-matched quiet sessions;
+- 8 projected-evidence-positive sessions;
+- 8 harness/project-matched quiet sessions;
 - 0 ambiguous sessions.
 
-If six positives do not exist, expand the corpus before spending. Do not turn
+If eight positives do not exist, expand the corpus before spending. Do not turn
 ambiguous or empty-state sessions into controls.
 
 Run two wordings on the canonical #109 state:
@@ -201,29 +237,33 @@ The analysis matrix is:
 |---|---|
 | Questions | 5 |
 | Wordings | 2 |
-| Corpus | 6 positive + 6 matched quiet per question |
+| Corpus | 8 positive + 8 matched quiet per question |
 | Drivers | TypeSafe, Flash, Luna |
 | State | one frozen canonical state per question |
-| **Analysis N** | **120 cells/driver; 360 total** |
+| **Analysis N** | **160 cells/driver; 480 total** |
 | Reused from Design B | w0 canonical-state cells |
-| **New calls** | **60/driver; 180 total** |
+| **New calls** | **80/driver; 240 total** |
 
 Read all three axes from the same exact cells:
 
 - wording: within-session `fire(w1) - fire(w0)`;
 - corpus: positive-panel minus quiet-panel fire;
-- driver: exact-cell discordance and paired fire differences.
+- driver: exact-cell discordance and paired fire differences;
+- interactions: `(w1-w0 positive) - (w1-w0 quiet)`, plus
+  driver-by-wording and driver-by-corpus differences.
 
-The readout is not “more fire is better.” It is:
+For each question, report session-clustered 95% intervals. Axes are independent
+and may co-occur; do not force one cause when an interaction remains. The
+readout is not “more fire is better.” It is:
 
-- **wording-supported** if w1 changes occupancy on the positive panel while
-  quiet stays lower;
-- **quiet-corpus-supported** if both wordings distinguish positive from quiet
-  in at least two drivers;
-- **driver-supported** if one driver has occupancy where another remains
-  all-defer on exact cells;
+- **wording-supported** if positive-panel `w1-w0 ≥0.25`, its interval excludes
+  zero, and the wording-by-corpus interaction is positive;
+- **quiet-corpus-supported** if positive-minus-quiet is ≥0.25 with interval
+  excluding zero under both wordings in at least two drivers;
+- **driver-supported** if an exact-cell pairwise driver difference is ≥0.25
+  with interval excluding zero under the same wording and corpus stratum;
 - **unresolved** if every wording and driver remains all-defer on the
-  evidence-positive panel.
+  evidence-positive panel, or an effect misses its threshold/interval rule.
 
 ## Design D — H2 nulls and the fixed-schedule ranking extension
 
@@ -244,9 +284,11 @@ never-fire is vacuously unbeatable.
 
 ### D2. Ranking extension after Design A passes
 
-Freeze 12 labeled sessions, including four response-blind hold-outs, and run
-the #109 preferred state/question pairs at **every reached checkpoint** in
-`(45, 60, 75, 90, 105, 120)`. Never use the median-of-reached selector.
+Freeze 12 labeled sessions, including four **fresh** response-blind hold-outs,
+and run the #109 preferred state/question pairs at **every reached
+checkpoint** in `(45, 60, 75, 90, 105, 120)`. The hold-out contains at least
+one non-Maps session, one runaway/window-intersection session, and one
+near-done/`none` session. Never use the median-of-reached selector.
 
 | Quantity | N |
 |---|---:|
@@ -258,8 +300,10 @@ the #109 preferred state/question pairs at **every reached checkpoint** in
 | **Minimum all-driver calls** | **1,296** |
 
 Meters include `n_at_risk` and `n_never_reached` at every checkpoint, plus
-never-fire, constant-75, and constant-90 fire times. If Design A misses its
-terminal gate, this matrix is not materialized.
+never-fire, constant-75, and constant-90 fire times. Each null must have at
+least four event-supported sessions under Design A. If Design A misses its
+terminal gate, this matrix is not materialized. A point tie, confidence
+interval crossing zero, or unsupported null is not a win.
 
 ## Success metrics
 
@@ -281,15 +325,18 @@ does not count toward an informative-cell floor.
 
 ### State sensitivity
 
-Report three within-session paired fire differences, state flip rate, and
-session-clustered bootstrap intervals, separately by driver and Maps versus
-non-Maps.
+Report three within-session paired fire differences and state flip rate
+**per question and driver**; never pool the twelve questions as the primary
+effect. Include session-clustered bootstrap intervals and Maps versus
+non-Maps rows. Harness rows are descriptive because codex/cursor N is two.
 
-- **Sensitive:** absolute paired difference ≥0.20, 95% interval excludes zero,
-  and held-out sign agrees.
+- **Preliminary sensitive:** replay-core absolute paired difference ≥0.20 and
+  its 95% interval excludes zero.
+- **Confirmed sensitive:** the fresh eight-session extension has the same sign
+  and an absolute difference ≥0.20.
 - **Representation-robust:** every absolute difference ≤0.10 and every 95%
   interval lies inside `[-0.15, 0.15]`.
-- Otherwise: **unresolved**; no post-hoc preferred state.
+- Otherwise: **unresolved or preliminary only**; no post-hoc preferred state.
 
 ### Outcome-linked card
 
@@ -300,6 +347,10 @@ Only after Design A passes:
 - runaway side: fewer `runaway_miss` cells than never-fire inside cited,
   non-`none`, non-ambiguous windows;
 - session-clustered intervals and strata are mandatory;
+- “ahead” requires model-minus-null error below zero with its 95% upper bound
+  below zero for every required component;
+- a tie, interval crossing zero, or unsupported null is unresolved/not
+  identifiable, never ahead;
 - winning one side and losing the other is not a win.
 
 ## Ranked burn order
@@ -307,12 +358,14 @@ Only after Design A passes:
 | Rank | Work | Judge calls | Stop condition |
 |---:|---|---:|---|
 | 0 | Materialize current 12×9 H2 nulls | 0 | 324 rows + unidentifiable stamp |
-| 1 | Acquire/double-label 16 new non-Maps t=75 sessions; second-adjudicate nine exact sessions | 0 | Labels frozen or inventory exhausted |
-| 2 | Build and leak-test 17 non-Claude state adapters | 0 | Non-empty, prefix-only, cross-driver hash parity |
-| 3 | B01 canary, all drivers interleaved | 432 | Parse/state gates pass |
-| 4 | B03–B07, then hold-out B02 | 2,592 | Core reaches 1,008/driver |
-| 5 | Five-question w1 add-on | 180 | Positive/quiet panels complete |
-| 6 | Fixed-schedule ranking extension | ≥1,296 | **Only** if labeled gate passes |
+| 1 | Refresh live harness inventory; ingest/double-label 16 fresh non-Maps t=75 sessions; second-adjudicate nine exact sessions | 0 | Labels frozen or fresh inventory exhausted |
+| 2 | Build/leak-test state adapters and canonical request/parse contract at all required checkpoints | 0 | Prepared cells are non-empty, prefix-only, hash-stable |
+| 3 | Freeze projected-state positive/quiet panels | 0 | 8 + 8 per question, before responses |
+| 4 | B01 canary, all drivers interleaved | 432 | Parse/state gates pass |
+| 5 | B03–B07, then late-replay B02 | 2,592 | Replay core reaches 1,008/driver |
+| 6 | Eight-fresh-session state validation | 864 | Independent sign check complete |
+| 7 | Five-question w1 add-on | 240 | Projected-state panels complete |
+| 8 | Fixed-schedule ranking extension | ≥1,296 | **Only** if label + null-support gates pass |
 
 This order spends zero judge calls on the two structural blockers, prevents a
 new TypeSafe-only pool, and prevents Flash parse loss from being discovered
@@ -323,10 +376,10 @@ after the other drivers have already consumed the wave.
 | Decision | Rationale | If wrong |
 |---|---|---|
 | t=45 for state sensitivity | It is the first fixed checkpoint shared by the frozen four-harness corpus | Rebuild the whole frozen matrix at another common fixed checkpoint; do not mix checkpoints |
-| 28 sessions | 28 × 12 × 3 = 1,008/driver and permits Maps/claude shares of 11/28 | Expand in complete stratified blocks; never drop below the per-driver floor |
-| First label tranche N=16 | Current corpus cannot create new t=75 positives; a non-Maps tranche can close both deficits | If inventory has fewer, label all and report ranking blocked |
+| 28 replay sessions | 28 × 12 × 3 = 1,008/driver and permits Maps/claude shares of 11/28; independent N is still 28, not 1,008 | Treat effects as preliminary and require the eight-fresh-session sign check |
+| First label tranche N=16 | The landed inventory supplies zero new eligible sessions; a fresh non-Maps tranche is required to close either deficit | Refresh/ingest from live harness roots; if fewer exist, label all and report ranking blocked |
 | Binary response for the paired core | Keeps the measured axis state, not response schema | A response-schema study is a separate preregistered matrix |
-| Sensitivity/equivalence margins | Makes “flip” and “robust” falsifiable before results | Publish raw intervals and mark unresolved; never tune margins after hold-out |
+| Sensitivity/equivalence margins | Makes per-question “flip” and “robust” falsifiable before results | Publish raw intervals and mark unresolved; never tune margins after fresh validation |
 
 ## Explicit non-authorization
 
