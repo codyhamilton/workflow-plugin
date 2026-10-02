@@ -33,6 +33,7 @@ MODEL = "jev-1.13.0"
 AEST = ZoneInfo("Australia/Brisbane")
 WORKERS = int(os.environ.get("TS_MISS_WORKERS", "8"))
 STATE_VARIANTS = ("markers_focus", "phase_hints_focus")
+HOLDOUT_STATE_VARIANT = "stats_only"
 QUESTIONS = {
     "late_miss_risk": "Does waiting further risk a late miss on a runaway trajectory?",
     "silent_stall": "Are turns elapsing with near-zero tangible output, rather than recoverable progress?",
@@ -113,11 +114,50 @@ def exact_label_keys() -> list[dict[str, Any]]:
                 "full_state": full,
                 "harness": pack.get("harness"),
                 "project": pack.get("project"),
+                "population": "labeled_exact_key",
             })
     return selected
 
 
-def build_cells(keys: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def non_maps_holdout_keys() -> list[dict[str, Any]]:
+    """Use non-Maps representative prefixes without inventing tail fields."""
+    selected = []
+    for session_id, pack in sorted(load_packs().items()):
+        project = str(pack.get("project") or "")
+        if "open-pajero-maps" in project:
+            continue
+        checkpoints = sorted(pack.get("checkpoints") or [], key=lambda row: int(row["checkpoint"]))
+        if not checkpoints:
+            continue
+        snap = checkpoints[len(checkpoints) // 2]
+        full = _helper.strip_leaks(snap.get("full_state") or {})
+        cumulative = full.get("cumulative") or {}
+        if not cumulative:
+            continue
+        selected.append({
+            "session_id": session_id,
+            "checkpoint": int(snap["checkpoint"]),
+            "full_state": full,
+            "harness": pack.get("harness"),
+            "project": project,
+            "population": "non_maps_unlabeled_holdout",
+        })
+    return selected
+
+
+def project_holdout(full: dict[str, Any]) -> dict[str, Any]:
+    cumulative = full.get("cumulative") or {}
+    return {
+        "checkpoint_turn": full.get("checkpoint_turn"),
+        "evidence_class": HOLDOUT_STATE_VARIANT,
+        "cumulative": {
+            key: cumulative.get(key)
+            for key in ("api_turns", "compaction_event_count", "assistant_text_chars", "tool_histogram")
+        },
+    }
+
+
+def build_cells(keys: list[dict[str, Any]], holdout_keys: list[dict[str, Any]]) -> list[dict[str, Any]]:
     cells = []
     for state_variant in STATE_VARIANTS:
         for question_variant in QUESTIONS:
@@ -138,7 +178,28 @@ def build_cells(keys: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "state": _helper.project(key["full_state"], state_variant),
                     "harness": key["harness"],
                     "project": key["project"],
+                    "population": key["population"],
                 })
+    for question_variant in QUESTIONS:
+        for key in holdout_keys:
+            scenario_id = f"state.{HOLDOUT_STATE_VARIANT}|q.{question_variant}"
+            raw = f"miss-identifiability|{scenario_id}|{key['session_id']}|{key['checkpoint']}"
+            cells.append({
+                "cell_id": hashlib.sha256(raw.encode()).hexdigest()[:16],
+                "scenario_id": scenario_id,
+                "state_selection": HOLDOUT_STATE_VARIANT,
+                "question_format": question_variant,
+                "response_class": "binary_fire",
+                "session_id": key["session_id"],
+                "checkpoint": key["checkpoint"],
+                "checkpoint_role": "non_maps_unlabeled_representative_holdout",
+                "framing": "H2",
+                "question": QUESTIONS[question_variant],
+                "state": project_holdout(key["full_state"]),
+                "harness": key["harness"],
+                "project": key["project"],
+                "population": key["population"],
+            })
     return cells
 
 
@@ -205,7 +266,7 @@ def post(cell: dict[str, Any], key: str) -> dict[str, Any]:
             **{k: cell[k] for k in (
                 "cell_id", "scenario_id", "state_selection", "question_format",
                 "response_class", "session_id", "checkpoint", "checkpoint_role",
-                "framing", "harness", "project",
+                "framing", "harness", "project", "population",
             )},
             "fire": fire,
             "risk_horizon": horizon,
@@ -285,7 +346,7 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
     labels = load_labels()
     successful = [row for row in rows if row.get("http") == 200 and not row.get("error")]
     by_axis = {}
-    for state in STATE_VARIANTS:
+    for state in (*STATE_VARIANTS, HOLDOUT_STATE_VARIANT):
         for question in QUESTIONS:
             group = [
                 row for row in successful
@@ -300,6 +361,16 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
                 "fire_on_runaway_positive_rows": sum(row.get("fire") == "fire" for row in positives),
             }
     unique_keys = {(row.get("session_id"), row.get("checkpoint")) for row in successful}
+    labeled_keys = {
+        key for key in unique_keys
+        if any(
+            row.get("session_id") == key[0]
+            and row.get("checkpoint") == key[1]
+            and row.get("population") == "labeled_exact_key"
+            for row in successful
+        )
+    }
+    holdout_keys = unique_keys - labeled_keys
     positive_keys = {
         key for key in unique_keys
         if label_at(labels, {"session_id": key[0], "checkpoint": key[1]}, "runaway_like_at_checkpoint") == "yes"
@@ -321,6 +392,11 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         "scope": "miss_identifiability_diagnostic",
         "n_exact_label_keys_planned": len(keys),
         "n_unique_keys_successful": len(unique_keys),
+        "n_labeled_keys_successful": len(labeled_keys),
+        "n_holdout_keys_successful": len(holdout_keys),
+        "n_holdout_cells_successful": sum(
+            row.get("population") == "non_maps_unlabeled_holdout" for row in successful
+        ),
         "n_cells_planned": len(cells),
         "n_cells_successful": len(successful),
         "n_cells_errors": len(rows) - len(successful),
@@ -359,6 +435,7 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         "after capture; no label value is sent to TypeSafe.",
         "",
         f"- exact label keys planned: **{len(keys)}**",
+        f"- non-Maps unlabeled holdout cells: **{meters['n_holdout_cells_successful']}**",
         f"- planned cells: **{len(cells)}**",
         f"- successful cells: **{len(successful)}**",
         f"- HTTP counts: `{json.dumps(meters['http_counts'], sort_keys=True)}`",
@@ -396,12 +473,14 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     RAW.mkdir(parents=True, exist_ok=True)
     keys = exact_label_keys()
-    cells = build_cells(keys)
+    holdout_keys = non_maps_holdout_keys()
+    cells = build_cells(keys, holdout_keys)
     (OUT / "cells_plan.json").write_text(json.dumps({
         "wave": "typesafe-miss-identifiability",
         "scope": "diagnostic",
         "selection": "all exact sidecar checkpoint keys with non-empty prefix tail",
         "n_exact_label_keys": len(keys),
+        "n_non_maps_holdout_keys": len(holdout_keys),
         "n_state_variants": len(STATE_VARIANTS),
         "n_questions": len(QUESTIONS),
         "n_cells_planned": len(cells),
