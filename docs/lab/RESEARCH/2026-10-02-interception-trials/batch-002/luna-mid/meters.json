@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02 01:45:39 AEST",
+  "generated_at": "2026-10-02 02:04:25 AEST",
   "batch": "batch-002",
   "wave": "Wave-0-scale",
   "driver": "luna",
@@ -10,14 +10,14 @@
   "typesafe_used": false,
   "hooks_unlock": false,
   "n_variants": 640,
-  "parse_miss_cells": 610,
+  "parse_miss_cells": 1,
   "error_count": 0,
-  "fire_count": 5,
+  "fire_count": 129,
   "rating_hist": {
-    "1": 13,
-    "2": 4,
-    "3": 1,
-    "0": 12
+    "1": 169,
+    "2": 112,
+    "3": 17,
+    "0": 341
   },
   "harness_cell_counts": {
     "claude-code": 363,
@@ -54,87 +54,139 @@
   ],
   "fire_rate_among_at_risk_cells": {
     "30": {
-      "n": 30,
-      "fire_rate": 0.1667
+      "n": 84,
+      "fire_rate": 0.0595
     },
     "35": {
-      "n": 0,
-      "fire_rate": null
+      "n": 82,
+      "fire_rate": 0.0976
     },
     "40": {
-      "n": 0,
-      "fire_rate": null
+      "n": 80,
+      "fire_rate": 0.1625
     },
     "45": {
-      "n": 0,
-      "fire_rate": null
+      "n": 76,
+      "fire_rate": 0.0921
     },
     "50": {
-      "n": 0,
-      "fire_rate": null
+      "n": 48,
+      "fire_rate": 0.1875
     },
     "55": {
-      "n": 0,
-      "fire_rate": null
+      "n": 42,
+      "fire_rate": 0.2143
     },
     "60": {
-      "n": 0,
-      "fire_rate": null
+      "n": 28,
+      "fire_rate": 0.2857
     },
     "65": {
-      "n": 0,
-      "fire_rate": null
+      "n": 23,
+      "fire_rate": 0.3043
     },
     "70": {
-      "n": 0,
-      "fire_rate": null
+      "n": 24,
+      "fire_rate": 0.375
     },
     "75": {
-      "n": 0,
-      "fire_rate": null
+      "n": 24,
+      "fire_rate": 0.375
     },
     "80": {
-      "n": 0,
-      "fire_rate": null
+      "n": 24,
+      "fire_rate": 0.1667
     },
     "85": {
-      "n": 0,
-      "fire_rate": null
+      "n": 18,
+      "fire_rate": 0.3889
     },
     "90": {
-      "n": 0,
-      "fire_rate": null
+      "n": 16,
+      "fire_rate": 0.25
     },
     "95": {
-      "n": 0,
-      "fire_rate": null
+      "n": 16,
+      "fire_rate": 0.4375
     },
     "100": {
-      "n": 0,
-      "fire_rate": null
+      "n": 16,
+      "fire_rate": 0.4375
     },
     "105": {
-      "n": 0,
-      "fire_rate": null
+      "n": 16,
+      "fire_rate": 0.1875
     },
     "110": {
-      "n": 0,
-      "fire_rate": null
+      "n": 10,
+      "fire_rate": 0.8
     },
     "115": {
-      "n": 0,
-      "fire_rate": null
+      "n": 6,
+      "fire_rate": 0.5
     },
     "120": {
-      "n": 0,
-      "fire_rate": null
+      "n": 6,
+      "fire_rate": 0.3333
     }
   },
   "prompt_leak_spotcheck_hits": [],
   "cell_id_salt": "b002s",
-  "partial": true,
-  "batches_done": 5,
+  "partial": false,
+  "wall_s": 1197.3,
   "n_batches": 107,
-  "wall_s_so_far": 71.7,
-  "model": "gpt-6-luna"
+  "batch_elapsed_sum_s": 1197.2,
+  "model": "gpt-6-luna",
+  "batch_errors": [
+    {
+      "batch_idx": 6,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 13,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 26,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 30,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 61,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 68,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 74,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 81,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 85,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 88,
+      "error": null,
+      "n_parsed": 5
+    }
+  ]
 }

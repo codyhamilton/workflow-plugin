@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-10-02 01:38:39 AEST",
+  "soft_standard_hold": true,
+  "hooks_unlock": false,
+  "product_unlock": false,
+  "n_packs": 20,
+  "drivers": {
+    "luna": {
+      "n_cells": 72,
+      "parse_miss_cells": 72,
+      "error_count": 0,
+      "fire_count": 0,
+      "wall_s": 1.1,
+      "leak_hits": 0,
+      "usage_tokens_rough": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+      },
+      "error": null,
+      "framing_cell_counts": {
+        "H1": 72
+      }
+    },
+    "typesafe": {
+      "n_cells": 180,
+      "parse_miss_cells": 0,
+      "error_count": 0,
+      "fire_count": 0,
+      "wall_s": 8.3,
+      "leak_hits": 0,
+      "usage_tokens_rough": {
+        "input_tokens": 125854,
+        "output_tokens": 6878,
+        "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+      },
+      "error": null,
+      "framing_cell_counts": {
+        "H1": 180
+      }
+    },
+    "flash": {
+      "n_cells": 240,
+      "parse_miss_cells": 0,
+      "error_count": 0,
+      "fire_count": 46,
+      "wall_s": 151.1,
+      "leak_hits": 0,
+      "usage_tokens_rough": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+      },
+      "error": null,
+      "framing_cell_counts": {
+        "H1": 240
+      }
+    }
+  }
+}

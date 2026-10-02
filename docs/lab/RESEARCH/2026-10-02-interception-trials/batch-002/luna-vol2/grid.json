@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-10-02 08:59:31 AEST",
+  "driver": "luna",
+  "model": "gpt-6-luna",
+  "n_cells": 100,
+  "n_batches": 17,
+  "framings": [
+    "H1",
+    "H2"
+  ],
+  "soft_standard_hold": true
+}

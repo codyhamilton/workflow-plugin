@@ -1,0 +1,267 @@
+{
+  "controls": [
+    {
+      "checkpoint": 40,
+      "control_id": "56f4a79c873257e3f5d446a0",
+      "harness": "cursor",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "garcia-music",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "87e55915-f481-4dcc-8b6a-"
+    },
+    {
+      "checkpoint": 45,
+      "control_id": "5f82fa40440840f22da09f71",
+      "harness": "cursor",
+      "label_status": "labeled_reference",
+      "preferred_action": "Use only in the labeled reference stratum after independent agreement is retained.",
+      "project": "garcia-music",
+      "rationale": "Retain the existing exact sidecar label as a reference control; do not pool it with the unlabeled holdout.",
+      "session_id": "b784e674-febe-4eb4-a2ca-"
+    },
+    {
+      "checkpoint": 45,
+      "control_id": "0fd13ac06f5f1ea2f3b614c2",
+      "harness": "codex",
+      "label_status": "labeled_reference",
+      "preferred_action": "Use only in the labeled reference stratum after independent agreement is retained.",
+      "project": "garcia-music",
+      "rationale": "Retain the existing exact sidecar label as a reference control; do not pool it with the unlabeled holdout.",
+      "session_id": "rollout-2026-04-06T16-00"
+    },
+    {
+      "checkpoint": 45,
+      "control_id": "4eacfe4f9f43c6a5b4edb58c",
+      "harness": "codex",
+      "label_status": "labeled_reference",
+      "preferred_action": "Use only in the labeled reference stratum after independent agreement is retained.",
+      "project": "garcia-music",
+      "rationale": "Retain the existing exact sidecar label as a reference control; do not pool it with the unlabeled holdout.",
+      "session_id": "rollout-2026-04-07T04-10"
+    },
+    {
+      "checkpoint": 30,
+      "control_id": "541ba816cff6b9b398d26ac0",
+      "harness": "codex",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "rollout-2026-04-26T12-35"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "c8c6a4e34543166849c50aec",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1352b9d77ffez5WKeILf"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "143522ead4f53465dc1292c9",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1363591c9ffecsL632uK"
+    },
+    {
+      "checkpoint": 55,
+      "control_id": "c3dfe89afb2f1f971e9624f2",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_139862c47ffeobqMSKLG"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "bfcc8a4f58644524f65c887f",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_139c24023ffepP3BK2sf"
+    },
+    {
+      "checkpoint": 55,
+      "control_id": "54a7903f62e535c4c4ff63b8",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_139f4e848ffeX2wDtPlg"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "b8db46b2e7395b4567c22040",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_19fc995cdffegmHlfSuH"
+    },
+    {
+      "checkpoint": 45,
+      "control_id": "115809ef2665431227f5d687",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_19fdcde9bffeGPlaJd0t"
+    },
+    {
+      "checkpoint": 55,
+      "control_id": "b9f9032a2b0d0fd02e3ac79e",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a0328cd5ffe6iabFeMK"
+    },
+    {
+      "checkpoint": 75,
+      "control_id": "8cf75a368d09f8328a7509ee",
+      "harness": "opencode",
+      "label_status": "labeled_reference",
+      "preferred_action": "Use only in the labeled reference stratum after independent agreement is retained.",
+      "project": "lemmings",
+      "rationale": "Retain the existing exact sidecar label as a reference control; do not pool it with the unlabeled holdout.",
+      "session_id": "ses_1a0369734ffeqlVOz4S8"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "88630d07658a93d074228caf",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a050f571ffed0MPHFgM"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "162dce78361728114ca56db7",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a0623c95ffeJol031aS"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "9b9314bb25bc7b87ce38bf4e",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a068fa41ffehTYBp71G"
+    },
+    {
+      "checkpoint": 55,
+      "control_id": "335099eaedbd82d55f7e1df2",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a0737cf4ffeAybMne2I"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "5aca941177e3bf9be81f1ed8",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a07d3452ffe5jX8CQZo"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "200ec62ed8cd8ef6396a10a8",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "workflow-plugin",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a09990bdffenRUXn21k"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "3ad44f6772f0e177e3f650ef",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "lemmings",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a5de51f3ffewQkiohT2"
+    },
+    {
+      "checkpoint": 45,
+      "control_id": "a85e381ce55243077a19c1ad",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "llama.cpp",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a61903c7ffeYqhJ9X9L"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "c29509bdd80d6eb6b1947747",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "llama.cpp",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_1a6280e0dffeW0FRROYz"
+    },
+    {
+      "checkpoint": 65,
+      "control_id": "518fd11dad803fa471e7fd5a",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "free-frontier",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_42080a163ffer9OHMlFr"
+    },
+    {
+      "checkpoint": 40,
+      "control_id": "7751093ffadac14d55d41516",
+      "harness": "opencode",
+      "label_status": "unlabeled_holdout",
+      "preferred_action": "Keep unlabeled until an independent adjudicator records a complete checkpoint sheet.",
+      "project": "garcia-music",
+      "rationale": "No outcome sidecar row exists for this representative non-Maps prefix; do not infer a negative label from judge output, window absence, final length, or lack of a fire.",
+      "session_id": "ses_f0d3f4608ffem463bgxw"
+    }
+  ],
+  "counts": {
+    "labeled_reference": 4,
+    "unlabeled_holdout": 21
+  },
+  "hooks": false,
+  "local_8080": false,
+  "metrics_computed": false,
+  "not_scoreboard": true,
+  "product_wiring": false,
+  "protocol_rev": "rotate-3-non-maps-controls-v1",
+  "soft_standard_hold": true,
+  "standard_unlock": false,
+  "unlabeled_controls_have_rationale": true
+}

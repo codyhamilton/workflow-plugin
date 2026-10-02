@@ -1,0 +1,20 @@
+{
+  "n": 2500,
+  "target": 2500,
+  "n_packs": 41,
+  "n_sessions": 41,
+  "n_questions": 1,
+  "n_projections": 3,
+  "questions": [
+    "compaction_storm"
+  ],
+  "projections": [
+    "delta_only",
+    "tail_focus",
+    "tool_hist_focus"
+  ],
+  "round_robin": true,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "catalog": "CASE-CATALOG.md"
+}

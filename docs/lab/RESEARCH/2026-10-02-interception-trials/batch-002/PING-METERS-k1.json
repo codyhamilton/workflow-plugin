@@ -1,25 +1,25 @@
 {
-  "generated_at": "2026-10-02 01:43:18 AEST",
+  "generated_at": "2026-10-02 09:01:03 AEST",
   "wave": "typesafe-k1",
   "soft_standard_hold": true,
-  "n_cells": 2500,
-  "fire_count": 35,
+  "n_cells": 1500,
+  "fire_count": 24,
   "parse_miss_cells": 0,
   "error_count": 0,
   "leak_hits": 0,
   "framing_cell_counts": {
-    "H1": 504,
-    "H2": 504,
-    "H3": 504,
-    "H4": 504,
-    "H5": 484
+    "H1": 336,
+    "H2": 336,
+    "H3": 336,
+    "H4": 324,
+    "H5": 168
   },
   "usage_tokens_rough": {
-    "input_tokens": 1843736,
-    "output_tokens": 142172,
+    "input_tokens": 1088858,
+    "output_tokens": 85350,
     "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
   },
-  "wall_s": 59.3,
+  "wall_s": 103.0,
   "n_packs": 20,
   "schedule": [
     45,

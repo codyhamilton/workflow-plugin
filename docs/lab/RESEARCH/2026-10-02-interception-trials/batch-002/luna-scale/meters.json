@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02 01:45:57 AEST",
+  "generated_at": "2026-10-02 02:12:26 AEST",
   "batch": "batch-002",
   "wave": "Wave-0-scale",
   "driver": "luna",
@@ -10,14 +10,14 @@
   "typesafe_used": false,
   "hooks_unlock": false,
   "n_variants": 960,
-  "parse_miss_cells": 870,
+  "parse_miss_cells": 0,
   "error_count": 0,
-  "fire_count": 18,
+  "fire_count": 143,
   "rating_hist": {
-    "0": 2,
-    "1": 70,
-    "2": 17,
-    "3": 1
+    "0": 527,
+    "1": 290,
+    "2": 113,
+    "3": 30
   },
   "harness_cell_counts": {
     "claude-code": 607,
@@ -53,75 +53,142 @@
   ],
   "fire_rate_among_at_risk_cells": {
     "45": {
-      "n": 31,
-      "fire_rate": 0.1613
+      "n": 155,
+      "fire_rate": 0.0839
     },
     "50": {
-      "n": 28,
+      "n": 140,
       "fire_rate": 0.1429
     },
     "55": {
-      "n": 25,
-      "fire_rate": 0.28
+      "n": 125,
+      "fire_rate": 0.168
     },
     "60": {
-      "n": 6,
-      "fire_rate": 0.3333
+      "n": 72,
+      "fire_rate": 0.125
     },
     "65": {
-      "n": 0,
-      "fire_rate": null
+      "n": 64,
+      "fire_rate": 0.1406
     },
     "70": {
-      "n": 0,
-      "fire_rate": null
+      "n": 52,
+      "fire_rate": 0.1346
     },
     "75": {
-      "n": 0,
-      "fire_rate": null
+      "n": 52,
+      "fire_rate": 0.1923
     },
     "80": {
-      "n": 0,
-      "fire_rate": null
+      "n": 52,
+      "fire_rate": 0.0769
     },
     "85": {
-      "n": 0,
-      "fire_rate": null
+      "n": 40,
+      "fire_rate": 0.025
     },
     "90": {
-      "n": 0,
-      "fire_rate": null
+      "n": 32,
+      "fire_rate": 0.2188
     },
     "95": {
-      "n": 0,
-      "fire_rate": null
+      "n": 32,
+      "fire_rate": 0.125
     },
     "100": {
-      "n": 0,
-      "fire_rate": null
+      "n": 32,
+      "fire_rate": 0.3125
     },
     "105": {
-      "n": 0,
-      "fire_rate": null
+      "n": 32,
+      "fire_rate": 0.3125
     },
     "110": {
-      "n": 0,
-      "fire_rate": null
+      "n": 32,
+      "fire_rate": 0.2188
     },
     "115": {
-      "n": 0,
-      "fire_rate": null
+      "n": 24,
+      "fire_rate": 0.25
     },
     "120": {
-      "n": 0,
-      "fire_rate": null
+      "n": 24,
+      "fire_rate": 0.2083
     }
   },
   "prompt_leak_spotcheck_hits": [],
   "cell_id_salt": "b002s",
-  "partial": true,
-  "batches_done": 15,
+  "partial": false,
+  "wall_s": 1768.6,
   "n_batches": 160,
-  "wall_s_so_far": 179.0,
-  "model": "gpt-6-luna"
+  "batch_elapsed_sum_s": 1768.4,
+  "model": "gpt-6-luna",
+  "batch_errors": [
+    {
+      "batch_idx": 4,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 9,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 13,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 41,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 50,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 77,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 82,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 86,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 114,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 123,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 150,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 155,
+      "error": null,
+      "n_parsed": 5
+    },
+    {
+      "batch_idx": 159,
+      "error": null,
+      "n_parsed": 5
+    }
+  ]
 }

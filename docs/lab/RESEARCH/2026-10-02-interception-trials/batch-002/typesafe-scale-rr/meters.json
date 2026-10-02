@@ -1,0 +1,11 @@
+{
+  "n_cells": 4000,
+  "new": 4000,
+  "fire": 32,
+  "errors": 0,
+  "tok_in": 3905767,
+  "tok_out": 207968,
+  "wall_s": 57.3,
+  "soft_hold": true,
+  "generated_at": "2026-10-02T01:45:31+10:00"
+}

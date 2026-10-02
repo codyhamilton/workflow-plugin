@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02 01:46:04 AEST",
+  "generated_at": "2026-10-02 02:17:34 AEST",
   "batch": "batch-002",
   "wave": "Wave-0-scale",
   "driver": "flash",
@@ -10,14 +10,14 @@
   "typesafe_used": false,
   "hooks_unlock": false,
   "n_variants": 2400,
-  "parse_miss_cells": 2150,
+  "parse_miss_cells": 20,
   "error_count": 0,
-  "fire_count": 96,
+  "fire_count": 638,
   "rating_hist": {
-    "3": 38,
-    "1": 92,
-    "2": 56,
-    "0": 55
+    "3": 318,
+    "1": 835,
+    "2": 317,
+    "0": 892
   },
   "harness_cell_counts": {
     "claude-code": 1555,
@@ -56,75 +56,237 @@
   ],
   "fire_rate_among_at_risk_cells": {
     "45": {
-      "n": 62,
-      "fire_rate": 0.2258
+      "n": 341,
+      "fire_rate": 0.1466
     },
     "50": {
-      "n": 28,
-      "fire_rate": 0.2857
+      "n": 298,
+      "fire_rate": 0.1644
     },
     "55": {
-      "n": 25,
-      "fire_rate": 0.56
+      "n": 275,
+      "fire_rate": 0.2218
     },
     "60": {
-      "n": 18,
-      "fire_rate": 0.3889
+      "n": 188,
+      "fire_rate": 0.234
     },
     "65": {
-      "n": 16,
-      "fire_rate": 0.25
+      "n": 176,
+      "fire_rate": 0.2557
     },
     "70": {
-      "n": 13,
-      "fire_rate": 0.5385
+      "n": 143,
+      "fire_rate": 0.3077
     },
     "75": {
-      "n": 13,
+      "n": 143,
       "fire_rate": 0.3077
     },
     "80": {
-      "n": 13,
-      "fire_rate": 0.4615
+      "n": 143,
+      "fire_rate": 0.2657
     },
     "85": {
-      "n": 10,
-      "fire_rate": 0.4
+      "n": 110,
+      "fire_rate": 0.3364
     },
     "90": {
-      "n": 8,
-      "fire_rate": 0.375
+      "n": 88,
+      "fire_rate": 0.4205
     },
     "95": {
-      "n": 8,
-      "fire_rate": 0.625
+      "n": 88,
+      "fire_rate": 0.3977
     },
     "100": {
-      "n": 8,
-      "fire_rate": 0.5
+      "n": 88,
+      "fire_rate": 0.3409
     },
     "105": {
-      "n": 8,
-      "fire_rate": 0.75
+      "n": 88,
+      "fire_rate": 0.3636
     },
     "110": {
-      "n": 8,
-      "fire_rate": 0.375
+      "n": 88,
+      "fire_rate": 0.3636
     },
     "115": {
-      "n": 6,
-      "fire_rate": 0.6667
+      "n": 63,
+      "fire_rate": 0.4762
     },
     "120": {
-      "n": 6,
+      "n": 60,
       "fire_rate": 0.5
     }
   },
   "prompt_leak_spotcheck_hits": [],
   "cell_id_salt": "b002s",
-  "partial": true,
-  "batches_done": 25,
+  "partial": false,
+  "wall_s": 2076.2,
   "n_batches": 240,
-  "wall_s_so_far": 186.2,
-  "model": "deepseek/deepseek-flash"
+  "batch_elapsed_sum_s": 4145.6,
+  "model": "deepseek/deepseek-flash",
+  "batch_errors": [
+    {
+      "batch_idx": 2,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 5,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 8,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 24,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 27,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 30,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 46,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 48,
+      "error": "\u001b[0m\n> build \u00b7 deepseek-flash\n\u001b[0m\n",
+      "n_parsed": 0
+    },
+    {
+      "batch_idx": 49,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 53,
+      "error": "\u001b[0m\n> build \u00b7 deepseek-flash\n\u001b[0m\n",
+      "n_parsed": 0
+    },
+    {
+      "batch_idx": 68,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 71,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 73,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 90,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 93,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 95,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 112,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 115,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 117,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 134,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 137,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 139,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 156,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 161,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 180,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 183,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 199,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 202,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 205,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 221,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 224,
+      "error": null,
+      "n_parsed": 9
+    },
+    {
+      "batch_idx": 227,
+      "error": null,
+      "n_parsed": 9
+    }
+  ]
 }
