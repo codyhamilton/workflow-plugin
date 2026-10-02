@@ -1,0 +1,51 @@
+{
+  "counts": {
+    "exact_session_checkpoint_keys": 67,
+    "finite_window_positive_keys": 4,
+    "finite_window_sessions": 3,
+    "near_done_runaway_joint": {
+      "near_done=no,runaway_like=no": 39,
+      "near_done=no,runaway_like=yes": 4,
+      "near_done=yes,runaway_like=no": 24
+    },
+    "sidecar_sessions": 20,
+    "strata": {
+      "decision_window_positive": 4,
+      "near_done_guard": 24,
+      "negative_control": 39
+    },
+    "window_status": {
+      "ambiguous": 0,
+      "inside_steer_window": 4,
+      "no_steer_window": 52,
+      "outside_steer_window": 11,
+      "unidentified": 0
+    }
+  },
+  "decision_window_definition": "Exact labeled key with runaway_like=yes and checkpoint inside the effective finite ideal_steer_window. This is a reference stratum only; it is not a hit or miss without judge-result joins.",
+  "generated_by": "run_rotate2_decision_window_audit.py",
+  "hooks": false,
+  "local_8080": false,
+  "metrics_computed": false,
+  "negative_control_definition": "Exact labeled (session_id, checkpoint) key with near_done=no and runaway_like=no. Window status remains an orthogonal field; none is not inferred from no_steer_window.",
+  "not_scoreboard": true,
+  "product_wiring": false,
+  "protocol_rev": "rotate-2-window-controls-v1",
+  "soft_standard_hold": true,
+  "validation": {
+    "all_checkpoint_keys_fixed_schedule": true,
+    "all_exact_session_checkpoint_keys_unique": true,
+    "all_independence_attestations_false": true,
+    "all_rows_have_exact_key_join": true,
+    "all_sidecar_rows_labeled": true,
+    "empirical_reference_validation": "not_complete",
+    "no_final_length_input": true,
+    "no_nearest_checkpoint_interpolation": true,
+    "protocol_shape_pass": true,
+    "remaining_reference_gates": [
+      "second independent adjudication with retained agreement",
+      "immutable blind transcript-digest bundle",
+      "judge-result join before any FP/miss aggregation"
+    ]
+  }
+}
