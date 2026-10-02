@@ -29,6 +29,7 @@ DRIVER = "typesafe"
 STRATUM = "maps-5h"
 API_URL = "https://api.typesafe.ai/v1/systemone"
 CHECKPOINTS = (50, 60, 75)
+REPLICATES = (1, 2, 3)
 WORKERS = (
     "92a48e004519",
     "ca977b9ca0dd",
@@ -65,10 +66,10 @@ def json_dump(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
 
 
-def stable_cell_id(worker_id: str, checkpoint: int) -> str:
+def stable_cell_id(worker_id: str, checkpoint: int, replicate: int) -> str:
     recipe = (
         f"batch003-v1|{DRIVER}|{worker_id}|{checkpoint}|"
-        "hybrid_v0|validation_phase|w0"
+        f"hybrid_v0|validation_phase|w0|replicate.{replicate}"
     )
     return hashlib.sha256(recipe.encode()).hexdigest()[:16]
 
@@ -168,21 +169,23 @@ def build_cells(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for row in sorted(rows, key=lambda item: (WORKERS.index(item["worker_id"]), item["checkpoint_turn"])):
         worker_id = row["worker_id"]
         checkpoint = row["checkpoint_turn"]
-        cells.append(
-            {
-                "cell_id": stable_cell_id(worker_id, checkpoint),
-                "case_id": CASE_ID,
-                "driver": DRIVER,
-                "model": MODEL,
-                "stratum": STRATUM,
-                "worker_id": worker_id,
-                "worker_stratum": WORKER_STRATA[worker_id],
-                "checkpoint": checkpoint,
-                "prior_checkpoint": row.get("prior_checkpoint_turn"),
-                "pack_sha256": EXPECTED_PACK_SHA256,
-                "state": prefix_state(row),
-            }
-        )
+        for replicate in REPLICATES:
+            cells.append(
+                {
+                    "cell_id": stable_cell_id(worker_id, checkpoint, replicate),
+                    "case_id": CASE_ID,
+                    "driver": DRIVER,
+                    "model": MODEL,
+                    "stratum": STRATUM,
+                    "worker_id": worker_id,
+                    "worker_stratum": WORKER_STRATA[worker_id],
+                    "checkpoint": checkpoint,
+                    "prior_checkpoint": row.get("prior_checkpoint_turn"),
+                    "replicate": replicate,
+                    "pack_sha256": EXPECTED_PACK_SHA256,
+                    "state": prefix_state(row),
+                }
+            )
     return cells
 
 
@@ -219,6 +222,7 @@ def post_cell(cell: dict[str, Any], out: Path, key: str) -> dict[str, Any]:
         "worker_stratum": cell["worker_stratum"],
         "checkpoint": cell["checkpoint"],
         "prior_checkpoint": cell["prior_checkpoint"],
+        "replicate": cell["replicate"],
         "state_prefix_only": True,
         "state_chars": len(json_dump(cell["state"])),
         "request_path": str(request_path.relative_to(out)),
@@ -308,6 +312,7 @@ def write_outputs(
                 "worker_stratum": cell["worker_stratum"],
                 "checkpoint": cell["checkpoint"],
                 "prior_checkpoint": cell["prior_checkpoint"],
+                "replicate": cell["replicate"],
                 "request_path": result.get("request_path"),
                 "response_path": result.get("response_path"),
                 "response_label": result.get("response_label"),
@@ -330,7 +335,7 @@ def write_outputs(
         "prepared_at": prepared_at,
         "n_cells_planned": len(cells),
         "n_cells_recorded": len(ordered),
-        "cell_id_recipe": "sha256(batch003-v1|driver|worker|checkpoint|hybrid_v0|validation_phase|w0)[:16]",
+        "cell_id_recipe": "sha256(batch003-v1|driver|worker|checkpoint|hybrid_v0|validation_phase|w0|replicate)[:16]",
         "choice_labels": list(RESPONSE_LABELS),
         "pattern_note_labels": list(PATTERN_LABELS),
         "cells": manifest_cells,
