@@ -1,0 +1,319 @@
+{
+  "schema_version": "soft-hold-session-strata-v1",
+  "base_sha": "06776c47ad978ace69030326cfa963186e8a737b",
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "selection_checkpoint": 45,
+  "selection_rule": {
+    "purpose": "Paired state-representation and cross-driver sensitivity only; not an outcome-ranking set.",
+    "requirements": [
+      "Every session has a prefix snapshot at fixed checkpoint 45.",
+      "No claude-code or Maps-family share above 40 percent.",
+      "All four currently represented harnesses and at least four projects are present.",
+      "No empty or synthetic state may substitute for a missing harness-native field."
+    ],
+    "tie_break": "Frozen IDs below; do not replace a failed session after responses are visible.",
+    "late_replay_block": "B02",
+    "holdout_block": null,
+    "historical_response_exposure": "All 28 sessions are landed batch-002 sessions. B02 is delayed replay validation, not an independent hold-out. Fresh hold-out sessions come from the new-corpus gate in TRIAL-MATRIX.json."
+  },
+  "summary": {
+    "n_sessions": 28,
+    "n_blocks": 7,
+    "sessions_per_block": 4,
+    "harness_counts": {
+      "claude-code": 11,
+      "opencode": 13,
+      "codex": 2,
+      "cursor": 2
+    },
+    "maps_family_sessions": 11,
+    "non_maps_sessions": 17,
+    "claude_code_share": 0.392857,
+    "maps_family_share": 0.392857,
+    "project_count": 6,
+    "response_blind_holdout_sessions": 0
+  },
+  "sessions": [
+    {
+      "block": "B01",
+      "session_id": "a56bad1c7f13",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B01",
+      "session_id": "ses_1a0328cd5ffe6iabFeMK",
+      "harness": "opencode",
+      "project": "lemmings",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B01",
+      "session_id": "rollout-2026-04-07T04-10",
+      "harness": "codex",
+      "project": "garcia-music",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B01",
+      "session_id": "b784e674-febe-4eb4-a2ca-",
+      "harness": "cursor",
+      "project": "garcia-music",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B02",
+      "session_id": "499377c18811",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B02",
+      "session_id": "ses_1a0369734ffeqlVOz4S8",
+      "harness": "opencode",
+      "project": "lemmings",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B02",
+      "session_id": "rollout-2026-04-06T16-00",
+      "harness": "codex",
+      "project": "garcia-music",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B02",
+      "session_id": "87e55915-f481-4dcc-8b6a-",
+      "harness": "cursor",
+      "project": "garcia-music",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B03",
+      "session_id": "a2e9f853749d",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B03",
+      "session_id": "a8d0a590128a",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B03",
+      "session_id": "ses_1a6280e0dffeW0FRROYz",
+      "harness": "opencode",
+      "project": "llama.cpp",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B03",
+      "session_id": "ses_42080a163ffer9OHMlFr",
+      "harness": "opencode",
+      "project": "free-frontier",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B04",
+      "session_id": "730a03ecdc0d",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B04",
+      "session_id": "4f4b98803720",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B04",
+      "session_id": "ses_f0d3f4608ffem463bgxw",
+      "harness": "opencode",
+      "project": "garcia-music",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B04",
+      "session_id": "ses_1352b9d77ffez5WKeILf",
+      "harness": "opencode",
+      "project": "workflow-plugin",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B05",
+      "session_id": "9659bf4fc9f4",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B05",
+      "session_id": "b13d1a65a961",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B05",
+      "session_id": "ses_19fdcde9bffeGPlaJd0t",
+      "harness": "opencode",
+      "project": "lemmings",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B05",
+      "session_id": "ses_1363591c9ffecsL632uK",
+      "harness": "opencode",
+      "project": "workflow-plugin",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B06",
+      "session_id": "919012be9f39",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B06",
+      "session_id": "2e083814b952",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B06",
+      "session_id": "ses_1a050f571ffed0MPHFgM",
+      "harness": "opencode",
+      "project": "lemmings",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B06",
+      "session_id": "ses_139862c47ffeobqMSKLG",
+      "harness": "opencode",
+      "project": "workflow-plugin",
+      "maps_family": false,
+      "corpus_source": "deterministic_30",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B07",
+      "session_id": "5415ae00a788",
+      "harness": "claude-code",
+      "project": "open-pajero-maps",
+      "maps_family": true,
+      "corpus_source": "deterministic_30",
+      "state_contract": "growth-fill-v1-native",
+      "holdout": false
+    },
+    {
+      "block": "B07",
+      "session_id": "ses_19fc995cdffegmHlfSuH",
+      "harness": "opencode",
+      "project": "lemmings",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B07",
+      "session_id": "ses_1a068fa41ffehTYBp71G",
+      "harness": "opencode",
+      "project": "workflow-plugin",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    },
+    {
+      "block": "B07",
+      "session_id": "ses_139c24023ffepP3BK2sf",
+      "harness": "opencode",
+      "project": "workflow-plugin",
+      "maps_family": false,
+      "corpus_source": "inventory_mid",
+      "state_contract": "harness-tail-adapter-required",
+      "holdout": false
+    }
+  ]
+}
