@@ -120,7 +120,7 @@ def verify_registry() -> dict[str, Any]:
         "EX-SHAPE-SIGNAL five-Q only"
     ):
         raise RuntimeError("registry question format is not EX-SHAPE-SIGNAL")
-    ids = [row["id"] for row in matrix]
+    ids = [row["id"] for row in matrix.get("perturbation_matrix", [])]
     if ids != [
         "order-swap",
         "drop-brief_anchor",
