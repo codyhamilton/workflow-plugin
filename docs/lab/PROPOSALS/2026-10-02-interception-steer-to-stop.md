@@ -18,6 +18,8 @@ confidence: protocol-resolved; framings provisionally ordered; not score-ranked
 
 Research pack: [`../RESEARCH/2026-10-02-interception-steer-to-stop/`](../RESEARCH/2026-10-02-interception-steer-to-stop/INDEX.md). Trials: [`../RESEARCH/2026-10-02-interception-trials/`](../RESEARCH/2026-10-02-interception-trials/INDEX.md).
 
+**2026-10-02 pointer (does not re-rank the bake-off below):** the next theory → signal → subset loop uses float closeness, and treats this paper’s H1 rating → fire chain as contrast. [`../RESEARCH/2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md`](../RESEARCH/2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md). Draft families named there are unsigned and are not a GO. `status: resolved-soft` is unchanged.
+
 This is the next layer after [`2026-10-01-progressive-jev-session-gates`](2026-10-01-progressive-jev-session-gates.md) (`status: researching`). That pack keeps the ~75 then ~15 re-check intuition and tried to tune it against multi-model gold (H5 failed, Krippendorff’s α 0.1189). This paper keeps the re-check intuition, rejects monitor agreement as gold, and scores fire-time against a non-length outcome sheet. It does not retune `A0`, `gate_thresholds.py`, or the resolved cheap-Jev use cases.
 
 ## Hold scope

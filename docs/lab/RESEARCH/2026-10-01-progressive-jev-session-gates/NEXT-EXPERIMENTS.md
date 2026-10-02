@@ -4,6 +4,8 @@
 
 **Gold protocol update (Cody 2026-10-01):** experiment **`shape-signal-panel-v1`** **supersedes** the unanimous A0 / ≥2 A0 gate as the primary next measurement. Do **not** require three-model exact exit agreement. Multi-model agreement on early signals / shape / inflections is primary; exit-turn spread is secondary. **Panel + agreement done** — see [`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md). **Hold Jev behaviour ship** and do **not** `--call-jev` until WSM progressive revalidation + validation handoff ([`TERMS.md`](TERMS.md) §§12–13) have a pre-registered decay schedule / harness design. Definitions: [`TERMS.md`](TERMS.md) §§11–13.
 
+**Measurement grammar (Cody 2026-10-02):** new signal asks follow [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md) ([`TERMS.md`](TERMS.md) §15) — float closeness, not a harder yes/no. Unsigned drafts only. The section **`signal-closeness-v0`** at the end of this file is the pointer. It does not launch seats and does not lift the decay hold.
+
 ## Completed — experiment **(b)** `sonnet-relabel-parent-pull-v1` (**FAIL**)
 
 **Status:** done. **Outcome:** scorecard **fail** — stop rule **1 (over-fire)**.  
@@ -394,3 +396,30 @@ These two ids split Cody’s same design fold for traceability; they ship togeth
 | Harness | Separate PR / seats — **not** this lab-docs fold |
 
 **Confidence:** stays **not high** until offline replay shows decay + handoff beats fixed `P0` on gold-relevant metrics; WSM steer remains convention until product wiring accepts it.
+
+---
+
+## Measurement grammar — **`signal-closeness-v0`** (design note 2026-10-02; unsigned; no seats)
+
+**Status:** design note landed. **Not** a seat, **not** a harness, **not** a replacement for `shape-qual-full-maps-v1` or for the decay/handoff hold above. **No `--call-jev`.**
+
+**Note:** [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md). **Terms:** [`TERMS.md`](TERMS.md) §15. **Decay alignment:** D0 in [`DESIGN-progressive-decay-bar-v0.md`](DESIGN-progressive-decay-bar-v0.md); D1 remains the unadopted challenger.
+
+Cody’s 2026-10-02 guidance, written here so the next theory → signal → subset pass does not depend on chat:
+
+1. Theorise qualitative signals (starter set: thrash, poll, productive-edit, validation inflection).
+2. One API call, many **independent** float asks. Each float is judged alone. Prove or kill each signal before any average.
+3. Only survivors get wording/anchor variants crossed with specialised state subsets: last-N assistant turns; opening prompt plus last-N; all user prompts plus last-N; programmatic turn-type profile with minimal prose. Cheap subsets first. Escalate only when float quality stalls.
+4. Weighted union and per-round discount-to-kill are Workflow System Manager’s, offline, aligned with D0. The model is not asked for the union.
+
+Wave-2 is the motive, not a ship ticket: blind validation labels collapsed (**63/63** `in_validation`), survival event times stayed null, the tournament kill showed extremes already separate at **zero** calls, and tool-grounding recovered productive-edit building mass (**12/18** vs v1’s **0**). Same-question reseat of the killed validation and survival framings is forbidden. Figures and the reading of each stamp: design note §4.
+
+**Unsigned draft family names** (Corpus Ops labels only — no protocol, no GO):
+
+| Name | When it could be signed |
+|------|-------------------------|
+| `PR-SIGNAL-CLOSENESS` | After an inventory exists for the independent float panel |
+| `PR-SIGNAL-STATE-ABLATION` | After at least one signal has survived on its own contrast |
+| `PR-DECAY-ACCUM` | After survivors exist **and** the [0, 1] union ↔ D0 `t_k` map is written. Does not open the decay harness |
+
+**Explicit non-goals:** no hooks, no `--call-jev`, no local `:8080`, maps only unless non-maps capture is unblocked, no behaviour ship. H1’s rating → fire chain stays contrast: [`../2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md`](../2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md).

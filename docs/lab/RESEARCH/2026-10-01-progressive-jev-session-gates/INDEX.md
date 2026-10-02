@@ -34,14 +34,16 @@ This pack completes the definitions, the citations, and the proof plan. A dry-ru
 
 | File | Role |
 |------|------|
-| [`TERMS.md`](TERMS.md) | Definitions: turn, schedule, continue vs checkout, fail-open, snapshot modes, v0 questions, gold, metrics; §11 shape-signal; §12–§13 WSM progressive decay + validation handoff (design only); §14 `shape-qual-full-maps-v1` (full T≥75 + early ≤~120T) |
+| [`TERMS.md`](TERMS.md) | Definitions: turn, schedule, continue vs checkout, fail-open, snapshot modes, v0 questions, gold, metrics; §11 shape-signal; §12–§13 WSM progressive decay + validation handoff (design only); §14 `shape-qual-full-maps-v1` (full T≥75 + early ≤~120T); §15 signal closeness (2026-10-02) |
 | [`HYPOTHESIS.md`](HYPOTHESIS.md) | What would falsify the progressive gate, the hybrid snapshot, and the v0 questions |
 | [`TUNING-PLAN.md`](TUNING-PLAN.md) | Corpus, multi-model gold, aggregation, param grid, staged calls, lock rule |
 | [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md) | What “pull the exit hatch” means, with maps examples. Draft delta at the end is not in force |
-| [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | **(b)** fail; **(c)–(f)** recorded; **`shape-signal-panel-v1`** seats done; primary packs **`shape-qual-full-maps-v1`** (34 T≥75, seats held); **hold** decay/handoff harness |
+| [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) | **(b)** fail; **(c)–(f)** recorded; **`shape-signal-panel-v1`** seats done; **`shape-qual-full-maps-v1`** packs done, seats not launched; decay/handoff harness not started; **`signal-closeness-v0`** is the 2026-10-02 measurement grammar (unsigned, no seats) |
 | [`LITERATURE.md`](LITERATURE.md) | Prior art and the limit of each citation |
 | [`proofs/README.md`](proofs/README.md) | Offline harness plan and the files that must exist before any recommendation |
+| [`DESIGN-progressive-decay-bar-v0.md`](DESIGN-progressive-decay-bar-v0.md) | Written D0 discount schedule and validation-handoff sketch. Harness not started. §8 points at the 2026-10-02 float-input grammar |
 | [`ADVERSARIAL-progressive-decay-bar-v0.md`](ADVERSARIAL-progressive-decay-bar-v0.md) | WSM adversarial pack (design-grounded); D0 comparison, proposed D1 — not shipped |
+| [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md) | 2026-10-02 measurement grammar: float closeness, independent multi-ask, per-signal prove/kill, then state subsets, then WSM union + D0 discount. Unsigned drafts only. No behaviour ship |
 
 ## How this sits on the resolved paper
 
@@ -70,6 +72,7 @@ Live Claude `PostToolBatch`, hook `additionalContext`, and any parent-surface fo
 
 ## Links
 
+- Signal-closeness measurement grammar (2026-10-02, unsigned): [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md). Interception contrast: [`../2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md`](../2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md)
 - Sibling harness design (does not change these terms, `A0`, or this pack's proofs): [`../2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md`](../2026-10-01-cheap-analysis-typesafe-opencode/INDEX.md)
 - Stub: [`../../PROPOSALS/2026-10-01-progressive-jev-session-gates.md`](../../PROPOSALS/2026-10-01-progressive-jev-session-gates.md)
 - Resolved predecessor: [`../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md`](../../PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md)

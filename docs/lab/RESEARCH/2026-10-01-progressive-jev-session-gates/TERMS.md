@@ -1,6 +1,6 @@
 # Terms — progressive Jev session gates
 
-**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 for `shape-signal-panel-v1`; §§12–13 WSM progressive revalidation + validation-phase handoff (Cody design fold 2026-10-01); §14 for `shape-qual-full-maps-v1` (full T≥75 Maps qual + early-signal ≤~120T).
+**Status:** definitions for an offline study. **Confidence: not high.** §§1–10 drafted before first replay; §11 for `shape-signal-panel-v1`; §§12–13 WSM progressive revalidation + validation-phase handoff (Cody design fold 2026-10-01); §14 for `shape-qual-full-maps-v1` (full T≥75 Maps qual + early-signal ≤~120T); §15 signal closeness (Cody measurement guidance 2026-10-02) — [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md).
 
 These terms are the contract for [`GOLD-LABEL-RUBRIC.md`](GOLD-LABEL-RUBRIC.md), [`TUNING-PLAN.md`](TUNING-PLAN.md), and [`proofs/README.md`](proofs/README.md). If a later harness uses a different meaning, it is a different study.
 
@@ -433,6 +433,8 @@ Two exit paths at checkpoint `c` with bar `t_k` on round index `k` (0 at the fir
 
 The offline sweep still uses fixed `confidence_min = 3` (§6, §9). §12 is the intended live policy once shape-signal agreement lands; harness seats stay separate from WSM docs. Agreement SUMMARY for `shape-signal-panel-v1` is now at [`proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md) (ca977 unanimous early_thrash; 92a48e shape split with ~90 thrash signals). **Still not shipped** — no `--call-jev`, no hook behaviour from this fold alone.
 
+**Inputs on the next signal loop (2026-10-02).** The score that meets `t_k` is not, on that loop, a hard yes/no or a single rating. §15 defines per-signal closeness floats and an offline weighted union. The union is what a later signature may compare to this decaying bar. The [0, 1] union and integer `t_k` are different scales until that signature maps them. See [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md).
+
 **Gold and agreement weight:** Multi-model agreement on **early signals**, **shape**, and **inflections** (§11) matters more than exact exit-turn match when interpreting leap vs accumulate or tuning decay. Exit-turn spread across seats is **secondary**, not a hard fail — same weighting as `shape-signal-panel-v1`.
 
 ## 13. Validation-phase handoff (design — not shipped)
@@ -449,6 +451,8 @@ At **progressive validation checks** — nominally ~**50**, **60**, and **75** `
 | **Already** in validation | Use §12 **leap** / **accumulate** and the decaying bar. Do **not** invent a third hard-exit without replay evidence. |
 
 The 50/60/75 anchors are for **phase detection and steer** only. They do not replace `session-checkout` gold labels or the P0 `(75, 15)` grid until measured separately. Paired hold: [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) **`validation-handoff-steer-v1`**.
+
+**Demoted as a primary measurement (2026-10-02).** Wave-2 killed the blind validation-phase yes/no (every labeled prefix in one class, including productive-edit). This section stays the handoff sketch. It is not the instrument the next signal loop asks first. A validation-shaped judgement, if retried, is a new closeness float under §15, not a reseat of the killed question. [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md) §4.
 
 
 ## 14. Full Maps qualitative shape (`shape-qual-full-maps-v1`)
@@ -477,6 +481,26 @@ Added 2026-10-01 for experiment **`shape-qual-full-maps-v1`**. Expands qualitati
 
 **Pack schema note:** hybrid_v0 (`N=8`, excerpt 400) omit-state safe packs under [`proofs/validated/gold/packs/`](proofs/validated/gold/packs/). Combined inventory [`INVENTORY-shape-qual-full-maps-v1-20261001-214046.json`](proofs/validated/gold/packs/INVENTORY-shape-qual-full-maps-v1-20261001-214046.json). Reuse prior packs where present; gap packs from run `20261001-214046`. `pack_meta.early_signal_window` on combined rows restates the ≤~120 rule for seat scaffolding.
 
+## 15. Signal closeness (`signal-closeness-v0`)
+
+Added 2026-10-02. Measurement vocabulary for the next theory → signal → subset loop. **Unsigned.** Does not replace §7 gold, §9 `P0`, §11–§14 seat contracts, or §12’s D0 bar. Procedure, starter signals, wave-2 figures, and the draft family names: [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md).
+
+| Term | Definition |
+|------|------------|
+| `signal_closeness` | A float in **[0, 1]** for one named qualitative signal. 0 is no resemblance to that signal’s written anchor; 1 is a clear instance. Judged alone. Not a class label, not an event time, not a fire bit |
+| Independent ask | One signal, one float, inside a request that may carry several signals. Floats need not sum to 1 and are not mutually exclusive. The request does not ask which signal wins |
+| Signal kill | That signal’s float is flat or reversed on its pre-declared contrast. The wording is not reseated. A repair is a new signal |
+| `turn_type_profile` | Programmatic array of turn types (`think`, `bash`, `read_file`, `write_file`, …) with minimal or no prose. Cheap first subset. A contrast this profile already orders is a zero-call separation: no model call for that signal |
+| `last_n_assistant` | Last N assistant turns only. N is a later variant axis, not frozen here |
+| `prompt_plus_last_n` | Opening system/user prompt plus last N assistant turns |
+| `all_user_prompts_plus_last_n` | Every user message in the prefix, plus last N assistant turns, and no earlier assistant prose |
+| Weighted union | Offline combination of surviving closeness floats. Weights belong to Workflow System Manager and are declared before that round’s kill outcomes are read. The model does not emit the union |
+| Discount-to-kill | Once per §2 / §12 round the fire bar drops until leap or the counterfactual run stops. The schedule to align is D0 (§12, decay design). A [0, 1] union is not integer `t_k` until a later signature maps the scales |
+| Run kill | The offline policy stops the counterfactual worker. Distinct from a signal kill |
+| Demoted primary | Hard yes/no, multi-class phase or tournament labels, integer event times, and a single rating thresholded into fire. Legal as a contrast column. Not what the union consumes |
+
+Draft family names `PR-SIGNAL-CLOSENESS`, `PR-SIGNAL-STATE-ABLATION`, and `PR-DECAY-ACCUM` are labels only. They are not an inventory, a seat plan, or a GO.
+
 ## 10. Out of scope for these terms
 
 - The bytes of a Claude hook response, including `additionalContext`.
@@ -485,3 +509,4 @@ Added 2026-10-01 for experiment **`shape-qual-full-maps-v1`**. Expands qualitati
 - Classify labels as a score or as a filter.
 - A live counter stored under `~/.cache/workflow-plugin/signal-state/`.
 - Retuning `BAND_EXIT_TURNS`, `HANDOFF_SIGNAL_TURNS`, or the context and byte thresholds.
+- A model-emitted weighted union, fire bar, or kill (§15). Those stay offline.
