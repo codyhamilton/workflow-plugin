@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -38,7 +39,7 @@ CASE_ID = "PR-STATS-JEV-TOURNAMENT"
 APPROACH_ID = "stats-jev-tournament"
 SCHEMA_ID = "early-signal-v0"
 STRATUM = "maps-5h"
-REGISTRATION_ID = "stats-jev-tournament-dry-novel-burn-1"
+REGISTRATION_ID = "stats-jev-tournament-redry-v2-final-1"
 REGISTRY_DEFAULT = Path("/home/codyh/workspace/corpus-ops/registry/stats-jev-tournament/framings.json")
 WORKERS = (
     "92a48e004519",
@@ -50,6 +51,24 @@ WORKERS = (
     "074c8cf22927",
     "daf933273c8f",
 )
+EXPECTED_FRAMINGS = {
+    "esv0-binary-foreshadow": (
+        "esv0-binary-foreshadow#d0f736b5ecc043ce",
+        "d0f736b5ecc043ce235cff655a3d3b72bc9b09fc8e231fe3b696e625893981f6",
+    ),
+    "esv0-likert-collapse": (
+        "esv0-likert-collapse#4ddae065dda2245f",
+        "4ddae065dda2245fbe46a9de7dbc61e56fd66c1d7938ccb7c45e5aff6fe35031",
+    ),
+    "esv0-binary-monitor-present": (
+        "esv0-binary-monitor-present#77ace2e03f04a9da",
+        "77ace2e03f04a9daf622faa0e49da54a620af1c0cf7b94be89e45fd9720e7db6",
+    ),
+    "esv0-binary-counts-only": (
+        "esv0-binary-counts-only#10485a6cd618781e",
+        "10485a6cd618781e93260513dd01dcc7fb058bdc6ebcf5be8b1f383d445983cd",
+    ),
+}
 
 
 def sha256_text(value: str) -> str:
@@ -85,6 +104,8 @@ def load_registry(path: Path) -> dict[str, Any]:
         raise ValueError("registry state mode or stratum does not match the dry phase")
     if registry.get("protocol", {}).get("live_max") != 32:
         raise ValueError("registry live cap is not 32")
+    if registry.get("freeze_version") != "TYPESAFE_LEGAL_v2":
+        raise ValueError("registry is not the final TYPESAFE_LEGAL_v2 freeze")
     return registry
 
 
@@ -99,8 +120,13 @@ def validate_framing(row: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"{row['registry_id']}: canonical question JSON mismatch")
     if expected_id != row["framing_id"]:
         raise ValueError(f"{row['registry_id']}: framing_id mismatch")
-    if row["freeze_status"] != "FREEZE_READY":
-        raise ValueError(f"{row['registry_id']}: framing is not FREEZE_READY")
+    expected = EXPECTED_FRAMINGS.get(row["registry_id"])
+    if expected is None or row["framing_id"] != expected[0]:
+        raise ValueError(f"{row['registry_id']}: unexpected final framing_id")
+    if computed_sha != expected[1] or row["questions_sha256"] != expected[1]:
+        raise ValueError(f"{row['registry_id']}: full questions_sha256 is not final")
+    if row["freeze_status"] != "TYPESAFE_LEGAL_v2":
+        raise ValueError(f"{row['registry_id']}: framing is not TYPESAFE_LEGAL_v2")
     return {
         "registry_id": row["registry_id"],
         "pilot_slug": row["pilot_slug"],
@@ -178,6 +204,9 @@ def run(registry_path: Path, output_dir: Path) -> dict[str, Any]:
             "likert_theme_collapse_rule": registry["likert_theme_collapse_rule"],
         },
     )
+    registry_copy = output_dir / "registry-copy" / "framings.json"
+    registry_copy.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(registry_path, registry_copy)
     write_jsonl(raw_dir / "stats_cards.jsonl", [worker_cards[worker_id] for worker_id in WORKERS])
 
     request_rows: list[dict[str, Any]] = []
@@ -310,7 +339,7 @@ def run(registry_path: Path, output_dir: Path) -> dict[str, Any]:
         )
 
     missing_fixtures = [
-        worker_id for worker_id, info in worker_fixture_info.items() if not info["used_path"]
+        worker_id for worker_id, info in worker_fixture_info.items() if not info["maps_jsonl_available"]
     ]
     manifest = {
         "manifest_version": 1,
