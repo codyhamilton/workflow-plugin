@@ -106,6 +106,8 @@ def probe_tables() -> tuple[dict, dict]:
 def main() -> int:
     base = baseline()
     flip, miss = probe_tables()
+    flip_fire = sum(value["fire"] for value in flip["by_axis"].values())
+    miss_fire = sum(value["fire"] for value in miss["by_axis"].values())
     analysis = {
         "scope": "Soft HOLD docs/trials/evidence only",
         "baseline": base,
@@ -152,10 +154,10 @@ def main() -> int:
         f"{base['preferred_cells']} | {base['preferred_cells']} | {base['preferred_fires']} | "
         "prior preferred scenario distribution |",
         f"| diagnostic state flip | 24 state×question scenarios × 7 reps × 2 classes | "
-        f"{flip_m['n_cells_planned']} | {flip_m['n_cells_successful']} | — | "
+        f"{flip_m['n_cells_planned']} | {flip_m['n_cells_successful']} | {flip_fire} | "
         "non-label-ready representation contrast |",
         f"| miss-identifiability + holdout | 52 exact keys + 25 non-Maps keys | "
-        f"{miss_m['n_cells_planned']} | {miss_m['n_cells_successful']} | — | "
+        f"{miss_m['n_cells_planned']} | {miss_m['n_cells_successful']} | {miss_fire} | "
         "post-hoc risk probe; no scoreboard |",
         "",
         f"#110 preferred fire distribution: **{base_rate}**. "
