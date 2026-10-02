@@ -27,7 +27,7 @@ URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-1.13.0"
 WORKERS = int(os.environ.get("TS_GROWTH_WORKERS", "12"))
 STAGE = os.environ.get("TS_RUN_STAGE", "preferred")
-TARGET = int(os.environ.get("TS_CASE_TARGET", "3000"))
+TARGET = int(os.environ.get("TS_CASE_TARGET", "3402"))
 AEST = ZoneInfo("Australia/Brisbane")
 
 _gspec = importlib.util.spec_from_file_location("growth_fill", BATCH / "growth_fill.py")
@@ -283,10 +283,20 @@ def case_cells() -> tuple[list[dict], Counter]:
              for question in QUESTIONS
              for rating in RATINGS]
     per_case = max(1, (TARGET + len(cases) - 1) // len(cases))
+    valid_rows = {}
+    for state in STATE_VARIANTS:
+        valid_rows[state] = []
+        for row in rows:
+            if project(row["full"], state) is not None:
+                valid_rows[state].append(row)
     for index, (state, question, rating) in enumerate(cases):
         # Keep the corpus broad: a case gets only a small round-robin slice,
         # rather than consuming every session before the next case appears.
-        ordered_rows = rows[index % len(rows):] + rows[:index % len(rows)]
+        state_rows = valid_rows[state]
+        if not state_rows:
+            gated[f"{state}:no_valid_rows"] += 1
+            continue
+        ordered_rows = state_rows[index % len(state_rows):] + state_rows[:index % len(state_rows)]
         for row in ordered_rows[:per_case]:
             state_data = project(row["full"], state)
             if state_data is None:
