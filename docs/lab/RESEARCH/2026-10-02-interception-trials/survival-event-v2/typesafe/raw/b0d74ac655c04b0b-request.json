@@ -1,0 +1,291 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "evidence_class": "hybrid_v0",
+    "framing": "PR-SURVIVAL-EVENT-v2",
+    "window_rule": "rows through last available cps <= min(T, 150)",
+    "marker_features": {
+      "reread_max": 5,
+      "compaction_event_count": 2,
+      "Edit_count": 7,
+      "Write_count": 5
+    },
+    "snapshot": [
+      {
+        "worker_id": "0677f597286e",
+        "checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": null,
+        "brief_anchor": "You are the worker for unit 3C-02 of plan `docs/plans/03-map-layer-parity-remediation/`. Repo: <REPO>, branch master. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3C-02-c-test-scaffolding.md`. Read it first and follow it exactly: owned paths, done evidence, boundary rule, waiting rules, machine facts, report format.\n\nOther units run alongside you right now (3C-03 golden capture, 3C-04 round-trip redesign), and they have their own uncommitted ed",
+        "api_turns_note": "api_turns = 75",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 126023,
+          "prefix_bytes": 1306824,
+          "tool_histogram": {
+            "Bash": 46,
+            "Read": 20,
+            "Edit": 7,
+            "Write": 5,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/docs/provenance.md",
+              "count": 5
+            },
+            {
+              "path": "<REPO>/parser/kiwiw/_cenc.c",
+              "count": 4
+            }
+          ],
+          "distinct_read_paths": 9,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 3263
+        },
+        "delta_since_prior": {},
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/docs/provenance.md",
+            "count": 5
+          },
+          {
+            "path": "<REPO>/parser/kiwiw/_cenc.c",
+            "count": 4
+          }
+        ],
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "I'll correct the now-inaccurate \"rebuilt when the source is newer\" line (it describes the exact mechanism I changed) and append my own new entry for the Contract T build products.",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "Now append my own new entry at the end of the file (after 3C-01's or others' latest entries, appending only \u2014 not touching 3C-03's concurrent additions).",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "That's the end of the file (231 lines original + my 3 added lines = 234). I'll append my new entry there.",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "Now let's check on the full pytest run.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "I'll wait for this notification. Meanwhile, let's prepare the commit message and double-check nothing else needs attention while it's still running \u2014 no further action possible until it completes, so I'll pause here.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "The full pytest suite is running in the background under a bounded wait (`timeout 3300`, polling every 10s for `ALLDONE`/`ABORT`/`FAIL`/`Traceback`). I'll continue once that notification arrives.",
+            "tool_names": []
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-214046",
+          "sources": [
+            "0677f597286e-gold-bundles-20261001-214046.jsonl (tail+brief+cumulative)",
+            "0677f597286e-dry-run-thrash-table-20261001-214046.json (top rereads)",
+            "0677f597286e-dry-run-checkpoints-20261001-214046.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 3208
+      },
+      {
+        "worker_id": "0677f597286e",
+        "checkpoint_turn": 90,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 75,
+        "brief_anchor": "You are the worker for unit 3C-02 of plan `docs/plans/03-map-layer-parity-remediation/`. Repo: <REPO>, branch master. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3C-02-c-test-scaffolding.md`. Read it first and follow it exactly: owned paths, done evidence, boundary rule, waiting rules, machine facts, report format.\n\nOther units run alongside you right now (3C-03 golden capture, 3C-04 round-trip redesign), and they have their own uncommitted ed",
+        "api_turns_note": "api_turns = 90",
+        "cumulative": {
+          "api_turns": 90,
+          "peak_ctx_tokens": 126023,
+          "prefix_bytes": 1420616,
+          "tool_histogram": {
+            "Bash": 60,
+            "Read": 20,
+            "Edit": 7,
+            "Write": 5,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/docs/provenance.md",
+              "count": 5
+            },
+            {
+              "path": "<REPO>/parser/kiwiw/_cenc.c",
+              "count": 4
+            }
+          ],
+          "distinct_read_paths": 9,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 4253
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 14
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/docs/provenance.md",
+            "count": 5
+          },
+          {
+            "path": "<REPO>/parser/kiwiw/_cenc.c",
+            "count": 4
+          }
+        ],
+        "tail": [
+          {
+            "turn": 83,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 84,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 85,
+            "excerpt": "Confirmed: `sha256 da13a77506424c55e74df186d841d5198cefb6e1e4dac27be25ad9307201fbbc` \u2014 identical to `perth_j1` reference, matches the expected `da13a775064\u2026`. Output-invariant, as required. Now clean up scratch outputs and proceed to commit.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 86,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 87,
+            "excerpt": "Good \u2014 the binary and hash are gitignored, only `test_cenc_internals.c` will be staged from that directory. Let's confirm `.gitignore` catches them and check `_cenc.so`/`.hash` are also ignored (not staged).",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 88,
+            "excerpt": "All correctly ignored. Now stage only my owned paths by name and commit.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 89,
+            "excerpt": "Only owned paths staged; other units' concurrent uncommitted work left untouched. Committing now.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 90,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-214046",
+          "sources": [
+            "0677f597286e-gold-bundles-20261001-214046.jsonl (tail+brief+cumulative)",
+            "0677f597286e-dry-run-thrash-table-20261001-214046.json (top rereads)",
+            "0677f597286e-dry-run-checkpoints-20261001-214046.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2998
+      }
+    ],
+    "checkpoint_turn": 90
+  },
+  "questions": {
+    "stage_1": {
+      "type": "choice",
+      "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
+      "labels": [
+        "event_observed",
+        "censored_productive",
+        "censored_unclear"
+      ],
+      "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation."
+      }
+    },
+    "stage_2": {
+      "type": "noul",
+      "answer_contract": "integer|null",
+      "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null."
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "One line citing a marker or tool pattern."
+    }
+  }
+}

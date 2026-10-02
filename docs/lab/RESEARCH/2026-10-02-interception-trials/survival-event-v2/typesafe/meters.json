@@ -1,0 +1,22 @@
+{
+  "behaviour_ship": false,
+  "captured_seats": 36,
+  "choice_scrape_failures": 0,
+  "choice_scrape_ok": 36,
+  "driver": "TypeSafe",
+  "errors": 0,
+  "framing": "two-stage event Q",
+  "generated_at": "2026-10-02T17:17:17+10:00",
+  "http_counts": {
+    "200": 36
+  },
+  "maps_only": true,
+  "model": "jev-1.13.0",
+  "no_8080": true,
+  "no_call_jev": true,
+  "planned_seats": 36,
+  "protocol_sha256": "eb3386c13c2936e83bef81ac21186c1a4a416ea3f196e391237d4c4b41d90bcd",
+  "status": "complete",
+  "successful_seats": 36,
+  "wire": "noul"
+}

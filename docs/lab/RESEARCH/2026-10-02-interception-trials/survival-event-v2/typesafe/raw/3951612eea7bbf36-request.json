@@ -1,0 +1,162 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "evidence_class": "hybrid_v0",
+    "framing": "PR-SURVIVAL-EVENT-v2",
+    "window_rule": "rows through last available cps <= min(T, 150)",
+    "marker_features": {
+      "reread_max": 4,
+      "compaction_event_count": 0,
+      "Edit_count": 0,
+      "Write_count": 0
+    },
+    "snapshot": [
+      {
+        "worker_id": "87a380bc64ff",
+        "checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": null,
+        "brief_anchor": "Repo: <REPO>, branch `master` (work directly on it, no new branch). You are a build worker for one unit of a larger plan-driven project (open-pajero-maps, reverse-engineering a proprietary map disc format).\n\nYour brief is the complete, self-sufficient spec for this unit: read it in full before doing anything else.\n\n  docs/plans/03-map-layer-parity-remediation/briefs/3-12-overlap-duplication-remeasure.md\n\nFollow it exactly \u2014 owned paths, contract, done evidence, ev",
+        "api_turns_note": "api_turns = 75",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 105811,
+          "prefix_bytes": 801534,
+          "tool_histogram": {
+            "Bash": 56,
+            "Read": 9,
+            "Monitor": 6,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/build_alldata.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/kiwiw/overlap.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 4,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 2284
+        },
+        "delta_since_prior": {},
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/build_alldata.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/kiwiw/overlap.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "Waiting for compare_disc and quantisation_roundtrip to finish.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "Waiting for the compare_disc and quantisation_roundtrip background jobs to complete.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Monitor"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Monitor"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "Now waiting for both monitors to report back.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "Waiting on the compare_disc and roundtrip monitors.",
+            "tool_names": []
+          },
+          {
+            "turn": 75,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-214046",
+          "sources": [
+            "87a380bc64ff-gold-bundles-20261001-214046.jsonl (tail+brief+cumulative)",
+            "87a380bc64ff-dry-run-thrash-table-20261001-214046.json (top rereads)",
+            "87a380bc64ff-dry-run-checkpoints-20261001-214046.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2576
+      }
+    ],
+    "checkpoint_turn": 75
+  },
+  "questions": {
+    "stage_1": {
+      "type": "choice",
+      "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
+      "labels": [
+        "event_observed",
+        "censored_productive",
+        "censored_unclear"
+      ],
+      "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation."
+      }
+    },
+    "stage_2": {
+      "type": "noul",
+      "answer_contract": "integer|null",
+      "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null."
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "One line citing a marker or tool pattern."
+    }
+  }
+}

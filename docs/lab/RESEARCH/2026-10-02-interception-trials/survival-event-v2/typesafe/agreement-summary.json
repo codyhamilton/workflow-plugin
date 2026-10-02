@@ -1,0 +1,82 @@
+{
+  "by_stratum": {
+    "poll_monitor": {
+      "event_observed_seats": 1,
+      "event_times": [
+        [
+          "87a380bc64ff",
+          null
+        ]
+      ],
+      "gate_failures": 1,
+      "n": 12,
+      "stage_1_counts": {
+        "censored_productive": 10,
+        "censored_unclear": 1,
+        "event_observed": 1
+      }
+    },
+    "residual": {
+      "event_observed_seats": 0,
+      "event_times": [],
+      "gate_failures": 0,
+      "n": 12,
+      "stage_1_counts": {
+        "censored_productive": 12
+      }
+    },
+    "thrash": {
+      "event_observed_seats": 5,
+      "event_times": [
+        [
+          "92a48e004519",
+          null
+        ],
+        [
+          "92a48e004519",
+          null
+        ],
+        [
+          "92a48e004519",
+          null
+        ],
+        [
+          "ca977b9ca0dd",
+          null
+        ],
+        [
+          "ca977b9ca0dd",
+          null
+        ]
+      ],
+      "gate_failures": 5,
+      "n": 6,
+      "stage_1_counts": {
+        "censored_unclear": 1,
+        "event_observed": 5
+      }
+    },
+    "weak": {
+      "event_observed_seats": 0,
+      "event_times": [],
+      "gate_failures": 0,
+      "n": 6,
+      "stage_1_counts": {
+        "censored_unclear": 6
+      }
+    }
+  },
+  "event_observed_seat_count": 0,
+  "event_time_values": [],
+  "exact_pair_agreement": null,
+  "gate_failures": 6,
+  "kill_summary": {
+    "framing_killed": true,
+    "reason": "Stage 1 recovered thrash events, but stage 2 was null for every event_observed seat.",
+    "stage_2_non_null_among_event_observed": 0,
+    "thrash_seats": 6,
+    "thrash_stage_1_event_observed": 5,
+    "thrash_stage_1_event_positive": true
+  },
+  "status": "no_valid_event_times"
+}
