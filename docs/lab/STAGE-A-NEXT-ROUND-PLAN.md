@@ -12,11 +12,11 @@ Status: analysis A–D done, outcome labels built, **no new Jev calls made yet**
 | Labels | Fixed checkpoints 25/55/100 put ~half past the last human prompt; `prompt_soon` conflates "agent autonomy" and "session ended". | Checkpoints go *just before each human prompt*; label = what the human did next. |
 
 ## New outcome set (built)
-`pairs_labelled.json`: 650 checkpoint-before-human-prompt pairs (discovery+dev only, 168 sessions: Cursor 539, Claude 111), automated prompts removed, two independent DeepSeek labellers (temp 0, different shuffles). **Agreement 83%** (540 agreed pairs): question 146, redirect 138, approve 94, correct 65, refine 47, new_task 30, other 12, abort 8.
-Targets: `adjust = refine|correct` (primary), `intervened = refine|correct|redirect|abort`, `negative = correct|abort`, `approve`. Use only the 540 agreed pairs. Still to do: hand-check ~50.
+`pairs_labelled.json`: 629 checkpoint-before-human-prompt pairs (discovery+dev only; the live authoring session is excluded), automated prompts removed, two independent DeepSeek labellers (temp 0, different shuffles). **Agreement 83%** ; after dropping pasted/automated prompts that slipped through the regex, **501 clean agreed pairs from 157 sessions**: question 144, redirect 117, approve 94, correct 63, refine 45, new_task 28, abort 8, other 2 (`adjust` positives: 108).
+Targets: `adjust = refine|correct` (primary), `intervened = refine|correct|redirect|abort`, `negative = correct|abort`, `approve`. Use only the clean agreed pairs (`labels_clean.json`). Still to do: hand-check ~50.
 
 ## Round 6 design (small, wide)
-- States: 2 fixed. Cells: the 540 labelled checkpoints (+ a matched sample of ~1 mid-run checkpoint per session as negatives).
+- States: 2 fixed. Cells: the 501 labelled checkpoints (+ a matched sample of ~1 mid-run checkpoint per session as negatives).
 - Signals: ~12 families × 3–4 markers (families from D: UI-iteration loop, user re-asking, done-without-verifying, scope creep, plan/design stage, autonomous run, error loop on external system, risky action, context pressure, decision-pending, task boundary, wrong-tool path, terse user, master "intervention-worthy"). Markers authored by DeepSeek under B's wording rules (ledger/direct-strength framing, no hedging, present-ness polarity), observability/duplication filtered.
 - Size: ~12 × 4 × 2 states × ~700 cells ≈ 67k rows if everything is run; run the primary state first (≈34k calls, ≈$3–6). Held-out stays sealed until a final frozen panel.
 - Analysis: rank AUC vs each label target, session-cluster bootstrap, discovery→dev selection check, per-signal marginal value over the master signal.
