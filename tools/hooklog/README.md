@@ -6,12 +6,14 @@ are the only way to get them), (2) the "recent tools" a live Jev call needs, whi
 
 - Store: `~/.local/share/workflow-plugin/hooklog/<harness>/<session_id>.jsonl` (override `WORKFLOW_HOOKLOG_DIR`;
   disable with `WORKFLOW_HOOKLOG=off`). Local only; secrets pattern-redacted, fields truncated (2 KB, prompts 20 KB).
-- Claude Code: `hooks/hooks.json` at the repo root registers it for the `workflow` plugin (UserPromptSubmit,
-  PostToolUse, PostToolUseFailure, Stop).
-- Cursor: copy `cursor-hooks.example.json` to `~/.cursor/hooks.json` (or `.cursor/hooks.json`) and fix the path.
+- Claude Code and Cursor: `hooks/hooks.json` at the repo root registers it for the `workflow` plugin, with
+  `--harness auto` (payload-detected). Cursor loads the same file and maps the Claude event names (verified headless:
+  `postToolUse` fires with no `~/.cursor/hooks.json`). Native-only Cursor events (`afterAgentThought`, `sessionEnd`) are not
+  mapped from this file, so Cursor turns fall back to the 1.5 s gap heuristic unless `cursor-hooks.example.json` is also installed.
+- OpenCode: `packages/opencode-workflow-hooks` (code-driven: `chat.message`, `tool.execute.after`, `message.part.updated`
+  step-finish, `session.idle`) writes the same rows. Verified with `opencode run`.
   Cursor hook event names/payloads vary by version and are **not verified here**; `normalize` is tolerant and
   silently ignores unknown events. Check `hooklog.py ls` after a session.
-- OpenCode: not wired (use the existing opencode-workflow-hooks package; adapter TODO).
 - Hooks always exit 0 and never print to stdout (except Cursor's `{"continue": true}`).
 - Inspect: `hooklog.py ls`, `hooklog.py show <file>`.
 - Row: `{v, ts, harness, session_id, hook_event, kind, cwd, text|tool_name|tool_use_id|input|output|ok}`.

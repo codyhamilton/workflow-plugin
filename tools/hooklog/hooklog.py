@@ -68,6 +68,13 @@ def _maybe_json(v: Any) -> Any:
     return v
 
 
+def detect_harness(p: dict[str, Any]) -> str:
+    """`--harness auto`: Cursor payloads carry cursor_version / conversation_id / workspace_roots; Claude's carry transcript_path."""
+    if p.get("cursor_version") or p.get("conversation_id") or (p.get("workspace_roots") and not p.get("transcript_path")):
+        return "cursor"
+    return "claude"
+
+
 def normalize(harness: str, p: dict[str, Any]) -> dict[str, Any] | None:
     """Map a hook payload to a row, or None when the event is not one we record.
     Field names are tolerant on purpose; Cursor payloads vary by version, so unknown shapes fall through."""
@@ -138,7 +145,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd")
     rec = sub.add_parser("record", help="read a hook payload on stdin and append it")
-    rec.add_argument("--harness", required=True, choices=["claude", "cursor", "opencode"])
+    rec.add_argument("--harness", required=True, choices=["auto", "claude", "cursor", "opencode"])
     sub.add_parser("ls", help="list sessions with row counts")
     show = sub.add_parser("show", help="print a session's rows")
     show.add_argument("path")
@@ -147,7 +154,10 @@ def main() -> int:
         try:
             if os.environ.get("WORKFLOW_HOOKLOG", "").lower() in ("0", "off", "false"):
                 raise SystemExit(0)
-            row = normalize(args.harness, json.loads(sys.stdin.read() or "{}"))
+            payload = json.loads(sys.stdin.read() or "{}")
+            if args.harness == "auto":
+                args.harness = detect_harness(payload)
+            row = normalize(args.harness, payload)
             if row:
                 append(row)
         except SystemExit:

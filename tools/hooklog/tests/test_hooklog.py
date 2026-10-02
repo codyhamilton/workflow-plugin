@@ -65,5 +65,18 @@ class T(unittest.TestCase):
             self.assertEqual(len(hl.read_session(f)), 1)
 
 
+class TestAutoHarness(unittest.TestCase):
+    def test_detects_cursor_and_claude(self):
+        self.assertEqual(hl.detect_harness({"conversation_id": "c", "cursor_version": "1"}), "cursor")
+        self.assertEqual(hl.detect_harness({"session_id": "s", "transcript_path": "/x"}), "claude")
+
+    def test_auto_routes_to_harness_dir(self):
+        with tempfile.TemporaryDirectory() as d:
+            run("auto", json.dumps({"hook_event_name": "postToolUse", "conversation_id": "c1", "tool_name": "Read"}), d)
+            run("auto", json.dumps({"hook_event_name": "PostToolUse", "session_id": "s1", "transcript_path": "/x", "tool_name": "Read"}), d)
+            self.assertTrue((Path(d) / "cursor" / "c1.jsonl").exists())
+            self.assertTrue((Path(d) / "claude" / "s1.jsonl").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
