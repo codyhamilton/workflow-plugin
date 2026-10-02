@@ -115,3 +115,24 @@ Fields are derived by `growth_fill.py` (see `GROWTH-DESIGN-NOTES.md`); sessions 
 
 Runner: `run_typesafe_scenario_corpus_sweep.py` → `typesafe-scenario-sweep/`  
 Review family top-up: `run_typesafe_review_topup.py` → `typesafe-review-check/` (separate family R).
+
+## Next response-class calibration wave
+
+The existing TypeSafe scenario volume uses `binary_fire` only. The
+response-class axis is therefore kept open without adding another
+state×question cartesian:
+
+| response class | diagnostic mapping |
+|---|---|
+| `binary_fire` | `fire` / `defer`; fire = `fire` |
+| `likert_0_3` | urgency 0–3; fire = rating ≥2 |
+| `four_class` | productive / near-completion / likely-runaway / uncertain; fire = likely-runaway |
+| `rating_plus_offset` | urgency 0–3 plus diagnostic offset; fire = rating ≥2 |
+
+`RESPONSE-CALIBRATION.md` and
+`run_typesafe_response_calibration.py` cover the twelve #109 preferred
+GROWTH pairs on nine exact representative labeled joins
+(`12×9×4 = 432` planned cells). A separate diagnostic-only stratum covers
+the seven other eligible representative joins (`12×7×4 = 336`); it is never
+merged into exact-label-ready meters. Tail-less packs are gated, labels are
+not sent to the judge, and outputs remain diagnostic and Soft HOLD.
