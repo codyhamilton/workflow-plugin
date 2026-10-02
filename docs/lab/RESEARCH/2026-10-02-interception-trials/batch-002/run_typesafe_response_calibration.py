@@ -587,7 +587,7 @@ def write_meters(rows: list[dict[str, Any]], planned: int, pairs: int) -> None:
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     RAW.mkdir(parents=True, exist_ok=True)
-    pairs = exact_pairs()
+    pairs = select_pairs()
     cells = build_cells(pairs)
     write_plan(cells, pairs)
     key = os.environ.get("TYPESAFE_API_KEY", "").strip()
