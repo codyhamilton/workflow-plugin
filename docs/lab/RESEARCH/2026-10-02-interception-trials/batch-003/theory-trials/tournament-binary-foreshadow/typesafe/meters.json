@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02T06:30:03.154+00:00",
+  "generated_at": "2026-10-02T06:32:19.419+00:00",
   "case_id": "tournament-binary-foreshadow",
   "driver": "typesafe",
   "model": "jev-1.13.0",
@@ -14,28 +14,28 @@
   "n_cells_recorded": 8,
   "n_successful": 8,
   "n_errors": 0,
-  "fire_count": 0,
-  "defer_count": 0,
+  "fire_count": 1,
+  "defer_count": 7,
   "parse_miss_count": 0,
   "response_label_counts": {
-    "fire_now": 0,
+    "fire_now": 1,
     "defer_recheck": 0,
     "defer_closing": 0,
-    "defer_productive": 0,
-    "defer_insufficient": 0
+    "defer_productive": 1,
+    "defer_insufficient": 6
   },
   "frame_answer_counts": {
     "reread_cluster": {
-      "no": 0,
+      "no": 8,
       "yes": 0
     },
     "thrash_bundle": {
-      "no": 0,
+      "no": 8,
       "yes": 0
     },
     "poll_monitor": {
-      "no": 0,
-      "yes": 0
+      "no": 4,
+      "yes": 4
     }
   },
   "response_class_equals_response_label": true,
@@ -43,12 +43,12 @@
     "75": {
       "n": 4,
       "fire": 0,
-      "defer": 0
+      "defer": 4
     },
     "90": {
       "n": 4,
-      "fire": 0,
-      "defer": 0
+      "fire": 1,
+      "defer": 3
     }
   },
   "error_cell_ids": [],
