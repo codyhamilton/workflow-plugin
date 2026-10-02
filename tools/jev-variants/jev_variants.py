@@ -359,7 +359,8 @@ def near_duplicate(kind: str, spec: dict[str, Any], reg: dict[str, Any]) -> str 
 
 
 ROLE_RULES = {
-    "signal-proposer": "Propose signals only from the discovery sessions listed below. Every signal needs a real counterexample you saw.",
+    "signal-proposer": "Propose signals only from the discovery sessions listed below. Every signal needs a real counterexample you saw. "
+    "Signals run together in one panel, so propose DISTINCT, observable agent-activity phases (e.g. unit tests just run, agent investigating/reading, agent writing the main implementation, agent stuck repeating a failing step), not variations of one idea.",
     "state-designer": "Change ONE dimension from an existing state per variant (window, truncation, prompt mode, counters). Never invent fields.",
     "marker-writer": "Write wording for the ONE signal below. Use clearly different wording families, not paraphrases. Ask whether the signal is present, never whether to stop.",
 }

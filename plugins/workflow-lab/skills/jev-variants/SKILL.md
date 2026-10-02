@@ -70,3 +70,10 @@ python3 tools/jev-variants/jev_variants.py digest --ledger results/ledger.jsonl
 ```
 
 Ledger rows: `cell_id, signal, state, marker, session, split, checkpoint, parse_ok, cost_usd, state_tokens, response`, plus `label` and `score` once independent labels exist. Authoring agents in the next round get the **digest**, never raw held-out rows. Retire variants that fail the parse or cost gates in the test card; record why in the results register (`docs/lab/JEV-RESULTS.md`), including nulls.
+
+## Panels, corpus and runner
+
+- **Never one signal.** A **panel** (`pn-…`) is a set of markers sent in one Jev call: at most one marker per signal, 1–16 markers (the API accepted 32 questions per call). Signal-proposers should return distinct activity phases ("tests just run", "investigating", "writing main implementation", "stuck repeating"). Create panels with `new panel`; cells are (panel, state, session, checkpoint) and markers whose signal needs features the state lacks are dropped per cell.
+- **Corpus manifest:** `python3 tools/jev-variants/build_corpus.py` writes `corpus.json` (session → harness, path, split, turns) from Claude Code and Cursor transcripts, plus hooklog sessions via `--hooklog-dir`. Split is a stable hash of the session id (discovery / dev / heldout). Held-out stays sealed.
+- **Run:** `python3 tools/jev-variants/runner.py --root <registry> --round-file <round> --ledger <ledger> [--limit N] [--concurrency 4] [--dry-run]`. One request per cell; one ledger row per (cell, marker) with answers, confidence, probabilities, `score` (0..1 present-ness, polarity applied), and `cost_estimated` (Jev returns tokens only). Secrets are scrubbed before sending; failed calls are recorded and resumed.
+- **Data capture:** `hooks/hooks.json` logs prompts and tool calls via `tools/hooklog`; `claude --plugin-dir <repo>` loads it for testing.
