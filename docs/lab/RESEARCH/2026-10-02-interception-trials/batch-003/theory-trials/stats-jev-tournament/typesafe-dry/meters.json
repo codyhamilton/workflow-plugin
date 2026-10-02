@@ -1,0 +1,60 @@
+{
+  "registration_id": "stats-jev-tournament-dry-novel-burn-1",
+  "mode": "dry",
+  "model_pin": "jev-1.13.0",
+  "cells_planned": 32,
+  "cells_recorded": 32,
+  "dry_run_decisions": 8,
+  "preflight_failures": 24,
+  "network_calls": 0,
+  "jev_posts": 0,
+  "flash_calls": 0,
+  "live_seats_run": 0,
+  "hold_out_scored": 0,
+  "transcript_excerpts_in_state": 0,
+  "missing_fixtures": 0,
+  "framing_summary": [
+    {
+      "registry_id": "esv0-binary-foreshadow",
+      "framing_id": "esv0-binary-foreshadow#a44e2b63c864be8b",
+      "cells": 8,
+      "dry_run_cells": 0,
+      "preflight_failures": 8,
+      "pass": false,
+      "failure_reasons": [
+        "invalid_questions"
+      ]
+    },
+    {
+      "registry_id": "esv0-likert-collapse",
+      "framing_id": "esv0-likert-collapse#4ddae065dda2245f",
+      "cells": 8,
+      "dry_run_cells": 8,
+      "preflight_failures": 0,
+      "pass": true,
+      "failure_reasons": []
+    },
+    {
+      "registry_id": "esv0-binary-monitor-present",
+      "framing_id": "esv0-binary-monitor-present#95fd5fc062f1b94f",
+      "cells": 8,
+      "dry_run_cells": 0,
+      "preflight_failures": 8,
+      "pass": false,
+      "failure_reasons": [
+        "invalid_questions"
+      ]
+    },
+    {
+      "registry_id": "esv0-binary-counts-only",
+      "framing_id": "esv0-binary-counts-only#7a26c8fca8ac76a4",
+      "cells": 8,
+      "dry_run_cells": 0,
+      "preflight_failures": 8,
+      "pass": false,
+      "failure_reasons": [
+        "invalid_questions"
+      ]
+    }
+  ]
+}
