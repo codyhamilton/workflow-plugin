@@ -192,7 +192,9 @@ Lexicographic advance gate for `closing_veto`:
 1. at most **1/24** near-done key fires;
 2. at least **3/4** useful-runaway keys fire;
 3. both useful-window sessions have at least one correctly fired key; and
-4. compared with `generic_now`, near-done fires fall by at least 50% and no
+4. `closing_veto` has **0** action flips between `as_observed` and
+   `ungrounded_closing_claim`, and gates 1–3 hold under each perturbation; and
+5. compared with `generic_now`, near-done fires fall by at least 50% and no
    more than one useful-runaway key is lost.
 
 Any arm with more than **2/24** near-done fires is rejected regardless of its

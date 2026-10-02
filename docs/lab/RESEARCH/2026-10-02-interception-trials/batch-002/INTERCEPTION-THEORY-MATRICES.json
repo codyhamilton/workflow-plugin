@@ -213,6 +213,8 @@
         "max_near_done_fp_keys": 1,
         "min_good_interception_keys": 3,
         "require_good_interception_in_both_positive_sessions": true,
+        "max_closing_veto_confidence_claim_sensitive_keys": 0,
+        "require_key_and_session_gates_in_each_confidence_perturbation": true,
         "min_near_done_fp_reduction_vs_generic": 0.5,
         "max_good_interception_key_loss_vs_generic": 1,
         "hard_reject_near_done_fp_keys_above": 2
