@@ -340,6 +340,7 @@ def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
         choice = answer.get("choice")
         response_label = choice if wire_type == "choice" else None
         response_class = response_label if wire_type == "choice" else wire_type
+        noul_score = answer.get("noul") if wire_type == "noul" else None
         choice_scrape_ok = (
             wire_type != "choice"
             or response_label is not None and response_class == response_label
@@ -349,11 +350,10 @@ def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
             "response_class": response_class,
             "response_label": response_label,
             "choice_scrape_ok": choice_scrape_ok,
+            "noul_score": noul_score,
             "value": response_label
             if wire_type == "choice"
-            else answer.get(
-                "text", answer.get("value", answer.get("response"))
-            ),
+            else answer.get("text", answer.get("value", answer.get("response", noul_score))),
         }
     return parsed
 
@@ -440,7 +440,11 @@ def post(cell: dict[str, Any], key: str) -> dict[str, Any]:
 
 def answer_signature(row: dict[str, Any], question_id: str) -> Any:
     answer = (row.get("answers") or {}).get(question_id) or {}
-    return answer.get("response_label") if answer.get("wire_type") == "choice" else answer.get("value")
+    if answer.get("wire_type") == "choice":
+        return answer.get("response_label")
+    if answer.get("wire_type") == "noul":
+        return answer.get("noul_score")
+    return answer.get("value")
 
 
 def write_flip_summary(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> None:
