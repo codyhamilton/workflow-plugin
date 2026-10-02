@@ -23,7 +23,7 @@ from zoneinfo import ZoneInfo
 
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[8]
+REPO = HERE.parents[7]
 PACK_PATH = (
     REPO
     / "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates"
