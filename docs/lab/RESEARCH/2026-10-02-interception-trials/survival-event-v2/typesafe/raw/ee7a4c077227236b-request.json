@@ -1,0 +1,144 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "evidence_class": "hybrid_v0",
+    "framing": "PR-SURVIVAL-EVENT-v2",
+    "window_rule": "rows through last available cps <= min(T, 150)",
+    "marker_features": {
+      "reread_max": 0,
+      "compaction_event_count": 2,
+      "Edit_count": 0,
+      "Write_count": 2
+    },
+    "snapshot": [
+      {
+        "worker_id": "07357f196666",
+        "checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": null,
+        "brief_anchor": "Use medium reasoning effort. If you spawn any read-only helper, use model opus at medium effort.\n\nYou are the worker for unit 3-09 of plan docs/plans/03-map-layer-parity-remediation. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3-09-shape-to-every-overlapped-cell.md`. Read it and follow it exactly.\n\nRepo: <REPO>, branch master. Commit only explicit paths (never `git add -A`) and never stage binaries or scratch output. End commit messages with:\n",
+        "api_turns_note": "api_turns = 75",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 138945,
+          "prefix_bytes": 1509388,
+          "tool_histogram": {
+            "Bash": 75,
+            "Write": 2
+          },
+          "reread_paths": [],
+          "distinct_read_paths": 0,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 62
+        },
+        "delta_since_prior": {},
+        "thrash_top_rereads": [],
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-214046",
+          "sources": [
+            "07357f196666-gold-bundles-20261001-214046.jsonl (tail+brief+cumulative)",
+            "07357f196666-dry-run-thrash-table-20261001-214046.json (top rereads)",
+            "07357f196666-dry-run-checkpoints-20261001-214046.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2082
+      }
+    ],
+    "checkpoint_turn": 75
+  },
+  "questions": {
+    "stage_1": {
+      "type": "choice",
+      "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
+      "labels": [
+        "event_observed",
+        "censored_productive",
+        "censored_unclear"
+      ],
+      "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation."
+      }
+    },
+    "stage_2": {
+      "type": "noul",
+      "answer_contract": "integer|null",
+      "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null."
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "One line citing a marker or tool pattern."
+    }
+  }
+}

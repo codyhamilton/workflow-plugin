@@ -1,0 +1,918 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "evidence_class": "hybrid_v0",
+    "framing": "PR-SURVIVAL-EVENT-v2",
+    "window_rule": "rows through last available cps <= min(T, 150)",
+    "marker_features": {
+      "reread_max": 3,
+      "compaction_event_count": 2,
+      "Edit_count": 1,
+      "Write_count": 2
+    },
+    "snapshot": [
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": null,
+        "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/\u2026 Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+        "api_turns_note": "api_turns = 75",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 127123,
+          "prefix_bytes": 2912944,
+          "tool_histogram": {
+            "Bash": 66,
+            "Read": 8,
+            "Monitor": 2,
+            "ToolSearch": 1,
+            "Write": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 2174
+        },
+        "delta_since_prior": {},
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "Standing by.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "Waiting for the census job \u2014 will resume analysis once it finishes.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "I'll wait for the next monitor event.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-194107",
+          "sources": [
+            "bb6165018de0-gold-bundles-20261001-194107.jsonl (tail+brief+cumulative)",
+            "bb6165018de0-dry-run-thrash-table-20261001-194107.json (top rereads)",
+            "bb6165018de0-dry-run-checkpoints-20261001-194107.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2319
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 90,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 75,
+        "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/\u2026 Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+        "api_turns_note": "api_turns = 90",
+        "cumulative": {
+          "api_turns": 90,
+          "peak_ctx_tokens": 136126,
+          "prefix_bytes": 3015135,
+          "tool_histogram": {
+            "Bash": 79,
+            "Read": 8,
+            "Monitor": 3,
+            "Write": 2,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 2548
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 13,
+            "Monitor": 1,
+            "Write": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 83,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 84,
+            "excerpt": "Good, moving fast through small levels. Let me arm a monitor for this run.",
+            "tool_names": [
+              "Monitor"
+            ]
+          },
+          {
+            "turn": 85,
+            "excerpt": "I'll wait for progress/completion notifications now.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 86,
+            "excerpt": "Now into level 0. I'll wait for further progress.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 87,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 88,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 89,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 90,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-194107",
+          "sources": [
+            "bb6165018de0-gold-bundles-20261001-194107.jsonl (tail+brief+cumulative)",
+            "bb6165018de0-dry-run-thrash-table-20261001-194107.json (top rereads)",
+            "bb6165018de0-dry-run-checkpoints-20261001-194107.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2463
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 105,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 90,
+        "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/\u2026 Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+        "api_turns_note": "api_turns = 105",
+        "cumulative": {
+          "api_turns": 105,
+          "peak_ctx_tokens": 143913,
+          "prefix_bytes": 3101833,
+          "tool_histogram": {
+            "Bash": 94,
+            "Read": 8,
+            "Monitor": 3,
+            "Write": 2,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 2924
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 15
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 98,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 99,
+            "excerpt": "Waiting for the census run (level 0, ~1836 blocks total) to progress further.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 100,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 101,
+            "excerpt": "Still waiting for the next block-count line from the monitor.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 102,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 103,
+            "excerpt": "While the census runs, let me prepare the report skeleton and pre-fill the spec-grounded rows I already have.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 104,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 105,
+            "excerpt": "Waiting for more progress from the census.",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-194107",
+          "sources": [
+            "bb6165018de0-gold-bundles-20261001-194107.jsonl (tail+brief+cumulative)",
+            "bb6165018de0-dry-run-thrash-table-20261001-194107.json (top rereads)",
+            "bb6165018de0-dry-run-checkpoints-20261001-194107.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2557
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 120,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 105,
+        "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/\u2026 Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+        "api_turns_note": "api_turns = 120",
+        "cumulative": {
+          "api_turns": 120,
+          "peak_ctx_tokens": 146213,
+          "prefix_bytes": 3163509,
+          "tool_histogram": {
+            "Bash": 109,
+            "Read": 8,
+            "Monitor": 3,
+            "Write": 2,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 0,
+          "assistant_text_chars": 3283
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 15
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 113,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 114,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 115,
+            "excerpt": "Still running fine, just between progress-print milestones. Let me wait more.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 116,
+            "excerpt": "I'll rely on the running monitor task for further updates rather than manual polling.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 117,
+            "excerpt": "Waiting for the monitor's next event (block-count progress or the final \"DONE\"/\"wrote\" line).",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 118,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 119,
+            "excerpt": "Standing by for the census monitor's next notification.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 120,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-194107",
+          "sources": [
+            "bb6165018de0-gold-bundles-20261001-194107.jsonl (tail+brief+cumulative)",
+            "bb6165018de0-dry-run-thrash-table-20261001-194107.json (top rereads)",
+            "bb6165018de0-dry-run-checkpoints-20261001-194107.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2586
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 135,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 120,
+        "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/\u2026 Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+        "api_turns_note": "api_turns = 135",
+        "cumulative": {
+          "api_turns": 135,
+          "peak_ctx_tokens": 146781,
+          "prefix_bytes": 3428535,
+          "tool_histogram": {
+            "Bash": 123,
+            "Read": 8,
+            "Monitor": 3,
+            "Write": 2,
+            "Edit": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 3283
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 14,
+            "Edit": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 128,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 129,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 130,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 131,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 132,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 133,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 134,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 135,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-194107",
+          "sources": [
+            "bb6165018de0-gold-bundles-20261001-194107.jsonl (tail+brief+cumulative)",
+            "bb6165018de0-dry-run-thrash-table-20261001-194107.json (top rereads)",
+            "bb6165018de0-dry-run-checkpoints-20261001-194107.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2294
+      },
+      {
+        "worker_id": "bb6165018de0",
+        "checkpoint_turn": 150,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 135,
+        "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/\u2026 Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+        "api_turns_note": "api_turns = 150",
+        "cumulative": {
+          "api_turns": 150,
+          "peak_ctx_tokens": 146781,
+          "prefix_bytes": 3514784,
+          "tool_histogram": {
+            "Bash": 137,
+            "Read": 9,
+            "Monitor": 3,
+            "Write": 2,
+            "Edit": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 7,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 3572
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "<TMP_REPO>/bd4f6c0d-5061-4e77-9a4c-2e083814b952/scratchpad/analysis_out.txt"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 14,
+            "Read": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/spec/format_english/pdf/0702122e.pdf",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 143,
+            "excerpt": "Block 1200/1836, 767s elapsed. Continuing to wait \u2014 should be roughly 500-600s more.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 144,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 145,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 146,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 147,
+            "excerpt": "1600/1836 blocks done. Close to finishing L0.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 148,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 149,
+            "excerpt": "The census finished. Now running the analysis.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 150,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-194107",
+          "sources": [
+            "bb6165018de0-gold-bundles-20261001-194107.jsonl (tail+brief+cumulative)",
+            "bb6165018de0-dry-run-thrash-table-20261001-194107.json (top rereads)",
+            "bb6165018de0-dry-run-checkpoints-20261001-194107.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2546
+      }
+    ],
+    "checkpoint_turn": 150
+  },
+  "questions": {
+    "stage_1": {
+      "type": "choice",
+      "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
+      "labels": [
+        "event_observed",
+        "censored_productive",
+        "censored_unclear"
+      ],
+      "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation."
+      }
+    },
+    "stage_2": {
+      "type": "choice",
+      "answer_contract": "integer|null",
+      "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null.",
+      "criteria": {
+        "null": "No event was observed in the shown window.",
+        "1": "The earliest event occurred at api_turn 1.",
+        "2": "The earliest event occurred at api_turn 2.",
+        "3": "The earliest event occurred at api_turn 3.",
+        "4": "The earliest event occurred at api_turn 4.",
+        "5": "The earliest event occurred at api_turn 5.",
+        "6": "The earliest event occurred at api_turn 6.",
+        "7": "The earliest event occurred at api_turn 7.",
+        "8": "The earliest event occurred at api_turn 8.",
+        "9": "The earliest event occurred at api_turn 9.",
+        "10": "The earliest event occurred at api_turn 10.",
+        "11": "The earliest event occurred at api_turn 11.",
+        "12": "The earliest event occurred at api_turn 12.",
+        "13": "The earliest event occurred at api_turn 13.",
+        "14": "The earliest event occurred at api_turn 14.",
+        "15": "The earliest event occurred at api_turn 15.",
+        "16": "The earliest event occurred at api_turn 16.",
+        "17": "The earliest event occurred at api_turn 17.",
+        "18": "The earliest event occurred at api_turn 18.",
+        "19": "The earliest event occurred at api_turn 19.",
+        "20": "The earliest event occurred at api_turn 20.",
+        "21": "The earliest event occurred at api_turn 21.",
+        "22": "The earliest event occurred at api_turn 22.",
+        "23": "The earliest event occurred at api_turn 23.",
+        "24": "The earliest event occurred at api_turn 24.",
+        "25": "The earliest event occurred at api_turn 25.",
+        "26": "The earliest event occurred at api_turn 26.",
+        "27": "The earliest event occurred at api_turn 27.",
+        "28": "The earliest event occurred at api_turn 28.",
+        "29": "The earliest event occurred at api_turn 29.",
+        "30": "The earliest event occurred at api_turn 30.",
+        "31": "The earliest event occurred at api_turn 31.",
+        "32": "The earliest event occurred at api_turn 32.",
+        "33": "The earliest event occurred at api_turn 33.",
+        "34": "The earliest event occurred at api_turn 34.",
+        "35": "The earliest event occurred at api_turn 35.",
+        "36": "The earliest event occurred at api_turn 36.",
+        "37": "The earliest event occurred at api_turn 37.",
+        "38": "The earliest event occurred at api_turn 38.",
+        "39": "The earliest event occurred at api_turn 39.",
+        "40": "The earliest event occurred at api_turn 40.",
+        "41": "The earliest event occurred at api_turn 41.",
+        "42": "The earliest event occurred at api_turn 42.",
+        "43": "The earliest event occurred at api_turn 43.",
+        "44": "The earliest event occurred at api_turn 44.",
+        "45": "The earliest event occurred at api_turn 45.",
+        "46": "The earliest event occurred at api_turn 46.",
+        "47": "The earliest event occurred at api_turn 47.",
+        "48": "The earliest event occurred at api_turn 48.",
+        "49": "The earliest event occurred at api_turn 49.",
+        "50": "The earliest event occurred at api_turn 50.",
+        "51": "The earliest event occurred at api_turn 51.",
+        "52": "The earliest event occurred at api_turn 52.",
+        "53": "The earliest event occurred at api_turn 53.",
+        "54": "The earliest event occurred at api_turn 54.",
+        "55": "The earliest event occurred at api_turn 55.",
+        "56": "The earliest event occurred at api_turn 56.",
+        "57": "The earliest event occurred at api_turn 57.",
+        "58": "The earliest event occurred at api_turn 58.",
+        "59": "The earliest event occurred at api_turn 59.",
+        "60": "The earliest event occurred at api_turn 60.",
+        "61": "The earliest event occurred at api_turn 61.",
+        "62": "The earliest event occurred at api_turn 62.",
+        "63": "The earliest event occurred at api_turn 63.",
+        "64": "The earliest event occurred at api_turn 64.",
+        "65": "The earliest event occurred at api_turn 65.",
+        "66": "The earliest event occurred at api_turn 66.",
+        "67": "The earliest event occurred at api_turn 67.",
+        "68": "The earliest event occurred at api_turn 68.",
+        "69": "The earliest event occurred at api_turn 69.",
+        "70": "The earliest event occurred at api_turn 70.",
+        "71": "The earliest event occurred at api_turn 71.",
+        "72": "The earliest event occurred at api_turn 72.",
+        "73": "The earliest event occurred at api_turn 73.",
+        "74": "The earliest event occurred at api_turn 74.",
+        "75": "The earliest event occurred at api_turn 75.",
+        "76": "The earliest event occurred at api_turn 76.",
+        "77": "The earliest event occurred at api_turn 77.",
+        "78": "The earliest event occurred at api_turn 78.",
+        "79": "The earliest event occurred at api_turn 79.",
+        "80": "The earliest event occurred at api_turn 80.",
+        "81": "The earliest event occurred at api_turn 81.",
+        "82": "The earliest event occurred at api_turn 82.",
+        "83": "The earliest event occurred at api_turn 83.",
+        "84": "The earliest event occurred at api_turn 84.",
+        "85": "The earliest event occurred at api_turn 85.",
+        "86": "The earliest event occurred at api_turn 86.",
+        "87": "The earliest event occurred at api_turn 87.",
+        "88": "The earliest event occurred at api_turn 88.",
+        "89": "The earliest event occurred at api_turn 89.",
+        "90": "The earliest event occurred at api_turn 90.",
+        "91": "The earliest event occurred at api_turn 91.",
+        "92": "The earliest event occurred at api_turn 92.",
+        "93": "The earliest event occurred at api_turn 93.",
+        "94": "The earliest event occurred at api_turn 94.",
+        "95": "The earliest event occurred at api_turn 95.",
+        "96": "The earliest event occurred at api_turn 96.",
+        "97": "The earliest event occurred at api_turn 97.",
+        "98": "The earliest event occurred at api_turn 98.",
+        "99": "The earliest event occurred at api_turn 99.",
+        "100": "The earliest event occurred at api_turn 100.",
+        "101": "The earliest event occurred at api_turn 101.",
+        "102": "The earliest event occurred at api_turn 102.",
+        "103": "The earliest event occurred at api_turn 103.",
+        "104": "The earliest event occurred at api_turn 104.",
+        "105": "The earliest event occurred at api_turn 105.",
+        "106": "The earliest event occurred at api_turn 106.",
+        "107": "The earliest event occurred at api_turn 107.",
+        "108": "The earliest event occurred at api_turn 108.",
+        "109": "The earliest event occurred at api_turn 109.",
+        "110": "The earliest event occurred at api_turn 110.",
+        "111": "The earliest event occurred at api_turn 111.",
+        "112": "The earliest event occurred at api_turn 112.",
+        "113": "The earliest event occurred at api_turn 113.",
+        "114": "The earliest event occurred at api_turn 114.",
+        "115": "The earliest event occurred at api_turn 115.",
+        "116": "The earliest event occurred at api_turn 116.",
+        "117": "The earliest event occurred at api_turn 117.",
+        "118": "The earliest event occurred at api_turn 118.",
+        "119": "The earliest event occurred at api_turn 119.",
+        "120": "The earliest event occurred at api_turn 120.",
+        "121": "The earliest event occurred at api_turn 121.",
+        "122": "The earliest event occurred at api_turn 122.",
+        "123": "The earliest event occurred at api_turn 123.",
+        "124": "The earliest event occurred at api_turn 124.",
+        "125": "The earliest event occurred at api_turn 125.",
+        "126": "The earliest event occurred at api_turn 126.",
+        "127": "The earliest event occurred at api_turn 127.",
+        "128": "The earliest event occurred at api_turn 128.",
+        "129": "The earliest event occurred at api_turn 129.",
+        "130": "The earliest event occurred at api_turn 130.",
+        "131": "The earliest event occurred at api_turn 131.",
+        "132": "The earliest event occurred at api_turn 132.",
+        "133": "The earliest event occurred at api_turn 133.",
+        "134": "The earliest event occurred at api_turn 134.",
+        "135": "The earliest event occurred at api_turn 135.",
+        "136": "The earliest event occurred at api_turn 136.",
+        "137": "The earliest event occurred at api_turn 137.",
+        "138": "The earliest event occurred at api_turn 138.",
+        "139": "The earliest event occurred at api_turn 139.",
+        "140": "The earliest event occurred at api_turn 140.",
+        "141": "The earliest event occurred at api_turn 141.",
+        "142": "The earliest event occurred at api_turn 142.",
+        "143": "The earliest event occurred at api_turn 143.",
+        "144": "The earliest event occurred at api_turn 144.",
+        "145": "The earliest event occurred at api_turn 145.",
+        "146": "The earliest event occurred at api_turn 146.",
+        "147": "The earliest event occurred at api_turn 147.",
+        "148": "The earliest event occurred at api_turn 148.",
+        "149": "The earliest event occurred at api_turn 149.",
+        "150": "The earliest event occurred at api_turn 150."
+      }
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "One line citing a marker or tool pattern."
+    }
+  }
+}

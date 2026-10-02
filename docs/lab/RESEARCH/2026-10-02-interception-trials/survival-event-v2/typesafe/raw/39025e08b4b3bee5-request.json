@@ -1,0 +1,525 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "evidence_class": "hybrid_v0",
+    "framing": "PR-SURVIVAL-EVENT-v2",
+    "window_rule": "rows through last available cps <= min(T, 150)",
+    "marker_features": {
+      "reread_max": 3,
+      "compaction_event_count": 8,
+      "Edit_count": 1,
+      "Write_count": 2
+    },
+    "snapshot": [
+      {
+        "worker_id": "daf933273c8f",
+        "checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": null,
+        "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+        "api_turns_note": "api_turns = 75",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 125620,
+          "prefix_bytes": 2497331,
+          "tool_histogram": {
+            "Bash": 67,
+            "Read": 9,
+            "Write": 2,
+            "Edit": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 5,
+          "compaction_event_count": 6,
+          "assistant_text_chars": 196
+        },
+        "delta_since_prior": {},
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Read",
+              "Read"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-204508",
+          "sources": [
+            "daf933273c8f-gold-bundles-20261001-204508.jsonl (tail+brief+cumulative)",
+            "daf933273c8f-dry-run-thrash-table-20261001-204508.json (top rereads)",
+            "daf933273c8f-dry-run-checkpoints-20261001-204508.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2265
+      },
+      {
+        "worker_id": "daf933273c8f",
+        "checkpoint_turn": 90,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 75,
+        "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+        "api_turns_note": "api_turns = 90",
+        "cumulative": {
+          "api_turns": 90,
+          "peak_ctx_tokens": 125620,
+          "prefix_bytes": 2690259,
+          "tool_histogram": {
+            "Bash": 80,
+            "Read": 12,
+            "Write": 2,
+            "Edit": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 6,
+          "assistant_text_chars": 251
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "<REPO>/parser/kiwiw/spool.py"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 13,
+            "Read": 3
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 83,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 84,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 85,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 86,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 87,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 88,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 89,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 90,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-204508",
+          "sources": [
+            "daf933273c8f-gold-bundles-20261001-204508.jsonl (tail+brief+cumulative)",
+            "daf933273c8f-dry-run-thrash-table-20261001-204508.json (top rereads)",
+            "daf933273c8f-dry-run-checkpoints-20261001-204508.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2355
+      },
+      {
+        "worker_id": "daf933273c8f",
+        "checkpoint_turn": 105,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 90,
+        "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+        "api_turns_note": "api_turns = 105",
+        "cumulative": {
+          "api_turns": 105,
+          "peak_ctx_tokens": 125620,
+          "prefix_bytes": 2832973,
+          "tool_histogram": {
+            "Bash": 96,
+            "Read": 12,
+            "Write": 2,
+            "Edit": 1,
+            "ToolSearch": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 6,
+          "assistant_text_chars": 251
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 16
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 98,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 99,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 100,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 101,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 102,
+            "excerpt": "",
+            "tool_names": [
+              "Bash",
+              "Bash"
+            ]
+          },
+          {
+            "turn": 103,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 104,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 105,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-204508",
+          "sources": [
+            "daf933273c8f-gold-bundles-20261001-204508.jsonl (tail+brief+cumulative)",
+            "daf933273c8f-dry-run-thrash-table-20261001-204508.json (top rereads)",
+            "daf933273c8f-dry-run-checkpoints-20261001-204508.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2331
+      },
+      {
+        "worker_id": "daf933273c8f",
+        "checkpoint_turn": 120,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 105,
+        "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+        "api_turns_note": "api_turns = 120",
+        "cumulative": {
+          "api_turns": 120,
+          "peak_ctx_tokens": 125620,
+          "prefix_bytes": 3165370,
+          "tool_histogram": {
+            "Bash": 109,
+            "Read": 12,
+            "ToolSearch": 2,
+            "Write": 2,
+            "Edit": 1,
+            "Monitor": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 6,
+          "compaction_event_count": 8,
+          "assistant_text_chars": 251
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 13,
+            "Monitor": 1,
+            "ToolSearch": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/tools/quantisation_roundtrip.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 113,
+            "excerpt": "",
+            "tool_names": [
+              "ToolSearch"
+            ]
+          },
+          {
+            "turn": 114,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 115,
+            "excerpt": "",
+            "tool_names": [
+              "Monitor"
+            ]
+          },
+          {
+            "turn": 116,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 117,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 118,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 119,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 120,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-204508",
+          "sources": [
+            "daf933273c8f-gold-bundles-20261001-204508.jsonl (tail+brief+cumulative)",
+            "daf933273c8f-dry-run-thrash-table-20261001-204508.json (top rereads)",
+            "daf933273c8f-dry-run-checkpoints-20261001-204508.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2381
+      }
+    ],
+    "checkpoint_turn": 120
+  },
+  "questions": {
+    "stage_1": {
+      "type": "choice",
+      "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
+      "labels": [
+        "event_observed",
+        "censored_productive",
+        "censored_unclear"
+      ],
+      "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation."
+      }
+    },
+    "stage_2": {
+      "type": "noul",
+      "answer_contract": "integer|null",
+      "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null."
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "One line citing a marker or tool pattern."
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "covariates": [
+    "reread_max",
+    "compaction_event_count",
+    "Edit_count",
+    "Write_count"
+  ],
+  "observed_events": 0,
+  "reason": "Exploratory Cox requires >=2 observed events.",
+  "status": "not_estimable"
+}

@@ -1,0 +1,1005 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "evidence_class": "hybrid_v0",
+    "framing": "PR-SURVIVAL-EVENT-v2",
+    "window_rule": "rows through last available cps <= min(T, 150)",
+    "marker_features": {
+      "reread_max": 4,
+      "compaction_event_count": 4,
+      "Edit_count": 20,
+      "Write_count": 2
+    },
+    "snapshot": [
+      {
+        "worker_id": "0853bc21d3aa",
+        "checkpoint_turn": 75,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": null,
+        "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file \u2014 read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+        "api_turns_note": "api_turns = 75",
+        "cumulative": {
+          "api_turns": 75,
+          "peak_ctx_tokens": 166945,
+          "prefix_bytes": 1308076,
+          "tool_histogram": {
+            "Bash": 52,
+            "Read": 20,
+            "Edit": 2,
+            "Write": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 12,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 1993
+        },
+        "delta_since_prior": {},
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 68,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 69,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 70,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 71,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 72,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 73,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 74,
+            "excerpt": "Now let's make the edits to `alldata_writer.py`. First the signature and docstring:",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 75,
+            "excerpt": "Now the body: build `lmr_by_level`, group divided input, seed `block_slots`, and update the placement loop.",
+            "tool_names": [
+              "Edit"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-202909",
+          "sources": [
+            "0853bc21d3aa-gold-bundles-20261001-202909.jsonl (tail+brief+cumulative)",
+            "0853bc21d3aa-dry-run-thrash-table-20261001-202909.json (top rereads)",
+            "0853bc21d3aa-dry-run-checkpoints-20261001-202909.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2552
+      },
+      {
+        "worker_id": "0853bc21d3aa",
+        "checkpoint_turn": 90,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 75,
+        "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file \u2014 read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+        "api_turns_note": "api_turns = 90",
+        "cumulative": {
+          "api_turns": 90,
+          "peak_ctx_tokens": 166945,
+          "prefix_bytes": 1463282,
+          "tool_histogram": {
+            "Bash": 57,
+            "Read": 22,
+            "Edit": 10,
+            "Write": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/build_alldata.py",
+              "count": 3
+            },
+            {
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 12,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 2310
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Edit": 8,
+            "Bash": 5,
+            "Read": 2
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/build_alldata.py",
+            "count": 3
+          },
+          {
+            "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 83,
+            "excerpt": "Now rewrite `_encode_level` to route through `plan_divisions`:",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 84,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 85,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 86,
+            "excerpt": "Now update `run()` to compute thresholds and pass `divided` to the writer, and update the manifest.",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 87,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 88,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 89,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 90,
+            "excerpt": "Now let's verify the file compiles and check for stray issues (unused `_level_dims` function now that llcode logic moved).",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-202909",
+          "sources": [
+            "0853bc21d3aa-gold-bundles-20261001-202909.jsonl (tail+brief+cumulative)",
+            "0853bc21d3aa-dry-run-thrash-table-20261001-202909.json (top rereads)",
+            "0853bc21d3aa-dry-run-checkpoints-20261001-202909.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2835
+      },
+      {
+        "worker_id": "0853bc21d3aa",
+        "checkpoint_turn": 105,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 90,
+        "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file \u2014 read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+        "api_turns_note": "api_turns = 105",
+        "cumulative": {
+          "api_turns": 105,
+          "peak_ctx_tokens": 166945,
+          "prefix_bytes": 1574348,
+          "tool_histogram": {
+            "Bash": 71,
+            "Read": 23,
+            "Edit": 10,
+            "Write": 1
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/build_alldata.py",
+              "count": 3
+            },
+            {
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 13,
+          "compaction_event_count": 2,
+          "assistant_text_chars": 2493
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "<REPO>/parser/tests/test_alldata_writer.py"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 14,
+            "Read": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/build_alldata.py",
+            "count": 3
+          },
+          {
+            "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 98,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 99,
+            "excerpt": "Good, existing test suite passes. Let's check that output and continue examining the check functions.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 100,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 101,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 102,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 103,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 104,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 105,
+            "excerpt": "Good, this is exactly the pattern I need. Now write `parser/tests/test_divide.py`.",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-202909",
+          "sources": [
+            "0853bc21d3aa-gold-bundles-20261001-202909.jsonl (tail+brief+cumulative)",
+            "0853bc21d3aa-dry-run-thrash-table-20261001-202909.json (top rereads)",
+            "0853bc21d3aa-dry-run-checkpoints-20261001-202909.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2778
+      },
+      {
+        "worker_id": "0853bc21d3aa",
+        "checkpoint_turn": 120,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 105,
+        "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file \u2014 read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+        "api_turns_note": "api_turns = 120",
+        "cumulative": {
+          "api_turns": 120,
+          "peak_ctx_tokens": 166945,
+          "prefix_bytes": 1850627,
+          "tool_histogram": {
+            "Bash": 81,
+            "Read": 25,
+            "Edit": 12,
+            "Write": 2
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/build_alldata.py",
+              "count": 3
+            },
+            {
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 14,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 2912
+        },
+        "delta_since_prior": {
+          "new_read_paths": [
+            "<REPO>/parser/tests/test_divide.py"
+          ],
+          "tool_histogram_delta": {
+            "Bash": 10,
+            "Edit": 2,
+            "Read": 2,
+            "Write": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/build_alldata.py",
+            "count": 3
+          },
+          {
+            "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 113,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 114,
+            "excerpt": "Now let's run this test file.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 115,
+            "excerpt": "",
+            "tool_names": [
+              "Read"
+            ]
+          },
+          {
+            "turn": 116,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 117,
+            "excerpt": "Now update the remaining `0, 0` literal usages to `_IX, _IY` for clarity/consistency (not required, but harmless if left). Let's just rerun tests first.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 118,
+            "excerpt": "All 5 pass. Now run the full test suite again.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 119,
+            "excerpt": "All pass except the two pre-existing, unrelated extractor-scale failures. Now let's rebuild the Perth fixture and run the compare_disc harness.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 120,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-202909",
+          "sources": [
+            "0853bc21d3aa-gold-bundles-20261001-202909.jsonl (tail+brief+cumulative)",
+            "0853bc21d3aa-dry-run-thrash-table-20261001-202909.json (top rereads)",
+            "0853bc21d3aa-dry-run-checkpoints-20261001-202909.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2983
+      },
+      {
+        "worker_id": "0853bc21d3aa",
+        "checkpoint_turn": 135,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 120,
+        "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file \u2014 read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+        "api_turns_note": "api_turns = 135",
+        "cumulative": {
+          "api_turns": 135,
+          "peak_ctx_tokens": 166945,
+          "prefix_bytes": 2071895,
+          "tool_histogram": {
+            "Bash": 86,
+            "Read": 27,
+            "Edit": 20,
+            "Write": 2
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/build_alldata.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 14,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 3156
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Edit": 8,
+            "Bash": 5,
+            "Read": 2
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/build_alldata.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 128,
+            "excerpt": "Now update `plan_divisions` body to use these safely:",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 129,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 130,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 131,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 132,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 133,
+            "excerpt": "",
+            "tool_names": [
+              "Edit"
+            ]
+          },
+          {
+            "turn": 134,
+            "excerpt": "Now rerun the build (this may take a while given road-heavy bisection):",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 135,
+            "excerpt": "It completed successfully. Let's see the full log summary.",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-202909",
+          "sources": [
+            "0853bc21d3aa-gold-bundles-20261001-202909.jsonl (tail+brief+cumulative)",
+            "0853bc21d3aa-dry-run-thrash-table-20261001-202909.json (top rereads)",
+            "0853bc21d3aa-dry-run-checkpoints-20261001-202909.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2746
+      },
+      {
+        "worker_id": "0853bc21d3aa",
+        "checkpoint_turn": 150,
+        "schedule": {
+          "first_at": 75,
+          "interval": 15
+        },
+        "snapshot_mode": "hybrid_v0",
+        "snapshot_params": {
+          "N": 8,
+          "excerpt": 400
+        },
+        "prior_checkpoint_turn": 135,
+        "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file \u2014 read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+        "api_turns_note": "api_turns = 150",
+        "cumulative": {
+          "api_turns": 150,
+          "peak_ctx_tokens": 166945,
+          "prefix_bytes": 2239659,
+          "tool_histogram": {
+            "Bash": 100,
+            "Read": 28,
+            "Edit": 20,
+            "Write": 2
+          },
+          "reread_paths": [
+            {
+              "path": "<REPO>/parser/build_alldata.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+              "count": 4
+            },
+            {
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+              "count": 3
+            }
+          ],
+          "distinct_read_paths": 14,
+          "compaction_event_count": 4,
+          "assistant_text_chars": 3405
+        },
+        "delta_since_prior": {
+          "new_read_paths": [],
+          "tool_histogram_delta": {
+            "Bash": 14,
+            "Read": 1
+          }
+        },
+        "thrash_top_rereads": [
+          {
+            "path": "<REPO>/parser/build_alldata.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/kiwiw/alldata_writer.py",
+            "count": 4
+          },
+          {
+            "path": "<REPO>/parser/osm_to_parcel_geometry.py",
+            "count": 3
+          }
+        ],
+        "tail": [
+          {
+            "turn": 143,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 144,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 145,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 146,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 147,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 148,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 149,
+            "excerpt": "All 224 pass. Now let's check the concurrent unit-14 agent hasn't touched my owned files, then commit.",
+            "tool_names": [
+              "Bash"
+            ]
+          },
+          {
+            "turn": 150,
+            "excerpt": "",
+            "tool_names": [
+              "Bash"
+            ]
+          }
+        ],
+        "gold_bundle_status": "ok",
+        "shrink_steps": [],
+        "pack_meta": {
+          "source_run": "20261001-202909",
+          "sources": [
+            "0853bc21d3aa-gold-bundles-20261001-202909.jsonl (tail+brief+cumulative)",
+            "0853bc21d3aa-dry-run-thrash-table-20261001-202909.json (top rereads)",
+            "0853bc21d3aa-dry-run-checkpoints-20261001-202909.with-state.jsonl (delta_since_prior)"
+          ],
+          "redaction": "hybrid_v0 N=8 excerpt=400; secrets; home/workspace/mount/tmp-claude paths \u2192 tokens; username scrubbed",
+          "note": "Safe judge pack for GOLD-LABEL-RUBRIC.md. Hybrid_v0 budget (last 8\u00d7400), not full gold 30\u00d7700. Raw gold-bundles/with-state stay gitignored under ubuntu-raw/."
+        },
+        "pack_chars": 2657
+      }
+    ],
+    "checkpoint_turn": 150
+  },
+  "questions": {
+    "stage_1": {
+      "type": "choice",
+      "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
+      "labels": [
+        "event_observed",
+        "censored_productive",
+        "censored_unclear"
+      ],
+      "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation."
+      }
+    },
+    "stage_2": {
+      "type": "choice",
+      "answer_contract": "integer|null",
+      "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null.",
+      "criteria": {
+        "null": "No event was observed in the shown window.",
+        "1": "The earliest event occurred at api_turn 1.",
+        "2": "The earliest event occurred at api_turn 2.",
+        "3": "The earliest event occurred at api_turn 3.",
+        "4": "The earliest event occurred at api_turn 4.",
+        "5": "The earliest event occurred at api_turn 5.",
+        "6": "The earliest event occurred at api_turn 6.",
+        "7": "The earliest event occurred at api_turn 7.",
+        "8": "The earliest event occurred at api_turn 8.",
+        "9": "The earliest event occurred at api_turn 9.",
+        "10": "The earliest event occurred at api_turn 10.",
+        "11": "The earliest event occurred at api_turn 11.",
+        "12": "The earliest event occurred at api_turn 12.",
+        "13": "The earliest event occurred at api_turn 13.",
+        "14": "The earliest event occurred at api_turn 14.",
+        "15": "The earliest event occurred at api_turn 15.",
+        "16": "The earliest event occurred at api_turn 16.",
+        "17": "The earliest event occurred at api_turn 17.",
+        "18": "The earliest event occurred at api_turn 18.",
+        "19": "The earliest event occurred at api_turn 19.",
+        "20": "The earliest event occurred at api_turn 20.",
+        "21": "The earliest event occurred at api_turn 21.",
+        "22": "The earliest event occurred at api_turn 22.",
+        "23": "The earliest event occurred at api_turn 23.",
+        "24": "The earliest event occurred at api_turn 24.",
+        "25": "The earliest event occurred at api_turn 25.",
+        "26": "The earliest event occurred at api_turn 26.",
+        "27": "The earliest event occurred at api_turn 27.",
+        "28": "The earliest event occurred at api_turn 28.",
+        "29": "The earliest event occurred at api_turn 29.",
+        "30": "The earliest event occurred at api_turn 30.",
+        "31": "The earliest event occurred at api_turn 31.",
+        "32": "The earliest event occurred at api_turn 32.",
+        "33": "The earliest event occurred at api_turn 33.",
+        "34": "The earliest event occurred at api_turn 34.",
+        "35": "The earliest event occurred at api_turn 35.",
+        "36": "The earliest event occurred at api_turn 36.",
+        "37": "The earliest event occurred at api_turn 37.",
+        "38": "The earliest event occurred at api_turn 38.",
+        "39": "The earliest event occurred at api_turn 39.",
+        "40": "The earliest event occurred at api_turn 40.",
+        "41": "The earliest event occurred at api_turn 41.",
+        "42": "The earliest event occurred at api_turn 42.",
+        "43": "The earliest event occurred at api_turn 43.",
+        "44": "The earliest event occurred at api_turn 44.",
+        "45": "The earliest event occurred at api_turn 45.",
+        "46": "The earliest event occurred at api_turn 46.",
+        "47": "The earliest event occurred at api_turn 47.",
+        "48": "The earliest event occurred at api_turn 48.",
+        "49": "The earliest event occurred at api_turn 49.",
+        "50": "The earliest event occurred at api_turn 50.",
+        "51": "The earliest event occurred at api_turn 51.",
+        "52": "The earliest event occurred at api_turn 52.",
+        "53": "The earliest event occurred at api_turn 53.",
+        "54": "The earliest event occurred at api_turn 54.",
+        "55": "The earliest event occurred at api_turn 55.",
+        "56": "The earliest event occurred at api_turn 56.",
+        "57": "The earliest event occurred at api_turn 57.",
+        "58": "The earliest event occurred at api_turn 58.",
+        "59": "The earliest event occurred at api_turn 59.",
+        "60": "The earliest event occurred at api_turn 60.",
+        "61": "The earliest event occurred at api_turn 61.",
+        "62": "The earliest event occurred at api_turn 62.",
+        "63": "The earliest event occurred at api_turn 63.",
+        "64": "The earliest event occurred at api_turn 64.",
+        "65": "The earliest event occurred at api_turn 65.",
+        "66": "The earliest event occurred at api_turn 66.",
+        "67": "The earliest event occurred at api_turn 67.",
+        "68": "The earliest event occurred at api_turn 68.",
+        "69": "The earliest event occurred at api_turn 69.",
+        "70": "The earliest event occurred at api_turn 70.",
+        "71": "The earliest event occurred at api_turn 71.",
+        "72": "The earliest event occurred at api_turn 72.",
+        "73": "The earliest event occurred at api_turn 73.",
+        "74": "The earliest event occurred at api_turn 74.",
+        "75": "The earliest event occurred at api_turn 75.",
+        "76": "The earliest event occurred at api_turn 76.",
+        "77": "The earliest event occurred at api_turn 77.",
+        "78": "The earliest event occurred at api_turn 78.",
+        "79": "The earliest event occurred at api_turn 79.",
+        "80": "The earliest event occurred at api_turn 80.",
+        "81": "The earliest event occurred at api_turn 81.",
+        "82": "The earliest event occurred at api_turn 82.",
+        "83": "The earliest event occurred at api_turn 83.",
+        "84": "The earliest event occurred at api_turn 84.",
+        "85": "The earliest event occurred at api_turn 85.",
+        "86": "The earliest event occurred at api_turn 86.",
+        "87": "The earliest event occurred at api_turn 87.",
+        "88": "The earliest event occurred at api_turn 88.",
+        "89": "The earliest event occurred at api_turn 89.",
+        "90": "The earliest event occurred at api_turn 90.",
+        "91": "The earliest event occurred at api_turn 91.",
+        "92": "The earliest event occurred at api_turn 92.",
+        "93": "The earliest event occurred at api_turn 93.",
+        "94": "The earliest event occurred at api_turn 94.",
+        "95": "The earliest event occurred at api_turn 95.",
+        "96": "The earliest event occurred at api_turn 96.",
+        "97": "The earliest event occurred at api_turn 97.",
+        "98": "The earliest event occurred at api_turn 98.",
+        "99": "The earliest event occurred at api_turn 99.",
+        "100": "The earliest event occurred at api_turn 100.",
+        "101": "The earliest event occurred at api_turn 101.",
+        "102": "The earliest event occurred at api_turn 102.",
+        "103": "The earliest event occurred at api_turn 103.",
+        "104": "The earliest event occurred at api_turn 104.",
+        "105": "The earliest event occurred at api_turn 105.",
+        "106": "The earliest event occurred at api_turn 106.",
+        "107": "The earliest event occurred at api_turn 107.",
+        "108": "The earliest event occurred at api_turn 108.",
+        "109": "The earliest event occurred at api_turn 109.",
+        "110": "The earliest event occurred at api_turn 110.",
+        "111": "The earliest event occurred at api_turn 111.",
+        "112": "The earliest event occurred at api_turn 112.",
+        "113": "The earliest event occurred at api_turn 113.",
+        "114": "The earliest event occurred at api_turn 114.",
+        "115": "The earliest event occurred at api_turn 115.",
+        "116": "The earliest event occurred at api_turn 116.",
+        "117": "The earliest event occurred at api_turn 117.",
+        "118": "The earliest event occurred at api_turn 118.",
+        "119": "The earliest event occurred at api_turn 119.",
+        "120": "The earliest event occurred at api_turn 120.",
+        "121": "The earliest event occurred at api_turn 121.",
+        "122": "The earliest event occurred at api_turn 122.",
+        "123": "The earliest event occurred at api_turn 123.",
+        "124": "The earliest event occurred at api_turn 124.",
+        "125": "The earliest event occurred at api_turn 125.",
+        "126": "The earliest event occurred at api_turn 126.",
+        "127": "The earliest event occurred at api_turn 127.",
+        "128": "The earliest event occurred at api_turn 128.",
+        "129": "The earliest event occurred at api_turn 129.",
+        "130": "The earliest event occurred at api_turn 130.",
+        "131": "The earliest event occurred at api_turn 131.",
+        "132": "The earliest event occurred at api_turn 132.",
+        "133": "The earliest event occurred at api_turn 133.",
+        "134": "The earliest event occurred at api_turn 134.",
+        "135": "The earliest event occurred at api_turn 135.",
+        "136": "The earliest event occurred at api_turn 136.",
+        "137": "The earliest event occurred at api_turn 137.",
+        "138": "The earliest event occurred at api_turn 138.",
+        "139": "The earliest event occurred at api_turn 139.",
+        "140": "The earliest event occurred at api_turn 140.",
+        "141": "The earliest event occurred at api_turn 141.",
+        "142": "The earliest event occurred at api_turn 142.",
+        "143": "The earliest event occurred at api_turn 143.",
+        "144": "The earliest event occurred at api_turn 144.",
+        "145": "The earliest event occurred at api_turn 145.",
+        "146": "The earliest event occurred at api_turn 146.",
+        "147": "The earliest event occurred at api_turn 147.",
+        "148": "The earliest event occurred at api_turn 148.",
+        "149": "The earliest event occurred at api_turn 149.",
+        "150": "The earliest event occurred at api_turn 150."
+      }
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "One line citing a marker or tool pattern."
+    }
+  }
+}
