@@ -29,6 +29,7 @@ WORKERS = int(os.environ.get("TS_GROWTH_WORKERS", "12"))
 STAGE = os.environ.get("TS_RUN_STAGE", "preferred")
 TARGET = int(os.environ.get("TS_CASE_TARGET", "3402"))
 AEST = ZoneInfo("Australia/Brisbane")
+WAVE2_REPLICATIONS = ("early", "mid", "late")
 
 _gspec = importlib.util.spec_from_file_location("growth_fill", BATCH / "growth_fill.py")
 _gf = importlib.util.module_from_spec(_gspec)
@@ -318,6 +319,141 @@ def case_cells() -> tuple[list[dict], Counter]:
     return cells, gated
 
 
+def wave2_rows() -> tuple[list[dict], Counter]:
+    """Select explicit early/mid/late checkpoint replications per session."""
+    rows, gated = [], Counter()
+    for pack in load_packs():
+        checkpoints = sorted(pack["checkpoints"], key=lambda row: int(row["checkpoint"]))
+        if not checkpoints:
+            gated["no_checkpoints"] += 1
+            continue
+        for replication, index in (
+            ("early", 0),
+            ("mid", len(checkpoints) // 2),
+            ("late", len(checkpoints) - 1),
+        ):
+            snap = checkpoints[index]
+            full = snap.get("full_state") or {}
+            if "checkpoint_turn" not in full:
+                full = {**full, "checkpoint_turn": int(snap["checkpoint"])}
+            rows.append({
+                "pack": pack,
+                "snap": snap,
+                "full": full,
+                "session_id": pack["worker_id"],
+                "replication": replication,
+                "label_gate": "not_joined",
+            })
+    return rows, gated
+
+
+def wave2_cells() -> tuple[list[dict], Counter]:
+    """Build a resumable post-#112 replication wave.
+
+    The first part deepens the preferred GROWTH pairs at three checkpoint
+    positions. The second part repeats every catalog case at those positions,
+    keeping the case identity stable while making checkpoint replication
+    explicit in the cell identity and row metadata.
+    """
+    rows, gated = wave2_rows()
+    growth_rows = []
+    for row in rows:
+        if project(row["full"], "markers_focus") is None:
+            gated["growth:no_tail"] += 1
+            continue
+        growth_rows.append(row)
+
+    cells = []
+    for state, question in GROWTH_SCENARIOS:
+        for row in growth_rows:
+            state_data = project(row["full"], state)
+            if state_data is None:
+                gated["growth:no_tail"] += 1
+                continue
+            raw = (
+                f"growth-wave2|{state}|{question}|{row['session_id']}|"
+                f"{row['replication']}|{row['snap']['checkpoint']}"
+            )
+            cells.append({
+                "cell_id": hashlib.sha1(raw.encode()).hexdigest()[:16],
+                "scenario_id": f"state.{state}|q.{question}",
+                "state_variant": state,
+                "question_variant": question,
+                "response_class": "binary_fire",
+                "state": state_data,
+                "checkpoint": int(row["snap"]["checkpoint"]),
+                "session_id": row["session_id"],
+                "replication": row["replication"],
+                "label_gate": row["label_gate"],
+                "harness": row["pack"].get("harness"),
+                "project": row["pack"].get("project"),
+                "wave2_family": "growth_cut_replication",
+            })
+
+    cases = [
+        (state, question, rating)
+        for state in STATE_VARIANTS
+        for question in QUESTIONS
+        for rating in RATINGS
+    ]
+    valid_rows = {}
+    for state in STATE_VARIANTS:
+        valid_rows[state] = [
+            row for row in rows if project(row["full"], state) is not None
+        ]
+
+    for case_order, (state, question, rating) in enumerate(cases):
+        state_rows = valid_rows[state]
+        if not state_rows:
+            gated[f"catalog:{state}:no_valid_rows"] += 1
+            continue
+        by_replication = {
+            replication: [
+                row for row in state_rows if row["replication"] == replication
+            ]
+            for replication in WAVE2_REPLICATIONS
+        }
+        selected_sessions = set()
+        for replication_index, replication in enumerate(WAVE2_REPLICATIONS):
+            candidates = by_replication[replication]
+            if not candidates:
+                gated[f"catalog:{state}:no_{replication}"] += 1
+                continue
+            start = (case_order + replication_index * 17) % len(candidates)
+            ordered = candidates[start:] + candidates[:start]
+            row = next(
+                (candidate for candidate in ordered
+                 if candidate["session_id"] not in selected_sessions),
+                ordered[0],
+            )
+            selected_sessions.add(row["session_id"])
+            state_data = project(row["full"], state)
+            if state_data is None:
+                gated[f"catalog:{state}:no_valid_rows"] += 1
+                continue
+            raw = (
+                f"casecatalog-wave2|{state}|{question}|{rating}|"
+                f"{row['session_id']}|{row['replication']}|{row['snap']['checkpoint']}"
+            )
+            cells.append({
+                "cell_id": hashlib.sha1(raw.encode()).hexdigest()[:16],
+                "case_id": f"state.{state}|q.{question}|rating.{rating}",
+                "state_variant": state,
+                "question_variant": question,
+                "response_class": rating,
+                "state": state_data,
+                "checkpoint": int(row["snap"]["checkpoint"]),
+                "session_id": row["session_id"],
+                "replication": row["replication"],
+                "case_order": case_order,
+                "label_gate": row["label_gate"],
+                "harness": row["pack"].get("harness"),
+                "project": row["pack"].get("project"),
+                "wave2_family": "case_catalog_replication",
+            })
+    return cells, gated
+
+
 def question_schema(cell: dict) -> dict:
     common = {
         "steer_urgency": {
@@ -371,8 +507,12 @@ def post(cell: dict) -> dict:
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
                  "Accept": "application/json"},
     )
-    out_name = os.environ.get(
-        "TS_CASE_OUT", "typesafe-case-catalog-v2" if STAGE == "cases" else "typesafe-growth-cut"
+    out_name = os.environ.get("TS_CASE_OUT") or (
+        "typesafe-case-catalog-v2"
+        if STAGE == "cases"
+        else "typesafe-growth-wave2"
+        if STAGE == "wave2"
+        else "typesafe-growth-cut"
     )
     out = BATCH / out_name
     raw_dir = out / "raw"
@@ -406,8 +546,10 @@ def post(cell: dict) -> dict:
         "response_class": cell["response_class"],
         "session_id": cell["session_id"],
         "checkpoint": cell["checkpoint"],
+        "replication": cell.get("replication"),
         "label_gate": cell.get("label_gate"),
         "harness": cell.get("harness"), "project": cell.get("project"),
+        "wave2_family": cell.get("wave2_family"),
         "http": code, "error": error,
         "answers": (ans or {}).get("answers") if ans else None,
         "usage": (ans or {}).get("usage") if ans else None,
@@ -419,21 +561,38 @@ def post(cell: dict) -> dict:
 
 
 def main() -> int:
-    if STAGE not in {"preferred", "cases"}:
-        raise SystemExit("TS_RUN_STAGE must be preferred or cases")
+    if STAGE not in {"preferred", "cases", "wave2"}:
+        raise SystemExit("TS_RUN_STAGE must be preferred, cases, or wave2")
     if not os.environ.get("TYPESAFE_API_KEY", "").strip():
         raise SystemExit("TYPESAFE_API_KEY missing")
-    cells, gated = preferred_cells() if STAGE == "preferred" else case_cells()
-    out_name = os.environ.get(
-        "TS_CASE_OUT", "typesafe-case-catalog-v2" if STAGE == "cases" else "typesafe-growth-cut"
+    if STAGE == "preferred":
+        cells, gated = preferred_cells()
+    elif STAGE == "cases":
+        cells, gated = case_cells()
+    else:
+        cells, gated = wave2_cells()
+    out_name = os.environ.get("TS_CASE_OUT") or (
+        "typesafe-case-catalog-v2"
+        if STAGE == "cases"
+        else "typesafe-growth-wave2"
+        if STAGE == "wave2"
+        else "typesafe-growth-cut"
     )
     out = BATCH / out_name
     out.mkdir(parents=True, exist_ok=True)
+    previous_meters = {}
+    meters_path = out / "meters.json"
+    if meters_path.exists():
+        try:
+            previous_meters = json.loads(meters_path.read_text())
+        except (OSError, ValueError):
+            previous_meters = {}
     plan = {
         "stage": STAGE, "target": TARGET if STAGE == "cases" else len(cells),
         "n_planned": len(cells), "n_sessions": len({c["session_id"] for c in cells}),
         "n_distinct_scenarios": len({c["scenario_id"] for c in cells if c.get("scenario_id")}),
         "n_distinct_cases": len({c["case_id"] for c in cells if c.get("case_id")}),
+        "replication_roles": list(WAVE2_REPLICATIONS) if STAGE == "wave2" else [],
         "exact_labeled_cells": sum(c.get("label_gate") == "exact" for c in cells),
         "diagnostic_cells": sum(c.get("label_gate") == "diagnostic" for c in cells),
         "gated": dict(gated), "soft_standard_hold": True, "product_wiring": False,
@@ -481,8 +640,15 @@ def main() -> int:
         "by_response_class": dict(Counter(r.get("response_class") for r in all_rows)),
         "by_state": dict(Counter(r.get("state_variant") for r in all_rows)),
         "by_question": dict(Counter(r.get("question_variant") for r in all_rows)),
+        "by_replication": dict(Counter(r.get("replication") for r in all_rows)),
+        "by_wave2_family": dict(Counter(r.get("wave2_family") for r in all_rows)),
         "generated_at": datetime.now(AEST).isoformat(timespec="seconds"),
     }
+    if not todo and previous_meters:
+        meters["new"] = previous_meters.get("new", 0)
+        meters["tok_in"] = previous_meters.get("tok_in", 0)
+        meters["tok_out"] = previous_meters.get("tok_out", 0)
+        meters["wall_s"] = previous_meters.get("wall_s", meters["wall_s"])
     (out / "meters.json").write_text(json.dumps(meters, indent=2) + "\n")
     by_case = defaultdict(lambda: [0, 0])
     for row in all_rows:

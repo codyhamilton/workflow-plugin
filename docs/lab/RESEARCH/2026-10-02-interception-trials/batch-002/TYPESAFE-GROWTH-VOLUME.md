@@ -3,6 +3,14 @@
 **Status:** trial evidence and docs only. No hooks, Standard behavior,
 product wiring, Pilot, or live behavior ship is authorized.
 
+## Post-#112 wave 2
+
+The continuous-volume replication append is documented in
+[`TYPESAFE-VOLUME-WAVE2.md`](TYPESAFE-VOLUME-WAVE2.md), with machine meters
+and rows under [`typesafe-growth-wave2/`](typesafe-growth-wave2/). It adds
+3,978 measured cells across explicit early/mid/late checkpoint replications;
+Soft HOLD remains unchanged.
+
 ## Preferred #109 cut
 
 The twelve ranked GROWTH scenarios were each evaluated against the 16

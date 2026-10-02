@@ -1,0 +1,4543 @@
+{
+  "n_distinct_cases": 1134,
+  "outcomes_by_case": {
+    "state.brief_cum_no_tail|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.brief_abandon|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.output_starvation|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.output_starvation|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.reread_loop|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.reread_loop|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.silent_stall|rating.binary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.silent_stall|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.silent_stall|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.thrash_bundle|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.brief_cum_no_tail|q.validation_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.compaction_storm|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.output_starvation|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.output_starvation|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.reread_loop|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.silent_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.silent_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.silent_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.chars_budget_1200|q.validation_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.output_starvation|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.output_starvation|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.delta_only|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.reread_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.reread_loop|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.delta_only|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.silent_stall|rating.binary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.delta_only|q.silent_stall|rating.likert_0_3": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.delta_only|q.silent_stall|rating.ternary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.delta_only|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.delta_only|q.validation_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.activity_without_value|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.activity_without_value|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.activity_without_value|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.compaction_storm|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.compaction_storm|rating.likert_0_3": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.compaction_storm|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.edit_churn|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.edit_churn|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.output_starvation|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.output_starvation|rating.likert_0_3": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.output_starvation|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.over_polish|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.reread_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.silent_stall|rating.binary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.markers_focus|q.silent_stall|rating.likert_0_3": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.markers_focus|q.silent_stall|rating.ternary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.markers_focus|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.test_flake_loop|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.markers_focus|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.markers_focus|q.validation_loop|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.markers_focus|q.validation_loop|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.abort_cheaper|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.output_starvation|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.output_starvation|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recheck_interval|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recheck_interval|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.reread_loop|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.reread_loop|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.silent_stall|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.silent_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.silent_stall|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.tail_risk|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.test_flake_loop|rating.binary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.under_verified|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.validation_loop|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.phase_hints_focus|q.validation_loop|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.brief_abandon|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.context_pressure|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.duplicate_work|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.output_starvation|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.output_starvation|rating.ternary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recovery_possible|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.reread_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.silent_stall|rating.binary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.silent_stall|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.silent_stall|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.under_verified|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.under_verified|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.recent_delta_brief|q.validation_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.context_pressure|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.tail_focus|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.output_starvation|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.tail_focus|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.output_starvation|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.tail_focus|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.reread_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.silent_stall|rating.binary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.tail_focus|q.silent_stall|rating.likert_0_3": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.tail_focus|q.silent_stall|rating.ternary_fire": {
+      "fire": 3,
+      "n": 3
+    },
+    "state.tail_focus|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.under_verified|rating.ternary_fire": {
+      "fire": 2,
+      "n": 3
+    },
+    "state.tail_focus|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tail_focus|q.validation_loop|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.output_starvation|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.output_starvation|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.output_starvation|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.reread_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.silent_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.silent_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.silent_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.tool_hist_focus|q.validation_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.abort_cheaper|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.abort_cheaper|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.abort_cheaper|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.activity_without_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.activity_without_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.activity_without_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.bash_retry_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.bash_retry_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.bash_retry_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.brief_abandon|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.brief_abandon|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.brief_abandon|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.closing_protect|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.closing_protect|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.closing_protect|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.compaction_storm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.compaction_storm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.compaction_storm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.context_pressure|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.context_pressure|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.context_pressure|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.context_thrash_compact|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.context_thrash_compact|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.context_thrash_compact|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.continue_learns|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.continue_learns|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.continue_learns|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.deliverable_orphan|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.deliverable_orphan|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.deliverable_orphan|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.dependency_wait|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.dependency_wait|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.dependency_wait|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.docs_only_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.docs_only_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.docs_only_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.duplicate_work|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.duplicate_work|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.duplicate_work|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.early_false_alarm|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.early_false_alarm|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.early_false_alarm|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.edit_churn|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.edit_churn|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.edit_churn|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.handoff_ready|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.handoff_ready|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.handoff_ready|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.idle_tool_spin|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.idle_tool_spin|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.idle_tool_spin|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.late_miss_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.late_miss_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.late_miss_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.mid_arc_healthy|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.mid_arc_healthy|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.mid_arc_healthy|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.output_starvation|rating.binary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.window_delta_tools|q.output_starvation|rating.likert_0_3": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.window_delta_tools|q.output_starvation|rating.ternary_fire": {
+      "fire": 1,
+      "n": 3
+    },
+    "state.window_delta_tools|q.over_polish|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.over_polish|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.over_polish|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.parallel_agent_thrash|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.parallel_agent_thrash|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.parallel_agent_thrash|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.plan_execute_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.plan_execute_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.plan_execute_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recheck_interval|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recheck_interval|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recheck_interval|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recoverable_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recoverable_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recoverable_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recovery_possible|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recovery_possible|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.recovery_possible|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.reread_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.reread_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.reread_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.resource_asymmetry|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.resource_asymmetry|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.resource_asymmetry|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.scope_creep_silent|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.scope_creep_silent|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.scope_creep_silent|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.scope_drift|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.scope_drift|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.scope_drift|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.silent_stall|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.silent_stall|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.silent_stall|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.speculative_rewrite|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.speculative_rewrite|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.speculative_rewrite|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.steer_now|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.steer_now|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.steer_now|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.stop_preserves_value|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.stop_preserves_value|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.stop_preserves_value|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.tail_risk|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.tail_risk|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.tail_risk|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.test_flake_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.test_flake_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.test_flake_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.thrash_bundle|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.thrash_bundle|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.thrash_bundle|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.thrash_vs_explore|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.thrash_vs_explore|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.thrash_vs_explore|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.tool_error_cascade|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.tool_error_cascade|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.tool_error_cascade|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.under_verified|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.under_verified|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.under_verified|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.user_wait_signal|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.user_wait_signal|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.user_wait_signal|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.validation_loop|rating.binary_fire": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.validation_loop|rating.likert_0_3": {
+      "fire": 0,
+      "n": 3
+    },
+    "state.window_delta_tools|q.validation_loop|rating.ternary_fire": {
+      "fire": 0,
+      "n": 3
+    }
+  },
+  "soft_standard_hold": true,
+  "product_wiring": false
+}

@@ -1,0 +1,21 @@
+{
+  "stage": "wave2",
+  "target": 3978,
+  "n_planned": 3978,
+  "n_sessions": 41,
+  "n_distinct_scenarios": 12,
+  "n_distinct_cases": 1134,
+  "replication_roles": [
+    "early",
+    "mid",
+    "late"
+  ],
+  "exact_labeled_cells": 0,
+  "diagnostic_cells": 0,
+  "gated": {
+    "growth:no_tail": 75
+  },
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "window_cartesian": false
+}
