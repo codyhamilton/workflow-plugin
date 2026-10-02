@@ -20,7 +20,7 @@ Checked 2026-10-03. These counts describe this machine's local Cursor cache at i
 
 The parser does **not** pull complete cloud transcripts or calculate cloud turns. Any >=60 cloud-run cohort remains unmeasured. To add one, find an authoritative complete message stream for `bc-*` runs, establish assistant-turn semantics from its schema, verify coverage against these 430 IDs, then add extraction and threshold filtering based on observed rows. Keep partial search-index text separate from that stream.
 
-Focused Cursor tests and `git diff --check` passed. Changes are uncommitted.
+Focused Cursor tests and `git diff --check` passed. Changes landed on branch `lab/cursor-cloud-parser-and-white-paper-method`.
 
 ## Update 2026-10-03: later, deeper search (supersedes "no message stream" above)
 

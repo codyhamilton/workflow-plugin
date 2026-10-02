@@ -213,7 +213,7 @@ From 20 sessions × 6 checkpoints:
 Per [`PROTOCOL.md`](../2026-10-02-interception-trials/batch-002/PROTOCOL.md) §R2 and [`OUTCOME-SHEET.md`](../2026-10-02-interception-trials/OUTCOME-SHEET.md):
 
 1. **Emit-time rule:** Cells are written with `window_status: "unidentified"` and `outcome_tag: null` so length-derived oracles never appear in the trial corpus.
-2. **Sidecar separation:** Human labels live only in `outcome-labels.jsonl`; the protocol forbids silent backfill into historical `results.jsonl`.
+2. **Sidecar separation:** Outcome labels (model-adjudicated, `chm-sol-adjudication`) live only in `outcome-labels.jsonl`; the protocol forbids silent backfill into historical `results.jsonl`.
 3. **Scoreboard gate:** FP/miss rows are **derived** after join + meter regeneration; labels landed **after** Wave-0 emit, and join/report was explicitly **TBD** ([`EVIDENCE-LOG.md`](../2026-10-02-interception-trials/EVIDENCE-LOG.md)).
 
 ### Measured join path (provisional)

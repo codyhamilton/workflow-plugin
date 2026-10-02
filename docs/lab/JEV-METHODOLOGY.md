@@ -31,6 +31,16 @@ Start with the current workflow as the default on low confidence, missing state,
 
 ## H2 — session continuation near the cost crossover
 
+### H2 scope: Stage A and Stage B (2026-10-03)
+
+The fire's functional effect is only a **steering message delivered from a `PostToolBatch` hook**. Net value (cost per successful deliverable) cannot be established from history; it needs expensive evaluation or live agents, so it is **not** a claim of this white paper.
+
+- **Stage A, this white paper: can Jev calls reliably predict when the steer should fire?** Show on historical transcripts (a) when the message would fire, (b) that it **does not fire on sessions likely to end soon anyway**, and (c) that it does fire on sessions that go on to long, costly tails. Evidence is fire timing against independently labelled outcomes, over the ladder questions Q1-Q3 below. A small corpus is acceptable for Stage A; a positive result earns collecting a larger one.
+- **Stage B, after A passes: does the steer help?** Controlled or live trial of the message, with total cost, completion and quality (existing H2 step 5).
+
+Stage A primary measures, defined before running: false-fire rate on sessions that end within the declared horizon of the checkpoint (should be low); fire rate on sessions that continue past it into the cost tail; first-fire turn distribution; per-signal agreement with independent presence labels. Cheap hazard baselines (turn index, context size, deterministic counters) still apply, since Jev must add something over them. Keep the human-stated cost premise (cost-tail concentration, break-even likely under 5%) as motivation, not as a Stage A result.
+
+
 Start the first candidate observation at **60 assistant turns**, with repeated looks around **15 turns** apart (60, 75, 90, …). This reflects Cody's working ideal of about 50 turns or fewer and allows a decision before the previously noted 75-turn cost concern. These are trial points, not a proven optimum or a hard stop. A transcript ending soon is not necessarily useful completion; a long session is not necessarily waste. The outcome is useful completion with acceptable quality and total cost, judged from work evidence. Claude Code lengths use deduplicated assistant API calls. Cursor JSONL lengths use observed parent assistant message rows: each row is a continuation turn, but the format does not certify billable API calls. Cursor cloud runs (`bc-*` IDs) require separate extraction before they can join this cohort.
 
 1. **Discover candidate signals.** Qualitative analysts inspect complete sessions and propose an inventory. For each signal record task applicability, observable anchor, counterexamples, proposed direction (near useful completion, productive continuation, or prolonged low-value work), and what a zero-call rule can already detect. “Tests passed” is an example to test, not an accepted predictor. Discovery cases cannot validate their own proposed signals.
@@ -45,8 +55,8 @@ The previous `A0` exact-exit agreement failure (α = 0.1189 on its initial panel
 
 Same evidence rules as H2 steps 1-5; what changes is the **input representation and cadence**. Treat it as a competing arm, not a replacement, until it beats or complements transcript-prefix state on held-out sessions.
 
-1. **Fix the hook-state spec.** Define exactly what `UserPromptSubmit` and `PostToolBatch` deliver and what each state variant keeps (last N batches, all prompts, counters). Hash each spec. Verify historical Claude transcripts can reproduce it prefix-only, and note the Cursor and OpenCode gap (no hooks; replay from transcripts only).
-2. **Re-derive signals under the limit.** Per H2 step 1, but only from signals visible without tool output. Record which transcript-based candidates are lost (result-dependent ones) and which new ones appear (prompt cadence, repeated targets, tool mix, user redirection).
+1. **Fix the hook-state spec.** Define exactly what `UserPromptSubmit` and `PostToolBatch` deliver and what each state variant keeps (last N batches, all prompts, counters). Hash each spec. Verify historical Claude transcripts can reproduce it prefix-only, and note the Cursor and OpenCode gap (no hooks recorded on Cursor Cloud or OpenCode; check Cursor local hooks; replay from transcripts).
+2. **Re-derive signals under the chosen state.** Per H2 step 1, from the signals visible in each variant (no outputs, truncated outputs, full `tool_response`). Record which transcript-based candidates are lost without outputs and which new ones appear (prompt cadence, repeated targets, tool mix, user redirection).
 3. **Association before Jev.** Test each signal's link to later useful completion on separate sessions, against the turn-count and cheap-counter baselines. A signal that adds nothing over counters does not need Jev.
 4. **Cadence trials.** Compare checkpoint spacing (for example every batch, every 5, every 15 turns) and window sizes. More calls on the same sessions are correlated trials; meter total Jev cost per session, since frequent cheap calls can exceed one larger call.
 5. **Head-to-head.** Against track A state at the same checkpoints and against no-Jev rules: held-out signal accuracy, outcome association, premature-interruption rate, and cost per successful deliverable.

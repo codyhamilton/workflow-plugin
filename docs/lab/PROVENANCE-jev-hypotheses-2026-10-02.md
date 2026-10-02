@@ -49,6 +49,18 @@
 
 Agent treatment: H2 track B in [`JEV-HYPOTHESES.md`](JEV-HYPOTHESES.md) and the matching section in [`JEV-METHODOLOGY.md`](JEV-METHODOLOGY.md). Open: which state window, which signals survive without outputs, and the call cadence are all untested.
 
+## Human input 6 — economics correction (2026-10-03)
+
+> Break even is not 30%, it's probably closer to <5%. 30% was a made up number. Economics, the main verified number across many thousands of transcripts (verified externally) is that the top 15% of subagents account for 70% of all subagent cost, due to the nonlinear cost accumulation of cache read with turn count x context. A few breakaway agents hitting several hundred turns can easily double an overall session cost, and killing them, whether they are "productive" or not is objectively beneficial. Even if it takes another few agents to pick up the tab, it works out far cheaper.
+
+Agent treatment: the ~30% break-even in the 2026-09-30 economics worksheet is withdrawn as unsupported (its own label was "intuition"). The cost-concentration figure is recorded in [`JEV-HYPOTHESES.md`](JEV-HYPOTHESES.md) as a **human-reported, externally sourced premise**; it is not yet reproduced on lab transcripts. Open: the actual break-even precision, and handoff/re-priming cost per killed agent.
+
+## Human input 7 — scope of the white paper (2026-10-03)
+
+> The proofs opus is asking for are not obtainable, since the only way to prove it is in expensive evaluations or in the wild on real agents. So we can't prove the net value before we have arrived at our approach. However, remember the actual functional impact of a signal fire is just a steering message in a posttoolbatch hook. What we _can_ show from historical transcripts is when that message is likely to fire, and we can produce evidence to show it avoids firing on sessions that are likely to end soon anyway. This is on a small corpus of sessions, but if we prove on the small corpus we can obtain more. The purpose of the white paper is to prove this first - can we produce calls to jev that reliably predict this. If so, we can test the benefit of the steering.
+
+Agent treatment: [`JEV-METHODOLOGY.md`](JEV-METHODOLOGY.md) now splits H2 into **Stage A** (this white paper: fire-timing validity on historical transcripts) and **Stage B** (steering benefit, later, live or controlled). Net value is explicitly out of scope for Stage A. Open: the exact near-end horizon and the acceptable false-fire rate.
+
 ## How the synthesis maps to the input
 
 | Human phrase | Agent-written treatment | Interpretation still open |

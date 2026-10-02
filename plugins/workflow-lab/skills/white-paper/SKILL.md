@@ -18,6 +18,12 @@ Produce a durable set of **facts backed by test data** that narrows later decisi
 
 Use existing project locations for research notes, raw results, and white papers. Do not impose a new folder layout or fixed model roles. Do not treat a document called `resolved`, an accepted proposal, a working harness, or judge agreement as proof of an outcome it did not measure.
 
+## Test cards, bounds, and stopping
+
+Before a wave runs, commit a short **test card**: question, population and case floor, comparator or baseline, predeclared pass and fail expectation, cost ceiling, and who set it. Commit it before the runs so results cannot reshape it. Record each card's outcome in the result register even when it fails.
+
+Set a spend bound per wave from its expected learning value. Define a **kill rule** per hypothesis in advance (for example, no supported link after a stated number of waves means park it and say why). State a minimum number of independent cases before a claim is called supported; repeated calls on the same sessions do not count. Treat an instrument that returns constant, empty-state, or unparsed answers as a failed instrument, and gate those cells out of any rate.
+
 ## Evidence and decision record
 
 Keep a result register linked to raw or reproducible artifacts. For each test record the tested question and version, case population and denominator, inputs and comparator, predeclared expectation, observations, cost, validity issues, interpretation, and next decision. Preserve all attempted variants, including ones that failed to parse, returned constant answers, depended on missing state, or showed no gain.

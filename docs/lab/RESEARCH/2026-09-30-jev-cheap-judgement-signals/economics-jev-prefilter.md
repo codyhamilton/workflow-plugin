@@ -1,5 +1,7 @@
 # Economics — Jev as cheap pre-filter
 
+> **Correction 2026-10-03:** the ~30% break-even figure below was an unsupported placeholder, per Cody; the expected break-even is closer to under 5%. See [Human input 6](../../PROVENANCE-jev-hypotheses-2026-10-02.md) and [H2 economic premise](../../JEV-HYPOTHESES.md).
+
 ## Position
 
 Frontier review (comprehensive-review, adversarial subagents, human Cody) is **high marginal cost** per invocation. Full-session transcript review is incompatible with Grok Bot’s thin context loop.

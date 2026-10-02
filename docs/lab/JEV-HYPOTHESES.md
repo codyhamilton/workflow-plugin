@@ -1,6 +1,6 @@
 # Jev research hypotheses — workflow decisions and session length
 
-**Status:** hypotheses, not established outcomes. **Owner:** Cody + Workflow Optimiser. **Updated:** 2026-10-02.
+**Status:** hypotheses, not established outcomes. **Owner:** Cody + Workflow Optimiser. **Updated:** 2026-10-03.
 
 **Human provenance:** [`PROVENANCE-jev-hypotheses-2026-10-02.md`](PROVENANCE-jev-hypotheses-2026-10-02.md) preserves Cody's wording verbatim and maps it to this agent-written synthesis. Where this file specifies a research procedure or metric beyond that wording, it is an agent interpretation to test.
 
@@ -34,21 +34,25 @@ Sessions beyond roughly **75 assistant API turns** can become cost-inefficient a
 
 For example, a passed test suite **might** be a near-completion signal for some engineering tasks if it commonly occurs shortly before useful completion. It might instead occur early, recur many times, or precede a long fix cycle. The first question is whether the observed event predicts a defined outcome in the relevant task population. Only then is it useful to test whether Jev can recognise the event from a bounded state representation. No single generic question such as “will this session run long?” substitutes for that work.
 
+**Scope of this white paper (human input 7):** it tests only whether Jev calls reliably predict when the steering message should fire, and that it avoids firing on sessions about to end anyway. Net benefit of steering is a later stage. See [methodology](JEV-METHODOLOGY.md) Stage A / Stage B.
+
+### H2 economic premise (human-reported, 2026-10-03)
+
+Cost accumulates nonlinearly with turn count times context, because cache reads repeat. Externally verified over many thousands of transcripts (per Cody; not yet reproduced on lab data): the top 15% of subagents account for about 70% of subagent cost, and a few breakaway agents running to several hundred turns can roughly double a session's cost. The claim is that stopping such an agent is beneficial **whether or not its work was productive**, even after paying for replacement agents. Break-even precision for an intervention is therefore expected to be low (probably under 5%), not the 30% once assumed in the cheap-judgement economics worksheet, which was an unsupported placeholder.
+
+Consequences to test: the target is the **cost tail**, not a "runaway" quality label, so productive-versus-unproductive labels matter less than cost-per-turn growth and the replacement cost of a handoff. This weakens the low runaway base rate (2 of 20 labelled sessions) as an objection, but it moves the burden to measuring handoff and re-priming cost honestly. Replication on lab transcripts using usage data is the cheapest first check.
+
 ### H2 research sequence
 
-1. **Qualitative discovery.** Have analysts inspect complete sessions to theorise candidate signals for near completion, productive continuation, and prolonged low-value continuation. Record each signal's task scope, observable anchor, likely counterexamples, and predicted direction. This is hypothesis generation, not evaluation evidence.
-2. **Independent signal test.** At fixed checkpoints, build prefix-only snapshots and independently label candidate signal presence. Compare each signal with later useful completion within stated horizons (for example, the next 15 or 30 turns), prolonged continuation, and final deliverable quality. Report conditional rates, baseline prevalence, coverage, and uncertainty by task type. A signal that tracks elapsed turns or eventual transcript length through leaked fields does not count.
-3. **Jev matcher trials.** For signals with useful outcome association, vary the bounded input state and matcher wording. Score Jev's per-signal confidence against independently labelled signal presence and check whether the measured association survives Jev measurement error. Many wording/state cells can be cheap, but repeated cells on the same sessions are not independent evidence. Keep sessions or projects held out when selecting variants and meter the actual call cost.
-4. **Combination and repeated policy.** Combine only supported signals outside the Jev request. Test weights, missing-signal handling, the continuation bar, and per-round discount on held-out sessions. Compare with no intervention and simple turn/context rules. Re-score fresh evidence at each checkpoint; do not let a high early score justify continuation forever. Distinguish the choice to continue from the later choice among close, compact, and handoff.
-5. **Intervention outcome.** A good offline predictor still has to improve real work. Measure total provider cost, including Jev calls, cache reads and compact/handoff overhead; useful completion and deliverable quality; premature interruption; missed low-value continuation; and whether the supervisor's advice was followed. The primary economic outcome is cost per successful deliverable, not shorter sessions alone.
+Five stages: qualitative signal discovery, independent signal-outcome association, Jev matcher trials, combination and replay, then an intervention test. Stage A of the [methodology](JEV-METHODOLOGY.md) covers the first four on historical transcripts; the intervention test is Stage B. Procedure lives there, not here.
 
 ### H2 track B — hook-event state (added 2026-10-03, hypothesis)
 
-An alternative to H2's transcript-prefix snapshots. Build Jev's state only from what hooks already expose: **`UserPromptSubmit`** (what the user said) and **`PostToolBatch`** (what the agent is doing: tool names, targets, and arguments, without tool output). Candidate state windows to compare: last N tool batches (for example 5), all user prompts, user prompts plus last N batches, plus cheap counters (turn index, edit/write ratio, repeated-target counts). Origin: Cody's wording in [provenance input 5](PROVENANCE-jev-hypotheses-2026-10-02.md).
+An alternative to transcript-prefix snapshots: build Jev's state from hook events only, **`UserPromptSubmit`** (what the user said) and **`PostToolBatch`** (what the agent is doing). Candidate windows: last N tool batches (for example 5), all user prompts, both, plus cheap counters. Origin: [provenance input 5](PROVENANCE-jev-hypotheses-2026-10-02.md). Small uniform state is cheap per call, so Jev could run more often on a narrower question.
 
-Why it may help: state is small and uniform, needs no transcript parsing or redaction of large outputs, and costs little per call, so Jev could be called **more often and on a narrower question** than every ~15 turns. Why it may not: it drops outputs, so signals that depend on results (a passing test suite, an error loop, a diff that landed) are invisible unless the hook payload carries them. **Track B therefore tests a different signal set, not a cheaper copy of track A.** Signals that survive must be defined from tool names, arguments, prompt text, and counters alone.
+`PostToolBatch.tool_calls[]` carries `tool_response` (the [hook proof](RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/post-tool-batch-hooks.md)), and every hook receives `transcript_path`, so omitting outputs is a **design choice, not a constraint**. Variants to compare: no outputs, truncated outputs or exit status only, and full responses. Which signals survive without outputs is the open question, not a given.
 
-Open constraints to verify before building: hooks fire on Claude Code (terminal, web, cloud sessions) but the [hook proof](RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/post-tool-batch-hooks.md) records **no hooks on Cursor Cloud Agent or OpenCode**, so track B's live reach is Claude Code only unless a plugin aggregates tool events. Hook state also has to be **reconstructable from historical transcripts** for offline replay; check that prompt and tool-call fields match what the hooks would have delivered.
+Constraints to verify: the proof records no hooks on Cursor Cloud Agent or OpenCode; whether Cursor's **local** hooks provide equivalent events is not yet checked. Hook state must be reproducible from historical transcripts for replay. Frequent calls multiply correlated trials and add synchronous latency; meter total Jev cost per session.
 
 ## Research discipline and current status
 
