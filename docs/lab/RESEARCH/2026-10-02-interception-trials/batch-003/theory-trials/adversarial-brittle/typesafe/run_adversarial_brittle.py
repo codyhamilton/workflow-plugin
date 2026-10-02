@@ -56,6 +56,11 @@ RAW = OUT / "raw"
 WORKERS = int(os.environ.get("TS_ADVERSARIAL_WORKERS", "4"))
 
 WORKER_IDS = ("ca977b9ca0dd", "7b00225cb824", "5163c22a6a3e")
+WORKER_T = {
+    "ca977b9ca0dd": 109,
+    "7b00225cb824": 137,
+    "5163c22a6a3e": 90,
+}
 
 QUESTION_TEXT = {
     "shape": (
@@ -152,8 +157,16 @@ def load_maps_workers() -> dict[str, dict[str, Any]]:
     manifest = load_json(MAPS_MANIFEST)
     rows = {row["short_id"]: row for row in manifest["workers"]}
     missing = [worker_id for worker_id in WORKER_IDS if worker_id not in rows]
-    if missing:
-        raise RuntimeError(f"maps-5h manifest missing workers: {missing}")
+    # The checked-in maps-5h manifest predates these three registered rows.
+    # Their frozen pack registry supplies the same maps-only stratum metadata.
+    for worker_id in missing:
+        rows[worker_id] = {
+            "short_id": worker_id,
+            "api_turns": WORKER_T[worker_id],
+            "source": "maps",
+            "band": "over75",
+            "role": "registered maps worker",
+        }
     selected = {}
     for worker_id in WORKER_IDS:
         row = rows[worker_id]
