@@ -1,0 +1,26 @@
+{
+  "wave": "typesafe-miss-identifiability",
+  "scope": "diagnostic",
+  "selection": "tail-bearing exact sidecar keys plus non-Maps representative holdout keys",
+  "n_exact_label_keys": 52,
+  "n_non_maps_holdout_keys": 25,
+  "n_state_variants": 3,
+  "n_questions": 3,
+  "n_cells_planned": 387,
+  "state_variants": [
+    "markers_focus",
+    "phase_hints_focus",
+    "stats_only"
+  ],
+  "questions": [
+    "late_miss_risk",
+    "silent_stall",
+    "activity_without_value"
+  ],
+  "framing": "H2",
+  "label_values_in_prompt": false,
+  "posthoc_label_join_only": true,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "raw_capture_dir": "raw/"
+}

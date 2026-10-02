@@ -1,0 +1,98 @@
+{
+  "status": "complete",
+  "scope": "miss_identifiability_diagnostic",
+  "n_exact_label_keys_planned": 52,
+  "n_unique_keys_successful": 77,
+  "n_labeled_keys_successful": 56,
+  "n_non_maps_holdout_keys_successful": 0,
+  "n_non_maps_labeled_holdout_keys": 0,
+  "n_non_maps_unlabeled_holdout_keys": 0,
+  "n_holdout_cells_successful": 0,
+  "n_cells_planned": 387,
+  "n_cells_successful": 387,
+  "n_cells_errors": 0,
+  "http_counts": {
+    "200": 387
+  },
+  "http_success_rate": 1.0,
+  "cell_id_collisions": 0,
+  "overlap_with_prior_result_cell_ids": 0,
+  "leak_spotcheck_hits": 0,
+  "runaway_positive_unique_keys": 1,
+  "runaway_positive_label_keys_total": 4,
+  "runaway_positive_label_keys_gated_no_tail": 3,
+  "runaway_positive_rows": 6,
+  "positive_keys_with_any_fire": 1,
+  "all_keys_with_any_fire": 57,
+  "by_state_question": {
+    "markers_focus|late_miss_risk": {
+      "n": 52,
+      "fire_count": 8,
+      "fire_rate": 0.1538,
+      "runaway_positive_rows": 1,
+      "fire_on_runaway_positive_rows": 0
+    },
+    "markers_focus|silent_stall": {
+      "n": 52,
+      "fire_count": 49,
+      "fire_rate": 0.9423,
+      "runaway_positive_rows": 1,
+      "fire_on_runaway_positive_rows": 1
+    },
+    "markers_focus|activity_without_value": {
+      "n": 52,
+      "fire_count": 38,
+      "fire_rate": 0.7308,
+      "runaway_positive_rows": 1,
+      "fire_on_runaway_positive_rows": 1
+    },
+    "phase_hints_focus|late_miss_risk": {
+      "n": 52,
+      "fire_count": 52,
+      "fire_rate": 1.0,
+      "runaway_positive_rows": 1,
+      "fire_on_runaway_positive_rows": 1
+    },
+    "phase_hints_focus|silent_stall": {
+      "n": 52,
+      "fire_count": 41,
+      "fire_rate": 0.7885,
+      "runaway_positive_rows": 1,
+      "fire_on_runaway_positive_rows": 1
+    },
+    "phase_hints_focus|activity_without_value": {
+      "n": 52,
+      "fire_count": 49,
+      "fire_rate": 0.9423,
+      "runaway_positive_rows": 1,
+      "fire_on_runaway_positive_rows": 1
+    },
+    "stats_only|late_miss_risk": {
+      "n": 25,
+      "fire_count": 0,
+      "fire_rate": 0.0,
+      "runaway_positive_rows": 0,
+      "fire_on_runaway_positive_rows": 0
+    },
+    "stats_only|silent_stall": {
+      "n": 25,
+      "fire_count": 5,
+      "fire_rate": 0.2,
+      "runaway_positive_rows": 0,
+      "fire_on_runaway_positive_rows": 0
+    },
+    "stats_only|activity_without_value": {
+      "n": 25,
+      "fire_count": 0,
+      "fire_rate": 0.0,
+      "runaway_positive_rows": 0,
+      "fire_on_runaway_positive_rows": 0
+    }
+  },
+  "label_values_in_prompt": false,
+  "posthoc_label_join_only": true,
+  "not_a_miss_scoreboard": true,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "generated_at": "2026-10-02T13:09:52+10:00"
+}
