@@ -77,7 +77,7 @@ def sha256(path: Path) -> str:
 
 def cell_id(worker_id: str, cutoff: int) -> str:
     return hashlib.sha256(
-        f"PR-SURVIVAL-EVENT-v2|maps-only|{worker_id}|{cutoff}|stage_1-stage_2".encode()
+        f"PR-SURVIVAL-EVENT-v2|maps-only|{worker_id}|{cutoff}|stage_1-stage_2|choice-v2".encode()
     ).hexdigest()[:16]
 
 
