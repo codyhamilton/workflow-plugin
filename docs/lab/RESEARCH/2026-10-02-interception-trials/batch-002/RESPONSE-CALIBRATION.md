@@ -76,6 +76,16 @@ aggregate `meters.json` and `METERS.md`.
 Missing credentials or HTTP 400 responses create `BLOCKER.md` and withhold
 meters; no values are invented.
 
+After both strata complete, build the no-network coverage inventory:
+
+```bash
+python3 docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/\
+analyze_typesafe_response_calibration.py
+```
+
+This writes `AXIS-MATRIX.json` and `AXIS-MATRIX.md` from aggregate meters
+only; it does not read or send raw API captures.
+
 ## HOLD
 
 No hooks, `:8080`, Soft Standard unlock, or product behavior changes are part

@@ -442,7 +442,8 @@ def write_plan(cells: list[dict[str, Any]], pairs: list[dict[str, Any]]) -> None
         "join_class": "exact_label_ready" if SCOPE == "exact" else "diagnostic_only",
         "catalog_scope": "12 preferred GROWTH state×question pairings from #109",
         "n_distinct_scenarios": len(PREFERRED_PAIRS),
-        "n_exact_representative_pairs": len(pairs),
+        "n_representative_pairs": len(pairs),
+        "n_exact_representative_pairs": len(pairs) if SCOPE == "exact" else 0,
         "n_response_classes": len(RESPONSE_CLASSES),
         "n_cells_planned": len(cells),
         "response_classes": list(RESPONSE_CLASSES),
@@ -458,7 +459,11 @@ def write_plan(cells: list[dict[str, Any]], pairs: list[dict[str, Any]]) -> None
             }
             for pair in pairs
         ],
-        "checkpoint_policy": "one exact-labeled representative mid per session",
+        "checkpoint_policy": (
+            "one exact-labeled representative mid per session"
+            if SCOPE == "exact"
+            else "one representative mid per eligible diagnostic session"
+        ),
         "tail_less_policy": "gate; do not substitute empty growth fields",
         "label_values_in_prompt": False,
         "window_cartesian": False,
@@ -531,7 +536,11 @@ def write_meters(rows: list[dict[str, Any]], planned: int, pairs: int) -> None:
         "response_classes": list(RESPONSE_CLASSES),
         "by_response_class": by_class,
         "by_scenario_response_class": by_scenario_class,
-        "checkpoint_policy": "one exact-labeled representative mid per session",
+        "checkpoint_policy": (
+            "one exact-labeled representative mid per session"
+            if SCOPE == "exact"
+            else "one representative mid per eligible diagnostic session"
+        ),
         "tail_less_gated": True,
         "window_cartesian": False,
         "diagnostic_only": True,
