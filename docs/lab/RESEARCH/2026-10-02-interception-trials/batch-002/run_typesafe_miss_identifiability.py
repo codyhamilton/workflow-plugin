@@ -370,10 +370,14 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         )
     }
     holdout_keys = unique_keys - labeled_keys
+    is_holdout = lambda row: (
+        row.get("population") == "non_maps_holdout"
+        or row.get("state_selection") == HOLDOUT_STATE_VARIANT
+    )
     non_maps_keys = {
         (row.get("session_id"), row.get("checkpoint"))
         for row in successful
-        if row.get("population") == "non_maps_holdout"
+        if is_holdout(row)
     }
     non_maps_labeled_keys = non_maps_keys & labeled_keys
     non_maps_unlabeled_keys = non_maps_keys - labeled_keys
@@ -403,7 +407,7 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         "n_non_maps_labeled_holdout_keys": len(non_maps_labeled_keys),
         "n_non_maps_unlabeled_holdout_keys": len(non_maps_unlabeled_keys),
         "n_holdout_cells_successful": sum(
-            row.get("population") == "non_maps_holdout" for row in successful
+            is_holdout(row) for row in successful
         ),
         "n_cells_planned": len(cells),
         "n_cells_successful": len(successful),
