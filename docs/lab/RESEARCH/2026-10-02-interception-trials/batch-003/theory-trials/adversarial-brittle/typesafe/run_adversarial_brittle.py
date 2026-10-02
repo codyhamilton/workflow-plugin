@@ -261,19 +261,19 @@ def questions() -> dict[str, dict[str, Any]]:
             },
         },
         "why_T_large": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["why_T_large"],
         },
         "inflection_points": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["inflection_points"],
         },
         "early_signals": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["early_signals"],
         },
         "recommended_exit_earliness": {
-            "type": "text",
+            "type": "noul",
             "instructions": QUESTION_TEXT["recommended_exit_earliness"],
         },
     }
@@ -316,7 +316,13 @@ def build_cells(
                             "evidence_class": "hybrid_v0",
                             "scenario_id": f"shape-signal|{perturbation}|{arm or 'baseline'}",
                             "framing": "EX-SHAPE-SIGNAL",
-                            "snapshot": mutate_pack(packs[worker_id], perturbation, arm),
+                            "snapshot": {
+                                "worker_id": worker_id,
+                                "T": worker_meta[worker_id]["api_turns"],
+                                "checkpoints": mutate_pack(
+                                    packs[worker_id], perturbation, arm
+                                ),
+                            },
                         },
                         "questions": questions(),
                     },
@@ -345,7 +351,9 @@ def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
             "choice_scrape_ok": choice_scrape_ok,
             "value": response_label
             if wire_type == "choice"
-            else answer.get("text", answer.get("value")),
+            else answer.get(
+                "text", answer.get("value", answer.get("response"))
+            ),
         }
     return parsed
 
@@ -354,7 +362,8 @@ def post(cell: dict[str, Any], key: str) -> dict[str, Any]:
     cell_id_value = cell["cell_id"]
     body = copy.deepcopy(cell["request"])
     body["state"]["checkpoint_turn"] = max(
-        row["checkpoint_turn"] for row in body["state"]["snapshot"]
+        row["checkpoint_turn"]
+        for row in body["state"]["snapshot"]["checkpoints"]
     )
     request_path = RAW / f"{cell_id_value}-request.json"
     request_path.write_text(json.dumps(body, indent=2) + "\n")
@@ -580,7 +589,13 @@ def main() -> int:
                 continue
             if row.get("cell_id"):
                 done[row["cell_id"]] = row
-    todo = [cell for cell in cells if cell["cell_id"] not in done]
+    todo = [
+        cell
+        for cell in cells
+        if cell["cell_id"] not in done
+        or done[cell["cell_id"]].get("http") != 200
+        or done[cell["cell_id"]].get("error")
+    ]
     with ThreadPoolExecutor(max_workers=WORKERS) as executor, results_path.open("a") as output:
         futures = [executor.submit(post, cell, key) for cell in todo]
         for future in as_completed(futures):
