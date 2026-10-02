@@ -1,6 +1,6 @@
 # PR-SIGNAL-CLOSENESS — TypeSafe Wave-3 seat
 
-Status: **pre-seat manifest ready; model cells pending**  
+Status: **complete**
 Scope: maps-only measurement; not a behaviour ship.
 
 ## Pins and gates
@@ -13,6 +13,9 @@ Scope: maps-only measurement; not a behaviour ship.
   - verified before manifest generation and before every model run
 - Inventory: `INVENTORY-READY.md`, status `READY`; no `WAVE3-INVENTORY-STATUS.md` was present
 - Driver/model: TypeSafe / `jev-1.13.0`
+- TypeSafe score wire: the three pinned anchors return raw expected ordinals
+  `0..2`; results retain `raw_score` and normalize by `2.0` to the protocol
+  float range `[0,1]`
 - `call_jev`: false; `:8080`: kept unloaded
 - Replicates: 2; preferred checkpoint: 75
 - Holdouts: 25 present in the panel and not scored
@@ -64,5 +67,18 @@ behaviour or intervention decision.
 
 ## Results
 
-Results are written append-only to `results.jsonl`; request/response captures
-are under the ignored `raw/` directory. This section is updated after seating.
+Results are written to `results.jsonl`; request/response captures are under
+the ignored `raw/` directory. All 18 planned cells returned HTTP 200 and
+valid normalized floats.
+
+| signal | model cells | zero_call_separation | outcome |
+|---|---:|---:|---|
+| `thrash` | 0 | true | PASS — zero-call separated; model skipped |
+| `poll` | 0 | true | PASS — zero-call separated; model skipped |
+| `productive_edit` | 0 | true | PASS — zero-call separated; model skipped |
+| `validation_inflection` | 18 | false | KILL — high-side mean `0.7375` did not exceed low-side mean `0.765625` |
+
+`validation_inflection` high-side scores were `0.915, 0.925, 0.56, 0.55`;
+low-side scores were `0.875, 0.875, 0.87, 0.875, 0.82, 0.84, 0.485, 0.485`.
+The result is a per-signal measurement outcome only; it does not ship
+behaviour or authorize a new signal family.
