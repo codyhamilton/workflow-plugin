@@ -34,24 +34,28 @@ MAPS_MANIFEST = (
     / "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals"
     / "proofs/fixtures/maps-5h-workers/manifest.json"
 )
+CASE_REGISTRY = Path(
+    "/home/codyh/workspace/corpus-ops/registry/adversarial-brittle"
+    "/ca977-kill-micro.json"
+)
 REGISTRY = Path(
     "/home/codyh/workspace/corpus-ops/registry/adversarial-brittle"
     "/perturbation-matrix.json"
 )
+CASE_REGISTRY_SHA256 = "ef922870b7687c50f9e73e5fb3dcf15e892680481f0dc4de1683581fa61db3f0"
 REGISTRY_SHA256 = "27027e1804167af5e547c54d8cfdc616340a3b982fb0e29251aa3336034dd865"
 URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-1.13.0"
 AEST = ZoneInfo("Australia/Brisbane")
-OUT = HERE
+OUT = (
+    REPO
+    / "docs/lab/RESEARCH/2026-10-02-interception-trials"
+    / "ca977-kill-micro/typesafe"
+)
 RAW = OUT / "raw"
 WORKERS = int(os.environ.get("TS_ADVERSARIAL_WORKERS", "4"))
 
-WORKER_IDS = (
-    "92a48e004519",
-    "bb6165018de0",
-    "0aab88c525de",
-    "036ff3ed4a89",
-)
+WORKER_IDS = ("ca977b9ca0dd", "7b00225cb824", "5163c22a6a3e")
 
 QUESTION_TEXT = {
     "shape": (
@@ -98,24 +102,25 @@ def sha256(path: Path) -> str:
 
 
 def verify_registry() -> dict[str, Any]:
-    if not REGISTRY.exists():
-        raise RuntimeError(f"registry missing: {REGISTRY}")
-    actual = sha256(REGISTRY)
-    size = REGISTRY.stat().st_size
-    if size != 2527 or actual != REGISTRY_SHA256:
-        raise RuntimeError(
-            f"registry pin mismatch: size={size}, sha256={actual}"
-        )
+    if not CASE_REGISTRY.exists() or not REGISTRY.exists():
+        raise RuntimeError("one or more registry files are missing")
+    case_actual = sha256(CASE_REGISTRY)
+    matrix_actual = sha256(REGISTRY)
+    if case_actual != CASE_REGISTRY_SHA256:
+        raise RuntimeError(f"case registry pin mismatch: sha256={case_actual}")
+    if matrix_actual != REGISTRY_SHA256:
+        raise RuntimeError(f"perturbation matrix pin mismatch: sha256={matrix_actual}")
+    case = load_json(CASE_REGISTRY)
     matrix = load_json(REGISTRY)
-    if matrix.get("case_id") != "PR-ADVERSARIAL-BRITTLE":
-        raise RuntimeError("registry case_id is not PR-ADVERSARIAL-BRITTLE")
-    if matrix.get("wsm_status") != "GO":
-        raise RuntimeError("registry wsm_status is not GO")
-    if matrix.get("question_format", {}).get("locked") != (
+    if case.get("case_id") != "PR-ADVERSARIAL-CA977-KILL":
+        raise RuntimeError("case registry case_id mismatch")
+    if case.get("wsm_status") != "GO":
+        raise RuntimeError("case registry wsm_status is not GO")
+    if case.get("question_format", {}).get("locked") != (
         "EX-SHAPE-SIGNAL five-Q only"
     ):
         raise RuntimeError("registry question format is not EX-SHAPE-SIGNAL")
-    ids = [row["id"] for row in matrix.get("perturbation_matrix", [])]
+    ids = [row["id"] for row in matrix]
     if ids != [
         "order-swap",
         "drop-brief_anchor",
@@ -125,12 +130,19 @@ def verify_registry() -> dict[str, Any]:
     ]:
         raise RuntimeError(f"unexpected perturbation order: {ids}")
     return {
-        "path": str(REGISTRY),
-        "bytes": size,
-        "sha256": actual,
-        "case_id": matrix["case_id"],
-        "wsm_status": matrix["wsm_status"],
-        "question_format": matrix["question_format"]["locked"],
+        "case_registry": {
+            "path": str(CASE_REGISTRY),
+            "bytes": CASE_REGISTRY.stat().st_size,
+            "sha256": case_actual,
+        },
+        "perturbation_matrix": {
+            "path": str(REGISTRY),
+            "bytes": REGISTRY.stat().st_size,
+            "sha256": matrix_actual,
+        },
+        "case_id": case["case_id"],
+        "wsm_status": case["wsm_status"],
+        "question_format": case["question_format"]["locked"],
         "stratum": "maps-5h",
         "perturbations": ids,
     }
@@ -277,7 +289,7 @@ def questions() -> dict[str, dict[str, Any]]:
 
 
 def cell_id(worker_id: str, perturbation: str, arm: str | None) -> str:
-    raw = f"PR-ADVERSARIAL-BRITTLE|maps-5h|{worker_id}|{perturbation}|{arm or '-'}"
+    raw = f"PR-ADVERSARIAL-CA977-KILL|maps-5h|{worker_id}|{perturbation}|{arm or '-'}"
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
@@ -495,6 +507,66 @@ def write_flip_summary(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) 
         )
         + "\n"
     )
+    unclear = {
+        worker_id: row
+        for worker_id, row in baseline.items()
+        if answer_signature(row, "shape") == "unclear"
+    }
+    kill_by_arm: dict[str, Any] = {}
+    for perturbation, arm in PERTURBATIONS:
+        if perturbation == "baseline":
+            continue
+        key = perturbation if arm is None else f"{perturbation}:{arm}"
+        group = [
+            row for row in rows
+            if row.get("perturbation") == perturbation
+            and row.get("arm") == arm
+            and row.get("http") == 200
+        ]
+        ca_base = baseline.get("ca977b9ca0dd")
+        ca_arm = next(
+            (row for row in group if row.get("worker_id") == "ca977b9ca0dd"),
+            None,
+        )
+        negative_flips = [
+            answer_signature(row, "shape")
+            != answer_signature(unclear[row["worker_id"]], "shape")
+            for row in group
+            if row.get("worker_id") in unclear
+        ]
+        ca_flip = bool(
+            ca_base and ca_arm
+            and answer_signature(ca_arm, "shape")
+            != answer_signature(ca_base, "shape")
+        )
+        negative_rate = (
+            sum(negative_flips) / len(negative_flips)
+            if negative_flips else None
+        )
+        kill_by_arm[key] = {
+            "ca977_shape_flip": ca_flip,
+            "ca977_baseline_shape": answer_signature(ca_base, "shape") if ca_base else None,
+            "ca977_arm_shape": answer_signature(ca_arm, "shape") if ca_arm else None,
+            "unclear_negative_workers": sorted(unclear),
+            "unclear_negative_flip_count": sum(negative_flips),
+            "unclear_negative_count": len(negative_flips),
+            "unclear_negative_flip_rate": round(negative_rate, 4) if negative_rate is not None else None,
+            "kill_pass": bool(ca_flip and negative_rate is not None and negative_rate >= 0.5),
+        }
+    (OUT / "kill-eval.json").write_text(
+        json.dumps(
+            {
+                "case_id": "PR-ADVERSARIAL-CA977-KILL",
+                "baseline_definition": "same-micro baseline shape == unclear",
+                "ca977_worker": "ca977b9ca0dd",
+                "by_arm": kill_by_arm,
+                "criterion": "ca977 cannot flip without >=50% unclear-negative flips under same arm",
+                "outcome": "pass" if any(item["kill_pass"] for item in kill_by_arm.values()) else "fail",
+            },
+            indent=2,
+            sort_keys=True,
+        ) + "\n"
+    )
 
 
 def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> None:
@@ -515,7 +587,8 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> Non
         "driver": "TypeSafe",
         "model": MODEL,
         "framing": "EX-SHAPE-SIGNAL five-Q only",
-        "registry_sha256": REGISTRY_SHA256,
+        "case_registry_sha256": CASE_REGISTRY_SHA256,
+        "perturbation_matrix_sha256": REGISTRY_SHA256,
         "soft_standard_hold": True,
         "product_wiring": False,
         "no_call_jev": True,
@@ -530,8 +603,8 @@ def write_manifest(
     worker_meta: dict[str, dict[str, Any]],
 ) -> None:
     manifest = {
-        "case_id": "PR-ADVERSARIAL-BRITTLE",
-        "batch": "batch-003",
+        "case_id": "PR-ADVERSARIAL-CA977-KILL",
+        "batch": "ca977-kill-micro",
         "stratum": "maps-5h",
         "driver": "TypeSafe",
         "model": MODEL,
@@ -598,7 +671,8 @@ def main() -> int:
                     row.get("http") == 200 and not row.get("error") for row in rows
                 ),
                 "errors": sum(bool(row.get("error")) for row in rows),
-                "registry_sha256": REGISTRY_SHA256,
+                "case_registry_sha256": CASE_REGISTRY_SHA256,
+                "perturbation_matrix_sha256": REGISTRY_SHA256,
             },
             sort_keys=True,
         )
