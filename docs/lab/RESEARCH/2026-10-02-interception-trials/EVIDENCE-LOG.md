@@ -25,6 +25,13 @@ unlabeled. `typesafe-k4` is meter-only (1500 reported cells, no committed
 `results.jsonl`) and remains unmeasurable at row level. Soft HOLD; no FP/miss
 board or product claim.
 
+**Competing interception theories — trial designs only.**
+[`batch-002/INTERCEPTION-THEORY-TRIALS.md`](batch-002/INTERCEPTION-THEORY-TRIALS.md)
+turns closing-value veto, ~15-turn persistence, work-kind evidence, and turn
+depth into frozen TypeSafe/Flash matrices. The machine-readable companion is
+[`batch-002/INTERCEPTION-THEORY-MATRICES.json`](batch-002/INTERCEPTION-THEORY-MATRICES.json).
+No trial results, new labels, product meters, or behaviour changes are claimed.
+
 ## Rules
 
 1. No row is score-ready while any post-checkpoint field appears in state or prompt (leakage audit required).

@@ -1,0 +1,494 @@
+{
+  "matrix_revision": "interception-theories-v2",
+  "generated_at": "2026-10-02",
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "not_a_product_scoreboard": true,
+  "drivers": {
+    "typesafe": {
+      "role": "primary_volume",
+      "model": "jev-1.13.0",
+      "execution": "one System One request per cell"
+    },
+    "flash_opencode": {
+      "role": "matched_confirmation",
+      "model": "deepseek/deepseek-flash",
+      "execution": "opencode run batches with deterministic per-repeat shuffle"
+    },
+    "luna": {
+      "role": "optional_matched_confirmation",
+      "execution": "same frozen cells; never reference gold"
+    }
+  },
+  "execution_adapter": {
+    "landed_multidriver_is_pattern_only": true,
+    "reasons_not_drop_in": [
+      "hardcoded shared repository path",
+      "Wave-0 response mapper does not parse theory labels",
+      "oversize state silently falls back to stats_only"
+    ],
+    "repo_resolution": [
+      "WF_REPO",
+      "git rev-parse --show-toplevel"
+    ],
+    "output_root": "batch-002/theory-trials/<theory_id>/<driver>",
+    "typesafe": {
+      "endpoint": "https://api.typesafe.ai/v1/systemone",
+      "model": "jev-1.13.0",
+      "calls": "one request per cell"
+    },
+    "flash_opencode": {
+      "command": [
+        "opencode",
+        "run",
+        "--model",
+        "deepseek/deepseek-flash",
+        "--format",
+        "default",
+        "<prompt>"
+      ],
+      "stdin": "DEVNULL"
+    },
+    "custom_response_parser_required": true,
+    "existing_typesafe_lever_join_compatible": false,
+    "outcome_join": "derive in theory output after capture",
+    "oversize_state_policy": "block; never substitute stats_only or another projection",
+    "protected_existing_outputs": [
+      "typesafe/",
+      "flash-hframings/",
+      "luna/"
+    ]
+  },
+  "reference": {
+    "labels": "outcome-labels.jsonl",
+    "protocol": "../OUTCOME-SHEET.md",
+    "join_key": [
+      "session_id",
+      "checkpoint"
+    ],
+    "natural_corpus": {
+      "sessions": 20,
+      "exact_checkpoint_keys": 67,
+      "near_done_yes_keys": 24,
+      "runaway_inside_window_keys": 4,
+      "no_steer_window_keys": 52,
+      "adjacent_15_turn_pairs": 47,
+      "pair_endpoint_near_done_yes": 17,
+      "pair_endpoint_runaway_inside_window": 3
+    },
+    "aggregation": {
+      "natural_corpus_independent_unit": "session",
+      "natural_corpus_repeated_observation": "checkpoint key",
+      "controlled_independent_unit": "card",
+      "positive_window_sessions": 2,
+      "repeats_are_independent_units": false,
+      "key_decision": "modal parsed label; ties map to defer_insufficient",
+      "nearest_checkpoint_interpolation": false
+    }
+  },
+  "natural_state_preflight": {
+    "state_revision": "trial-prefix-v1",
+    "source": "recorded source transcript through checkpoint only",
+    "serialized_character_ceiling": 2400,
+    "field_budgets": {
+      "anchor_characters": 240,
+      "delta_paths": 4,
+      "delta_path_characters_each": 120,
+      "tail_events": 8,
+      "tail_excerpt_characters_each": 120
+    },
+    "t2_prior_projection_character_ceiling": 900,
+    "t2_paired_state_character_ceiling": 3500,
+    "clipping_meter_required": true,
+    "required_fields": [
+      "brief_or_title_anchor",
+      "cumulative_prefix_counters",
+      "delta_from_prior_fixed_checkpoint",
+      "last_8_assistant_events_redacted_excerpt_and_ordered_tool_names",
+      "tail_relative_positions"
+    ],
+    "landed_lite_keys_requiring_offline_reconstruction": 15,
+    "required_nonempty_checkpoint_keys": 67,
+    "required_adjacent_pairs": 47,
+    "missing_source_policy": "block the frozen matrix; never shrink or fabricate",
+    "forbidden_inputs": [
+      "final session length",
+      "outcome labels",
+      "judge answers",
+      "tail text fabricated from counters"
+    ]
+  },
+  "shared_response": {
+    "labels": [
+      "fire_now",
+      "defer_closing",
+      "defer_productive",
+      "defer_insufficient"
+    ],
+    "fire_labels": [
+      "fire_now"
+    ]
+  },
+  "frozen_arm_instructions": {
+    "generic_now": "Decide whether steering toward stop is useful now from this prefix. Choose fire_now only for likely avoidable low-value continuation; otherwise choose the most specific defer label.",
+    "closing_veto": "First inspect for concrete unfinished completion, validation, or delivery value. If present, choose defer_closing. Otherwise choose fire_now only for likely avoidable low-value continuation, defer_productive for checkable progress, or defer_insufficient when evidence is weak.",
+    "immediate_now": "Judge the current card without requiring persistence. Choose exactly one T2 response label.",
+    "persistence_required": "Choose fire_persistent only when the low-value pattern is present in both prior and current cards and no new checkable progress appears. If concern appears in only one card or evidence is weak, choose defer_recheck; protect closing and productive work with their specific defer labels.",
+    "generic_value": "Apply one activity-versus-value standard without using a work-kind-specific evidence contract.",
+    "work_kind_conditioned_hard_dev": "Use edits, changed command/test outcomes, resolved blockers, and deliverable state; tool volume or confidence alone is not progress.",
+    "work_kind_conditioned_writing": "Use narrowed claims, coherent artifact growth, incorporated review, and delivery state; word count or confidence alone is not progress."
+  },
+  "growth_replication": {
+    "source": "GROWTH-RANKING.json",
+    "state_fill": "growth-fill-v1",
+    "framing": "H1",
+    "response_class": "binary_fire",
+    "scenarios": [
+      "state.markers_focus|q.dependency_wait",
+      "state.markers_focus|q.context_thrash_compact",
+      "state.markers_focus|q.idle_tool_spin",
+      "state.recent_delta_brief|q.brief_abandon",
+      "state.recent_delta_brief|q.docs_only_drift",
+      "state.recent_delta_brief|q.scope_creep_silent",
+      "state.recent_delta_brief|q.edit_churn",
+      "state.recent_delta_brief|q.bash_retry_storm",
+      "state.recent_delta_brief|q.parallel_agent_thrash",
+      "state.markers_focus|q.test_flake_loop",
+      "state.recent_delta_brief|q.speculative_rewrite",
+      "state.recent_delta_brief|q.deliverable_orphan"
+    ],
+    "exact_labeled_keys": [
+      {
+        "session_id": "2e083814b952",
+        "checkpoint": 45
+      },
+      {
+        "session_id": "499377c18811",
+        "checkpoint": 75
+      },
+      {
+        "session_id": "5415ae00a788",
+        "checkpoint": 45
+      },
+      {
+        "session_id": "567e678f0a57",
+        "checkpoint": 45
+      },
+      {
+        "session_id": "730a03ecdc0d",
+        "checkpoint": 75
+      },
+      {
+        "session_id": "a2e9f853749d",
+        "checkpoint": 75
+      },
+      {
+        "session_id": "a8d0a590128a",
+        "checkpoint": 75
+      },
+      {
+        "session_id": "a56bad1c7f13",
+        "checkpoint": 75
+      },
+      {
+        "session_id": "b13d1a65a961",
+        "checkpoint": 60
+      }
+    ],
+    "exact_labeled_cells_per_driver": 108,
+    "all_state_valid_keys": 16,
+    "all_state_valid_cells_per_driver": 192,
+    "diagnostic_only_cells_per_driver": 84,
+    "next_driver_cells": {
+      "flash_opencode": 108,
+      "luna_optional": 108
+    },
+    "axes_held_closed": [
+      "confidence_perturbation",
+      "turn_depth_mask",
+      "cadence_pair",
+      "work_kind",
+      "response_class",
+      "framing",
+      "state_representation"
+    ]
+  },
+  "theories": [
+    {
+      "rank": 1,
+      "theory_id": "T1_closing_value_veto",
+      "claim": "Concrete completion, validation, or delivery value vetoes fire; confidence language alone does not.",
+      "source_pool": {
+        "type": "natural_corpus",
+        "checkpoint_keys": 67
+      },
+      "axes": {
+        "prompt_arm": [
+          "generic_now",
+          "closing_veto"
+        ],
+        "confidence_perturbation": [
+          "as_observed",
+          "ungrounded_closing_claim"
+        ],
+        "state": [
+          "trial-prefix-v1"
+        ]
+      },
+      "controlled_perturbation": {
+        "field": "assistant_self_assessment",
+        "value": "I am confident the task is nearly complete.",
+        "represented_as_transcript_evidence": false,
+        "underlying_prefix_bytes_equal": true
+      },
+      "repeats": {
+        "typesafe": 4,
+        "flash_opencode": 1,
+        "luna_optional": 1
+      },
+      "planned_cells": {
+        "typesafe": 1072,
+        "flash_opencode": 268,
+        "luna_optional": 268
+      },
+      "primary_meters": [
+        "near_done_fp_keys/24",
+        "good_interception_keys/4",
+        "no_window_fire_keys/52",
+        "confidence_claim_sensitive_keys",
+        "repeat_entropy",
+        "parse_error_rate"
+      ],
+      "advance_gate": {
+        "max_near_done_fp_keys": 1,
+        "min_good_interception_keys": 3,
+        "require_good_interception_in_both_positive_sessions": true,
+        "max_closing_veto_confidence_claim_sensitive_keys": 0,
+        "require_key_and_session_gates_in_each_confidence_perturbation": true,
+        "min_near_done_fp_reduction_vs_generic": 0.5,
+        "max_good_interception_key_loss_vs_generic": 1,
+        "hard_reject_near_done_fp_keys_above": 2
+      }
+    },
+    {
+      "rank": 2,
+      "theory_id": "T2_persistence_reintercept",
+      "claim": "A concern should persist across one approximately 15-turn interval before fire.",
+      "source_pool": {
+        "type": "natural_corpus_adjacent_pairs",
+        "pairs": 47,
+        "schedule_edges": [
+          "45->60",
+          "60->75",
+          "75->90",
+          "90->105",
+          "105->120"
+        ]
+      },
+      "axes": {
+        "state_history_arm": [
+          "current_only",
+          "paired_15"
+        ],
+        "rule_arm": [
+          "immediate_now",
+          "persistence_required"
+        ]
+      },
+      "response": {
+        "labels": [
+          "fire_persistent",
+          "defer_recheck",
+          "defer_closing",
+          "defer_productive"
+        ],
+        "fire_labels": [
+          "fire_persistent"
+        ]
+      },
+      "paired_state_contract": {
+        "adds": [
+          "bounded prior projected state",
+          "current delta/state",
+          "elapsed_turns=15"
+        ],
+        "forbids": [
+          "prior judge answer",
+          "final session length",
+          "outcome labels"
+        ]
+      },
+      "repeats": {
+        "typesafe": 6,
+        "flash_opencode": 2,
+        "luna_optional": 1
+      },
+      "planned_cells": {
+        "typesafe": 1128,
+        "flash_opencode": 376,
+        "luna_optional": 188
+      },
+      "primary_meters": [
+        "near_done_fp_keys/17",
+        "good_interception_keys/3",
+        "defer_recheck_rate",
+        "paired_decision_flips",
+        "repeat_entropy",
+        "parse_error_rate"
+      ],
+      "advance_gate": {
+        "max_near_done_fp_keys": 1,
+        "min_good_interception_keys": 2,
+        "require_good_interception_in_both_positive_sessions": true,
+        "must_reduce_near_done_fp_vs_current_immediate": true,
+        "max_good_interception_key_loss_vs_current_immediate": 1
+      }
+    },
+    {
+      "rank": 3,
+      "theory_id": "T3_work_kind_evidence",
+      "claim": "Hard development and writing need different progress and closing evidence contracts.",
+      "source_pool": {
+        "type": "synthetic_controlled_cards",
+        "synthetic_controlled": true,
+        "growth_archetypes": 12,
+        "work_kinds": [
+          "hard_dev",
+          "writing"
+        ],
+        "reference_actions": [
+          "fire_now",
+          "defer_closing"
+        ],
+        "cards": 48,
+        "authoring": "independent human freezes cards and actions before judge results are opened"
+      },
+      "axes": {
+        "prompt_arm": [
+          "generic_value",
+          "work_kind_conditioned"
+        ],
+        "generic_arm_work_kind_value": "unspecified",
+        "conditioned_arm_work_kind_value": [
+          "hard_dev",
+          "writing"
+        ],
+        "reference_action_in_payload": false
+      },
+      "repeats": {
+        "typesafe": 12,
+        "flash_opencode": 2,
+        "luna_optional": 2
+      },
+      "planned_cells": {
+        "typesafe": 1152,
+        "flash_opencode": 192,
+        "luna_optional": 192
+      },
+      "primary_meters": [
+        "near_done_fp_cards/24",
+        "good_interception_cards/24",
+        "balanced_accuracy_by_work_kind",
+        "macro_balanced_accuracy",
+        "work_kind_accuracy_gap",
+        "repeat_entropy",
+        "parse_error_rate"
+      ],
+      "advance_gate": {
+        "max_near_done_fp_cards": 1,
+        "min_good_interception_cards": 20,
+        "min_macro_balanced_accuracy": 0.85,
+        "max_work_kind_accuracy_gap": 0.1,
+        "min_improvement_on_weaker_kind_vs_generic": 0.1
+      }
+    },
+    {
+      "rank": 4,
+      "theory_id": "T4_turn_depth_prior",
+      "claim": "Explicit checkpoint depth adds useful hazard information after prefix evidence is held fixed.",
+      "source_pool": {
+        "type": "natural_corpus",
+        "checkpoint_keys": 67
+      },
+      "axes": {
+        "depth_arm": [
+          "depth_visible",
+          "depth_blind"
+        ],
+        "state": [
+          "trial-prefix-v1"
+        ],
+        "prompt": [
+          "generic_now"
+        ]
+      },
+      "depth_blind_contract": {
+        "tail_positions_in_both_arms": "relative_to_checkpoint",
+        "remove_paths": [
+          "checkpoint_turn",
+          "prior_checkpoint_turn",
+          "schedule",
+          "elapsed_turns",
+          "cumulative.api_turns"
+        ],
+        "all_other_state_bytes_equal": true,
+        "structural_diff_required": true
+      },
+      "repeats": {
+        "typesafe_scout": 1,
+        "typesafe_full_total": 8,
+        "flash_confirmation": 2
+      },
+      "planned_cells": {
+        "typesafe_scout": 134,
+        "typesafe_full_total": 1072,
+        "typesafe_additional_after_scout": 938,
+        "flash_confirmation": 268
+      },
+      "primary_meters": [
+        "visible_blind_decision_flips",
+        "near_done_fp_keys/24",
+        "good_interception_keys/4",
+        "no_window_fire_slope_by_checkpoint",
+        "repeat_entropy",
+        "parse_error_rate"
+      ],
+      "scout_stop": "Stop if depth_visible adds any near-done fire without adding a useful-runaway fire.",
+      "advance_gate": {
+        "min_added_good_interception_keys": 1,
+        "max_added_near_done_fp_keys": 0,
+        "require_good_interception_in_both_positive_sessions": true,
+        "allow_positive_late_turn_fire_slope_on_no_window_keys": false
+      }
+    }
+  ],
+  "required_outputs": [
+    "matrix.json",
+    "results.jsonl",
+    "meters.json",
+    "METERS.md"
+  ],
+  "interpretation_gates": {
+    "min_parse_completeness": 0.99,
+    "allow_empty_required_state": false,
+    "require_trial_prefix_v1_keys": 67,
+    "require_trial_prefix_v1_adjacent_pairs": 47,
+    "allow_label_leak": false,
+    "allow_planned_arm_count_mismatch": false,
+    "raw_window_status": "unidentified",
+    "outcome_join_is_derived": true
+  },
+  "open_after_replication": [
+    "phase_hints_focus representation contrast",
+    "response classes beyond the frozen replication",
+    "writing-heavy natural corpus",
+    "more independently adjudicated positive windows",
+    "driver-specific calibration without agreement-as-gold"
+  ],
+  "non_authorization": [
+    "No hook or live interception is authorized.",
+    "No localhost :8080 service is required or authorized.",
+    "No Standard unlock or product behavior change is authorized.",
+    "Passing a trial advances offline evidence only."
+  ]
+}
