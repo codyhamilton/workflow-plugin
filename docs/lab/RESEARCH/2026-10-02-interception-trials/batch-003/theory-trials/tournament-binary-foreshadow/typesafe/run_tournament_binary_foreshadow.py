@@ -552,7 +552,12 @@ def run(args: argparse.Namespace) -> int:
                 row = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if row.get("cell_id") and not row.get("error"):
+            if (
+                row.get("cell_id")
+                and not row.get("error")
+                and row.get("http_status") == 200
+                and row.get("response_label") in RESPONSE_LABELS
+            ):
                 existing[row["cell_id"]] = row
     todo = [cell for cell in cells if cell["cell_id"] not in existing]
     with ThreadPoolExecutor(max_workers=4) as pool:
