@@ -52,8 +52,17 @@ def detectors(calls: list[dict[str, Any]]) -> dict[str, bool]:
 def auc(pos: list[float], neg: list[float]) -> float | None:
     if not pos or not neg:
         return None
-    w = sum((p > n) + 0.5 * (p == n) for p in pos for n in neg)
-    return w / (len(pos) * len(neg))
+    allv = sorted([(v, 0) for v in neg] + [(v, 1) for v in pos])
+    ranks: dict[float, float] = {}
+    i = 0
+    while i < len(allv):
+        j = i
+        while j < len(allv) and allv[j][0] == allv[i][0]:
+            j += 1
+        ranks[allv[i][0]] = (i + j + 1) / 2
+        i = j
+    rp = sum(ranks[v] for v in pos)
+    return (rp - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg))
 
 
 def main() -> int:
@@ -62,6 +71,8 @@ def main() -> int:
     ap.add_argument("--corpus", required=True)
     ap.add_argument("--ledger", required=True)
     ap.add_argument("--k", type=int, default=5)
+    ap.add_argument("--by", choices=["marker", "state"], default="marker")
+    ap.add_argument("--min-pos", type=int, default=10)
     a = ap.parse_args()
     corpus = json.loads(Path(a.corpus).read_text())
     corpus = corpus.get("sessions", corpus)
@@ -70,6 +81,7 @@ def main() -> int:
         d = json.loads(f.read_text())
         names[d["id"]] = d["spec"]["name"]
     cache: dict[str, list] = {}
+    dcache: dict[tuple, dict] = {}
     got: dict[tuple, list[tuple[float, bool]]] = defaultdict(list)
     for line in Path(a.ledger).read_text().splitlines():
         r = json.loads(line)
@@ -78,13 +90,18 @@ def main() -> int:
         nm = names.get(r["signal"])
         s = corpus[r["session"]]
         ev = cache.setdefault(r["session"], load_events(s["harness"], s["path"]))
-        d = detectors(window_calls(ev, r["checkpoint"], a.k))
+        key = (r["session"], r["checkpoint"])
+        if key not in dcache:
+            dcache[key] = detectors(window_calls(ev, r["checkpoint"], a.k))
+        d = dcache[key]
         if nm in d:
-            got[(nm, r["marker"], s["harness"])].append((r["score"], d[nm]))
-    print(f"{'signal':34}{'marker':16}{'harness':8}{'n':>4}{'pos':>4}{'auc':>6}")
+            got[(nm, r[a.by], s["harness"])].append((r["score"], d[nm]))
+    print(f"{'signal':34}{a.by:16}{'harness':8}{'n':>4}{'pos':>4}{'auc':>6}")
     for (nm, mk, h), v in sorted(got.items()):
         pos = [s for s, l in v if l]
         neg = [s for s, l in v if not l]
+        if len(pos) < a.min_pos or len(neg) < a.min_pos:
+            continue
         x = auc(pos, neg)
         print(f"{nm:34}{mk:16}{h:8}{len(v):>4}{len(pos):>4}{'  n/a' if x is None else f'{x:6.2f}'}")
     return 0
