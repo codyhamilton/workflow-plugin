@@ -9,3 +9,5 @@
 - state_variants: {"stats_only": 438, "hybrid_v0": 438, "stats_plus_delta": 84}
 - cell_id_salt: `b002s`
 
+Cross-stream index: [`../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md`](../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md).
+

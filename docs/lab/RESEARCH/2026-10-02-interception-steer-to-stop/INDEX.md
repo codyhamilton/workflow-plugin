@@ -14,6 +14,7 @@ The pack below is the multi-framing input. The proposal is the current recommend
 | File | Role |
 |------|------|
 | [`ANALYSIS.md`](ANALYSIS.md) | **Soft HOLD** corpus analysis (batch-002 streams, 200-scenario sweep, provisional outcome join) — [`analysis/`](analysis/) artifacts |
+| [`METERS-APPENDIX.md`](METERS-APPENDIX.md) | Packed meter tables (TypeSafe post–#110, 12×9 GROWTH cut, Flash/Luna stream index); cross-links [#109](https://github.com/codyhamilton/workflow-plugin/pull/109)/[#110](https://github.com/codyhamilton/workflow-plugin/pull/110)/[#111](https://github.com/codyhamilton/workflow-plugin/pull/111) |
 | [`WINDOW-STATUS-JOIN.md`](WINDOW-STATUS-JOIN.md) | Sol analysis of label/digest-derived window identity, exact join coverage, and gates still blocking a full scoreboard join |
 | [`RESEARCH-PACK.md`](RESEARCH-PACK.md) | Full multi-framing research pack / draft thesis (H1–H5, measurement designs, Wave-0 protocol notes) |
 | [`ADVERSARIAL-GATE-opus.md`](ADVERSARIAL-GATE-opus.md) | Opus adversarial review; R1–R3 BLOCKs and risk table |

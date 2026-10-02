@@ -1,4 +1,4 @@
-# METERS — batch-002 flash-scale
+# METERS — batch-002 flash-mid
 **Generated:** 2026-10-02 01:45:35 AEST
 **Soft Standard HOLD** — Flash/Luna volume only; no TypeSafe / hooks / product unlock.
 - n_variants: **1600**
@@ -8,4 +8,6 @@
 - framings: {"H1": 1600}
 - state_variants: {"stats_only": 658, "hybrid_v0": 658, "stats_plus_delta": 284}
 - cell_id_salt: `b002s`
+
+Cross-stream index: [`../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md`](../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md).
 

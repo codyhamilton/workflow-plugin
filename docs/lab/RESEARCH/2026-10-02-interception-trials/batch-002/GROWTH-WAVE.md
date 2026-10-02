@@ -2,37 +2,33 @@
 
 **Soft Standard HOLD** — measured corpus only; no hooks / product wiring / FP-miss board.
 
-## Meters
-- n_distinct_scenarios: **297** (prior landed #104: 200)
-- n_sessions_swept: **41**
-- n_cells incidental: **12169**
-- errors: **0**
-- growth state-scenarios (markers/phase_hints/recent_delta_brief × questions): **17**
+> **Superseded meters:** Pre–`growth-fill-v1` numbers below are historical. For landed refill meters, the 12×9 preferred cut, and stream cross-links, use [`../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md`](../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md) ([#111](https://github.com/codyhamilton/workflow-plugin/pull/111) fold + [#109](https://github.com/codyhamilton/workflow-plugin/pull/109) / [#110](https://github.com/codyhamilton/workflow-plugin/pull/110) evidence).
 
-## Exploratory fire (growth states only)
-- `state.phase_hints_focus|q.bash_retry_storm` — fire_rate=0.0732 (n=41)
-- `state.markers_focus|q.bash_retry_storm` — fire_rate=0.0244 (n=41)
-- `state.markers_focus|q.docs_only_drift` — fire_rate=0.0244 (n=41)
-- `state.markers_focus|q.edit_churn` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.brief_abandon` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.parallel_agent_thrash` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.test_flake_loop` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.dependency_wait` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.speculative_rewrite` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.context_thrash_compact` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.deliverable_orphan` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.scope_creep_silent` — fire_rate=0.0 (n=41)
-- `state.markers_focus|q.idle_tool_spin` — fire_rate=0.0 (n=41)
-- `state.phase_hints_focus|q.edit_churn` — fire_rate=0.0 (n=41)
-- `state.phase_hints_focus|q.brief_abandon` — fire_rate=0.0 (n=41)
+## Current landed meters (`growth-fill-v1`)
+
+Source: [`typesafe-scenario-sweep/meters.json`](typesafe-scenario-sweep/meters.json).
+
+| Field | Value |
+|-------|------:|
+| `n_distinct_scenarios` | **392** |
+| `n_sessions_swept` | **41** |
+| `n_cells_incidental` (scored) | **13,522** |
+| `stale_growth_rows_excluded` | **2,312** |
+| GROWTH scenarios (filled) | **102** (× **16** eligible sessions, not ×41) |
+| errors | **0** |
+
+Ranked first-run scope: **12** preferred pairs → **108** exact-labeled-ready cells/driver ([#109](https://github.com/codyhamilton/workflow-plugin/pull/109)); volume runner in [#112](https://github.com/codyhamilton/workflow-plugin/pull/112).
 
 ## HOLD
-- Soft HOLD unchanged. No Soft Standard unlock.
-- Join path: Sol seat `bc-7bfd7ac9` (do not duplicate Composer `bc-53492200`).
 
-## Runway / follow-up
-- First MAX=280 pass did **not** reach GROWTH adds (pre-growth list already ~296). Partial GROWTH cells (~17) came from an aborted growth-first probe.
-- Script fix: insert GROWTH after NEW×NEW/NEW×FL (~168) before FL expansion; default MAX=320. Fill wave in flight on Ubuntu (`scenario-growth-320-fill`).
-- `recent_delta_brief` was 0 in the 297 snapshot — expect coverage after 320 fill.
-- Sol trial-design seat writing `GROWTH-DESIGN-NOTES.md` / `GROWTH-RANKING.json` (Codex Sol high; not Flash).
-- Soft HOLD unchanged. Join analysis: do not duplicate — Sol `bc-7bfd7ac9`.
+- Soft HOLD unchanged. No Soft Standard unlock.
+- Join path: [`WINDOW-STATUS-JOIN.md`](../../2026-10-02-interception-steer-to-stop/WINDOW-STATUS-JOIN.md); corpus narrative: [`ANALYSIS.md`](../../2026-10-02-interception-steer-to-stop/ANALYSIS.md).
+
+## Prior in-flight snapshot (pre-fill; do not cite)
+
+The following described the partial MAX=320 stream before `growth-fill-v1` landed ([#110](https://github.com/codyhamilton/workflow-plugin/pull/110)):
+
+- n_distinct_scenarios: **297** (prior landed #104: 200)
+- n_cells incidental: **12,169**
+- growth state-scenarios in partial meters: **17**
+- Exploratory fire list used ×41 denominators and empty-field GROWTH rows — not valid state-shape evidence (see [`GROWTH-DESIGN-NOTES.md`](GROWTH-DESIGN-NOTES.md)).

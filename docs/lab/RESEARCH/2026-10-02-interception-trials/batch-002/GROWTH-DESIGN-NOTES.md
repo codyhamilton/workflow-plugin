@@ -2,7 +2,7 @@
 
 **Soft Standard HOLD** — measured-corpus tooling only. No hooks, no Soft Standard unlock, no FP/miss product claims (`window_status` still unidentified). Nothing here needs `:8080`.
 
-Follow-on to #107 (merged; not amended). Analysis seat (Sol catalog `bc-cca7ac7f`) may layer ranking on top; this note covers the implementation only.
+Follow-on to #107 (merged; not amended). Analysis seat (Sol catalog `bc-cca7ac7f`) may layer ranking on top; this note covers the implementation only. Packed post–#110 meters and the 12×9 cut: [`../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md`](../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md).
 
 ## Problem
 
