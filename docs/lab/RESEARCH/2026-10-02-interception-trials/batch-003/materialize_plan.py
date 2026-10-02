@@ -38,7 +38,9 @@ def snapshot_paths() -> dict[str, str]:
     for path in sorted((BATCH_002 / "snapshots-mid").glob("*.json")):
         row = load(path)
         session_id = row.get("worker_id") or path.stem
-        paths[session_id] = str(path.relative_to(HERE))
+        paths[session_id] = str(
+            Path("..") / path.relative_to(HERE.parent)
+        )
     return paths
 
 
