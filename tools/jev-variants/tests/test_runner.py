@@ -58,6 +58,23 @@ class TestRunner(unittest.TestCase):
         self.assertFalse(rows[0]["parse_ok"])
         self.assertIn("HTTP 500", rows[0]["error"])
 
+    def test_hide_next_prompt_keeps_outcome_out_of_state(self):
+        d = Path(tempfile.mkdtemp())
+        p = d / "s.jsonl"
+        rows = [{"role": "user", "message": {"content": [{"type": "text", "text": "<user_query>first ask</user_query>"}]}},
+                {"role": "assistant", "message": {"content": [{"type": "tool_use", "name": "Shell", "input": {}}]}},
+                {"role": "user", "message": {"content": [{"type": "text", "text": "<user_query>OUTCOME SENTINEL</user_query>"}]}}]
+        p.write_text("\n".join(json.dumps(r) for r in rows))
+        corp = {"s1": {"harness": "cursor", "path": str(p), "split": "discovery"}}
+        reg = {"marker": REG["marker"], "state": {"st-1": {"spec": dict(REG["state"]["st-1"]["spec"], user_prompts="all")}}}
+        seen = []
+        for hide in (False, True):
+            led = d / f"l{hide}.jsonl"
+            runner.run([dict(CELL, hide_next_prompt=hide)], reg, corp, led, 0.01, lambda r: seen.append(json.dumps(r)) or 1 / 0)
+        self.assertIn("OUTCOME SENTINEL", seen[0])
+        self.assertNotIn("OUTCOME SENTINEL", seen[1])
+        self.assertIn("first ask", seen[1])
+
     def test_dry_run_makes_no_calls(self):
         led = Path(tempfile.mkdtemp()) / "l.jsonl"
         runner.run([CELL], REG, corpus(), led, 0.01, lambda r: 1 / 0, dry_run=True)

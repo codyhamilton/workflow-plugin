@@ -246,10 +246,12 @@ def expand(rnd: dict[str, Any], reg: dict[str, Any], done: set[str], corpus: dic
                         use.append(mid)
                 if not use:
                     continue
-                for cp in rnd["checkpoints"]:
+                cps = rnd.get("session_checkpoints", {}).get(sess) if rnd.get("session_checkpoints") else rnd["checkpoints"]
+                for cp in cps or []:
                     cell_id = hashlib.sha256(f"{pid}|{stid}|{','.join(use)}|{sess}|{cp}".encode()).hexdigest()[:12]
                     cells.append({"cell_id": cell_id, "round": rnd["round"], "panel": pid, "state": stid, "markers": use,
-                                  "session": sess, "split": rnd["sessions"][sess], "checkpoint": cp})
+                                  "session": sess, "split": rnd["sessions"][sess], "checkpoint": cp,
+                                  **({"hide_next_prompt": True} if rnd.get("hide_next_prompt") else {})})
     todo = [c for c in cells if c["cell_id"] not in done]
     est = len(todo) * rnd["est_cost_per_call_usd"]
     over = len(todo) > rnd["max_calls"] or est > rnd["max_cost_usd"]

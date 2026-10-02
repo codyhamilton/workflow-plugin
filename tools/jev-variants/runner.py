@@ -122,7 +122,10 @@ def run(cells: list[dict[str, Any]], reg: dict[str, Any], corpus: dict[str, Any]
 
     def _one(cell: dict[str, Any]) -> None:
         spec = reg["state"][cell["state"]]["spec"]
-        state = build_state(spec, events_for(cell["session"]), cell["checkpoint"])
+        evs = events_for(cell["session"])
+        if cell.get("hide_next_prompt"):  # labelled cells: the human prompt arriving at this checkpoint is the outcome, never state
+            evs = [e for e in evs if not (e["kind"] == "user_prompt" and e["turn"] == cell["checkpoint"])]
+        state = build_state(spec, evs, cell["checkpoint"])
         state["text"] = scrub(state["text"], len(state["text"]) + 1)  # redact secrets before anything leaves the machine
         req = build_request(cell, reg, state)
         if dry_run:

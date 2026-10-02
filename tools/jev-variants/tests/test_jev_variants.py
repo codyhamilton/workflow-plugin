@@ -95,6 +95,15 @@ class T(unittest.TestCase):
         self.assertTrue(res["over_budget"])
         self.assertEqual(res["cells"], [])
 
+    def test_session_checkpoints_and_hide_flag(self):
+        reg = jv.load_registry(self.root)
+        rnd = self.rnd(states=[self.st1], session_checkpoints={"a": [3, 9], "b": [4]}, hide_next_prompt=True)
+        cells = jv.expand(rnd, reg, set())["cells"]
+        self.assertEqual(sorted((c["session"], c["checkpoint"]) for c in cells), [("a", 3), ("a", 9), ("b", 4)])
+        self.assertTrue(all(c["hide_next_prompt"] for c in cells))
+        plain = jv.expand(self.rnd(states=[self.st1]), reg, set())["cells"]
+        self.assertTrue(all("hide_next_prompt" not in c for c in plain))
+
     def test_heldout_sealed(self):
         reg = jv.load_registry(self.root)
         errs = jv.validate_round(self.rnd(sessions={"a": "heldout"}), reg)
