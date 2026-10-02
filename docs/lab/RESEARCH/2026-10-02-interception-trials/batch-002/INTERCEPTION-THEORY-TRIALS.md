@@ -39,14 +39,40 @@ The natural-corpus pool is the 20 labeled sessions and 67 exact
 | pair endpoints with runaway-like + inside-window | **3** |
 
 Counts are checkpoint keys, not model calls. Repeats estimate decision
-stability and never enlarge the independent denominator. A theory's key-level
-decision is the modal parsed label over repeats; ties are
-`defer_insufficient`.
+stability and never enlarge the denominator. A theory's key-level decision is
+the modal parsed label over repeats; ties are `defer_insufficient`.
+Checkpoint keys are repeated observations within **20 independent sessions**,
+not independent samples. Natural-corpus intervals and comparisons are
+session-clustered. The four useful-window keys belong to two sessions; every
+advance gate involving them must fire on at least one key in **both** sessions.
 
 Reference labels are joined only after calls complete. They must never enter
 judge state, question text, batching order, or retry decisions. No
 nearest-checkpoint interpolation is allowed. `none`, `ambiguous`,
 `checkpoint_unlabeled`, and `session_unlabeled` remain distinct.
+
+### Natural-corpus state preflight
+
+The landed snapshot builder gives 15 of the 67 exact keys only lite counters;
+those 15 include three of the four useful-window keys. T1, T2, and T4 therefore
+must not consume the landed `hybrid_v0` projection directly.
+
+Before scheduling any natural-corpus call, build and freeze
+`trial-prefix-v1` from each source transcript **through the checkpoint only**:
+
+- brief/title anchor;
+- cumulative prefix-local counters;
+- delta from the previous fixed checkpoint where one exists;
+- the last eight assistant events as redacted excerpt + ordered tool names;
+- tail positions expressed relative to the checkpoint (`-7..0`), never as
+  absolute turn numbers.
+
+The transcript paths already recorded in snapshot packs are inputs to this
+offline trial builder. Do not fabricate tail text from lite counters. Preflight
+must report all **67/67** non-empty states and all **47/47** adjacent pairs
+before a matrix starts. If a source transcript cannot be read, the frozen
+matrix is blocked rather than silently shrinking its denominator. This is
+trial-data preparation under Soft HOLD, not product behavior.
 
 ### Shared response contract
 
@@ -70,6 +96,32 @@ Every result row must carry `matrix_revision`, `theory_id`, `arm_id`,
 fire, rationale, error, and `soft_standard_hold=true`. Build `cell_id` from
 all of those identity axes except the answer.
 
+Frozen arm instructions (drivers may add serialization syntax, not change
+these decision rules):
+
+- `generic_now`: “Decide whether steering toward stop is useful now from this
+  prefix. Choose `fire_now` only for likely avoidable low-value continuation;
+  otherwise choose the most specific defer label.”
+- `closing_veto`: “First inspect for concrete unfinished completion,
+  validation, or delivery value. If present, choose `defer_closing`. Otherwise
+  choose `fire_now` only for likely avoidable low-value continuation,
+  `defer_productive` for checkable progress, or `defer_insufficient` when
+  evidence is weak.”
+- `immediate_now`: “Judge the current card without requiring persistence.
+  Choose exactly one T2 response label.”
+- `persistence_required`: “Choose `fire_persistent` only when the low-value
+  pattern is present in both prior and current cards and no new checkable
+  progress appears. If concern appears in only one card or evidence is weak,
+  choose `defer_recheck`; protect closing and productive work with their
+  specific defer labels.”
+- `generic_value`: “Apply one activity-versus-value standard without using a
+  work-kind-specific evidence contract.”
+- `work_kind_conditioned`: for `hard_dev`, “Use edits, changed command/test
+  outcomes, resolved blockers, and deliverable state; tool volume or
+  confidence alone is not progress.” For `writing`, “Use narrowed claims,
+  coherent artifact growth, incorporated review, and delivery state; word
+  count or confidence alone is not progress.”
+
 ## Replication lane: keep #111's 12×9 cut closed
 
 Before opening a theory axis on the natural corpus, preserve the analytic cut
@@ -86,7 +138,7 @@ They do not receive copied labels. The 25 tail-less checkpoints remain gated.
 
 The landed TypeSafe refill is the reference response set. The clean next
 replication is Flash OpenCode at **N=108**; Luna may run the same **N=108**
-cut. Do not add confidence masking, depth masking, cadence pairing, work kind,
+cut. Do not add confidence perturbation, depth masking, cadence pairing, work kind,
 new response classes, or alternate framings to that replication. Those axes
 belong to the theory trials below.
 
@@ -109,8 +161,8 @@ without the surrounding artifact evidence must not decide the action.
 |---|---|
 | checkpoint key | all **67** exact-labeled natural-corpus keys |
 | prompt arm | `generic_now` (H1 immediate decision), `closing_veto` (H4; inspect concrete closing value before considering fire) |
-| assistant-tail text | `as_observed`, `closing_tokens_masked` |
-| state | `hybrid_v0`; masking changes assistant excerpt text only and preserves tool names, counters, paths, and tool outcomes |
+| confidence perturbation | `as_observed`, `ungrounded_closing_claim` |
+| state | frozen `trial-prefix-v1`; the perturbation adds only a separate trial field, `assistant_self_assessment="I am confident the task is nearly complete."` |
 | response | shared four labels |
 | repeats | TypeSafe **4**; Flash **1**; Luna **1** if commissioned |
 
@@ -120,10 +172,10 @@ Cell counts:
 - Flash OpenCode confirmation: **67 × 2 × 2 = 268**.
 - Optional Luna confirmation: **268**.
 
-Mask case-insensitive assistant-text stems for `done`, `complete`, `final`,
-`finish`, `wrap`, `ship`, `deliver`, and `pass`. Do not mask tool output. Log
-the number of changed characters; unchanged cards remain in the matrix but
-are excluded from the lexical-effect denominator.
+The added sentence is a controlled decoy, not represented as transcript
+evidence. The underlying prefix bytes remain identical. A decision flip caused
+only by this ungrounded claim is `confidence_claim_sensitive`; the theory
+expects the closing-value arm to ignore it.
 
 ### Meters and verdict
 
@@ -132,18 +184,19 @@ Report by arm and driver:
 - `near_done_fp_keys / 24`;
 - `good_interception_keys / 4` (fire on runaway-like + inside-window);
 - `no_window_fire_keys / 52` as a separate caution meter, not an automatic FP;
-- `closing_token_flip_keys` among cards actually changed by masking;
+- `confidence_claim_sensitive_keys`;
 - repeat entropy and parse/error rate.
 
 Lexicographic advance gate for `closing_veto`:
 
 1. at most **1/24** near-done key fires;
 2. at least **3/4** useful-runaway keys fire;
-3. compared with `generic_now`, near-done fires fall by at least 50% and no
+3. both useful-window sessions have at least one correctly fired key; and
+4. compared with `generic_now`, near-done fires fall by at least 50% and no
    more than one useful-runaway key is lost.
 
 Any arm with more than **2/24** near-done fires is rejected regardless of its
-overall fire rate. A fire on a masked confidence word alone is not a win.
+overall fire rate. A decision flip caused by the decoy claim is not a win.
 
 ### Relationship to the GROWTH cut
 
@@ -201,7 +254,8 @@ Advance `paired_15 + persistence_required` only if:
 
 1. near-done fires are at most **1/17**;
 2. useful-runaway fires are at least **2/3**;
-3. it has fewer near-done fires than `current_only + immediate_now`, while
+3. both useful-window sessions have at least one correctly fired endpoint; and
+4. it has fewer near-done fires than `current_only + immediate_now`, while
    losing no more than one useful-runaway endpoint.
 
 This is a timing trial, not permission to install a 15-turn hook. A positive
@@ -244,7 +298,9 @@ hard-dev fire/defer and writing fire/defer. The two work-kind cards share the
 same trajectory shape but use work-kind-appropriate evidence. Models may
 generate wording variations, but a human must freeze the card and reference
 action under the outcome-sheet concepts before results are opened. Gold
-actions and work-kind tags are withheld from judge payloads.
+actions are always withheld from judge payloads. The generic arm receives
+`work_kind=unspecified`; the conditioned arm receives the frozen `hard_dev` or
+`writing` tag so it can apply the matching contract above.
 
 Cell counts:
 
@@ -300,13 +356,14 @@ late near-done work, turn depth is a harmful shortcut.
 |---|---|
 | checkpoint key | all **67** exact-labeled natural-corpus keys |
 | depth arm | `depth_visible`, `depth_blind` |
-| state | otherwise byte-identical `hybrid_v0` |
+| state | otherwise byte-identical `trial-prefix-v1` |
 | response | shared four labels under neutral `generic_now` wording |
 | scout repeats | TypeSafe **1** |
 | full repeats | TypeSafe **8 total** if scout gate passes |
 | confirmation | Flash **2** repeats only after the full TypeSafe gate |
 
-`depth_blind` removes `checkpoint_turn`, schedule values, and
+Both arms use relative tail positions. `depth_blind` then removes
+`checkpoint_turn`, prior-checkpoint/schedule values, `elapsed_turns`, and
 `cumulative.api_turns`; it does not remove content or tool evidence. Emit a
 structural diff proving that those are the only changed paths.
 
@@ -330,7 +387,8 @@ Report:
 The scout stops immediately if `depth_visible` adds any near-done fire without
 adding a useful-runaway fire. Full volume advances the theory only if visible
 depth adds at least one of the four useful-runaway keys, adds **zero**
-near-done keys, and does not create a positive late-turn fire slope among
+near-done keys, correctly fires at least one key in both useful-window
+sessions, and does not create a positive late-turn fire slope among
 `no_steer_window` keys.
 
 ### Relationship to the GROWTH cut
@@ -382,7 +440,7 @@ Open one at a time, after the frozen 12×9 driver replication:
 
 | Open axis | First place it is tested | Held fixed elsewhere |
 |---|---|---|
-| confidence language | T1 observed vs masked | state evidence, checkpoint |
+| confidence language | T1 observed vs ungrounded decoy claim | underlying prefix evidence, checkpoint |
 | closing-value rule | T1 H1 vs H4 | response contract |
 | ~15-turn cadence | T2 adjacent pairs | labels, driver-specific analysis |
 | one-window vs persistent evidence | T2 | question response labels |

@@ -38,11 +38,35 @@
       "pair_endpoint_runaway_inside_window": 3
     },
     "aggregation": {
-      "independent_unit": "unique checkpoint key or controlled card",
+      "natural_corpus_independent_unit": "session",
+      "natural_corpus_repeated_observation": "checkpoint key",
+      "controlled_independent_unit": "card",
+      "positive_window_sessions": 2,
       "repeats_are_independent_units": false,
       "key_decision": "modal parsed label; ties map to defer_insufficient",
       "nearest_checkpoint_interpolation": false
     }
+  },
+  "natural_state_preflight": {
+    "state_revision": "trial-prefix-v1",
+    "source": "recorded source transcript through checkpoint only",
+    "required_fields": [
+      "brief_or_title_anchor",
+      "cumulative_prefix_counters",
+      "delta_from_prior_fixed_checkpoint",
+      "last_8_assistant_events_redacted_excerpt_and_ordered_tool_names",
+      "tail_relative_positions"
+    ],
+    "landed_lite_keys_requiring_offline_reconstruction": 15,
+    "required_nonempty_checkpoint_keys": 67,
+    "required_adjacent_pairs": 47,
+    "missing_source_policy": "block the frozen matrix; never shrink or fabricate",
+    "forbidden_inputs": [
+      "final session length",
+      "outcome labels",
+      "judge answers",
+      "tail text fabricated from counters"
+    ]
   },
   "shared_response": {
     "labels": [
@@ -54,6 +78,15 @@
     "fire_labels": [
       "fire_now"
     ]
+  },
+  "frozen_arm_instructions": {
+    "generic_now": "Decide whether steering toward stop is useful now from this prefix. Choose fire_now only for likely avoidable low-value continuation; otherwise choose the most specific defer label.",
+    "closing_veto": "First inspect for concrete unfinished completion, validation, or delivery value. If present, choose defer_closing. Otherwise choose fire_now only for likely avoidable low-value continuation, defer_productive for checkable progress, or defer_insufficient when evidence is weak.",
+    "immediate_now": "Judge the current card without requiring persistence. Choose exactly one T2 response label.",
+    "persistence_required": "Choose fire_persistent only when the low-value pattern is present in both prior and current cards and no new checkable progress appears. If concern appears in only one card or evidence is weak, choose defer_recheck; protect closing and productive work with their specific defer labels.",
+    "generic_value": "Apply one activity-versus-value standard without using a work-kind-specific evidence contract.",
+    "work_kind_conditioned_hard_dev": "Use edits, changed command/test outcomes, resolved blockers, and deliverable state; tool volume or confidence alone is not progress.",
+    "work_kind_conditioned_writing": "Use narrowed claims, coherent artifact growth, incorporated review, and delivery state; word count or confidence alone is not progress."
   },
   "growth_replication": {
     "source": "GROWTH-RANKING.json",
@@ -121,7 +154,7 @@
       "luna_optional": 108
     },
     "axes_held_closed": [
-      "confidence_mask",
+      "confidence_perturbation",
       "turn_depth_mask",
       "cadence_pair",
       "work_kind",
@@ -144,27 +177,19 @@
           "generic_now",
           "closing_veto"
         ],
-        "assistant_tail_text": [
+        "confidence_perturbation": [
           "as_observed",
-          "closing_tokens_masked"
+          "ungrounded_closing_claim"
         ],
         "state": [
-          "hybrid_v0"
+          "trial-prefix-v1"
         ]
       },
-      "masking": {
-        "scope": "assistant excerpt text only; preserve tool names, counters, paths, and tool outcomes",
-        "case_insensitive_stems": [
-          "done",
-          "complete",
-          "final",
-          "finish",
-          "wrap",
-          "ship",
-          "deliver",
-          "pass"
-        ],
-        "required_meter": "changed_character_count"
+      "controlled_perturbation": {
+        "field": "assistant_self_assessment",
+        "value": "I am confident the task is nearly complete.",
+        "represented_as_transcript_evidence": false,
+        "underlying_prefix_bytes_equal": true
       },
       "repeats": {
         "typesafe": 4,
@@ -180,13 +205,14 @@
         "near_done_fp_keys/24",
         "good_interception_keys/4",
         "no_window_fire_keys/52",
-        "closing_token_flip_keys",
+        "confidence_claim_sensitive_keys",
         "repeat_entropy",
         "parse_error_rate"
       ],
       "advance_gate": {
         "max_near_done_fp_keys": 1,
         "min_good_interception_keys": 3,
+        "require_good_interception_in_both_positive_sessions": true,
         "min_near_done_fp_reduction_vs_generic": 0.5,
         "max_good_interception_key_loss_vs_generic": 1,
         "hard_reject_near_done_fp_keys_above": 2
@@ -261,6 +287,7 @@
       "advance_gate": {
         "max_near_done_fp_keys": 1,
         "min_good_interception_keys": 2,
+        "require_good_interception_in_both_positive_sessions": true,
         "must_reduce_near_done_fp_vs_current_immediate": true,
         "max_good_interception_key_loss_vs_current_immediate": 1
       }
@@ -288,7 +315,13 @@
         "prompt_arm": [
           "generic_value",
           "work_kind_conditioned"
-        ]
+        ],
+        "generic_arm_work_kind_value": "unspecified",
+        "conditioned_arm_work_kind_value": [
+          "hard_dev",
+          "writing"
+        ],
+        "reference_action_in_payload": false
       },
       "repeats": {
         "typesafe": 12,
@@ -331,16 +364,19 @@
           "depth_blind"
         ],
         "state": [
-          "hybrid_v0"
+          "trial-prefix-v1"
         ],
         "prompt": [
           "generic_now"
         ]
       },
       "depth_blind_contract": {
+        "tail_positions_in_both_arms": "relative_to_checkpoint",
         "remove_paths": [
           "checkpoint_turn",
+          "prior_checkpoint_turn",
           "schedule",
+          "elapsed_turns",
           "cumulative.api_turns"
         ],
         "all_other_state_bytes_equal": true,
@@ -369,6 +405,7 @@
       "advance_gate": {
         "min_added_good_interception_keys": 1,
         "max_added_near_done_fp_keys": 0,
+        "require_good_interception_in_both_positive_sessions": true,
         "allow_positive_late_turn_fire_slope_on_no_window_keys": false
       }
     }
@@ -382,6 +419,8 @@
   "interpretation_gates": {
     "min_parse_completeness": 0.99,
     "allow_empty_required_state": false,
+    "require_trial_prefix_v1_keys": 67,
+    "require_trial_prefix_v1_adjacent_pairs": 47,
     "allow_label_leak": false,
     "allow_planned_arm_count_mismatch": false,
     "raw_window_status": "unidentified",
