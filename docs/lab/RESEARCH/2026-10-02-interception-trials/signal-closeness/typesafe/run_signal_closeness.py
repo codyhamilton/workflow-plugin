@@ -297,13 +297,19 @@ def parse_score(payload: dict[str, Any]) -> dict[str, Any]:
     answer = (payload.get("answers") or {}).get("validation_inflection") or {}
     value = answer_value(answer)
     try:
-        score = float(value)
+        raw_score = float(value)
     except (TypeError, ValueError):
-        score = None
+        raw_score = None
+    # TypeSafe's score wire returns the expected ordinal over the three
+    # criteria (0, 1, 2).  The protocol output is the corresponding float in
+    # [0, 1], so retain the raw ordinal and normalize by the pinned scale.
+    score = raw_score / 2.0 if raw_score is not None else None
     return {
         "wire_type": answer.get("type"),
+        "raw_score": raw_score,
         "score": score,
         "score_in_range": score is not None and 0.0 <= score <= 1.0,
+        "score_normalization": "raw TypeSafe ordinal / 2.0",
         "raw_answer": answer,
     }
 
@@ -472,6 +478,21 @@ def write_analysis(
     return summary
 
 
+def normalize_existing_row(row: dict[str, Any]) -> dict[str, Any]:
+    """Upgrade rows from the first accepted 0..2 score-wire responses."""
+    raw_answer = row.get("raw_answer") or {}
+    raw_score = raw_answer.get("score", row.get("raw_score"))
+    try:
+        raw_score = float(raw_score)
+    except (TypeError, ValueError):
+        return row
+    row["raw_score"] = raw_score
+    row["score"] = raw_score / 2.0
+    row["score_in_range"] = 0.0 <= row["score"] <= 1.0
+    row["score_normalization"] = "raw TypeSafe ordinal / 2.0"
+    return row
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prepare-only", action="store_true")
@@ -513,6 +534,15 @@ def main() -> int:
             done[row["cell_id"]] = row
             output.write(json.dumps(row) + "\n")
             output.flush()
+    for cell_id_value in list(done):
+        done[cell_id_value] = normalize_existing_row(done[cell_id_value])
+    results_path.write_text(
+        "".join(
+            json.dumps(done[cell["cell_id"]]) + "\n"
+            for cell in cells
+            if cell["cell_id"] in done
+        )
+    )
     rows = [done[cell["cell_id"]] for cell in cells if cell["cell_id"] in done]
     write_analysis(rows, cells, zero_calls)
     print(json.dumps({
