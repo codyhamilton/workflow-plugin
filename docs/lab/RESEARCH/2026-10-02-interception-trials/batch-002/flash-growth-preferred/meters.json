@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-10-02T12:46:52+10:00",
+  "batch": "batch-002",
+  "wave": "growth-preferred-flash",
+  "driver": "flash",
+  "model": "deepseek/deepseek-flash",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "hooks_unlock": false,
+  "preferred_cut": true,
+  "growth_fill_version": "growth-fill-v1",
+  "n_scenarios": 12,
+  "n_exact_labeled_sessions": 9,
+  "n_cells_attempted": 108,
+  "n_fire": 19,
+  "n_defer": 89,
+  "n_parse_miss": 0,
+  "n_errors": 0,
+  "fire_rate": 0.1759,
+  "rating_hist": {
+    "1": 38,
+    "2": 9,
+    "0": 51,
+    "3": 10
+  },
+  "outcomes_by_scenario": {
+    "state.markers_focus|q.context_thrash_compact": {
+      "n_sessions": 9,
+      "fire_count": 4,
+      "defer_count": 5,
+      "fire_rate": 0.4444
+    },
+    "state.markers_focus|q.dependency_wait": {
+      "n_sessions": 9,
+      "fire_count": 4,
+      "defer_count": 5,
+      "fire_rate": 0.4444
+    },
+    "state.markers_focus|q.idle_tool_spin": {
+      "n_sessions": 9,
+      "fire_count": 6,
+      "defer_count": 3,
+      "fire_rate": 0.6667
+    },
+    "state.markers_focus|q.test_flake_loop": {
+      "n_sessions": 9,
+      "fire_count": 3,
+      "defer_count": 6,
+      "fire_rate": 0.3333
+    },
+    "state.recent_delta_brief|q.bash_retry_storm": {
+      "n_sessions": 9,
+      "fire_count": 0,
+      "defer_count": 9,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.brief_abandon": {
+      "n_sessions": 9,
+      "fire_count": 0,
+      "defer_count": 9,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.deliverable_orphan": {
+      "n_sessions": 9,
+      "fire_count": 0,
+      "defer_count": 9,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.docs_only_drift": {
+      "n_sessions": 9,
+      "fire_count": 1,
+      "defer_count": 8,
+      "fire_rate": 0.1111
+    },
+    "state.recent_delta_brief|q.edit_churn": {
+      "n_sessions": 9,
+      "fire_count": 0,
+      "defer_count": 9,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.parallel_agent_thrash": {
+      "n_sessions": 9,
+      "fire_count": 1,
+      "defer_count": 8,
+      "fire_rate": 0.1111
+    },
+    "state.recent_delta_brief|q.scope_creep_silent": {
+      "n_sessions": 9,
+      "fire_count": 0,
+      "defer_count": 9,
+      "fire_rate": 0.0
+    },
+    "state.recent_delta_brief|q.speculative_rewrite": {
+      "n_sessions": 9,
+      "fire_count": 0,
+      "defer_count": 9,
+      "fire_rate": 0.0
+    }
+  },
+  "wall_s": 120.6,
+  "n_batches": 18,
+  "batch_elapsed_sum_s": 236.7,
+  "cells_per_batch": 6,
+  "max_par": 2,
+  "checkpoint_policy": "one_representative_mid_per_session",
+  "window_cartesian": false,
+  "empty_state_policy": "unsupported_not_negative",
+  "include_diagnostic": false,
+  "exact_session_ids": [
+    "2e083814b952",
+    "499377c18811",
+    "5415ae00a788",
+    "567e678f0a57",
+    "730a03ecdc0d",
+    "a2e9f853749d",
+    "a56bad1c7f13",
+    "a8d0a590128a",
+    "b13d1a65a961"
+  ],
+  "note": "Flash often omits token meters; counts are cell-level only."
+}

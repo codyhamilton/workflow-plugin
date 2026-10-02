@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-10-02T12:46:52+10:00",
+  "driver": "flash",
+  "model": "deepseek/deepseek-flash",
+  "n_cells": 108,
+  "preferred_pairs": [
+    "state.markers_focus|q.dependency_wait",
+    "state.markers_focus|q.context_thrash_compact",
+    "state.markers_focus|q.idle_tool_spin",
+    "state.recent_delta_brief|q.brief_abandon",
+    "state.recent_delta_brief|q.docs_only_drift",
+    "state.recent_delta_brief|q.scope_creep_silent",
+    "state.recent_delta_brief|q.edit_churn",
+    "state.recent_delta_brief|q.bash_retry_storm",
+    "state.recent_delta_brief|q.parallel_agent_thrash",
+    "state.markers_focus|q.test_flake_loop",
+    "state.recent_delta_brief|q.speculative_rewrite",
+    "state.recent_delta_brief|q.deliverable_orphan"
+  ],
+  "exact_session_ids": [
+    "2e083814b952",
+    "499377c18811",
+    "5415ae00a788",
+    "567e678f0a57",
+    "730a03ecdc0d",
+    "a2e9f853749d",
+    "a56bad1c7f13",
+    "a8d0a590128a",
+    "b13d1a65a961"
+  ],
+  "soft_standard_hold": true
+}
