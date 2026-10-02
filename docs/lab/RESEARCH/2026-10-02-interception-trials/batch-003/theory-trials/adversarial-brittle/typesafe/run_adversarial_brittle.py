@@ -145,7 +145,10 @@ def load_maps_workers() -> dict[str, dict[str, Any]]:
     selected = {}
     for worker_id in WORKER_IDS:
         row = rows[worker_id]
-        if row.get("source") != "maps" or row["api_turns"] < 75:
+        # This fixture manifest omits a per-row source field; its directory
+        # and role metadata establish the maps corpus.  Reject an explicit
+        # non-maps source if a future manifest adds the field.
+        if row.get("source") not in (None, "maps") or row["api_turns"] < 75:
             raise RuntimeError(f"worker is not maps-5h eligible: {worker_id}")
         selected[worker_id] = row
     if manifest.get("counting") is None:
