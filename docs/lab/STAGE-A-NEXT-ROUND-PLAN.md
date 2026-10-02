@@ -57,3 +57,25 @@ Next-round plan:
 2. Add more claude-harness labelled checkpoints (hooklog capture is accumulating) so the Claude side can be tested.
 3. Test each signal's marginal value over human-would-intervene-now (the direct "would the human step in" question).
 4. Fit nothing yet: held-out stays sealed until the signal list is frozen.
+
+### Claude-harness check (no new spend)
+
+More Claude checkpoints are not available from local data: only 24 Claude sessions pass the corpus filters (229
+local transcripts, most are automated lab runs), and 61 clean labels with 9 `adjust` positives remain after
+filtering. Relaxing labeller agreement adds 22 pairs and no positives. No new Jev calls were made; this re-cuts the
+R6 ledger by harness (`analysis/R6_claude.py`).
+
+| signal | Claude AUC (n=61, 9 pos), 90% CI | Cursor AUC (n=440, 99 pos), 90% CI |
+|---|---|---|
+| ui-visual-iteration-loop | 0.64 (0.43-0.85) | 0.70 (0.64-0.76) |
+| human-would-intervene-now | 0.61 (0.44-0.72) | 0.67 (0.60-0.72) |
+| claims-done-without-verifying | 0.62 (0.40-0.75) | 0.67 (0.62-0.73) |
+| scope-creep-beyond-request | 0.55 (0.34-0.77) | 0.65 (0.59-0.70) |
+| commit-boundary-reached | 0.48 (0.35-0.59) | 0.64 (0.59-0.70) |
+| serial-single-read-grind | 0.44 (0.31-0.59) | 0.60 (0.55-0.66) |
+
+Reading: Claude point estimates are in the same direction for the top three signals, but every interval includes
+0.5, so Stage A makes no Claude-specific claim. Cursor results hold with tighter intervals. Cursor
+transcripts carry no tool outputs, so the signals that work are ones readable from prompts, tool names and
+arguments. Claude evidence needs new labelled Claude sessions (a data-collection problem, not a Jev one).
+`commit-boundary-reached` and `serial-single-read-grind` are weakest and are the first to drop if the list shrinks.
