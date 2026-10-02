@@ -13,6 +13,10 @@ proofs: master 112ccfe (PR #24, squash)
 
 Research on these four use cases is closed. The recommendations below are accepted. Product code is not shipped: default Claude settings, the driver, `assert_phase`, and `classify.py` are unchanged. Wiring those callers is implementation. It is not another research pass.
 
+**Scope of that resolution:** it closes feasibility and the proposed advisory behaviour, not empirical benefit. No measured result yet shows that these Jev answers improve gate decisions, final quality, review selection, or total cost. The current parent hypothesis is [`../JEV-HYPOTHESES.md`](../JEV-HYPOTHESES.md): design exit, refine exit, and build exit are the structural gates; this paper's PostToolBatch signal addresses the separate long-session hypothesis. This paper does **not** cover design exit, and its refine complexity score alone does not establish refine readiness.
+
+**2026-10-02 human refinement:** [`../PROVENANCE-jev-hypotheses-2026-10-02.md`](../PROVENANCE-jev-hypotheses-2026-10-02.md) records Cody's wording. The next H1 study should test a set of simple design-exit criteria with per-answer confidence and, at refine exit, continuous size ratings plus expected file scope per brief. The primary prospective saving at refine is confidently avoiding low-value review. The existing top-three complexity proposal below is historical guidance, not empirical proof of that saving. Low recall is tolerable; false confident advances or skips are the risk to constrain.
+
 Research pack: [`../RESEARCH/2026-09-30-jev-cheap-judgement-signals/`](../RESEARCH/2026-09-30-jev-cheap-judgement-signals/INDEX.md). Proofs: [`../RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/`](../RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs/README.md) on master `112ccfe`.
 
 ## Signal

@@ -35,7 +35,7 @@ def compute_stats(data: dict) -> dict:
 
     wall_seconds = session.get("wall_seconds")
     parent_api_calls = session.get("parent_api_calls", session.get("api_calls"))
-    subagent_api_calls = session.get("subagent_api_calls", 0)
+    subagent_api_calls = session.get("subagent_api_calls")
     parent_token_usage = session.get("parent_token_usage", session.get("token_usage"))
     subagent_token_usage = session.get("subagent_token_usage")
 
@@ -49,6 +49,13 @@ def compute_stats(data: dict) -> dict:
         "parent_tool_counts": session.get("parent_tool_counts", {}),
         "parent_tool_counts_raw": session.get("parent_tool_counts_raw", {}),
         "parent_tool_turns": parent_turns,
+        "transcript_available": session.get("transcript_available"),
+        "parent_assistant_turns": session.get("parent_assistant_turns"),
+        "parent_user_turns": session.get("parent_user_turns"),
+        "subagent_assistant_turns": session.get("subagent_assistant_turns"),
+        "subagent_user_turns": session.get("subagent_user_turns"),
+        "assistant_turns": session.get("assistant_turns"),
+        "user_turns": session.get("user_turns"),
         "model_breakdown": dict(model_counter.most_common()),
         "subagent_tool_totals": dict(sub_tool_totals.most_common()),
         "subagent_tool_turn_stats": {
@@ -96,6 +103,18 @@ def print_text(stats: dict) -> None:
     print(f"  Start         : {stats.get('start_time_iso', 'unknown')}")
     print(f"  End           : {stats.get('end_time_iso', 'unknown')}")
     print(f"  Wall time     : {stats['wall_time_human']}")
+    if stats.get("transcript_available") is False:
+        print("  NOTE          : no transcript body available; tool and turn counts below are unknown, not zero")
+    if stats.get("parent_assistant_turns") is not None:
+        print(
+            f"  Assistant turns: {stats['assistant_turns']} "
+            "(Cursor message rows; API calls unknown)"
+        )
+        print(f"    parent      : {stats['parent_assistant_turns']}")
+        print(f"    subagents   : {stats['subagent_assistant_turns']}")
+        print(f"  User turns    : {stats['user_turns']} (message rows)")
+        print(f"    parent      : {stats['parent_user_turns']}")
+        print(f"    subagents   : {stats['subagent_user_turns']}")
     if stats.get("api_calls") is not None:
         print(f"  API calls     : {stats['api_calls']}")
         if stats.get("subagent_api_calls"):

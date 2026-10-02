@@ -1,5 +1,9 @@
 # Design — signal closeness (v0)
 
+> **Draft instrument, not current method:** Start at the [lab results](../../JEV-RESULTS.md) and [active methodology](../../JEV-METHODOLOGY.md). A qualitative float earns a variant sweep only after its underlying signal has shown useful association with an independent outcome. The D0 stop-bar direction below is historical contrast to Cody's proposed continuation-confidence bar.
+
+**2026-10-02 parent-hypothesis clarification:** [`../../JEV-HYPOTHESES.md`](../../JEV-HYPOTHESES.md) H2 puts an empirical signal-outcome test before matcher optimisation. A Jev float measures confidence that a signal is present; it does not itself establish that the signal predicts near useful completion or prolonged continuation. Supported signal floats can later feed a *continuation-confidence* policy with a modest per-round discount. The offline union and D0 stop-bar material below remain unsigned design contrasts; their scale and direction are not silently assumed to implement that policy.
+
 **Date:** 2026-10-02  
 **Status:** design intent · measurement / white-paper evidence only · **unsigned** · **not** behaviour ship.  
 **Confidence: not high.** Definitions only. No seats, no inventory signature, no GO.  

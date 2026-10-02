@@ -4,6 +4,8 @@ _Last updated: 2026-09-30 (Brisbane), Grok Bot reorientation. Maintained by Work
 
 Strategy pass: [`ANALYSIS/2026-09-30-grokbot-driver-reorient.md`](ANALYSIS/2026-09-30-grokbot-driver-reorient.md).
 
+The current Jev research questions and evidence standard are in [`JEV-HYPOTHESES.md`](JEV-HYPOTHESES.md). They extend the earlier assert-hook remit below; their quality and cost effects remain unproven.
+
 ## North star
 
 Improve **outcome quality per token** for the design → phased refine/execute → review → close-out loop, measured on real runs the automated driver can observe — trailer-complete phases, verifier results, and provider cost — while core skills stay cloud-safe.

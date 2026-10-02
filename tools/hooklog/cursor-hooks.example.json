@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+      }
+    ],
+    "afterAgentThought": [
+      {
+        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+      }
+    ]
+  }
+}

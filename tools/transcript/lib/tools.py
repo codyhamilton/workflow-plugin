@@ -36,6 +36,7 @@ _TOOL_ALIASES: dict[str, str] = {
     "claude": "claude-code",
     "claude-code": "claude-code",
     "cursor": "cursor",
+    "cursor-cloud": "cursor-cloud",
 }
 
 
@@ -55,5 +56,5 @@ def resolve_tool_flag(value: str | None) -> str:
         return "all"
     key = value.lower().strip()
     if key not in _TOOL_ALIASES:
-        raise ValueError(f"Unknown tool '{value}'. Use: all, claude-code, cursor")
+        raise ValueError(f"Unknown tool '{value}'. Use: all, claude-code, cursor, cursor-cloud")
     return _TOOL_ALIASES[key]

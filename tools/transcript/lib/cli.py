@@ -17,7 +17,7 @@ def add_tool_arg(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--tool",
         default="all",
-        help="Harness filter: all (default), claude-code, cursor",
+        help="Harness filter: all (default), claude-code, cursor, cursor-cloud",
     )
 
 
@@ -51,6 +51,8 @@ def resolve_session_ref(
     if ref == "latest":
         summaries = []
         for p in parsers:
+            if p.name == "cursor-cloud" and tool == "all":
+                continue  # `latest` should resolve a readable transcript by default.
             if project_path:
                 summaries.extend(p.discover(project_path))
             else:

@@ -1,9 +1,11 @@
 ---
 name: lab-proposal
-description: When a lab signal may deserve a research white paper — triage → research pack → propose. Use after usage analysis, hook logs, FINDINGS, driver asserts, 5h burn, mis-sized sessions, or assert disagreements surface a theme worth a durable proposal.
+description: Legacy lab signal triage and proposal layout. Use for maintaining an existing lab-proposal artifact. For new evidence-backed white paper research, use the white-paper skill.
 ---
 
 # Lab proposal
+
+> **Current research method:** For new work, use [`../white-paper/SKILL.md`](../white-paper/SKILL.md). This file records the older lab proposal convention and may help maintain existing documents. Its fixed model-role pipeline and proposal-first structure do not establish tested facts.
 
 Lightweight path from **signal** to **research pack** to **white paper proposal**. This is not the full `design` → `execute` pipeline; it produces lab docs only until Cody accepts behaviour changes.
 

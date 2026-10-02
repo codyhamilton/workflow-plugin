@@ -132,7 +132,7 @@ When `ideal_steer_window` is `none` or `ambiguous`, or `label_status≠labeled`,
 ## Explicit non-authorization
 
 This sheet **does not** unlock Soft Standard, TypeSafe, hooks, or live Jev.
-Favorable future FP/miss numbers **do not** release any hold. Human labels and
+Favorable future FP/miss numbers **do not** release any hold. Model-adjudicated outcome labels and
 the committed TypeSafe lever-row join now exist, but that establishes
 mechanical coverage only. It does not resolve independent-trial aggregation,
 meter-only waves, adjudication/versioning, or the other gates in

@@ -2,9 +2,11 @@
 
 Curated bibliography for optimising workflow-plugin. Each entry: **takeaway** → **implication for this repo** → **confidence** (how sure we are the mapping applies).
 
+**Jev research entry point (2026-10-02):** [tested results](../JEV-RESULTS.md) → [parent hypotheses](../JEV-HYPOTHESES.md) → [active methodology](../JEV-METHODOLOGY.md). Dated packs below preserve experiments and historical protocols. Their older proposed next steps are not automatically the current research order.
+
 Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-systems.md).
 
-**Dated research packs** (inputs to `PROPOSALS/` white papers; see `lab-proposal` skill):
+**Dated research packs** (inputs to evidence-backed `PROPOSALS/` white papers; see the [`white-paper` skill](../../../plugins/workflow-lab/skills/white-paper/SKILL.md)):
 
 | Pack | Question | Proposal (if any) |
 |------|----------|-------------------|

@@ -8,6 +8,8 @@ import json
 import sys
 
 from lib.cli import add_format_arg, add_tool_arg, get_parsers, setup_path
+from lib.registry import REGISTRY
+from lib.types import SessionRef
 
 setup_path()
 
@@ -32,6 +34,10 @@ def main() -> None:
     parser.add_argument("--since", metavar="ISO", help="Only sessions after ISO timestamp")
     parser.add_argument(
         "--min-subagents", type=int, metavar="N", help="Minimum subagent count"
+    )
+    parser.add_argument(
+        "--min-parent-assistant-turns", type=int, metavar="N",
+        help="Require at least N observed parent assistant turns; unknown counts are excluded and reported",
     )
     add_tool_arg(parser)
     add_format_arg(parser)
@@ -58,6 +64,31 @@ def main() -> None:
                 )
             )
 
+    if args.min_parent_assistant_turns is not None:
+        if args.min_parent_assistant_turns < 0:
+            parser.error("--min-parent-assistant-turns must be nonnegative")
+        filtered = []
+        unknown = {}
+        for summary in sessions:
+            source = REGISTRY.get(summary.source)
+            if summary.storage_path:
+                ref = SessionRef(summary.source, summary.session_id, summary.project_path, summary.storage_path)
+            else:
+                ref = source.resolve(summary.session_id, summary.project_path)
+            try:
+                count = source.extract(ref).session.get("parent_assistant_turns")
+            except FileNotFoundError:
+                count = None
+            summary.parent_assistant_turns = count
+            if count is None:
+                unknown[summary.source] = unknown.get(summary.source, 0) + 1
+            elif count >= args.min_parent_assistant_turns:
+                filtered.append(summary)
+        sessions = filtered
+        if unknown:
+            details = ", ".join(f"{source}: {count}" for source, count in sorted(unknown.items()))
+            print(f"Excluded sessions with unknown parent assistant turns ({details}).", file=sys.stderr)
+
     sessions.sort(key=lambda s: s.start_time_iso, reverse=True)
     if args.limit:
         sessions = sessions[: args.limit]
@@ -78,6 +109,7 @@ def main() -> None:
                         "start_time_iso": s.start_time_iso,
                         "subagent_count": s.subagent_count,
                         "bytes": s.bytes,
+                        "parent_assistant_turns": s.parent_assistant_turns,
                     }
                     for s in sessions
                 ],
@@ -88,14 +120,15 @@ def main() -> None:
 
     header = (
         f"{'SOURCE':<12} {'SESSION_ID':<38} {'START':<26} "
-        f"{'SUBAGENTS':>9} {'BYTES':>10}"
+        f"{'SUBAGENTS':>9} {'TURNS':>7} {'BYTES':>10}"
     )
     print(header)
     print("-" * len(header))
     for s in sessions:
         print(
             f"{s.source:<12} {s.session_id:<38} {s.start_time_iso:<26} "
-            f"{s.subagent_count:>9} {s.bytes:>10}"
+            f"{str(s.subagent_count if s.subagent_count is not None else 'unknown'):>9} "
+            f"{str(s.parent_assistant_turns if s.parent_assistant_turns is not None else '?'):>7} {s.bytes:>10}"
         )
         if s.external_url:
             print(f"             {s.external_url}")

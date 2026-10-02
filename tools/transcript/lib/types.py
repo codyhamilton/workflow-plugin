@@ -13,8 +13,10 @@ class SessionSummary:
     external_url: str | None
     project_path: str | None
     start_time_iso: str
-    subagent_count: int
+    subagent_count: int | None
     bytes: int
+    storage_path: str | None = None
+    parent_assistant_turns: int | None = None
 
 
 @dataclass
