@@ -1,6 +1,8 @@
 # @codyhamilton/opencode-workflow-hooks
 
-OpenCode plugin that **approximates** Claude `PostToolBatch` soft signals:
+OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus types** into
+`~/.local/share/workflow-plugin/hooklog/opencode/<session>.jsonl` and **approximates** Claude
+`PostToolBatch` soft signals:
 
 1. Buffer each `tool.execute.after` per session.
 2. Flush one batch per model step on `message.updated` or `session.idle`.
@@ -57,7 +59,10 @@ git pull origin master
 
 | Variable | Default | Role |
 |----------|---------|------|
-| `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable plugin hooks |
+| `WORKFLOW_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
+| `WORKFLOW_HOOKLOG_DIR` | shared local store | Override JSONL root |
+| `WORKFLOW_HOOKLOG_CLI` | repo `tools/hooklog/hooklog.py` | Override capture helper |
+| `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
 | `WORKFLOW_REPO_ROOT` | auto (package → repo root) | Python gate imports |
 | `WORKFLOW_JEV_SIGNAL_LOG` | `tools/driver/.jev-signal-log.jsonl` | Signal JSONL path |
 | `WORKFLOW_INSTALL_MODE` | `opencode` (set by plugin spawn) | Analytics `host_kind` |
@@ -69,6 +74,9 @@ git pull origin master
 ## Tests
 
 ```bash
+# Callback/bus smoke, including unchanged permission/args/headers/compaction outputs (Node 22.18+)
+node --experimental-strip-types --test packages/opencode-workflow-hooks/tests/test_hooks.mjs
+
 # Package unit tests
 python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
 
@@ -81,7 +89,15 @@ python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
 ```bash
 cd packages/opencode-workflow-hooks
 npm link
-# In opencode.json: "@codyhamilton/opencode-workflow-hooks@0.1.0"
+# In opencode.json: "@codyhamilton/opencode-workflow-hooks@0.2.0"
 ```
 
 Publishing to npm is optional; `file://` from the monorepo checkout is the supported path for Coding Harness Manager.
+
+Hooklog keeps native names and `source: hook|bus|derived`; the catch-all `event` callback
+also captures future bus types. Session IDs are resolved from nested message/part/session envelopes;
+load/teardown and other events without a session use `unknown.jsonl`. Bus tool events remain
+observations so they do not duplicate dedicated tool callbacks in turn counting. Existing
+PostToolBatch/Stop markers remain derived rows. Config, prompts, headers, permissions, args,
+environment, tool definitions and experimental outputs are observed without mutation.
+`dispose` and `experimental.provider.small_model` may be absent in older plugin runtimes.

@@ -33,7 +33,7 @@ class T(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             r = run("cursor", json.dumps({"hook_event_name": "afterShellExecution", "conversation_id": "c1", "command": "ls", "output": "a"}), d)
             self.assertEqual(r.returncode, 0)
-            self.assertIn('"continue": true', r.stdout)
+            self.assertEqual(json.loads(r.stdout), {})
             rows = hl.read_session(Path(d) / "cursor" / "c1.jsonl")
             self.assertEqual((rows[0]["tool_name"], rows[0]["input"]["command"]), ("Shell", "ls"))
 
@@ -54,9 +54,50 @@ class T(unittest.TestCase):
 
     def test_garbage_never_fails(self):
         with tempfile.TemporaryDirectory() as d:
-            for bad in ("", "not json", "[]", '{"hook_event_name":"Unknown"}'):
+            for bad in ("", "not json", "[]"):
                 self.assertEqual(run("claude", bad, d).returncode, 0)
             self.assertEqual(list(Path(d).glob("*/*")), [])
+
+    def test_new_and_future_events_are_retained(self):
+        for event in ("SessionStart", "InstructionsLoaded", "Interrupt", "workspaceOpen", "FutureHook"):
+            row = hl.normalize("codex", {"hook_event_name": event, "reason": "test"})
+            self.assertEqual((row["hook_event"], row["kind"], row["data"]["reason"]), (event, "event", "test"))
+
+    def test_pre_tool_and_bus_are_not_completed_calls(self):
+        self.assertEqual(hl.normalize("codex", {"hook_event_name": "PreToolUse"})["kind"], "tool_pre")
+        self.assertEqual(hl.normalize("opencode", {"hook_event_name": "tool.execute.after", "source": "bus"})["kind"], "event")
+        self.assertEqual(hl.normalize("cursor", {"hook_event_name": "sessionEnd"})["kind"], "event")
+
+    def test_lifecycle_headers_and_display_are_scrubbed(self):
+        row = hl.normalize("opencode", {"hook_event_name": "chat.headers", "headers": {
+            "Authorization": "short-secret", "X-API-Key": "short-key"}, "text": "x" * 5000})
+        self.assertEqual(row["data"]["headers"], {"Authorization": "[REDACTED]", "X-API-Key": "[REDACTED]"})
+        self.assertLess(len(row["data"]["text"]), 2100)
+        encoded = hl.normalize("cursor", {"hook_event_name": "postToolUse", "tool_input":
+            '{"password":"short-secret", "input_tokens":123}'})
+        self.assertEqual(encoded["data"]["tool_input"], {"password": "[REDACTED]", "input_tokens": 123})
+        row = hl.normalize("claude", {"hook_event_name": "MessageDisplay", "text": "password=abcdefgh"})
+        self.assertIn("[REDACTED]", row["text"])
+
+    def test_cursor_permissive_responses_on_error_and_disable(self):
+        with tempfile.TemporaryDirectory() as d:
+            for event in ("preToolUse", "subagentStart", "beforeShellExecution", "beforeMCPExecution",
+                          "beforeReadFile", "beforeTabFileRead", "beforeSubmitPrompt"):
+                for payload in ("not json", '{"hook_event_name":"wrong"}'):
+                    for disabled in ("on", "off"):
+                        result = subprocess.run([sys.executable, str(SCRIPT), "record", "--harness", "cursor", "--event", event],
+                            input=payload, text=True, capture_output=True,
+                            env=dict(os.environ, WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_HOOKLOG=disabled))
+                        self.assertEqual(result.returncode, 0)
+                        expected = {"continue": True} if event == "beforeSubmitPrompt" else {"permission": "allow"}
+                        self.assertEqual(json.loads(result.stdout), expected)
+
+    def test_unwritable_store_never_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "file"
+            path.touch()
+            result = run("codex", '{"hook_event_name":"Stop","session_id":"s"}', str(path))
+            self.assertEqual((result.returncode, result.stdout), (0, ""))
 
     def test_torn_line_tolerated(self):
         with tempfile.TemporaryDirectory() as d:

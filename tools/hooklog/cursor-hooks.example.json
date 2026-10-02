@@ -1,29 +1,130 @@
 {
   "version": 1,
   "hooks": {
-    "beforeSubmitPrompt": [
+    "sessionStart": [
       {
-        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
-      }
-    ],
-    "postToolUse": [
-      {
-        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
-      }
-    ],
-    "afterAgentResponse": [
-      {
-        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
-      }
-    ],
-    "afterAgentThought": [
-      {
-        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event sessionStart",
+        "timeout": 5
       }
     ],
     "sessionEnd": [
       {
-        "command": "python3 /ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py record --harness cursor"
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event sessionEnd",
+        "timeout": 5
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event preToolUse",
+        "timeout": 5
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event postToolUse",
+        "timeout": 5
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event postToolUseFailure",
+        "timeout": 5
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event subagentStart",
+        "timeout": 5
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event subagentStop",
+        "timeout": 5
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event beforeShellExecution",
+        "timeout": 5
+      }
+    ],
+    "afterShellExecution": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event afterShellExecution",
+        "timeout": 5
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event beforeMCPExecution",
+        "timeout": 5
+      }
+    ],
+    "afterMCPExecution": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event afterMCPExecution",
+        "timeout": 5
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event beforeReadFile",
+        "timeout": 5
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event afterFileEdit",
+        "timeout": 5
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event beforeSubmitPrompt",
+        "timeout": 5
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event preCompact",
+        "timeout": 5
+      }
+    ],
+    "stop": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event stop",
+        "timeout": 5
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event afterAgentResponse",
+        "timeout": 5
+      }
+    ],
+    "afterAgentThought": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event afterAgentThought",
+        "timeout": 5
+      }
+    ],
+    "beforeTabFileRead": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event beforeTabFileRead",
+        "timeout": 5
+      }
+    ],
+    "afterTabFileEdit": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event afterTabFileEdit",
+        "timeout": 5
+      }
+    ],
+    "workspaceOpen": [
+      {
+        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/hooklog/hooklog.py\" record --harness cursor --event workspaceOpen",
+        "timeout": 5
       }
     ]
   }
