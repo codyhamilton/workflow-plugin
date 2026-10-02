@@ -32,7 +32,7 @@ Sixteen `results.jsonl` files under `batch-002/` (full table in [`analysis/ARTIF
 | Stream | Rows | Scored | Fire rate (scored) | Sessions | Driver | Notes |
 |--------|-----:|-------:|-------------------:|---------:|--------|-------|
 | `results.jsonl` (Wave-0 Flash) | 240 | 240 | **31.3%** | 20 | Flash (`policy-under-test`) | 4/12 lever combos only; canonical decontam path |
-| `typesafe-scenario-sweep/` | **8200** | 8200 | **1.41%** | 41 | TypeSafe | **200 scenarios** × 41 sessions; 1 mid checkpoint/session (#104) |
+| `typesafe-scenario-sweep/` | **15,834** | 13,522‡ | **1.89%‡** | 41 | TypeSafe | **392 measured scenarios**; mixed 41/16-session denominators; 1 mid checkpoint/session |
 | `typesafe-k1/` | 2500 | 2500 | **1.4%** | 3* | TypeSafe | Lever grid; H1–H5 interleaved |
 | `typesafe-k2/` | 2500 | 2500 | **1.3%** | 3* | TypeSafe | k2 duplicate scale |
 | `flash-scale/` | 2400 | 250† | 38.4%† | — | Flash | Streaming; partial score |
@@ -44,6 +44,10 @@ Sixteen `results.jsonl` files under `batch-002/` (full table in [`analysis/ARTIF
 | `archive-t45-only/` | 240 | 240 | 22.5% | 20 | Flash | **Excluded** — allocation bug |
 
 † Incomplete streams at land time per [`CUMULATIVE-STREAM.md`](../2026-10-02-interception-trials/batch-002/CUMULATIVE-STREAM.md).
+
+‡ Post-#110 meters exclude 2,312 stale, empty-field GROWTH rows. The 102
+filled GROWTH scenarios have 16 eligible sessions; the other 290 scenarios
+have 41. Raw rows are retained for provenance.
 
 `typesafe-review-check/results.jsonl` (1744 rows) uses a **review-axis schema** (`answers`, `axis`, `builder`) — not comparable fire rates without a separate mapper.
 
@@ -116,7 +120,60 @@ for a useful negative state selector. Future comparisons must report
 state-field eligibility/missingness and gate unsupported cells, as the
 post-#107 GROWTH fill does.
 
-### 2b. Wave-0 Flash lever slice (240 cells, 20 labeled sessions)
+### 2b. Post-fill GROWTH evidence and preferred reporting cut (#109/#110)
+
+The post-#108 refill in
+[#110](https://github.com/codyhamilton/workflow-plugin/pull/110) processed
+2,042 new cells with zero errors. Of those, 1,632 were `growth-fill-v1`
+GROWTH cells (102 scenarios × 16 state-eligible Claude-Code snapshots):
+**103 fire / 1,529 defer**. The runner gated 2,550 unsupported cells
+(102 × 25 tail-less snapshots) instead of substituting empty state, and the
+meters excluded all 2,312 stale pre-fill GROWTH rows.
+
+The mutually exclusive scenario-level fire-rate bands from the resulting
+392-scenario meters are:
+
+| Scope | 0 | (0, 0.10] | (0.10, 0.25] | (0.25, 0.50] | (0.50, 0.75] | >0.75 |
+|---|---:|---:|---:|---:|---:|---:|
+| All measured scenarios (392) | **334** | 31 | 16 | 4 | 5 | 2 |
+| Filled GROWTH only (102) | **77** | 8 | 8 | 4 | 4 | 1 |
+
+The maximum is 0.875. These bands show a mostly-zero response distribution;
+they are not accuracy bands and do not identify an FP or miss.
+
+[#109](https://github.com/codyhamilton/workflow-plugin/pull/109) ranks one
+state for each of the 12 GROWTH questions in
+[`GROWTH-RANKING.json`](../2026-10-02-interception-trials/batch-002/GROWTH-RANKING.json).
+The selection rule is evidence compatibility, not highest observed fire:
+
+- `markers_focus` supplies direct wait, compaction, silent/repeated-tool, and
+  verification/error markers for four questions.
+- `recent_delta_brief` supplies the brief plus recent tool/text and interval
+  delta for the other eight.
+- `phase_hints_focus` is retained as a representation contrast, but its coarse
+  tool-class mix lacks brief, path, command-outcome, and artifact-result
+  identity, so it is not preferred for this first cut.
+
+Exact-checkpoint join coverage then determines the reporting denominator:
+**12 × 9 = 108 exact-labeled cells per evaluated driver**. The other seven
+state-valid snapshots (four checkpoint-unlabeled and three session-unlabeled)
+contribute **12 × 7 = 84 diagnostic cells** only; no nearest-checkpoint label
+is copied. The 25 tail-less snapshots remain gated.
+
+The #110 TypeSafe refill already contains this cut. Across all 16 state-valid
+snapshots it fires 10/192: `markers_focus × idle_tool_spin` contributes 9/16
+and `markers_focus × context_thrash_compact` 1/16; the other ten preferred
+pairs are 0/16. Restricting to the nine exact-labeled snapshots gives
+**6/108** (5 and 1 respectively); the seven diagnostic snapshots contribute
+4/84. This is response evidence only. It does not compare fire with labels or
+produce a product board.
+
+The repository does not establish an independent preregistration timestamp
+for this cut (#110 merged before #109). Treat it as an evidence-compatible
+analytic selection, not a claimed preregistered evaluation. A replication
+should freeze the 12 pair IDs before another driver is run.
+
+### 2c. Wave-0 Flash lever slice (240 cells, 20 labeled sessions)
 
 Only **four** of twelve planned combos ran (240-cell cap); eight combos in [`grid.json`](../2026-10-02-interception-trials/batch-002/grid.json) never executed ([`analysis/wave0-lever-combos.json`](analysis/wave0-lever-combos.json)):
 
@@ -131,11 +188,11 @@ Only **four** of twelve planned combos ran (240-cell cap); eight combos in [`gri
 
 **Rating / fire:** Wave-0 meters already note rating ≥2 aligns with `fire` on executed maps; 75 fires / 240 cells.
 
-### 2c. Multi-driver contrast (same protocol family)
+### 2d. Multi-driver contrast (same protocol family)
 
 At full stream completion, Flash family fire rates (**~19–31%** on finished slices) sit **an order of magnitude above** TypeSafe k1/k2 (**~1.3%**) on overlapping lever semantics — expected given driver role (`policy-under-test` vs System One mapping) and different question grids. **Do not** treat cross-driver fire rate as comparable without session-clustered contrasts on identical `(session_id, checkpoint, state, question)` keys.
 
-### 2d. Outcome labels (reference sidecar)
+### 2e. Outcome labels (reference sidecar)
 
 From 20 sessions × 6 checkpoints:
 
