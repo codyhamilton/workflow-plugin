@@ -11,6 +11,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -42,6 +43,11 @@ LEAK_TOKENS = {
     "full_length", "norm_length", "runaway_like", "near_done",
     "ideal_steer_window", "termination_cause",
 }
+LEAK_VALUE_RE = re.compile(
+    r"\b(?:T_observed_session|T_observed|progress_frac|full_length|"
+    r"norm_length|runaway_like|near_done|ideal_steer_window|"
+    r"termination_cause)\b"
+)
 
 _spec = importlib.util.spec_from_file_location(
     "diagnostic_state_flip",
@@ -268,7 +274,7 @@ def leak_hits(cells: list[dict[str, Any]]) -> int:
             for child in value:
                 walk(child)
         elif isinstance(value, str):
-            hits += sum(token in value for token in LEAK_TOKENS)
+            hits += len(LEAK_VALUE_RE.findall(value))
     for cell in cells:
         walk(cell["state"])
         walk(cell["question"])
@@ -298,6 +304,12 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         key for key in unique_keys
         if label_at(labels, {"session_id": key[0], "checkpoint": key[1]}, "runaway_like_at_checkpoint") == "yes"
     }
+    positive_label_keys_total = {
+        (session_id, int(checkpoint))
+        for session_id, label in labels.items()
+        for checkpoint, value in (label.get("runaway_like_at_checkpoint") or {}).items()
+        if value == "yes"
+    }
     fire_by_key = defaultdict(int)
     for row in successful:
         if row.get("fire") == "fire":
@@ -318,6 +330,8 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         "overlap_with_prior_result_cell_ids": len(set(cell_ids) & prior_ids),
         "leak_spotcheck_hits": leak_hits(cells),
         "runaway_positive_unique_keys": len(positive_keys),
+        "runaway_positive_label_keys_total": len(positive_label_keys_total),
+        "runaway_positive_label_keys_gated_no_tail": len(positive_label_keys_total - unique_keys),
         "runaway_positive_rows": sum(
             label_at(labels, row, "runaway_like_at_checkpoint") == "yes"
             for row in successful
@@ -353,6 +367,8 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         f"- overlap with prior result cell IDs: **{meters['overlap_with_prior_result_cell_ids']}**",
         f"- leak spotcheck hits: **{meters['leak_spotcheck_hits']}**",
         f"- unique `runaway_like=yes` keys: **{meters['runaway_positive_unique_keys']}**",
+        f"- total positive label keys: **{meters['runaway_positive_label_keys_total']}** "
+        f"(gated for missing tail: **{meters['runaway_positive_label_keys_gated_no_tail']}**)",
         f"- positive keys with any fire: **{meters['positive_keys_with_any_fire']}**",
         "",
         f"Harness mix: `{dict(rows_by_harness)}`",
