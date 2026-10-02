@@ -339,7 +339,7 @@ def run(registry_path: Path, output_dir: Path) -> dict[str, Any]:
         )
 
     missing_fixtures = [
-        worker_id for worker_id, info in worker_fixture_info.items() if not info["maps_jsonl_available"]
+        worker_id for worker_id, info in worker_fixture_info.items() if not info["used_path"]
     ]
     manifest = {
         "manifest_version": 1,
