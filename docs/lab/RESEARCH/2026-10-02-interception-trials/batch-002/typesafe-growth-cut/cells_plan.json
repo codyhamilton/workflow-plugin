@@ -1,0 +1,16 @@
+{
+  "stage": "preferred",
+  "target": 192,
+  "n_planned": 192,
+  "n_sessions": 16,
+  "n_distinct_scenarios": 12,
+  "n_distinct_cases": 0,
+  "exact_labeled_cells": 108,
+  "diagnostic_cells": 84,
+  "gated": {
+    "no_tail": 25
+  },
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "window_cartesian": false
+}
