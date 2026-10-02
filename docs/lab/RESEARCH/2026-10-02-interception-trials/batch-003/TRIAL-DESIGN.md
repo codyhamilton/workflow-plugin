@@ -308,10 +308,11 @@ near-done/`none` session. Never use the median-of-reached selector.
 Meters include `n_at_risk` and `n_never_reached` at every checkpoint, plus
 never-fire, constant-75, and constant-90 fire times. Each null must have at
 least four event-supported sessions under Design A, and the selected 12 must
-include the four constant-90 references and four runaway/window-intersection
-sessions. If Design A misses its terminal gate, this matrix is not
-materialized. A point tie, confidence interval crossing zero, or unsupported
-null is not a win.
+include the four constant-75 references, four constant-90 references, and four
+runaway/window-intersection sessions; roles may overlap when labels support
+them. If Design A misses its terminal gate, this matrix is not materialized.
+A point tie, confidence interval crossing zero, or unsupported null is not a
+win.
 
 ## Success metrics
 

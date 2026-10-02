@@ -369,7 +369,7 @@
     "minimum_cells_per_driver_with_t90_support": 480,
     "maximum_cells_per_driver_if_all_reach_t120": 864,
     "minimum_formula_per_driver": "12 scenarios * ((12 sessions * checkpoints 45,60,75) + (4 constant-90 reference sessions * checkpoint 90))",
-    "selection_support": "The selected 12 must themselves include the four runaway/window-intersection sessions and four constant-90 reference sessions required by the terminal gate; support elsewhere in the labeled pool does not count.",
+    "selection_support": "The selected 12 must themselves include the four runaway/window-intersection sessions, four constant-75 reference sessions, and four constant-90 reference sessions required by the terminal gate; roles may overlap when labels support them, but support elsewhere in the labeled pool does not count.",
     "holdout": "Four fresh response-blind sessions selected after labels are frozen and before calls; include at least one non-Maps session, one runaway session with a reached fixed checkpoint inside its window, and one near-done/none reference session.",
     "nulls": [
       "never_fire",
