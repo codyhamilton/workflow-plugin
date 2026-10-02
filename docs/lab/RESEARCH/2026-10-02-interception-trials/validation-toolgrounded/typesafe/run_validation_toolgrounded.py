@@ -51,7 +51,7 @@ def sha256(path: Path) -> str:
 
 
 def cell_id(seat: str, worker: str, checkpoint: int) -> str:
-    raw = f"{PROTOCOL_SHA256}|maps-only|{seat}|{worker}|{checkpoint}|choice-toolgrounded-v2"
+    raw = f"{PROTOCOL_SHA256}|maps-only|{seat}|{worker}|{checkpoint}|choice-toolgrounded-v3"
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
@@ -169,11 +169,24 @@ def build_cells() -> list[dict[str, Any]]:
                                     },
                                 },
                                 "pattern_note": {
+                                    "type": "choice",
+                                    "instructions": (
+                                        "Choose exactly one pattern note from the shown "
+                                        "tool evidence: test_fix_loop, forward_edit, or "
+                                        "mixed_or_unclear."
+                                    ),
+                                    "labels": list(PATTERN_NOTES),
+                                    "criteria": {
+                                        "test_fix_loop": "Reactive read/fix/test loop dominates.",
+                                        "forward_edit": "Forward editing/building dominates.",
+                                        "mixed_or_unclear": "Evidence is mixed or unclear.",
+                                    },
+                                },
+                                "freeform_note": {
                                     "type": "noul",
                                     "instructions": (
-                                        "One line only. Return exactly one pattern note: "
-                                        "test_fix_loop, forward_edit, or mixed_or_unclear. "
-                                        "It must be consistent with the tool_evidence_block."
+                                        "One concise free-form note about the tool "
+                                        "evidence; do not introduce a new label."
                                     ),
                                 },
                             },
@@ -190,7 +203,7 @@ def answer_value(answer: dict[str, Any]) -> Any:
 def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
     answers = payload.get("answers") or {}
     parsed: dict[str, Any] = {}
-    for question_id in ("choice", "pattern_note"):
+    for question_id in ("choice", "pattern_note", "freeform_note"):
         answer = answers.get(question_id) or {}
         is_choice = answer.get("type") == "choice"
         label = answer.get("choice") if is_choice else None
@@ -205,20 +218,9 @@ def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
             "raw": answer,
         }
     choice = parsed["choice"]
-    note = parsed["pattern_note"]["value"]
+    note = parsed["pattern_note"]["response_label"]
     parsed["choice_valid"] = choice["response_label"] in LABELS
     parsed["pattern_note_valid"] = note in PATTERN_NOTES
-    parsed["building_evidence_ok"] = (
-        choice["response_label"] != "building"
-        or (
-            parsed["pattern_note"]["value"] == "forward_edit"
-            and (
-                parsed["tool_evidence"]["edit_count"]
-                if "tool_evidence" in parsed
-                else True
-            )
-        )
-    )
     return parsed
 
 
@@ -306,6 +308,7 @@ def write_analysis(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> N
         "choice_counts_by_stratum": by_stratum,
         "building_rule": "building ONLY when Edit or Write appears in shown tool evidence",
         "pattern_notes": list(PATTERN_NOTES),
+        "freeform_wire": "noul",
     }
     (OUT / "choice-counts.json").write_text(json.dumps(summary, indent=2) + "\n")
     (OUT / "toolgrounded-summary.json").write_text(json.dumps(summary, indent=2) + "\n")
@@ -315,6 +318,10 @@ def write_analysis(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> N
         "choice_scrape_failures": sum(not row.get("choice_scrape_ok", False) for row in successful),
         "pattern_note_invalid": sum(
             not (row.get("answers") or {}).get("pattern_note_valid", False)
+            for row in successful
+        ),
+        "freeform_noul_answers": sum(
+            (row.get("answers") or {}).get("freeform_note", {}).get("wire_type") == "noul"
             for row in successful
         ),
         "generated_at": datetime.now(AEST).isoformat(timespec="seconds"),
