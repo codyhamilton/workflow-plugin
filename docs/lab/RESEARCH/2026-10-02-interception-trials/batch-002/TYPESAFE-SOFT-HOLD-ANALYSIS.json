@@ -1,0 +1,555 @@
+{
+  "scope": "Soft HOLD docs/trials/evidence only",
+  "baseline": {
+    "source": "TypeSafe #110 growth-fill-v1 preferred scenario meters",
+    "source_commit": "44764b9",
+    "n_distinct_scenarios": 392,
+    "n_sessions_swept": 41,
+    "n_cells_incidental": 13522,
+    "errors": 0,
+    "preferred_pairs": {
+      "state.markers_focus|q.dependency_wait": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.markers_focus|q.context_thrash_compact": {
+        "n_sessions": 16,
+        "fire_count": 1,
+        "fire_rate": 0.0625
+      },
+      "state.markers_focus|q.idle_tool_spin": {
+        "n_sessions": 16,
+        "fire_count": 9,
+        "fire_rate": 0.5625
+      },
+      "state.recent_delta_brief|q.brief_abandon": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.docs_only_drift": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.scope_creep_silent": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.edit_churn": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.bash_retry_storm": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.parallel_agent_thrash": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.markers_focus|q.test_flake_loop": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.speculative_rewrite": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "state.recent_delta_brief|q.deliverable_orphan": {
+        "n_sessions": 16,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      }
+    },
+    "preferred_cells": 192,
+    "preferred_fires": 10
+  },
+  "diagnostic_state_flip": {
+    "meters": {
+      "status": "complete",
+      "scope": "diagnostic_only",
+      "join_class": "diagnostic_only",
+      "n_distinct_scenarios": 24,
+      "n_representative_pairs": 7,
+      "n_cells_planned": 336,
+      "n_cells_successful": 336,
+      "n_cells_errors": 0,
+      "http_counts": {
+        "200": 336
+      },
+      "cell_id_collisions": 0,
+      "by_state_response_class": {
+        "markers_focus|binary_fire": {
+          "n": 84,
+          "fire_count": 13,
+          "fire_rate": 0.1548
+        },
+        "markers_focus|four_class": {
+          "n": 84,
+          "fire_count": 18,
+          "fire_rate": 0.2143
+        },
+        "phase_hints_focus|binary_fire": {
+          "n": 84,
+          "fire_count": 18,
+          "fire_rate": 0.2143
+        },
+        "phase_hints_focus|four_class": {
+          "n": 84,
+          "fire_count": 18,
+          "fire_rate": 0.2143
+        }
+      },
+      "leak_spotcheck_hits": 0,
+      "label_values_in_prompt": false,
+      "window_cartesian": false,
+      "soft_standard_hold": true,
+      "product_wiring": false,
+      "generated_at": "2026-10-02T13:04:46+10:00"
+    },
+    "by_axis": {
+      "markers_focus|dependency_wait|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|dependency_wait|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|context_thrash_compact|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|context_thrash_compact|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|idle_tool_spin|binary_fire": {
+        "n": 7,
+        "fire": 5,
+        "fire_rate": 0.7143
+      },
+      "markers_focus|idle_tool_spin|four_class": {
+        "n": 7,
+        "fire": 5,
+        "fire_rate": 0.7143
+      },
+      "markers_focus|brief_abandon|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|brief_abandon|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|docs_only_drift|binary_fire": {
+        "n": 7,
+        "fire": 2,
+        "fire_rate": 0.2857
+      },
+      "markers_focus|docs_only_drift|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|scope_creep_silent|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|scope_creep_silent|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|edit_churn|binary_fire": {
+        "n": 7,
+        "fire": 2,
+        "fire_rate": 0.2857
+      },
+      "markers_focus|edit_churn|four_class": {
+        "n": 7,
+        "fire": 2,
+        "fire_rate": 0.2857
+      },
+      "markers_focus|bash_retry_storm|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|bash_retry_storm|four_class": {
+        "n": 7,
+        "fire": 1,
+        "fire_rate": 0.1429
+      },
+      "markers_focus|parallel_agent_thrash|binary_fire": {
+        "n": 7,
+        "fire": 4,
+        "fire_rate": 0.5714
+      },
+      "markers_focus|parallel_agent_thrash|four_class": {
+        "n": 7,
+        "fire": 7,
+        "fire_rate": 1.0
+      },
+      "markers_focus|test_flake_loop|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|test_flake_loop|four_class": {
+        "n": 7,
+        "fire": 3,
+        "fire_rate": 0.4286
+      },
+      "markers_focus|speculative_rewrite|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|speculative_rewrite|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|deliverable_orphan|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "markers_focus|deliverable_orphan|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|dependency_wait|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|dependency_wait|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|context_thrash_compact|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|context_thrash_compact|four_class": {
+        "n": 7,
+        "fire": 1,
+        "fire_rate": 0.1429
+      },
+      "phase_hints_focus|idle_tool_spin|binary_fire": {
+        "n": 7,
+        "fire": 2,
+        "fire_rate": 0.2857
+      },
+      "phase_hints_focus|idle_tool_spin|four_class": {
+        "n": 7,
+        "fire": 3,
+        "fire_rate": 0.4286
+      },
+      "phase_hints_focus|brief_abandon|binary_fire": {
+        "n": 7,
+        "fire": 2,
+        "fire_rate": 0.2857
+      },
+      "phase_hints_focus|brief_abandon|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|docs_only_drift|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|docs_only_drift|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|scope_creep_silent|four_class": {
+        "n": 7,
+        "fire": 1,
+        "fire_rate": 0.1429
+      },
+      "phase_hints_focus|scope_creep_silent|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|edit_churn|four_class": {
+        "n": 7,
+        "fire": 1,
+        "fire_rate": 0.1429
+      },
+      "phase_hints_focus|edit_churn|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|bash_retry_storm|binary_fire": {
+        "n": 7,
+        "fire": 5,
+        "fire_rate": 0.7143
+      },
+      "phase_hints_focus|bash_retry_storm|four_class": {
+        "n": 7,
+        "fire": 3,
+        "fire_rate": 0.4286
+      },
+      "phase_hints_focus|parallel_agent_thrash|binary_fire": {
+        "n": 7,
+        "fire": 4,
+        "fire_rate": 0.5714
+      },
+      "phase_hints_focus|parallel_agent_thrash|four_class": {
+        "n": 7,
+        "fire": 3,
+        "fire_rate": 0.4286
+      },
+      "phase_hints_focus|test_flake_loop|binary_fire": {
+        "n": 7,
+        "fire": 5,
+        "fire_rate": 0.7143
+      },
+      "phase_hints_focus|test_flake_loop|four_class": {
+        "n": 7,
+        "fire": 4,
+        "fire_rate": 0.5714
+      },
+      "phase_hints_focus|speculative_rewrite|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|speculative_rewrite|four_class": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|deliverable_orphan|binary_fire": {
+        "n": 7,
+        "fire": 0,
+        "fire_rate": 0.0
+      },
+      "phase_hints_focus|deliverable_orphan|four_class": {
+        "n": 7,
+        "fire": 2,
+        "fire_rate": 0.2857
+      }
+    },
+    "rows": 336
+  },
+  "miss_identifiability": {
+    "meters": {
+      "status": "complete",
+      "scope": "miss_identifiability_diagnostic",
+      "n_exact_label_keys_planned": 52,
+      "n_unique_keys_successful": 77,
+      "n_labeled_keys_successful": 56,
+      "n_non_maps_holdout_keys_successful": 25,
+      "n_non_maps_labeled_holdout_keys": 4,
+      "n_non_maps_unlabeled_holdout_keys": 21,
+      "n_holdout_cells_successful": 75,
+      "n_cells_planned": 387,
+      "n_cells_successful": 387,
+      "n_cells_errors": 0,
+      "http_counts": {
+        "200": 387
+      },
+      "http_success_rate": 1.0,
+      "cell_id_collisions": 0,
+      "overlap_with_prior_result_cell_ids": 0,
+      "leak_spotcheck_hits": 0,
+      "runaway_positive_unique_keys": 1,
+      "runaway_positive_label_keys_total": 4,
+      "runaway_positive_label_keys_gated_no_tail": 3,
+      "runaway_positive_rows": 6,
+      "positive_keys_with_any_fire": 1,
+      "all_keys_with_any_fire": 57,
+      "by_state_question": {
+        "markers_focus|late_miss_risk": {
+          "n": 52,
+          "fire_count": 8,
+          "fire_rate": 0.1538,
+          "runaway_positive_rows": 1,
+          "fire_on_runaway_positive_rows": 0
+        },
+        "markers_focus|silent_stall": {
+          "n": 52,
+          "fire_count": 49,
+          "fire_rate": 0.9423,
+          "runaway_positive_rows": 1,
+          "fire_on_runaway_positive_rows": 1
+        },
+        "markers_focus|activity_without_value": {
+          "n": 52,
+          "fire_count": 38,
+          "fire_rate": 0.7308,
+          "runaway_positive_rows": 1,
+          "fire_on_runaway_positive_rows": 1
+        },
+        "phase_hints_focus|late_miss_risk": {
+          "n": 52,
+          "fire_count": 52,
+          "fire_rate": 1.0,
+          "runaway_positive_rows": 1,
+          "fire_on_runaway_positive_rows": 1
+        },
+        "phase_hints_focus|silent_stall": {
+          "n": 52,
+          "fire_count": 41,
+          "fire_rate": 0.7885,
+          "runaway_positive_rows": 1,
+          "fire_on_runaway_positive_rows": 1
+        },
+        "phase_hints_focus|activity_without_value": {
+          "n": 52,
+          "fire_count": 49,
+          "fire_rate": 0.9423,
+          "runaway_positive_rows": 1,
+          "fire_on_runaway_positive_rows": 1
+        },
+        "stats_only|late_miss_risk": {
+          "n": 25,
+          "fire_count": 0,
+          "fire_rate": 0.0,
+          "runaway_positive_rows": 0,
+          "fire_on_runaway_positive_rows": 0
+        },
+        "stats_only|silent_stall": {
+          "n": 25,
+          "fire_count": 5,
+          "fire_rate": 0.2,
+          "runaway_positive_rows": 0,
+          "fire_on_runaway_positive_rows": 0
+        },
+        "stats_only|activity_without_value": {
+          "n": 25,
+          "fire_count": 0,
+          "fire_rate": 0.0,
+          "runaway_positive_rows": 0,
+          "fire_on_runaway_positive_rows": 0
+        }
+      },
+      "label_values_in_prompt": false,
+      "posthoc_label_join_only": true,
+      "not_a_miss_scoreboard": true,
+      "soft_standard_hold": true,
+      "product_wiring": false,
+      "generated_at": "2026-10-02T13:11:02+10:00"
+    },
+    "by_axis": {
+      "markers_focus|late_miss_risk": {
+        "n": 52,
+        "fire": 8,
+        "fire_rate": 0.1538,
+        "population": {
+          "labeled_exact_key": 52
+        }
+      },
+      "markers_focus|silent_stall": {
+        "n": 52,
+        "fire": 49,
+        "fire_rate": 0.9423,
+        "population": {
+          "labeled_exact_key": 52
+        }
+      },
+      "markers_focus|activity_without_value": {
+        "n": 52,
+        "fire": 38,
+        "fire_rate": 0.7308,
+        "population": {
+          "labeled_exact_key": 52
+        }
+      },
+      "phase_hints_focus|late_miss_risk": {
+        "n": 52,
+        "fire": 52,
+        "fire_rate": 1.0,
+        "population": {
+          "labeled_exact_key": 52
+        }
+      },
+      "phase_hints_focus|silent_stall": {
+        "n": 52,
+        "fire": 41,
+        "fire_rate": 0.7885,
+        "population": {
+          "labeled_exact_key": 52
+        }
+      },
+      "phase_hints_focus|activity_without_value": {
+        "n": 52,
+        "fire": 49,
+        "fire_rate": 0.9423,
+        "population": {
+          "labeled_exact_key": 52
+        }
+      },
+      "stats_only|late_miss_risk": {
+        "n": 25,
+        "fire": 0,
+        "fire_rate": 0.0,
+        "population": {
+          "non_maps_unlabeled_holdout": 25
+        }
+      },
+      "stats_only|silent_stall": {
+        "n": 25,
+        "fire": 5,
+        "fire_rate": 0.2,
+        "population": {
+          "non_maps_unlabeled_holdout": 25
+        }
+      },
+      "stats_only|activity_without_value": {
+        "n": 25,
+        "fire": 0,
+        "fire_rate": 0.0,
+        "population": {
+          "non_maps_unlabeled_holdout": 25
+        }
+      }
+    },
+    "rows": 387
+  },
+  "comparison_rules": [
+    "Fire rates are descriptive judge-output distributions, not precision, recall, FP, miss, or unlock evidence.",
+    "The #110 preferred denominator is 12 pairs \u00d7 16 tail-valid sessions; the new diagnostic denominator is 12 pairs \u00d7 7 non-label-ready representatives \u00d7 2 state variants \u00d7 2 response classes.",
+    "The miss probe joins outcome labels only after capture and excludes three positive label keys whose snapshots have no tail evidence.",
+    "The non-Maps holdout is independent of the exact tail-gated selection; any sidecar overlap is post-hoc and remains descriptive."
+  ],
+  "open_gaps": [
+    "Only one runaway_like=yes checkpoint key is state-valid after the tail gate; three of four positive label keys remain missing-state gated.",
+    "No validated decision-window or negative-control protocol supports an FP/miss scoreboard.",
+    "The response-class/state flip is diagnostic and does not establish a preferred representation.",
+    "H2 and non-Maps holdout coverage remain exploratory; a future labeled non-Maps corpus is still needed."
+  ],
+  "hold": {
+    "soft_standard_hold": true,
+    "product_wiring": false,
+    "hooks": false,
+    "local_llama_8080": false
+  }
+}

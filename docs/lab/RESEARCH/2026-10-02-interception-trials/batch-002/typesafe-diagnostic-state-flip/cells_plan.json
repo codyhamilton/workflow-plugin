@@ -1,0 +1,24 @@
+{
+  "wave": "typesafe-diagnostic-state-flip",
+  "scope": "diagnostic",
+  "join_class": "diagnostic_only",
+  "catalog_scope": "12 preferred GROWTH pairs from #109 \u00d7 7 #114 diagnostic representatives",
+  "n_distinct_scenarios": 24,
+  "n_representative_pairs": 7,
+  "n_state_variants": 2,
+  "n_response_classes": 2,
+  "n_cells_planned": 336,
+  "state_variants": [
+    "markers_focus",
+    "phase_hints_focus"
+  ],
+  "response_classes": [
+    "binary_fire",
+    "four_class"
+  ],
+  "label_values_in_prompt": false,
+  "window_cartesian": false,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "raw_capture_dir": "raw/"
+}
