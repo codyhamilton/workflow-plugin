@@ -115,7 +115,7 @@ def main() -> int:
             "Fire rates are descriptive judge-output distributions, not precision, recall, FP, miss, or unlock evidence.",
             "The #110 preferred denominator is 12 pairs × 16 tail-valid sessions; the new diagnostic denominator is 12 pairs × 7 non-label-ready representatives × 2 state variants × 2 response classes.",
             "The miss probe joins outcome labels only after capture and excludes three positive label keys whose snapshots have no tail evidence.",
-            "The non-Maps holdout is unlabeled and is reported as a response-distribution control only.",
+            "The non-Maps holdout is independent of the exact tail-gated selection; any sidecar overlap is post-hoc and remains descriptive.",
         ],
         "open_gaps": [
             "Only one runaway_like=yes checkpoint key is state-valid after the tail gate; three of four positive label keys remain missing-state gated.",
@@ -182,8 +182,10 @@ def main() -> int:
         "",
         f"- **{miss_m['n_cells_successful']}/{miss_m['n_cells_planned']}** HTTP-200 cells",
         f"- exact sidecar keys with usable tail: **{miss_m['n_exact_label_keys_planned']}**",
-        f"- unlabeled non-Maps holdout: **{miss_m['n_holdout_cells_successful']} cells / "
-        f"{miss_m['n_holdout_keys_successful']} keys**",
+        f"- non-Maps holdout: **{miss_m['n_holdout_cells_successful']} cells / "
+        f"{miss_m['n_non_maps_holdout_keys_successful']} keys** "
+        f"({miss_m['n_non_maps_labeled_holdout_keys']} sidecar-labeled; "
+        f"{miss_m['n_non_maps_unlabeled_holdout_keys']} without sidecar rows)",
         f"- sidecar `runaway_like=yes` keys: **{miss_m['runaway_positive_label_keys_total']} total**, "
         f"**{miss_m['runaway_positive_unique_keys']} state-valid**, "
         f"**{miss_m['runaway_positive_label_keys_gated_no_tail']} gated for missing tail**",
@@ -201,7 +203,8 @@ def main() -> int:
         "The probe found a state-valid positive key and produced descriptive fire coverage",
         "on it, but that is not a miss rate: three other positive label keys are not",
         "state-eligible, and there is no validated decision window or negative-control set.",
-        "The non-Maps rows are unlabeled controls, not false-positive labels.",
+        "The non-Maps rows are a holdout population; sidecar overlap is not treated as a",
+        "false-positive label or a miss score.",
         "",
         "## Remaining open",
         "",

@@ -140,7 +140,7 @@ def non_maps_holdout_keys() -> list[dict[str, Any]]:
             "full_state": full,
             "harness": pack.get("harness"),
             "project": project,
-            "population": "non_maps_unlabeled_holdout",
+            "population": "non_maps_holdout",
         })
     return selected
 
@@ -370,6 +370,13 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         )
     }
     holdout_keys = unique_keys - labeled_keys
+    non_maps_keys = {
+        (row.get("session_id"), row.get("checkpoint"))
+        for row in successful
+        if row.get("population") == "non_maps_holdout"
+    }
+    non_maps_labeled_keys = non_maps_keys & labeled_keys
+    non_maps_unlabeled_keys = non_maps_keys - labeled_keys
     positive_keys = {
         key for key in unique_keys
         if label_at(labels, {"session_id": key[0], "checkpoint": key[1]}, "runaway_like_at_checkpoint") == "yes"
@@ -392,9 +399,11 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         "n_exact_label_keys_planned": len(keys),
         "n_unique_keys_successful": len(unique_keys),
         "n_labeled_keys_successful": len(labeled_keys),
-        "n_holdout_keys_successful": len(holdout_keys),
+        "n_non_maps_holdout_keys_successful": len(non_maps_keys),
+        "n_non_maps_labeled_holdout_keys": len(non_maps_labeled_keys),
+        "n_non_maps_unlabeled_holdout_keys": len(non_maps_unlabeled_keys),
         "n_holdout_cells_successful": sum(
-            row.get("population") == "non_maps_unlabeled_holdout" for row in successful
+            row.get("population") == "non_maps_holdout" for row in successful
         ),
         "n_cells_planned": len(cells),
         "n_cells_successful": len(successful),
@@ -434,7 +443,9 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
         "after capture; no label value is sent to TypeSafe.",
         "",
         f"- exact label keys planned: **{len(keys)}**",
-        f"- non-Maps unlabeled holdout cells: **{meters['n_holdout_cells_successful']}**",
+        f"- non-Maps holdout cells: **{meters['n_holdout_cells_successful']}** "
+        f"({meters['n_non_maps_labeled_holdout_keys']} sidecar-labeled keys; "
+        f"{meters['n_non_maps_unlabeled_holdout_keys']} without sidecar rows)",
         f"- planned cells: **{len(cells)}**",
         f"- successful cells: **{len(successful)}**",
         f"- HTTP counts: `{json.dumps(meters['http_counts'], sort_keys=True)}`",
@@ -477,13 +488,13 @@ def main() -> int:
     (OUT / "cells_plan.json").write_text(json.dumps({
         "wave": "typesafe-miss-identifiability",
         "scope": "diagnostic",
-        "selection": "all exact sidecar checkpoint keys with non-empty prefix tail",
+        "selection": "tail-bearing exact sidecar keys plus non-Maps representative holdout keys",
         "n_exact_label_keys": len(keys),
         "n_non_maps_holdout_keys": len(holdout_keys),
-        "n_state_variants": len(STATE_VARIANTS),
+        "n_state_variants": len(STATE_VARIANTS) + 1,
         "n_questions": len(QUESTIONS),
         "n_cells_planned": len(cells),
-        "state_variants": list(STATE_VARIANTS),
+        "state_variants": [*STATE_VARIANTS, HOLDOUT_STATE_VARIANT],
         "questions": list(QUESTIONS),
         "framing": "H2",
         "label_values_in_prompt": False,
