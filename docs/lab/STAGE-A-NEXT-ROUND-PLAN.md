@@ -154,3 +154,41 @@ Findings:
 Next: (1) variants of the four replicating observable signals (thresholds, window sizes, framing) and 2-3
 more concrete loop signals; (2) do not add more judgement signals; (3) a combined score over the best 4-5 is the
 candidate for the held-out test, to be frozen only after a dev-replicated round and Cody's agreement on the freeze.
+
+## Round 8 results and the zero-call control (6,012 calls, 0 errors, $1.20)
+
+Setup: 11 new signals (threshold variants of the four replicating R7 signals; four new concrete signals) x 4
+framings x 3 windows (8, 14, 24 batches), with the R7 originals and ui-visual as controls
+(`analysis/R8_an.py`; target `adjust`, 501 labels).
+
+- Thresholds and windows barely matter. Variants of the same signal land within ~0.02 AUC of each other (churn 2+/5+
+  0.675/0.671 vs 0.669; fanout 3+/8+ 0.664/0.652 vs 0.652; streak 6+/20+ 0.654/0.677 vs 0.657). Best single
+  signals sit at 0.66-0.69 and none is distinguishable from its neighbours. Window 8 is as good as 24 (state tokens
+  scale with the window, so the 8-batch state is the cheapest and loses nothing; ui-visual and fanout are slightly
+  better at 8). Framing means are all 0.63-0.64.
+- New concrete signals are weak: shell-heavy-window 0.54, new-file-creation-burst 0.56 (both hurt the baseline),
+  destructive-shell-commands 0.60, edit-without-prior-read 0.63 (no value over baseline).
+
+Zero-call control (`analysis/R8_zero.py`): the same four counts computed by plain code from the transcripts, no model.
+
+| feature | zero-call AUC | Jev (matching signal) | corr Jev vs counter |
+|---|---|---|---|
+| max edits to one file (14 batches) | 0.647 | 0.675 | 0.77 |
+| distinct files edited | 0.634 | 0.664 | 0.74 |
+| batches since last human prompt | 0.669 | 0.677 | 0.89 |
+| browser/screenshot calls | 0.544 | 0.663 | 0.43 |
+| sum of the four | 0.683 | 0.706 | |
+
+- A free counter reproduces most of the "observable-loop" lift. Jev's score tracks the counters (corr 0.74-0.89);
+  adding the four Jev signals to the four counters lifts AUC 0.683 -> 0.702 (delta CI +0.007 to +0.032), while
+  adding the counters to Jev does nothing (-0.016 to +0.007).
+- Where Jev gains is where a detector is hard to write: the browser/UI-loop signal (0.66 vs 0.54 for a name regex),
+  and ui-visual-iteration-loop (0.69). Where a count is enough, code is as good and costs nothing.
+- Revised reading for the white paper: Jev adds a small but real increment over cheap counters, concentrated in
+  signals that need a judgement over tool names/arguments; its main use is as a way to find and express such signals
+  and as a candidate scorer when no regex exists, not as a better counter. All AUCs stay modest (0.65-0.71).
+
+Next: (1) stop sweeping thresholds/windows (flat); (2) hunt judgement-needing signals where counters fail
+(ui/visual loops, "same goal retried by different means", "agent re-doing what it did earlier") and measure their
+increment over the zero-call baseline, not over the master signal; (3) add the zero-call counter baseline to every
+analysis from now on. Held-out remains sealed; no freeze.
