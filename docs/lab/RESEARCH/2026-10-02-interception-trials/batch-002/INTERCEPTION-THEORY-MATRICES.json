@@ -1,5 +1,5 @@
 {
-  "matrix_revision": "interception-theories-v1",
+  "matrix_revision": "interception-theories-v2",
   "generated_at": "2026-10-02",
   "soft_standard_hold": true,
   "product_wiring": false,
@@ -19,6 +19,45 @@
       "role": "optional_matched_confirmation",
       "execution": "same frozen cells; never reference gold"
     }
+  },
+  "execution_adapter": {
+    "landed_multidriver_is_pattern_only": true,
+    "reasons_not_drop_in": [
+      "hardcoded shared repository path",
+      "Wave-0 response mapper does not parse theory labels",
+      "oversize state silently falls back to stats_only"
+    ],
+    "repo_resolution": [
+      "WF_REPO",
+      "git rev-parse --show-toplevel"
+    ],
+    "output_root": "batch-002/theory-trials/<theory_id>/<driver>",
+    "typesafe": {
+      "endpoint": "https://api.typesafe.ai/v1/systemone",
+      "model": "jev-1.13.0",
+      "calls": "one request per cell"
+    },
+    "flash_opencode": {
+      "command": [
+        "opencode",
+        "run",
+        "--model",
+        "deepseek/deepseek-flash",
+        "--format",
+        "default",
+        "<prompt>"
+      ],
+      "stdin": "DEVNULL"
+    },
+    "custom_response_parser_required": true,
+    "existing_typesafe_lever_join_compatible": false,
+    "outcome_join": "derive in theory output after capture",
+    "oversize_state_policy": "block; never substitute stats_only or another projection",
+    "protected_existing_outputs": [
+      "typesafe/",
+      "flash-hframings/",
+      "luna/"
+    ]
   },
   "reference": {
     "labels": "outcome-labels.jsonl",
@@ -50,6 +89,17 @@
   "natural_state_preflight": {
     "state_revision": "trial-prefix-v1",
     "source": "recorded source transcript through checkpoint only",
+    "serialized_character_ceiling": 2400,
+    "field_budgets": {
+      "anchor_characters": 240,
+      "delta_paths": 4,
+      "delta_path_characters_each": 120,
+      "tail_events": 8,
+      "tail_excerpt_characters_each": 120
+    },
+    "t2_prior_projection_character_ceiling": 900,
+    "t2_paired_state_character_ceiling": 3500,
+    "clipping_meter_required": true,
     "required_fields": [
       "brief_or_title_anchor",
       "cumulative_prefix_counters",

@@ -91,6 +91,45 @@ deterministically shuffled per repeat. Luna may mirror a confirmatory cut, but
 driver agreement is reported only as a secondary diagnostic. Never majority
 vote drivers into a reference label.
 
+### Execution adapter boundary
+
+The landed `run_batch002_multidriver.py` is a driver-pattern source, not a
+drop-in runner for these matrices:
+
+- it hardcodes `/home/codyh/workspace/workflow-plugin`, which may be another
+  Soft HOLD seat's dirty clone;
+- its existing response mapper knows the Wave-0 binary/Likert/four-class
+  labels, not the frozen theory labels above;
+- states over roughly 3,500 serialized characters silently fall back to
+  `stats_only`, which would invalidate these comparisons.
+
+The execution seat must use a trial-local adapter under
+`batch-002/theory-trials/<theory_id>/<driver>/`. It may reuse the TypeSafe HTTP
+and Flash OpenCode call patterns, but it must:
+
+1. resolve the repository from `WF_REPO` (or `git rev-parse --show-toplevel`);
+   never write through the landed hardcoded path;
+2. send TypeSafe cells to System One `jev-1.13.0` one request per cell, and
+   Flash batches through
+   `opencode run --model deepseek/deepseek-flash --format default`;
+3. serialize and parse the exact theory response labels; do not route custom
+   rows through the existing lever response mapper;
+4. write a new output directory and leave `typesafe/`, `flash-hframings/`,
+   `luna/`, and the shared clone untouched;
+5. block a cell whose frozen state exceeds its declared budget; never
+   substitute `stats_only` or another state under the same cell id; and
+6. derive the outcome join in the theory output after capture. Do not feed the
+   custom-label stream to `typesafe_lever_join.py`, whose expected signature
+   is the existing `Wave-0-multi` lever schema.
+
+`trial-prefix-v1` has a **2,400-character serialized ceiling**: anchor ≤240
+characters, selected prefix counters, selected delta fields (at most four
+paths, each ≤120 characters), and eight excerpts ≤120 characters each. T2's
+prior projection is separately capped at **900 characters** (selected
+counters/delta + last two relative events), so `paired_15` stays within
+**3,500 characters**. Preflight reports clipping by field and blocks any card
+that still exceeds its ceiling.
+
 Every result row must carry `matrix_revision`, `theory_id`, `arm_id`,
 `repeat`, `session_id`/card id, checkpoint, driver, state hash, parsed label,
 fire, rationale, error, and `soft_standard_hold=true`. Build `cell_id` from
