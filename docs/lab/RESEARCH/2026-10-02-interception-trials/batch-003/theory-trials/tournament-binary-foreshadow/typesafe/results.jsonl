@@ -1,0 +1,8 @@
+{"cell_id": "bb5931b9ca922763", "worker_id": "92a48e004519", "checkpoint": 75, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "4f10e2a0a6f1099e", "worker_id": "92a48e004519", "checkpoint": 90, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "4cae66e1964e6bac", "worker_id": "bb6165018de0", "checkpoint": 75, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "48597132b6436a71", "worker_id": "bb6165018de0", "checkpoint": 90, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "2ab3ab6700a91d33", "worker_id": "0aab88c525de", "checkpoint": 75, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "a61d8129251194c3", "worker_id": "0aab88c525de", "checkpoint": 90, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "0b276ed8a85355b1", "worker_id": "036ff3ed4a89", "checkpoint": 75, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
+{"cell_id": "87d6087593d8127f", "worker_id": "036ff3ed4a89", "checkpoint": 90, "response_label": null, "response_class": null, "decision": "dry_run", "fire": null, "error": null}
