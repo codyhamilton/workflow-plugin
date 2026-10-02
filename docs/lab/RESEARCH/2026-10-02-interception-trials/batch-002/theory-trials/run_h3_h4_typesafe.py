@@ -323,6 +323,7 @@ def post_cell(approach: Approach, out: Path, cell: dict[str, Any]) -> dict[str, 
             result["decision"] = "fire" if choice == "fire_now" else "defer"
             result["fire"] = choice == "fire_now"
             result["response_label"] = choice
+            result["response_class"] = choice
         else:
             result["error"] = f"unexpected response choice: {choice!r}"
     except urllib.error.HTTPError as exc:
