@@ -50,10 +50,16 @@ STAGE_1 = {
     "type": "choice",
     "instructions": "In the shown window, did this trajectory become unproductive at some api_turn?",
     "labels": ["event_observed", "censored_productive", "censored_unclear"],
+    "criteria": {
+        "event_observed": "At least one api_turn is identified where continuing became a mistake.",
+        "censored_productive": "The shown trajectory remained productive through the window.",
+        "censored_unclear": "The evidence is insufficient to distinguish an event from productive continuation.",
+    },
 }
 STAGE_2 = {
-    "type": "integer|null",
-    "instructions": "If event_observed: earliest api_turn where continuing became a mistake. Else null.",
+    "type": "noul",
+    "answer_contract": "integer|null",
+    "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null.",
 }
 
 
@@ -152,6 +158,20 @@ def answer_value(answer: dict[str, Any]) -> Any:
     return answer.get("value", answer.get("text"))
 
 
+def integer_or_null(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value
+    text = str(value).strip().lower().strip("`")
+    if text in {"", "null", "none", "n/a"}:
+        return None
+    try:
+        return int(text)
+    except ValueError:
+        return value
+
+
 def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
     answers = payload.get("answers") or {}
     parsed = {}
@@ -170,7 +190,8 @@ def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
             "value": answer_value(answer),
         }
     stage_1 = parsed["stage_1"]["response_label"]
-    stage_2 = parsed["stage_2"]["value"]
+    stage_2 = integer_or_null(parsed["stage_2"]["value"])
+    parsed["stage_2"]["value"] = stage_2
     parsed["gate_ok"] = (
         stage_2 is not None
         if stage_1 == "event_observed"
