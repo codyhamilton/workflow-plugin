@@ -92,6 +92,8 @@ def core_cells(matrix: dict, strata: dict, drivers: set[str], blocks: set[str]):
                         "maps_family": session["maps_family"],
                         "corpus_source": session["corpus_source"],
                         "state_contract": session["state_contract"],
+                        "canonical_projection_required": True,
+                        "delta_interval": [30, 45],
                         "snapshot_source": snapshots[session["session_id"]],
                         "canonical_questions": {
                             "fire_now": {

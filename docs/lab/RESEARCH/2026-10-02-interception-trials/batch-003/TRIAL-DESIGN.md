@@ -126,9 +126,12 @@ Design A, frozen before any batch-003 output is opened.
 
 ### B2. Harness-native state prerequisite
 
-The 17 non-Claude sessions must gain a prefix-only, harness-native contract
-for `tail`, `markers`, `phase_hints`, `recent`, `brief_anchor`, and
-`delta_since_prior`. The contract is not permission to fabricate empty state:
+All 28 sessions must rebuild a prefix-only canonical projection for `tail`,
+`markers`, `phase_hints`, `recent`, `brief_anchor`, and
+`delta_since_prior`; the 17 non-Claude sessions additionally need
+harness-native extraction. Even the 11 claude-code rows must not reuse the
+stored `snapshots-mid` t=45 delta, which is 40→45 rather than the frozen
+30→45 interval. The contract is not permission to fabricate empty state:
 
 - `tail` is the last three ordered assistant/tool records at or before the
   scored checkpoint;
@@ -221,8 +224,11 @@ as a positive control. For each question, freeze:
 - 8 harness/project-matched quiet sessions;
 - 0 ambiguous sessions.
 
-If eight positives do not exist, expand the corpus before spending. Do not turn
-ambiguous or empty-state sessions into controls.
+Panels may use the frozen 28-session replay core plus the eight fresh
+validation sessions. If eight positives do not exist there, block this
+factorial. Any expansion requires a new manifest revision that adds both w0
+and w1 cells and recalculates N before responses. Do not turn ambiguous or
+empty-state sessions into controls.
 
 Run two wordings on the canonical #109 state:
 
@@ -294,16 +300,18 @@ near-done/`none` session. Never use the median-of-reached selector.
 |---|---:|
 | Sessions | 12 |
 | Preferred scenarios | 12 |
-| Minimum reached checkpoints/session | 3 (45, 60, 75) |
-| **Minimum cells/driver** | **432** |
+| Minimum reached checkpoints/session | 3 (45, 60, 75), plus t=90 on four null-reference sessions |
+| **Minimum cells/driver** | **480** |
 | Maximum if all reach t=120 | 864 |
-| **Minimum all-driver calls** | **1,296** |
+| **Minimum all-driver calls** | **1,440** |
 
 Meters include `n_at_risk` and `n_never_reached` at every checkpoint, plus
 never-fire, constant-75, and constant-90 fire times. Each null must have at
-least four event-supported sessions under Design A. If Design A misses its
-terminal gate, this matrix is not materialized. A point tie, confidence
-interval crossing zero, or unsupported null is not a win.
+least four event-supported sessions under Design A, and the selected 12 must
+include the four constant-90 references and four runaway/window-intersection
+sessions. If Design A misses its terminal gate, this matrix is not
+materialized. A point tie, confidence interval crossing zero, or unsupported
+null is not a win.
 
 ## Success metrics
 
@@ -333,9 +341,9 @@ non-Maps rows. Harness rows are descriptive because codex/cursor N is two.
 - **Preliminary sensitive:** replay-core absolute paired difference ≥0.20 and
   its 95% interval excludes zero.
 - **Confirmed sensitive:** the fresh eight-session extension has the same sign
-  and an absolute difference ≥0.20.
-- **Representation-robust:** every absolute difference ≤0.10 and every 95%
-  interval lies inside `[-0.15, 0.15]`.
+  and an absolute difference ≥0.20, with its 95% interval excluding zero.
+- **Representation-robust:** both replay core and fresh validation have every
+  absolute difference ≤0.10 and every 95% interval inside `[-0.15, 0.15]`.
 - Otherwise: **unresolved or preliminary only**; no post-hoc preferred state.
 
 ### Outcome-linked card
@@ -365,7 +373,7 @@ Only after Design A passes:
 | 5 | B03–B07, then late-replay B02 | 2,592 | Replay core reaches 1,008/driver |
 | 6 | Eight-fresh-session state validation | 864 | Independent sign check complete |
 | 7 | Five-question w1 add-on | 240 | Projected-state panels complete |
-| 8 | Fixed-schedule ranking extension | ≥1,296 | **Only** if label + null-support gates pass |
+| 8 | Fixed-schedule ranking extension | ≥1,440 | **Only** if label + null-support gates pass |
 
 This order spends zero judge calls on the two structural blockers, prevents a
 new TypeSafe-only pool, and prevents Flash parse loss from being discovered

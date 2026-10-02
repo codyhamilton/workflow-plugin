@@ -102,6 +102,7 @@ def validate() -> dict:
         8 * len(matrix["questions"]) * len(matrix["states"])
     ) == 288
     assert core["fresh_validation_extension"]["n_cells_all_drivers"] == 864
+    assert matrix["state_contract_gate"]["canonical_rebuild_sessions_at_t45"] == 28
 
     zero = matrix["zero_fire_factorial"]
     panel_sessions = (
@@ -115,6 +116,11 @@ def validate() -> dict:
     assert zero["new_cells_per_driver_after_core_reuse"] == (
         len(zero["questions"]) * panel_sessions
     ) == 80
+
+    ranking = matrix["fixed_schedule_ranking_extension"]
+    assert ranking["minimum_cells_per_driver_with_t90_support"] == (
+        12 * ((12 * 3) + 4)
+    ) == 480
 
     nulls = matrix["current_12x9_h2_nulls"]
     exact_sessions = nulls["sessions"]

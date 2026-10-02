@@ -187,8 +187,10 @@
   },
   "state_contract_gate": {
     "target_sessions": "SESSION-STRATA.json plus every fresh validation and ranking-extension session at every reached fixed checkpoint",
-    "native_sessions": 11,
+    "source_field_native_sessions": 11,
     "adapter_sessions": 17,
+    "canonical_rebuild_sessions_at_t45": 28,
+    "native_rebuild_rule": "Rebuild all batch-003 projections from prefix records. Even the 11 claude-code sources must recompute delta_since_prior over [30,45]; do not reuse the snapshots-mid 40-to-45 stored delta.",
     "required_non_claude_contract": {
       "tail": "Last three harness-native assistant/tool records at or before checkpoint; preserve order and source role.",
       "markers": "Prefix-only lexical/tool counts using the growth-fill-v1 field names.",
@@ -287,7 +289,7 @@
       "annotation": "Before any batch-003 response is opened, a human blind to judge outputs inspects the exact canonical projected state, marks target evidence present, absent, or ambiguous at t=45, and cites the projected fields that carry the evidence.",
       "projection_eligibility": "A transcript-positive session is not positive unless the evidence survives into the canonical state used for this question.",
       "matching": "Match positive and quiet panels by harness first, then project and prefix activity density; keyed session_id order breaks ties.",
-      "insufficient_positive_rule": "Expand the corpus before calls; do not relabel ambiguous or reuse empty state as a positive control."
+      "insufficient_positive_rule": "If the frozen 28-session replay core plus eight-session fresh validation set cannot supply 8 positive and 8 quiet projected states, block this factorial. Any corpus expansion requires a new manifest revision that adds both w0 and w1 cells and recalculates call counts before responses."
     },
     "analysis_cells_per_driver": 160,
     "analysis_cells_all_drivers": 480,
@@ -364,9 +366,10 @@
     "scenarios": 12,
     "states": "The one preferred state frozen for each question in GROWTH-RANKING.json.",
     "checkpoints": "Every reached member of fixed_schedule; no median-of-reached selector.",
-    "minimum_cells_per_driver_through_t75": 432,
+    "minimum_cells_per_driver_with_t90_support": 480,
     "maximum_cells_per_driver_if_all_reach_t120": 864,
-    "minimum_formula_per_driver": "12 sessions * 12 scenarios * checkpoints 45,60,75",
+    "minimum_formula_per_driver": "12 scenarios * ((12 sessions * checkpoints 45,60,75) + (4 constant-90 reference sessions * checkpoint 90))",
+    "selection_support": "The selected 12 must themselves include the four runaway/window-intersection sessions and four constant-90 reference sessions required by the terminal gate; support elsewhere in the labeled pool does not count.",
     "holdout": "Four fresh response-blind sessions selected after labels are frozen and before calls; include at least one non-Maps session, one runaway session with a reached fixed checkpoint inside its window, and one near-done/none reference session.",
     "nulls": [
       "never_fire",
@@ -401,8 +404,8 @@
       ],
       "interval": "Session-clustered bootstrap interval, reported separately by driver and Maps versus non-Maps; harness rows are descriptive because codex/cursor N is two.",
       "replay_status": "The 28-session core is historically response-exposed and yields preliminary replay estimates only.",
-      "sensitive": "Preliminary sensitive: per-question absolute paired difference at least 0.20 with a 95 percent interval excluding zero. Confirmed sensitive: the fresh eight-session validation extension has the same sign and an absolute difference at least 0.20.",
-      "representation_robust": "All absolute paired differences at most 0.10 and all 95 percent intervals contained in [-0.15, 0.15].",
+      "sensitive": "Preliminary sensitive: per-question absolute paired difference at least 0.20 with a 95 percent interval excluding zero. Confirmed sensitive: the fresh eight-session validation extension has the same sign, an absolute difference at least 0.20, and its 95 percent interval excludes zero.",
+      "representation_robust": "Core and fresh validation both have all absolute paired differences at most 0.10 and all 95 percent intervals contained in [-0.15, 0.15].",
       "otherwise": "Unresolved or preliminary only; do not select one state post hoc."
     },
     "zero_fire_axes": {
@@ -484,7 +487,7 @@
     {
       "rank": 8,
       "item": "Run the fixed-schedule ranking extension only if the labeled terminal gate is met.",
-      "judge_calls": "1296 minimum across three drivers; at-risk growth above t=75 is additive"
+      "judge_calls": "1440 minimum across three drivers, including four t=90 reference sessions; at-risk growth above required support is additive"
     }
   ]
 }
