@@ -580,6 +580,13 @@ def main() -> int:
     )
     out = BATCH / out_name
     out.mkdir(parents=True, exist_ok=True)
+    previous_meters = {}
+    meters_path = out / "meters.json"
+    if meters_path.exists():
+        try:
+            previous_meters = json.loads(meters_path.read_text())
+        except (OSError, ValueError):
+            previous_meters = {}
     plan = {
         "stage": STAGE, "target": TARGET if STAGE == "cases" else len(cells),
         "n_planned": len(cells), "n_sessions": len({c["session_id"] for c in cells}),
@@ -637,6 +644,11 @@ def main() -> int:
         "by_wave2_family": dict(Counter(r.get("wave2_family") for r in all_rows)),
         "generated_at": datetime.now(AEST).isoformat(timespec="seconds"),
     }
+    if not todo and previous_meters:
+        meters["new"] = previous_meters.get("new", 0)
+        meters["tok_in"] = previous_meters.get("tok_in", 0)
+        meters["tok_out"] = previous_meters.get("tok_out", 0)
+        meters["wall_s"] = previous_meters.get("wall_s", meters["wall_s"])
     (out / "meters.json").write_text(json.dumps(meters, indent=2) + "\n")
     by_case = defaultdict(lambda: [0, 0])
     for row in all_rows:

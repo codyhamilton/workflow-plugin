@@ -64,7 +64,25 @@ Analytic selection only — [#110](https://github.com/codyhamilton/workflow-plug
 
 ---
 
-## 4. Per-stream meter sheets (Flash / Luna / Wave-0)
+## 4. TypeSafe continuous volume wave 2
+
+The post-#112 replication/depth append is documented in
+[`TYPESAFE-VOLUME-WAVE2.md`](../2026-10-02-interception-trials/batch-002/TYPESAFE-VOLUME-WAVE2.md).
+Its canonical machine meters are
+[`typesafe-growth-wave2/meters.json`](../2026-10-02-interception-trials/batch-002/typesafe-growth-wave2/meters.json).
+
+| Family | Cells | Replication | Fires | API errors |
+|--------|------:|-------------|------:|-----------:|
+| Preferred GROWTH cut | 576 | 12 pairs × 16 tail-valid sessions × early/mid/late | 29 | 0 |
+| Case catalog | 3,402 | 1,134 cases × 3 checkpoint replications | 135 | 0 |
+| **Wave 2 total** | **3,978** | **41 corpus sessions; 75 tail-less GROWTH cells gated** | **164** | **0** |
+
+This is descriptive Soft HOLD evidence only; it does not establish
+precision/recall, false positives, misses, or a behavior threshold.
+
+---
+
+## 5. Per-stream meter sheets (Flash / Luna / Wave-0)
 
 | Stream | `METERS.md` | Rows (landed) | Scored @ land | Soft HOLD note |
 |--------|-------------|-------------:|--------------:|----------------|
