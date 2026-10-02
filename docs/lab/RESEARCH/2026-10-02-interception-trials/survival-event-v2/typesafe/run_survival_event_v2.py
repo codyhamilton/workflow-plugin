@@ -57,9 +57,13 @@ STAGE_1 = {
     },
 }
 STAGE_2 = {
-    "type": "noul",
+    "type": "choice",
     "answer_contract": "integer|null",
     "instructions": "If event_observed, return only the earliest api_turn integer where continuing became a mistake; otherwise return null.",
+    "criteria": {
+        "null": "No event was observed in the shown window.",
+        **{str(turn): f"The earliest event occurred at api_turn {turn}." for turn in range(1, 151)},
+    },
 }
 
 
@@ -190,7 +194,11 @@ def parse_answers(payload: dict[str, Any]) -> dict[str, Any]:
             "value": answer_value(answer),
         }
     stage_1 = parsed["stage_1"]["response_label"]
-    stage_2 = integer_or_null(parsed["stage_2"]["value"])
+    stage_2 = integer_or_null(
+        parsed["stage_2"]["response_label"]
+        if parsed["stage_2"]["wire_type"] == "choice"
+        else parsed["stage_2"]["value"]
+    )
     parsed["stage_2"]["value"] = stage_2
     parsed["gate_ok"] = (
         stage_2 is not None
@@ -233,7 +241,10 @@ def post(cell: dict[str, Any], key: str) -> dict[str, Any]:
             "http": status,
             "error": None,
             "answers": answers,
-            "choice_scrape_ok": answers["stage_1"]["choice_scrape_ok"],
+            "choice_scrape_ok": all(
+                answers[question_id]["choice_scrape_ok"]
+                for question_id in ("stage_1", "stage_2")
+            ),
             "raw_response": f"raw/{cell['cell_id']}-response.json",
             "usage": payload.get("usage"),
             "ts": datetime.now(AEST).isoformat(timespec="seconds"),
