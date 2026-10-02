@@ -1,0 +1,46 @@
+{
+  "stage": "preferred",
+  "target": 192,
+  "n_planned": 192,
+  "n_sessions": 16,
+  "n_distinct_scenarios": 12,
+  "n_distinct_cases": 0,
+  "exact_labeled_cells": 108,
+  "diagnostic_cells": 84,
+  "gated": {
+    "no_tail": 25
+  },
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "window_cartesian": false,
+  "n_cells": 192,
+  "new": 192,
+  "errors": 0,
+  "tok_in": 123112,
+  "tok_out": 9784,
+  "wall_s": 4.9,
+  "http_errors": 0,
+  "fire": 8,
+  "by_response_class": {
+    "binary_fire": 192
+  },
+  "by_state": {
+    "markers_focus": 64,
+    "recent_delta_brief": 128
+  },
+  "by_question": {
+    "dependency_wait": 16,
+    "context_thrash_compact": 16,
+    "idle_tool_spin": 16,
+    "test_flake_loop": 16,
+    "brief_abandon": 16,
+    "docs_only_drift": 16,
+    "scope_creep_silent": 16,
+    "edit_churn": 16,
+    "bash_retry_storm": 16,
+    "parallel_agent_thrash": 16,
+    "speculative_rewrite": 16,
+    "deliverable_orphan": 16
+  },
+  "generated_at": "2026-10-02T12:40:10+10:00"
+}
