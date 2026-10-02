@@ -1,0 +1,345 @@
+[
+  {
+    "T": 296,
+    "early_window_end": 120,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 36,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 4,
+      "compaction_last_le120": 12,
+      "edit_write_absent": true,
+      "last_checkpoint_le120": 75,
+      "no_mutation": true,
+      "peak_ctx_first": 129961,
+      "reread_cluster": true,
+      "reread_max": 10,
+      "tool_histogram_last": {
+        "Bash": 55,
+        "Read": 31
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/92a48e004519-dry-run-metrics-20261001-194107.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/92a48e004519-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "7ef052461bca7e8488939e1b9ad4ed9416dc53b5a7a6740dc47d50677e406ced",
+    "stimulus_chars": 5956,
+    "worker_id": "92a48e004519"
+  },
+  {
+    "T": 109,
+    "early_window_end": 109,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 167,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 2,
+      "compaction_last_le120": 10,
+      "edit_write_absent": true,
+      "last_checkpoint_le120": 75,
+      "no_mutation": true,
+      "peak_ctx_first": 123714,
+      "reread_cluster": true,
+      "reread_max": 10,
+      "tool_histogram_last": {
+        "Bash": 42,
+        "Read": 45
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/ca977b9ca0dd-dry-run-metrics-20261001-204508.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/ca977b9ca0dd-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "4e2e8eb6b060c2407668a8a5ffff9b9f5b854f1be0eab665d7599afca971d337",
+    "stimulus_chars": 6457,
+    "worker_id": "ca977b9ca0dd"
+  },
+  {
+    "T": 89,
+    "early_window_end": 89,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 2284,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 0,
+      "edit_write_absent": true,
+      "last_checkpoint_le120": 75,
+      "no_mutation": true,
+      "peak_ctx_first": 92950,
+      "reread_cluster": true,
+      "reread_max": 4,
+      "tool_histogram_last": {
+        "Bash": 56,
+        "Monitor": 6,
+        "Read": 9,
+        "ToolSearch": 1
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/87a380bc64ff-dry-run-metrics-20261001-214046.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/87a380bc64ff-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "7168467e2d497b3de6c7412181094bb8cc0c7c374f996013a8e9256817f0cd4b",
+    "stimulus_chars": 6586,
+    "worker_id": "87a380bc64ff"
+  },
+  {
+    "T": 154,
+    "early_window_end": 120,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 2174,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 0,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 75,
+      "no_mutation": false,
+      "peak_ctx_first": 121906,
+      "reread_cluster": true,
+      "reread_max": 3,
+      "tool_histogram_last": {
+        "Bash": 66,
+        "Monitor": 2,
+        "Read": 8,
+        "ToolSearch": 1,
+        "Write": 1
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/bb6165018de0-dry-run-metrics-20261001-194107.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/bb6165018de0-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "617b8baffc4ac23c25960d4f9fcc4366f1a7c3b7cfbb1c6981a6de07f5a03fe4",
+    "stimulus_chars": 5608,
+    "worker_id": "bb6165018de0"
+  },
+  {
+    "T": 93,
+    "early_window_end": 93,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 1289,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 0,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 75,
+      "no_mutation": false,
+      "peak_ctx_first": 93883,
+      "reread_cluster": false,
+      "reread_max": 0,
+      "tool_histogram_last": {
+        "Agent": 6,
+        "Bash": 25,
+        "Edit": 6,
+        "Monitor": 28,
+        "Read": 8,
+        "Skill": 1,
+        "ToolSearch": 1
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/15f24c7ba18c-dry-run-metrics-20261001-214046.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/15f24c7ba18c-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "fd1282d3ac2230b5591dea77dd04f8979098c4f74df084ba4cceacc8236f57b0",
+    "stimulus_chars": 5384,
+    "worker_id": "15f24c7ba18c"
+  },
+  {
+    "T": 97,
+    "early_window_end": 97,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 3905,
+      "checkpoints_seen_le120": 2,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 2,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 90,
+      "no_mutation": false,
+      "peak_ctx_first": 146033,
+      "reread_cluster": true,
+      "reread_max": 3,
+      "tool_histogram_last": {
+        "Agent": 2,
+        "Bash": 61,
+        "Edit": 1,
+        "Monitor": 5,
+        "Read": 7,
+        "SendMessage": 2,
+        "Skill": 1,
+        "ToolSearch": 4
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/8e36f8e80baa-dry-run-metrics-20261001-214046.json",
+    "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/8e36f8e80baa-judge-packs-20261001-214046.jsonl",
+    "source_pack_sha256": "36446e414f83e03a6b6acfe42035daaac8c521e413504a91c9f874690cffdb2b",
+    "stimulus_chars": 4256,
+    "worker_id": "8e36f8e80baa"
+  },
+  {
+    "T": 122,
+    "early_window_end": 120,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 251,
+      "checkpoints_seen_le120": 4,
+      "compaction_delta_le120": 2,
+      "compaction_last_le120": 8,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 120,
+      "no_mutation": false,
+      "peak_ctx_first": 125620,
+      "reread_cluster": true,
+      "reread_max": 3,
+      "tool_histogram_last": {
+        "Bash": 109,
+        "Edit": 1,
+        "Monitor": 1,
+        "Read": 12,
+        "ToolSearch": 2,
+        "Write": 2
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/daf933273c8f-dry-run-metrics-20261001-204508.json",
+    "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/daf933273c8f-judge-packs-20261001-204508.jsonl",
+    "source_pack_sha256": "bb1afbd4874d586c14645da602b4364c3581edfed58c62ffac346803975cec47",
+    "stimulus_chars": 6820,
+    "worker_id": "daf933273c8f"
+  },
+  {
+    "T": 83,
+    "early_window_end": 83,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 62,
+      "checkpoints_seen_le120": 1,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 2,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 75,
+      "no_mutation": false,
+      "peak_ctx_first": 138945,
+      "reread_cluster": false,
+      "reread_max": 0,
+      "tool_histogram_last": {
+        "Bash": 75,
+        "Write": 2
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/07357f196666-dry-run-metrics-20261001-214046.json",
+    "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/07357f196666-judge-packs-20261001-214046.jsonl",
+    "source_pack_sha256": "4f180da369413e56fd5f5fae75d7a918ead80bf7fb7bb2e1dbe596a5174ed56c",
+    "stimulus_chars": 1570,
+    "worker_id": "07357f196666"
+  },
+  {
+    "T": 93,
+    "early_window_end": 93,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 3263,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 2,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 75,
+      "no_mutation": false,
+      "peak_ctx_first": 126023,
+      "reread_cluster": true,
+      "reread_max": 5,
+      "tool_histogram_last": {
+        "Bash": 46,
+        "Edit": 7,
+        "Read": 20,
+        "ToolSearch": 1,
+        "Write": 5
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/0677f597286e-dry-run-metrics-20261001-214046.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/0677f597286e-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "51860649397c96a36ced93965d97dd8eafe836719a516adcefe6a300f8018311",
+    "stimulus_chars": 7470,
+    "worker_id": "0677f597286e"
+  },
+  {
+    "T": 76,
+    "early_window_end": 76,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 2586,
+      "checkpoints_seen_le120": 3,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 0,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 75,
+      "no_mutation": false,
+      "peak_ctx_first": 122645,
+      "reread_cluster": false,
+      "reread_max": 0,
+      "tool_histogram_last": {
+        "Bash": 58,
+        "Edit": 4,
+        "Read": 12,
+        "ToolSearch": 1,
+        "Write": 2
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/074c8cf22927-dry-run-metrics-20261001-214046.json",
+    "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/074c8cf22927-judge-packs-20261002-earlycps.jsonl",
+    "source_pack_sha256": "ed8d8c1a6f4f7d555c7ed20412252457b631df3429101ff756722fedb487f2f9",
+    "stimulus_chars": 6312,
+    "worker_id": "074c8cf22927"
+  },
+  {
+    "T": 155,
+    "early_window_end": 120,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 2912,
+      "checkpoints_seen_le120": 4,
+      "compaction_delta_le120": 2,
+      "compaction_last_le120": 4,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 120,
+      "no_mutation": false,
+      "peak_ctx_first": 166945,
+      "reread_cluster": true,
+      "reread_max": 4,
+      "tool_histogram_last": {
+        "Bash": 81,
+        "Edit": 12,
+        "Read": 25,
+        "Write": 2
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/INVENTORY-shape-qual-full-maps-v1-20261001-214046.json",
+    "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/0853bc21d3aa-judge-packs-20261001-202909.jsonl",
+    "source_pack_sha256": "bf6fe6da772757aa63cc5366be0dbb61e82b768664e70a9cecbe44f0058fb10e",
+    "stimulus_chars": 8640,
+    "worker_id": "0853bc21d3aa"
+  },
+  {
+    "T": 94,
+    "early_window_end": 94,
+    "feature_set": "EX-MARKER-1A",
+    "markers": {
+      "assistant_text_chars_last": 2740,
+      "checkpoints_seen_le120": 2,
+      "compaction_delta_le120": 0,
+      "compaction_last_le120": 2,
+      "edit_write_absent": false,
+      "last_checkpoint_le120": 90,
+      "no_mutation": false,
+      "peak_ctx_first": 145806,
+      "reread_cluster": true,
+      "reread_max": 5,
+      "tool_histogram_last": {
+        "Bash": 47,
+        "Edit": 13,
+        "Monitor": 1,
+        "Read": 26,
+        "ToolSearch": 2
+      }
+    },
+    "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/16a958631580-dry-run-metrics-20261001-214046.json",
+    "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/16a958631580-judge-packs-20261001-214046.jsonl",
+    "source_pack_sha256": "4e95b743b1a17a49a91e8ccd032d10f4008374d3da3226189ec73ae2bf6141c2",
+    "stimulus_chars": 4400,
+    "worker_id": "16a958631580"
+  }
+]
