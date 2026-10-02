@@ -13,6 +13,10 @@ extends: docs/lab/PROPOSALS/2026-09-30-jev-cheap-judgement-signals.md use case 1
 
 **Status: researching. Confidence: not high.**
 
+**Parent hypothesis:** [`../JEV-HYPOTHESES.md`](../JEV-HYPOTHESES.md) H2 asks whether Jev can help choose when to continue, close, compact, or hand off a long-running agent while preserving useful work and reducing total cost. The 75-turn first look and 15-turn re-check are candidate measurements, not a proven economic optimum or runtime rule. Exact multi-model exit agreement below was the initial protocol; later shape-signal and interception work broadened the evidence question. This stub is retained as that protocol's record.
+
+**Current research order (Cody, 2026-10-02):** theorise multiple task-grounded signals; establish each signal's association with near useful completion or prolonged continuation; test Jev's confidence for signal presence across state and matcher variants; then combine supported signals into a *continuation-confidence* policy with a modest discount at each ~15-turn re-check. The current first candidate observation is **turn 60**; the turn-75 schedule below is historical. A generic “will this session run long?” question and the older stop-confidence schedules below are contrasts, not the starting instrument. The exact aggregation, discount, and intervention action remain to be measured.
+
 Cody’s bar for calling this design high-confidence is three parts together: the assumptions have been tested, the tests are hard numbers from offline transcript replay, and the framing has been checked against public studies where those studies exist. This stub and the research pack lock the vocabulary, the question set to try, and the measurement protocol. They do not contain those numbers. No recommendation in this file is accepted behaviour.
 
 The resolved cheap-Jev paper stays as written. This pack extends **use case 1 only** (in-session progress). It does not reopen refine, unit-complete, or phase-complete judgements, and it does not edit `gate_thresholds.py` or `jev_signal_schemas.py`.

@@ -12,6 +12,10 @@ confidence: protocol-resolved; framings provisionally ordered; not score-ranked
 
 # Interception / steer-to-stop
 
+**Parent hypothesis:** [`../JEV-HYPOTHESES.md`](../JEV-HYPOTHESES.md) H2 asks whether cheap Jev advice can reduce the *total* cost of long sessions while preserving useful completion. Fire-time and near-done protection are intermediate tests. An observed fire rate or a shorter session alone does not prove the hypothesis; compact/handoff overhead, steer adherence, deliverable quality, and cost remain outcome questions.
+
+**Current research ordering (Cody, 2026-10-02):** establish which qualitative signals predict near useful completion or prolonged continuation, trial Jev confidence for each supported signal across state and matcher variants, and then test a combined, repeatedly discounted *continuation-confidence* policy. The rating-to-fire trials and provisional H1 ranking below remain recorded contrasts, not a shortcut past signal validity.
+
 **Soft Standard HOLD — behaviour ship only.** This paper does not ship behaviour, hooks, Pilot, Standard, Max, or live in-loop Jev. It does not pause trials and it does not treat a thin pilot as evidence. The evidence path is continuous large-n waves on real transcripts, run by TypeSafe, Flash, and Luna, analysed with session-level statistics. Behaviour is built after that evidence is in the paper and Cody accepts it.
 
 **Status: resolved-soft.** Recommendations below are the lab’s current reading of the pack, the adversarial gate, and Wave-0. They are not an accepted runtime policy. batch-002 (240 Flash cells, 22 sessions, one driver) is a decontaminated diagnostic. It is below the scale bar.

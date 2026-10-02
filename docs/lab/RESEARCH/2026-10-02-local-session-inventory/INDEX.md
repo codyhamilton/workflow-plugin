@@ -15,5 +15,6 @@
 | [stats-compact.json](stats-compact.json) | Summaries + shortlist without full session array |
 | [SHORTLIST.md](SHORTLIST.md) | Provisional candidates (deterministic + Flash) |
 | [flash-run.json](flash-run.json) | Flash command metadata |
+| [JEV-CORPUS-UPDATE.md](JEV-CORPUS-UPDATE.md) | Current Cursor/Claude Code transcript recheck for Jev research, with assistant-call versus row-count caveats |
 
 Mirror: `/tmp/2026-10-02-local-session-inventory/`

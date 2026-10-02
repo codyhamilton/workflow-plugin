@@ -1,5 +1,9 @@
 # Research pack — progressive Jev session gates
 
+> **Research history:** Begin new work with the [lab results](../../JEV-RESULTS.md) and [active methodology](../../JEV-METHODOLOGY.md). Cody's current first observation is at turn **60**, with ~15-turn rechecks; this pack's turn-75 `A0` target and stop-confidence sweeps are prior protocols. Their proposed next steps do not supersede the signal-association-first method.
+
+**Current parent hypothesis and research order (Cody, 2026-10-02):** [`../../JEV-HYPOTHESES.md`](../../JEV-HYPOTHESES.md) H2. First theorise and validate several signals against later useful completion or prolonged continuation; then test Jev as a per-signal confidence matcher across state and wording variants; only then combine supported signals and test a discounted continuation-confidence bar at repeated checkpoints. The exact-exit gold and stop-confidence schedules recorded in this pack are historical protocol/contrast, not proof of that policy.
+
 **Date:** 2026-10-01  
 **Slug:** `progressive-jev-session-gates`  
 **Status:** researching. **Confidence: not high.**  
