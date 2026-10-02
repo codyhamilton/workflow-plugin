@@ -202,3 +202,27 @@ Eight new signals (same goal by different means, redoing earlier work, work dive
 - The new signals correlate 0.58-0.69 with the counters and 0.68-0.78 with the master signal; the two with low correlation are the two at chance.
 
 Reading: the hypothesis that judgement signals recover what counters miss is not supported on this label set. R8's small Jev increment (+0.007 to +0.032) over counters does not grow with more judgement-style signals; the jev scores largely re-express activity volume. The white paper should report Jev at about parity with cheap counters (0.65-0.71) on this outcome, with the label noise ceiling as a likely limit. Held-out stays sealed; nothing pushed. Next candidates: a different outcome target (e.g. abort/redirect) where counters may fail, or hand-checking labels.
+
+## Round 9b: other outcome targets (no new Jev calls)
+
+Same R9 scores (13 markers x 4 panels, 8-batch window) and counters, re-scored against other next-message labels (analysis `R9_tgt.py`). Labels: question 144, redirect 117, approve 94, correct 63, refine 45, new_task 28, abort 8 (too few to measure; abort+redirect = 125 is the nearest proxy). AUC < 0.5 means the signal is anti-predictive (higher activity, lower chance of the outcome).
+
+| target | pos | turn | counters4 | counters+turn | master | mean of all Jev signals | Jev over counters+turn (CI) |
+|---|---|---|---|---|---|---|---|
+| adjust (refine/correct) | 108 | .599 | .683 | .691 | .663 | .679 | +.002 (-.006..+.007) |
+| correct | 63 | .601 | .673 | .687 | .648 | .661 | -.003 (-.014..+.006) |
+| refine | 45 | .570 | .645 | .644 | .639 | .652 | +.007 (+.001..+.013) |
+| redirect | 117 | .440 | .387 | .379 | .379 | .385 | .000 |
+| abort+redirect | 125 | .457 | .391 | .388 | .398 | .393 | .000 |
+| any intervention | 233 | .535 | .542 | .546 | .534 | .541 | .000 |
+| question | 144 | .380 | .430 | .391 | .453 | .426 | +.010 (+.003..+.020) |
+| approve | 94 | .609 | .618 | .641 | .591 | .636 | -.002 |
+| new_task | 28 | .485 | .258 | .322 | .280 | .229 | -.039 (-.062..-.020) |
+
+Findings:
+- Counters do not do worse on redirect/abort; they do the same as Jev (both about 0.38-0.39, i.e. 0.61-0.62 inverted). Redirect and new_task follow quiet, finished-looking checkpoints, not busy ones. new_task is the clearest: activity counters reach 0.74 inverted, Jev 0.77 inverted (mean of all signals 0.229).
+- Any-intervention is near chance (0.53-0.55) for every predictor, because adjust and redirect pull opposite ways. A pooled "human intervenes" target hides the signal; adjust must stay the primary target.
+- Jev adds a significant but tiny increment on refine (+0.007) and question (+0.010). Nothing near the +0.03-0.09 seen in R6-R7 against the weaker master baseline.
+- Aborts (8) cannot be measured on this corpus.
+
+Reading for the paper: the signals track "how much is the agent doing without a human in the loop", which predicts correction and refinement positively and redirect and new-task negatively. Cheap counters capture this equally well. A claim that Jev reads something counters cannot is not supported by any target tested.
