@@ -608,6 +608,9 @@ def main() -> int:
             output.write(json.dumps(row, sort_keys=True) + "\n")
             output.flush()
     rows = [done[cell["cell_id"]] for cell in cells if cell["cell_id"] in done]
+    results_path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
+    )
     write_meters(rows, cells)
     write_flip_summary(rows, cells)
     print(
