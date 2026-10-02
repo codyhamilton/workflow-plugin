@@ -192,3 +192,13 @@ Next: (1) stop sweeping thresholds/windows (flat); (2) hunt judgement-needing si
 (ui/visual loops, "same goal retried by different means", "agent re-doing what it did earlier") and measure their
 increment over the zero-call baseline, not over the master signal; (3) add the zero-call counter baseline to every
 analysis from now on. Held-out remains sealed; no freeze.
+
+## Round 9 results: judgement-needing signals against the zero-call baseline
+
+Eight new signals (same goal by different means, redoing earlier work, work diverges from request, workaround instead of root fix, exploring without converging, fixing its own earlier edit, still working after request met, agent should have asked), 4 framings each, state st-6cde963701 (8-batch window), 501 labelled checkpoints (108 adjust), 2004 calls, $0.40, no errors. Reference: zero-call counters (churn, fanout, streak, browser) 0.683, plus turn 0.691.
+
+- Alone: agent-should-have-asked 0.673, fixing-its-own-earlier-edit 0.660, redoing-earlier-work 0.627, still-working-after-request-met 0.632, workaround 0.631, same-goal-different-means 0.612; exploring-without-converging 0.476 and work-diverges-from-request 0.515 are at chance. ui-visual (control) 0.690.
+- Over counters+turn: no signal adds reliably. Deltas range -0.018 to +0.009; every CI includes 0 (work-diverges is reliably negative). Mean of the six that score >=0.6: 0.664 alone, +0.001 over counters+turn (CI -0.010..+0.011). The R6 master signal over counters+turn: 0.693, i.e. +0.002.
+- The new signals correlate 0.58-0.69 with the counters and 0.68-0.78 with the master signal; the two with low correlation are the two at chance.
+
+Reading: the hypothesis that judgement signals recover what counters miss is not supported on this label set. R8's small Jev increment (+0.007 to +0.032) over counters does not grow with more judgement-style signals; the jev scores largely re-express activity volume. The white paper should report Jev at about parity with cheap counters (0.65-0.71) on this outcome, with the label noise ceiling as a likely limit. Held-out stays sealed; nothing pushed. Next candidates: a different outcome target (e.g. abort/redirect) where counters may fail, or hand-checking labels.
