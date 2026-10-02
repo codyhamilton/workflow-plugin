@@ -286,13 +286,14 @@ def write_analysis(rows: list[dict[str, Any]]) -> None:
     event_rows = [
         row for row in successful
         if (row.get("answers") or {}).get("stage_1", {}).get("response_label") == "event_observed"
+        and (row.get("answers") or {}).get("stage_2", {}).get("value") is not None
     ]
     event_times = [
         (row["worker_id"], (row.get("answers") or {}).get("stage_2", {}).get("value"))
         for row in event_rows
     ]
     agreement = {
-        "status": "estimable" if event_rows else "no_observed_events",
+        "status": "estimable" if event_rows else "no_valid_event_times",
         "event_observed_seat_count": len(event_rows),
         "event_time_values": [value for _, value in event_times],
         "exact_pair_agreement": (
@@ -303,6 +304,26 @@ def write_analysis(rows: list[dict[str, Any]]) -> None:
         "by_stratum": by_stratum,
         "gate_failures": sum(
             not bool((row.get("answers") or {}).get("gate_ok")) for row in successful
+        ),
+    }
+    thrash = by_stratum["thrash"]
+    stage_1_events = thrash["stage_1_counts"].get("event_observed", 0)
+    stage_2_non_null = len([
+        row for row in successful
+        if row["stratum"] == "thrash"
+        and (row.get("answers") or {}).get("stage_2", {}).get("value") is not None
+    ])
+    agreement["kill_summary"] = {
+        "thrash_stage_1_event_observed": stage_1_events,
+        "thrash_seats": thrash["n"],
+        "thrash_stage_1_event_positive": stage_1_events > 0,
+        "stage_2_non_null_among_event_observed": stage_2_non_null,
+        "framing_killed": stage_1_events > 0 and stage_2_non_null == 0,
+        "reason": (
+            "Stage 1 recovered thrash events, but stage 2 was null for every "
+            "event_observed seat."
+            if stage_1_events > 0 and stage_2_non_null == 0
+            else None
         ),
     }
     (OUT / "agreement-summary.json").write_text(json.dumps(agreement, indent=2, sort_keys=True) + "\n")
