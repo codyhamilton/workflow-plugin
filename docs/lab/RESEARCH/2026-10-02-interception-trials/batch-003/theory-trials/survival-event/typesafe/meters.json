@@ -1,0 +1,24 @@
+{
+  "agreement_kill_fired": null,
+  "captured_rows": 36,
+  "case_id": "PR-SURVIVAL-EVENT",
+  "choice_scrape_failures": 0,
+  "errors": 0,
+  "http_counts": {
+    "200": 36
+  },
+  "kill_fired": false,
+  "localhost_8080_used": false,
+  "no_call_jev": true,
+  "planned_calls": 36,
+  "product_wiring": false,
+  "protocol_sha256": "b32652421d15dcd85ecc920c6bcd13d5304b9ce457dc17c69bbe8213549cf26d",
+  "queue_gate": {
+    "execution_eligible": false,
+    "note": "The requested queue-after-#133 gate was not met when this seat ran.",
+    "prerequisite_pr": 133,
+    "status_at_execution_check": "OPEN"
+  },
+  "stimulus_max_chars": 8640,
+  "successful_parsed_rows": 36
+}
