@@ -363,11 +363,10 @@ def write_meters(rows: list[dict[str, Any]], cells: list[dict[str, Any]], keys: 
     unique_keys = {(row.get("session_id"), row.get("checkpoint")) for row in successful}
     labeled_keys = {
         key for key in unique_keys
-        if any(
-            row.get("session_id") == key[0]
-            and row.get("checkpoint") == key[1]
-            and row.get("population") == "labeled_exact_key"
-            for row in successful
+        if key[0] in labels
+        and (
+            str(key[1]) in (labels[key[0]].get("near_done_at_checkpoint") or {})
+            or str(key[1]) in (labels[key[0]].get("runaway_like_at_checkpoint") or {})
         )
     }
     holdout_keys = unique_keys - labeled_keys
