@@ -280,6 +280,15 @@ def write_analysis(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> N
         (row.get("answers") or {}).get("choice", {}).get("response_label")
         for row in successful
     )
+    building_evidence_violations = [
+        row["cell_id"]
+        for row in successful
+        if (row.get("answers") or {}).get("choice", {}).get("response_label") == "building"
+        and not (
+            row["tool_evidence"]["edit_count"] > 0
+            or row["tool_evidence"]["write_count"] > 0
+        )
+    ]
     by_stratum = {
         stratum: dict(Counter(
             (row.get("answers") or {}).get("choice", {}).get("response_label")
@@ -307,6 +316,12 @@ def write_analysis(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> N
         "choice_counts": dict(counts),
         "choice_counts_by_stratum": by_stratum,
         "building_rule": "building ONLY when Edit or Write appears in shown tool evidence",
+        "building_evidence_violations": building_evidence_violations,
+        "response_class_equals_response_label": all(
+            (row.get("answers") or {}).get("choice", {}).get("response_class")
+            == (row.get("answers") or {}).get("choice", {}).get("response_label")
+            for row in successful
+        ),
         "pattern_notes": list(PATTERN_NOTES),
         "freeform_wire": "noul",
     }
@@ -320,6 +335,7 @@ def write_analysis(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) -> N
             not (row.get("answers") or {}).get("pattern_note_valid", False)
             for row in successful
         ),
+        "building_evidence_violations": building_evidence_violations,
         "freeform_noul_answers": sum(
             (row.get("answers") or {}).get("freeform_note", {}).get("wire_type") == "noul"
             for row in successful
