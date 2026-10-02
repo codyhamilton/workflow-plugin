@@ -17,7 +17,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 
-REPO = Path(__file__).resolve().parents[7]
+REPO = Path(__file__).resolve().parents[6]
 PACK_DIR = (
     REPO
     / "docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates"
