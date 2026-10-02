@@ -113,6 +113,14 @@ def run(cells: list[dict[str, Any]], reg: dict[str, Any], corpus: dict[str, Any]
             return ev_cache[sess]
 
     def one(cell: dict[str, Any]) -> None:
+        try:
+            _one(cell)
+        except Exception as e:  # a bad cell must not abort a 10k batch
+            with lock:
+                stats["skipped"] = stats.get("skipped", 0) + 1
+                print(f"skip {cell['cell_id']}: {type(e).__name__}: {e}", file=sys.stderr)
+
+    def _one(cell: dict[str, Any]) -> None:
         spec = reg["state"][cell["state"]]["spec"]
         state = build_state(spec, events_for(cell["session"]), cell["checkpoint"])
         state["text"] = scrub(state["text"], len(state["text"]) + 1)  # redact secrets before anything leaves the machine

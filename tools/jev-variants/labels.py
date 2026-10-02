@@ -21,10 +21,13 @@ TESTCMD = re.compile(r"\b(pytest|unittest|npm (run )?test|yarn test|jest|vitest|
 READ = {"Read", "Grep", "Glob", "LS", "ReadFile", "SemanticSearch", "WebFetch", "WebSearch"}
 EDIT = {"Edit", "Write", "MultiEdit", "StrReplace", "NotebookEdit", "ApplyPatch"}
 FAIL = re.compile(r"(error|failed|traceback|exception|no such file)", re.I)
+TESTFAIL = re.compile(r"(\b[1-9]\d* (failed|failures?|errors?)\b|\bFAILED\b|Traceback|exit code [1-9]|\bFAIL\b)", re.I)
 
 
 def _target(c: dict[str, Any]) -> str:
     i = c.get("input") or {}
+    if not isinstance(i, dict):
+        return str(i)[:200]
     return str(i.get("file_path") or i.get("path") or i.get("command") or i.get("pattern") or "")[:200]
 
 
@@ -40,12 +43,16 @@ def detectors(calls: list[dict[str, Any]]) -> dict[str, bool]:
     tgts = [(c["name"], _target(c)) for c in calls]
     rep = any(tgts.count(t) >= 3 for t in set(tgts))
     failing = sum(1 for c in calls if c.get("output") and FAIL.search(c["output"][:400]))
+    tests = [c for c in calls[-3:] if c["name"] == "Bash" and TESTCMD.search(_target(c))]
+    green = bool(tests) and not any(c.get("output") and TESTFAIL.search(c["output"]) for c in tests[-1:]) \
+        and not any(x["name"] in EDIT for x in calls[calls.index(tests[-1]) + 1:]) if tests else False
     return {
         "writing-main-implementation": bool(src_edits),
         "docs-only-recordkeeping": bool(edits) and all(DOC.search(_target(c)) for c in edits),
         "investigating-before-editing": bool(calls) and not edits and all(n in READ or n == "Bash" for n in names),
-        "stuck-repeating-failing-step": rep and failing >= 2,
-        "last-test-run-green": any(c["name"] == "Bash" and TESTCMD.search(_target(c)) for c in calls[-3:]),
+        "stuck-repeating-failing-step": rep and (failing >= 1 or sum(1 for t in tgts if t[0] == "Bash") >= 3),
+        "last-test-run-green": green,
+        "last-test-run-any": bool(tests),
     }
 
 
@@ -109,3 +116,15 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+CORRECTION = re.compile(r"^\s*(no\b|nope|wrong|stop|don'?t|do not|that'?s (not|wrong)|not what|instead|revert|undo|actually|why did you|you (should|shouldn'?t|didn'?t|missed)|still (broken|fails|failing))|\b(not what i|that is wrong|that's wrong|doesn'?t work|isn'?t working|still not|you missed|why are you)\b", re.I)
+
+
+def outcome(events: list[dict[str, Any]], checkpoint: int, horizon: int = 8) -> dict[str, bool | None]:
+    """What the human did next (events AFTER the checkpoint; never shown to Jev).
+    next_prompt_in_horizon: any user prompt within `horizon` turns; next_is_correction: that prompt reads as a correction."""
+    nxt = next((e for e in events if e["kind"] == "user_prompt" and e["turn"] > checkpoint), None)
+    if nxt is None or nxt["turn"] - checkpoint > horizon:
+        return {"prompt_soon": False, "correction": None if nxt is None else False}
+    return {"prompt_soon": True, "correction": bool(CORRECTION.search(nxt["text"][:300]))}

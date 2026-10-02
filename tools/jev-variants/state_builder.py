@@ -26,7 +26,9 @@ def _clip(text: str, n: int) -> str:
 
 
 def _target(call: dict[str, Any]) -> str | None:
-    inp = call.get("input") or {}
+    inp = call.get("input")
+    if not isinstance(inp, dict):
+        return _clip(inp, 80) if isinstance(inp, str) and inp else None
     for k in _PATH_KEYS:
         if isinstance(inp.get(k), str):
             return inp[k]
