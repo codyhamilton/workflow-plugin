@@ -19,11 +19,11 @@
   "product_wiring": false,
   "window_cartesian": false,
   "n_cells": 3978,
-  "new": 0,
+  "new": 3978,
   "errors": 0,
-  "tok_in": 0,
-  "tok_out": 0,
-  "wall_s": 0.1,
+  "tok_in": 2461676,
+  "tok_out": 229197,
+  "wall_s": 94.0,
   "http_errors": 0,
   "fire": 164,
   "by_response_class": {
@@ -95,5 +95,5 @@
     "growth_cut_replication": 576,
     "case_catalog_replication": 3402
   },
-  "generated_at": "2026-10-02T12:51:37+10:00"
+  "generated_at": "2026-10-02T12:52:55+10:00"
 }
