@@ -564,7 +564,10 @@ def write_flip_summary(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) 
             "unclear_negative_flip_count": sum(negative_flips),
             "unclear_negative_count": len(negative_flips),
             "unclear_negative_flip_rate": round(negative_rate, 4) if negative_rate is not None else None,
-            "kill_pass": bool(ca_flip and negative_rate is not None and negative_rate >= 0.5),
+            "kill_pass": bool(
+                ca_flip is False
+                or (negative_rate is not None and negative_rate >= 0.5)
+            ),
         }
     (OUT / "kill-eval.json").write_text(
         json.dumps(
@@ -574,7 +577,11 @@ def write_flip_summary(rows: list[dict[str, Any]], cells: list[dict[str, Any]]) 
                 "ca977_worker": "ca977b9ca0dd",
                 "by_arm": kill_by_arm,
                 "criterion": "ca977 cannot flip without >=50% unclear-negative flips under same arm",
-                "outcome": "pass" if any(item["kill_pass"] for item in kill_by_arm.values()) else "fail",
+                "outcome": (
+                    "pass"
+                    if all(item["kill_pass"] for item in kill_by_arm.values())
+                    else "fail"
+                ),
             },
             indent=2,
             sort_keys=True,
@@ -675,6 +682,9 @@ def main() -> int:
             output.write(json.dumps(row, sort_keys=True) + "\n")
             output.flush()
     rows = [done[cell["cell_id"]] for cell in cells if cell["cell_id"] in done]
+    results_path.write_text(
+        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n"
+    )
     write_meters(rows, cells)
     write_flip_summary(rows, cells)
     print(
