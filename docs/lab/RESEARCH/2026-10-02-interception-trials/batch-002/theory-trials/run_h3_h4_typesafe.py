@@ -472,7 +472,7 @@ def write_outputs(approach: Approach, out: Path, cells: list[dict[str, Any]]) ->
         "http_successes": sum(row.get("http_status") == 200 for row in ordered),
         "errors": len(errors),
         "parse_miss_cells": sum(
-            row.get("error", "").startswith("unexpected response choice")
+            (row.get("error") or "").startswith("unexpected response choice")
             for row in ordered
         ),
         "fire_count": len(fires),
@@ -573,6 +573,40 @@ def run_approach(approach: Approach) -> int:
     out = ROOT / approach.directory / "typesafe"
     out.mkdir(parents=True, exist_ok=True)
     cells = build_cells(approach)
+    results_path = out / "results.jsonl"
+    if results_path.is_file():
+        existing = [
+            json.loads(line)
+            for line in results_path.read_text().splitlines()
+            if line.strip()
+        ]
+        expected_ids = {cell["cell_id"] for cell in cells}
+        if (
+            {row.get("cell_id") for row in existing} == expected_ids
+            and len(existing) == len(cells)
+            and not any(row.get("error") for row in existing)
+        ):
+            # Make completed runs idempotent and repair older rows before
+            # regenerating their manifest and meters.
+            for row in existing:
+                if row.get("response_label") is not None:
+                    row["response_class"] = row["response_label"]
+            results_path.write_text(
+                "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in existing)
+            )
+            write_outputs(approach, out, cells)
+            print(
+                json.dumps(
+                    {
+                        "approach_id": approach.approach_id,
+                        "n_cells": len(cells),
+                        "errors": 0,
+                        "resumed_existing_results": True,
+                        "cell_ids": [cell["cell_id"] for cell in cells],
+                    }
+                )
+            )
+            return 0
     results: list[dict[str, Any]] = []
     with ThreadPoolExecutor(max_workers=4) as pool:
         futures = [pool.submit(post_cell, approach, out, cell) for cell in cells]
