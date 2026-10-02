@@ -31,7 +31,7 @@ Paste the `cost.py` output into `cost-comparison.md` under the appropriate `## B
 - Full Claude URL
 - `latest` (most recent session for the project)
 
-Filter to one harness with `--tool claude-code` or `--tool cursor`. Default queries both.
+Filter to one harness with `--tool claude-code`, `--tool cursor`, or `--tool cursor-cloud`. Default queries all; `latest` skips cursor-cloud unless explicit.
 
 ## Workflow
 
@@ -46,6 +46,7 @@ Filter to one harness with `--tool claude-code` or `--tool cursor`. Default quer
 - `token_usage` and `api_calls` in extract output include **parent + all subagents** (deduped per `message.id`). Use `parent_token_usage` / `subagent_token_usage` for the split.
 - Context estimate is the first parent response only — not total session context. For billed tokens, use `token_usage` from `stats.py`.
 - **Cursor** JSONL has no usage blocks. Use `cost_estimate.py` for ballpark tokens/cost (fixed context + per-tool deltas + cache simulation). Reconcile with `usage-events-*.csv` via `--reconcile-csv` or `cost_window.py` for the CSV side.
+- For Cursor session length, use `session.parent_assistant_turns` from `extract.py` or `stats.py`: one count per assistant message row. `assistant_turns` includes subagents; `parent_tool_turns` counts tool calls. Cursor `api_calls` remains unknown, and duplicate JSONL copies under different project directories must be resolved before corpus counting. Cloud runs (`bc-*`) are handled by `--tool cursor-cloud`, which reads locally cached run metadata (ID, timestamps, name, status, remote path) plus any cached conversation (only ~19 of 430 runs; 3 complete). Without a body: `transcript_available: false`, turn counts `null`, `search` unsupported. With a complete composer/bubble set, `parent_*_turns` are exact; with only search-index text or partial bubbles, use `observed_*_turns` (lower bounds, `transcript_complete: false`). Tool counts shown as 0 for a cloud run are unknown, not zero. `find.py --min-parent-assistant-turns N` excludes unknown counts (reported on stderr).
 
 ## Reference
 

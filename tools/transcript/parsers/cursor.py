@@ -174,6 +174,7 @@ class CursorParser:
                     start_time_iso=start_iso,
                     subagent_count=sub_count,
                     bytes=parent_size,
+                    storage_path=parent_jsonl,
                 )
             )
         return sessions
@@ -230,6 +231,8 @@ class CursorParser:
         task_calls: list[dict] = []
         user_queries: list[dict] = []
         task_seq = 0
+        assistant_turns = 0
+        user_turns = 0
 
         with open(jsonl_path, encoding="utf-8", errors="replace") as f:
             for msg_idx, line in enumerate(f):
@@ -244,6 +247,7 @@ class CursorParser:
                 content = msg.get("message", {}).get("content", [])
 
                 if role == "user":
+                    user_turns += 1
                     text = _extract_text_from_content(content)
                     query = _extract_user_query(text)
                     if query:
@@ -255,6 +259,7 @@ class CursorParser:
                         )
 
                 elif role == "assistant":
+                    assistant_turns += 1
                     for item in content:
                         if item.get("type") != "tool_use":
                             continue
@@ -276,12 +281,16 @@ class CursorParser:
             "tool_counts": dict(tool_counts),
             "task_calls": task_calls,
             "user_queries": user_queries,
+            "assistant_turns": assistant_turns,
+            "user_turns": user_turns,
         }
 
     def _parse_subagent(self, jsonl_path: str) -> dict:
         tool_counts: Counter[str] = Counter()
         direction_text = ""
         has_task_calls = False
+        assistant_turns = 0
+        user_turns = 0
 
         with open(jsonl_path, encoding="utf-8", errors="replace") as f:
             for line in f:
@@ -295,9 +304,12 @@ class CursorParser:
                 role = msg.get("role", "")
                 content = msg.get("message", {}).get("content", [])
 
-                if role == "user" and not direction_text:
-                    direction_text = _extract_text_from_content(content)
+                if role == "user":
+                    user_turns += 1
+                    if not direction_text:
+                        direction_text = _extract_text_from_content(content)
                 elif role == "assistant":
+                    assistant_turns += 1
                     for item in content:
                         if item.get("type") == "tool_use":
                             name = item.get("name", "")
@@ -312,6 +324,8 @@ class CursorParser:
             "total_tool_turns": sum(raw.values()),
             "description": direction_text[:300],
             "has_task_calls": has_task_calls,
+            "assistant_turns": assistant_turns,
+            "user_turns": user_turns,
         }
 
     def extract(self, ref: SessionRef) -> NormalizedSession:
@@ -346,6 +360,8 @@ class CursorParser:
                         "total_tool_turns": data["total_tool_turns"],
                         "description": data["description"],
                         "has_task_calls": data["has_task_calls"],
+                        "assistant_turns": data["assistant_turns"],
+                        "user_turns": data["user_turns"],
                     }
                 )
 
@@ -377,6 +393,18 @@ class CursorParser:
             "parent_tool_counts": normalize_counts(raw_counts),
             "parent_tool_counts_raw": raw_counts,
             "parent_tool_turns": sum(raw_counts.values()),
+            "parent_assistant_turns": parent_data["assistant_turns"],
+            "parent_user_turns": parent_data["user_turns"],
+            "subagent_assistant_turns": sum(
+                sa["assistant_turns"] for sa in subagents
+            ),
+            "subagent_user_turns": sum(sa["user_turns"] for sa in subagents),
+            "assistant_turns": parent_data["assistant_turns"] + sum(
+                sa["assistant_turns"] for sa in subagents
+            ),
+            "user_turns": parent_data["user_turns"] + sum(
+                sa["user_turns"] for sa in subagents
+            ),
             "api_calls": None,
             "context_estimate": None,
             "token_usage": None,
