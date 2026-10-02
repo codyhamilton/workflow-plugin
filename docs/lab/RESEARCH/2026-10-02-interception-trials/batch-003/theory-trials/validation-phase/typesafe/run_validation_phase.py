@@ -456,7 +456,7 @@ def copy_inputs(out: Path, pack_path: Path, pack_sha256: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    default_out = Path(__file__).resolve().parent / "typesafe"
+    default_out = Path(__file__).resolve().parent
     parser.add_argument(
         "--pack",
         type=Path,
