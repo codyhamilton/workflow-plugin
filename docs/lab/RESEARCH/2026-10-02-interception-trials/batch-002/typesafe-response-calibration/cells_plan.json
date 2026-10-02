@@ -1,0 +1,121 @@
+{
+  "wave": "typesafe-response-class-calibration",
+  "scope": "exact",
+  "join_class": "exact_label_ready",
+  "catalog_scope": "12 preferred GROWTH state\u00d7question pairings from #109",
+  "n_distinct_scenarios": 12,
+  "n_representative_pairs": 9,
+  "n_exact_representative_pairs": 9,
+  "n_response_classes": 4,
+  "n_cells_planned": 432,
+  "response_classes": [
+    "binary_fire",
+    "likert_0_3",
+    "four_class",
+    "rating_plus_offset"
+  ],
+  "preferred_pairs": [
+    {
+      "state": "markers_focus",
+      "question": "dependency_wait"
+    },
+    {
+      "state": "markers_focus",
+      "question": "context_thrash_compact"
+    },
+    {
+      "state": "markers_focus",
+      "question": "idle_tool_spin"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "brief_abandon"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "docs_only_drift"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "scope_creep_silent"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "edit_churn"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "bash_retry_storm"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "parallel_agent_thrash"
+    },
+    {
+      "state": "markers_focus",
+      "question": "test_flake_loop"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "speculative_rewrite"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "deliverable_orphan"
+    }
+  ],
+  "representative_pairs": [
+    {
+      "session_id": "2e083814b952",
+      "checkpoint": 45,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "499377c18811",
+      "checkpoint": 75,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "5415ae00a788",
+      "checkpoint": 45,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "567e678f0a57",
+      "checkpoint": 45,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "730a03ecdc0d",
+      "checkpoint": 75,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "a2e9f853749d",
+      "checkpoint": 75,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "a56bad1c7f13",
+      "checkpoint": 75,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "a8d0a590128a",
+      "checkpoint": 75,
+      "join_class": "exact_label_ready"
+    },
+    {
+      "session_id": "b13d1a65a961",
+      "checkpoint": 60,
+      "join_class": "exact_label_ready"
+    }
+  ],
+  "checkpoint_policy": "one exact-labeled representative mid per session",
+  "tail_less_policy": "gate; do not substitute empty growth fields",
+  "label_values_in_prompt": false,
+  "window_cartesian": false,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "raw_capture_dir": "raw/"
+}

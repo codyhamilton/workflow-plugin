@@ -1,0 +1,111 @@
+{
+  "wave": "typesafe-response-class-calibration",
+  "scope": "diagnostic",
+  "join_class": "diagnostic_only",
+  "catalog_scope": "12 preferred GROWTH state\u00d7question pairings from #109",
+  "n_distinct_scenarios": 12,
+  "n_representative_pairs": 7,
+  "n_exact_representative_pairs": 0,
+  "n_response_classes": 4,
+  "n_cells_planned": 336,
+  "response_classes": [
+    "binary_fire",
+    "likert_0_3",
+    "four_class",
+    "rating_plus_offset"
+  ],
+  "preferred_pairs": [
+    {
+      "state": "markers_focus",
+      "question": "dependency_wait"
+    },
+    {
+      "state": "markers_focus",
+      "question": "context_thrash_compact"
+    },
+    {
+      "state": "markers_focus",
+      "question": "idle_tool_spin"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "brief_abandon"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "docs_only_drift"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "scope_creep_silent"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "edit_churn"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "bash_retry_storm"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "parallel_agent_thrash"
+    },
+    {
+      "state": "markers_focus",
+      "question": "test_flake_loop"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "speculative_rewrite"
+    },
+    {
+      "state": "recent_delta_brief",
+      "question": "deliverable_orphan"
+    }
+  ],
+  "representative_pairs": [
+    {
+      "session_id": "004a52c29513",
+      "checkpoint": 35,
+      "join_class": "diagnostic_only"
+    },
+    {
+      "session_id": "4f4b98803720",
+      "checkpoint": 70,
+      "join_class": "diagnostic_only"
+    },
+    {
+      "session_id": "919012be9f39",
+      "checkpoint": 55,
+      "join_class": "diagnostic_only"
+    },
+    {
+      "session_id": "9659bf4fc9f4",
+      "checkpoint": 70,
+      "join_class": "diagnostic_only"
+    },
+    {
+      "session_id": "9a9249e2f356",
+      "checkpoint": 35,
+      "join_class": "diagnostic_only"
+    },
+    {
+      "session_id": "aa9e5be26e92",
+      "checkpoint": 55,
+      "join_class": "diagnostic_only"
+    },
+    {
+      "session_id": "ac7c401379d0",
+      "checkpoint": 35,
+      "join_class": "diagnostic_only"
+    }
+  ],
+  "checkpoint_policy": "one representative mid per eligible diagnostic session",
+  "tail_less_policy": "gate; do not substitute empty growth fields",
+  "label_values_in_prompt": false,
+  "window_cartesian": false,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "raw_capture_dir": "raw/"
+}
