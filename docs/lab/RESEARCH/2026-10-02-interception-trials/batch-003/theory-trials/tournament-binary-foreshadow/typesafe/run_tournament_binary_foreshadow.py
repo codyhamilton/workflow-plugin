@@ -124,8 +124,8 @@ def load_framing(registry_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         raise SystemExit("locked registry framing_id/hash mismatch")
     if row.get("freeze_status") != "TYPESAFE_LEGAL_v2":
         raise SystemExit("selected framing is not TYPESAFE_LEGAL_v2")
-    if "tournament-monitor-called-out" in json.dumps(registry, sort_keys=True):
-        raise SystemExit("killed monitor framing is present in the selected registry payload")
+    if "tournament-monitor-called-out" in json.dumps(row, sort_keys=True):
+        raise SystemExit("killed monitor framing is present in the selected framing")
     return registry, row
 
 
