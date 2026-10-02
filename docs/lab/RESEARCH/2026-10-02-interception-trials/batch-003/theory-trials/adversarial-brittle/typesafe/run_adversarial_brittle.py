@@ -545,6 +545,13 @@ def write_manifest(
     registry_stamp: dict[str, Any],
     worker_meta: dict[str, dict[str, Any]],
 ) -> None:
+    safe_worker_meta = {
+        worker_id: {
+            key: row.get(key)
+            for key in ("short_id", "fixture_name", "band", "role", "api_turns", "peak_ctx")
+        }
+        for worker_id, row in worker_meta.items()
+    }
     manifest = {
         "case_id": "PR-ADVERSARIAL-BRITTLE",
         "batch": "batch-003",
@@ -554,7 +561,7 @@ def write_manifest(
         "framing": "EX-SHAPE-SIGNAL five-Q only",
         "seat_definition": "one TypeSafe request per worker × perturbation arm",
         "seat_count": len(cells),
-        "workers": worker_meta,
+        "workers": safe_worker_meta,
         "perturbations": [
             {"id": perturbation, "arm": arm} for perturbation, arm in PERTURBATIONS
         ],
