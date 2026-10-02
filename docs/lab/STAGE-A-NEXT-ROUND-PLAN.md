@@ -105,3 +105,17 @@ Reading:
 - Implication for the next round: spend variants on (a) the master signal's wording/anchors and (b) new
   signals near `ui-visual-iteration-loop`: concrete, observable loops (repeated edits to the same file, repeated
   failing command, re-asks) rather than judgement-flavoured ones.
+
+## Round 7 draft (registered, NOT run)
+
+Registered (author claude-r7 / flash-r7-mk; ~4,000 cells, est. $0.80, 157 sessions, held-out sealed):
+- 7 observable-loop signals, each with a zero-call detector: same-file-edit-churn, repeated-identical-command,
+  corrective-language-in-recent-prompts, edit-then-revert-oscillation, long-unattended-tool-streak,
+  wide-file-fanout, repeated-browser-check-without-progress.
+- 4 new framings of human-would-intervene-now (peer, next-message, cost-of-continuing, evidence-list), 16 new
+  markers in all x 4 panels, plus `ui-visual-iteration-loop` as the control in every panel.
+- A wider state (14 batches, no outputs, last 3 prompts) because the count-based signals need more than 5 batches.
+- Success test (in `r7-card.md`): a new signal whose delta AUC over the master signal has a 90% cluster CI above
+  zero, replicated discovery -> dev. Master framings are judged against the R6 master AUC of 0.67.
+Gate before running: Cody sees the card (cost is small, so the run can go ahead on the same terms as R6 if he
+has not objected). Round file and specs live in the scratchpad `r7*`; archived under `~/jev-lab-data`.
