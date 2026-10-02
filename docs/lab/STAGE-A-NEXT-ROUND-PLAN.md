@@ -79,3 +79,29 @@ Reading: Claude point estimates are in the same direction for the top three sign
 transcripts carry no tool outputs, so the signals that work are ones readable from prompts, tool names and
 arguments. Claude evidence needs new labelled Claude sessions (a data-collection problem, not a Jev one).
 `commit-boundary-reached` and `serial-single-read-grind` are weakest and are the first to drop if the list shrinks.
+
+### Value over `human-would-intervene-now` (Cursor, n=440, 99 `adjust`, no new spend)
+
+Rank-sum of each signal with the direct "would the human step in" signal, against that signal alone
+(`analysis/R6_incr.py`; mean over states and framings; session-cluster bootstrap 90% CI on the AUC difference).
+
+| signal | alone | + intervene | delta 90% CI | corr with intervene |
+|---|---|---|---|---|
+| (baseline) human-would-intervene-now | 0.673 | | | |
+| ui-visual-iteration-loop | 0.704 | 0.705 | [+0.013, +0.052] | 0.75 |
+| claims-done-without-verifying | 0.670 | 0.682 | [-0.007, +0.025] | 0.82 |
+| scope-creep-beyond-request | 0.648 | 0.670 | [-0.021, +0.013] | 0.81 |
+| commit-boundary-reached | 0.642 | 0.682 | [-0.013, +0.032] | 0.66 |
+| serial-single-read-grind | 0.602 | 0.660 | [-0.044, +0.020] | 0.60 |
+| all six | | 0.692 | [-0.003, +0.046] | |
+
+Reading:
+- The direct intervene signal is already as good as any specific signal (0.67) and the specific ones are highly
+  correlated with it (0.6-0.8), so most of their predictive content is shared.
+- Only `ui-visual-iteration-loop` adds reliably (delta interval above zero), and it beats the master signal alone.
+  It is also the least redundant with the others, so it is the best candidate for new variants and is the one to refine.
+- Combining all six adds about +0.02 over the master signal alone, interval spanning zero. More signals of this
+  kind will not buy much; the next gains need signals that are decorrelated from "the human would intervene".
+- Implication for the next round: spend variants on (a) the master signal's wording/anchors and (b) new
+  signals near `ui-visual-iteration-loop`: concrete, observable loops (repeated edits to the same file, repeated
+  failing command, re-asks) rather than judgement-flavoured ones.
