@@ -7,6 +7,12 @@
 
 **Sibling outputs:** [`METERS-APPENDIX.md`](METERS-APPENDIX.md) (packed tables; [#109](https://github.com/codyhamilton/workflow-plugin/pull/109)/[#110](https://github.com/codyhamilton/workflow-plugin/pull/110)/[#111](https://github.com/codyhamilton/workflow-plugin/pull/111)) · [`analysis/ARTIFACT-INVENTORY.json`](analysis/ARTIFACT-INVENTORY.json) · [`analysis/scenario-fire-rankings.json`](analysis/scenario-fire-rankings.json) · [`analysis/PROVISIONAL-join-summary.json`](analysis/PROVISIONAL-join-summary.json) · [`analysis/PROVISIONAL-join-wave0-flash.jsonl`](analysis/PROVISIONAL-join-wave0-flash.jsonl)
 
+**Adversarial fold (Soft HOLD, #105/#109/#110/#111):** [`ADVERSARIAL-FOLD-soft-hold.md`](ADVERSARIAL-FOLD-soft-hold.md)
+recomputes the figures below and records what they cannot support (identifiability of the
+12×9 cut, response-constant pairs, checkpoint-selector dependence on T, Maps/claude-code
+concentration, sweep-wide state eligibility). Where it differs from a table in this file,
+the fold's stratified figure is the one to quote.
+
 **Window-status refinement:** [`WINDOW-STATUS-JOIN.md`](WINDOW-STATUS-JOIN.md)
 derives explicit `inside` / `outside` / `none` / `ambiguous` / `unidentified`
 states from the outcome sidecar, separates window identity from checkpoint
@@ -253,6 +259,14 @@ Row-level table: [`analysis/PROVISIONAL-join-wave0-flash.jsonl`](analysis/PROVIS
 | k1/k2 session N | TypeSafe bulk waves hit **3** sessions in snapshot — not the 41-session scenario sweep pool. |
 | No formal FP/miss board | Provisional counts are **not** calibrated precision/recall; n=20 sessions, thin combos. |
 | Scenario ↔ outcome join | Scenario sweep uses different checkpoints (`session_representative_mid`) than `FIXED_SCHEDULE` labels. |
+| Preferred 12×9 cut cannot identify a miss | All nine exact-labeled snapshots are `runaway_like=no` (8 `no_steer_window`, 1 `outside`); white-paper minimum of ≥4 runaway-like sessions and a non-Maps hold-out is unmet. Fold §1. |
+| Preferred cut is response-constant | 10 of 12 pairs fire 0/16 under TypeSafe (all eight `recent_delta_brief` pairs 0/128); 9 of 10 cut fires are `idle_tool_spin`. Fold §2a. |
+| State representation moves answers | `test_flake_loop` 0/16 (preferred `markers_focus`) vs 10/16 (`phase_hints_focus`); `bash_retry_storm` 0/16 vs 5/16. Fold §2b. |
+| Representative checkpoint depends on T | `pick_rep_snap` takes the median of the reached list, so session length selects the scored cell (Opus R3 via selection). Fold §4. |
+| GROWTH pool is one stratum | 16/16 sessions are claude-code and `open-pajero-maps` (white paper caps both at 40%). Fold §5. |
+| Pooled sweep rate mixes eligibility | 3.06% claude-code (192/6,272) vs 0.87% lite (63/7,250), 50 of the lite fires empty-state; `delta_only` is 0/608 state-eligible. Fold §3. |
+| Flash vol2 `parse_miss=10` unexplained | No raw/meter landed (#109); treat unsidecarred Flash rates as missing-not-at-random. Fold §6. |
+| Single adjudicator | All 20 labels are `chm-sol-adjudication`. Fold §6. |
 
 ---
 
@@ -261,8 +275,11 @@ Row-level table: [`analysis/PROVISIONAL-join-wave0-flash.jsonl`](analysis/PROVIS
 1. **Label the 2 missing Wave-0 sessions** (or mark `excluded` with rationale) so join denominator matches `grid.json`.
 2. **Run the eight skipped lever combos** at the white-paper scale bar (≥1k new trials/driver), same sessions, session-clustered contrasts.
 3. **`ideal_steer_window_by_cp`** pilot on the 3 sessions with non-`none` windows + `a56bad1c7f13` runaway@60 — test whether `PROVISIONAL_runaway_hit` / miss become identifiable at schedule points.
-4. **Scenario sweep follow-up:** hold state fixed (`tail_focus` vs `window_delta_tools`) and swap only `silent_stall` vs `mid_arc_healthy` on the **same** 41 sessions — quantifies question-wording lever without new sessions.
+4. **Scenario sweep follow-up:** hold state fixed and swap only `silent_stall` vs `mid_arc_healthy` on the **same** sessions — quantifies the question-wording lever without new sessions. Use `tail_focus` on the 16 claude-code sessions; `window_delta_tools` is all-null (§2a) and is not a valid contrast arm until its projection is fixed.
 5. **Blind diagnostic:** correlate `PROVISIONAL_*` tags with Flash vs TypeSafe on matched keys — H6-style dissociation only; still not gold.
+6. **Label before the next GROWTH spend:** blind adjudication of the seven GROWTH-eligible snapshots that lack a label at their sweep checkpoint (four checkpoint-unlabeled, three session-unlabeled), `ideal_steer_window_by_cp` where windows are coarse, and a second adjudicator on the nine exact sessions (fold §1, §6).
+7. **Freeze before the next driver:** the 12 pair IDs, the three-state contrast per preferred question (all 36 pairs), and a response-occupancy report per pair and driver (fold §2).
+8. **Persist the Flash per-batch parse sidecar** (#109) before further Flash volume.
 
 ---
 

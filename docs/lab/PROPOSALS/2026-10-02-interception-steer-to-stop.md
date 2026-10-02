@@ -299,3 +299,25 @@ batch-002 `results.jsonl` stays frozen. Every later batch gets a new id. The sta
 ### Resolved recommendations
 
 Run continuous large-n TypeSafe, Flash, and Luna waves on real right-sized transcripts, analyse them with session-clustered contrasts, and write the estimates back into this paper. That is the evidence path. Behaviour ship stays held until Cody accepts it. No framing is built from this merge.
+
+## Amendment — Soft HOLD evidence fold (#105, #109, #110, #111)
+
+Source: [`ADVERSARIAL-FOLD-soft-hold.md`](../RESEARCH/2026-10-02-interception-steer-to-stop/ADVERSARIAL-FOLD-soft-hold.md). Status stays `resolved-soft`. These are evidence-quality amendments to the scale bar and measurement rules above. They add no FP/miss claim and unlock no behaviour.
+
+The scale bar counts trials per driver. The GROWTH refill shows why that count over-states information: 1,632 post-fill cells are 16 sessions; the preferred 12×9 cut is 9 sessions with zero runaway-like positives; ten of its twelve pairs are all-defer under TypeSafe. Cells are repeated measures of sessions (Measurement, above), and here the sessions are also one project and one harness.
+
+| # | Amendment | Fold § |
+|---|-----------|--------|
+| A1 | A wave is **ranking-ready** only when the labeled pool meets the §4 minimum (≥12 sessions at t=75, ≥4 runaway-like with a cited window, ≥4 near-done or `none`, ≥4 held-out including ≥1 non-Maps). The ≥1,000 trials/driver floor still applies to diagnostics, but a cell count does not satisfy the ranking gate. | 1 |
+| A2 | Adjudicate outcome labels, blind to responses, before the next refill; add a second adjudicator on the nine exact-label sessions. | 1, 6 |
+| A3 | Freeze pair IDs and the contrast list before each driver runs; run all three states per preferred question as a paired control. | 2b |
+| A4 | Report response occupancy (fires, sessions with any fire, all-defer flag) per pair and driver; all-defer pairs do not count toward the trial floor for that driver. | 2a |
+| A5 | Near-done and runaway claims use `FIXED_SCHEDULE` only. One-checkpoint sweeps (median of reached) are state/wording sensitivity, because the selector depends on session length. | 4 |
+| A6 | Stamp state-eligible-only estimates (all GROWTH) Maps-concentrated and claude-code-only; a harness-native `tail` contract for one non-Claude harness is the unblocker. | 5 |
+| A7 | Quote sweep fire rates only with the state-eligibility column (claude-code 3.06% vs lite 0.87%; `delta_only` 0/608 state-eligible). | 3 |
+| A8 | Treat Flash rates without a per-batch parse sidecar as missing-not-at-random. | 6 |
+| A9 | Add session-level covariates to the meter (tail length, turn count, activity density); per-session fire propensity correlates across drivers (ρ=0.61, n=13, exploratory). | 2c |
+
+### Resolved recommendations
+
+Size and report GROWTH work in sessions with identified positives, not cells. Label first, freeze the contrast list, publish response occupancy, and stamp every GROWTH estimate Maps-concentrated and claude-code-only. Behaviour ship stays held.
