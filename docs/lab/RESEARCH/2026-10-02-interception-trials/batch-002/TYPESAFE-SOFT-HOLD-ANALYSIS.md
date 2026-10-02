@@ -77,7 +77,7 @@ non-label-ready, so these rates are not joins to gold outcomes.
 
 - **387/387** HTTP-200 cells
 - exact sidecar keys with usable tail: **52**
-- non-Maps holdout: **0 cells / 0 keys** (0 sidecar-labeled; 0 without sidecar rows)
+- non-Maps holdout: **75 cells / 25 keys** (4 sidecar-labeled; 21 without sidecar rows)
 - sidecar `runaway_like=yes` keys: **4 total**, **1 state-valid**, **3 gated for missing tail**
 - HTTP success: **1.0**; leak hits: **0**; collisions: **0**; prior-ID overlap: **0**
 

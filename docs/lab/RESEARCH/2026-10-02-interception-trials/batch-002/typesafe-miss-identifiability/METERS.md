@@ -7,7 +7,7 @@ flips `markers_focus` against `phase_hints_focus`. The sidecar is joined
 after capture; no label value is sent to TypeSafe.
 
 - exact label keys planned: **52**
-- non-Maps holdout cells: **0** (0 sidecar-labeled keys; 0 without sidecar rows)
+- non-Maps holdout cells: **75** (4 sidecar-labeled keys; 21 without sidecar rows)
 - planned cells: **387**
 - successful cells: **387**
 - HTTP counts: `{"200": 387}`

@@ -4,10 +4,10 @@
   "n_exact_label_keys_planned": 52,
   "n_unique_keys_successful": 77,
   "n_labeled_keys_successful": 56,
-  "n_non_maps_holdout_keys_successful": 0,
-  "n_non_maps_labeled_holdout_keys": 0,
-  "n_non_maps_unlabeled_holdout_keys": 0,
-  "n_holdout_cells_successful": 0,
+  "n_non_maps_holdout_keys_successful": 25,
+  "n_non_maps_labeled_holdout_keys": 4,
+  "n_non_maps_unlabeled_holdout_keys": 21,
+  "n_holdout_cells_successful": 75,
   "n_cells_planned": 387,
   "n_cells_successful": 387,
   "n_cells_errors": 0,
@@ -94,5 +94,5 @@
   "not_a_miss_scoreboard": true,
   "soft_standard_hold": true,
   "product_wiring": false,
-  "generated_at": "2026-10-02T13:09:52+10:00"
+  "generated_at": "2026-10-02T13:11:02+10:00"
 }
