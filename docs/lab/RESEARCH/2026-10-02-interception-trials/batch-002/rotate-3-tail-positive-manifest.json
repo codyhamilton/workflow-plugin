@@ -1,0 +1,74 @@
+{
+  "counts": {
+    "positive_keys": 4,
+    "still_tail_gated": 0,
+    "tail_digest_available": 4
+  },
+  "hooks": false,
+  "interpretation": "A recovered digest establishes source availability only. It does not validate a label, create a hit/miss outcome, or unlock behavior.",
+  "local_8080": false,
+  "metrics_computed": false,
+  "not_scoreboard": true,
+  "positives": [
+    {
+      "checkpoint": 60,
+      "gate_status": "evidence_recovered_not_independently_adjudicated",
+      "ideal_steer_window": [
+        55,
+        62
+      ],
+      "independent_adjudication_required": true,
+      "not_a_scoreboard": true,
+      "reference_label": "runaway_like=yes",
+      "session_id": "a56bad1c7f13",
+      "tail_digest_available": true,
+      "tail_source": "snapshot"
+    },
+    {
+      "checkpoint": 45,
+      "gate_status": "evidence_recovered_not_independently_adjudicated",
+      "ideal_steer_window": [
+        22,
+        164
+      ],
+      "independent_adjudication_required": true,
+      "not_a_scoreboard": true,
+      "reference_label": "runaway_like=yes",
+      "session_id": "ses_1a0328cd5ffe6iabFeMK",
+      "tail_digest_available": true,
+      "tail_source": "local_opencode_sqlite_digest_only"
+    },
+    {
+      "checkpoint": 60,
+      "gate_status": "evidence_recovered_not_independently_adjudicated",
+      "ideal_steer_window": [
+        22,
+        164
+      ],
+      "independent_adjudication_required": true,
+      "not_a_scoreboard": true,
+      "reference_label": "runaway_like=yes",
+      "session_id": "ses_1a0328cd5ffe6iabFeMK",
+      "tail_digest_available": true,
+      "tail_source": "local_opencode_sqlite_digest_only"
+    },
+    {
+      "checkpoint": 75,
+      "gate_status": "evidence_recovered_not_independently_adjudicated",
+      "ideal_steer_window": [
+        22,
+        164
+      ],
+      "independent_adjudication_required": true,
+      "not_a_scoreboard": true,
+      "reference_label": "runaway_like=yes",
+      "session_id": "ses_1a0328cd5ffe6iabFeMK",
+      "tail_digest_available": true,
+      "tail_source": "local_opencode_sqlite_digest_only"
+    }
+  ],
+  "product_wiring": false,
+  "protocol_rev": "rotate-3-tail-positive-v1",
+  "soft_standard_hold": true,
+  "standard_unlock": false
+}

@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-10-02 02:17:34 AEST",
+  "driver": "flash",
+  "capture_tag": "flash-scale",
+  "model": "deepseek/deepseek-flash",
+  "n_cells": 2400,
+  "n_batches": 240,
+  "framings": [
+    "H1",
+    "H2",
+    "H3"
+  ],
+  "state_variants": [
+    "compact_focus",
+    "hybrid_v0",
+    "stats_only",
+    "stats_plus_delta"
+  ],
+  "dense_schedule": [
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120
+  ],
+  "cell_id_salt": "b002s",
+  "soft_standard_hold": true,
+  "sibling_dirs_untouched": [
+    "typesafe",
+    "flash-hframings",
+    "luna",
+    "flash-hframings-b",
+    "luna-b"
+  ]
+}

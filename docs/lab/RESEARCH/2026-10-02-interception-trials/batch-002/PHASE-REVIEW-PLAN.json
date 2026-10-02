@@ -1,0 +1,16 @@
+{
+  "n": 2000,
+  "by_axis": {
+    "phase_gate": 1756,
+    "review_check": 244
+  },
+  "by_builder": {
+    "phase_alignment": 1716,
+    "outcome-evidence": 40,
+    "unit_needs_review": 135,
+    "refine_brief": 25,
+    "session_progress": 84
+  },
+  "soft_standard_hold": true,
+  "product_wiring": false
+}

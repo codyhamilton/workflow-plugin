@@ -1,0 +1,35 @@
+{
+  "soft_standard_hold": true,
+  "tag": "vol2",
+  "drivers": {
+    "luna": {
+      "n_cells": 100,
+      "fire_count": 3,
+      "parse_miss_cells": 0,
+      "error_count": 0,
+      "leak_hits": 0,
+      "framing_cell_counts": {
+        "H1": 74,
+        "H2": 26
+      },
+      "wall_s": 86.8,
+      "error": null
+    },
+    "flash": {
+      "n_cells": 400,
+      "fire_count": 179,
+      "parse_miss_cells": 10,
+      "error_count": 0,
+      "leak_hits": 0,
+      "framing_cell_counts": {
+        "H1": 85,
+        "H2": 72,
+        "H3": 80,
+        "H4": 83,
+        "H5": 80
+      },
+      "wall_s": 420.5,
+      "error": null
+    }
+  }
+}

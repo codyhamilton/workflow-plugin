@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-10-02 08:59:31 AEST",
+  "batch": "batch-002",
+  "wave": "Wave-0-multi",
+  "driver": "luna",
+  "meters_class": "score-ready-path-diagnostics",
+  "score_ready_fp_miss_board": false,
+  "reason_fp_miss_board_false": "window_status=unidentified; do not invent outcome labels; join later via OUTCOME-SHEET",
+  "protocol_fixes": [
+    "R1_no_T_in_prompt_or_state",
+    "R2_non_length_outcome_sheet",
+    "R3_fixed_schedule_hazard"
+  ],
+  "soft_standard_hold": true,
+  "hooks_unlock": false,
+  "product_unlock": false,
+  "n_cells": 100,
+  "parse_miss_cells": 0,
+  "error_count": 0,
+  "fire_count": 3,
+  "rating_hist": {
+    "1": 54,
+    "0": 43,
+    "2": 3
+  },
+  "harness_cell_counts": {
+    "claude-code": 100
+  },
+  "framing_cell_counts": {
+    "H1": 74,
+    "H2": 26
+  },
+  "fixed_schedule": [
+    45,
+    60,
+    75,
+    90,
+    105,
+    120
+  ],
+  "fire_rate_among_at_risk_cells": {
+    "45": {
+      "n": 100,
+      "fire_rate": 0.03
+    },
+    "60": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "75": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "90": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "105": {
+      "n": 0,
+      "fire_rate": null
+    },
+    "120": {
+      "n": 0,
+      "fire_rate": null
+    }
+  },
+  "prompt_leak_spotcheck_hits": [],
+  "usage_tokens_rough": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "note": "TypeSafe usage when present; Flash/Luna often omit token meters"
+  },
+  "wall_s": 86.8,
+  "n_batches": 17,
+  "batch_elapsed_sum_s": 172.6,
+  "model": "gpt-6-luna"
+}

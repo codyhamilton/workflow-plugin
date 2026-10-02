@@ -1,0 +1,14 @@
+{
+  "axis": "phase-gate",
+  "n_planned": 5000,
+  "n_todo": 3550,
+  "n_already": 3206,
+  "n_sessions": 33,
+  "schemas": [
+    "outcome_evidence",
+    "phase_alignment"
+  ],
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "generated_at": "2026-10-02T08:59:20+10:00"
+}

@@ -1,0 +1,27 @@
+{
+  "adjudicator_templates": 2,
+  "blind_corpus_rows": 67,
+  "blind_corpus_unique_review_ids": 67,
+  "hooks": false,
+  "independent_agreement": "not_run",
+  "labeled_sidecar_sessions": 20,
+  "local_8080": false,
+  "metrics_computed": false,
+  "non_maps_controls": 25,
+  "non_maps_labeled_reference_controls": 4,
+  "non_maps_unlabeled_holdout_controls": 21,
+  "not_scoreboard": true,
+  "product_wiring": false,
+  "protocol_rev": "rotate-3-independent-adjudication-v1",
+  "reference_validation": "not_complete",
+  "remaining_gates": [
+    "two independent completed adjudicator sheets",
+    "retained agreement and adjudication-disagreement report",
+    "exact-key TypeSafe/Luna join reviewed after adjudication",
+    "session-clustered descriptive analysis only"
+  ],
+  "soft_standard_hold": true,
+  "standard_unlock": false,
+  "tail_positive_keys": 4,
+  "tail_positive_keys_with_digest": 4
+}

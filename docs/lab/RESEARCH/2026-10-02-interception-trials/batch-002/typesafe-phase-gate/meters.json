@@ -1,0 +1,15 @@
+{
+  "axis": "phase-gate",
+  "n_cells": 6756,
+  "new": 3550,
+  "ok": 3550,
+  "errors": 0,
+  "tok_in": 1983417,
+  "tok_out": 71000,
+  "wall_s": 246.3,
+  "n_sessions": 33,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "assert_phase_unlock": false,
+  "generated_at": "2026-10-02T09:03:26+10:00"
+}

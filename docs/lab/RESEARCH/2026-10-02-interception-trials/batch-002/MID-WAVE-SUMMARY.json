@@ -1,0 +1,495 @@
+{
+  "generated_at": "2026-10-02 01:44:28 AEST",
+  "wave": "Wave-0-mid",
+  "soft_standard_hold": true,
+  "n_packs": 42,
+  "dense_schedule": [
+    30,
+    35,
+    40,
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120
+  ],
+  "results": {
+    "luna": {
+      "generated_at": "2026-10-02 02:04:25 AEST",
+      "batch": "batch-002",
+      "wave": "Wave-0-scale",
+      "driver": "luna",
+      "capture_dir": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/luna-mid",
+      "meters_class": "score-ready-path-diagnostics",
+      "score_ready_fp_miss_board": false,
+      "soft_standard_hold": true,
+      "typesafe_used": false,
+      "hooks_unlock": false,
+      "n_variants": 640,
+      "parse_miss_cells": 1,
+      "error_count": 0,
+      "fire_count": 129,
+      "rating_hist": {
+        "1": 169,
+        "2": 112,
+        "3": 17,
+        "0": 341
+      },
+      "harness_cell_counts": {
+        "claude-code": 363,
+        "opencode": 217,
+        "cursor": 22,
+        "codex": 38
+      },
+      "framing_counts": {
+        "H1": 640
+      },
+      "state_variant_counts": {
+        "stats_only": 640
+      },
+      "dense_schedule": [
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120
+      ],
+      "fire_rate_among_at_risk_cells": {
+        "30": {
+          "n": 84,
+          "fire_rate": 0.0595
+        },
+        "35": {
+          "n": 82,
+          "fire_rate": 0.0976
+        },
+        "40": {
+          "n": 80,
+          "fire_rate": 0.1625
+        },
+        "45": {
+          "n": 76,
+          "fire_rate": 0.0921
+        },
+        "50": {
+          "n": 48,
+          "fire_rate": 0.1875
+        },
+        "55": {
+          "n": 42,
+          "fire_rate": 0.2143
+        },
+        "60": {
+          "n": 28,
+          "fire_rate": 0.2857
+        },
+        "65": {
+          "n": 23,
+          "fire_rate": 0.3043
+        },
+        "70": {
+          "n": 24,
+          "fire_rate": 0.375
+        },
+        "75": {
+          "n": 24,
+          "fire_rate": 0.375
+        },
+        "80": {
+          "n": 24,
+          "fire_rate": 0.1667
+        },
+        "85": {
+          "n": 18,
+          "fire_rate": 0.3889
+        },
+        "90": {
+          "n": 16,
+          "fire_rate": 0.25
+        },
+        "95": {
+          "n": 16,
+          "fire_rate": 0.4375
+        },
+        "100": {
+          "n": 16,
+          "fire_rate": 0.4375
+        },
+        "105": {
+          "n": 16,
+          "fire_rate": 0.1875
+        },
+        "110": {
+          "n": 10,
+          "fire_rate": 0.8
+        },
+        "115": {
+          "n": 6,
+          "fire_rate": 0.5
+        },
+        "120": {
+          "n": 6,
+          "fire_rate": 0.3333
+        }
+      },
+      "prompt_leak_spotcheck_hits": [],
+      "cell_id_salt": "b002s",
+      "partial": false,
+      "wall_s": 1197.3,
+      "n_batches": 107,
+      "batch_elapsed_sum_s": 1197.2,
+      "model": "gpt-6-luna",
+      "batch_errors": [
+        {
+          "batch_idx": 6,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 13,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 26,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 30,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 61,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 68,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 74,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 81,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 85,
+          "error": null,
+          "n_parsed": 5
+        },
+        {
+          "batch_idx": 88,
+          "error": null,
+          "n_parsed": 5
+        }
+      ]
+    },
+    "flash": {
+      "generated_at": "2026-10-02 02:29:46 AEST",
+      "batch": "batch-002",
+      "wave": "Wave-0-scale",
+      "driver": "flash",
+      "capture_dir": "/home/codyh/workspace/workflow-plugin/docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/flash-mid",
+      "meters_class": "score-ready-path-diagnostics",
+      "score_ready_fp_miss_board": false,
+      "soft_standard_hold": true,
+      "typesafe_used": false,
+      "hooks_unlock": false,
+      "n_variants": 1600,
+      "parse_miss_cells": 0,
+      "error_count": 0,
+      "fire_count": 295,
+      "rating_hist": {
+        "3": 157,
+        "0": 805,
+        "1": 500,
+        "2": 138
+      },
+      "harness_cell_counts": {
+        "claude-code": 907,
+        "opencode": 543,
+        "cursor": 55,
+        "codex": 95
+      },
+      "framing_counts": {
+        "H1": 1600
+      },
+      "state_variant_counts": {
+        "stats_only": 658,
+        "hybrid_v0": 658,
+        "stats_plus_delta": 284
+      },
+      "dense_schedule": [
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120
+      ],
+      "fire_rate_among_at_risk_cells": {
+        "30": {
+          "n": 210,
+          "fire_rate": 0.1
+        },
+        "35": {
+          "n": 205,
+          "fire_rate": 0.1463
+        },
+        "40": {
+          "n": 200,
+          "fire_rate": 0.155
+        },
+        "45": {
+          "n": 190,
+          "fire_rate": 0.1316
+        },
+        "50": {
+          "n": 120,
+          "fire_rate": 0.2167
+        },
+        "55": {
+          "n": 105,
+          "fire_rate": 0.1905
+        },
+        "60": {
+          "n": 70,
+          "fire_rate": 0.1857
+        },
+        "65": {
+          "n": 60,
+          "fire_rate": 0.35
+        },
+        "70": {
+          "n": 60,
+          "fire_rate": 0.2833
+        },
+        "75": {
+          "n": 60,
+          "fire_rate": 0.1833
+        },
+        "80": {
+          "n": 60,
+          "fire_rate": 0.1667
+        },
+        "85": {
+          "n": 45,
+          "fire_rate": 0.3111
+        },
+        "90": {
+          "n": 39,
+          "fire_rate": 0.2821
+        },
+        "95": {
+          "n": 32,
+          "fire_rate": 0.2812
+        },
+        "100": {
+          "n": 32,
+          "fire_rate": 0.25
+        },
+        "105": {
+          "n": 32,
+          "fire_rate": 0.2188
+        },
+        "110": {
+          "n": 32,
+          "fire_rate": 0.1562
+        },
+        "115": {
+          "n": 24,
+          "fire_rate": 0.2917
+        },
+        "120": {
+          "n": 24,
+          "fire_rate": 0.375
+        }
+      },
+      "prompt_leak_spotcheck_hits": [],
+      "cell_id_salt": "b002s",
+      "partial": false,
+      "wall_s": 2718.2,
+      "n_batches": 160,
+      "batch_elapsed_sum_s": 2718.0,
+      "model": "deepseek/deepseek-flash",
+      "batch_errors": [
+        {
+          "batch_idx": 3,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 15,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 18,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 20,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 36,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 40,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 44,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 48,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 51,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 53,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 69,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 73,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 77,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 81,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 84,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 86,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 102,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 106,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 110,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 114,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 119,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 135,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 139,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 143,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 147,
+          "error": null,
+          "n_parsed": 9
+        },
+        {
+          "batch_idx": 149,
+          "error": null,
+          "n_parsed": 9
+        }
+      ]
+    }
+  }
+}

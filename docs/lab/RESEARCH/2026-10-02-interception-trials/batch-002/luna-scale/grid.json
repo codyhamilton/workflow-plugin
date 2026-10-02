@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-10-02 02:12:26 AEST",
+  "driver": "luna",
+  "capture_tag": "luna-scale",
+  "model": "gpt-6-luna",
+  "n_cells": 960,
+  "n_batches": 160,
+  "framings": [
+    "H1"
+  ],
+  "state_variants": [
+    "hybrid_v0",
+    "stats_only",
+    "stats_plus_delta"
+  ],
+  "dense_schedule": [
+    45,
+    50,
+    55,
+    60,
+    65,
+    70,
+    75,
+    80,
+    85,
+    90,
+    95,
+    100,
+    105,
+    110,
+    115,
+    120
+  ],
+  "cell_id_salt": "b002s",
+  "soft_standard_hold": true,
+  "sibling_dirs_untouched": [
+    "typesafe",
+    "flash-hframings",
+    "luna",
+    "flash-hframings-b",
+    "luna-b"
+  ]
+}
