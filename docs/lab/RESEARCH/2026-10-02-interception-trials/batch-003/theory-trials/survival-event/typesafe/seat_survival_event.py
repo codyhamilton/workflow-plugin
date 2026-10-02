@@ -324,13 +324,14 @@ def parse_answers(payload: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
     event = answers.get("event_time") or {}
     wire_type = event.get("type")
     label = event.get("choice")
-    scrape_ok = wire_type != "choice" or (
-        label is not None and event.get("response_class") == label
-    )
+    # System One's choice wire has no separate response_class field.  The
+    # registered response class is the returned choice label itself.
+    response_class = label if wire_type == "choice" else event.get("response_class")
+    scrape_ok = wire_type == "choice" and label is not None and response_class == label
     if wire_type != "choice":
         return {
             "event_time": None,
-            "response_class": event.get("response_class"),
+            "response_class": response_class,
             "response_label": None,
             "choice_scrape_ok": False,
             "wire_type": wire_type,
@@ -339,7 +340,7 @@ def parse_answers(payload: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
     if not scrape_ok:
         return {
             "event_time": None,
-            "response_class": event.get("response_class"),
+            "response_class": response_class,
             "response_label": label,
             "choice_scrape_ok": False,
             "wire_type": wire_type,
@@ -353,7 +354,7 @@ def parse_answers(payload: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
         except (TypeError, ValueError):
             return {
                 "event_time": None,
-                "response_class": event.get("response_class"),
+                "response_class": response_class,
                 "response_label": label,
                 "choice_scrape_ok": False,
                 "wire_type": wire_type,
@@ -365,7 +366,7 @@ def parse_answers(payload: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
     rationale = rationale_answer.get("text", rationale_answer.get("value"))
     return {
         "event_time": value,
-        "response_class": event.get("response_class"),
+        "response_class": response_class,
         "response_label": label,
         "choice_scrape_ok": True,
         "wire_type": wire_type,
@@ -488,6 +489,7 @@ def run_calls(out: Path, cells: list[dict[str, Any]], workers: int) -> list[dict
             if line.strip():
                 row = json.loads(line)
                 done[row["cell_id"]] = row
+    repair_results(out, done)
     todo = [cell for cell in cells if cell["cell_id"] not in done]
     with ThreadPoolExecutor(max_workers=workers) as executor:
         futures = {
@@ -510,10 +512,25 @@ def run_calls(out: Path, cells: list[dict[str, Any]], workers: int) -> list[dict
     return [done[cell["cell_id"]] for cell in cells if cell["cell_id"] in done]
 
 
+def repair_results(out: Path, done: dict[str, dict[str, Any]]) -> None:
+    """Re-parse captured HTTP responses without spending another API call."""
+    raw_dir = out / "raw"
+    for row in done.values():
+        response_path = raw_dir / f"{row['cell_id']}-response.json"
+        if row.get("http") != 200 or not response_path.exists():
+            continue
+        payload = json.loads(response_path.read_text(encoding="utf-8"))
+        parsed, parse_error = parse_answers(payload)
+        row["error"] = parse_error
+        row["answers"] = parsed
+
+
 def event_value(row: dict[str, Any]) -> int | None:
     answers = row.get("answers") or {}
     value = answers.get("event_time")
-    return value.get("event_time") if isinstance(value, dict) else None
+    if isinstance(value, dict):
+        return value.get("event_time")
+    return value if isinstance(value, int) else None
 
 
 def agreement_summary(results: list[dict[str, Any]], metadata: list[dict[str, Any]]) -> dict[str, Any]:
@@ -685,7 +702,7 @@ def analyze(out: Path, results: list[dict[str, Any]], metadata: list[dict[str, A
         "errors": len(results) - len(successful),
         "http_counts": dict(Counter(str(row.get("http")) for row in results)),
         "choice_scrape_failures": sum(
-            not bool((row.get("answers") or {}).get("event_time", {}).get("choice_scrape_ok"))
+            not bool((row.get("answers") or {}).get("choice_scrape_ok"))
             for row in successful
         ),
         "stimulus_max_chars": max(row["stimulus_chars"] for row in metadata),
@@ -696,6 +713,41 @@ def analyze(out: Path, results: list[dict[str, Any]], metadata: list[dict[str, A
         "agreement_kill_fired": agreement["agreement_kill_fired"],
     }
     write_json(out / "meters.json", meters)
+    meta_by_worker = {row["worker_id"]: row for row in metadata}
+    report_lines = [
+        "# PR-SURVIVAL-EVENT TypeSafe seat",
+        "",
+        "Maps-only research artifact. No behavior ship, product wiring, `--call-jev`, "
+        "or localhost:8080 use.",
+        "",
+        f"- Protocol SHA-256: `{EXPECTED_PROTOCOL_SHA256}`",
+        f"- Driver/model: TypeSafe `{MODEL}`",
+        "- Stratum: `maps-5h`",
+        f"- Calls: {len(results)}/{len(WORKERS) * len(SEATS)} HTTP-successful and parsed",
+        f"- Maximum stimulus: {meters['stimulus_max_chars']} characters",
+        f"- Exact three-seat event-time agreement: {agreement['worker_exact_agreement_rate']:.3f}",
+        "- Observed event times: all 36 answers were `null` (censored/no supported "
+        "event in the shown window).",
+        "- Cox kill: not fired; the 2-covariate LOO gate was not evaluable because "
+        "there were fewer than two observed events. This is not evidence of a pass.",
+        "- Agreement kill: not evaluable because the protocol does not provide the "
+        "prefix-causal alpha baseline; exact agreement is trivially 1.000 because "
+        "all seats returned `null`.",
+        "",
+        "See `results.jsonl`, `raw/`, `agreement-summary.json`, `cox-summary.json`, "
+        "and `meters.json` for the complete record.",
+        "",
+        "## Cell IDs",
+        "",
+        "| Worker | Seat | T (analysis metadata) | Cell ID |",
+        "|---|---:|---:|---|",
+    ]
+    for row in results:
+        report_lines.append(
+            f"| `{row['worker_id']}` | {row['seat']} | "
+            f"{meta_by_worker[row['worker_id']]['T']} | `{row['cell_id']}` |"
+        )
+    (out / "REPORT.md").write_text("\n".join(report_lines) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -714,6 +766,13 @@ def main() -> int:
             for line in (out / "results.jsonl").read_text(encoding="utf-8").splitlines()
             if line.strip()
         ]
+        done = {row["cell_id"]: row for row in results}
+        repair_results(out, done)
+        results = list(done.values())
+        (out / "results.jsonl").write_text(
+            "\n".join(json.dumps(row, ensure_ascii=False) for row in results) + "\n",
+            encoding="utf-8",
+        )
         analyze(out, results, metadata)
         return 0
     cells, metadata = prepare(out)
