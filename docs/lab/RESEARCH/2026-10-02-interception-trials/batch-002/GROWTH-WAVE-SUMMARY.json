@@ -1,4 +1,7 @@
 {
+  "snapshot_status": "superseded_pre_growth_fill_v1",
+  "superseded_by": "typesafe-scenario-sweep/meters.json",
+  "authoritative_meters_appendix": "../../2026-10-02-interception-steer-to-stop/METERS-APPENDIX.md",
   "soft_standard_hold": true,
   "product_wiring": false,
   "hooks_unlock": false,

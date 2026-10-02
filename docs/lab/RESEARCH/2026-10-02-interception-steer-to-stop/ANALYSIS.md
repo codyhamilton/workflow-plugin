@@ -5,7 +5,7 @@
 **Generated:** 2026-10-02 (UTC artifacts via [`analyze_corpus.py`](../2026-10-02-interception-trials/batch-002/analyze_corpus.py))  
 **Reproduce:** `python3 docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/analyze_corpus.py`
 
-**Sibling outputs:** [`analysis/ARTIFACT-INVENTORY.json`](analysis/ARTIFACT-INVENTORY.json) · [`analysis/scenario-fire-rankings.json`](analysis/scenario-fire-rankings.json) · [`analysis/PROVISIONAL-join-summary.json`](analysis/PROVISIONAL-join-summary.json) · [`analysis/PROVISIONAL-join-wave0-flash.jsonl`](analysis/PROVISIONAL-join-wave0-flash.jsonl)
+**Sibling outputs:** [`METERS-APPENDIX.md`](METERS-APPENDIX.md) (packed tables; [#109](https://github.com/codyhamilton/workflow-plugin/pull/109)/[#110](https://github.com/codyhamilton/workflow-plugin/pull/110)/[#111](https://github.com/codyhamilton/workflow-plugin/pull/111)) · [`analysis/ARTIFACT-INVENTORY.json`](analysis/ARTIFACT-INVENTORY.json) · [`analysis/scenario-fire-rankings.json`](analysis/scenario-fire-rankings.json) · [`analysis/PROVISIONAL-join-summary.json`](analysis/PROVISIONAL-join-summary.json) · [`analysis/PROVISIONAL-join-wave0-flash.jsonl`](analysis/PROVISIONAL-join-wave0-flash.jsonl)
 
 **Window-status refinement:** [`WINDOW-STATUS-JOIN.md`](WINDOW-STATUS-JOIN.md)
 derives explicit `inside` / `outside` / `none` / `ambiguous` / `unidentified`
