@@ -282,8 +282,12 @@ def case_cells() -> tuple[list[dict], Counter]:
              for state in STATE_VARIANTS
              for question in QUESTIONS
              for rating in RATINGS]
+    per_case = max(1, (TARGET + len(cases) - 1) // len(cases))
     for index, (state, question, rating) in enumerate(cases):
-        for row in rows:
+        # Keep the corpus broad: a case gets only a small round-robin slice,
+        # rather than consuming every session before the next case appears.
+        ordered_rows = rows[index % len(rows):] + rows[:index % len(rows)]
+        for row in ordered_rows[:per_case]:
             state_data = project(row["full"], state)
             if state_data is None:
                 gated[f"{state}:no_tail"] += 1
@@ -357,7 +361,10 @@ def post(cell: dict) -> dict:
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
                  "Accept": "application/json"},
     )
-    out = BATCH / ("typesafe-growth-cut" if STAGE == "preferred" else "typesafe-case-catalog")
+    out_name = os.environ.get(
+        "TS_CASE_OUT", "typesafe-case-catalog-v2" if STAGE == "cases" else "typesafe-growth-cut"
+    )
+    out = BATCH / out_name
     raw_dir = out / "raw"
     raw_dir.mkdir(parents=True, exist_ok=True)
     started = time.time()
@@ -407,7 +414,10 @@ def main() -> int:
     if not os.environ.get("TYPESAFE_API_KEY", "").strip():
         raise SystemExit("TYPESAFE_API_KEY missing")
     cells, gated = preferred_cells() if STAGE == "preferred" else case_cells()
-    out = BATCH / ("typesafe-growth-cut" if STAGE == "preferred" else "typesafe-case-catalog")
+    out_name = os.environ.get(
+        "TS_CASE_OUT", "typesafe-case-catalog-v2" if STAGE == "cases" else "typesafe-growth-cut"
+    )
+    out = BATCH / out_name
     out.mkdir(parents=True, exist_ok=True)
     plan = {
         "stage": STAGE, "target": TARGET if STAGE == "cases" else len(cells),
