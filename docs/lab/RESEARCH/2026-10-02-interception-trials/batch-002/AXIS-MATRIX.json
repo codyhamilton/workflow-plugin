@@ -1,0 +1,737 @@
+{
+  "wave": "typesafe-response-class-calibration",
+  "status": "complete",
+  "n_scenarios": 12,
+  "n_response_classes": 4,
+  "n_matrix_cells": 48,
+  "exact_cells": 432,
+  "diagnostic_cells": 336,
+  "exact_pairs": 9,
+  "diagnostic_pairs": 7,
+  "raw_included": false,
+  "diagnostic_only": true,
+  "soft_standard_hold": true,
+  "product_wiring": false,
+  "rows": [
+    {
+      "scenario_id": "state.markers_focus|q.context_thrash_compact",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 3,
+        "fire_rate": 0.3333
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 1,
+        "fire_rate": 0.1429
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.context_thrash_compact",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 1,
+        "fire_rate": 0.1111
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.context_thrash_compact",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 5,
+        "fire_rate": 0.5556
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 2,
+        "fire_rate": 0.2857
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.context_thrash_compact",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 1,
+        "fire_rate": 0.1111
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.dependency_wait",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.dependency_wait",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.dependency_wait",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.dependency_wait",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.idle_tool_spin",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 7,
+        "fire_rate": 0.7778
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 5,
+        "fire_rate": 0.7143
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.idle_tool_spin",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 3,
+        "fire_rate": 0.3333
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 4,
+        "fire_rate": 0.5714
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.idle_tool_spin",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 7,
+        "fire_rate": 0.7778
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 6,
+        "fire_rate": 0.8571
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.idle_tool_spin",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 3,
+        "fire_rate": 0.3333
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 3,
+        "fire_rate": 0.4286
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.test_flake_loop",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 4,
+        "fire_rate": 0.4444
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 1,
+        "fire_rate": 0.1429
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.test_flake_loop",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 2,
+        "fire_rate": 0.2222
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 1,
+        "fire_rate": 0.1429
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.test_flake_loop",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 6,
+        "fire_rate": 0.6667
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 4,
+        "fire_rate": 0.5714
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.markers_focus|q.test_flake_loop",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 1,
+        "fire_rate": 0.1111
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.bash_retry_storm",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.bash_retry_storm",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.bash_retry_storm",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.bash_retry_storm",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.brief_abandon",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.brief_abandon",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.brief_abandon",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.brief_abandon",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.deliverable_orphan",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.deliverable_orphan",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.deliverable_orphan",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.deliverable_orphan",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.docs_only_drift",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.docs_only_drift",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.docs_only_drift",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.docs_only_drift",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.edit_churn",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.edit_churn",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.edit_churn",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.edit_churn",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.parallel_agent_thrash",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.parallel_agent_thrash",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.parallel_agent_thrash",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 1,
+        "fire_rate": 0.1429
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.parallel_agent_thrash",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.scope_creep_silent",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.scope_creep_silent",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.scope_creep_silent",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.scope_creep_silent",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.speculative_rewrite",
+      "response_class": "binary_fire",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.speculative_rewrite",
+      "response_class": "likert_0_3",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.speculative_rewrite",
+      "response_class": "four_class",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    },
+    {
+      "scenario_id": "state.recent_delta_brief|q.speculative_rewrite",
+      "response_class": "rating_plus_offset",
+      "exact_label_ready": {
+        "n": 9,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "diagnostic_only": {
+        "n": 7,
+        "fire_count": 0,
+        "fire_rate": 0.0
+      },
+      "complete": true
+    }
+  ]
+}

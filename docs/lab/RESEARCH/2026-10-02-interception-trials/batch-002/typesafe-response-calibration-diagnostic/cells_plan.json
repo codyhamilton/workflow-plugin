@@ -1,13 +1,13 @@
 {
   "wave": "typesafe-response-class-calibration",
-  "scope": "exact",
-  "join_class": "exact_label_ready",
+  "scope": "diagnostic",
+  "join_class": "diagnostic_only",
   "catalog_scope": "12 preferred GROWTH state\u00d7question pairings from #109",
   "n_distinct_scenarios": 12,
-  "n_representative_pairs": 9,
-  "n_exact_representative_pairs": 9,
+  "n_representative_pairs": 7,
+  "n_exact_representative_pairs": 0,
   "n_response_classes": 4,
-  "n_cells_planned": 432,
+  "n_cells_planned": 336,
   "response_classes": [
     "binary_fire",
     "likert_0_3",
@@ -66,52 +66,42 @@
   ],
   "representative_pairs": [
     {
-      "session_id": "2e083814b952",
-      "checkpoint": 45,
-      "join_class": "exact_label_ready"
+      "session_id": "004a52c29513",
+      "checkpoint": 35,
+      "join_class": "diagnostic_only"
     },
     {
-      "session_id": "499377c18811",
-      "checkpoint": 75,
-      "join_class": "exact_label_ready"
+      "session_id": "4f4b98803720",
+      "checkpoint": 70,
+      "join_class": "diagnostic_only"
     },
     {
-      "session_id": "5415ae00a788",
-      "checkpoint": 45,
-      "join_class": "exact_label_ready"
+      "session_id": "919012be9f39",
+      "checkpoint": 55,
+      "join_class": "diagnostic_only"
     },
     {
-      "session_id": "567e678f0a57",
-      "checkpoint": 45,
-      "join_class": "exact_label_ready"
+      "session_id": "9659bf4fc9f4",
+      "checkpoint": 70,
+      "join_class": "diagnostic_only"
     },
     {
-      "session_id": "730a03ecdc0d",
-      "checkpoint": 75,
-      "join_class": "exact_label_ready"
+      "session_id": "9a9249e2f356",
+      "checkpoint": 35,
+      "join_class": "diagnostic_only"
     },
     {
-      "session_id": "a2e9f853749d",
-      "checkpoint": 75,
-      "join_class": "exact_label_ready"
+      "session_id": "aa9e5be26e92",
+      "checkpoint": 55,
+      "join_class": "diagnostic_only"
     },
     {
-      "session_id": "a56bad1c7f13",
-      "checkpoint": 75,
-      "join_class": "exact_label_ready"
-    },
-    {
-      "session_id": "a8d0a590128a",
-      "checkpoint": 75,
-      "join_class": "exact_label_ready"
-    },
-    {
-      "session_id": "b13d1a65a961",
-      "checkpoint": 60,
-      "join_class": "exact_label_ready"
+      "session_id": "ac7c401379d0",
+      "checkpoint": 35,
+      "join_class": "diagnostic_only"
     }
   ],
-  "checkpoint_policy": "one exact-labeled representative mid per session",
+  "checkpoint_policy": "one representative mid per eligible diagnostic session",
   "tail_less_policy": "gate; do not substitute empty growth fields",
   "label_values_in_prompt": false,
   "window_cartesian": false,
