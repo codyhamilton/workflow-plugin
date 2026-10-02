@@ -250,6 +250,18 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 
 ---
 
+## 2026-10-02 — Signal-closeness measurement grammar (docs only)
+
+### Observation (high for the record; thesis confidence not high)
+
+- Cody’s 2026-10-02 measurement guidance is in [`RESEARCH/2026-10-01-progressive-jev-session-gates/DESIGN-signal-closeness-v0.md`](RESEARCH/2026-10-01-progressive-jev-session-gates/DESIGN-signal-closeness-v0.md), with vocabulary in that pack’s [`TERMS.md`](RESEARCH/2026-10-01-progressive-jev-session-gates/TERMS.md) §15 and the experiment pointer in [`NEXT-EXPERIMENTS.md`](RESEARCH/2026-10-01-progressive-jev-session-gates/NEXT-EXPERIMENTS.md).
+- Recorded loop: theorise qualitative signals; one API call with many independent float asks, each judged alone; prove or kill each signal; then wording variants × specialised state subsets (last-N, prompt plus last-N, all user prompts plus last-N, programmatic turn-type profile); Workflow System Manager owns the weighted union and a per-round discount aligned with decay schedule D0 ([`DESIGN-progressive-decay-bar-v0.md`](RESEARCH/2026-10-01-progressive-jev-session-gates/DESIGN-progressive-decay-bar-v0.md)). Hard yes/no and multi-class are demoted as the primary instrument.
+- Wave-2 lessons are cited there as motive, not as a ship ticket: validation-phase v1 collapsed to `in_validation` (63/63), survival event times stayed null, the tournament kill separated extremes at zero calls, tool-grounding recovered productive-edit building mass (12/18 vs 0). Same-question reseat of those killed framings stays forbidden.
+- H1 rating → fire remains contrast only for this loop: [`RESEARCH/2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md`](RESEARCH/2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md). The interception bake-off order is not re-ranked.
+- Draft family names `PR-SIGNAL-CLOSENESS`, `PR-SIGNAL-STATE-ABLATION`, and `PR-DECAY-ACCUM` are unsigned. No harness, hook, or `--call-jev` change. No behaviour ship.
+
+---
+
 ## Template for future entries
 
 ```markdown

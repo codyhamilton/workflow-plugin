@@ -19,6 +19,8 @@ The resolved cheap-Jev paper stays as written. This pack extends **use case 1 on
 
 Research pack: [`../RESEARCH/2026-10-01-progressive-jev-session-gates/`](../RESEARCH/2026-10-01-progressive-jev-session-gates/INDEX.md).
 
+**Measurement grammar (2026-10-02, unsigned):** the next signal loop is float closeness to qualitative signals, not a harder yes/no — [`../RESEARCH/2026-10-01-progressive-jev-session-gates/DESIGN-signal-closeness-v0.md`](../RESEARCH/2026-10-01-progressive-jev-session-gates/DESIGN-signal-closeness-v0.md). It does not change this stub’s status and does not unlock a sweep.
+
 ## Signal
 
 The 2026-09-30 maps pass scored 150 subagents against the workflow band of 50–75 API turns and 100–125k peak context. 24 of 150 (16%) were over that band. Eight exceeded 100 turns. Worker `92a48e004519` reached **296** API calls, a **12.7MB** JSONL, and **130k** peak context, with six paths re-read at least three times and about sixty compact-ish events. Worker `bb6165018de0` reached **154** API calls. The closed gate would have logged `band_exit` at turn 76 and become `jev_eligible` once, near turn 85 or on context and bytes. Nothing in that design asks again at 90, 105, and onward. The field note that the band comes from already says the 50–75 figure is a cost crossover, not a published optimum ([`docs/analysis/2026-09-08-workflow-vs-field.md`](../../analysis/2026-09-08-workflow-vs-field.md)).

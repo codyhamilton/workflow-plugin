@@ -4,8 +4,9 @@
 **Owner:** Workflow System Manager (orchestration intent). **Not shipped.** No hooks, no `--call-jev`, no changes to `gate_thresholds.py` or replay harness behaviour in this fold.
 
 **Experiment ids (paired hold):** [`progressive-decay-bar-v1`](NEXT-EXPERIMENTS.md#primary-next--progressive-decay-bar-v1-and-validation-handoff-steer-v1-wsm-design-fold--no-harness-yet), [`validation-handoff-steer-v1`](NEXT-EXPERIMENTS.md#primary-next--progressive-decay-bar-v1-and-validation-handoff-steer-v1-wsm-design-fold--no-harness-yet).  
-**Terms anchor:** [`TERMS.md`](TERMS.md) §§11–14 (especially §12 decay, §13 handoff).  
-**Prerequisite met:** `shape-signal-panel-v1` Phase 2 + agreement SUMMARY ([`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md)). Harness still blocked until this schedule is pre-registered and reviewed.
+**Terms anchor:** [`TERMS.md`](TERMS.md) §§11–15 (especially §12 decay, §13 handoff, §15 signal closeness).  
+**Prerequisite met:** `shape-signal-panel-v1` Phase 2 + agreement SUMMARY ([`shape-signal-agreement-SUMMARY-20261001.md`](proofs/validated/gold/shape-signal-agreement-SUMMARY-20261001.md)). Harness still blocked until this schedule is pre-registered and reviewed.  
+**Input grammar (2026-10-02, not a harness unlock):** [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md). The next signal loop feeds this bar with independent closeness floats and an offline union. It does not change D0.
 
 This document is the **written decay schedule + handoff steer** that [`NEXT-EXPERIMENTS.md`](NEXT-EXPERIMENTS.md) required before any live `confidence_min` decay or validation-phase wiring. It does **not** unlock Jev behaviour.
 
@@ -176,5 +177,18 @@ Ten items for Workflow Systems / Sol review before harness pre-registration:
 | P0 fixed bar (contrast) | [`TERMS.md`](TERMS.md) §§3, 6, 9 **`P0`** |
 | Closed gate constants (unchanged) | [`gate_thresholds.py`](../../2026-09-30-jev-cheap-judgement-signals/proofs/gate_thresholds.py) (named only) |
 | WSM orchestration patterns | [`workflow-systems.md`](../2026-09-30-workflow-systems.md) §§6–7 |
+| Float inputs, per-signal kill, unsigned `PR-DECAY-ACCUM` | [`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md); [`TERMS.md`](TERMS.md) **§15** |
 
-**Version:** v0 — design doc only. Bump version id when D0 or phase anchors change.
+---
+
+## 8. Input grammar — signal closeness (2026-10-02)
+
+D0 still discounts `confidence_min` by round index. What may **feed** that bar on the next measurement loop is no longer a hard yes/no or a multi-class label.
+
+[`DESIGN-signal-closeness-v0.md`](DESIGN-signal-closeness-v0.md) is the grammar: one request, several independent closeness floats in **[0, 1]**, each signal proved or killed alone, then wording × state-subset variants, then a **Workflow System Manager** weighted union. The model does not emit the union or the fire bit. Per-round discount-to-kill **aligns with D0** (the table in §2.2). **D1** stays the adversarial challenger (§6 of that note). The [0, 1] union is not integer `t_k` until a later signature maps the scales. That signature is the unsigned draft family `PR-DECAY-ACCUM`. This section does not sign it and does not open a harness.
+
+Wave-2 killed the blind form of the §3 validation question (**63/63** `in_validation` on validation-phase v1, including productive-edit). Section 3 remains the 2026-10-01 handoff sketch. It is demoted as the **primary measurement** for the next signal loop. A validation-shaped float, if anyone theorises one, is a new signal under the closeness note, not a reseat of the killed question. Tool-grounded recovery of productive-edit mass (**12/18** building, thrash **0/18**) is a lesson about evidence anchors, not a behaviour result.
+
+H1’s rating → fire path is contrast for this loop, not the input to D0: [`../2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md`](../2026-10-02-interception-steer-to-stop/SIGNAL-CLOSENESS-CONTRAST.md).
+
+**Version:** v0 — design doc only. Bump the version id when D0 or the phase anchors change. The 2026-10-02 signal-closeness note does not bump D0.
