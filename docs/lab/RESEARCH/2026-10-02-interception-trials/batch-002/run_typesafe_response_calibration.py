@@ -27,7 +27,14 @@ import importlib.util
 
 REPO = Path(os.environ.get("WF_REPO", Path(__file__).resolve().parents[5]))
 BATCH = REPO / "docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002"
-OUT = BATCH / "typesafe-response-calibration"
+SCOPE = os.environ.get("TS_RESPONSE_SCOPE", "exact").strip().lower()
+if SCOPE not in {"exact", "diagnostic"}:
+    raise SystemExit("TS_RESPONSE_SCOPE must be exact or diagnostic")
+OUT = BATCH / (
+    "typesafe-response-calibration"
+    if SCOPE == "exact"
+    else "typesafe-response-calibration-diagnostic"
+)
 RAW = OUT / "raw"
 LABELS = BATCH / "outcome-labels.jsonl"
 URL = "https://api.typesafe.ai/v1/systemone"
@@ -165,8 +172,8 @@ def representative(pack: dict[str, Any]) -> dict[str, Any] | None:
     return checkpoints[len(checkpoints) // 2] if checkpoints else None
 
 
-def exact_pairs() -> list[dict[str, Any]]:
-    """Return exact representative joins; never interpolate a nearby label."""
+def eligible_pairs() -> list[dict[str, Any]]:
+    """Return all non-empty GROWTH representative joins without interpolation."""
     labels = load_labels()
     pairs: list[dict[str, Any]] = []
     for pack in sorted(load_packs(), key=lambda row: row["worker_id"]):
@@ -186,10 +193,10 @@ def exact_pairs() -> list[dict[str, Any]]:
         sid = pack["worker_id"]
         cp = str(snap["checkpoint"])
         label = labels.get(sid) or {}
-        if label.get("label_status") != "labeled":
-            continue
-        if cp not in (label.get("near_done_at_checkpoint") or {}):
-            continue
+        exact = (
+            label.get("label_status") == "labeled"
+            and cp in (label.get("near_done_at_checkpoint") or {})
+        )
         pairs.append(
             {
                 "session_id": sid,
@@ -197,9 +204,16 @@ def exact_pairs() -> list[dict[str, Any]]:
                 "harness": pack.get("harness"),
                 "project": pack.get("project"),
                 "full_state": filled,
+                "join_class": "exact_label_ready" if exact else "diagnostic_only",
             }
         )
     return pairs
+
+
+def select_pairs() -> list[dict[str, Any]]:
+    pairs = eligible_pairs()
+    wanted = "exact_label_ready" if SCOPE == "exact" else "diagnostic_only"
+    return [pair for pair in pairs if pair["join_class"] == wanted]
 
 
 def project_state(full: dict[str, Any], state_variant: str) -> dict[str, Any]:
@@ -424,6 +438,8 @@ def post(cell: dict[str, Any], key: str) -> dict[str, Any]:
 def write_plan(cells: list[dict[str, Any]], pairs: list[dict[str, Any]]) -> None:
     plan = {
         "wave": "typesafe-response-class-calibration",
+        "scope": SCOPE,
+        "join_class": "exact_label_ready" if SCOPE == "exact" else "diagnostic_only",
         "catalog_scope": "12 preferred GROWTH state×question pairings from #109",
         "n_distinct_scenarios": len(PREFERRED_PAIRS),
         "n_exact_representative_pairs": len(pairs),
@@ -434,8 +450,12 @@ def write_plan(cells: list[dict[str, Any]], pairs: list[dict[str, Any]]) -> None
             {"state": state, "question": question}
             for state, question in PREFERRED_PAIRS
         ],
-        "exact_pairs": [
-            {"session_id": pair["session_id"], "checkpoint": pair["checkpoint"]}
+        "representative_pairs": [
+            {
+                "session_id": pair["session_id"],
+                "checkpoint": pair["checkpoint"],
+                "join_class": pair["join_class"],
+            }
             for pair in pairs
         ],
         "checkpoint_policy": "one exact-labeled representative mid per session",
@@ -452,7 +472,7 @@ def write_plan(cells: list[dict[str, Any]], pairs: list[dict[str, Any]]) -> None
 def write_blocker(reason: str, rows: list[dict[str, Any]] | None = None) -> None:
     counts = Counter(str(row.get("http")) for row in rows or [])
     text = [
-        "# BLOCKER — TypeSafe response calibration",
+        f"# BLOCKER — TypeSafe {SCOPE} response calibration",
         "",
         "**Soft HOLD:** no meters are claimed from this run.",
         "",
@@ -497,9 +517,12 @@ def write_meters(rows: list[dict[str, Any]], planned: int, pairs: int) -> None:
     meters = {
         "status": "complete" if len(successful) == planned else "partial",
         "wave": "typesafe-response-class-calibration",
+        "scope": SCOPE,
+        "join_class": "exact_label_ready" if SCOPE == "exact" else "diagnostic_only",
         "metric": "paired response-class diagnostics",
         "n_distinct_scenarios": len(PREFERRED_PAIRS),
-        "n_exact_representative_pairs": pairs,
+        "n_representative_pairs": pairs,
+        "n_exact_representative_pairs": pairs if SCOPE == "exact" else 0,
         "n_response_classes": len(RESPONSE_CLASSES),
         "n_cells_planned": planned,
         "n_cells_successful": len(successful),
@@ -525,13 +548,20 @@ def write_meters(rows: list[dict[str, Any]], planned: int, pairs: int) -> None:
         "**Soft Standard HOLD** — paired diagnostics only; no hooks, unlock, or product behavior.",
         "",
         "This is a response-class complement to #112, not a new scenario-volume claim.",
-        "It reuses the twelve #109 preferred state×question pairs and nine exact",
-        "representative joins. Tail-less packs and unlabeled representative joins were gated.",
+        (
+            "It reuses the twelve #109 preferred state×question pairs and nine exact"
+            " representative joins."
+            if SCOPE == "exact"
+            else
+            "It reuses the twelve #109 preferred state×question pairs and seven"
+            " diagnostic-only representative joins."
+        ),
+        "Tail-less packs were gated; diagnostic joins are not label-ready.",
         "",
         "## Counts",
         f"- status: **{meters['status']}**",
         f"- scenarios: **{meters['n_distinct_scenarios']}**",
-        f"- exact representative pairs: **{meters['n_exact_representative_pairs']}**",
+        f"- representative pairs: **{meters['n_representative_pairs']}**",
         f"- response classes: **{meters['n_response_classes']}**",
         f"- planned cells: **{meters['n_cells_planned']}**",
         f"- successful cells: **{meters['n_cells_successful']}**",

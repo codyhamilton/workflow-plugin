@@ -131,7 +131,8 @@ state×question cartesian:
 
 `RESPONSE-CALIBRATION.md` and
 `run_typesafe_response_calibration.py` cover the twelve #109 preferred
-GROWTH pairs on nine exact representative labeled joins (`12×9×4 = 432`
-planned cells). Tail-less packs and unlabeled representative joins are
-gated; labels are not sent to the judge. Outputs remain diagnostic and
-Soft HOLD.
+GROWTH pairs on nine exact representative labeled joins
+(`12×9×4 = 432` planned cells). A separate diagnostic-only stratum covers
+the seven other eligible representative joins (`12×7×4 = 336`); it is never
+merged into exact-label-ready meters. Tail-less packs are gated, labels are
+not sent to the judge, and outputs remain diagnostic and Soft HOLD.

@@ -12,15 +12,18 @@ The design is:
 | axis | selection |
 |---|---|
 | state × question | the 12 preferred GROWTH pairings frozen by #109 |
-| corpus | 9 exact representative `(session_id, checkpoint)` joins |
+| corpus | 9 exact joins + 7 diagnostic-only representative joins |
 | response classes | `binary_fire`, `likert_0_3`, `four_class`, `rating_plus_offset` |
-| planned cells | `12 × 9 × 4 = 432` |
+| planned cells | `12 × 9 × 4 = 432` exact; `12 × 7 × 4 = 336` diagnostic |
 | checkpoint | one representative mid checkpoint per session |
 | framing | H1 only |
 
 The nine joins are selected by exact checkpoint-key presence in the landed
 outcome-label sidecar. No nearest-checkpoint interpolation is performed. The
 label values are not copied into the state, questions, or API payload.
+
+The other seven GROWTH-eligible representative joins remain a separate
+diagnostic-only stratum. They are never mixed into exact-label-ready meters.
 
 ## Preferred state × question pairs
 
@@ -56,9 +59,18 @@ WF_REPO="$PWD" python3 \
 run_typesafe_response_calibration.py
 ```
 
-The script is resumable. Request, response, error, and row captures are under
-the ignored `typesafe-response-calibration/raw/` directory. It writes the
-tracked `cells_plan.json` and, only after successful non-400 responses,
+The script is resumable. The default command runs the exact stratum. Run the
+diagnostic complement separately:
+
+```bash
+TS_RESPONSE_SCOPE=diagnostic WF_REPO="$PWD" python3 \
+  docs/lab/RESEARCH/2026-10-02-interception-trials/batch-002/\
+run_typesafe_response_calibration.py
+```
+
+Request, response, error, and row captures are under ignored
+`typesafe-response-calibration*/raw/` directories. Each stratum writes its
+own tracked `cells_plan.json` and, only after successful non-400 responses,
 aggregate `meters.json` and `METERS.md`.
 
 Missing credentials or HTTP 400 responses create `BLOCKER.md` and withhold
