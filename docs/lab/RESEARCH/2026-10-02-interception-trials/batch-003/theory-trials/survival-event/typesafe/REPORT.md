@@ -11,6 +11,7 @@ Maps-only research artifact. No behavior ship, product wiring, `--call-jev`, or 
 - Observed event times: all 36 answers were `null` (censored/no supported event in the shown window).
 - Cox kill: not fired; the 2-covariate LOO gate was not evaluable because there were fewer than two observed events. This is not evidence of a pass.
 - Agreement kill: not evaluable because the protocol does not provide the prefix-causal alpha baseline; exact agreement is trivially 1.000 because all seats returned `null`.
+- Queue gate: **not met**. PR [#133](https://github.com/codyhamilton/workflow-plugin/pull/133) was still OPEN when checked after execution; preserve these results as audit evidence, but do not treat this batch as a valid post-#133 seat.
 
 See `results.jsonl`, `raw/`, `agreement-summary.json`, `cox-summary.json`, and `meters.json` for the complete record.
 

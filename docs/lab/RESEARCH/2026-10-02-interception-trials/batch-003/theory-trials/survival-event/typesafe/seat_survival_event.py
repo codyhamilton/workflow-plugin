@@ -41,6 +41,12 @@ API_URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-1.13.0"
 EARLY_MAX = 120
 SEATS = (1, 2, 3)
+QUEUE_GATE = {
+    "prerequisite_pr": 133,
+    "status_at_execution_check": "OPEN",
+    "execution_eligible": False,
+    "note": "The requested queue-after-#133 gate was not met when this seat ran.",
+}
 WORKERS = (
     "92a48e004519",
     "ca977b9ca0dd",
@@ -692,6 +698,7 @@ def analyze(out: Path, results: list[dict[str, Any]], metadata: list[dict[str, A
     cox = cox_summary(results, metadata)
     write_json(out / "agreement-summary.json", agreement)
     write_json(out / "cox-summary.json", cox)
+    write_json(out / "queue-gate.json", QUEUE_GATE)
     successful = [row for row in results if row.get("http") == 200 and not row.get("error")]
     meters = {
         "case_id": "PR-SURVIVAL-EVENT",
@@ -711,6 +718,7 @@ def analyze(out: Path, results: list[dict[str, Any]], metadata: list[dict[str, A
         "localhost_8080_used": False,
         "kill_fired": cox["kill_fired"],
         "agreement_kill_fired": agreement["agreement_kill_fired"],
+        "queue_gate": QUEUE_GATE,
     }
     write_json(out / "meters.json", meters)
     meta_by_worker = {row["worker_id"]: row for row in metadata}
@@ -733,6 +741,9 @@ def analyze(out: Path, results: list[dict[str, Any]], metadata: list[dict[str, A
         "- Agreement kill: not evaluable because the protocol does not provide the "
         "prefix-causal alpha baseline; exact agreement is trivially 1.000 because "
         "all seats returned `null`.",
+        "- Queue gate: **not met**. PR [#133](https://github.com/codyhamilton/workflow-plugin/pull/133) "
+        "was still OPEN when checked after execution; preserve these results as "
+        "audit evidence, but do not treat this batch as a valid post-#133 seat.",
         "",
         "See `results.jsonl`, `raw/`, `agreement-summary.json`, `cox-summary.json`, "
         "and `meters.json` for the complete record.",
