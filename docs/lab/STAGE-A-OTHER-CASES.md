@@ -27,3 +27,26 @@ Source of the cases: [use-cases-cody-locked.md](RESEARCH/2026-09-30-jev-cheap-ju
 1. Case 2 first: most data (133 briefs), cleanest mechanical outcome (budget overrun), and a trivial baseline (length).
 2. Case 3: derive "later fix to same files" from git; needs more care on label noise.
 3. Case 4: fewest samples; likely a descriptive section, not a test.
+
+## Case 2 first run (brief complexity, 78 briefs)
+
+Scripts: `tools/jev-variants/case2/` (pair -> label2 -> facts -> base -> doc_runner -> score/incr). Data (briefs, labels, Jev responses) is in the lab archive `case2/`, not the repo. 78 briefs x 3 states x 5 questions = 234 calls, 0 errors, cents of spend.
+
+States: **A** brief text only. **B** brief plus a deterministic FACTS table (owned/required-reading paths: exists or not, lines, bytes, parsed budget). **C** FACTS only, no prose.
+Outcome: `process_trouble` (10 units; the worker hit unplanned work), from an LLM label with an evidence quote; STRICT = 7 hand-checked; proc+neg = 14. All positives are in open-pajero-maps (10 of 55); silver-chronicle (18) and garcia-music (5) have none.
+
+| Score (AUC vs process_trouble) | all | 90% CI | strict | proc+neg |
+|---|---|---|---|---|
+| zero-call `owned_new_files` | 0.76 | [0.65, 0.86] | 0.69 | 0.71 |
+| zero-call `budget_turns` | 0.62 | [0.45, 0.79] | 0.63 | 0.64 |
+| Jev A "unplanned trouble?" | 0.76 | [0.58, 0.89] | 0.82 | 0.73 |
+| Jev A "overall complex?" | 0.74 | [0.65, 0.83] | 0.67 | 0.78 |
+| Jev B (brief + facts) trouble / complex | 0.57 / 0.73 | | 0.61 / 0.63 | 0.60 / 0.75 |
+| Jev C (facts only) trouble / complex | 0.48 / 0.31 | | | |
+| rank-sum Jev A trouble + new_files | 0.83 | | 0.83 | 0.78 |
+
+Reading, with the caveats it needs:
+- Jev on the brief prose alone ties the best counter (0.76) and is only weakly correlated with it (rho 0.18 with new-file count), so the combination (0.83) is plausibly additive. That is the first case where Jev has something a counter does not.
+- Adding the deterministic FACTS table did **not** help; it hurt the trouble question (0.76 -> 0.57). Facts-only is at or below chance. The facts are most useful as zero-call baselines, not as Jev context.
+- 15 Jev comparisons were run and the positive set is 10 (7 strict) from one project, so the CIs are wide and the headline number is not corrected for multiplicity. Nothing has been replicated; there is no held-out or second-project positive.
+- Next: freeze one question (trouble), wait for new briefs/outcomes as a replication set, and label the 3 other projects' units for a negative-result check. Case 3 follows.
