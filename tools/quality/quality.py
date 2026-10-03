@@ -213,7 +213,19 @@ CREATE TABLE IF NOT EXISTS criterion_scores(score_id INTEGER NOT NULL REFERENCES
 CREATE TABLE IF NOT EXISTS links(id INTEGER PRIMARY KEY, ts REAL, from_artifact INTEGER REFERENCES artifacts(id), to_artifact INTEGER NOT NULL REFERENCES artifacts(id),
   type TEXT NOT NULL, note TEXT, evidence TEXT, source TEXT, UNIQUE(from_artifact, to_artifact, type, evidence));
 CREATE INDEX IF NOT EXISTS ix_scores_art ON scores(artifact_id, ts);
+CREATE TABLE IF NOT EXISTS executions(id INTEGER PRIMARY KEY, brief_id INTEGER NOT NULL REFERENCES artifacts(id), started REAL, ended REAL, status TEXT,
+  outcome TEXT, summary TEXT, metrics TEXT, harness TEXT, workflow_version TEXT, model TEXT, conversation_id TEXT, initiator_type TEXT, initiator_id TEXT,
+  repo TEXT, head_start TEXT, head_end TEXT, design_stage TEXT, execution_stage TEXT,
+  cost_usd REAL, tokens_in INTEGER, tokens_out INTEGER, turns INTEGER, tool_calls INTEGER);
+CREATE TABLE IF NOT EXISTS findings(id INTEGER PRIMARY KEY, execution_id INTEGER NOT NULL REFERENCES executions(id), brief_id INTEGER NOT NULL REFERENCES artifacts(id),
+  ts REAL, kind TEXT NOT NULL, category TEXT, severity TEXT, text TEXT NOT NULL, UNIQUE(execution_id, kind, text));
+CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY, ts REAL, event TEXT NOT NULL, artifact_id INTEGER, execution_id INTEGER, harness TEXT, workflow_version TEXT,
+  model TEXT, conversation_id TEXT, initiator_type TEXT, initiator_id TEXT, repo TEXT, design_stage TEXT, execution_stage TEXT, payload TEXT);
+CREATE INDEX IF NOT EXISTS ix_events_art ON events(artifact_id, ts);
+CREATE INDEX IF NOT EXISTS ix_exec_brief ON executions(brief_id);
 """
+MIGRATE = {"artifacts": [("parent_id", "INTEGER"), ("repo_path", "TEXT"), ("design_stage", "TEXT"), ("execution_stage", "TEXT"), ("work_type", "TEXT")],
+           "scores": [("model", "TEXT"), ("initiator_type", "TEXT"), ("initiator_id", "TEXT"), ("repo", "TEXT")]}
 LINK_TYPES = ("rework", "missing_scope", "defect", "supersedes", "derived_from", "overlaps_prior")
 
 
@@ -221,6 +233,11 @@ def db() -> sqlite3.Connection:
     d = store_dir(); d.mkdir(parents=True, exist_ok=True)
     c = sqlite3.connect(d / "quality.db"); c.row_factory = sqlite3.Row
     c.executescript(SCHEMA)
+    for t, cols in MIGRATE.items():
+        have = {r[1] for r in c.execute(f"PRAGMA table_info({t})")}
+        for n, ty in cols:
+            if n not in have:
+                c.execute(f"ALTER TABLE {t} ADD COLUMN {n} {ty}")
     return c
 
 
@@ -241,6 +258,8 @@ def log_row(row: dict[str, Any]) -> bool:
                         " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", (aid, row["ts"], row["sha"], row["registry"], row["harness"], row["session_id"], row["head"],
                         row["plugin_version"], 1, row["composite"], row["composite_det"], row["jev_error"], json.dumps(row["facts"])))
         if cur.rowcount:
+            c.execute("UPDATE scores SET model=?,initiator_type=?,initiator_id=?,repo=? WHERE id=?",
+                      (row.get("model"), row.get("initiator_type"), row.get("initiator_id"), row.get("repo"), cur.lastrowid))
             c.executemany("INSERT INTO criterion_scores VALUES(?,?,?,?,?)", [(cur.lastrowid, k, v["score"], v["how"], json.dumps(v["detail"])) for k, v in row["criteria"].items()])
         row["artifact_id"] = aid
         return bool(cur.rowcount)
