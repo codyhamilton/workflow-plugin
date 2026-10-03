@@ -108,3 +108,20 @@ Three tests on existing data, 0 errors. Caveat up front: the anchored questions 
 
 **Read.** Both: (a) saturated/vague question framing was a real, fixable cause on case 4 (anchoring fixed `unresolved`); (b) absolute scoring is not the main limit on case 4 (pairwise ≈ absolute), but on case 2 pairwise looks at least as good as absolute and the anchored absolute is no better. Where information is absent from the text (case 3, facts-only), none of the three changes help.
 Not yet tested: pairwise on case 3, and pairwise against the counters on a matched sample. Data: `~/jev-lab-data/2026-10-03-stageA/{case2/t2b.jsonl,case4/t23.jsonl}`.
+
+## Case 2, criteria-matching version: ask for good-brief criteria, not "is it complex?"
+
+Per Cody: use Jev where it is strong (matching concrete criteria against text). 8 anchored questions from `skills/refine/templates/brief.md` (contract cited with settled decisions, concrete changes, runnable done evidence, fail-first check, keep-untouched, bounded reading, discovery needed, budget fits), one call per brief, 78 briefs, 0 errors (`tools/jev-variants/case2/crit.py`, `crit_score.py`; data `case2/crit.jsonl`). AUC for process_trouble (10 pos), absence of a good criterion = predicted trouble.
+
+| signal | process_trouble [90% CI] | strict | proc+negative |
+|---|---|---|---|
+| **discovery_needed** ("does any step tell the worker to investigate/determine something the brief does not settle?") | **0.84 [0.75,0.93]** | 0.86 | 0.85 |
+| contract_cited | 0.73 | 0.63 | 0.64 |
+| keep_untouched / fail_first / runnable_done | 0.61 / 0.58 / 0.60 | | |
+| concrete_changes / bounded_reading / budget_fits | 0.52 / 0.54 / 0.49 | | |
+| composite of all 8 | 0.76 | 0.75 | 0.74 |
+| counter owned_new_files | 0.76 | 0.69 | 0.71 |
+| rank(discovery_needed) + rank(owned_new_files) | **0.89 [0.80,0.97]** | 0.86 | 0.88 |
+
+**Read.** Template-compliance criteria (does the brief have the sections a good brief has) mostly do not predict trouble; briefs in this corpus largely comply or fail uniformly. The one criterion that does is the concrete, text-checkable "does the brief leave a step for the worker to discover", which beats the earlier vague "will the worker hit trouble" question (0.76) and the best counter, and is nearly independent of the counter (rho 0.14), so the pair reaches 0.89. This supports the framing: Jev is strong when asked to match a specific, verifiable criterion in the text and weak when asked for a holistic judgement.
+**Caveats.** 8 criteria tested, one winner (multiplicity); discovery_needed was my guess before the run, not tuned afterwards, but it is the best of 8. All positives come from one project (open-pajero-maps); within that project its AUC is 0.80, the other projects have no positives. 10 positives. Replication on a held-back project or fresh briefs is the next step; held-out stays sealed.
