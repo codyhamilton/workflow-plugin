@@ -226,3 +226,28 @@ Findings:
 - Aborts (8) cannot be measured on this corpus.
 
 Reading for the paper: the signals track "how much is the agent doing without a human in the loop", which predicts correction and refinement positively and redirect and new-task negatively. Cheap counters capture this equally well. A claim that Jev reads something counters cannot is not supported by any target tested.
+
+## Label hand-check (40 labels) and noise sensitivity
+
+I read 40 labelled checkpoints (20 adjust positives and 20 non-adjust, random, seed 7; `analysis/hand_sample.json`), judging each human message against the agent context. One reader, and the same model family as the two LLM labelers, so this is not an independent audit. (`labels_clean.json` holds only pairs where both labelers agreed, so the 100% agreement there is by construction, not a quality measure.)
+
+- Positives: 20/20 reasonable (refine/correct). One (#9) mixes both.
+- Non-adjust: 6/20 arguably adjust. Redirect after a plan or while the agent worked ("seems odd to use opacity... what about a line light source?"; feedback on a plan's design; "add into the plan...") and new_task for a bug report on the agent's just-finished feature. The rest (question, approve, genuine redirect/new_task) fine. With n=20 the true rate is wide (roughly 12-54%).
+- So label error is one-sided: the positive class is clean, the negative class contains hidden adjusts, which only lowers measured AUC.
+
+Sensitivity of AUCs to the label set (`R9_noise.py`; counters4 / counters+turn / master / Jev mean / ui-visual):
+
+| label set | n (pos) | counters4 | counters+turn | master | Jev mean | ui-visual |
+|---|---|---|---|---|---|---|
+| baseline | 501 (108) | .683 | .691 | .663 | .679 | .690 |
+| drop plan-context checkpoints | 464 (102) | .681 | .689 | .670 | .685 | .696 |
+| plan-context redirects counted as adjust | 501 (125) | .659 | .657 | .633 | .649 | .658 |
+| drop all redirect | 384 (108) | .665 | .672 | .642 | .658 | .668 |
+| drop no-tool checkpoints | 392 (95) | .687 | .689 | .650 | .666 | .688 |
+| tool-work checkpoints only | 355 (89) | .683 | .683 | .653 | .670 | .694 |
+
+- Ranking and gaps between predictors do not move under any of these cuts; counters stay at or above Jev, ui-visual stays top among Jev signals. The result is not an artefact of one label subset.
+- Making the plan-context redirect relabel (the cut that moves hidden adjusts to positive by my rule) lowers every AUC by 0.02-0.03; my rule is crude, so this is not evidence of a better label.
+- Ceiling: a predictor that perfectly separates the current positives would score 0.87 / 0.79 / 0.74 if 10% / 20% / 30% of negatives were really adjust. My 6/20 estimate sits in the 20-30% range, which puts the achievable ceiling near 0.74-0.79. The observed 0.65-0.70 is therefore not far below it, and label noise alone could explain why nothing exceeds about 0.71.
+
+Conclusion for Stage A: the label noise caps AUC but does not change any predictor comparison. Remaining improvement would need cleaner labels (an independent human pass on negatives, especially redirect and new_task) before any further signal work is measurable. Held-out stays sealed; nothing pushed.
