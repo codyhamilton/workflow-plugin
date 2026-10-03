@@ -251,3 +251,26 @@ Sensitivity of AUCs to the label set (`R9_noise.py`; counters4 / counters+turn /
 - Ceiling: a predictor that perfectly separates the current positives would score 0.87 / 0.79 / 0.74 if 10% / 20% / 30% of negatives were really adjust. My 6/20 estimate sits in the 20-30% range, which puts the achievable ceiling near 0.74-0.79. The observed 0.65-0.70 is therefore not far below it, and label noise alone could explain why nothing exceeds about 0.71.
 
 Conclusion for Stage A: the label noise caps AUC but does not change any predictor comparison. Remaining improvement would need cleaner labels (an independent human pass on negatives, especially redirect and new_task) before any further signal work is measurable. Held-out stays sealed; nothing pushed.
+
+## Round 10 - keep-going signals (the inverse test)
+
+Reframe (Cody): a counter alone can only cut sessions (a 75-turn trigger cuts every one). Jev earns its place only by finding productive busyness that says "don't interrupt yet". The trigger is a soft message the agent can weigh, so a false trigger is cheap. Stage A had never tested this direction: all signals to R9 were problem detectors.
+
+Metric: inside the stratum the counters would cut (top 50% / 30% of counters+turn), AUC for approve (keep) vs adjust (refine/correct). Counters+turn itself scores 0.487 there, so the counters cannot tell a good long run from a bad one.
+
+Zero-call write counters (writes in window, new-file writes, bytes, big writes, tweak share, writes in last 3 batches): keep-AUC 0.44-0.53 everywhere, chance. 
+
+R10: 11 signals (8 productive-continuation, 3 about writes: mainline production, tweak churn, writing now), 4 framings, 2004 cells, $0.40, 0 errors, same 501 labels.
+
+| Signal | keep-AUC top 50% | top 30% [90% CI] | disc / dev (top 30%) |
+|---|---|---|---|
+| steady-forward-progress | 0.583 | 0.620 [0.53, 0.71] | 0.59 / 0.64 |
+| human-recently-endorsed-direction | 0.545 | 0.583 [0.49, 0.69] | 0.69 / 0.44 (no replication) |
+| writes-are-mainline-production | 0.513 | 0.548 | 0.54 / 0.57 |
+| writing-output-right-now | 0.502 | 0.544 | 0.55 / 0.54 |
+| writes-are-tweak-churn | 0.468 | 0.473 | chance |
+| converging-on-requested-change | 0.415 | 0.406 | 0.43 / 0.40 (wrong way, replicated) |
+
+Reading: one weak candidate, steady-forward-progress, replicates discovery to dev at both cuts, but it is 1 of 11 comparisons and its lower bound is 0.53, so it is a lead, not a finding. The mainline-vs-tweak writes judgement is at chance, same as the write counters; the human-endorsement signal does not replicate. "Converging on the requested change" is reliably anti-keep: cells where the agent looks closest to done are more likely to get an adjustment, plausibly because finished output is what the human reviews. Not tested: active monitoring (judged not worth a signal, since the trigger is a soft message).
+
+Next, if pursued: variants of steady-forward-progress (windows, wording) replicated on dev before any held-out use. Held-out stays sealed.
