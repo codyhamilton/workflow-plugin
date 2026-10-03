@@ -20,6 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "hooklog"))
+import bodies
 import hookevents as he  # noqa: E402
 import lifecycle as lc  # noqa: E402
 import quality as q  # noqa: E402
@@ -67,6 +68,12 @@ TOOLS += [
        {"id": {"type": "integer"}, **_COST, "items": {"type": "array", "items": {"type": "object", "required": ["kind", "text"], "properties": {
            "kind": {"enum": list(lc.ITEM_KINDS)}, "text": {"type": "string"}, "category": {"type": "string"}, "severity": {"type": "string"}, "scope": {"enum": ["brief", "design"]}}}}}, ("id",)),
     _t("complete_execution", "Log completion of an execution with outcome, summary and cost.", {"id": {"type": "integer"}, "outcome": {"enum": list(lc.EXEC_OUTCOMES)}, "summary": {"type": "string"}, "metrics": {"type": "object"}, **_COST, "items": {"type": "array"}}, ("id", "outcome")),
+    _t("define_checks", "Add, change or retire Jev checks without a release. Each: kind (brief|design), name ('b.x'), q, levels (worst first), invert?, basis?, active?. Changing the set re-scores identical content on the next post.",
+       {"checks": {"type": "array", "items": {"type": "object", "required": ["kind", "name"]}}}, ("checks",)),
+    {"name": "list_checks", "description": "Current Jev checks (registry plus service-defined).", "inputSchema": {"type": "object", "properties": {"kind": {"enum": ["brief", "design"]}}}},
+    _t("rescore", "Re-run all current checks on an artifact's stored text.", {"kind": {"enum": ["brief", "design"]}, "id": {"type": "integer"}}, ("kind", "id")),
+    {"name": "search_plans", "description": "Full-text search over every stored design/brief version (FTS5 syntax).",
+     "inputSchema": {"type": "object", "required": ["q"], "properties": {"q": {"type": "string"}, "kind": {"enum": ["brief", "design"]}, "project": {"type": "string"}, "limit": {"type": "integer"}}}},
     {"name": "outcomes", "description": "Up-front brief rating vs realised execution (done rate, cost, gaps, adjustments), sliced.",
      "inputSchema": {"type": "object", "properties": {"by": {"enum": sorted(lc.SLICES)}}}},
     {"name": "plan_cost", "description": "A plan's design/brief ratings mapped to executions and cost.",
@@ -85,6 +92,14 @@ def lifecycle_call(name: str, a: dict):
         return lc.patch_execution(int(a["id"]), a)
     if name == "complete_execution":
         return lc.complete_execution(int(a["id"]), a)
+    if name == "define_checks":
+        return lc.put_checks(a)
+    if name == "list_checks":
+        return lc.list_checks(a.get("kind"))
+    if name == "rescore":
+        return lc.rescore(a["kind"], int(a["id"]), a)
+    if name == "search_plans":
+        return {"hits": lc.search(a["q"], a.get("kind"), a.get("project"), a.get("limit", 20))}
     if name == "outcomes":
         return lc.outcomes(a.get("by", "project"))
     if name == "plan_cost":
@@ -92,7 +107,7 @@ def lifecycle_call(name: str, a: dict):
     raise KeyError(name)
 
 
-LIFECYCLE = {"post_design", "patch_design", "post_brief", "patch_brief", "start_execution", "patch_execution", "complete_execution", "outcomes", "plan_cost"}
+LIFECYCLE = {"define_checks", "list_checks", "rescore", "search_plans", "post_design", "patch_design", "post_brief", "patch_brief", "start_execution", "patch_execution", "complete_execution", "outcomes", "plan_cost"}
 
 
 def rate_artifact(a: dict) -> str:
@@ -152,6 +167,12 @@ ROUTES = [  # (method, pattern, handler(body, query, *ids))
     ("POST", r"/v1/(design|brief)s", lambda b, qs, k: lc.put_artifact(k, b)),
     ("PATCH", r"/v1/(design|brief)s/(\d+)", lambda b, qs, k, i: lc.put_artifact(k, {**b, "_patch": True}, int(i))),
     ("GET", r"/v1/(design|brief)s/(\d+)", lambda b, qs, k, i: lc.get(k, int(i))),
+    ("GET", r"/v1/(design|brief)s/(\d+)/body", lambda b, qs, k, i: lc.body_of(k, int(i), qs.get("sha"))),
+    ("GET", r"/v1/(design|brief)s/(\d+)/versions", lambda b, qs, k, i: {"versions": bodies.versions(int(i))}),
+    ("POST", r"/v1/(design|brief)s/(\d+)/rescore", lambda b, qs, k, i: lc.rescore(k, int(i), b)),
+    ("GET", r"/v1/search", lambda b, qs: {"hits": lc.search(he.need(qs, "q"), qs.get("kind"), qs.get("project"), qs.get("limit", 20))}),
+    ("PUT", r"/v1/checks", lambda b, qs: lc.put_checks(b)),
+    ("GET", r"/v1/checks", lambda b, qs: lc.list_checks(qs.get("kind"))),
     ("POST", r"/v1/briefs/(\d+)/executions", lambda b, qs, i: lc.start_execution(int(i), b)),
     ("PATCH", r"/v1/executions/(\d+)", lambda b, qs, i: lc.patch_execution(int(i), b)),
     ("POST", r"/v1/executions/(\d+)/complete", lambda b, qs, i: lc.complete_execution(int(i), b)),
@@ -201,7 +222,7 @@ class H(BaseHTTPRequestHandler):
             n = int(self.headers.get("Content-Length") or 0)
             if n > MAX_BODY:
                 return self._send(413, b'{"error":"request too large"}')
-            body = json.loads(self.rfile.read(n) or b"{}") if method in ("POST", "PATCH") else {}
+            body = json.loads(self.rfile.read(n) or b"{}") if method in ("POST", "PATCH", "PUT") else {}
             res = route(method, u.path.rstrip("/"), body, {k: v[0] for k, v in parse_qs(u.query).items()})
         except json.JSONDecodeError:
             return self._send(400, b'{"error":"bad json"}')
@@ -215,6 +236,9 @@ class H(BaseHTTPRequestHandler):
 
     def do_PATCH(self):
         self._rest("PATCH")
+
+    def do_PUT(self):
+        self._rest("PUT")
 
     def do_POST(self):
         if self.path.startswith("/v1/"):

@@ -108,6 +108,48 @@ class T(unittest.TestCase):
         with q.db() as c:
             self.assertEqual(c.execute("SELECT COUNT(*) FROM conversation_binds WHERE conversation_id=?", (sid,)).fetchone()[0], 2)
 
+    def test_bodies_stored_versioned_and_searchable(self):
+        import bodies
+        import lifecycle as lc
+        t1 = BRIEF + "\nUses the zanzibar cache. token=sk-abcdef1234567890abcd\n"
+        b = lc.put_artifact("brief", {"text": t1, "project": "bs", "plan": "pbs", "name": "01", "use_jev": False, "conversation_id": "cv"})
+        self.assertTrue(b["body_stored"])
+        again = lc.put_artifact("brief", {"text": t1, "project": "bs", "plan": "pbs", "name": "01", "use_jev": False})
+        self.assertFalse(again["body_stored"])
+        lc.put_artifact("brief", {"text": t1 + "\nSecond revision mentions quokkas.\n", "project": "bs", "plan": "pbs", "name": "01", "use_jev": False})
+        self.assertEqual(len(bodies.versions(b["id"])), 2)
+        self.assertIn("zanzibar", lc.body_of("brief", b["id"], bodies.versions(b["id"])[0]["sha"])["text"])
+        self.assertNotIn("sk-abcdef1234567890abcd", lc.body_of("brief", b["id"], None)["text"])  # scrubbed at rest
+        hits = lc.search("quokkas", "brief", "bs", 5)
+        self.assertEqual([h["artifact_id"] for h in hits], [b["id"]])
+        self.assertIn("quokkas", hits[0]["snippet"]); self.assertEqual(lc.search("quokkas", "design", None, 5), [])
+        with self.assertRaises(lc.Bad):
+            lc.search('"unbalanced', None, None, 5)
+        # a version's sha joins to its score
+        self.assertTrue({v["sha"] for v in bodies.versions(b["id"])} <= {r["sha"] for r in q.rows("brief") if r["artifact_id"] == b["id"]})
+
+    def test_service_defined_checks_change_registry_and_rescore(self):
+        import lifecycle as lc
+        base = q.registry_tag("brief")
+        b = lc.put_artifact("brief", {"text": BRIEF, "project": "ck", "plan": "pck", "name": "01", "use_jev": False})
+        chk = {"kind": "brief", "name": "b.ac_rationale", "q": "For each acceptance criterion, does the brief say why it is a criterion and how it is proven required?",
+               "levels": ["No rationale", "Rationale for some", "Rationale for most, no proof", "Rationale and proof for each"], "author": "t"}
+        r = lc.put_checks(chk)
+        self.assertEqual(r["checks"], [{"name": "b.ac_rationale", "version": 1, "changed": True}])
+        self.assertNotEqual(q.registry_tag("brief"), base); self.assertEqual(q.registry_tag("design"), q.REG_VERSION)
+        self.assertEqual(lc.put_checks(chk)["checks"][0]["changed"], False)          # identical = no new version
+        self.assertIn("b.ac_rationale", q.jev_spec("brief"))
+        self.assertTrue(lc.rescore("brief", b["id"], {"use_jev": False})["scored"])    # new check set re-scores identical stored text
+        lc.put_checks({"kind": "brief", "name": "b.ac_rationale", "active": False})    # retire
+        self.assertNotIn("b.ac_rationale", q.jev_spec("brief")); self.assertEqual(q.db_checks("brief")["b.ac_rationale"]["version"], 2)
+        lc.put_checks({"kind": "brief", "name": "b.discovery_free", "active": False})  # a registry check can be retired too
+        self.assertNotIn("b.discovery_free", q.jev_spec("brief"))
+        lc.put_checks({"kind": "brief", "name": "b.discovery_free"})                   # and restored
+        self.assertIn("b.discovery_free", q.jev_spec("brief"))
+        for bad in ({"kind": "brief", "name": "nodot", "q": "x", "levels": ["a", "b"]}, {"kind": "brief", "name": "b.x", "q": "x", "levels": ["a"]}, {"kind": "other", "name": "b.x"}):
+            with self.assertRaises(lc.Bad):
+                lc.put_checks(bad)
+
     def test_lifecycle_rest_flow(self):
         srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
         threading.Thread(target=srv.serve_forever, daemon=True).start()

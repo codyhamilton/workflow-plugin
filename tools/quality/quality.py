@@ -166,6 +166,29 @@ def context_facts(kind: str, text: str) -> dict[str, Any]:
 
 # ---------- Jev criteria ----------
 
+def db_checks(kind: str) -> dict[str, dict[str, Any]]:
+    """Latest version of every service-defined Jev check for this kind: name -> {spec, version, active}. Overrides or retires registry checks of the same name."""
+    with db() as c:
+        return {r["name"]: {"spec": json.loads(r["spec"]), "version": r["version"], "active": bool(r["active"])}
+                for r in c.execute("SELECT * FROM check_defs WHERE kind=? ORDER BY version", (kind,))}
+
+
+def jev_spec(kind: str) -> dict[str, dict[str, Any]]:
+    spec = {k: dict(v) for k, v in CRIT[kind]["jev"].items()}
+    for name, d in db_checks(kind).items():
+        if d["active"]:
+            spec[name] = {"invert": False, **d["spec"]}
+        else:
+            spec.pop(name, None)
+    return spec
+
+
+def registry_tag(kind: str) -> str:
+    """Registry version, plus a short signature of the service-defined checks, so changing a check re-scores identical content."""
+    d = db_checks(kind)
+    return REG_VERSION if not d else f"{REG_VERSION}+" + hashlib.sha1(json.dumps({k: (v["version"], v["active"]) for k, v in sorted(d.items())}).encode()).hexdigest()[:6]
+
+
 def jev_scores(kind: str, text: str) -> tuple[dict[str, tuple[float, Any]], str | None]:
     if not os.environ.get("TYPESAFE_API_KEY"):
         return {}, "no TYPESAFE_API_KEY"
@@ -174,7 +197,7 @@ def jev_scores(kind: str, text: str) -> tuple[dict[str, tuple[float, Any]], str 
         from hooklog import scrub
     except Exception as e:  # pragma: no cover
         return {}, f"jev client unavailable: {e}"
-    spec = CRIT[kind]["jev"]
+    spec = jev_spec(kind)
     qs = {k: {"type": "score", "instructions": v["q"], "criteria": v["levels"]} for k, v in spec.items()}
     snap = ("BRIEF:\n" if kind == "brief" else "DESIGN DOCUMENT:\n") + scrub(text[:60000], 10**9)
     try:
@@ -237,6 +260,8 @@ CREATE INDEX IF NOT EXISTS ix_events_art ON events(artifact_id, ts);
 CREATE INDEX IF NOT EXISTS ix_exec_brief ON executions(brief_id);
 CREATE TABLE IF NOT EXISTS hook_events(id INTEGER PRIMARY KEY, ts REAL NOT NULL, harness TEXT NOT NULL, session_id TEXT NOT NULL, hook_event TEXT, kind TEXT NOT NULL,
   cwd TEXT, agent_id TEXT, generation_id TEXT, tool_name TEXT, tool_use_id TEXT, ok INTEGER, text TEXT, input TEXT, output TEXT, extra TEXT, row_key TEXT NOT NULL UNIQUE);
+CREATE TABLE IF NOT EXISTS check_defs(id INTEGER PRIMARY KEY, name TEXT NOT NULL, version INTEGER NOT NULL, kind TEXT NOT NULL, spec TEXT NOT NULL,
+  active INTEGER NOT NULL DEFAULT 1, ts REAL, author TEXT, note TEXT, UNIQUE(name, kind, version));
 CREATE TABLE IF NOT EXISTS conversation_binds(id INTEGER PRIMARY KEY, ts REAL, conversation_id TEXT NOT NULL, harness TEXT, artifact_id INTEGER, execution_id INTEGER,
   how TEXT, hook_row_key TEXT);
 CREATE UNIQUE INDEX IF NOT EXISTS ux_binds ON conversation_binds(conversation_id, COALESCE(artifact_id, 0), COALESCE(execution_id, 0));
@@ -331,7 +356,7 @@ def summary(row: dict[str, Any]) -> str:
 def score_content(kind: str, text: str, path: Path, repo: Path, use_jev: bool, log: bool, harness="manual", session="manual", ts=None, **over: Any) -> dict[str, Any]:
     text = split_frontmatter(text)[1]
     res = score_text(kind, text, repo, use_jev)
-    row = {"v": 1, "ts": ts or time.time(), "kind": kind, "registry": REG_VERSION, "sha": hashlib.sha256(text.encode()).hexdigest()[:16], **tag(path, repo, harness, session), **res}
+    row = {"v": 1, "ts": ts or time.time(), "kind": kind, "registry": registry_tag(kind), "sha": hashlib.sha256(text.encode()).hexdigest()[:16], **tag(path, repo, harness, session), **res}
     row.update({k: v for k, v in over.items() if v})
     row["rating"] = rate(res, kind, (kind, row["project"], row["path"]))
     if log:
@@ -414,7 +439,7 @@ def cmd_backfill(root: Path, use_jev: bool) -> int:
             continue
         repo = repo_root(p)
         text = p.read_text(errors="ignore")
-        key = (k, project_name(repo), p.resolve().relative_to(repo.resolve()).as_posix() if p.resolve().is_relative_to(repo.resolve()) else str(p), hashlib.sha256(text.encode()).hexdigest()[:16], REG_VERSION)
+        key = (k, project_name(repo), p.resolve().relative_to(repo.resolve()).as_posix() if p.resolve().is_relative_to(repo.resolve()) else str(p), hashlib.sha256(text.encode()).hexdigest()[:16], registry_tag(k))
         if key in done:
             continue
         ts = _git(repo, "log", "-1", "--format=%ct", "--", str(p))

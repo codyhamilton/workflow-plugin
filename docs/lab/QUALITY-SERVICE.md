@@ -52,3 +52,18 @@ Kinds: `user_prompt`, `tool_call`, `batch_end`, `step`, `agent_text`, `stop`, an
 Capture: `hooklog.py record` posts to the service at `WORKFLOW_QUALITY_URL` (default `http://127.0.0.1:8765`, the address `.mcp.json` registers; empty disables; an explicit `WORKFLOW_HOOKLOG_DIR` without a URL means file-only; `WORKFLOW_QUALITY_TOKEN` is sent if set). If the service is down (2 s timeout, `WORKFLOW_QUALITY_TIMEOUT`) the row is spooled to the file store as before. `python3 tools/quality/backfill_hooklog.py [--url ...] [--exclude <session prefix>]` loads files into the ledger and drains the spool; reruns are no-ops.
 
 Backfill of the existing store (2026-10-03): 90,792 rows, 265 sessions (opencode 231, claude 4, cursor 1). Historic scores carry no conversation id (the 346 git-history scores all have `session_id` unknown), so the join covers work posted from now on (verified end to end: real hook command, live server, no conversation id supplied).
+
+## Stored text and search
+Every posted design/brief version is kept in `bodies.db` beside the ledger (not in `quality.db`, so the ledger stays small and its lock is not shared). Content-addressed by the same hash as `scores.sha`, so a version joins to its scores; one row per (artifact, version) records conversation and workflow version. Text is secret-scrubbed before storage. FTS5 (porter stemming) indexes all versions.
+- `GET /v1/{design|brief}s/{id}/body[?sha=]`, `GET .../versions`
+- `GET /v1/search?q=<fts5 query>[&kind=&project=&limit=]` (MCP `search_plans`)
+- `POST /v1/{design|brief}s/{id}/rescore`: re-run all current checks on the stored text (MCP `rescore`).
+Artifacts posted before this feature have no stored body.
+
+## Checks are data
+Jev checks are rows, not columns: scores are `criterion_scores(score_id, criterion, score)`, so any number of checks can come and go. Check definitions can be changed without a release:
+- `PUT /v1/checks` (MCP `define_checks`): `{kind, name: "b.x", q, levels (worst first), invert?, basis?, active?}` or `{checks: [...]}`. A changed spec becomes version+1; identical is a no-op; `active:false` retires a check (registry checks too, and `{kind,name}` alone restores/keeps the current spec).
+- `GET /v1/checks[?kind=]` (MCP `list_checks`) shows registry plus service-defined checks.
+- Score rows carry `registry = <criteria.json version>+<signature of service-defined checks>`, so changing the set re-scores identical content on the next post or rescore, and old scores keep the check set they were produced under. Baseline peers match on the base registry version.
+- `load_checks.py checks/acceptance-provenance.json` loads the shipped acceptance-criterion rationale checks (`b.ac_why`, `b.ac_proven_required`, `b.ac_judgement_labelled`, and `d.*` equivalents).
+Deterministic checks still live in code; only Jev checks are service-defined.

@@ -1,0 +1,78 @@
+{
+ "checks": [
+  {
+   "kind": "brief",
+   "name": "b.ac_why",
+   "q": "For each acceptance criterion in the brief (a done-evidence item, threshold, gate or success condition), does the text say why it is a criterion, i.e. what failure or risk it guards against?",
+   "levels": [
+    "No reasons given for any criterion",
+    "Reasons for a few",
+    "Reasons for most",
+    "Every criterion states what it guards against"
+   ],
+   "basis": "U2 (Cody): agents treat a stated criterion as binding authority; the reason it exists decides whether a breach is a stop or a flag."
+  },
+  {
+   "kind": "brief",
+   "name": "b.ac_proven_required",
+   "q": "For each acceptance criterion in the brief, does the text show how it is known to be required (a measurement, an upstream requirement, or a stated derivation) with a pointer that could be checked (command and date, document and section, or the inputs it derives from)?",
+   "levels": [
+    "No criterion has checkable support",
+    "A few have a pointer",
+    "Most have a pointer",
+    "Every criterion has a checkable pointer, or is labelled as a judgement"
+   ],
+   "basis": "U2: acceptance criteria are end-of-chain outputs; one with no provenance marks the research and direction above it as unjustified, forcing the backward audit."
+  },
+  {
+   "kind": "brief",
+   "name": "b.ac_judgement_labelled",
+   "q": "Where an acceptance criterion or number in the brief is a judgement or an estimate rather than measured or derived, is it labelled as such (so a worker can treat a breach as advisory), instead of being presented as a hard requirement?",
+   "levels": [
+    "Judgement calls are presented as hard requirements",
+    "Mostly unlabelled",
+    "Mostly labelled",
+    "All judgement calls are labelled, or none exist"
+   ],
+   "basis": "U2: '10k' and '10k because it feels about right' trigger different agent behaviour; the label is what makes the difference.",
+   "invert": false
+  },
+  {
+   "kind": "design",
+   "name": "d.ac_why",
+   "q": "For each acceptance criterion in the design (success criteria, phase outcomes and gates) (a done-evidence item, threshold, gate or success condition), does the text say why it is a criterion, i.e. what failure or risk it guards against?",
+   "levels": [
+    "No reasons given for any criterion",
+    "Reasons for a few",
+    "Reasons for most",
+    "Every criterion states what it guards against"
+   ],
+   "basis": "U2 (Cody): agents treat a stated criterion as binding authority; the reason it exists decides whether a breach is a stop or a flag."
+  },
+  {
+   "kind": "design",
+   "name": "d.ac_proven_required",
+   "q": "For each acceptance criterion in the design (success criteria, phase outcomes and gates), does the text show how it is known to be required (a measurement, an upstream requirement, or a stated derivation) with a pointer that could be checked (command and date, document and section, or the inputs it derives from)?",
+   "levels": [
+    "No criterion has checkable support",
+    "A few have a pointer",
+    "Most have a pointer",
+    "Every criterion has a checkable pointer, or is labelled as a judgement"
+   ],
+   "basis": "U2: acceptance criteria are end-of-chain outputs; one with no provenance marks the research and direction above it as unjustified, forcing the backward audit."
+  },
+  {
+   "kind": "design",
+   "name": "d.ac_judgement_labelled",
+   "q": "Where an acceptance criterion or number in the design (success criteria, phase outcomes and gates) is a judgement or an estimate rather than measured or derived, is it labelled as such (so a worker can treat a breach as advisory), instead of being presented as a hard requirement?",
+   "levels": [
+    "Judgement calls are presented as hard requirements",
+    "Mostly unlabelled",
+    "Mostly labelled",
+    "All judgement calls are labelled, or none exist"
+   ],
+   "basis": "U2: '10k' and '10k because it feels about right' trigger different agent behaviour; the label is what makes the difference.",
+   "invert": false
+  }
+ ]
+}

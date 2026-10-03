@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+import bodies
 import quality as q
 
 INITIATORS = ("human", "bot", "agent", "unknown")
@@ -70,7 +71,7 @@ Z_FLAG = 2.0
 def baseline(kind: str, project: str, exclude: int | None, crit: dict, composite: float | None) -> dict[str, Any]:
     """Where this artifact sits against the repo's other artifacts of the same kind (latest version of each, same criteria registry).
     Returns the peer count, per-criterion mean/stdev/z and the outliers; says so when there are too few peers to compare."""
-    peers = [r for r in q.latest_per_artifact(q.rows(kind)) if r["project"] == project and r["registry"] == q.REG_VERSION and r["artifact_id"] != exclude]
+    peers = [r for r in q.latest_per_artifact(q.rows(kind)) if r["project"] == project and r["registry"].split("+")[0] == q.REG_VERSION and r["artifact_id"] != exclude]
     n = len(peers)
     if n < MIN_PEERS:
         return {"scope": f"repo:{project}", "peers": n, "enough_history": False, "note": f"not enough history in {project} to compare ({n} prior {kind}s, need {MIN_PEERS})"}
@@ -97,6 +98,69 @@ def rating_text(kind: str, aid: int, composite: float | None, crit: dict, base: 
     else:
         lines.append("No criterion is far outside the repo's norm; the ratings carry no strong signal on their own.")
     return " ".join(lines)
+
+
+def put_checks(b: dict[str, Any]) -> dict[str, Any]:
+    """PUT /v1/checks: {kind, name, q, levels, invert?, basis?, active?, author?, note?} or {checks:[...]}. A changed spec or active flag becomes version+1; an identical one is a no-op."""
+    items = b.get("checks") or [b]
+    out = []
+    for it in items:
+        kind, name = it.get("kind"), it.get("name")
+        if kind not in ("brief", "design") or not isinstance(name, str) or not re.fullmatch(r"[a-z]\.[a-z0-9_]+", name or ""):
+            raise Bad("kind (brief|design) and name like 'b.some_check' are required")
+        active = it.get("active", True)
+        cur = q.db_checks(kind).get(name) or ({"spec": q.CRIT[kind]["jev"][name], "version": 0, "active": True} if name in q.CRIT[kind]["jev"] else None)
+        if "q" not in it and cur:
+            spec = cur["spec"]
+        else:
+            levels = it.get("levels")
+            if not isinstance(it.get("q"), str) or not (isinstance(levels, list) and len(levels) >= 2 and all(isinstance(x, str) for x in levels)):
+                raise Bad(f"{name}: q (string) and levels (list of >=2 strings, worst first) are required")
+            spec = {k: it[k] for k in ("q", "levels", "basis") if k in it} | {"invert": bool(it.get("invert", False))}
+        if cur and cur["spec"] == spec and cur["active"] == bool(active):
+            out.append({"name": name, "version": cur["version"], "changed": False}); continue
+        v = (cur["version"] if cur else 0) + 1
+        with q.db() as c:
+            c.execute("INSERT INTO check_defs(name,kind,version,spec,active,ts,author,note) VALUES(?,?,?,?,?,?,?,?)",
+                      (name, kind, v, json.dumps(spec), int(bool(active)), time.time(), it.get("author"), it.get("note")))
+        out.append({"name": name, "version": v, "changed": True})
+    return {"checks": out, "registry": {k: q.registry_tag(k) for k in ("brief", "design")}}
+
+
+def list_checks(kind: str | None = None) -> dict[str, Any]:
+    out = []
+    for k in ([kind] if kind else ["brief", "design"]):
+        for name, s in q.jev_spec(k).items():
+            d = q.db_checks(k).get(name)
+            out.append({"kind": k, "name": name, "source": "service" if d else "registry", "version": d["version"] if d else None, **{x: s.get(x) for x in ("q", "levels", "invert", "basis")}})
+        out += [{"kind": k, "name": n, "source": "service", "version": d["version"], "active": False} for n, d in q.db_checks(k).items() if not d["active"]]
+    return {"checks": out}
+
+
+def body_of(kind: str, aid: int, sha: str | None) -> dict[str, Any]:
+    with q.db() as c:
+        _artifact(c, kind, aid)
+    r = bodies.get(aid, sha)
+    if not r:
+        raise Bad("no stored body" + (f" with sha {sha}" if sha else ""))
+    return r
+
+
+def search(query: str, kind: str | None, project: str | None, limit: Any) -> list[dict[str, Any]]:
+    try:
+        return bodies.search(query, kind, project, int(limit))
+    except ValueError as e:
+        raise Bad(str(e))
+
+
+def rescore(kind: str, aid: int, b: dict[str, Any]) -> dict[str, Any]:
+    """Re-run all current checks on the stored text of the latest version (no new content needed)."""
+    with q.db() as c:
+        a = _artifact(c, kind, aid)
+    body = bodies.get(aid)
+    if not body:
+        raise Bad("no stored body for this artifact (posted before bodies were kept)")
+    return put_artifact(kind, {**b, "text": body["text"], "project": a["project"], "path": a["path"], "plan": a["plan"], "repo_path": b.get("repo_path") or a["repo_path"]}, aid)
 
 
 def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[str, Any]:
@@ -137,7 +201,7 @@ def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[s
         sha = hashlib.sha256(text.encode()).hexdigest()[:16]
         with q.db() as c:
             have = c.execute("SELECT s.id FROM scores s JOIN artifacts a ON a.id=s.artifact_id WHERE a.kind=? AND a.project=? AND a.path=? AND s.sha=? AND s.registry=?"
-                             " AND (? OR s.jev_error IS NULL)", (kind, project, path, sha, q.REG_VERSION, not b.get("use_jev", True))).fetchone()
+                             " AND (? OR s.jev_error IS NULL)", (kind, project, path, sha, q.registry_tag(kind), not b.get("use_jev", True))).fetchone()
         if not have:
             row = q.score_content(kind, text, full, repo, b.get("use_jev", True), True, ctx["harness"] or "api", ctx["conversation_id"] or "unknown",
                                   project=project, plan=plan, plugin_version=ctx["workflow_version"], model=ctx["model"],
@@ -156,6 +220,8 @@ def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[s
     with q.db() as c:
         if aid is None:
             raise Bad("unreachable")
+        if text:
+            out["body_stored"] = bodies.put(aid, hashlib.sha256(text.encode()).hexdigest()[:16], text, ctx)
         c.execute("UPDATE scores SET repo=? WHERE id=(SELECT id FROM scores WHERE artifact_id=? ORDER BY ts DESC, id DESC LIMIT 1)", (repo_path, aid))
         if repo_path:
             c.execute("UPDATE artifacts SET repo_path=? WHERE id=?", (repo_path, aid))
