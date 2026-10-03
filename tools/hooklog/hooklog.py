@@ -131,6 +131,20 @@ def append(row: dict[str, Any]) -> Path:
     return path
 
 
+def post_to_service(row: dict[str, Any]) -> bool:
+    """WORKFLOW_QUALITY_URL (e.g. http://127.0.0.1:8765) routes rows to the quality service; any failure returns False so the caller spools to file."""
+    base = os.environ.get("WORKFLOW_QUALITY_URL")
+    if not base:
+        return False
+    import urllib.request
+    req = urllib.request.Request(base.rstrip("/") + "/v1/hook-events", json.dumps({"rows": [row]}, default=str).encode(),
+                                 {"Content-Type": "application/json", **({"Authorization": f"Bearer {os.environ['WORKFLOW_QUALITY_TOKEN']}"} if os.environ.get("WORKFLOW_QUALITY_TOKEN") else {})})
+    try:
+        return urllib.request.urlopen(req, timeout=float(os.environ.get("WORKFLOW_QUALITY_TIMEOUT", "2"))).status < 300
+    except Exception:
+        return False
+
+
 def read_session(path: Path) -> list[dict[str, Any]]:
     rows = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -158,8 +172,8 @@ def main() -> int:
             if args.harness == "auto":
                 args.harness = detect_harness(payload)
             row = normalize(args.harness, payload)
-            if row:
-                append(row)
+            if row and not post_to_service(row):
+                append(row)  # file store is the spool when the service is unset or down; backfill_hooklog.py drains it
         except SystemExit:
             pass
         except Exception as exc:  # never break the agent

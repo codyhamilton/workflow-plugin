@@ -52,6 +52,14 @@ class T(unittest.TestCase):
                                        "generation_id": "9ecc107f-081f-4fdc-9e61-24a99b5a70f4-2-3bkg", "text": "t"})
         self.assertEqual((step["kind"], step["step"]), ("step", 2))
 
+    def test_service_down_spools_to_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            env = dict(os.environ, WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_QUALITY_URL="http://127.0.0.1:9", WORKFLOW_QUALITY_TIMEOUT="0.5")
+            r = subprocess.run([sys.executable, str(SCRIPT), "record", "--harness", "claude"], capture_output=True, text=True, env=env,
+                               input=json.dumps({"hook_event_name": "UserPromptSubmit", "session_id": "s9", "prompt": "hi"}))
+            self.assertEqual(r.returncode, 0)
+            self.assertEqual(len(hl.read_session(Path(d) / "claude" / "s9.jsonl")), 1)
+
     def test_garbage_never_fails(self):
         with tempfile.TemporaryDirectory() as d:
             for bad in ("", "not json", "[]", '{"hook_event_name":"Unknown"}'):

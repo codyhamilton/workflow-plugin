@@ -20,11 +20,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "hooklog"))
+import hookevents as he  # noqa: E402
 import lifecycle as lc  # noqa: E402
 import quality as q  # noqa: E402
 from urllib.parse import parse_qs, urlparse  # noqa: E402
 
 PROTOCOL = "2025-03-26"
+MAX_BODY = 16 * 1024 * 1024
 TOOLS = [
     {"name": "rate_artifact",
      "description": "Score a workflow brief or DESIGN.md against the stable quality criteria, log it to the central ledger and return its relative rating (informational).",
@@ -154,6 +156,11 @@ ROUTES = [  # (method, pattern, handler(body, query, *ids))
     ("PATCH", r"/v1/executions/(\d+)", lambda b, qs, i: lc.patch_execution(int(i), b)),
     ("POST", r"/v1/executions/(\d+)/complete", lambda b, qs, i: lc.complete_execution(int(i), b)),
     ("GET", r"/v1/executions/(\d+)", lambda b, qs, i: lc.get("execution", int(i))),
+    ("POST", r"/v1/hook-events", lambda b, qs: he.post(b)),
+    ("GET", r"/v1/hook-events", lambda b, qs: he.events(he.need(qs, "session_id"), qs.get("kind"), qs.get("limit", 500), qs.get("offset", 0))),
+    ("GET", r"/v1/sessions/([^/]+)", lambda b, qs, i: he.session(i)),
+    ("GET", r"/v1/executions/(\d+)/activity", lambda b, qs, i: he.execution_activity(int(i))),
+    ("GET", r"/v1/plans/([^/]+)/([^/]+)/sessions", lambda b, qs, p, n: he.plan_sessions(p, n)),
     ("GET", r"/v1/outcomes", lambda b, qs: lc.outcomes(qs.get("by", "project"))),
     ("GET", r"/v1/plans/([^/]+)/([^/]+)/cost", lambda b, qs, p, n: lc.plan_cost(p, n)),
 ]
@@ -191,7 +198,10 @@ class H(BaseHTTPRequestHandler):
             return
         u = urlparse(self.path)
         try:
-            body = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)) or b"{}") if method in ("POST", "PATCH") else {}
+            n = int(self.headers.get("Content-Length") or 0)
+            if n > MAX_BODY:
+                return self._send(413, b'{"error":"request too large"}')
+            body = json.loads(self.rfile.read(n) or b"{}") if method in ("POST", "PATCH") else {}
             res = route(method, u.path.rstrip("/"), body, {k: v[0] for k, v in parse_qs(u.query).items()})
         except json.JSONDecodeError:
             return self._send(400, b'{"error":"bad json"}')

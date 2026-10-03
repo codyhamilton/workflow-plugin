@@ -235,6 +235,9 @@ CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY, ts REAL, event TEXT NO
   model TEXT, conversation_id TEXT, initiator_type TEXT, initiator_id TEXT, repo TEXT, design_stage TEXT, execution_stage TEXT, payload TEXT);
 CREATE INDEX IF NOT EXISTS ix_events_art ON events(artifact_id, ts);
 CREATE INDEX IF NOT EXISTS ix_exec_brief ON executions(brief_id);
+CREATE TABLE IF NOT EXISTS hook_events(id INTEGER PRIMARY KEY, ts REAL NOT NULL, harness TEXT NOT NULL, session_id TEXT NOT NULL, hook_event TEXT, kind TEXT NOT NULL,
+  cwd TEXT, agent_id TEXT, generation_id TEXT, tool_name TEXT, tool_use_id TEXT, ok INTEGER, text TEXT, input TEXT, output TEXT, extra TEXT, row_key TEXT NOT NULL UNIQUE);
+CREATE INDEX IF NOT EXISTS ix_hook_session ON hook_events(session_id, ts);
 """
 MIGRATE = {"artifacts": [("parent_id", "INTEGER"), ("repo_path", "TEXT"), ("design_stage", "TEXT"), ("execution_stage", "TEXT"), ("work_type", "TEXT")],
            "scores": [("model", "TEXT"), ("initiator_type", "TEXT"), ("initiator_id", "TEXT"), ("repo", "TEXT")]}
@@ -243,7 +246,8 @@ LINK_TYPES = ("rework", "missing_scope", "defect", "supersedes", "derived_from",
 
 def db() -> sqlite3.Connection:
     d = store_dir(); d.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(d / "quality.db"); c.row_factory = sqlite3.Row
+    c = sqlite3.connect(d / "quality.db", timeout=10); c.row_factory = sqlite3.Row
+    c.execute("PRAGMA busy_timeout=10000"); c.execute("PRAGMA journal_mode=WAL")
     c.executescript(SCHEMA)
     for t, cols in MIGRATE.items():
         have = {r[1] for r in c.execute(f"PRAGMA table_info({t})")}

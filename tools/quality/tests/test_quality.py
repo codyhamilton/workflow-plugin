@@ -63,6 +63,28 @@ class T(unittest.TestCase):
         b = lc.put_artifact("brief", {"text": f"---\ndesign_id: {d['id']}\n---\n" + BRIEF, "project": "fm", "plan": "p0", "name": "01", "use_jev": False})
         self.assertEqual(b["artifact"]["parent_id"], d["id"]); self.assertIn(f"design_id: {d['id']}", b["frontmatter"])
 
+    def test_hook_events_ingest_and_join(self):
+        import hookevents as he
+        import lifecycle as lc
+        sid = "conv-hook-1"
+        b = lc.put_artifact("brief", {"text": BRIEF, "project": "hk", "plan": "ph", "path": "docs/plans/ph/briefs/01.md", "use_jev": False, "conversation_id": sid, "harness": "claude"})
+        ex = lc.start_execution(b["id"], {"conversation_id": sid, "harness": "claude"})
+        t0 = __import__("time").time()
+        rows = [{"v": 1, "ts": t0 + 0.001, "harness": "claude", "session_id": sid, "hook_event": "UserPromptSubmit", "kind": "user_prompt", "text": "go api_key=abcdefgh12345678"},
+                {"v": 1, "ts": t0 + 0.002, "harness": "claude", "session_id": sid, "hook_event": "PostToolUse", "kind": "tool_call", "tool_name": "Bash", "input": {"command": "ls"}, "ok": False},
+                {"v": 1, "ts": t0 + 0.003, "harness": "claude", "session_id": sid, "hook_event": "PostToolUse", "kind": "tool_call", "tool_name": "Edit", "input": {}, "ok": True},
+                {"kind": "bogus"}]
+        self.assertEqual(he.ingest(rows), {"inserted": 3, "duplicate": 0, "rejected": 1})
+        self.assertEqual(he.ingest(rows[:3])["duplicate"], 3)
+        self.assertEqual(he.post({"harness": "claude", "payload": {"hook_event_name": "UserPromptSubmit", "session_id": sid, "prompt": "again"}})["inserted"], 1)
+        self.assertTrue(any("[REDACTED]" in e["text"] for e in he.events(sid, "user_prompt")))
+        s = he.session(sid)
+        self.assertEqual((s["activity"]["prompts"], s["activity"]["tools"], s["activity"]["tool_failures"]), (2, 2, 1))
+        self.assertEqual([a["id"] for a in s["artifacts"]], [b["id"]])
+        self.assertEqual(s["executions"][0]["id"], ex["id"])
+        self.assertEqual(he.execution_activity(ex["id"])["activity"]["tools"], 2)
+        self.assertEqual([x["session_id"] for x in he.plan_sessions("hk", "ph")["sessions"]], [sid])
+
     def test_lifecycle_rest_flow(self):
         srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
@@ -89,7 +111,8 @@ class T(unittest.TestCase):
         self.assertEqual((done["brief"]["gaps"], done["brief"]["adjustments"]), (1, 1))
         self.assertEqual(call("GET", f"/v1/briefs/{bid}")[1]["execution_stage"], "complete")
         rows = call("GET", "/v1/outcomes?by=initiator")[1]
-        self.assertEqual((rows[0]["grp"], rows[0]["done_rate"], rows[0]["cost_usd"]), ("human", 1.0, 2.0))
+        h = next(r for r in rows if r["grp"] == "human")
+        self.assertEqual((h["done_rate"], h["cost_usd"]), (1.0, 2.0))
         self.assertEqual(call("GET", "/v1/plans/lc/pl/cost")[1]["total_cost_usd"], 2.0)
         with q.db() as c:
             self.assertEqual(c.execute("SELECT count(*) FROM links WHERE type='missing_scope' AND to_artifact=?", (bid,)).fetchone()[0], 1)  # a gap back-references its brief
