@@ -1,7 +1,7 @@
 {
   "name": "@codyhamilton/opencode-workflow-hooks",
-  "version": "0.1.0",
-  "description": "OpenCode plugin: buffer tool.execute.after, flush PostToolBatch-shaped soft signals via shared Jev gates",
+  "version": "0.2.0",
+  "description": "OpenCode plugin: full-surface advisory hooklog capture and PostToolBatch soft signals",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -28,5 +28,8 @@
     "workflow",
     "jev",
     "hooks"
-  ]
+  ],
+  "scripts": {
+    "test:hooks": "node --experimental-strip-types --test tests/test_hooks.mjs"
+  }
 }

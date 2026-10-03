@@ -140,7 +140,9 @@ def load_hooklog(path: Path) -> list[dict[str, Any]]:
       - `agent_text` alone is NOT a turn (a reply that precedes tool calls shares their turn);
       - Cursor `afterAgentThought` (kind `step`) fires once per model response, so each is a turn and
         the tool calls after it belong to it (verified against a real `agent -p` run);
-      - logs with neither marker fall back to a time gap > BATCH_GAP_S between tool calls.
+      - logs with neither marker (including Codex) fall back to a time gap > BATCH_GAP_S between tool calls.
+    Lifecycle/event and pre-tool rows are observations, not turn boundaries. Cursor's specific
+    shell/MCP/edit hooks are ignored when the canonical postToolUse surface is present.
     Subagent rows (agent_id set) are excluded, as sidechains are for Claude transcripts."""
     rows = []
     for line in path.read_text(errors="ignore").splitlines():
@@ -152,6 +154,8 @@ def load_hooklog(path: Path) -> list[dict[str, Any]]:
             rows.append(r)
     has_markers = any(r.get("kind") == "batch_end" for r in rows)
     has_steps = any(r.get("kind") == "step" for r in rows)
+    cursor_has_post = any(r.get("harness") == "cursor" and r.get("hook_event", "").lower()
+                          in ("posttooluse", "posttoolusefailure") for r in rows)
     events: list[dict[str, Any]] = []
     turn = 0
     pending: list[dict[str, Any]] = []   # tool calls awaiting a boundary
@@ -181,6 +185,11 @@ def load_hooklog(path: Path) -> list[dict[str, Any]]:
             if r.get("text"):
                 events.append({"kind": "user_prompt", "turn": turn, "text": r["text"]})
         elif k == "tool_call":
+            if r.get("harness") == "cursor" and r.get("hook_event", "").lower() == "aftertabfileedit":
+                continue  # inline completions are not agent model turns
+            if cursor_has_post and r.get("harness") == "cursor" and r.get("hook_event", "").lower() in (
+                    "aftershellexecution", "aftermcpexecution", "afterfileedit"):
+                continue
             ts = r.get("ts", 0.0)
             if not (has_markers or has_steps) and pending and last_ts is not None and ts - last_ts > BATCH_GAP_S:
                 flush()

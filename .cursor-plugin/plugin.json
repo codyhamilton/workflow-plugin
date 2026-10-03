@@ -1,8 +1,9 @@
 {
   "name": "workflow",
   "description": "Cloud-safe core workflow skills for Cursor: design, refine, execute, comprehensive-review, close-out, post-build",
-  "version": "2.7.2",
+  "version": "2.8.0",
   "author": {
     "name": "William Hamilton"
-  }
+  },
+  "hooks": "./hooks/cursor.json"
 }

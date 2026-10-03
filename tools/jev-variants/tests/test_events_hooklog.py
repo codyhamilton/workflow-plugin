@@ -60,6 +60,30 @@ class T(unittest.TestCase):
         self.assertEqual(events.total_turns(ev), 3)
         self.assertEqual([len(e["calls"]) for e in ev if e["kind"] == "tool_batch"], [2, 1])
 
+    def test_full_surface_observations_do_not_add_turns_or_duplicate_tools(self):
+        rows = [
+            {"kind": "event", "hook_event": "sessionStart", "ts": 0},
+            {"kind": "step", "ts": 1},
+            {"kind": "tool_pre", "ts": 2},
+            {"kind": "tool_call", "harness": "cursor", "hook_event": "afterShellExecution", "tool_name": "Shell", "ts": 3},
+            {"kind": "tool_call", "harness": "cursor", "hook_event": "postToolUse", "tool_name": "Shell", "ts": 4},
+            {"kind": "tool_call", "harness": "cursor", "hook_event": "afterTabFileEdit", "tool_name": "Edit", "ts": 5},
+            {"kind": "stop", "ts": 6},
+            {"kind": "event", "hook_event": "sessionEnd", "ts": 7},
+        ]
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "s.jsonl"
+            f.write_text("\n".join(json.dumps(r) for r in rows))
+            ev = events.load_hooklog(f)
+        self.assertEqual(events.total_turns(ev), 1)
+        self.assertEqual([len(e["calls"]) for e in ev if e["kind"] == "tool_batch"], [1])
+
+    def test_session_end_does_not_duplicate_claude_stop(self):
+        self.assertEqual(self._turns([
+            {"kind": "tool_call", "ts": 1}, {"kind": "batch_end", "ts": 2},
+            {"kind": "stop", "ts": 3}, {"kind": "event", "hook_event": "SessionEnd", "ts": 4},
+        ]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
