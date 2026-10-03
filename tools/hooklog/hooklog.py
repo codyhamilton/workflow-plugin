@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Harness-neutral session event log: user prompts and tool calls, one JSONL file per session.
+"""Harness-neutral session event rows: normalisation, redaction and the per-session JSONL archive.
 
-Wired as a hook command (stdin = hook payload JSON). Never blocks or fails the agent: always exits 0.
-Store: $WORKFLOW_HOOKLOG_DIR or ~/.local/share/workflow-plugin/hooklog/<harness>/<session_id>.jsonl
-Local only. Secrets are pattern-redacted and large fields truncated before writing.
+Capture is not here: hooks run `spool.sh` (bash), which drops the raw payload in a spool directory, and `drain.py`
+calls `normalize()` below, archives to <harness>/<session_id>.jsonl and posts to the quality service.
+`record` remains as a compatibility shim for older registrations: it spools exactly as spool.sh does.
+Store: $WORKFLOW_HOOKLOG_DIR or ~/.local/share/workflow-plugin/hooklog. Secrets are pattern-redacted and large fields
+truncated in normalize(), before anything is archived or posted.
 
 Row (v=1): {v, ts, harness, session_id, hook_event, kind: user_prompt|tool_call|tool_pre|batch_end|step|agent_text|stop|event,
             cwd, text?, tool_name?, tool_use_id?, input?, output?, ok?}
@@ -31,6 +33,10 @@ SECRET_KEY = re.compile(r"(?i)(authorization|cookie|api[_-]?key|token$|secret|pa
 
 def store_dir() -> Path:
     return Path(os.environ.get("WORKFLOW_HOOKLOG_DIR") or Path.home() / ".local/share/workflow-plugin/hooklog")
+
+
+def spool_dir() -> Path:
+    return Path(os.environ.get("WORKFLOW_HOOKLOG_SPOOL") or store_dir() / "spool")
 
 
 def scrub(text: str, limit: int) -> str:
@@ -80,14 +86,14 @@ def detect_harness(p: dict[str, Any]) -> str:
     return "claude"
 
 
-def normalize(harness: str, p: dict[str, Any]) -> dict[str, Any] | None:
+def normalize(harness: str, p: dict[str, Any], ts: float | None = None) -> dict[str, Any] | None:
     """Preserve every named event; lifecycle/unknown shapes become bounded `event` rows."""
     ev = str(_first(p, "hook_event_name", "event") or "")
     if not ev:
         return None
     sid = str(_first(p, "session_id", "conversation_id", "sessionID") or "unknown")
     cwd = _first(p, "cwd") or (p.get("workspace_roots") or [None])[0]
-    row: dict[str, Any] = {"v": 1, "ts": time.time(), "harness": harness, "session_id": scrub(sid, MAX_FIELD),
+    row: dict[str, Any] = {"v": 1, "ts": time.time() if ts is None else ts, "harness": harness, "session_id": scrub(sid, MAX_FIELD),
                            "hook_event": scrub(ev, MAX_FIELD), "cwd": clip(cwd)}
     for key in ("agent_id", "generation_id", "turn_id", "source"):
         if p.get(key):
@@ -157,25 +163,10 @@ def read_session(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def post_to_service(row: dict[str, Any]) -> bool:
-    """Rows go to the quality service (WORKFLOW_QUALITY_URL, default http://127.0.0.1:8765; set it empty to disable); any failure returns False so the caller spools to file."""
-    # default is the address .mcp.json registers; an explicit WORKFLOW_HOOKLOG_DIR (file-only intent, tests) turns the default off
-    base = os.environ.get("WORKFLOW_QUALITY_URL", None if os.environ.get("WORKFLOW_HOOKLOG_DIR") else "http://127.0.0.1:8765")
-    if not base:
-        return False
-    import urllib.request
-    req = urllib.request.Request(base.rstrip("/") + "/v1/hook-events", json.dumps({"rows": [row]}, default=str).encode(),
-                                 {"Content-Type": "application/json", **({"Authorization": f"Bearer {os.environ['WORKFLOW_QUALITY_TOKEN']}"} if os.environ.get("WORKFLOW_QUALITY_TOKEN") else {})})
-    try:
-        return urllib.request.urlopen(req, timeout=float(os.environ.get("WORKFLOW_QUALITY_TIMEOUT", "2"))).status < 300
-    except Exception:
-        return False
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd")
-    rec = sub.add_parser("record", help="read a hook payload on stdin and append it")
+    rec = sub.add_parser("record", help="compatibility shim: spool a hook payload from stdin (use spool.sh)")
     rec.add_argument("--harness", required=True, choices=["auto", "claude", "cursor", "opencode", "codex"])
     rec.add_argument("--event", help="registration event name (also used for Cursor's permissive response)")
     sub.add_parser("ls", help="list sessions with row counts")
@@ -183,28 +174,22 @@ def main() -> int:
     show.add_argument("path")
     args = ap.parse_args()
     if args.cmd == "record":
-        payload: dict[str, Any] = {}
+        # Compatibility shim: older registrations still call `hooklog.py record`. Spool the raw payload, as spool.sh does.
         try:
-            if os.environ.get("WORKFLOW_HOOKLOG", "").lower() in ("0", "off", "false"):
-                raise SystemExit(0)
-            parsed = json.loads(sys.stdin.read() or "{}")
-            if not isinstance(parsed, dict):
-                raise ValueError("hook payload must be an object")
-            payload = parsed
-            if args.event:
-                payload["hook_event_name"] = args.event
-            if args.harness == "auto":
-                args.harness = detect_harness(payload)
-            row = normalize(args.harness, payload)
-            if row and not post_to_service(row):
-                append(row)  # file store is the spool when the service is unset or down; backfill_hooklog.py drains it
-        except SystemExit:
-            pass
+            if os.environ.get("WORKFLOW_HOOKLOG", "").lower() not in ("0", "off", "false"):
+                sd = spool_dir()
+                (sd / "tmp").mkdir(parents=True, exist_ok=True)
+                ts = time.time()
+                name = f"{ts:.6f}-{os.getpid()}-{os.urandom(2).hex()}"
+                env = json.dumps({"ts": round(ts, 6), "harness": args.harness, "event": args.event or ""})
+                tmp = sd / "tmp" / name
+                tmp.write_text(env + "\n" + sys.stdin.read(), encoding="utf-8")
+                tmp.rename(sd / f"{name}.evt")
         except Exception as exc:  # never break the agent
             if os.environ.get("WORKFLOW_HOOKLOG_DEBUG"):
                 print(f"hooklog: {exc}", file=sys.stderr)
         if args.harness == "cursor":
-            ev = str(args.event or payload.get("hook_event_name") or "").lower()
+            ev = str(args.event or "").lower()
             if ev in ("pretooluse", "subagentstart", "beforeshellexecution", "beforemcpexecution",
                       "beforereadfile", "beforetabfileread"):
                 print('{"permission": "allow"}')

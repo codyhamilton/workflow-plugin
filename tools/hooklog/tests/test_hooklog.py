@@ -1,8 +1,11 @@
 import json
 import os
 import subprocess
+import http.server
 import sys
 import tempfile
+import threading
+import time
 import unittest
 from pathlib import Path
 
@@ -10,12 +13,31 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import hooklog as hl  # noqa: E402
 
 SCRIPT = Path(hl.__file__)
+SPOOL = SCRIPT.parent / "spool.sh"
+DRAIN = SCRIPT.parent / "drain.py"
+
+
+def env_for(d, **kw):
+    e = dict(os.environ, WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_HOOKLOG_KICK="0", WORKFLOW_QUALITY_URL="")
+    e.update(kw)
+    return e
+
+
+def spool(harness, payload, d, event=None, **kw):
+    cmd = ["bash", str(SPOOL), "--harness", harness] + (["--event", event] if event else [])
+    return subprocess.run(cmd, input=payload, capture_output=True, text=True, env=env_for(d, **kw))
+
+
+def drain(d, **kw):
+    r = subprocess.run([sys.executable, str(DRAIN), "--once"], capture_output=True, text=True, env=env_for(d, **kw))
+    return json.loads(r.stdout)
 
 
 def run(harness, payload, d):
-    env = dict(os.environ, WORKFLOW_HOOKLOG_DIR=d)
-    return subprocess.run([sys.executable, str(SCRIPT), "record", "--harness", harness], input=payload,
-                          capture_output=True, text=True, env=env)
+    """What a hook does, then what the drain does."""
+    r = spool(harness, payload, d)
+    drain(d)
+    return r
 
 
 class T(unittest.TestCase):
@@ -52,19 +74,64 @@ class T(unittest.TestCase):
                                        "generation_id": "9ecc107f-081f-4fdc-9e61-24a99b5a70f4-2-3bkg", "text": "t"})
         self.assertEqual((step["kind"], step["step"]), ("step", 2))
 
-    def test_service_down_spools_to_file(self):
+    def test_hook_returns_without_drain_and_keeps_fire_time(self):
         with tempfile.TemporaryDirectory() as d:
-            env = dict(os.environ, WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_QUALITY_URL="http://127.0.0.1:9", WORKFLOW_QUALITY_TIMEOUT="0.5")
-            r = subprocess.run([sys.executable, str(SCRIPT), "record", "--harness", "claude"], capture_output=True, text=True, env=env,
-                               input=json.dumps({"hook_event_name": "UserPromptSubmit", "session_id": "s9", "prompt": "hi"}))
-            self.assertEqual(r.returncode, 0)
+            spool("claude", json.dumps({"hook_event_name": "Stop", "session_id": "s1"}), d)
+            self.assertEqual(len(list((Path(d) / "spool").glob("*.evt"))), 1)
+            self.assertFalse((Path(d) / "claude").exists())  # nothing archived until the drain runs
+            before = time.time()
+            time.sleep(0.05)
+            drain(d)
+            self.assertLess(hl.read_session(Path(d) / "claude" / "s1.jsonl")[0]["ts"], before)
+            self.assertEqual(list((Path(d) / "spool").glob("*.evt")), [])
+
+    def test_legacy_record_shim_spools(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = subprocess.run([sys.executable, str(SCRIPT), "record", "--harness", "claude"], capture_output=True, text=True,
+                               env=env_for(d), input=json.dumps({"hook_event_name": "Stop", "session_id": "s7"}))
+            self.assertEqual((r.returncode, r.stdout), (0, ""))
+            drain(d)
+            self.assertEqual(len(hl.read_session(Path(d) / "claude" / "s7.jsonl")), 1)
+
+    def test_drain_retains_while_service_down_then_delivers_once(self):
+        got = []
+
+        class H(http.server.BaseHTTPRequestHandler):
+            def do_POST(self):
+                got.append((self.headers.get("Authorization"), json.loads(self.rfile.read(int(self.headers["Content-Length"])))))
+                self.send_response(200); self.end_headers(); self.wfile.write(b"{}")
+
+            def log_message(self, *a):
+                pass
+        with tempfile.TemporaryDirectory() as d:
+            spool("claude", json.dumps({"hook_event_name": "UserPromptSubmit", "session_id": "s9", "prompt": "hi"}), d)
+            down = drain(d, WORKFLOW_QUALITY_URL="http://127.0.0.1:9", WORKFLOW_QUALITY_TIMEOUT="0.5")
+            self.assertEqual((down["sent"], down["pending"]), (0, 1))
+            self.assertFalse((Path(d) / "claude").exists())
+            srv = http.server.HTTPServer(("127.0.0.1", 0), H)
+            threading.Thread(target=srv.serve_forever, daemon=True).start()
+            try:
+                up = drain(d, WORKFLOW_QUALITY_URL=f"http://127.0.0.1:{srv.server_port}", WORKFLOW_QUALITY_TOKEN="tok")
+            finally:
+                srv.shutdown(); srv.server_close()
+            self.assertEqual((up["sent"], up["pending"]), (1, 0))
+            self.assertEqual(got[0][0], "Bearer tok")
+            self.assertEqual(got[0][1]["rows"][0]["session_id"], "s9")
             self.assertEqual(len(hl.read_session(Path(d) / "claude" / "s9.jsonl")), 1)
+            self.assertEqual(drain(d, WORKFLOW_QUALITY_URL="http://127.0.0.1:9")["pending"], 0)
+
+    def test_unparseable_spool_file_is_quarantined(self):
+        with tempfile.TemporaryDirectory() as d:
+            spool("claude", "not json", d)
+            self.assertEqual(drain(d)["bad"], 1)
+            self.assertEqual(len(list((Path(d) / "spool" / "bad").glob("*.evt"))), 1)
+            self.assertEqual(list(Path(d).glob("claude/*")), [])
 
     def test_garbage_never_fails(self):
         with tempfile.TemporaryDirectory() as d:
             for bad in ("", "not json", "[]"):
                 self.assertEqual(run("claude", bad, d).returncode, 0)
-            self.assertEqual(list(Path(d).glob("*/*")), [])
+            self.assertEqual(list(Path(d).glob("*/*.jsonl")), [])
 
     def test_new_and_future_events_are_retained(self):
         for event in ("SessionStart", "InstructionsLoaded", "Interrupt", "workspaceOpen", "FutureHook"):
@@ -93,9 +160,7 @@ class T(unittest.TestCase):
                           "beforeReadFile", "beforeTabFileRead", "beforeSubmitPrompt"):
                 for payload in ("not json", '{"hook_event_name":"wrong"}'):
                     for disabled in ("on", "off"):
-                        result = subprocess.run([sys.executable, str(SCRIPT), "record", "--harness", "cursor", "--event", event],
-                            input=payload, text=True, capture_output=True,
-                            env=dict(os.environ, WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_HOOKLOG=disabled))
+                        result = spool("cursor", payload, d, event, WORKFLOW_HOOKLOG=disabled)
                         self.assertEqual(result.returncode, 0)
                         expected = {"continue": True} if event == "beforeSubmitPrompt" else {"permission": "allow"}
                         self.assertEqual(json.loads(result.stdout), expected)
@@ -104,7 +169,7 @@ class T(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = Path(d) / "file"
             path.touch()
-            result = run("codex", '{"hook_event_name":"Stop","session_id":"s"}', str(path))
+            result = spool("codex", '{"hook_event_name":"Stop","session_id":"s"}', str(path))
             self.assertEqual((result.returncode, result.stdout), (0, ""))
 
     def test_torn_line_tolerated(self):

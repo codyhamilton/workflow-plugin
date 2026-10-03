@@ -6,6 +6,8 @@
  */
 import type { Plugin } from "@opencode-ai/plugin"
 import { spawn } from "node:child_process"
+import { mkdir, rename, writeFile } from "node:fs/promises"
+import os from "node:os"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
 
@@ -26,10 +28,16 @@ function flushHelperPath(): string {
   return path.join(packageRoot(), "python", "batch_flush_cli.py")
 }
 
-// hooklog capture (tools/hooklog): same rows Claude and Cursor hooks write, so the corpus loader treats all harnesses alike.
-function hooklogPath(): string {
-  return process.env.WORKFLOW_HOOKLOG_CLI || path.join(packageRoot(), "..", "..", "tools", "hooklog", "hooklog.py")
+// hooklog capture (tools/hooklog): drop the raw payload in the shared spool; tools/hooklog/drain.py normalises, scrubs,
+// archives and posts it, so capture costs one small file write and never waits on python or the network.
+function spoolDir(): string {
+  if (process.env.WORKFLOW_HOOKLOG_SPOOL) return process.env.WORKFLOW_HOOKLOG_SPOOL
+  const store = process.env.WORKFLOW_HOOKLOG_DIR || path.join(os.homedir(), ".local", "share", "workflow-plugin", "hooklog")
+  return path.join(store, "spool")
 }
+
+let lastSpoolTs = 0
+let spoolSeq = 0
 
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
   if (/^(0|off|false)$/i.test(process.env.WORKFLOW_HOOKLOG || "")) return
@@ -43,17 +51,15 @@ async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
       }
       return value
     })
-    await new Promise<void>((resolve) => {
-      const child = spawn(process.env.PYTHON || process.env.WORKFLOW_PYTHON || "python3", [hooklogPath(), "record", "--harness", "opencode"], {
-        stdio: ["pipe", "ignore", "ignore"],
-      })
-      const timeout = setTimeout(() => { child.kill("SIGKILL"); resolve() }, 5000)
-      const finish = () => { clearTimeout(timeout); resolve() }
-      child.on("error", finish)
-      child.on("close", finish)
-      child.stdin?.on("error", () => {})
-      child.stdin?.end(snapshot)
-    })
+    // ts is when the hook fired and must stay strictly increasing: the drain orders and turn-counts by it.
+    lastSpoolTs = Math.max(Date.now() / 1000, lastSpoolTs + 1e-6)
+    const ts = lastSpoolTs.toFixed(6)
+    const name = `${ts}-${process.pid}-${String(spoolSeq++).padStart(6, "0")}`
+    const dir = spoolDir()
+    await mkdir(path.join(dir, "tmp"), { recursive: true, mode: 0o700 })
+    const tmp = path.join(dir, "tmp", name)
+    await writeFile(tmp, `${JSON.stringify({ ts: Number(ts), harness: "opencode", event: "" })}\n${snapshot}`, { mode: 0o600 })
+    await rename(tmp, path.join(dir, `${name}.evt`))
   } catch {
     // capture is advisory — never throw into the hook chain
   }

@@ -1,4 +1,4 @@
-"""Registration smoke: run every shipped command against an isolated JSONL store."""
+"""Registration smoke: run every shipped command against an isolated spool, drain it, check the archive."""
 import json
 import os
 from pathlib import Path
@@ -21,12 +21,12 @@ class SurfaceTests(unittest.TestCase):
             with self.subTest(file=file), tempfile.TemporaryDirectory() as tmp:
                 config = json.loads((ROOT / file).read_text())
                 self.assertEqual(set(config['hooks']), expected)
-                env = dict(os.environ, WORKFLOW_HOOKLOG_DIR=tmp, WORKFLOW_HOOKLOG='on',
+                env = dict(os.environ, WORKFLOW_HOOKLOG_DIR=tmp, WORKFLOW_HOOKLOG='on', WORKFLOW_HOOKLOG_KICK='0', WORKFLOW_QUALITY_URL='',
                            CLAUDE_PLUGIN_ROOT=str(ROOT), CURSOR_PLUGIN_ROOT=str(ROOT))
                 for event, groups in config['hooks'].items():
                     if harness == 'claude' and event in ('WorktreeCreate', 'WorktreeRemove'):
                         self.assertEqual(groups, [])  # logger must not replace host operations
-                        command = f'python3 "{ROOT}/tools/hooklog/hooklog.py" record --harness claude'
+                        command = f'bash "{ROOT}/tools/hooklog/spool.sh" --harness claude --event {event}'
                         # Existing worktree handlers can call this command with their payload.
                     else:
                         hook = groups[0] if harness == 'cursor' else groups[0]['hooks'][0]
@@ -39,6 +39,7 @@ class SurfaceTests(unittest.TestCase):
                     self.assertEqual(result.returncode, 0, (event, result.stderr))
                     if harness != 'cursor':
                         self.assertEqual(result.stdout, '')
+                subprocess.run(['python3', str(ROOT / 'tools/hooklog/drain.py'), '--once'], env=env, check=True, capture_output=True)
                 rows = [json.loads(line) for line in (Path(tmp) / harness / 'surface-test.jsonl').read_text().splitlines()]
                 self.assertEqual({row['hook_event'] for row in rows}, expected)
                 self.assertEqual(len(rows), len(expected))

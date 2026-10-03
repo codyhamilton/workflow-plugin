@@ -1,0 +1,7 @@
+[Unit]
+Description=Workflow hooklog drain (spool -> archive + quality service)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %REPO%/tools/hooklog/drain.py --once
+# WORKFLOW_QUALITY_URL / WORKFLOW_QUALITY_TOKEN come from the user session environment (~/.config/environment.d).

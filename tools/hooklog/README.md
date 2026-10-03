@@ -20,12 +20,22 @@ The [official plugin reference](https://cursor.com/docs/reference/plugins#availa
 also lists those 18, plus 2 Tab hooks and workspaceOpen: **21 distinct names**. Every named
 catalog event is registered. The 22nd name needs a catalog correction; it is not fabricated.
 
-## Quality service
+## Capture path: spool, then drain
 
-Rows are posted to the quality service (`WORKFLOW_QUALITY_URL`, default `http://127.0.0.1:8765`, the address `.mcp.json`
-registers; set it empty to disable). If it is unset, down or slow (`WORKFLOW_QUALITY_TIMEOUT`, 2 s), the row is appended to the
-JSONL store above, which then acts as a spool; `tools/quality/backfill_hooklog.py` drains it. An explicit `WORKFLOW_HOOKLOG_DIR`
-means file-only. See `docs/lab/QUALITY-SERVICE.md`.
+Hooks run `spool.sh` (bash): it writes the raw payload plus a small envelope (`ts` = when the hook fired, harness, event) to
+`<store>/spool/<ts>-<pid>-<rand>.evt` via tmp-then-rename, then exits. No python, no network, no waiting. Cursor
+hooks get their permissive reply (`{"permission":"allow"}` etc.); capture can never block or fail the agent.
+
+`drain.py` does everything else, outside the hot path: it normalises and scrubs each file, posts batches (500) to the
+quality service (`WORKFLOW_QUALITY_URL`, default `http://127.0.0.1:8765`, empty = local only; `WORKFLOW_QUALITY_TOKEN` is sent as a
+bearer token), archives each row to the per-session JSONL above, and deletes the spool file. If the service is down, throttled or
+rejects credentials, files stay and the next pass retries; the service dedupes by content hash, so re-delivery is harmless. Files that
+cannot be parsed, or that the service refuses outright, move to `spool/bad/`. An explicit `WORKFLOW_HOOKLOG_DIR` without a URL means
+local only. A crash between archive and delete can duplicate archive lines (never service rows). `WORKFLOW_HOOKLOG_ARCHIVE=0` skips the archive.
+
+It runs when a session ends (`spool.sh` kicks a background `drain.py --once` on Stop/SessionEnd; `WORKFLOW_HOOKLOG_KICK=0` disables), or
+continuously via `tools/hooklog/install-drain.sh` (systemd user timer, every 15 s), or by hand: `drain.py --once | --watch | --status`.
+`hooklog.py record` remains as a compatibility shim that spools the same way. See `docs/lab/QUALITY-SERVICE.md`.
 
 ## Claude Code
 
@@ -43,7 +53,7 @@ path contract. Do not add a standalone logger as a replacement worktree handler.
 from a handler that already has the payload in `$payload`:
 
 ```sh
-printf '%s\n' "$payload" | python3 "$CLAUDE_PLUGIN_ROOT/tools/hooklog/hooklog.py" record --harness claude
+printf '%s\n' "$payload" | bash "$CLAUDE_PLUGIN_ROOT/tools/hooklog/spool.sh" --harness claude --event WorktreeCreate
 # The existing handler then performs its original operation and returns its original output.
 ```
 

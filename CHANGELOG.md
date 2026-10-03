@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.9.0 — 2026-10-04
+
+- Hooklog capture is now a bash spooler plus an async drain. Hooks run `tools/hooklog/spool.sh`, which writes the raw payload
+  to a local spool directory and returns (no python or network on the hot path; Cursor permissive replies preserved).
+  `tools/hooklog/drain.py` normalises and scrubs, posts batches to the quality service with the bearer token, archives to the
+  per-session JSONL, and retries after downtime (idempotent; rows keep their original `ts`). `install-drain.sh` adds a
+  systemd timer; session end also kicks a drain.
+- All shipped registrations (Claude, Cursor, Codex examples) call `spool.sh`; Claude registrations now pass `--event`.
+  `hooklog.py record` stays as a spooling shim for older installs; `post_to_service` is removed.
+- OpenCode hooks package writes spool files directly (`WORKFLOW_HOOKLOG_CLI` removed; `WORKFLOW_HOOKLOG_SPOOL` added).
+
 ## 2.8.0 — 2026-10-03
 
 - Add the quality service (`tools/quality`): a local HTTP MCP + REST server with a SQLite ledger, registered in

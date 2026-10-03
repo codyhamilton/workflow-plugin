@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event SessionStart",
             "timeout": 5
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event Setup",
             "timeout": 5
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event InstructionsLoaded",
             "timeout": 5
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event UserPromptSubmit",
             "timeout": 5
           }
         ]
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event UserPromptExpansion",
             "timeout": 5
           }
         ]
@@ -60,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event MessageDisplay",
             "timeout": 5
           }
         ]
@@ -71,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PreToolUse",
             "timeout": 5
           }
         ]
@@ -82,7 +82,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PermissionRequest",
             "timeout": 5
           }
         ]
@@ -93,7 +93,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PermissionDenied",
             "timeout": 5
           }
         ]
@@ -104,7 +104,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PostToolUse",
             "timeout": 5
           }
         ]
@@ -115,7 +115,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PostToolUseFailure",
             "timeout": 5
           }
         ]
@@ -126,7 +126,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PostToolBatch",
             "timeout": 5
           }
         ]
@@ -137,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event Notification",
             "timeout": 5
           }
         ]
@@ -148,7 +148,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event SubagentStart",
             "timeout": 5
           }
         ]
@@ -159,7 +159,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event SubagentStop",
             "timeout": 5
           }
         ]
@@ -170,7 +170,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event TaskCreated",
             "timeout": 5
           }
         ]
@@ -181,7 +181,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event TaskCompleted",
             "timeout": 5
           }
         ]
@@ -192,7 +192,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event Stop",
             "timeout": 5
           }
         ]
@@ -203,7 +203,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event StopFailure",
             "timeout": 5
           }
         ]
@@ -214,7 +214,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event TeammateIdle",
             "timeout": 5
           }
         ]
@@ -225,7 +225,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event ConfigChange",
             "timeout": 5
           }
         ]
@@ -236,7 +236,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event CwdChanged",
             "timeout": 5
           }
         ]
@@ -247,7 +247,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event DirectoryAdded",
             "timeout": 5
           }
         ]
@@ -258,7 +258,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event FileChanged",
             "timeout": 5
           }
         ]
@@ -271,7 +271,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PreCompact",
             "timeout": 5
           }
         ]
@@ -282,7 +282,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PostCompact",
             "timeout": 5
           }
         ]
@@ -293,7 +293,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PreModelSwitch",
             "timeout": 5
           }
         ]
@@ -304,7 +304,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PostModelSwitch",
             "timeout": 5
           }
         ]
@@ -315,7 +315,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event Elicitation",
             "timeout": 5
           }
         ]
@@ -326,7 +326,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event ElicitationResult",
             "timeout": 5
           }
         ]
@@ -337,7 +337,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness auto",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event SessionEnd",
             "timeout": 5
           }
         ]

@@ -60,8 +60,8 @@ git pull origin master
 | Variable | Default | Role |
 |----------|---------|------|
 | `WORKFLOW_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
-| `WORKFLOW_HOOKLOG_DIR` | shared local store | Override JSONL root |
-| `WORKFLOW_HOOKLOG_CLI` | repo `tools/hooklog/hooklog.py` | Override capture helper |
+| `WORKFLOW_HOOKLOG_DIR` | shared local store | Override store root (spool is `<dir>/spool`) |
+| `WORKFLOW_HOOKLOG_SPOOL` | `<store>/spool` | Override spool directory; `tools/hooklog/drain.py` archives and posts it |
 | `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
 | `WORKFLOW_REPO_ROOT` | auto (package → repo root) | Python gate imports |
 | `WORKFLOW_JEV_SIGNAL_LOG` | `tools/driver/.jev-signal-log.jsonl` | Signal JSONL path |
