@@ -85,6 +85,29 @@ class T(unittest.TestCase):
         self.assertEqual(he.execution_activity(ex["id"])["activity"]["tools"], 2)
         self.assertEqual([x["session_id"] for x in he.plan_sessions("hk", "ph")["sessions"]], [sid])
 
+    def test_hook_calls_bind_conversation_to_plan(self):
+        """No conversation_id passed to the service: the hook row for the service call binds it."""
+        import hookevents as he
+        import lifecycle as lc
+        sid, t0 = "conv-bound-1", __import__("time").time()
+        b = lc.put_artifact("brief", {"text": BRIEF, "project": "bd", "plan": "pb", "path": "docs/plans/pb/briefs/01.md", "use_jev": False})
+        ex = lc.start_execution(b["id"], {})
+        mcp = {"v": 1, "ts": t0 + 0.001, "harness": "claude", "session_id": sid, "kind": "tool_call", "tool_name": "mcp__workflow-quality__post_brief", "ok": True,
+               "input": {}, "output": [{"type": "text", "text": json.dumps({"scored": True, "id": b["id"], "baseline": {"id": 999}})}]}
+        sh = {"v": 1, "ts": t0 + 0.002, "harness": "claude", "session_id": sid, "kind": "tool_call", "tool_name": "Bash", "ok": True,
+              "input": {"command": f"curl -s -X POST localhost:8765/v1/briefs/{b['id']}/executions -d '{{}}'"}, "output": {"stdout": json.dumps(ex)}}
+        other = {"v": 1, "ts": t0 + 0.003, "harness": "claude", "session_id": sid, "kind": "tool_call", "tool_name": "Bash", "ok": True,
+                 "input": {"command": "curl -s localhost:8765/v1/briefs/1"}, "output": {"stdout": "{\"id\": 12345}"}}
+        he.ingest([mcp, sh, other])
+        he.ingest([mcp, sh, other])  # idempotent
+        s = he.session(sid)
+        self.assertEqual([a["id"] for a in s["artifacts"]], [b["id"]])
+        self.assertEqual([e["id"] for e in s["executions"]], [ex["id"]])
+        self.assertEqual([x["session_id"] for x in he.plan_sessions("bd", "pb")["sessions"]], [sid])
+        self.assertEqual(he.execution_activity(ex["id"])["execution"]["conversation_id"], sid)
+        with q.db() as c:
+            self.assertEqual(c.execute("SELECT COUNT(*) FROM conversation_binds WHERE conversation_id=?", (sid,)).fetchone()[0], 2)
+
     def test_lifecycle_rest_flow(self):
         srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
         threading.Thread(target=srv.serve_forever, daemon=True).start()

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -58,7 +59,48 @@ def ingest(rows: list[dict[str, Any]]) -> dict[str, int]:
             cur = c.execute(f"INSERT OR IGNORE INTO hook_events({','.join(COLS)},extra,row_key) VALUES({','.join('?' * (len(COLS) + 2))})",
                             (*vals, _js(extra) if extra else None, key))
             out["inserted" if cur.rowcount else "duplicate"] += 1
+            _bind(c, r, key)
     return out
+
+
+_MCP = re.compile(r"(post|patch)_(design|brief)$|start_execution$")
+_REST = re.compile(r"/v1/(designs|briefs)(?:/(\d+))?(?:/executions)?(?![\w/-])")
+_ID = re.compile(r'\\*"id\\*"\s*:\s*(\d+)')
+
+
+def _response_id(out: Any) -> int | None:
+    """Top-level `id` of a service response, whatever wrapping the harness put around it (MCP content blocks, shell stdout)."""
+    blob = out if isinstance(out, str) else json.dumps(out, default=str)
+    m = _ID.search(blob)
+    return int(m.group(1)) if m else None
+
+
+def bind_target(r: dict[str, Any]) -> tuple[str, int] | None:
+    """('artifact'|'execution', id) when a hook tool_call is the agent talking to the quality service, else None."""
+    if r.get("kind") != "tool_call" or r.get("ok") is False or r.get("output") is None:
+        return None
+    name, inp = str(r.get("tool_name") or ""), r.get("input")
+    if "quality" in name and _MCP.search(name):
+        i = _response_id(r["output"])
+        if i is None:
+            return None
+        return ("execution" if name.endswith("start_execution") else "artifact", i)
+    cmd = (inp or {}).get("command") if isinstance(inp, dict) else None
+    if name in ("Bash", "Shell") and isinstance(cmd, str):
+        m = _REST.search(cmd)
+        if m and ("POST" in cmd or "PATCH" in cmd or "--data" in cmd or " -d " in cmd):
+            i = _response_id(r["output"])
+            if i is not None:
+                return ("execution" if "/executions" in cmd else "artifact", i)
+    return None
+
+
+def _bind(c, r: dict[str, Any], key: str) -> None:
+    t = bind_target(r)
+    if t:
+        kind, i = t
+        c.execute("INSERT OR IGNORE INTO conversation_binds(ts,conversation_id,harness,artifact_id,execution_id,how,hook_row_key) VALUES(?,?,?,?,?,?,?)",
+                  (r["ts"], str(r["session_id"]), r["harness"], i if kind == "artifact" else None, i if kind == "execution" else None, "hook_tool_call", key))
 
 
 def post(body: dict[str, Any]) -> dict[str, int]:
@@ -80,16 +122,20 @@ def session(session_id: str) -> dict[str, Any]:
                        " SUM(kind='step' OR kind='batch_end' OR kind='stop') boundaries, MIN(harness) harness, MIN(cwd) cwd FROM hook_events WHERE session_id=? AND agent_id IS NULL", (session_id,)).fetchone()
         top = c.execute("SELECT tool_name, COUNT(*) n FROM hook_events WHERE session_id=? AND kind='tool_call' GROUP BY 1 ORDER BY 2 DESC LIMIT 8", (session_id,)).fetchall()
         arts = c.execute("SELECT DISTINCT a.id, a.kind, a.project, a.plan, a.path FROM scores s JOIN artifacts a ON a.id=s.artifact_id WHERE s.session_id=?"
-                         " UNION SELECT DISTINCT a.id, a.kind, a.project, a.plan, a.path FROM events e JOIN artifacts a ON a.id=e.artifact_id WHERE e.conversation_id=?",
-                         (session_id, session_id)).fetchall()
-        ex = c.execute("SELECT id, brief_id, started, ended, outcome, cost_usd FROM executions WHERE conversation_id=?", (session_id,)).fetchall()
+                         " UNION SELECT DISTINCT a.id, a.kind, a.project, a.plan, a.path FROM events e JOIN artifacts a ON a.id=e.artifact_id WHERE e.conversation_id=?"
+                         " UNION SELECT DISTINCT a.id, a.kind, a.project, a.plan, a.path FROM conversation_binds b JOIN artifacts a ON a.id=b.artifact_id WHERE b.conversation_id=?"
+                         " UNION SELECT DISTINCT a.id, a.kind, a.project, a.plan, a.path FROM conversation_binds b JOIN executions x ON x.id=b.execution_id JOIN artifacts a ON a.id=x.brief_id WHERE b.conversation_id=?",
+                         (session_id,) * 4).fetchall()
+        ex = c.execute("SELECT id, brief_id, started, ended, outcome, cost_usd FROM executions WHERE conversation_id=?"
+                         " OR id IN (SELECT execution_id FROM conversation_binds WHERE conversation_id=? AND execution_id IS NOT NULL)", (session_id, session_id)).fetchall()
     return {"session_id": session_id, "activity": dict(st), "top_tools": [dict(r) for r in top], "artifacts": [dict(r) for r in arts], "executions": [dict(r) for r in ex]}
 
 
 def execution_activity(exec_id: int) -> dict[str, Any]:
     """Hook events inside an execution's window in its conversation (prompts, tool calls, failures, interventions)."""
     with q.db() as c:
-        e = c.execute("SELECT id, brief_id, conversation_id, started, ended FROM executions WHERE id=?", (exec_id,)).fetchone()
+        e = c.execute("SELECT id, brief_id, COALESCE(conversation_id, (SELECT conversation_id FROM conversation_binds WHERE execution_id=executions.id ORDER BY ts LIMIT 1)) conversation_id,"
+                      " started, ended FROM executions WHERE id=?", (exec_id,)).fetchone()
         if not e:
             raise Bad(f"no execution {exec_id}")
         if not e["conversation_id"]:
@@ -105,5 +151,7 @@ def plan_sessions(project: str, plan: str) -> dict[str, Any]:
         ids = {r[0] for r in c.execute(
             "SELECT s.session_id FROM scores s JOIN artifacts a ON a.id=s.artifact_id WHERE a.project=? AND a.plan=?"
             " UNION SELECT e.conversation_id FROM executions e JOIN artifacts a ON a.id=e.brief_id WHERE a.project=? AND a.plan=?"
-            " UNION SELECT ev.conversation_id FROM events ev JOIN artifacts a ON a.id=ev.artifact_id WHERE a.project=? AND a.plan=?", (project, plan) * 3) if r[0] and r[0] != "unknown"}
+            " UNION SELECT ev.conversation_id FROM events ev JOIN artifacts a ON a.id=ev.artifact_id WHERE a.project=? AND a.plan=?"
+            " UNION SELECT b.conversation_id FROM conversation_binds b JOIN artifacts a ON a.id=b.artifact_id WHERE a.project=? AND a.plan=?"
+            " UNION SELECT b.conversation_id FROM conversation_binds b JOIN executions x ON x.id=b.execution_id JOIN artifacts a ON a.id=x.brief_id WHERE a.project=? AND a.plan=?", (project, plan) * 5) if r[0] and r[0] != "unknown"}
     return {"project": project, "plan": plan, "sessions": [session(i) for i in sorted(ids)]}

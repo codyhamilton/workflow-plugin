@@ -37,7 +37,7 @@ design_id: 17
 
 ## Hook events
 
-The hooklog now lands in the same ledger (`hook_events` table), so hook activity joins plans through the harness conversation id: a hook row's `session_id` equals `scores.session_id` and the `conversation_id` on executions and events. Pass `conversation_id` (and `harness`) on post/start calls to make the join.
+The hooklog now lands in the same ledger (`hook_events` table), so hook activity joins plans through the harness conversation id: a hook row's `session_id` equals `scores.session_id` and the `conversation_id` on executions and events. The join needs no cooperation from the agent: when a hook `tool_call` row is the agent talking to the service (an MCP `post_*`/`patch_*`/`start_execution` call, or a shell `curl` to `/v1/briefs|designs|.../executions` with a body) and its response carries an `id`, ingest records `conversation_id <-> artifact/execution id` in `conversation_binds`. Passing `conversation_id` explicitly on post/start calls also works and is stored on the score, execution and event as before; sessions, plan joins and execution activity read both.
 
 | Call | Effect |
 |---|---|
@@ -49,6 +49,6 @@ The hooklog now lands in the same ledger (`hook_events` table), so hook activity
 
 Kinds: `user_prompt`, `tool_call`, `batch_end`, `step`, `agent_text`, `stop`, and `event` (opencode bus events and Claude lifecycle rows; their payload is in `extra`).
 
-Capture: set `WORKFLOW_QUALITY_URL` (and `WORKFLOW_QUALITY_TOKEN` if the service needs one) in the hook environment and `hooklog.py record` posts to the service. If it is unset or unreachable (2 s timeout, `WORKFLOW_QUALITY_TIMEOUT`) the row is spooled to the file store as before. `python3 tools/quality/backfill_hooklog.py [--url ...] [--exclude <session prefix>]` loads files into the ledger and drains the spool; reruns are no-ops.
+Capture: `hooklog.py record` posts to the service at `WORKFLOW_QUALITY_URL` (default `http://127.0.0.1:8765`, the address `.mcp.json` registers; empty disables; an explicit `WORKFLOW_HOOKLOG_DIR` without a URL means file-only; `WORKFLOW_QUALITY_TOKEN` is sent if set). If the service is down (2 s timeout, `WORKFLOW_QUALITY_TIMEOUT`) the row is spooled to the file store as before. `python3 tools/quality/backfill_hooklog.py [--url ...] [--exclude <session prefix>]` loads files into the ledger and drains the spool; reruns are no-ops.
 
-Backfill of the existing store (2026-10-03): 90,792 rows, 265 sessions (opencode 231, claude 4, cursor 1). Historic scores carry no conversation id (the 346 git-history scores all have `session_id` unknown), so the join starts paying off for work posted from now on.
+Backfill of the existing store (2026-10-03): 90,792 rows, 265 sessions (opencode 231, claude 4, cursor 1). Historic scores carry no conversation id (the 346 git-history scores all have `session_id` unknown), so the join covers work posted from now on (verified end to end: real hook command, live server, no conversation id supplied).

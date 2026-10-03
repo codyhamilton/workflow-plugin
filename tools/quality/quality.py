@@ -237,6 +237,10 @@ CREATE INDEX IF NOT EXISTS ix_events_art ON events(artifact_id, ts);
 CREATE INDEX IF NOT EXISTS ix_exec_brief ON executions(brief_id);
 CREATE TABLE IF NOT EXISTS hook_events(id INTEGER PRIMARY KEY, ts REAL NOT NULL, harness TEXT NOT NULL, session_id TEXT NOT NULL, hook_event TEXT, kind TEXT NOT NULL,
   cwd TEXT, agent_id TEXT, generation_id TEXT, tool_name TEXT, tool_use_id TEXT, ok INTEGER, text TEXT, input TEXT, output TEXT, extra TEXT, row_key TEXT NOT NULL UNIQUE);
+CREATE TABLE IF NOT EXISTS conversation_binds(id INTEGER PRIMARY KEY, ts REAL, conversation_id TEXT NOT NULL, harness TEXT, artifact_id INTEGER, execution_id INTEGER,
+  how TEXT, hook_row_key TEXT);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_binds ON conversation_binds(conversation_id, COALESCE(artifact_id, 0), COALESCE(execution_id, 0));
+CREATE INDEX IF NOT EXISTS ix_binds_conv ON conversation_binds(conversation_id);
 CREATE INDEX IF NOT EXISTS ix_hook_session ON hook_events(session_id, ts);
 """
 MIGRATE = {"artifacts": [("parent_id", "INTEGER"), ("repo_path", "TEXT"), ("design_stage", "TEXT"), ("execution_stage", "TEXT"), ("work_type", "TEXT")],

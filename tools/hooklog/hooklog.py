@@ -132,8 +132,9 @@ def append(row: dict[str, Any]) -> Path:
 
 
 def post_to_service(row: dict[str, Any]) -> bool:
-    """WORKFLOW_QUALITY_URL (e.g. http://127.0.0.1:8765) routes rows to the quality service; any failure returns False so the caller spools to file."""
-    base = os.environ.get("WORKFLOW_QUALITY_URL")
+    """Rows go to the quality service (WORKFLOW_QUALITY_URL, default http://127.0.0.1:8765; set it empty to disable); any failure returns False so the caller spools to file."""
+    # default is the address .mcp.json registers; an explicit WORKFLOW_HOOKLOG_DIR (file-only intent, tests) turns the default off
+    base = os.environ.get("WORKFLOW_QUALITY_URL", None if os.environ.get("WORKFLOW_HOOKLOG_DIR") else "http://127.0.0.1:8765")
     if not base:
         return False
     import urllib.request
