@@ -125,3 +125,21 @@ Per Cody: use Jev where it is strong (matching concrete criteria against text). 
 
 **Read.** Template-compliance criteria (does the brief have the sections a good brief has) mostly do not predict trouble; briefs in this corpus largely comply or fail uniformly. The one criterion that does is the concrete, text-checkable "does the brief leave a step for the worker to discover", which beats the earlier vague "will the worker hit trouble" question (0.76) and the best counter, and is nearly independent of the counter (rho 0.14), so the pair reaches 0.89. This supports the framing: Jev is strong when asked to match a specific, verifiable criterion in the text and weak when asked for a holistic judgement.
 **Caveats.** 8 criteria tested, one winner (multiplicity); discovery_needed was my guess before the run, not tuned afterwards, but it is the best of 8. All positives come from one project (open-pajero-maps); within that project its AUC is 0.80, the other projects have no positives. 10 positives. Replication on a held-back project or fresh briefs is the next step; held-out stays sealed.
+
+## Criteria metrics: stability and case 4 (tested)
+
+Direction from Cody: build a small set of stable, text-checkable alignment metrics for designs and briefs. A metric is only worth keeping if it is (1) stable on re-run, (2) shown to correlate with a later quality outcome, (3) not just size.
+
+**Stability (test-retest, same inputs, second run).** Case 2, 8 criteria x 78 briefs: Spearman rho 0.98-0.99 on every criterion, mean absolute score difference 0.01-0.05 on the 0-3 scale. Case 4, 6 criteria x 11 phases: rho 0.96-1.00. Criteria-style questions are effectively deterministic; stability is not the problem.
+
+**Case 4 criteria (stripped work record, mean of 2 runs; AUC = trouble direction).**
+
+| criterion | strict (not_closed) | soft |
+|---|---|---|
+| rework (unit or phase redone/re-planned) | 0.92 | 0.80 |
+| failed_gate_open (failure recorded, no passing re-run shown) | 0.79 | 0.90 |
+| outcome_backed, units_not_outcome, unexplained_deviation, carried_named | 0.17-0.43 | 0.23-0.43 |
+
+Two concrete, checkable criteria (rework, an open failed gate) separate the phases that were not closed; the "quality of the record" criteria (outcome claims backed by output, carried items named) do not track outcome and move the wrong way: phases that failed their gate also tend to document themselves heavily. They are descriptive quality measures, not outcome predictors; whether they correlate with anything else is untested. n=11, 3 non-independent positives, same caveat as before.
+
+**Acceptance rule proposed for a metric registry** (not yet built): test-retest rho >= 0.9; AUC against a later-outcome label with a 90% CI above 0.5 on at least two projects; and it adds signal beyond the size/new-files counters (rank-combination AUC rises). So far: `discovery_needed` (case 2) passes 1 and 3 on one project; `rework` and `failed_gate_open` (case 4) pass 1 only, on n=11.
