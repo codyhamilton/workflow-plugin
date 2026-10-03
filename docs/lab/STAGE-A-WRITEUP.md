@@ -56,3 +56,9 @@ An independent audit protocol is in `STAGE-A-LABEL-AUDIT.md`; it fixes the level
 - a held-out test of the pre-registered combination: counters plus the best Jev UI/browser signal against counters alone.
 
 Freeze rule: held-out is scored once, after a dev-replicated round and Cody's agreement on the frozen panel. Not yet frozen.
+
+## 7. Scope: Stage A covers use case 1 only
+
+Stage A tested use case 1 (in-session size/progress check at `PostToolBatch`). Its conclusions do not extend to use cases 2-4 (brief complexity after refine, unit needs-review, phase alignment), which are judgements over text a counter cannot read. See [STAGE-A-OTHER-CASES.md](STAGE-A-OTHER-CASES.md).
+
+Implication for use case 1 (Cody, 2026-10-03): the trigger is a soft message the agent can weigh, not a hard stop. Together with the results above (Jev ties cheap counters, adds nothing material over them, and no signal separates good long runs from bad ones inside the counter-high stratum; Round 10), the default for case 1 should be a zero-call counter-timed nudge. Jev stays an optional arm. Whether a gated or more specific message beats a plain nudge is a behavioural question (agent reaction, human corrections, wasted turns, token cost of the nudge) that offline AUC against human labels cannot answer; it needs the Stage B live or controlled trial: no nudge vs counter nudge vs Jev-gated nudge.
