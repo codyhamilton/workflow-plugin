@@ -5,7 +5,7 @@ description: Generate and register Jev Stage A test variants (signals, state spe
 
 # Jev variants
 
-The Stage A search is a matrix: **signal × state variant × marker wording × session × checkpoint**. Agents author the first three axes; code (`tools/jev-variants/jev_variants.py`) validates them and expands rounds. Evidence rules live in `docs/lab/JEV-METHODOLOGY.md` (H2, Stage A). Sessions, not cells, are the evidence denominator.
+The Stage A search is a matrix: **signal × state variant × marker wording × session × checkpoint**. Agents author the first three axes; code (`tools/jev-variants/jev_variants.py`) validates them and expands rounds. Evidence rules live in `docs/lab/JEV-METHODOLOGY.md` (H2, Stage A). Sessions, not cells, are the evidence denominator. Before proposing variants, read `docs/lab/GUIDANCE-measurement.md`: wording and state-size tuning is a settled null, and a zero-call counter is the baseline any new signal must beat.
 
 ## Running authoring agents (opencode / Flash)
 

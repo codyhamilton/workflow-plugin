@@ -112,3 +112,7 @@ A retro that has been fully absorbed into `reference.md` updates has no further 
 ## Pipeline-Outcomes Harvest
 
 Merged PRs built through this workflow leave a second corpus behind, in each plan folder (see `docs/ARCHITECTURE.md`'s PR Artifact Seam contract): `REVIEW.md` (including its plan-sufficiency judgment), `QA.md`, and remediation briefs, all written by the pipeline stage — never by this skill invoking anything, this is a one-way read. Alongside retros, these are real outcomes to mine: a plan-sufficiency judgment across many merged PRs shows where `plan` systematically under- or over-specifies; `QA.md` pass/fail and undriveable-criteria patterns show where acceptance criteria failed to be QA-drivable; remediation-brief volume and content show where `execute` or `comprehensive-review` recur on the same defect class. Read them the same way retros are read — extract lessons not yet reflected in `reference.md`, fold them in — and do not restructure the skill files being tuned on the strength of a single occurrence.
+
+## Established Measurement Findings
+
+When tuning anything that scores, nudges or gates on session or plan quality (Jev, counters, quality-service checks), start from `docs/lab/WHITE-PAPER-CLOSE.md` section 1 (established) and `docs/lab/GUIDANCE-measurement.md`. Do not re-test them. Section 2 items are hypotheses: do not build workflow behaviour on them until the listed test passes. Add new firm findings there, with their limit, only after replication or an independent label.
