@@ -1,0 +1,13 @@
+[Unit]
+Description=Workflow quality service (ledger, MCP + REST on 127.0.0.1:8765)
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %REPO%/tools/quality/server.py --port 8765
+Restart=always
+RestartSec=5
+# TYPESAFE_API_KEY comes from the user session environment (~/.config/environment.d); without it the service runs deterministic-only.
+
+[Install]
+WantedBy=default.target
