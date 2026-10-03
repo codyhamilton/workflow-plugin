@@ -93,3 +93,18 @@ Zero-call counters (strict / soft): chars 0.75/0.80, bounce 0.67/0.62, over_budg
 **Caveats.** n=11 with 3 non-independent positives; a failed gate described in the body is not "alignment drift" Jev discovered, it is easy reading; the stripping is regex-based and may leave residual cues (leak check found none of the obvious strings); chars alone gets 0.75–0.80, so the size confound is not excluded; the one closed-with-debt/concerns pair is where Jev is weakest (`notdone` 1.1–2.2). Facts-only (C) is clearly worse than the record, so Jev is reading content. The real question — drift that later forces rework of a phase that the assert passed — needs prospectively collected `--live` pairs; this run cannot answer it. Report as descriptive.
 
 Data: `~/jev-lab-data/2026-10-03-stageA/case4/` (items4.json, run4.jsonl, blocks.json).
+
+## What limits Jev on judgement calls: criteria, confidence, or absolute scoring? (tested)
+
+Three tests on existing data, 0 errors. Caveat up front: the anchored questions were written after seeing case 4 results, so case 4 is tuned; case 2 is the untuned replication.
+
+1. **Confidence/probabilities (case 4, no new calls).** `probabilities` add nothing over `score` (P(3) AUC within 0.02 of score; -P(0) is worse). `confidence` does not flag errors: it is often higher on wrong calls than right ones (e.g. `unresolved`, A: 0.89 wrong vs 0.59 right). Not usable as a trust signal.
+2. **Anchored criteria (each level describes concrete record content).**
+   - Case 4: `unresolved` soft AUC 0.87 -> 1.00 (strict 0.83 -> 0.88/0.92); `notdone` unchanged (already 0.90-1.00); `digdeeper` stays weak (0.60-0.78), it is a bad question, not a bad scale.
+   - Case 2 (untuned): anchored `trouble` 0.74 vs unanchored 0.76 vs best counter 0.76. No gain, so anchoring helps where the question was ambiguous/saturated, not where the information isn't in the text.
+3. **Pairwise (A vs B, both orders, same text).**
+   - Case 4: 48/60 pairs correct (80%), no position bias (mean raw 1.51/3); 21/30 pairs right in both orders, 6 order-dependent, 3 wrong both ways. Per-item win-rate AUC 0.88 strict / 1.00 soft, roughly equal to absolute `notdone` (1.00/0.90).
+   - Case 2: 134/160 pairs correct (84%) for process_trouble vs clean/concerns, no strong order effect (63/80 vs 71/80); mean win-score 0.80 vs 0.20. Pairwise accuracy on a 10-pos sample is not directly comparable to absolute AUC (0.76), but a pair-level 84% is at or above it.
+
+**Read.** Both: (a) saturated/vague question framing was a real, fixable cause on case 4 (anchoring fixed `unresolved`); (b) absolute scoring is not the main limit on case 4 (pairwise ≈ absolute), but on case 2 pairwise looks at least as good as absolute and the anchored absolute is no better. Where information is absent from the text (case 3, facts-only), none of the three changes help.
+Not yet tested: pairwise on case 3, and pairwise against the counters on a matched sample. Data: `~/jev-lab-data/2026-10-03-stageA/{case2/t2b.jsonl,case4/t23.jsonl}`.
