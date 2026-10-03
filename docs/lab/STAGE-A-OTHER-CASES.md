@@ -69,3 +69,27 @@ Scripts: `tools/jev-variants/case2/c3*.py` (c3b candidates -> c3_facts -> c3_run
 | Jev C (no diff body) fix / complex | 0.46 / 0.46 | 0.56 / 0.59 | 0.58 / 0.59 |
 
 Reading: **no signal.** Under the size-neutral outcomes Jev sits at 0.50-0.59, the same as the zero-call baselines (prior-fix history, lines added), with no state beating the diff-free state C. Under the strict outcome Jev is at or below chance. The outcome is itself weak: in a hot, fix-heavy repo (garcia: 62% of commits have some later fix touching the same file) a later "fix" commit is mostly unrelated churn on a shared file, not a defect in this unit. So this is "no evidence", not "evidence of absence". Better labels (line-level overlap via blame of the fix hunks against the unit's added lines, or a human review verdict) would be needed before spending more on case 3. Case 4 remains: it has the fewest samples and a deterministic baseline (`phase_assert.py --deterministic`).
+
+## Case 4 first run (phase-complete alignment sanity) — descriptive only
+
+**Data.** 11 labelled phase events from 4 IMPLEMENTATION.md files (open-pajero-maps plans 03/04, silver-chronicle plans 01/02), split into phase-run blocks (`tools/jev-variants/case4/`). Labels from the closing record: 3 `not_closed` (p03 phase 2 run 1, restart, grounded), 6 `closed`, 1 `closed_with_debt`, 1 `closed_with_concerns`. Strict outcome = not_closed (3 pos); soft = anything not clean-closed (5 pos). The three not_closed events are successive attempts at one phase, so they are not independent. Historical phases have no trailer or workflow_report, so only the heading/evidence sub-checks of `phase_assert.deterministic_outcome_evidence` apply.
+
+**States.** A: work record with verdict/verification/carried sections and status lines stripped; B: A plus a counted-facts line; C: facts only; D: full record including verdict (ceiling, label leaks by design). 5 questions, 55 calls, 0 errors.
+
+**Result (AUC, n=11, no CIs worth quoting).**
+
+| state | notdone | digdeeper | unresolved | concerns | claimed |
+|---|---|---|---|---|---|
+| A strict | 1.00 | 0.75 | 0.83 | 0.75 | 0.44 |
+| B strict | 0.96 | 0.73 | 0.81 | 0.75 | 0.48 |
+| C strict | 0.71 | 0.75 | 0.71 | 0.67 | 0.40 |
+| D strict | 1.00 | 1.00 | 1.00 | 0.98 | 0.46 |
+| A soft | 0.90 | 0.80 | 0.87 | 0.73 | 0.60 |
+
+Zero-call counters (strict / soft): chars 0.75/0.80, bounce 0.67/0.62, over_budget 0.67/0.70, concerns 0.35/0.62, units 0.31/0.53.
+
+**Versus the deterministic baseline.** The assert's evidence sub-check passes 10 of 11 events, including two of the three not_closed ones; verification-heading and carried-heading checks are mixed and do not track the label (each passes some not_closed and fails some closed). So there is drift the deterministic checks pass that Jev flags: on the stripped record `notdone` ranks all 3 not_closed events above all 8 others. The kill line (Jev disagrees with a deterministic check in the same state) would fire here on the evidence check, which suggests those sub-checks are too weak for the historical shape rather than that Jev is wrong, since the failed-gate text is visible in the work record.
+
+**Caveats.** n=11 with 3 non-independent positives; a failed gate described in the body is not "alignment drift" Jev discovered, it is easy reading; the stripping is regex-based and may leave residual cues (leak check found none of the obvious strings); chars alone gets 0.75–0.80, so the size confound is not excluded; the one closed-with-debt/concerns pair is where Jev is weakest (`notdone` 1.1–2.2). Facts-only (C) is clearly worse than the record, so Jev is reading content. The real question — drift that later forces rework of a phase that the assert passed — needs prospectively collected `--live` pairs; this run cannot answer it. Report as descriptive.
+
+Data: `~/jev-lab-data/2026-10-03-stageA/case4/` (items4.json, run4.jsonl, blocks.json).
