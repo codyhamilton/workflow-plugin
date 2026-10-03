@@ -35,3 +35,10 @@ Criteria 1, 5, 6 are fully scriptable; 2 and 3 are partly scriptable; 4 needs Je
 
 ## Next
 Backtest criteria 1/5/6 as scripts over the Pajero briefs and check agreement with the 9 known defects; extend extraction to other projects; second-pass the 20 rework rows with human-only context.
+
+## U2 (from Cody): implicit authority and missing scepticism
+Agents treat a number in a formal acceptance criterion as binding authority. "x must not exceed 10k" triggers stop-and-ask when reality breaches it; "10k because it feels about right" would not, and "10k because we measured that it explodes above it" would stop for the right reason. Acceptance criteria are end-of-chain outputs, so an unjustified number also marks the research and direction above it as unjustified. Requiring provenance on each criterion forces the backward audit: if you can't say why it is x, re-walk the chain until you can.
+
+Criterion candidate (C-prov): every threshold / success criterion states a provenance class (measured | derived | external | judgement) and an evidence pointer (command+date, document, or the inputs it derives from). Measured/derived without a pointer counts as unproven. Judgement is allowed but must be labelled, and labelled thresholds are advisory (flag and proceed), not gates.
+
+Backtest plan: extract numeric thresholds from Pajero briefs' acceptance/done-evidence text; classify provenance present/vague/absent; compare absent-provenance briefs with the stop-and-ask events and rework rows (b9eb9e9a#23/#24 "10k had none" is the known positive). Falsified if provenance does not separate churn from clean briefs.
