@@ -14,6 +14,10 @@ This tree is the **durable notebook** for optimising the [workflow-plugin](https
 | Transcript tooling (cost, extract, classify viz) | engineering spikes | `tools/transcript/` |
 | Bot driver (status, one-phase trigger, asserts, skill check) | engineering spikes | `tools/driver/` |
 
+## Closed research
+
+Stage A is closed: [WHITE-PAPER-CLOSE.md](WHITE-PAPER-CLOSE.md) (established / hypotheses / open) and [GUIDANCE-measurement.md](GUIDANCE-measurement.md). Next stage is data collection through the quality service.
+
 ## Cadence
 
 - **Weekly (light):** skim `FINDINGS.md`, update `GOALS.md` if remit shifted, triage `BACKLOG.md`, move or close items in `PROPOSALS/`.

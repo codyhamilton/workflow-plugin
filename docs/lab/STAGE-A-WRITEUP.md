@@ -1,5 +1,7 @@
 # Stage A write-up: what Jev signals measure, and how well (paper draft, 2026-10-03)
 
+> Closed 2026-10-03. This is the use case 1 paper; the scoped set of established findings, hypotheses and open questions is in [WHITE-PAPER-CLOSE.md](WHITE-PAPER-CLOSE.md), and operator guidance in [GUIDANCE-measurement.md](GUIDANCE-measurement.md).
+
 Status: draft for the white paper. Data archive: `~/jev-lab-data/2026-10-03-stageA/` (ledger, registry, analysis scripts). Round-by-round detail and numbers: `STAGE-A-NEXT-ROUND-PLAN.md`. Held-out sessions are sealed and have not been scored. Nothing here has been pushed or published.
 
 ## 1. Question
