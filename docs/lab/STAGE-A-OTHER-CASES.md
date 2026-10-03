@@ -50,3 +50,22 @@ Reading, with the caveats it needs:
 - Adding the deterministic FACTS table did **not** help; it hurt the trouble question (0.76 -> 0.57). Facts-only is at or below chance. The facts are most useful as zero-call baselines, not as Jev context.
 - 15 Jev comparisons were run and the positive set is 10 (7 strict) from one project, so the CIs are wide and the headline number is not corrected for multiplicity. Nothing has been replicated; there is no held-out or second-project positive.
 - Next: freeze one question (trouble), wait for new briefs/outcomes as a replication set, and label the 3 other projects' units for a negative-result check. Case 3 follows.
+
+## Case 3 first run (unit complete: "needs review?" / will need a fix)
+
+Scripts: `tools/jev-variants/case2/c3*.py` (c3b candidates -> c3_facts -> c3_run -> c3_score). Data in the lab archive `case2/`.
+
+**Units.** The briefed units in case 2 only yield 51 units with resolvable commits and 6 fix-like follow-ups, mostly weeks later, so they cannot carry a test. Instead the unit is a non-fix, first-parent commit (601 across open-pajero-maps 116, silver-chronicle 41, garcia-music-opt-18 444). **Outcome:** a later `fix`/`revert`/`bug`/`regress` commit within 72h (also 7d) touching the same files. Only garcia has enough positives (78 under the strict rule), so all scoring is garcia-only (n=444).
+**States** (1803 calls, 0 errors): A message + diffstat + 14k-char diff; B = A + deterministic facts (files, lines, test files, prior-30d fix commits on those files); C = message + diffstat + facts, no diff body. Five questions: fix-needed, review-warranted, risk, partial/loose ends, complexity.
+
+**Outcome-definition trap (found, not fixed by the data).** The first outcome ("fix covers >=50% of the original's files") is size-confounded: small commits hit it easily, so zero-call `files` scores AUC 0.22 and every Jev score (which tracks size) is "anti-predictive" (0.32-0.47). Size-stratified AUCs (strata 1 / 2 / 3-4 / 5+ files) remove this.
+
+| size-stratified AUC, garcia | strict outcome (>=50% overlap, 72h) | any overlap 72h | any overlap 7d |
+|---|---|---|---|
+| zero-call prior fix commits on files (30d) | 0.62 [0.54, 0.70] | 0.58 | 0.57 |
+| zero-call message length | 0.61 [0.55, 0.68] | 0.56 | 0.63 |
+| zero-call lines added | 0.42 | 0.59 | 0.58 |
+| Jev A fix / review / risk / complex | 0.40 / 0.39 / 0.44 / 0.45 | 0.50 / 0.54 / 0.55 / 0.58 | 0.57 / 0.54 / 0.56 / 0.57 |
+| Jev C (no diff body) fix / complex | 0.46 / 0.46 | 0.56 / 0.59 | 0.58 / 0.59 |
+
+Reading: **no signal.** Under the size-neutral outcomes Jev sits at 0.50-0.59, the same as the zero-call baselines (prior-fix history, lines added), with no state beating the diff-free state C. Under the strict outcome Jev is at or below chance. The outcome is itself weak: in a hot, fix-heavy repo (garcia: 62% of commits have some later fix touching the same file) a later "fix" commit is mostly unrelated churn on a shared file, not a defect in this unit. So this is "no evidence", not "evidence of absence". Better labels (line-level overlap via blame of the fix hunks against the unit's added lines, or a human review verdict) would be needed before spending more on case 3. Case 4 remains: it has the fewest samples and a deterministic baseline (`phase_assert.py --deterministic`).
