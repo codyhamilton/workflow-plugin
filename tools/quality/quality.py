@@ -48,6 +48,18 @@ def kind_of(path: Path) -> str | None:
     return None
 
 
+_FM = re.compile(r"\A---\n(.*?)\n---[ \t]*\n?", re.S)
+
+
+def split_frontmatter(text: str) -> tuple[dict[str, str], str]:
+    """Flat `key: value` frontmatter (identity only: design_id, brief_id) and the body. Ids never affect the score or the content hash."""
+    m = _FM.match(text)
+    if not m:
+        return {}, text
+    fm = {k.strip(): v.split("#")[0].strip().strip("\"'") for k, _, v in (ln.partition(":") for ln in m.group(1).splitlines()) if k.strip()}
+    return fm, text[m.end():].lstrip("\n")
+
+
 def sections(text: str, level: str = "## ") -> dict[str, str]:
     out: dict[str, list[str]] = {}
     cur = None
@@ -309,6 +321,7 @@ def summary(row: dict[str, Any]) -> str:
 
 
 def score_content(kind: str, text: str, path: Path, repo: Path, use_jev: bool, log: bool, harness="manual", session="manual", ts=None, **over: Any) -> dict[str, Any]:
+    text = split_frontmatter(text)[1]
     res = score_text(kind, text, repo, use_jev)
     row = {"v": 1, "ts": ts or time.time(), "kind": kind, "registry": REG_VERSION, "sha": hashlib.sha256(text.encode()).hexdigest()[:16], **tag(path, repo, harness, session), **res}
     row.update({k: v for k, v in over.items() if v})

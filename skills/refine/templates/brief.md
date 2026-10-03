@@ -1,3 +1,8 @@
+---
+brief_id: <assigned by the quality service on first post>
+design_id: <from the design's frontmatter>
+---
+
 # Brief: <phase>-<NN> — <unit name>
 
 Consumer: <the worker that will do this>.

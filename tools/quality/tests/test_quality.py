@@ -45,6 +45,24 @@ class T(unittest.TestCase):
         self.assertTrue(bad["isError"])
         srv.shutdown()
 
+    def test_frontmatter_ids_and_breakdown(self):
+        import lifecycle as lc
+        fm, body = q.split_frontmatter("---\ndesign_id: 7\n---\n# D\n")
+        self.assertEqual((fm, body), ({"design_id": "7"}, "# D\n"))
+        d = lc.put_artifact("design", {"text": "# D\n\n## Intent\n> x\n", "project": "fm", "plan": "p0", "use_jev": False})
+        self.assertIn(f"design_id: {d['id']}", d["frontmatter"])
+        self.assertFalse(d["baseline"]["enough_history"]); self.assertIn("not enough history", d["summary"])
+        # a file carrying its id patches the same artifact, and frontmatter does not change the hash
+        again = lc.put_artifact("design", {"text": d["frontmatter"] + "# D\n\n## Intent\n> x\n", "project": "fm", "plan": "p0", "use_jev": False})
+        self.assertEqual(again["id"], d["id"]); self.assertFalse(again["scored"])
+        for i in range(1, 7):
+            lc.put_artifact("design", {"text": "# D\n\n## Intent\n> x\n" + "\n## Domains\n" * (i % 3) + f"filler {i}\n", "project": "fm", "plan": f"p{i}", "use_jev": False})
+        last = lc.put_artifact("design", {"text": "# D\n\n## Intent\n> x\nmore\n", "project": "fm", "plan": "px", "use_jev": False})
+        self.assertTrue(last["baseline"]["enough_history"]); self.assertIn("vs repo:fm mean", last["summary"])
+        self.assertIn("repo_mean", next(iter(last["breakdown"].values())))
+        b = lc.put_artifact("brief", {"text": f"---\ndesign_id: {d['id']}\n---\n" + BRIEF, "project": "fm", "plan": "p0", "name": "01", "use_jev": False})
+        self.assertEqual(b["artifact"]["parent_id"], d["id"]); self.assertIn(f"design_id: {d['id']}", b["frontmatter"])
+
     def test_lifecycle_rest_flow(self):
         srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
         threading.Thread(target=srv.serve_forever, daemon=True).start()

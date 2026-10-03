@@ -12,6 +12,7 @@ Refine one phase: the next phase in `DESIGN.md`'s order that has no Units list. 
 - The phase is decomposed into units. A unit is what one worker can hold and finish: one contract, a file surface it can read without exhausting its context, done evidence it can check itself, and a budget it can count.
 - Units that may run in parallel own disjoint paths. Two units that must touch the same file are one unit or are sequential.
 - Each unit has a brief at `briefs/<phase>-<NN>-<slug>.md` from `templates/brief.md`, addressed to the worker, self-sufficient: a clean agent handed only the brief and the repo can do the work.
+- Ratings are obtained: each brief is posted to the `workflow-quality` service (`post_brief`, with the `design_id` from the design's frontmatter) and the returned `brief_id` is written to the brief's frontmatter. The returned ratings are reported with their repo baseline; any criterion flagged out of the repo's norm is fixed or named. If the service is unreachable or errors, that is reported, never skipped silently.
 - The phase's Units list is written under that phase in `DESIGN.md`: unit, brief path, dependencies, what may run alongside. No status column.
 - The previous phase's carried items are placed: absorbed into a unit of this phase, or bounced.
 - On the first refinement of a design, every phase has had one coarse check: its surfaces can be located, its contracts are stated, its outcome is provable, its dependency order is real. No briefs beyond this phase.
@@ -34,4 +35,4 @@ A phase one worker can carry is not refined; `execute` briefs it inline. When in
 - Done evidence is runnable or observable. "Works correctly" is not evidence.
 - A unit that cannot be named clearly is not a unit. Do not split to hit a count.
 - A unit whose done evidence waits on a long-running process (roughly ten minutes or more) splits at the kickoff: one unit starts it and hands off a short summary; a fresh unit verifies the result.
-- Every brief names its consumer. No status, scores, or progress fields anywhere.
+- Every brief names its consumer. Frontmatter carries identity only (`brief_id`, `design_id`). No status, scores, or progress fields anywhere.

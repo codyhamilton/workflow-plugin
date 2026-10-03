@@ -63,10 +63,53 @@ def _view(c, aid: int) -> dict[str, Any]:
     return a
 
 
+MIN_PEERS = 5
+Z_FLAG = 2.0
+
+
+def baseline(kind: str, project: str, exclude: int | None, crit: dict, composite: float | None) -> dict[str, Any]:
+    """Where this artifact sits against the repo's other artifacts of the same kind (latest version of each, same criteria registry).
+    Returns the peer count, per-criterion mean/stdev/z and the outliers; says so when there are too few peers to compare."""
+    peers = [r for r in q.latest_per_artifact(q.rows(kind)) if r["project"] == project and r["registry"] == q.REG_VERSION and r["artifact_id"] != exclude]
+    n = len(peers)
+    if n < MIN_PEERS:
+        return {"scope": f"repo:{project}", "peers": n, "enough_history": False, "note": f"not enough history in {project} to compare ({n} prior {kind}s, need {MIN_PEERS})"}
+
+    def stat(vals: list[float], v: float) -> dict[str, Any]:
+        m = sum(vals) / len(vals); sd = (sum((x - m) ** 2 for x in vals) / len(vals)) ** 0.5
+        z = (v - m) / sd if sd >= 0.05 else 0.0
+        return {"repo_mean": round(m, 3), "repo_stdev": round(sd, 3), "z": round(z, 2), "outlier": "high" if z >= Z_FLAG else "low" if z <= -Z_FLAG else None}
+    per = {k: stat([r["criteria"][k]["score"] for r in peers if k in r["criteria"]], c["score"]) for k, c in crit.items() if sum(k in r["criteria"] for r in peers) >= MIN_PEERS}
+    out: dict[str, Any] = {"scope": f"repo:{project}", "peers": n, "enough_history": True, "criteria": per, "outliers": {k: v["outlier"] for k, v in per.items() if v["outlier"]}}
+    comps = [r["composite"] for r in peers if r.get("composite") is not None]
+    if composite is not None and len(comps) >= MIN_PEERS:
+        out["composite"] = stat(comps, composite)
+    return out
+
+
+def rating_text(kind: str, aid: int, composite: float | None, crit: dict, base: dict) -> str:
+    if not base.get("enough_history"):
+        return f"[workflow quality, informational] {kind} {aid}: composite {composite}. {base['note']}. Ratings are most useful against a baseline; treat them as unranked."
+    cm = base.get("composite", {})
+    lines = [f"[workflow quality, informational] {kind} {aid}: composite {composite} vs {base['scope']} mean {cm.get('repo_mean')} (z {cm.get('z')}, n={base['peers']})."]
+    if base["outliers"]:
+        lines.append("Out of the repo's norm: " + "; ".join(f"{k} {crit[k]['score']} ({v} vs mean {base['criteria'][k]['repo_mean']})" for k, v in base["outliers"].items()) + ".")
+    else:
+        lines.append("No criterion is far outside the repo's norm; the ratings carry no strong signal on their own.")
+    return " ".join(lines)
+
+
 def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[str, Any]:
-    """POST (aid None, upsert by project+path) or PATCH (aid given) a design or brief."""
+    """POST (aid None, upsert by project+path) or PATCH (aid given) a design or brief. Frontmatter ids in `text` are honoured."""
     ctx = ctx_of(b)
     text = b.get("text")
+    if text:
+        fm, _ = q.split_frontmatter(text)
+        if aid is None and fm.get(f"{kind}_id", "").isdigit():
+            aid = int(fm[f"{kind}_id"])
+            b = {**b, "_patch": True}
+        if kind == "brief" and not b.get("design_id") and fm.get("design_id", "").isdigit():
+            b = {**b, "design_id": int(fm["design_id"])}
     with q.db() as c:
         if aid is not None:
             a = _artifact(c, kind, aid)
@@ -88,6 +131,7 @@ def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[s
             ctx["repo"] = ctx["repo"] or repo_path
     out: dict[str, Any] = {}
     if text:
+        text = q.split_frontmatter(text)[1]
         repo = Path(repo_path).expanduser() if repo_path else Path("/nonexistent-repo")
         full = repo / path if repo_path and not Path(path).is_absolute() else Path(path)
         sha = hashlib.sha256(text.encode()).hexdigest()[:16]
@@ -99,11 +143,16 @@ def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[s
                                   project=project, plan=plan, plugin_version=ctx["workflow_version"], model=ctx["model"],
                                   initiator_type=ctx["initiator_type"], initiator_id=ctx["initiator_id"])
             aid = row["artifact_id"]
-            out = {"scored": True, "composite": row["composite"], "rating": row["rating"], "summary": q.summary(row), "jev_error": row["jev_error"]}
+            out = {"scored": True, "composite": row["composite"], "rating": row["rating"], "jev_error": row["jev_error"]}
+            crit = row["criteria"]
         else:
             with q.db() as c:
                 aid = q.artifact_id(c, kind, project, path, plan, time.time())
             out = {"scored": False, "reason": "identical content already scored"}
+            with q.db() as c:
+                srow = _latest(c, aid)
+            crit = next((r["criteria"] for r in q.rows(kind) if r["id"] == srow["id"]), {})
+            out["composite"] = srow["composite"]
     with q.db() as c:
         if aid is None:
             raise Bad("unreachable")
@@ -123,6 +172,13 @@ def put_artifact(kind: str, b: dict[str, Any], aid: int | None = None) -> dict[s
               {k: b[k] for k in ("work_type", "design_id") if b.get(k)} | {"scored": out.get("scored")})
         out["id"] = aid
         out["artifact"] = _view(c, aid)
+        parent = out["artifact"]["parent_id"]
+        out["frontmatter"] = "---\n" + (f"design_id: {parent}\n" if kind == "brief" and parent else "") + f"{kind}_id: {aid}\n---\n"
+        if text:
+            base = baseline(kind, project, aid, crit, out.get("composite"))
+            out["breakdown"] = {k: {"score": v["score"], "how": v["how"], **(base.get("criteria", {}).get(k, {}))} for k, v in crit.items()}
+            out["baseline"] = {k: v for k, v in base.items() if k != "criteria"}
+            out["summary"] = rating_text(kind, aid, out.get("composite"), crit, base)
     return out
 
 

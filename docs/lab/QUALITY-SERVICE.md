@@ -19,3 +19,18 @@
 | `GET /v1/plans/{project}/{plan}/cost` | design and brief ratings mapped to executions and cost. |
 
 MCP tool names: `post_design`, `patch_design`, `post_brief`, `patch_brief`, `start_execution`, `patch_execution`, `complete_execution`, `outcomes`, `plan_cost`, plus the earlier `rate_artifact`, `link_artifacts`, `quality_report`.
+
+## Ids, frontmatter and the ratings breakdown
+
+Designs and briefs carry identity-only frontmatter (never scores or status):
+
+```
+---
+brief_id: 42
+design_id: 17
+---
+```
+
+- Posting returns `id` and a ready-to-write `frontmatter` block. A later post whose text begins with that frontmatter patches the same artifact (no path matching needed); a brief's `design_id` links it to its design. Frontmatter is stripped before hashing and scoring, so adding ids never triggers a re-score.
+- The design and refine skills make obtaining ratings a required output, so the service call is part of the deliverable rather than optional.
+- The response also carries `breakdown` (per criterion: score, how, and the repo's mean, stdev, z and `outlier` high/low at |z| >= 2), `baseline` (scope `repo:<project>`, peer count) and a short `summary`. Peers are the latest version of every other artifact of the same kind in the same repo under the current criteria registry. With fewer than 5 peers the response says `not enough history` instead of comparing. A single rating means little; one well outside the repo's norm is the signal.
