@@ -40,3 +40,39 @@ excludes `id` and `content`; a resent rejected fact is rejected again, not `dupl
   violation; a `tmp/` directory was added to each tenant directory; index names are the worker's
   own.
 - Agent: Sonnet, 9 tool calls, about 58k tokens.
+
+### 1-03-ingest-serve (execution 16)
+
+- Built: `internal/ingest` (fact types, validation, precheck, row hash, pending write, batch
+  append), `internal/serve` (auth, `/v1/health`, `/v1/ingest`, `/v1/artifacts`, the promotion
+  worker), and `cmd/workflow` (`serve`, `version`).
+- Commit: `497fa69`. `go vet` and `go test -race ./...` pass across six packages.
+- Deviations: worker control is `Options.DisableWorker` plus `Server.StartWorker()`; a missing `ts`
+  is stored as 0, and a mistyped `ts`, `harness` or `event` is `invalid:`; a `version` subcommand
+  was added; no `429` this phase.
+- Agent: Sonnet, 10 tool calls, about 65k tokens.
+
+### Phase 1 verification
+
+The orchestrator built the binary and ran `serve` with `WORKFLOW_SERVE_KEYS=a=ka,b=kb` on a temp
+data dir and port 18771, then posted a three-fact batch: a hook event, a design, and a brief
+containing an AWS-format key.
+
+- First POST: `accepted`, `accepted`, `rejected` with `precheck: aws_access_key at line 1`.
+- Resend: `duplicate`, `duplicate`, `rejected` (the refine's reading of the outcome).
+- `GET /v1/artifacts` with key `ka`: the design with `versions: 1` and screen verdict `unscreened`;
+  its blob is in `blobs/`.
+- Same request with `kb`: 404. Bad key: 401.
+- The secret's text appears in neither the data directory nor the server log.
+
+Outcome holds.
+
+### Carried
+
+1. `Promote` moves the blob before writing the `screens` row. A crash between the two leaves a
+   blob with no screen row. Phase 3's screen worker must retry anything not screened when it starts.
+2. A resent artifact whose pending file was lost while its ledger row survived returns `duplicate`
+   and is never re-written. Phase 3 should treat a fact whose content has neither a pending file
+   nor a blob as a screen gap.
+3. The service never sends `429` yet. The drain must still honour it (design 2).
+4. `TestServeOutcome` picks a free port by binding and releasing it, which is a small race.
