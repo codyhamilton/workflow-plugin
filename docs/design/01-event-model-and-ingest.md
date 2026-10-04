@@ -21,7 +21,9 @@ Everything is a recorded fact with a join key. State is a view over facts.
 | Hook event | harness hook → spool | conversation ID, harness, event, tool, timing, model and cost where the payload has them |
 | Artifact version | write hook → drain reads file | `repo_id`, `path`, content hash, content, conversation ID, source (`worktree` or `commit`) |
 | Commit | hook on `git commit` | SHA, touched paths, rename pairs, conversation ID |
-| Capture gap | repair submit | reason, harness, conversation ID |
+
+Gaps (a brief whose design has no version, a write with no artifact version) are computed by the
+view, not submitted.
 
 ### Keys
 
@@ -106,7 +108,7 @@ needs no scorer, and waits for the linked dataset.
 
 ## Ingest contract
 
-Envelope types accepted by the remote: `hook_event`, `artifact_version`, `commit`, `capture_gap`.
+Envelope types accepted by the remote: `hook_event`, `artifact_version`, `commit`.
 
 - Idempotent by row hash; at-least-once delivery.
 - No session or lifecycle state on the server.
@@ -117,10 +119,11 @@ Envelope types accepted by the remote: `hook_event`, `artifact_version`, `commit
 
 - **Hooks** do cheap local work only: write the spool envelope; on `git commit`, run
   `git rev-parse HEAD` and `git diff-tree -M --name-status`. No network, no file edits.
-- **Drain** reads artifact files and hashes them together, scrubs, archives, delivers.
-- **Repair submit** is a separate, synchronous, explicit path for "the remote does not know this
-  artifact". It shares the envelope builder, the scrub and the delivery client with the drain as a
-  library, and shares no queue. Every use is logged as a `capture_gap`.
+- **Drain** reads artifact files and hashes them together, scrubs, delivers. For design, brief and
+  report paths touched by a commit it also sends the committed blob (source `commit`), so a missed
+  worktree write is recovered when the agent commits it.
+- **No repair submit.** Dropped in [design 2](02-edge-capture.md#no-repair-submit): retries, commit
+  catch-up and rewrites cover its cases, and what remains is a gap the view reports.
 
 ## Decisions
 
@@ -161,8 +164,7 @@ What carries over:
 
 What goes:
 
-- The `artifact_submit.py hook` registration on every harness. Its CLI form becomes the basis of
-  repair submit.
+- The `artifact_submit.py hook` registration on every harness, and its CLI form.
 - The submitted predicate. Idempotent ingest makes it unnecessary.
 - Synchronous `posted …` / `posting still owed` feedback.
 - `tools/hooklog/tests/test_artifact_submit_surfaces.py`, which asserts the old shape and is

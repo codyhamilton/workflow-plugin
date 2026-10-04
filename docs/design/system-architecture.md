@@ -54,8 +54,7 @@ TypeSafe's choice and is not part of any contract here.
 |---|---|---|
 | Hook payload → spool envelope | raw event + `{ts, harness, event}` | harness → disk |
 | Spool → remote ingest | scrubbed events and artifact versions, batched, idempotent by hash | drain → remote |
-| Repair submit → remote | one artifact, synchronous, loud on failure | agent/CLI → remote |
-| Remote → advisory tools | scores, similar plans, cost estimates | remote → agent |
+| Remote → advisory tools | scores, similar plans, cost estimates, queue state | remote → local MCP shim → agent |
 | Remote → scorer | scrubbed artifact text | remote → Jev |
 
 ## What is retired
@@ -70,7 +69,7 @@ are maintainer operations and move to the REST API or CLI.
 | # | Design | Covers |
 |---|---|---|
 | 1 | [Event model and ingest contract](01-event-model-and-ingest.md) | join keys, artifact identity, derived execution view, execution report, envelope types |
-| 2 | Edge capture | spool, drain daemon, per-harness install and trust, repair submit |
+| 2 | [Edge capture](02-edge-capture.md) | spool, drain daemon, client config, MCP shim plumbing, per-harness install and trust |
 | 3 | Remote service | API versioning, auth and tenancy, where the scrub runs, offline behaviour, scorer backend |
 | 4 | Agent advisory surface | the read-only MCP, hook feedback, behaviour when the remote is unreachable |
 | 5 | Distribution and monorepo | plugin layout, per-harness packaging, the pinned Codex copy |
