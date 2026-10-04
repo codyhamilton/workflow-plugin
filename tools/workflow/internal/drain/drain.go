@@ -328,6 +328,9 @@ func Run(ctx context.Context, o Options) (string, error) {
 				return ReasonNoConfig, nil
 			}
 			r.logf("config unavailable; retrying")
+			if !o.Hosted && time.Since(r.lastNew) >= o.GiveUp {
+				return ReasonGaveUp, nil
+			}
 			if !sleep(ctx, max(o.Poll, time.Second)) {
 				return ReasonStopped, nil
 			}

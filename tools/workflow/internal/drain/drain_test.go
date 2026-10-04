@@ -3,6 +3,7 @@ package drain
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -364,6 +365,20 @@ func TestNoConfigExitsUntouched(t *testing.T) {
 	o.Sink = func() (Sink, error) { return nil, clientconfig.ErrNoConfig }
 	if r := run(t, o); r != ReasonNoConfig || count(dir, ".evt") != 1 {
 		t.Fatal(r)
+	}
+}
+
+func TestInvalidConfigGivesUp(t *testing.T) {
+	dir := t.TempDir()
+	spoolFile(t, dir, "a-1")
+	o := opts(dir, "")
+	o.Sink = func() (Sink, error) { return nil, errors.New("client.toml: bad endpoint") }
+	o.GiveUp = 300 * time.Millisecond
+	if r := run(t, o); r != ReasonGaveUp || count(dir, ".evt") != 1 {
+		t.Fatal(r)
+	}
+	if Running(dir) {
+		t.Fatal("lock not released")
 	}
 }
 
