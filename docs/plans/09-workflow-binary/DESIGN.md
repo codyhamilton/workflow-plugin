@@ -247,6 +247,34 @@ phase 4 outcome reads it). Content sent to Jev unscrubbed is accepted by design 
 - Approach: known
 - Depends on: phases 2, 3 and 4
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 5-01 `workflow --version` and `workflow init` | [briefs/5-01-version-init.md](briefs/5-01-version-init.md) | nothing | 5-03, 5-04 |
+| 5-02 `bin/workflow` wrapper and release build | [briefs/5-02-wrapper-release.md](briefs/5-02-wrapper-release.md) | 5-01 | 5-03, 5-04 |
+| 5-03 Spool default flip and drain retirement | [briefs/5-03-spool-flip-retire.md](briefs/5-03-spool-flip-retire.md) | nothing | 5-01, 5-02, 5-04 |
+| 5-04 OpenCode plugin on the queue | [briefs/5-04-opencode-plugin.md](briefs/5-04-opencode-plugin.md) | nothing | 5-01, 5-02, 5-03 |
+| 5-05 Harness configs, MCP registration and the phase 5 outcome | [briefs/5-05-configs-outcome.md](briefs/5-05-configs-outcome.md) | 5-01 to 5-04 | nothing |
+
+Decisions settled at refine (detail in the briefs): `--version` and `version` both print `workflow
+<version> <commit>`; the wrapper resolves `WORKFLOW_BIN`, then
+`${XDG_CACHE_HOME:-~/.cache}/workflow/<VERSION>/`, then a checksummed download, then a source build
+under a `mkdir` lock (stale on a dead pid or after 10 minutes) with an atomic rename, and exports
+`WORKFLOW_ROOT`; the cache key is the version, so a developer uses `WORKFLOW_BIN` after code
+changes. `init` writes only absent files, adds `WORKFLOW_CHECKS_DIR=<root>/tools/quality` to
+`serve.env`, never writes `TYPESAFE_API_KEY` (the unit reads an optional `serve.secrets.env` the
+user creates) and runs no `systemctl`. `spool.sh` writes only the queue, drops payloads without a
+conversation id and a missing or `auto` harness, kicks `bin/workflow drain`, and falls back to a
+`mkdir`+pid kick lock without `flock`. The darwin drain stays poll-only (no kqueue). SessionStart
+hooks and the OpenCode plugin load run `bin/workflow --version` detached. The shim registers as
+stdio `bin/workflow mcp` in `.mcp.json` and in Cursor and Codex examples.
+
+Carried from phase 4: the `mkdir` hook lock and `unknown-` files are absorbed by 5-03, and kqueue
+is decided as poll-only. Still carried, no phase 5 outcome reads them: 0600 not checked on read, no
+`repo_id` before a first commit, synthesized commit fixtures, `screen_gaps` falling only on
+restart, and commit-path matching in the shim.
+
 ### Phase 6 — Skills and templates
 
 - Outcome: a grep of `skills/` (including templates) and `plugins/` for `post_design`, `post_brief`,
