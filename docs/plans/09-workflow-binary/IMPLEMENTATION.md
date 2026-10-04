@@ -164,3 +164,62 @@ Python suite passes. `~/.local/share/workflow` and `~/.config/workflow` still do
 5. Deferred to phase 5: the hook-side `mkdir` lock and kqueue on macOS; dropping `unknown-`
    spooling when the default flips.
 6. The client config's 0600 mode is not checked on read.
+
+## Phase 3 — Screening and scoring
+
+Refined into two sequential units (briefs 220 and 221), committed in `ffd33f7`. Refine decisions:
+
+- `serve` reads `WORKFLOW_CHECKS_DIR` (the `tools/quality` folder). Without it, the key still screens
+  but nothing is scored. Phase 5's `workflow init` writes it into `serve.env`.
+- A Jev credential level of 2 or 3 flags. Screen rejections use stage `screen` and pattern
+  `jev_screen`. Backoff for an unreachable scorer starts at 5 s and doubles to 5 min.
+- Carried 1 and 2 were both absorbed into 3-02.
+
+### 3-01-scorer-checks (execution 22)
+
+- Built: `internal/scorer` (the `Scorer` interface, `LoadChecks`, `Jev`, `Fake`) and
+  `tools/quality/checks/execution-report.json`, holding five `r.*` checks whose wording matches
+  design 1 verbatim.
+- Commit: `dd1588a`. The live `TestJevLive` ran: verdict pass, 11 `d.*` scores within 0..1.
+- Jev answers fractionally (for example 0.583), not with 0..3 integers. The screen truncated, so a
+  1.9 passed. The orchestrator changed it to round to the nearest level (`1c1d2ea`), so 1.5 and above
+  flags, and added test cases.
+- The legacy service never reads `checks/execution-report.json`; `load_checks.py` would reject the
+  `report` kind.
+- Agent: Sonnet, 7 tool calls, about 62k tokens.
+
+### 3-02-screen-worker (execution 23)
+
+- Built: `internal/screen` and its `Step`. `store.Promote` now writes the screen row and scores in one
+  transaction. Also: the gap and blob helpers, serve backoff, re-screening unscreened blobs at worker
+  start, `screen_gaps` in `/v1/health`, and `cmd` wiring of `TYPESAFE_API_KEY` and
+  `WORKFLOW_CHECKS_DIR`. Every binary test blanks the key in the child process.
+- Commit: `49600c5`.
+- Carried 2: a resend after the pending file is lost returns `duplicate` and re-creates the pending
+  file, so no ingest fix is needed.
+- Deviations: tests were written after the code, so there is no failing-first output. `ContentFacts`
+  returns a struct.
+- Limits: `screen_gaps` is counted once at worker start; the new store methods are covered only
+  through the serve and screen tests.
+- Agent: Sonnet, 19 tool calls, about 84k tokens.
+
+### Phase 3 verification
+
+The orchestrator ran `go vet` and `go test -race -count=1 ./...` (all 11 packages pass) with the key
+blank, then `go test -v -run TestScreeningOutcome ./internal/serve`: every subtest passed, covering
+pending until screened, pass, pass kinds, flag, unreachable, no key, the crash between blob and
+screen row, the screen gap, and the report checks.
+
+End to end with the real key: the binary ran in a `mktemp -d` dir on port 18771 with
+`WORKFLOW_CHECKS_DIR` set, and plan 09's DESIGN.md was ingested as an `artifact_version`. The result
+was `accepted`, then a screen of `{"verdict":"pass","scorer":"jev-1.13.0"}` with 11 scores (for
+example `d.outcomes_checkable` 0.977), and health showed `pending 0, screen_gaps 0`. The stderr
+showed `checks design=11 brief=11 report=5`. The key appeared in neither the log nor the data dir.
+The server was killed and the dir removed. Outcome holds.
+
+### Carried
+
+1. From phase 2: no `repo_id` before a repo's first commit; synthesized commit fixtures; 0600 not
+   checked on read; the phase 5 items (`mkdir` lock, kqueue, dropping `unknown-`).
+2. `screen_gaps` does not fall until a restart.
+3. Content is sent to Jev unscrubbed, after the precheck (design 3, principle 9).
