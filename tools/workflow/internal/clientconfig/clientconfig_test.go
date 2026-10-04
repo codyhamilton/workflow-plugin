@@ -1,7 +1,6 @@
 package clientconfig
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,8 +29,9 @@ func TestLoad(t *testing.T) {
 
 func TestMissingFile(t *testing.T) {
 	t.Setenv("WORKFLOW_CLIENT_CONFIG", filepath.Join(t.TempDir(), "none.toml"))
-	if _, err := Load(); !errors.Is(err, ErrNoConfig) {
-		t.Fatalf("got %v", err)
+	c, err := Load()
+	if err != nil || !c.Local || c.Endpoint != LocalEndpoint || c.Key != "" || c.Mode() != "local" {
+		t.Fatalf("got %+v %v", c, err)
 	}
 }
 

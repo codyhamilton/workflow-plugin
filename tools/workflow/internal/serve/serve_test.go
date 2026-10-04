@@ -133,7 +133,10 @@ func TestHTTPErrors(t *testing.T) {
 }
 
 func TestParseKeys(t *testing.T) {
-	for _, bad := range []string{"", "a", "a=", "=k", "a=k,b=k", "a=k,a=j", "-x=k", "a b=k"} {
+	if kp, err := ParseKeys(" "); kp != nil || err != nil {
+		t.Fatal("empty keys must be local mode", kp, err)
+	}
+	for _, bad := range []string{"a", "a=", "=k", "a=k,b=k", "a=k,a=j", "-x=k", "a b=k"} {
 		if _, err := ParseKeys(bad); err == nil {
 			t.Errorf("%q accepted", bad)
 		} else if strings.Contains(err.Error(), "=k") && bad != "" && strings.Contains(err.Error(), "k,") {
@@ -142,6 +145,72 @@ func TestParseKeys(t *testing.T) {
 	}
 	if kp, err := ParseKeys("a=ka,b.c-d=kb"); err != nil || len(kp) != 2 {
 		t.Fatal(kp, err)
+	}
+}
+
+func TestLocalModeConfig(t *testing.T) {
+	env := func(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
+	for _, addr := range []string{"", "127.0.0.1:0", "localhost:8770", "[::1]:8770", "127.0.0.2:1"} {
+		c, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"}))
+		if err != nil || !c.Local() {
+			t.Errorf("%q: %v", addr, err)
+		}
+	}
+	for _, addr := range []string{"0.0.0.0:8770", ":8770", "[::]:8770", "192.168.1.5:8770", "example.com:80"} {
+		if _, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"})); err == nil {
+			t.Errorf("%q: keyless non-loopback bind accepted", addr)
+		}
+	}
+	if c, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": "0.0.0.0:8770", "WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka"})); err != nil || c.Local() {
+		t.Fatal("keyed wildcard bind refused", err)
+	}
+}
+
+func TestLocalModeHTTP(t *testing.T) {
+	dir := t.TempDir()
+	s := New(Config{Data: dir}, Options{DisableWorker: true})
+	t.Cleanup(func() { s.Close() })
+	h := s.Handler()
+	req := func(method, host, ctype, auth, body string) int {
+		r := httptest.NewRequest(method, "http://"+host+"/v1/ingest", strings.NewReader(body))
+		if ctype != "" {
+			r.Header.Set("Content-Type", ctype)
+		}
+		if auth != "" {
+			r.Header.Set("Authorization", auth)
+		}
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, r)
+		return w.Code
+	}
+	cases := []struct {
+		host, ctype, auth string
+		want              int
+	}{
+		{"127.0.0.1:8770", "application/json", "", 200},
+		{"localhost:8770", "application/json; charset=utf-8", "", 200},
+		{"[::1]:8770", "application/json", "Bearer anything", 200},
+		{"127.0.0.1:8770", "text/plain", "", 415},
+		{"127.0.0.1:8770", "", "", 415},
+		{"evil.example:8770", "application/json", "", 403},
+	}
+	for _, c := range cases {
+		if got := req("POST", c.host, c.ctype, c.auth, artBody("# local\n")); got != c.want {
+			t.Errorf("%+v: got %d", c, got)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, LocalTenant, "pending")); err != nil {
+		t.Fatal("local tenant not used:", err)
+	}
+}
+
+func TestKeyRequiredMessage(t *testing.T) {
+	s, _ := newServer(t, true)
+	if code, body := do(t, s.Handler(), "POST", "/v1/ingest", "", `{"facts":[]}`); code != 401 || !strings.Contains(body, "requires a key") {
+		t.Fatal(code, body)
+	}
+	if code, body := do(t, s.Handler(), "POST", "/v1/ingest", "wrong", `{"facts":[]}`); code != 401 || strings.Contains(body, "requires a key") {
+		t.Fatal(code, body)
 	}
 }
 

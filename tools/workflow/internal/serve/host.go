@@ -91,7 +91,8 @@ func (s *Server) tenantForKey(key string) (string, bool) {
 }
 
 // Host runs until ctx ends. Each tick it loads the client config: when the endpoint is this server
-// and the key maps to a tenant it runs the drain in process (holding the queue lock); otherwise it
+// and the key maps to a tenant (in local mode, any client config pointing here is LocalTenant) it
+// runs the drain in process (holding the queue lock); otherwise it
 // stops the hosted drain, releases the lock and leaves the queue alone. It returns after the hosted
 // drain has stopped.
 func (s *Server) Host(ctx context.Context, o HostOptions) {
@@ -134,6 +135,10 @@ func (s *Server) Host(ctx context.Context, o HostOptions) {
 			say("not hosting the drain: client config unavailable")
 		case !pointsHere(cfg.Endpoint, o.Bound):
 			say("not hosting the drain: client config endpoint is elsewhere")
+		case s.cfg.Local():
+			tenant, ok = LocalTenant, true
+		case cfg.Key == "":
+			say("not hosting the drain: this service requires a key and the client has none; run workflow login")
 		default:
 			if tenant, ok = s.tenantForKey(cfg.Key); !ok {
 				say("not hosting the drain: client config key maps to no tenant")

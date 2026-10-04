@@ -37,7 +37,7 @@ order:
    against the envelope's `cwd`, then made repo-relative with the drain's function). The shim parses
    each queue file to check; the queue is normally a handful of files, so this is accepted. If present, the shim kicks the drain,
    waits up to about 1.5 s, and re-checks. Still queued: report count, oldest age, and why
-   (`no config`, `remote unreachable`, `draining`).
+   (`bad config`, `remote unreachable`, `draining`).
 2. **Rejected.** Any `rejected/` file for `path`: report the reason. The fix is to rewrite the file;
    that fires a new hook.
 3. **Delivered.** Ask the service for `(repo_id, path)`: the latest version's hash, its screen

@@ -2,7 +2,6 @@ package drain
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,7 +12,7 @@ import (
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
 )
 
-// RunStandalone is `workflow drain`: exit 0 when idle-exited, lock held by another, no config or stopped.
+// RunStandalone is `workflow drain`: exit 0 when idle-exited, lock held by another or stopped.
 func RunStandalone(ctx context.Context, stderr io.Writer) int {
 	o := Options{Sink: ConfigSink, Log: stderr, Poll: 250 * time.Millisecond}
 	for env, dst := range map[string]*time.Duration{
@@ -87,17 +86,16 @@ func RunStatus(w io.Writer) int {
 		fmt.Fprintln(w, "drain: not running")
 	}
 	cfg, err := clientconfig.Load()
-	switch {
-	case errors.Is(err, clientconfig.ErrNoConfig):
-		fmt.Fprintln(w, "config: missing")
-		fmt.Fprintln(w, "endpoint: -")
-		return 0
-	case err != nil:
+	if err != nil {
 		fmt.Fprintf(w, "config: %s (invalid)\n", clientconfig.Path())
 		fmt.Fprintln(w, "endpoint: -")
 		return 0
 	}
-	fmt.Fprintf(w, "config: %s\n", clientconfig.Path())
+	if cfg.Local {
+		fmt.Fprintln(w, "config: none (local mode)")
+	} else {
+		fmt.Fprintf(w, "config: %s (remote mode)\n", clientconfig.Path())
+	}
 	reach := "unreachable"
 	c := &http.Client{Timeout: 2 * time.Second}
 	if resp, err := c.Get(strings.TrimRight(cfg.Endpoint, "/") + "/v1/health"); err == nil {

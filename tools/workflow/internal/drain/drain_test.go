@@ -14,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
 )
 
@@ -355,16 +354,6 @@ func TestRaceSecondDrainExits(t *testing.T) {
 	<-done
 	if Running(dir) {
 		t.Fatal("lock not released")
-	}
-}
-
-func TestNoConfigExitsUntouched(t *testing.T) {
-	dir := t.TempDir()
-	spoolFile(t, dir, "a-1")
-	o := opts(dir, "")
-	o.Sink = func() (Sink, error) { return nil, clientconfig.ErrNoConfig }
-	if r := run(t, o); r != ReasonNoConfig || count(dir, ".evt") != 1 {
-		t.Fatal(r)
 	}
 }
 

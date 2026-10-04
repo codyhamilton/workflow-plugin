@@ -82,7 +82,6 @@ def main():
         ("version-clean-build", lambda: sh(unittest_cmd("tools.release.test_release", "WrapperTests.test_1_clean_cache_build"))),
         ("concurrent-first-runs", lambda: sh(unittest_cmd("tools.release.test_release", "WrapperTests.test_2_concurrent"))),
         ("release-build", lambda: sh(unittest_cmd("tools.release.test_release", "BuildTests.test_7_build_sh"))),
-        ("init", lambda: sh(["go", "test", "-count=1", "-run", "TestInit", "./..."], cwd=ROOT / "tools/workflow")),
         ("write-replay", lambda: sh([sys.executable, "-m", "unittest", "-v", "tools.hooklog.tests.test_write_surfaces"])),
         ("no-retired-refs", no_retired_refs),
         ("retired-files-gone", retired_files_gone),

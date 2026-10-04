@@ -14,7 +14,7 @@ import (
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
 )
 
-// HTTPSink POSTs to <Endpoint>/v1/ingest with the bearer key, 30 s timeout.
+// HTTPSink POSTs to <Endpoint>/v1/ingest with the bearer key (none in local mode), 30 s timeout.
 type HTTPSink struct {
 	Endpoint string
 	Key      string
@@ -31,7 +31,9 @@ func (s *HTTPSink) Send(ctx context.Context, facts []json.RawMessage) (Response,
 		return Response{}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+s.Key)
+	if s.Key != "" {
+		req.Header.Set("Authorization", "Bearer "+s.Key)
+	}
 	c := s.Client
 	if c == nil {
 		c = &http.Client{Timeout: 30 * time.Second}
@@ -68,7 +70,7 @@ func (netErr) Error() string { return "network error" }
 
 var errNetwork error = netErr{}
 
-// ConfigSink builds an HTTPSink from a fresh clientconfig.Load (so ErrNoConfig passes through).
+// ConfigSink builds an HTTPSink from a fresh clientconfig.Load.
 func ConfigSink() (Sink, error) {
 	c, err := clientconfig.Load()
 	if err != nil {

@@ -31,7 +31,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/facts"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
 )
@@ -40,7 +39,6 @@ import (
 const (
 	ReasonIdle     = "idle"
 	ReasonLockHeld = "lock held by another drain"
-	ReasonNoConfig = "no client config"
 	ReasonGaveUp   = "backoff at cap and no new file"
 	ReasonStopped  = "stopped"
 )
@@ -62,8 +60,7 @@ type Sink interface {
 	Send(ctx context.Context, facts []json.RawMessage) (Response, error)
 }
 
-// SinkFunc builds the sink for the next batch, so config changes need no restart. It may return
-// clientconfig.ErrNoConfig.
+// SinkFunc builds the sink for the next batch, so config changes need no restart.
 type SinkFunc func() (Sink, error)
 
 // Options configure Run. Zero durations take the design defaults.
@@ -263,11 +260,6 @@ func Run(ctx context.Context, o Options) (string, error) {
 		return "", err
 	}
 	r := &runner{o: o, seen: map[string]bool{}, lastNew: time.Now()}
-	if !o.Hosted {
-		if _, err := o.Sink(); errors.Is(err, clientconfig.ErrNoConfig) {
-			return ReasonNoConfig, nil
-		}
-	}
 	lock, err := acquire(ctx, o.Dir, o.LockWait, o.Poll, o.Hosted)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -324,9 +316,6 @@ func Run(ctx context.Context, o Options) (string, error) {
 		}
 		sink, err := o.Sink()
 		if err != nil {
-			if errors.Is(err, clientconfig.ErrNoConfig) && !o.Hosted {
-				return ReasonNoConfig, nil
-			}
 			r.logf("config unavailable; retrying")
 			if !o.Hosted && time.Since(r.lastNew) >= o.GiveUp {
 				return ReasonGaveUp, nil

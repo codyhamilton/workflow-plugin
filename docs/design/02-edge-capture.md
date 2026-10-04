@@ -120,10 +120,11 @@ drain uses `flock(2)` as on Linux.
 
 ## Config
 
-One file, read by both the drain and the shim: `~/.config/workflow/client.toml`, mode 0600.
+One file, read by both the drain and the shim: `~/.config/workflow/client.toml`, mode 0600. Its
+presence means remote mode; it is written by `workflow login` (not built yet).
 
 ```toml
-endpoint = "https://quality.example"   # or "http://127.0.0.1:8770"
+endpoint = "https://quality.example"
 key = "…"                              # write-and-read client key for the quality service
 ```
 
@@ -132,8 +133,10 @@ key = "…"                              # write-and-read client key for the qua
 - Re-read on every batch, so changing endpoint or key needs no restart.
 - The key is the quality service's client key, never `TYPESAFE_API_KEY`, which stays on the server.
 - Registration (how a key is issued) is out of scope.
-- No config: the drain makes no attempt and exits; the queue grows and nothing is lost. `status`
-  says so.
+- No config is local mode: `http://127.0.0.1:8770` with no key. If nothing listens there the
+  queue grows and nothing is lost; `status` shows the mode and the failure.
+- An invalid config is never guessed past: the drain retries, then gives up, and the shim reports
+  `bad config`.
 
 The drain never starts or manages the quality service, local or remote (principle 8).
 

@@ -52,15 +52,22 @@ Server configuration is environment only:
 
 | Variable | Meaning |
 |---|---|
-| `WORKFLOW_SERVE_ADDR` | listen address |
+| `WORKFLOW_SERVE_ADDR` | listen address, default `127.0.0.1:8770` |
 | `WORKFLOW_SERVE_DATA` | data directory |
-| `WORKFLOW_SERVE_KEYS` | `tenant=key[,tenant=key…]`; required, the service refuses to start without it |
+| `WORKFLOW_SERVE_KEYS` | `tenant=key[,tenant=key…]`; unset or empty means keyless local mode |
 | `TYPESAFE_API_KEY` | scorer credential; server side only, never in any client config |
 
 Registration, key issue and rotation are out of scope. A key maps to exactly one tenant; the client
 never names its tenant. Keys are compared in constant time and never logged.
 
-Local mode still requires a key. One auth path means local tests exercise what remote runs.
+**Local mode** is the keyless case, for one user on one machine:
+
+- Every request maps to tenant `local`, and any key sent is ignored.
+- The bind must be loopback; the service refuses to start keyless on any other address.
+- Browser guards: the `Host` header must be a loopback name (stops DNS rebinding), and a POST must
+  be `Content-Type: application/json` (a cross-origin form cannot send it without a preflight).
+
+A keyed service sent no key answers 401 saying a key is required (`workflow login`).
 
 ## API
 

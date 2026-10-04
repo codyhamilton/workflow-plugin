@@ -40,7 +40,9 @@ func (s *server) get(ctx context.Context, cfg clientconfig.Config, path string, 
 	if err != nil {
 		return 0, nil, errors.New("bad endpoint")
 	}
-	rq.Header.Set("Authorization", "Bearer "+cfg.Key)
+	if cfg.Key != "" {
+		rq.Header.Set("Authorization", "Bearer "+cfg.Key)
+	}
 	resp, err := s.o.HTTP.Do(rq)
 	if err != nil {
 		return 0, nil, errors.New("request failed")
@@ -55,7 +57,7 @@ func (s *server) get(ctx context.Context, cfg clientconfig.Config, path string, 
 func (s *server) fetch(ctx context.Context, path string, q map[string]string, out any) string {
 	cfg, err := clientconfig.Load()
 	if err != nil {
-		return noConfigText(err)
+		return badConfigText(err)
 	}
 	code, body, err := s.get(ctx, cfg, path, q, 3*time.Second)
 	switch {
@@ -70,10 +72,7 @@ func (s *server) fetch(ctx context.Context, path string, q map[string]string, ou
 	return ""
 }
 
-func noConfigText(err error) string {
-	if errors.Is(err, clientconfig.ErrNoConfig) {
-		return fmt.Sprintf("no client config at %s; nothing is delivered until it exists", clientconfig.Path())
-	}
+func badConfigText(err error) string {
 	return fmt.Sprintf("client config at %s is unusable: %v", clientconfig.Path(), err)
 }
 
@@ -219,7 +218,7 @@ func (s *server) feedback(ctx context.Context, args map[string]any) (string, boo
 		var extra []string
 		switch {
 		case cfgErr != nil:
-			why = "no config (" + clientconfig.Path() + ")"
+			why = "bad config (" + clientconfig.Path() + ")"
 		default:
 			if code, _, err := s.get(ctx, cfg, "/v1/health", nil, 3*time.Second); err != nil || code >= 500 {
 				why = "remote unreachable"
@@ -246,7 +245,7 @@ func (s *server) feedback(ctx context.Context, args map[string]any) (string, boo
 		note = []string{"note: earlier rejection superseded by a later write"}
 	}
 	if cfgErr != nil {
-		return state("no config", append([]string{noConfigText(cfgErr)}, note...)...)
+		return state("bad config", append([]string{badConfigText(cfgErr)}, note...)...)
 	}
 	code, body, err := s.get(ctx, cfg, "/v1/artifacts", map[string]string{"repo_id": repo, "path": rel}, 3*time.Second)
 	switch {

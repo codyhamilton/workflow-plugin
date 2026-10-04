@@ -1,10 +1,12 @@
 // Package clientconfig loads the one client config file the drain and the MCP shim share
-// (design 2, Config): ~/.config/workflow/client.toml with `endpoint` and `key`.
+// (design 2, Config): ~/.config/workflow/client.toml with `endpoint` and `key`. The file means
+// remote mode and is written by `workflow login`; with no file the client is in local mode and
+// talks to the keyless local service at LocalEndpoint.
 //
 // The path is $WORKFLOW_CLIENT_CONFIG when set (tests only), else $HOME/.config/workflow/client.toml.
 // Only the subset design 2 shows is parsed: `name = "string"` lines, `#` comments and blank lines;
 // unknown names are ignored; any other line is an error that names the line number, never its text.
-// A missing file is ErrNoConfig. The key is never logged or placed in an error.
+// The key is never logged or placed in an error.
 package clientconfig
 
 import (
@@ -17,13 +19,22 @@ import (
 	"strings"
 )
 
-// ErrNoConfig means the config file does not exist; the drain then makes no attempt.
-var ErrNoConfig = errors.New("clientconfig: no client config")
+// LocalEndpoint is where local mode sends, matching serve's default address.
+const LocalEndpoint = "http://127.0.0.1:8770"
 
-// Config is the parsed file.
+// Config is the parsed file, or the local default when there is none.
 type Config struct {
 	Endpoint string
-	Key      string
+	Key      string // empty in local mode
+	Local    bool   // no config file: local mode
+}
+
+// Mode names the mode for status lines.
+func (c Config) Mode() string {
+	if c.Local {
+		return "local"
+	}
+	return "remote"
 }
 
 var lineRE = regexp.MustCompile(`^([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*("(?:[^"\\]|\\.)*")\s*(?:#.*)?$`)
@@ -40,13 +51,14 @@ func Path() string {
 	return filepath.Join(home, ".config", "workflow", "client.toml")
 }
 
-// Load reads and parses the config on every call, so edits need no restart.
+// Load reads and parses the config on every call, so edits need no restart. A missing file is
+// local mode, not an error.
 func Load() (Config, error) {
 	path := Path()
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return Config{}, ErrNoConfig
+			return Config{Endpoint: LocalEndpoint, Local: true}, nil
 		}
 		return Config{}, fmt.Errorf("clientconfig: read %s: %w", path, err)
 	}

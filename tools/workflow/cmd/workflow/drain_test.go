@@ -382,14 +382,21 @@ func TestStatus(t *testing.T) {
 	os.WriteFile(filepath.Join(e.queue, "rejected", "r.evt"), []byte("x"), 0o600)
 	os.WriteFile(filepath.Join(e.queue, "rejected", "r.evt.reason"), []byte("r.evt: 413\n"), 0o600)
 
+	os.WriteFile(e.cfg, []byte("not toml\n"), 0o600)
 	out, code := e.status()
-	for _, want := range []string{"queue: " + e.queue, "queued: 2", "rejected: 1", "drain: not running", "config: missing", "endpoint: -"} {
+	for _, want := range []string{"queue: " + e.queue, "queued: 2", "rejected: 1", "drain: not running", "config: " + e.cfg + " (invalid)", "endpoint: -"} {
 		if !strings.Contains(out, want+"\n") {
 			t.Errorf("missing %q in\n%s", want, out)
 		}
 	}
 	if code != 0 {
-		t.Errorf("exit %d without config", code)
+		t.Errorf("exit %d with an invalid config", code)
+	}
+
+	// no config: local mode (probes the local endpoint with a GET; never posts)
+	os.Remove(e.cfg)
+	if out, _ := e.status(); !strings.Contains(out, "config: none (local mode)\nendpoint: http://127.0.0.1:8770 ") {
+		t.Errorf("local mode not shown:\n%s", out)
 	}
 
 	lock, err := os.OpenFile(filepath.Join(e.queue, ".drain.lock"), os.O_CREATE|os.O_RDWR, 0o600)

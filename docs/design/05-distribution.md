@@ -47,17 +47,18 @@ harness waits for an MCP server, so every harness's `SessionStart` hook also run
 
 ## Local bootstrap
 
-`workflow init` sets up local mode once:
+There is no install command. Local setup varies too much by system (systemd, launchd, a terminal)
+for the plugin to presume one, and local mode needs no generated state:
 
-- writes `~/.config/workflow/client.toml` (mode 0600) with `endpoint = "http://127.0.0.1:8770"`
-  and a random key, unless it exists;
-- writes `~/.config/workflow/serve.env` (mode 0600) with `WORKFLOW_SERVE_KEYS=local=<that key>`;
-- writes a systemd user unit `workflow-serve.service` that runs `bin/workflow serve` with that
-  environment file, and prints the `systemctl --user enable --now` command rather than running it.
+- `workflow serve` with no `WORKFLOW_SERVE_KEYS` runs keyless on `127.0.0.1:8770` and stores under
+  tenant `local`. How it is kept running is the user's choice.
+- With no `~/.config/workflow/client.toml`, the drain and the shim use `http://127.0.0.1:8770`
+  with no key.
+- Remote mode is opted into with `workflow login` (not built yet), which ensures a tenant and key
+  exist and writes `client.toml`.
 
-macOS launchd is out of this round; there `serve` is started by hand. With no `serve` running and
-no remote configured, the drain finds the endpoint unreachable and the queue grows; `workflow
-status` reports it as a failure, not as idle.
+With no `serve` running and no remote configured, the drain finds the endpoint unreachable and the
+queue grows; `workflow status` reports it as a failure, not as idle.
 
 ## Release
 

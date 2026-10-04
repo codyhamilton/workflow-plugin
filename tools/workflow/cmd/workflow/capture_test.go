@@ -23,8 +23,8 @@ var listenRE = regexp.MustCompile(`serve: listening on (\S+)`)
 
 // startHosted runs `workflow serve` with the queue and client config visible (so it can host the
 // drain), on addr ("127.0.0.1:0" for any port). stderr goes to a file under logs/. It returns the
-// bound address read from the "listening on" line.
-func (e *env) startHosted(addr string) string {
+// bound address read from the "listening on" line. extra env entries override the defaults.
+func (e *env) startHosted(addr string, extra ...string) string {
 	e.t.Helper()
 	logPath := filepath.Join(e.logs, fmt.Sprintf("serve.%d.log", time.Now().UnixNano()))
 	lf, err := os.Create(logPath)
@@ -34,6 +34,7 @@ func (e *env) startHosted(addr string) string {
 	cmd := exec.Command(e.bin, "serve")
 	cmd.Env = append(append([]string{}, e.base...), "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr,
 		"WORKFLOW_SERVE_KEYS=t="+apiKey, "WORKFLOW_SERVE_POLL=500ms")
+	cmd.Env = append(cmd.Env, extra...)
 	cmd.Stderr = lf
 	if err := cmd.Start(); err != nil {
 		e.t.Fatal(err)
@@ -315,4 +316,31 @@ func TestCaptureOutcome(t *testing.T) {
 			t.Errorf("exit %d\n%s", code, out)
 		}
 	})
+}
+
+// A keyless serve is local mode: it hosts the drain for a config that points at it, ignores the
+// config's key, and stores under the local tenant.
+func TestLocalModeHosting(t *testing.T) {
+	e := newEnv(t)
+	bound := e.startHosted("127.0.0.1:0", "WORKFLOW_SERVE_KEYS=")
+	e.writeConfig(bound)
+	waitFor(t, 10*time.Second, "serve holds the lock", e.lockHeld)
+	for i := 0; i < 3; i++ {
+		if err := e.spool("claude", map[string]any{"hook_event_name": "Stop", "session_id": "conv-local", "n": i}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	waitFor(t, 30*time.Second, "queue empty", func() bool { return e.queued() == 0 })
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "local", "ledger.db")+"?mode=ro")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	var n int
+	if err := db.QueryRow("SELECT count(*) FROM facts WHERE type='hook_event'").Scan(&n); err != nil || n != 3 {
+		t.Fatalf("local tenant rows: %d %v", n, err)
+	}
+	if len(e.starts()) != 0 || len(e.rejected()) != 0 {
+		t.Fatal("standalone drain started or files rejected")
+	}
 }

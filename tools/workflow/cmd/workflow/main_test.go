@@ -37,11 +37,11 @@ func TestServeOutcome(t *testing.T) {
 	env := append(os.Environ(), "TYPESAFE_API_KEY=", "HOME="+tmp, "WORKFLOW_SERVE_DATA="+data, "WORKFLOW_SERVE_ADDR=127.0.0.1:0",
 		"WORKFLOW_QUEUE="+filepath.Join(tmp, "queue"), "WORKFLOW_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"))
 
-	// no keys: refuses to start
+	// no keys: refuses any bind that is not loopback
 	noKeys := exec.Command(bin, "serve")
-	noKeys.Env = append(env, "WORKFLOW_SERVE_KEYS=")
+	noKeys.Env = append(env, "WORKFLOW_SERVE_KEYS=", "WORKFLOW_SERVE_ADDR=0.0.0.0:0")
 	if err := noKeys.Run(); err == nil {
-		t.Fatal("started without keys")
+		t.Fatal("started without keys on a wildcard bind")
 	}
 
 	cmd := exec.Command(bin, "serve")

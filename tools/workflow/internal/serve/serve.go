@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -35,7 +36,14 @@ type Config struct {
 // KeyPair maps one key to one tenant.
 type KeyPair struct{ Tenant, Key string }
 
-// ConfigFromEnv reads WORKFLOW_SERVE_ADDR, WORKFLOW_SERVE_DATA and WORKFLOW_SERVE_KEYS.
+// LocalTenant is the one tenant of local mode.
+const LocalTenant = "local"
+
+// Local reports local mode: no keys, every request is LocalTenant, and the bind is loopback.
+func (c Config) Local() bool { return len(c.Keys) == 0 }
+
+// ConfigFromEnv reads WORKFLOW_SERVE_ADDR, WORKFLOW_SERVE_DATA and WORKFLOW_SERVE_KEYS. With no
+// keys the service runs in local mode and refuses any bind that is not loopback.
 func ConfigFromEnv(getenv func(string) string) (Config, error) {
 	c := Config{Addr: getenv("WORKFLOW_SERVE_ADDR"), Data: getenv("WORKFLOW_SERVE_DATA")}
 	if c.Addr == "" {
@@ -50,13 +58,32 @@ func ConfigFromEnv(getenv func(string) string) (Config, error) {
 	}
 	ks, err := ParseKeys(getenv("WORKFLOW_SERVE_KEYS"))
 	c.Keys = ks
+	if err == nil && c.Local() && !loopbackBind(c.Addr) {
+		err = fmt.Errorf("WORKFLOW_SERVE_KEYS is empty, so WORKFLOW_SERVE_ADDR must be loopback (it is %q)", c.Addr)
+	}
 	return c, err
 }
 
-// ParseKeys parses "tenant=key[,tenant=key…]". Errors name the problem, never a key.
+// loopbackBind reports whether addr binds only a loopback interface.
+func loopbackBind(addr string) bool {
+	h, _, err := net.SplitHostPort(addr)
+	return err == nil && loopbackHost(h)
+}
+
+// loopbackHost reports whether h is localhost or a loopback IP.
+func loopbackHost(h string) bool {
+	if h == "localhost" {
+		return true
+	}
+	ip := net.ParseIP(h)
+	return ip != nil && ip.IsLoopback()
+}
+
+// ParseKeys parses "tenant=key[,tenant=key…]". An empty string is no keys (local mode). Errors name
+// the problem, never a key.
 func ParseKeys(s string) ([]KeyPair, error) {
 	if strings.TrimSpace(s) == "" {
-		return nil, errors.New("WORKFLOW_SERVE_KEYS is required and is empty")
+		return nil, nil
 	}
 	var out []KeyPair
 	seenKey := map[string]string{}
@@ -359,7 +386,34 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not found"})
 	})
+	if s.cfg.Local() {
+		return localGuard(mux)
+	}
 	return mux
+}
+
+// localGuard keeps browsers out of a keyless service. A Host that is not loopback is refused, which
+// stops DNS rebinding, and a POST must be JSON, which a cross-origin page cannot send without a
+// preflight that this service never answers.
+func localGuard(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		host := r.Host
+		if hh, _, err := net.SplitHostPort(host); err == nil {
+			host = hh
+		}
+		if !loopbackHost(host) {
+			writeJSON(w, 403, map[string]string{"error": "local mode accepts only loopback hosts"})
+			return
+		}
+		if r.Method == http.MethodPost {
+			mt, _, _ := strings.Cut(r.Header.Get("Content-Type"), ";")
+			if !strings.EqualFold(strings.TrimSpace(mt), "application/json") {
+				writeJSON(w, 415, map[string]string{"error": "content type must be application/json"})
+				return
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
@@ -379,8 +433,12 @@ func (s *Server) method(m string, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// tenantFor maps the bearer token to its tenant (see tenantForKey).
+// tenantFor maps the bearer token to its tenant (see tenantForKey). In local mode every request
+// is LocalTenant and any token is ignored.
 func (s *Server) tenantFor(r *http.Request) (string, bool) {
+	if s.cfg.Local() {
+		return LocalTenant, true
+	}
 	tok, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
 	if !ok {
 		return "", false
@@ -394,7 +452,11 @@ func (s *Server) auth(h tenantHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name, ok := s.tenantFor(r)
 		if !ok {
-			writeJSON(w, 401, map[string]string{"error": "unauthorized"})
+			msg := "unauthorized"
+			if !strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ") {
+				msg = "unauthorized: this service requires a key; run workflow login"
+			}
+			writeJSON(w, 401, map[string]string{"error": msg})
 			return
 		}
 		ts, err := s.tenant(name)

@@ -28,9 +28,11 @@ The OpenCode plugin writes the same files itself.
 
 After spooling, `spool.sh` starts one detached `bin/workflow drain` (a lock keeps it to one;
 `WORKFLOW_HOOKLOG_KICK=0` disables, `WORKFLOW_BIN` names the binary). The drain posts the queued files
-to the endpoint in `client.toml` and deletes them; files the service refuses move to `rejected/`.
-With no `client.toml` the drain exits and the files wait. A running `workflow serve` on the same
-machine hosts the drain itself. `workflow drain --status` reports the queue.
+to the endpoint and deletes them; files the service refuses move to `rejected/`. The endpoint is
+the one in `~/.config/workflow/client.toml` (remote mode), or `http://127.0.0.1:8770` with no key
+when that file is absent (local mode). While the endpoint is unreachable the files wait. A running
+`workflow serve` on the same machine hosts the drain itself. `workflow status` reports the queue
+and the mode.
 
 `bin/workflow` is a wrapper: it uses `WORKFLOW_BIN`, then the cached binary under
 `${XDG_CACHE_HOME:-~/.cache}/workflow/<version>/`, then a checksummed download, then a source build.
@@ -39,10 +41,15 @@ first real call finds a warm cache.
 
 ## Setup
 
-`bin/workflow init` writes `~/.config/workflow/client.toml` and `serve.env` (mode 0600) and the user
-unit `workflow-serve.service`, and enables nothing. To turn on screening, put
-`TYPESAFE_API_KEY=...` in `~/.config/workflow/serve.secrets.env` (mode 0600); it is never written by
-`init` and never goes in a hook config.
+There is no install step. For local mode, run `bin/workflow serve` however suits the machine (a
+terminal, a systemd user unit, launchd). With no `WORKFLOW_SERVE_KEYS` it runs keyless, binds
+`127.0.0.1:8770` (`WORKFLOW_SERVE_ADDR` may name another loopback address, never a public one),
+and stores data under `WORKFLOW_SERVE_DATA` (default `~/.local/share/workflow/serve`), tenant
+`local`. To turn on screening, set `TYPESAFE_API_KEY` in serve's environment; it never goes in a
+hook config or `client.toml`.
+
+Remote mode is `client.toml` (mode 0600, `endpoint` and `key`), written by `workflow login` (not
+built yet).
 
 ## MCP
 

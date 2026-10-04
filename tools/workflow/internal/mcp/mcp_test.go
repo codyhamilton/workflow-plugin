@@ -394,16 +394,16 @@ func TestShim(t *testing.T) {
 		t.Log("\n" + a)
 		want(t, a, "state: stale", "current content not yet delivered", "abababababab", "2026-01-01T00:00:00Z")
 	})
-	t.Run("9 no config and unreachable", func(t *testing.T) {
+	t.Run("9 bad config and unreachable", func(t *testing.T) {
 		e := newEnv(t, &texts)
 		c := e.serve()
-		os.Remove(e.cfg)
+		os.WriteFile(e.cfg, []byte("not toml\n"), 0o600)
 		before := e.hits.Load()
 		a := c.feedback(e.design)
 		t.Log("\n" + a)
-		want(t, a, "state: no config", e.cfg)
+		want(t, a, "state: bad config", e.cfg, "unusable")
 		if e.hits.Load() != before {
-			t.Error("HTTP made with no config")
+			t.Error("HTTP made with a bad config")
 		}
 		e.writeConfig("http://127.0.0.1:1")
 		e.evt(e.queue, "a.evt", e.design, time.Second)
@@ -418,12 +418,12 @@ func TestShim(t *testing.T) {
 			t.Errorf("list_checks isError: %s", text)
 		}
 		want(t, text, "service unreachable")
-		os.Remove(e.cfg)
+		os.WriteFile(e.cfg, []byte("not toml\n"), 0o600)
 		text, isErr = c.tool("search_artifacts", map[string]any{"query": "x"})
 		if isErr {
 			t.Errorf("search isError: %s", text)
 		}
-		want(t, text, "no client config")
+		want(t, text, "unusable")
 	})
 	t.Run("10 not tracked", func(t *testing.T) {
 		e := newEnv(t, &texts)
