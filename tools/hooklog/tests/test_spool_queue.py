@@ -11,7 +11,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SPOOL = HERE.parent / "spool.sh"
-DRAIN = HERE.parent / "drain.py"
 FIXTURE = json.loads((HERE / "fixtures" / "artifact_writes.json").read_text())
 
 
@@ -31,54 +30,80 @@ def evts(d):
     return sorted(Path(d).glob("*.evt"))
 
 
+
 class Base(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.d, True)
 
 
-class LegacyPath(Base):
-    def test_fixture_payloads_named_by_id_and_drain(self):
+class QueueDefault(Base):
+    def q(self):
+        return os.path.join(self.d, "queue")
+
+    def test_fixture_payloads_named_by_id(self):
         for item in FIXTURE:
-            p = item["payload"]
-            r = run_spool(json.dumps(p), item["harness"], WORKFLOW_HOOKLOG_DIR=self.d)
+            r = run_spool(json.dumps(item["payload"]), item["harness"], WORKFLOW_QUEUE=self.q(),
+                          HOME=self.d, WORKFLOW_HOOKLOG_DIR=os.path.join(self.d, "legacy"))
             self.assertEqual(r.returncode, 0)
-        files = evts(Path(self.d) / "spool")
+        files = evts(self.q())
         self.assertEqual(len(files), len(FIXTURE))
         for item in FIXTURE:
             p = item["payload"]
             i = p.get("session_id") or p.get("conversation_id")
             self.assertEqual(len([f for f in files if f.name.startswith(i + "-") and f.name[len(i) + 1].isdigit()]), 1, i)
-        r = subprocess.run(["python3", str(DRAIN), "--once"], capture_output=True, text=True,
-                           env=env(WORKFLOW_HOOKLOG_DIR=self.d))
-        self.assertEqual(r.returncode, 0, r.stderr)
-        self.assertEqual(evts(Path(self.d) / "spool"), [])
-        for item in FIXTURE:
-            p = item["payload"]
-            i = p.get("session_id") or p.get("conversation_id")
-            self.assertTrue(list(Path(self.d).glob(f"*/{i}.jsonl")), i)
 
-    def test_no_id_is_unknown(self):
-        r = run_spool('{"hook_event_name":"Stop"}', WORKFLOW_HOOKLOG_DIR=self.d)
+    def test_default_is_the_queue(self):
+        legacy = os.path.join(self.d, "legacy")
+        r = run_spool('{"session_id":"s1"}', "claude", WORKFLOW_QUEUE=self.q(), WORKFLOW_HOOKLOG_DIR=legacy, HOME=self.d)
         self.assertEqual(r.returncode, 0)
-        files = evts(Path(self.d) / "spool")
+        files = evts(self.q())
         self.assertEqual(len(files), 1)
-        self.assertTrue(files[0].name.startswith("unknown-"))
+        self.assertTrue(files[0].name.startswith("s1-"))
+        self.assertFalse(os.path.exists(legacy))
+
+    def test_default_queue_under_home(self):
+        run_spool('{"session_id":"s1"}', "claude", HOME=self.d)
+        self.assertEqual(len(evts(os.path.join(self.d, ".local/share/workflow/queue"))), 1)
+
+    def test_no_id_dropped(self):
+        r = run_spool('{"hook_event_name":"Stop"}', WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        self.assertEqual(r.returncode, 0)
+        self.assertEqual(evts(self.q()), [])
+        self.assertEqual(list(Path(self.q()).glob("*.evt")), [])
+
+    def test_auto_and_missing_harness_spool_nothing(self):
+        for harness in ("auto", None):
+            cmd = ["bash", str(SPOOL)] + (["--harness", harness] if harness else [])
+            r = subprocess.run(cmd, input='{"session_id":"s1"}', capture_output=True, text=True,
+                               env=env(WORKFLOW_QUEUE=self.q(), HOME=self.d))
+            self.assertEqual((r.returncode, r.stdout), (0, ""))
+            self.assertEqual(evts(self.q()), [])
+        r = run_spool('{"conversation_id":"c1"}', "auto", "preToolUse", WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        self.assertEqual(r.stdout, "")  # not cursor, so no response
+        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        self.assertEqual(json.loads(r.stdout), {"permission": "allow"})
+        self.assertEqual(len(evts(self.q())), 1)
 
     def test_sanitised_prefix(self):
-        run_spool('{"hook_event_name":"Stop","session_id" : "a/b c"}', WORKFLOW_HOOKLOG_DIR=self.d)
-        files = evts(Path(self.d) / "spool")
+        run_spool('{"hook_event_name":"Stop","session_id" : "a/b c"}', WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        files = evts(self.q())
         self.assertEqual(len(files), 1)
         self.assertTrue(files[0].name.startswith("a_b_c-"), files[0].name)
 
     def test_key_preference(self):
-        run_spool('{"conversation_id":"c1","session_id":"s1"}', WORKFLOW_HOOKLOG_DIR=self.d)
-        self.assertTrue(evts(Path(self.d) / "spool")[0].name.startswith("s1-"))
+        run_spool('{"conversation_id":"c1","session_id":"s1"}', WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        self.assertTrue(evts(self.q())[0].name.startswith("s1-"))
 
     def test_cursor_response(self):
-        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", WORKFLOW_HOOKLOG_DIR=self.d)
+        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", WORKFLOW_QUEUE=self.q(), HOME=self.d)
         self.assertEqual(json.loads(r.stdout), {"permission": "allow"})
         self.assertEqual(r.returncode, 0)
+
+    def test_bash32_lint(self):
+        text = SPOOL.read_text()
+        for pat in (r"read -r -N", r"read -N", "EPOCHREALTIME", "mapfile", ",,}", r"[[ -v"):
+            self.assertNotIn(pat, text, pat)
 
 
 class GoPath(Base):
@@ -86,6 +111,7 @@ class GoPath(Base):
         super().setUp()
         self.q = os.path.join(self.d, "queue")
         self.legacy = os.path.join(self.d, "legacy")
+        self.home = os.path.join(self.d, "home")
         self.log = os.path.join(self.d, "stub.log")
         self.bin = os.path.join(self.d, "stub.sh")
         Path(self.bin).write_text(f'#!/bin/sh\necho "$* q=$WORKFLOW_QUEUE" >> "{self.log}"\n')
@@ -93,7 +119,7 @@ class GoPath(Base):
 
     def spool(self, payload, **kw):
         return run_spool(payload, WORKFLOW_BIN=self.bin, WORKFLOW_QUEUE=self.q,
-                         WORKFLOW_HOOKLOG_DIR=self.legacy, **kw)
+                         WORKFLOW_HOOKLOG_DIR=self.legacy, HOME=self.home, **kw)
 
     def calls(self, wait=False):
         for _ in range(30 if wait else 1):
@@ -147,6 +173,77 @@ class GoPath(Base):
         self.assertTrue(all(r.returncode == 0 for r in rs))
         self.assertEqual(len({f.name for f in evts(self.q)}), 20)
         self.assertEqual(list(Path(self.q, "tmp").iterdir()), [])
+
+    def fallback(self, payload='{"session_id":"s1"}', **kw):
+        return run_spool(payload, WORKFLOW_BIN=self.sleeper, WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1",
+                         WORKFLOW_SPOOL_NOFLOCK="1", HOME=self.home, **kw)
+
+    def make_sleeper(self):
+        self.sleeper = os.path.join(self.d, "sleeper.sh")
+        Path(self.sleeper).write_text(f'#!/bin/sh\necho "$* $$" >> "{self.log}"\nsleep 2\n')
+        os.chmod(self.sleeper, 0o755)
+
+    def wait_gone(self):
+        for _ in range(60):
+            if subprocess.run(["pgrep", "-f", self.sleeper], capture_output=True).returncode != 0:
+                return
+            time.sleep(0.1)
+
+    def test_default_kick_target(self):
+        root = os.path.join(self.d, "repo")
+        shutil.copytree(SPOOL.parent, os.path.join(root, "tools", "hooklog"), ignore=shutil.ignore_patterns("tests", "__pycache__"))
+        os.makedirs(os.path.join(root, "bin"))
+        stub = os.path.join(root, "bin", "workflow")
+        Path(stub).write_text(f'#!/bin/sh\necho "$* q=$WORKFLOW_QUEUE" >> "{self.log}"\n')
+        os.chmod(stub, 0o755)
+        cmd = ["bash", os.path.join(root, "tools", "hooklog", "spool.sh"), "--harness", "claude"]
+        subprocess.run(cmd, input='{"session_id":"s1"}', capture_output=True, text=True,
+                       env=env(WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1", HOME=self.home))
+        self.assertEqual(self.calls(True), [f"drain q={self.q}"])
+
+    def test_mkdir_fallback_single_drain(self):
+        self.make_sleeper()
+        try:
+            with ThreadPoolExecutor(10) as ex:
+                rs = list(ex.map(lambda i: self.fallback(json.dumps({"session_id": "s1", "n": i})), range(10)))
+            self.assertTrue(all(r.returncode == 0 for r in rs))
+            time.sleep(0.5)
+            self.assertEqual(len(self.calls()), 1, self.calls())
+        finally:
+            self.wait_gone()
+
+    def test_mkdir_fallback_dead_pid_retaken(self):
+        self.make_sleeper()
+        kick = Path(self.q, ".kick.d")
+        kick.mkdir(parents=True)
+        dead = subprocess.Popen(["true"])
+        dead.wait()
+        (kick / "pid").write_text(str(dead.pid))
+        try:
+            self.fallback()
+            self.assertEqual(len(self.calls(True)), 1)
+            self.assertNotEqual((kick / "pid").read_text().strip(), str(dead.pid))
+        finally:
+            self.wait_gone()
+
+    def test_mkdir_fallback_no_pid_blocks_when_young(self):
+        self.make_sleeper()
+        Path(self.q, ".kick.d").mkdir(parents=True)
+        self.fallback()
+        time.sleep(0.5)
+        self.assertEqual(self.calls(), [])
+
+    def test_mkdir_fallback_no_pid_old_is_retaken(self):
+        self.make_sleeper()
+        kick = Path(self.q, ".kick.d")
+        kick.mkdir(parents=True)
+        old = time.time() - 300
+        os.utime(kick, (old, old))
+        try:
+            self.fallback()
+            self.assertEqual(len(self.calls(True)), 1)
+        finally:
+            self.wait_gone()
 
 
 if __name__ == "__main__":
