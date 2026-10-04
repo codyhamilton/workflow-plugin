@@ -43,9 +43,6 @@ func TestServeOutcome(t *testing.T) {
 	if err := noKeys.Run(); err == nil {
 		t.Fatal("started without keys")
 	}
-	if c := exec.Command(bin, "drain"); c.Run() == nil {
-		t.Fatal("drain should exit non-zero")
-	}
 
 	cmd := exec.Command(bin, "serve")
 	cmd.Env = append(env, "WORKFLOW_SERVE_KEYS=a=ka,b=kb")

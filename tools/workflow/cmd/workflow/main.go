@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/serve"
 )
 
@@ -33,7 +34,13 @@ func run(args []string) int {
 	switch args[0] {
 	case "serve":
 		return runServe()
-	case "drain", "mcp", "status":
+	case "drain":
+		ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer stop()
+		return drain.RunStandalone(ctx, os.Stderr)
+	case "status":
+		return drain.RunStatus(os.Stdout)
+	case "mcp":
 		fmt.Fprintln(os.Stderr, "not implemented yet")
 		return 2
 	case "version":
