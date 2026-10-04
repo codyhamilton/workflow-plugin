@@ -7,7 +7,7 @@ means the spool grows and the next pass retries. Re-delivery is harmless: the se
 the time the hook fired, not the drain time. Files that cannot be parsed, or that the service refuses outright, move to
 spool/bad/ for inspection.
 
-  drain.py [--once | --watch [--interval S]] [--batch N] [--status]
+  drain.py [--once | --watch [--interval S] | --daemon [--idle S]] [--batch N] [--status]
 Env: WORKFLOW_QUALITY_URL (default http://127.0.0.1:8765; empty = local archive only; an explicit WORKFLOW_HOOKLOG_DIR
 without a URL also means local only), WORKFLOW_QUALITY_TOKEN, WORKFLOW_QUALITY_TIMEOUT (default 30 s per batch),
 WORKFLOW_HOOKLOG_ARCHIVE=0 to skip the JSONL archive when the service has the rows.
@@ -133,6 +133,8 @@ def main() -> int:
     ap.add_argument("--watch", action="store_true", help="loop forever instead of one pass")
     ap.add_argument("--once", action="store_true", help="one pass (default)")
     ap.add_argument("--interval", type=float, default=10.0, help="seconds between passes with --watch")
+    ap.add_argument("--daemon", action="store_true", help="drain, then exit after --idle seconds without progress or new events")
+    ap.add_argument("--idle", type=float, default=60.0, help="idle seconds before --daemon exits")
     ap.add_argument("--batch", type=int, default=500)
     ap.add_argument("--status", action="store_true", help="print pending/bad counts and exit")
     a = ap.parse_args()
@@ -141,10 +143,10 @@ def main() -> int:
         print(json.dumps(status(sd)))
         return 0
     (sd / "tmp").mkdir(parents=True, exist_ok=True)
-    lock = open(sd / ".drain.lock", "w")
-    try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except OSError:
+    if a.daemon:
+        return daemon(sd, a.idle, a.batch)
+    lock = take_lock(sd)
+    if lock is None:
         return 0  # another drain is running
     delay = a.interval
     while True:
@@ -156,6 +158,42 @@ def main() -> int:
         delay = min(delay * 2, 300.0) if st["pending"] else a.interval  # back off while the service is unreachable
         time.sleep(delay)
 
+
+def take_lock(sd: Path):
+    lock = open(sd / ".drain.lock", "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        lock.close()
+        return None
+    return lock
+
+
+def daemon(sd: Path, idle: float, batch: int) -> int:
+    """Stateless singleton started by hooks: the flock is the only state and dies with the process. Exits after `idle` seconds
+    in which nothing was delivered and no new event arrived (a down service therefore does not keep it alive forever; the next
+    hook starts a fresh one). After releasing the lock it rescans, so an event written during shutdown is never stranded."""
+    (sd / "tmp").mkdir(parents=True, exist_ok=True)
+    lock = take_lock(sd)
+    if lock is None:
+        return 0
+    seen: frozenset[str] = frozenset()
+    while True:
+        last_progress = time.time()
+        while time.time() - last_progress < idle:
+            sweep_tmp(sd)
+            st = drain_once(sd, service_url(), batch)
+            names = frozenset(p.name for p in sd.glob("*.evt"))
+            if st["sent"] or st["archived"] or st["dropped"] or st["bad"] or not names <= seen:
+                last_progress = time.time()
+            seen = names
+            time.sleep(5.0 if st["pending"] else 1.0)
+        lock.close()  # release, then recheck: a hook may have written after our last pass
+        if frozenset(p.name for p in sd.glob("*.evt")) <= seen:
+            return 0  # nothing new; leftovers are a down service, which the next hook's daemon retries
+        lock = take_lock(sd)
+        if lock is None:
+            return 0  # a hook already started a replacement
 
 if __name__ == "__main__":
     sys.exit(main())
