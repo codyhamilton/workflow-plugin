@@ -128,7 +128,13 @@ def session(session_id: str) -> dict[str, Any]:
                          (session_id,) * 4).fetchall()
         ex = c.execute("SELECT id, brief_id, started, ended, outcome, cost_usd FROM executions WHERE conversation_id=?"
                          " OR id IN (SELECT execution_id FROM conversation_binds WHERE conversation_id=? AND execution_id IS NOT NULL)", (session_id, session_id)).fetchall()
-    return {"session_id": session_id, "activity": dict(st), "top_tools": [dict(r) for r in top], "artifacts": [dict(r) for r in arts], "executions": [dict(r) for r in ex]}
+        submitted = {r[0] for r in c.execute(
+            "SELECT artifact_id FROM scores WHERE session_id=?"
+            " UNION SELECT artifact_id FROM conversation_binds WHERE conversation_id=? AND artifact_id IS NOT NULL"
+            " UNION SELECT artifact_id FROM events WHERE conversation_id=? AND event IN"
+            " ('posted_design','patched_design','posted_brief','patched_brief')", (session_id,) * 3)}
+    return {"session_id": session_id, "activity": dict(st), "top_tools": [dict(r) for r in top],
+            "artifacts": [{**dict(r), "submission_bound": r["id"] in submitted} for r in arts], "executions": [dict(r) for r in ex]}
 
 
 def execution_activity(exec_id: int) -> dict[str, Any]:
