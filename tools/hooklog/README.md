@@ -116,7 +116,7 @@ path. Preserve existing hooks. Codex also supports inline `[hooks]` in `config.t
 Non-managed hooks need the host's trust review before execution; installing a definition does
 not bypass that review. See [official OpenAI documentation](https://developers.openai.com/codex/hooks).
 
-All 12 names use `hooklog.py record --harness codex`: SessionStart, SessionEnd, SubagentStart,
+All 12 names use `spool.sh --harness codex`: SessionStart, SessionEnd, SubagentStart,
 SubagentStop, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact,
 UserPromptSubmit, Stop, Interrupt. Explicit `codex` avoids ambiguity with Claude's common
 payload fields; `auto` only distinguishes Cursor from Claude. Codex is **not N/A**.

@@ -17,7 +17,7 @@
           {
             "type": "command",
             "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
-            "timeout": 5
+            "timeout": 3
           }
         ]
       }
@@ -132,7 +132,7 @@
           {
             "type": "command",
             "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
-            "timeout": 5
+            "timeout": 3
           }
         ]
       }
