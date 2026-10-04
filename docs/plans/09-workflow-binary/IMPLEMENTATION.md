@@ -223,3 +223,71 @@ The server was killed and the dir removed. Outcome holds.
    checked on read; the phase 5 items (`mkdir` lock, kqueue, dropping `unknown-`).
 2. `screen_gaps` does not fall until a restart.
 3. Content is sent to Jev unscrubbed, after the precheck (design 3, principle 9).
+
+## Phase 4 — Advisory shim and reads
+
+Refine split the phase into three units (briefs 222, 223 and 224), committed in `e31b364`. 4-01 and
+4-02 ran in parallel; 4-03 ran after both. Refine settled these decisions:
+
+- MCP is hand-written JSON-RPC 2.0, one message per line. `initialize` echoes a supported protocol
+  version. A service that is down or has no config gives a normal result; `isError` marks bad
+  arguments only.
+- A baseline flag needs n ≥ 4 and a score strictly below p25. Quartiles use linear interpolation.
+  Stored scores already have `invert` applied.
+- Search is FTS5 (which modernc supports) over the latest screened version per path. The query
+  becomes quoted words joined by OR. `limit` defaults to 10, maximum 50.
+- Two fields were added to `/v1` responses: `latest.rejection` on `/v1/artifacts` and `loaded` on
+  `/v1/checks`. The code names the passing verdict `pass`; design 4 says "passed".
+
+### 4-01-service-reads (execution 24)
+
+- Built: store migration 2 (the FTS5 `search` table and a backfill on upgrade), `LatestScores`,
+  `Search` and `Latest.Rejection`; `/v1/checks`, `/v1/baselines`, `/v1/search` and
+  `latest.rejection`. Checks now load whenever `WORKFLOW_CHECKS_DIR` is set, even without a key.
+- Commit: `742c768`. `TestAdvisoryReads` (6 subtests) and `TestReadsWiring` pass.
+- Departures: `DropBlob` now runs its own transaction, so the index delete and the rejection insert
+  commit together. The backfill test builds its version-1 database by downgrading a current one.
+- Agent: Sonnet, 23 tool calls, about 92k tokens.
+
+### 4-02-mcp-shim (execution 25)
+
+- Built: `internal/mcp` (the protocol, the three tools, the `artifact_feedback` states and queue
+  matching) and `facts.WritePaths`.
+- Commit: `2127e0e`. `TestShim` passes 11 subtests plus one extra.
+- Departures: with work queued but no config, the shim neither kicks the drain nor waits.
+  `(no baseline)` and `baselines unavailable` cover cases the brief left open. A single queued
+  event reads `1 events`.
+- Known limit: files written by commit tool calls are not matched in the queue, so a committed file
+  that has not drained shows as not delivered or stale.
+- Agent: Sonnet, 14 tool calls, about 86k tokens.
+
+### 4-03-mcp-wiring-outcome (execution 26)
+
+- Built: `workflow mcp` (stdio, signals, exit 0 on EOF, exit 2 for any argument) and
+  `TestAdvisoryOutcome`, which runs against the built binary.
+- Commit: `7d9aee5`. 4-02's default drain starter is exercised in the queued subtest.
+- Departures: `tools-answer` runs before `service-down`. With the service down, a delivered file
+  reads `not delivered` plus `service unreachable`.
+- Agent: Sonnet, 16 tool calls, about 83k tokens.
+
+### Phase 4 verification
+
+The orchestrator ran `go vet` and `go test -race -count=1 ./...`; all 12 packages pass with the key
+blank. `go test -v -run TestAdvisoryOutcome ./cmd/workflow` passed every subtest: reads,
+initialize, tools-list, queued, rejected, delivered-baseline (`BELOW p25` on the lowest check
+only), stale, distinct-answers, tools-answer and service-down.
+
+A direct stdio run of the built binary in a temp `HOME` with no config answered `initialize`
+(echoing 2025-06-18), listed exactly `artifact_feedback`, `list_checks` and `search_artifacts`, and
+returned `state: no config` naming the file, with `isError` false. No workflow processes are left
+running. The live dirs do not exist. The phase outcome holds.
+
+### Carried
+
+1. From phases 2 and 3:
+   - no `repo_id` before a repo's first commit (the shim reports `not tracked`);
+   - synthesized commit fixtures;
+   - mode 0600 not checked on read;
+   - the phase 5 items;
+   - `screen_gaps` only falls on restart.
+2. Commit-path matching in the shim's queue check.
