@@ -152,6 +152,14 @@ its own.
 - Approach: known
 - Depends on: nothing
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 1-01 Go module, keys and secret patterns | [briefs/1-01-module-keys-secrets.md](briefs/1-01-module-keys-secrets.md) | nothing | nothing |
+| 1-02 Tenant store and group-commit writer | [briefs/1-02-store.md](briefs/1-02-store.md) | 1-01 | nothing (shares `go.mod`) |
+| 1-03 Ingest, precheck and `workflow serve` | [briefs/1-03-ingest-serve.md](briefs/1-03-ingest-serve.md) | 1-01, 1-02 | nothing |
+
 ### Phase 2 — Capture
 
 - Outcome: in a `mktemp -d` queue with a temp `serve`, 20 concurrent `spool.sh` calls are all
