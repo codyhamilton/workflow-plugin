@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/mcp"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/serve"
@@ -44,14 +45,30 @@ func run(args []string) int {
 	case "status":
 		return drain.RunStatus(os.Stdout)
 	case "mcp":
-		fmt.Fprintln(os.Stderr, "not implemented yet")
-		return 2
+		return runMCP(args[1:])
 	case "version":
 		fmt.Printf("workflow %s (%s)\n", version, commit)
 		return 0
 	}
 	fmt.Fprint(os.Stderr, usage)
 	return 2
+}
+
+// runMCP serves the advisory shim on stdin and stdout until EOF or a signal. Only JSON-RPC goes to
+// stdout; diagnostics go to stderr.
+func runMCP(args []string) int {
+	if len(args) > 0 {
+		fmt.Fprint(os.Stderr, "usage: workflow mcp (no arguments)\n")
+		return 2
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	err := mcp.Serve(ctx, os.Stdin, os.Stdout, mcp.Options{Version: version, QueueDir: drain.QueueDir()})
+	if err != nil && !errors.Is(err, context.Canceled) {
+		fmt.Fprintln(os.Stderr, "workflow mcp:", err)
+		return 1
+	}
+	return 0
 }
 
 func runServe() int {
