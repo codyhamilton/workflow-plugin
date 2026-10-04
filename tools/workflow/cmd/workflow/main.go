@@ -26,7 +26,7 @@ var (
 	commit  = "unknown"
 )
 
-const usage = "usage: workflow serve | drain | mcp | status\n"
+const usage = "usage: workflow serve | drain | mcp | status | init | version\n"
 
 func main() { os.Exit(run(os.Args[1:])) }
 
@@ -46,8 +46,10 @@ func run(args []string) int {
 		return drain.RunStatus(os.Stdout)
 	case "mcp":
 		return runMCP(args[1:])
-	case "version":
-		fmt.Printf("workflow %s (%s)\n", version, commit)
+	case "init":
+		return runInit(args[1:])
+	case "--version", "version":
+		fmt.Printf("workflow %s %s\n", version, commit)
 		return 0
 	}
 	fmt.Fprint(os.Stderr, usage)
