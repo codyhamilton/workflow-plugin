@@ -64,7 +64,7 @@ func runServe() int {
 		fmt.Fprintln(os.Stderr, "workflow serve: data directory:", err)
 		return 1
 	}
-	step, err := screenStep(os.Getenv("TYPESAFE_API_KEY"), os.Getenv("WORKFLOW_CHECKS_DIR"))
+	step, checks, err := screenStep(os.Getenv("TYPESAFE_API_KEY"), os.Getenv("WORKFLOW_CHECKS_DIR"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)
 		return 1
@@ -74,7 +74,7 @@ func runServe() int {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)
 		return 1
 	}
-	s := serve.New(cfg, serve.Options{Version: version, ScreenStep: step})
+	s := serve.New(cfg, serve.Options{Version: version, ScreenStep: step, Checks: checks})
 	srv := &http.Server{Handler: s.Handler(), ReadHeaderTimeout: 10 * time.Second}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -112,25 +112,33 @@ func runServe() int {
 	return code
 }
 
-// screenStep builds the screen step from the environment. No key: nil, so verdicts are
-// "unscreened". The key is used only to build the scorer; it is never printed.
-func screenStep(key, checksDir string) (serve.ScreenFunc, error) {
+// screenStep builds the screen step and loads the checks from the environment. No key: a nil step,
+// so verdicts are "unscreened". WORKFLOW_CHECKS_DIR is loaded whenever it is set (nil checks when
+// not), for the screen step and for /v1/checks. The key is used only to build the scorer; it is
+// never printed.
+func screenStep(key, checksDir string) (serve.ScreenFunc, *scorer.Checks, error) {
 	key = strings.TrimSpace(key)
+	var checks scorer.Checks
+	var loaded *scorer.Checks
+	if checksDir != "" {
+		c, err := scorer.LoadChecks(checksDir)
+		if err != nil {
+			return nil, nil, fmt.Errorf("checks: %w", err)
+		}
+		checks, loaded = c, &c
+	}
+	counts := fmt.Sprintf("checks design=%d brief=%d report=%d", checks.Count("design"), checks.Count("brief"), checks.Count("report"))
 	if key == "" {
 		fmt.Fprintln(os.Stderr, "workflow serve: scorer none; verdicts are unscreened")
-		return nil, nil
+		if loaded != nil {
+			fmt.Fprintln(os.Stderr, "workflow serve: "+counts)
+		}
+		return nil, loaded, nil
 	}
-	var checks scorer.Checks
 	if checksDir == "" {
 		fmt.Fprintln(os.Stderr, "workflow serve: scoring is off because WORKFLOW_CHECKS_DIR is unset; screening only")
-	} else {
-		var err error
-		if checks, err = scorer.LoadChecks(checksDir); err != nil {
-			return nil, fmt.Errorf("checks: %w", err)
-		}
 	}
 	sc := scorer.NewJev(key, checks)
-	fmt.Fprintf(os.Stderr, "workflow serve: scorer %s; checks design=%d brief=%d report=%d\n", sc.Name(),
-		checks.Count("design"), checks.Count("brief"), checks.Count("report"))
-	return screen.Step(sc), nil
+	fmt.Fprintf(os.Stderr, "workflow serve: scorer %s; %s\n", sc.Name(), counts)
+	return screen.Step(sc), loaded, nil
 }

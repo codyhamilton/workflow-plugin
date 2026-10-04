@@ -88,8 +88,9 @@ type Options struct {
 	DisableWorker bool          // tests: leave pending/ alone
 	PollInterval  time.Duration // default 3s
 	GroupWindow   time.Duration
-	ScreenStep    ScreenFunc    // default: promote as unscreened
-	ScreenBackoff time.Duration // first wait after an unreachable scorer; default 5s, doubles to 5 min
+	ScreenStep    ScreenFunc     // default: promote as unscreened
+	Checks        *scorer.Checks // loaded checks for /v1/checks; nil = none loaded
+	ScreenBackoff time.Duration  // first wait after an unreachable scorer; default 5s, doubles to 5 min
 }
 
 // ScreenFunc is the screen step applied to one pending hash. Phase 3 replaces it.
@@ -285,6 +286,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/health", s.method(http.MethodGet, s.health))
 	mux.HandleFunc("/v1/ingest", s.method(http.MethodPost, s.auth(s.ingest)))
 	mux.HandleFunc("/v1/artifacts", s.method(http.MethodGet, s.auth(s.artifacts)))
+	mux.HandleFunc("/v1/checks", s.method(http.MethodGet, s.auth(s.checks)))
+	mux.HandleFunc("/v1/baselines", s.method(http.MethodGet, s.auth(s.baselines)))
+	mux.HandleFunc("/v1/search", s.method(http.MethodGet, s.auth(s.search)))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not found"})
 	})
@@ -413,11 +417,15 @@ func (s *Server) artifacts(w http.ResponseWriter, r *http.Request, _ string, ts 
 	if sc := a.Latest.Screen; sc != nil {
 		screen = map[string]any{"verdict": sc.Verdict, "scorer": sc.Scorer, "at": sc.At.UTC().Format(time.RFC3339)}
 	}
+	var rejection any
+	if rj := a.Latest.Rejection; rj != nil {
+		rejection = map[string]any{"stage": rj.Stage, "reason": rj.Reason, "at": rj.At.UTC().Format(time.RFC3339)}
+	}
 	scores := []map[string]any{}
 	for _, sc := range a.Latest.Scores {
 		scores = append(scores, map[string]any{"check": sc.Check, "score": sc.Score})
 	}
 	writeJSON(w, 200, map[string]any{"repo_id": a.RepoID, "path": a.Path, "kind": keys.Kind(a.Path), "versions": a.Versions,
 		"latest": map[string]any{"content_hash": a.Latest.ContentHash, "received_at": a.Latest.ReceivedAt.UTC().Format(time.RFC3339),
-			"conversation_id": a.Latest.ConversationID, "source": a.Latest.Source, "screen": screen, "scores": scores}})
+			"conversation_id": a.Latest.ConversationID, "source": a.Latest.Source, "screen": screen, "scores": scores, "rejection": rejection}})
 }

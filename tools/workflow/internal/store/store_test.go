@@ -353,3 +353,47 @@ func TestWriterBurst(t *testing.T) {
 	fmt.Printf("writer-burst: tenants=%d facts=%d p50=%v p99=%v db_bytes=%d\n", tenants, total,
 		lat[len(lat)/2], lat[len(lat)*99/100], bytes)
 }
+
+func TestSearchIndex(t *testing.T) {
+	ctx := context.Background()
+	tn := openT(t, Options{})
+	put := func(content string, verdict string) string {
+		h := keys.ContentHash([]byte(content))
+		raw := []byte(fmt.Sprintf(`{"type":"artifact_version","content_hash":%q}`, h))
+		if _, err := tn.Append(ctx, []FactRow{{RowHash: keys.ContentHash(raw), Type: "artifact_version", ConversationID: "c", Harness: "h",
+			Event: "w", TS: 1, RepoID: "r", Path: "docs/plans/01-x/DESIGN.md", ContentHash: h, Raw: raw}}); err != nil {
+			t.Fatal(err)
+		}
+		if err := tn.WritePending(h, []byte(content)); err != nil {
+			t.Fatal(err)
+		}
+		if err := tn.Promote(ctx, h, Screen{Verdict: verdict}); err != nil {
+			t.Fatal(err)
+		}
+		return h
+	}
+	count := func() int {
+		var n int
+		if err := tn.rdb.QueryRow(`SELECT count(*) FROM search`).Scan(&n); err != nil {
+			t.Fatal(err)
+		}
+		return n
+	}
+	h1 := put("alpha\n", "pass")
+	put("\xff\xfe not utf8\n", "unscreened")
+	if n := count(); n != 1 {
+		t.Fatalf("index rows %d, want 1 (invalid UTF-8 skipped)", n)
+	}
+	if err := tn.Reindex(ctx); err != nil || count() != 1 {
+		t.Fatalf("reindex: %v %d", err, count())
+	}
+	if _, err := tn.wdb.Exec(`DELETE FROM search`); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.Reindex(ctx); err != nil || count() != 1 {
+		t.Fatalf("rebuild: %v %d", err, count())
+	}
+	if err := tn.DropBlob(ctx, h1, Rejection{Stage: "screen"}); err != nil || count() != 0 {
+		t.Fatalf("drop: %v %d", err, count())
+	}
+}

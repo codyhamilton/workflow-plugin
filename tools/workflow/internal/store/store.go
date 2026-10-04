@@ -42,6 +42,8 @@ var migrations = []string{
 		id INTEGER PRIMARY KEY, content_hash TEXT NOT NULL, check_name TEXT NOT NULL, result REAL NOT NULL,
 		scorer TEXT NOT NULL, at INTEGER NOT NULL);
 	CREATE INDEX scores_hash ON scores(content_hash, check_name);`,
+	// 2: full-text index of screened content, one row per content hash.
+	`CREATE VIRTUAL TABLE search USING fts5(content_hash UNINDEXED, body, tokenize='porter unicode61');`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -104,7 +106,11 @@ func Open(dir string, opts Options) (*Tenant, error) {
 		return nil, err
 	}
 	t := &Tenant{dir: dir, window: opts.GroupWindow, wdb: wdb, rdb: rdb, queue: make(chan *request, 1024)}
-	if err := t.migrate(); err != nil {
+	from, err := t.migrate()
+	if err == nil && from == 1 {
+		err = t.reindex(context.Background()) // existing db gaining the search index; writer not started yet
+	}
+	if err != nil {
 		wdb.Close()
 		rdb.Close()
 		return nil, err
@@ -115,29 +121,31 @@ func Open(dir string, opts Options) (*Tenant, error) {
 	return t, nil
 }
 
-func (t *Tenant) migrate() error {
+// migrate applies pending migrations and returns the user_version it started from.
+func (t *Tenant) migrate() (int, error) {
 	var v int
 	if err := t.wdb.QueryRow(`PRAGMA user_version`).Scan(&v); err != nil {
-		return err
+		return 0, err
 	}
+	from := v
 	for i := v; i < len(migrations); i++ {
 		tx, err := t.wdb.Begin()
 		if err != nil {
-			return err
+			return from, err
 		}
 		if _, err := tx.Exec(migrations[i]); err != nil {
 			tx.Rollback()
-			return fmt.Errorf("store: migration %d: %w", i+1, err)
+			return from, fmt.Errorf("store: migration %d: %w", i+1, err)
 		}
 		if _, err := tx.Exec(fmt.Sprintf(`PRAGMA user_version = %d`, i+1)); err != nil {
 			tx.Rollback()
-			return err
+			return from, err
 		}
 		if err := tx.Commit(); err != nil {
-			return err
+			return from, err
 		}
 	}
-	return nil
+	return from, nil
 }
 
 // Close finishes queued writes, then closes the databases.
@@ -441,6 +449,9 @@ func (t *Tenant) Promote(ctx context.Context, hash string, s Screen, scores ...S
 				return err
 			}
 		}
+		if searchable(s.Verdict) {
+			return t.indexTx(tx, hash)
+		}
 		return nil
 	})
 }
@@ -457,7 +468,12 @@ func (t *Tenant) DropBlob(ctx context.Context, hash string, r Rejection) error {
 	if r.ContentHash == "" {
 		r.ContentHash = hash
 	}
-	return t.AppendRejection(ctx, r)
+	return t.submit(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.Exec(`DELETE FROM search WHERE content_hash=?`, hash); err != nil {
+			return err
+		}
+		return insertRejection(tx, r)
+	})
 }
 
 // PendingPath is the pending file's path (tests set its mod time).
@@ -626,6 +642,13 @@ type Latest struct {
 	ConversationID, Source string
 	Screen                 *ScreenRow
 	Scores                 []ScoreRow
+	Rejection              *RejectionRow // most recent rejection of this content hash, or nil
+}
+
+// RejectionRow is a stored rejection as the artifact read shows it.
+type RejectionRow struct {
+	Stage, Reason string
+	At            time.Time
 }
 type Artifact struct {
 	RepoID, Path string
@@ -663,6 +686,16 @@ func (t *Tenant) Artifact(ctx context.Context, repoID, path string) (*Artifact, 
 	case err == nil:
 		s.At = time.Unix(0, at)
 		a.Latest.Screen = &s
+	case !errors.Is(err, sql.ErrNoRows):
+		return nil, err
+	}
+	var rj RejectionRow
+	err = t.rdb.QueryRowContext(ctx, `SELECT stage, reason, at FROM rejections WHERE content_hash=?
+		ORDER BY id DESC LIMIT 1`, h).Scan(&rj.Stage, &rj.Reason, &at)
+	switch {
+	case err == nil:
+		rj.At = time.Unix(0, at)
+		a.Latest.Rejection = &rj
 	case !errors.Is(err, sql.ErrNoRows):
 		return nil, err
 	}
