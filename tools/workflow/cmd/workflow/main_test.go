@@ -34,8 +34,8 @@ func TestServeOutcome(t *testing.T) {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
 	data := filepath.Join(tmp, "data")
-	addr := freePort(t)
-	env := append(os.Environ(), "HOME="+tmp, "WORKFLOW_SERVE_DATA="+data, "WORKFLOW_SERVE_ADDR="+addr)
+	env := append(os.Environ(), "HOME="+tmp, "WORKFLOW_SERVE_DATA="+data, "WORKFLOW_SERVE_ADDR=127.0.0.1:0",
+		"WORKFLOW_QUEUE="+filepath.Join(tmp, "queue"), "WORKFLOW_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"))
 
 	// no keys: refuses to start
 	noKeys := exec.Command(bin, "serve")
@@ -46,23 +46,28 @@ func TestServeOutcome(t *testing.T) {
 
 	cmd := exec.Command(bin, "serve")
 	cmd.Env = append(env, "WORKFLOW_SERVE_KEYS=a=ka,b=kb")
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
+	errPath := filepath.Join(tmp, "serve.log")
+	errFile, err := os.Create(errPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd.Stderr = errFile
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
 	defer func() { cmd.Process.Kill(); cmd.Wait() }()
-	base := "http://" + addr
-	for i := 0; ; i++ {
-		if r, err := http.Get(base + "/v1/health"); err == nil {
-			r.Body.Close()
-			break
+	var addr string
+	for i := 0; addr == ""; i++ {
+		b, _ := os.ReadFile(errPath)
+		if m := listenRE.FindSubmatch(b); m != nil {
+			addr = string(m[1])
+		} else if i > 200 {
+			t.Fatal("server did not start: " + string(b))
+		} else {
+			time.Sleep(50 * time.Millisecond)
 		}
-		if i > 100 {
-			t.Fatal("server did not start: " + stderr.String())
-		}
-		time.Sleep(50 * time.Millisecond)
 	}
+	base := "http://" + addr
 
 	secret := "AKIA" + "IOSFODNN7" + "EXAMPLE"
 	content := "# design\n"
@@ -128,7 +133,7 @@ func TestServeOutcome(t *testing.T) {
 
 	cmd.Process.Signal(syscall.SIGTERM)
 	cmd.Wait()
-	if strings.Contains(stderr.String(), secret) {
+	if b, _ := os.ReadFile(errPath); bytes.Contains(b, []byte(secret)) {
 		t.Fatal("secret in stderr")
 	}
 	filepath.WalkDir(data, func(p string, d fs.DirEntry, err error) error {

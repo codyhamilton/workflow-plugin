@@ -72,6 +72,16 @@ func runServe() int {
 	defer stop()
 	errc := make(chan error, 1)
 	go func() { errc <- srv.Serve(ln) }()
+	hostCtx, hostCancel := context.WithCancel(context.Background())
+	hostDone := make(chan struct{})
+	var hostPoll time.Duration // WORKFLOW_SERVE_POLL: test-only hosting tick
+	if d, err := time.ParseDuration(os.Getenv("WORKFLOW_SERVE_POLL")); err == nil {
+		hostPoll = d
+	}
+	go func() {
+		defer close(hostDone)
+		s.Host(hostCtx, serve.HostOptions{Bound: ln.Addr().String(), Poll: hostPoll, Log: os.Stderr})
+	}()
 	fmt.Fprintf(os.Stderr, "workflow serve: listening on %s\n", ln.Addr())
 	code := 0
 	select {
@@ -80,6 +90,8 @@ func runServe() int {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)
 		code = 1
 	}
+	hostCancel() // the hosted drain stops and releases the lock before tenants close
+	<-hostDone
 	sctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(sctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
