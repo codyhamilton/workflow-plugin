@@ -37,7 +37,7 @@ type fakeAPI struct {
 	path   string
 	status int
 	body   string // if set, returned verbatim
-	screen int
+	screen float64
 	raw    map[string]int
 }
 
@@ -156,13 +156,18 @@ func TestJev(t *testing.T) {
 	t.Run("screen levels", func(t *testing.T) {
 		f := newAPI(t)
 		j := f.jev(t)
-		for lvl, flag := range map[int]bool{0: false, 1: false, 2: true, 3: true} {
-			f.screen = lvl
+		// Jev answers fractionally; the level is the nearest integer.
+		for _, c := range []struct {
+			raw   float64
+			flag  bool
+			level string
+		}{{0, false, ""}, {1, false, ""}, {1.4, false, ""}, {1.5, true, "2"}, {1.9, true, "2"}, {2, true, "2"}, {3, true, "3"}} {
+			f.screen = c.raw
 			v, err := j.Screen(ctx, []byte("c"), nil)
-			if err != nil || v.Flag != flag {
-				t.Errorf("level %d: %+v %v", lvl, v, err)
+			if err != nil || v.Flag != c.flag {
+				t.Errorf("raw %v: %+v %v", c.raw, v, err)
 			}
-			if flag && v.Reason != "screen: jev screen_credential level "+string(rune('0'+lvl)) {
+			if c.flag && v.Reason != "screen: jev screen_credential level "+c.level {
 				t.Errorf("reason = %q", v.Reason)
 			}
 		}

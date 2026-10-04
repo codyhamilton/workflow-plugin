@@ -23,3 +23,8 @@ None for this brief.
 ## Known problems
 - Content is sent unscrubbed (legacy `quality.py` scrubbed first); the brief says the precheck is upstream, so the scorer does not scrub.
 - The legacy criteria.json also holds a `version` and `note` key; the loader ignores any non-kind key.
+
+## Orchestrator amendment
+
+The screen level was `int(raw)`, so a fractional 1.9 passed. It is now `math.Round(raw)`: 1.5 and
+above flags. `TestJev/screen_levels` covers 0, 1, 1.4, 1.5, 1.9, 2 and 3.

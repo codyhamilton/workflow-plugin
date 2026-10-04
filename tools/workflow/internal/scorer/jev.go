@@ -102,7 +102,8 @@ func (j *Jev) Screen(ctx context.Context, content []byte, kinds []string) (Verdi
 		return Verdict{}, errors.New("scorer: response has no screen_credential answer")
 	}
 	j.keep(content, scoresOf(cks, answers))
-	level := int(raw)
+	// Jev answers fractionally; round to the nearest level so 1.9 flags.
+	level := int(math.Round(raw))
 	if level >= screenFlagAt {
 		return Verdict{Flag: true, Reason: fmt.Sprintf("screen: jev %s level %d", screenName, level)}, nil
 	}
