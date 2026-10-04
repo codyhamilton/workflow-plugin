@@ -4,6 +4,10 @@ design_id: 172
 
 # Artifact submit hooks
 
+> **Superseded** by [docs/design/system-architecture.md](../../design/system-architecture.md) and
+> [docs/design/01-event-model-and-ingest.md](../../design/01-event-model-and-ingest.md). Hooks no
+> longer post; the drain captures artifact versions. Kept for history.
+
 ## Intent
 
 User request, verbatim:
