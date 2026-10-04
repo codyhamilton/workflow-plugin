@@ -200,6 +200,13 @@ its own.
 - Approach: known
 - Depends on: phase 1
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 3-01 Scorer, check loading and execution-report checks | [briefs/3-01-scorer-checks.md](briefs/3-01-scorer-checks.md) | nothing | nothing |
+| 3-02 Screen worker, store support and `serve` wiring | [briefs/3-02-screen-worker.md](briefs/3-02-screen-worker.md) | 3-01 | nothing |
+
 ### Phase 4 — Advisory shim and reads
 
 - Outcome: `GET /v1/artifacts`, `/v1/checks`, `/v1/baselines` and `/v1/search` answer per design 4
