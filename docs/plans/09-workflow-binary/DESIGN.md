@@ -178,6 +178,15 @@ its own.
 - Approach: known
 - Depends on: phase 1
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 2-01 `spool.sh` conversation names and Go kick | [briefs/2-01-spool-coexistence.md](briefs/2-01-spool-coexistence.md) | nothing | 2-02 |
+| 2-02 Fact building and client config | [briefs/2-02-facts-clientconfig.md](briefs/2-02-facts-clientconfig.md) | nothing | 2-01 |
+| 2-03 `workflow drain` and `workflow status` | [briefs/2-03-drain-status.md](briefs/2-03-drain-status.md) | 2-01, 2-02 | nothing |
+| 2-04 `serve` hosts the drain; phase outcome test | [briefs/2-04-serve-hosted-drain.md](briefs/2-04-serve-hosted-drain.md) | 2-03 | nothing |
+
 ### Phase 3 — Screening and scoring
 
 - Outcome: with a fake scorer, accepted artifact content sits in `pending/` until screened; pass
