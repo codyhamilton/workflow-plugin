@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Harness-neutral session event rows: normalisation, redaction and the per-session JSONL archive.
 
-Capture is not here: hooks run `spool.sh` (bash), which drops the raw payload in a spool directory, and `drain.py`
-calls `normalize()` below, archives to <harness>/<session_id>.jsonl and posts to the quality service.
-`record` remains as a compatibility shim for older registrations: it spools exactly as spool.sh does.
+Capture is not here: hooks run `spool.sh` (bash), which drops the raw payload in the queue, and `workflow drain`
+(tools/workflow) normalises, scrubs and posts it. This module keeps `normalize()` and the archive readers.
+`record` remains as a compatibility shim for older registrations: it execs spool.sh.
 Store: $WORKFLOW_HOOKLOG_DIR or ~/.local/share/workflow-plugin/hooklog. Secrets are pattern-redacted and large fields
 truncated in normalize(), before anything is archived or posted.
 
@@ -174,18 +174,13 @@ def main() -> int:
     show.add_argument("path")
     args = ap.parse_args()
     if args.cmd == "record":
-        # Compatibility shim: older registrations still call `hooklog.py record`. Spool the raw payload, as spool.sh does.
+        # Compatibility shim: older registrations still call `hooklog.py record`. Hand off to spool.sh, which queues
+        # the payload, kicks the drain and prints Cursor's response.
+        spool = Path(__file__).resolve().parent / "spool.sh"
         try:
-            if os.environ.get("WORKFLOW_HOOKLOG", "").lower() not in ("0", "off", "false"):
-                sd = spool_dir()
-                (sd / "tmp").mkdir(parents=True, exist_ok=True)
-                ts = time.time()
-                name = f"{ts:.6f}-{os.getpid()}-{os.urandom(2).hex()}"
-                env = json.dumps({"ts": round(ts, 6), "harness": args.harness, "event": args.event or ""})
-                tmp = sd / "tmp" / name
-                tmp.write_text(env + "\n" + sys.stdin.read(), encoding="utf-8")
-                tmp.rename(sd / f"{name}.evt")
-        except Exception as exc:  # never break the agent
+            sys.stdout.flush()
+            os.execvp("bash", ["bash", str(spool), "--harness", args.harness, "--event", args.event or ""])
+        except Exception as exc:  # never break the agent; fall through to Cursor's response
             if os.environ.get("WORKFLOW_HOOKLOG_DEBUG"):
                 print(f"hooklog: {exc}", file=sys.stderr)
         if args.harness == "cursor":
