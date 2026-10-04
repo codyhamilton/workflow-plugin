@@ -1,8 +1,10 @@
 package secrets
 
 import (
+	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -129,5 +131,84 @@ func TestRepoDocsClean(t *testing.T) {
 	}
 	if len(bad) > 0 {
 		t.Errorf("secret-shaped text in docs:\n%s", strings.Join(bad, "\n"))
+	}
+}
+
+func envHits(text string) []Hit {
+	var out []Hit
+	for _, h := range Scan(text) {
+		if h.Pattern == "env_assignment" {
+			out = append(out, h)
+		}
+	}
+	return out
+}
+
+// TestEnvAssignmentProse: ordinary plan prose that merely mentions a key,
+// token or secret must not hit env_assignment.
+func TestEnvAssignmentProse(t *testing.T) {
+	for _, s := range []string{
+		"Trailer key: `Workflow-Phase:`",
+		"No key: `Options.ScreenStep`",
+		"secret: aws_access_key at line 3",
+		"- secret: aws_access_key at line 3",
+		"The api_key: configured-in-the-environment-1",
+		"Use the token: Workflow-Phase-Trailer-Name",
+	} {
+		if h := envHits(s); len(h) != 0 {
+			t.Errorf("%q hit %+v", s, h)
+		}
+	}
+}
+
+func TestEnvAssignmentPositives(t *testing.T) {
+	for _, s := range []string{
+		"API_" + "KEY=abcd1234efgh",
+		"export GITHUB_" + "TOKEN=\"abcd1234efgh5678\"",
+		"run: export DB_" + "PASSWORD=hunter2hunter2",
+		"{\"client_" + "secret\": \"abcd1234efgh5678wxyz\"}",
+		"client_" + "secret: abcd1234efgh5678wxyz",
+		"- api_" + "key: abcd1234efgh5678wxyz",
+	} {
+		if h := envHits(s); len(h) != 1 {
+			t.Errorf("%q hits %+v", s, h)
+		}
+	}
+}
+
+// TestEnvAssignmentCorpus walks the repo's plan and design docs, when
+// present, and asserts no env_assignment hit.
+func TestEnvAssignmentCorpus(t *testing.T) {
+	var bad []string
+	seen := 0
+	for _, d := range []string{"../../../../docs/plans", "../../../../docs/design"} {
+		if _, err := os.Stat(d); err != nil {
+			continue
+		}
+		filepath.WalkDir(d, func(path string, de fs.DirEntry, err error) error {
+			if err != nil || de.IsDir() || !strings.HasSuffix(path, ".md") {
+				return nil
+			}
+			b, err := os.ReadFile(path)
+			if err != nil {
+				return nil
+			}
+			seen++
+			lines := strings.Split(string(b), "\n")
+			for _, h := range envHits(string(b)) {
+				// Genuine NAME=value examples that docs quote on purpose.
+				if l := lines[h.Line-1]; strings.Contains(l, "TYPESAFE_API_"+"KEY=sentinel") || strings.Contains(l, "API_"+"KEY=abcd1234efgh") {
+					continue
+				}
+				bad = append(bad, path+":"+strconv.Itoa(h.Line))
+			}
+			return nil
+		})
+	}
+	if seen == 0 {
+		t.Skip("no docs corpus present")
+	}
+	if len(bad) > 0 {
+		t.Errorf("env_assignment false positives in %d files:\n%s", seen, strings.Join(bad, "\n"))
 	}
 }

@@ -34,17 +34,29 @@ var patterns = []pattern{
 	{name: "jwt", re: regexp.MustCompile(`\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}`)},
 	{name: "bearer_token", re: regexp.MustCompile(`(?i)\bbearer[ \t]+[A-Za-z0-9._~+/\-]{20,}=*`)},
 	{name: "connection_string", re: regexp.MustCompile(`\b[A-Za-z][A-Za-z0-9+.\-]*://[^\s:/@]+:([^\s@/]+)@[^\s/]+`), group: 1, ok: func(v string) bool { return !placeholder(v, false) }},
-	{name: "env_assignment", re: regexp.MustCompile(`(?i)[A-Za-z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD)["']?[ \t]*[=:][ \t]*["']?([^\s"']+)`), group: 1, ok: func(v string) bool { return !placeholder(v, true) }},
+	// env_assignment has two forms. Env style (NAME=value) needs an
+	// uppercase identifier ending in KEY/SECRET/TOKEN/PASSWORD at a word
+	// start, so prose such as "Trailer key: x" never matches. The colon form
+	// (YAML/JSON) needs a quoted key or a key at line start, and a value
+	// with secret-like length and entropy.
+	{name: "env_assignment", re: regexp.MustCompile("(?m)(?:^|[ \\t\"'`(])(?:export[ \\t]+)?[A-Z0-9_]*(?:KEY|SECRET|TOKEN|PASSWORD)[ \\t]*=[ \\t]*[\"']?([^\\s\"']+)"), group: 1, ok: func(v string) bool { return !placeholder(v, true) }},
+	{name: "env_assignment", re: regexp.MustCompile(`(?mi)(?:^[ \t]*(?:-[ \t]+)?|["'])[A-Za-z0-9_\-]*(?:KEY|SECRET|TOKEN|PASSWORD)["']?[ \t]*:[ \t]*["']?([^\s"',]+)`), group: 1, ok: func(v string) bool { return !placeholder(v, true) && secretLike(v) }},
 }
 
 var xRun = regexp.MustCompile(`^[xX*.\-_]{3,}$`)
+
+// secretLike is the stricter value test for the colon form: at least 16
+// characters and at least one digit, so words and identifiers do not hit.
+func secretLike(v string) bool {
+	return utf8.RuneCountInString(v) >= 16 && strings.ContainsAny(v, "0123456789")
+}
 
 // placeholder reports whether v looks like a documentation placeholder.
 func placeholder(v string, lengthRule bool) bool {
 	if lengthRule && utf8.RuneCountInString(v) < 8 {
 		return true
 	}
-	for _, p := range []string{"$", "<", "{", "…", "...", "*"} {
+	for _, p := range []string{"$", "<", "{", "`", "…", "...", "*"} {
 		if strings.HasPrefix(v, p) {
 			return true
 		}
@@ -116,9 +128,11 @@ func Redact(text string) string {
 
 // Patterns returns the stable pattern names.
 func Patterns() []string {
-	names := make([]string, len(patterns))
-	for i, p := range patterns {
-		names[i] = p.name
+	var names []string
+	for _, p := range patterns {
+		if len(names) == 0 || names[len(names)-1] != p.name {
+			names = append(names, p.name)
+		}
 	}
 	return names
 }
