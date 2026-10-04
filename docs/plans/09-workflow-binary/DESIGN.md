@@ -219,6 +219,18 @@ its own.
 - Approach: known
 - Depends on: phases 2 and 3
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 4-01 Advisory reads in the service: checks, baselines, search | [briefs/4-01-service-reads.md](briefs/4-01-service-reads.md) | nothing | 4-02 |
+| 4-02 MCP shim package: protocol, three tools, queue awareness | [briefs/4-02-mcp-shim.md](briefs/4-02-mcp-shim.md) | nothing | 4-01 |
+| 4-03 `workflow mcp` wiring and the phase 4 outcome test | [briefs/4-03-mcp-wiring-outcome.md](briefs/4-03-mcp-wiring-outcome.md) | 4-01, 4-02 | nothing |
+
+Carried from phase 3: "no `repo_id` before a first commit" becomes 4-02's `not tracked` answer; the
+other phase 2 items stay with phase 5. `screen_gaps` falling only on restart stays carried (no
+phase 4 outcome reads it). Content sent to Jev unscrubbed is accepted by design 3 (principle 9).
+
 ### Phase 5 — Distribution and cutover
 
 - Outcome: `bin/workflow --version` prints `workflow <version> <commit>` from a clean temp cache by
