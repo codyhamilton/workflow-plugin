@@ -1,7 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
-import { createServer } from 'node:http'
-import { createHash } from 'node:crypto'
+import { mkdtemp, readdir, readFile, rm, writeFile, chmod } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -11,134 +9,151 @@ import plugin from '../src/index.ts'
 
 const named = 'event config dispose chat.message chat.params chat.headers permission.ask command.execute.before tool.execute.before tool.execute.after tool.definition shell.env experimental.chat.messages.transform experimental.chat.system.transform experimental.session.compacting experimental.compaction.autocontinue experimental.text.complete experimental.provider.small_model'.split(' ')
 const bus = 'command.executed file.edited file.watcher.updated installation.updated lsp.client.diagnostics lsp.updated message.part.removed message.part.updated message.removed message.updated permission.asked permission.replied server.connected session.created session.compacted session.deleted session.diff session.error session.idle session.status session.updated todo.updated shell.env tool.execute.before tool.execute.after tui.prompt.append tui.command.execute tui.toast.show'.split(' ')
+const spoolSh = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'tools', 'hooklog', 'spool.sh')
+const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
-const drainPy = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'tools', 'hooklog', 'drain.py')
-const drain = () => execFileSync('python3', [drainPy, '--once'], { env: { ...process.env, WORKFLOW_QUALITY_URL: '' } })
-
-test('18 callbacks and 28 bus types preserve payloads, outputs, sessions and boundaries', async () => {
+// Isolated env: temp HOME/queue/cache, stub WORKFLOW_BIN that records its args, no keys.
+async function sandbox(extra = {}) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), 'workflow-hooks-'))
-  process.env.WORKFLOW_HOOKLOG_DIR = tmp
-  process.env.WORKFLOW_HOOKLOG = 'on'
-  process.env.WORKFLOW_OPENCODE_SIGNALS = '0' // capture is independent of soft signals
+  const saved = { ...process.env }
+  const stub = path.join(tmp, 'stub.sh')
+  const log = path.join(tmp, 'stub.log')
+  await writeFile(stub, `#!/bin/sh\necho "$@" >> ${log}\n`)
+  await chmod(stub, 0o755)
+  Object.assign(process.env, {
+    HOME: tmp, XDG_CACHE_HOME: path.join(tmp, 'cache'), WORKFLOW_QUEUE: path.join(tmp, 'queue'),
+    WORKFLOW_BIN: stub, WORKFLOW_HOOKLOG: 'on', WORKFLOW_OPENCODE_SIGNALS: '0',
+    WORKFLOW_HOOKLOG_KICK: '0', TYPESAFE_API_KEY: '', ...extra,
+  })
+  const calls = async () => { try { return (await readFile(log, 'utf8')).trim().split('\n').filter(Boolean) } catch { return [] } }
+  const done = async () => {
+    for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key]
+    Object.assign(process.env, saved)
+    await rm(tmp, { recursive: true, force: true })
+  }
+  return { tmp, queue: path.join(tmp, 'queue'), calls, done }
+}
+const evts = async (q) => (await readdir(q).catch(() => [])).filter(n => n.endsWith('.evt'))
+const read = async (q, n) => { const [head, ...rest] = (await readFile(path.join(q, n), 'utf8')).split('\n'); return [JSON.parse(head), JSON.parse(rest.join('\n'))] }
+
+test('18 callbacks and 28 bus types queue payloads, sessions and boundaries', async () => {
+  const sb = await sandbox()
   try {
     const hooks = await plugin({ directory: '/tmp/project' })
     assert.deepEqual(Object.keys(hooks).sort(), named.sort())
     const input = { sessionID: 's', tool: 'read', callID: 't', args: { path: 'a' } }
     const output = { status: 'ask', args: { path: 'a' }, parts: [{ type: 'text', text: 'prompt' }],
-                     text: 'answer', output: 'result', title: 'read a', headers: { Authorization: 'short-secret' },
-                     env: { TOKEN: 'short-secret' }, enabled: true }
-    for (const name of named.filter(n => !['event', 'dispose'].includes(n))) {
+                     text: 'answer', output: 'result', title: 'read a', headers: { Authorization: 'x' },
+                     env: { TOKEN: 'x' }, enabled: true }
+    const hookNames = named.filter(n => !['event', 'dispose'].includes(n))
+    for (const name of hookNames) {
       const before = JSON.stringify({ input, output })
       await hooks[name](input, output)
       assert.equal(JSON.stringify({ input, output }), before, name)
     }
-    for (const type of bus) {
-      const event = { type, properties: { info: { id: 's', directory: '/tmp/project' } } }
-      await hooks.event({ event })
-    }
-    // Real message/part envelopes put sessionID below properties, alongside unrelated IDs.
+    for (const type of bus) await hooks.event({ event: { type, properties: { info: { id: 's', directory: '/tmp/project' } } } })
     await hooks.event({ event: { type: 'message.part.updated', properties: { part: { id: 'part', sessionID: 's', type: 'step-finish' } } } })
     const cyclic = { sessionID: 's' }
     cyclic.properties = cyclic
     await hooks['chat.params'](cyclic, output)
     const idle = hooks.event({ event: { type: 'session.idle', properties: { sessionID: 's' } } })
-    await hooks.dispose() // host bus dispatch can still be in flight during teardown
+    await hooks.dispose()
     await idle
-    drain()
-    const rows = (await readFile(path.join(tmp, 'opencode/s.jsonl'), 'utf8')).trim().split('\n').map(JSON.parse)
-    assert.deepEqual(new Set(rows.filter(r => r.source === 'hook').map(r => r.hook_event)), new Set(named.filter(n => !['event', 'dispose'].includes(n))))
-    assert.deepEqual(new Set(rows.filter(r => r.source === 'bus').map(r => r.hook_event)), new Set(bus))
-    assert(rows.filter(r => r.source === 'bus').every(r => r.kind === 'event'))
-    assert.equal(rows.filter(r => r.kind === 'tool_call').length, 1)
-    assert.equal(rows.find(r => r.kind === 'tool_pre').input.path, 'a')
-    assert.deepEqual(rows.find(r => r.kind === 'batch_end').tool_use_ids, ['t'])
-    assert.equal(rows.at(-1).hook_event, 'Stop')
-    assert.equal(rows.find(r => r.hook_event === 'chat.headers').data.output.headers.Authorization, '[REDACTED]')
-    const unknown = (await readFile(path.join(tmp, 'opencode/unknown.jsonl'), 'utf8')).trim().split('\n').map(JSON.parse)
-    assert.equal(unknown.at(-1).hook_event, 'dispose')
-    process.env.WORKFLOW_HOOKLOG_SPOOL = path.join(tmp, 'spool-file') // unwritable spool cannot throw or rewrite status
-    await writeFile(path.join(tmp, 'spool-file'), 'x')
+    const rows = []
+    for (const n of await evts(sb.queue)) rows.push(await read(sb.queue, n))
+    assert(rows.every(([env]) => env.harness === 'opencode'))
+    const hookEvents = new Set(rows.filter(([, p]) => p.source === 'hook').map(([env]) => env.event))
+    assert.deepEqual(hookEvents, new Set(hookNames))
+    const busEvents = new Set(rows.filter(([, p]) => p.source === 'bus').map(([env]) => env.event))
+    assert.deepEqual(busEvents, new Set(bus))
+    assert(rows.some(([env]) => env.event === 'PostToolBatch'))
+    assert(rows.some(([env]) => env.event === 'Stop'))
+    const ts = rows.map(([env]) => env.ts)
+    assert(ts.every(t => typeof t === 'number'))
+    // unwritable queue cannot throw into the hook chain
+    await writeFile(path.join(sb.tmp, 'file'), 'x')
+    process.env.WORKFLOW_QUEUE = path.join(sb.tmp, 'file')
     await hooks['permission.ask'](input, output)
     assert.equal(output.status, 'ask')
-  } finally {
-    delete process.env.WORKFLOW_HOOKLOG_SPOOL
-    await rm(tmp, { recursive: true, force: true })
-  }
+  } finally { await sb.done() }
 })
 
-test('artifact backstop follows tool logging, deduplicates, and preserves tool outputs', async () => {
-  const tmp = await mkdtemp(path.join(os.tmpdir(), 'workflow-artifact-hooks-'))
-  const saved = { ...process.env }
-  const requests = []
-  const artifacts = new Map()
-  const outcomes = []
-  const server = createServer(async (req, res) => {
-    let raw = ''
-    for await (const chunk of req) raw += chunk
-    requests.push([req.method, req.url])
-    let response = {}
-    if (req.method === 'POST' && ['/v1/designs', '/v1/briefs'].includes(req.url)) {
-      const body = JSON.parse(raw)
-      const sha = createHash('sha256').update(body.text).digest('hex').slice(0, 16)
-      const id = artifacts.get(body.path)?.id || artifacts.size + 1
-      const kind = req.url === '/v1/designs' ? 'design' : 'brief'
-      const artifact = { id, kind, project: body.project, path: body.path, sha, text: body.text,
-                         conversation: body.conversation_id, submission_bound: true }
-      artifacts.set(body.path, artifact)
-      response = { id, frontmatter: `---\n${kind}_id: ${id}\n---\n` }
-    } else if (req.url.startsWith('/v1/sessions/')) {
-      const conversation = decodeURIComponent(req.url.split('/').at(-1))
-      response = { artifacts: [...artifacts.values()].filter(a => a.conversation === conversation) }
-    } else if (/\/v1\/(designs|briefs)\/\d+\/body/.test(req.url)) {
-      response = [...artifacts.values()].find(a => a.id === Number(req.url.split('/')[3]))
-    } else if (req.url === '/v1/hook-events') {
-      outcomes.push(...JSON.parse(raw).rows)
-      response = { inserted: 1 }
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify(response))
-  })
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
-  process.env.WORKFLOW_QUALITY_URL = `http://127.0.0.1:${server.address().port}`
-  process.env.WORKFLOW_HOOKLOG_DIR = path.join(tmp, 'spool')
-  process.env.WORKFLOW_OPENCODE_SIGNALS = '0'
-  process.env.WORKFLOW_HOOKLOG = 'on'
-  delete process.env.WORKFLOW_HOOKLOG_CLI
-  delete process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI
+test('tool.execute.after writes one queue file named like spool.sh with the opencode envelope', async () => {
+  const sb = await sandbox()
   try {
-    await mkdir(path.join(tmp, 'docs/plans/example/briefs'), { recursive: true })
-    const hooks = await plugin({ directory: tmp })
-    for (const [tool, filePath, endpoint] of [
-      ['write', 'docs/plans/example/DESIGN.md', '/v1/designs'],
-      ['edit', 'docs/plans/example/briefs/01.md', '/v1/briefs'],
-    ]) {
-      await writeFile(path.join(tmp, filePath), '# Fixture\n')
-      const input = { sessionID: 'artifact-session', tool, callID: tool, args: { filePath } }
-      const output = { title: 'written', output: 'unchanged tool result' }
-      const original = JSON.stringify({ input, output })
-      await hooks['tool.execute.after'](input, output)
-      await hooks['tool.execute.after'](input, output)
-      assert.equal(JSON.stringify({ input, output }), original)
-      assert.equal(requests.filter(([method, url]) => method === 'POST' && url === endpoint).length, 1)
-    }
-    // capture is a spool file, written before submission and independent of the service
-    assert((await readdir(path.join(tmp, 'spool', 'spool'))).some(n => n.endsWith('.evt')))
-    assert.equal(outcomes.filter(row => row.tool_name === 'artifact_submit').length, 4)
-    assert(outcomes.filter(row => row.tool_name === 'artifact_submit').every(row => row.ok))
-    const postCount = requests.filter(([method, url]) => method === 'POST' && ['/v1/designs', '/v1/briefs'].includes(url)).length
-    await hooks.event({ event: { type: 'file.edited', properties: { sessionID: 'other-session', file: 'docs/plans/example/DESIGN.md' } } })
-    await hooks['tool.execute.after']({ sessionID: 'other-session', tool: 'read', callID: 'read', args: { filePath: 'docs/plans/example/DESIGN.md' } }, { output: '# Fixture' })
-    assert.equal(requests.filter(([method, url]) => method === 'POST' && ['/v1/designs', '/v1/briefs'].includes(url)).length, postCount)
-    process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI = path.join(tmp, 'missing.py')
-    const output = { title: 'written', output: 'preserved through helper failure' }
-    await hooks['tool.execute.after']({ sessionID: 'failure-session', tool: 'write', callID: 'failure', args: { filePath: 'docs/plans/example/DESIGN.md' } }, output)
-    assert.equal(output.output, 'preserved through helper failure')
-    assert.equal(await readFile(path.join(tmp, 'docs/plans/example/DESIGN.md'), 'utf8'), '# Fixture\n')
-    await hooks.dispose()
-  } finally {
-    await new Promise(resolve => server.close(resolve))
-    for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key]
-    Object.assign(process.env, saved)
-    await rm(tmp, { recursive: true, force: true })
-  }
+    const hooks = await plugin({ directory: '/tmp/project' })
+    await hooks['tool.execute.after']({ sessionID: 'ses/odd id', tool: 'write', callID: 'c1', args: { filePath: 'a.md' } }, { output: 'ok', title: 'w' })
+    const names = await evts(sb.queue)
+    assert.equal(names.length, 1)
+    assert.match(names[0], /^ses_odd_id-\d+\.\d+-\d+-\d+\.evt$/)
+    const [env, payload] = await read(sb.queue, names[0])
+    assert.deepEqual(Object.keys(env), ['ts', 'harness', 'event'])
+    assert.equal(env.harness, 'opencode')
+    assert.equal(env.event, 'tool.execute.after')
+    assert.equal(payload.tool_name, 'write')
+    assert.equal(payload.tool_input.filePath, 'a.md')
+    assert.equal((await readdir(path.join(sb.queue, 'tmp'))).length, 0)
+
+    // spool.sh, same id, into a second queue: same prefix and envelope keys
+    const q2 = path.join(sb.tmp, 'queue2')
+    execFileSync('bash', [spoolSh, '--harness', 'opencode', '--event', 'tool.execute.after'], {
+      input: JSON.stringify({ session_id: 'ses/odd id' }),
+      env: { ...process.env, WORKFLOW_QUEUE: q2, WORKFLOW_HOOKLOG_KICK: '0' },
+    })
+    const ref = await evts(q2)
+    assert.equal(ref.length, 1)
+    assert.equal(ref[0].split('-')[0], names[0].split('-')[0])
+    assert.match(ref[0], /^ses_odd_id-\d+\.\d+-\d+-\d+\.evt$/)
+    const [refEnv] = await read(q2, ref[0]).catch(async () => [JSON.parse((await readFile(path.join(q2, ref[0]), 'utf8')).split('\n')[0])])
+    assert.deepEqual(Object.keys(refEnv), Object.keys(env))
+  } finally { await sb.done() }
+})
+
+test('a record without a sessionID is dropped', async () => {
+  const sb = await sandbox()
+  try {
+    const hooks = await plugin({ directory: '/tmp/project' })
+    await hooks.event({ event: { type: 'server.connected', properties: {} } })
+    await hooks.config({}, {})
+    assert.equal((await evts(sb.queue)).length, 0)
+  } finally { await sb.done() }
+})
+
+test('kick runs WORKFLOW_BIN drain at most once per 10 s; load prefetches --version', async () => {
+  const sb = await sandbox({ WORKFLOW_HOOKLOG_KICK: '1' })
+  try {
+    const hooks = await plugin({ directory: '/tmp/project' })
+    const ev = { sessionID: 'k', tool: 'write', callID: 'c', args: {} }
+    await hooks['tool.execute.after'](ev, { output: 'a' })
+    await hooks['tool.execute.after'](ev, { output: 'b' })
+    for (let i = 0; i < 50 && (await sb.calls()).length < 2; i++) await sleep(100)
+    const calls = await sb.calls()
+    assert.equal(calls.filter(c => c === 'drain').length, 1, calls.join('|'))
+    assert.equal(calls.filter(c => c === '--version').length, 1, calls.join('|'))
+  } finally { await sb.done() }
+})
+
+test('KICK=0 disables kick and prefetch', async () => {
+  const sb = await sandbox()
+  try {
+    const hooks = await plugin({ directory: '/tmp/project' })
+    await hooks['tool.execute.after']({ sessionID: 'k', tool: 'write', callID: 'c', args: {} }, { output: 'a' })
+    await sleep(400)
+    assert.deepEqual(await sb.calls(), [])
+  } finally { await sb.done() }
+})
+
+test('no legacy submit helper spawn under any event', async () => {
+  const sb = await sandbox({ WORKFLOW_LEGACY: '1' })
+  try {
+    const hooks = await plugin({ directory: '/tmp/project' })
+    const output = { title: 'written', output: 'preserved' }
+    await hooks['tool.execute.after']({ sessionID: 'a', tool: 'write', callID: 'w', args: { filePath: 'docs/plans/x/DESIGN.md' } }, output)
+    assert.equal(output.output, 'preserved')
+    const [, payload] = await read(sb.queue, (await evts(sb.queue))[0])
+    assert.equal(payload.tool_name, 'write')
+    assert.deepEqual(await sb.calls(), [])
+    const src = await readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'index.ts'), 'utf8')
+    assert(!/artifact.submit|runPythonHook/i.test(src))
+  } finally { await sb.done() }
 })

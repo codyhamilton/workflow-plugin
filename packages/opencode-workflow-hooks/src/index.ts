@@ -28,16 +28,42 @@ function flushHelperPath(): string {
   return path.join(packageRoot(), "python", "batch_flush_cli.py")
 }
 
-// hooklog capture (tools/hooklog): drop the raw payload in the shared spool; tools/hooklog/drain.py normalises, scrubs,
-// archives and posts it, so capture costs one small file write and never waits on python or the network.
-function spoolDir(): string {
-  if (process.env.WORKFLOW_HOOKLOG_SPOOL) return process.env.WORKFLOW_HOOKLOG_SPOOL
-  const store = process.env.WORKFLOW_HOOKLOG_DIR || path.join(os.homedir(), ".local", "share", "workflow-plugin", "hooklog")
-  return path.join(store, "spool")
+// Queue capture: one file per event in the shared queue, same name and envelope as tools/hooklog/spool.sh's queue branch
+// (<conversation>-<ts>-<pid>-<rand>.evt, written under tmp/ then renamed); `bin/workflow drain` ingests it.
+function queueDir(): string {
+  return process.env.WORKFLOW_QUEUE || path.join(os.homedir(), ".local", "share", "workflow", "queue")
+}
+
+// package location: src/ -> package -> packages -> repo root
+function repoRoot(): string {
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
+}
+
+function spawnBin(args: string[]): void {
+  try {
+    const bin = process.env.WORKFLOW_BIN
+    const child = bin
+      ? spawn(bin, args, { detached: true, stdio: "ignore" })
+      : spawn("bash", [path.join(repoRoot(), "bin", "workflow"), ...args], { detached: true, stdio: "ignore" })
+    child.on("error", () => {})
+    child.unref()
+  } catch {
+    // advisory — never throw into the hook chain
+  }
+}
+
+const kickEnabled = () => process.env.WORKFLOW_HOOKLOG_KICK !== "0"
+let lastKick = 0
+
+function kickDrain(): void {
+  if (!kickEnabled()) return
+  const now = Date.now()
+  if (now - lastKick < 10_000) return
+  lastKick = now
+  spawnBin(["drain"])
 }
 
 let lastSpoolTs = 0
-let spoolSeq = 0
 
 // Providers/config can contain cycles; capture a snapshot without touching live objects.
 function snapshotOf(payload: Record<string, unknown>): string {
@@ -54,44 +80,22 @@ function snapshotOf(payload: Record<string, unknown>): string {
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
   if (/^(0|off|false)$/i.test(process.env.WORKFLOW_HOOKLOG || "")) return
   try {
+    const sid = typeof payload.session_id === "string" ? payload.session_id.replace(/[^A-Za-z0-9._-]/g, "_") : ""
+    if (!sid) return
     const snapshot = snapshotOf(payload)
     // ts is when the hook fired and must stay strictly increasing: the drain orders and turn-counts by it.
     lastSpoolTs = Math.max(Date.now() / 1000, lastSpoolTs + 1e-6)
     const ts = lastSpoolTs.toFixed(6)
-    const name = `${ts}-${process.pid}-${String(spoolSeq++).padStart(6, "0")}`
-    const dir = spoolDir()
+    const name = `${ts}-${process.pid}-${Math.floor(Math.random() * 32768)}`
+    const dir = queueDir()
     await mkdir(path.join(dir, "tmp"), { recursive: true, mode: 0o700 })
     const tmp = path.join(dir, "tmp", name)
-    await writeFile(tmp, `${JSON.stringify({ ts: Number(ts), harness: "opencode", event: "" })}\n${snapshot}`, { mode: 0o600 })
-    await rename(tmp, path.join(dir, `${name}.evt`))
+    const event = String(payload.hook_event_name || "").replace(/[^A-Za-z0-9._-]/g, "")
+    await writeFile(tmp, `${JSON.stringify({ ts: Number(ts), harness: "opencode", event })}\n${snapshot}`, { mode: 0o600 })
+    await rename(tmp, path.join(dir, `${sid}-${name}.evt`))
+    kickDrain()
   } catch {
     // capture is advisory — never throw into the hook chain
-  }
-}
-
-async function submitArtifact(payload: Record<string, unknown>): Promise<void> {
-  const tool = String(payload.tool_name || "").split(".").at(-1) || ""
-  if (!/^(write|edit|multiedit|write_file|edit_file|create_file|str_replace_editor|apply_patch|applypatch)$/i.test(tool)) return
-  const helper = process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI || path.join(packageRoot(), "..", "..", "tools", "quality", "artifact_submit.py")
-  await runPythonHook(helper, ["hook", "--harness", "opencode"], payload)
-}
-
-async function runPythonHook(helper: string, args: string[], payload: Record<string, unknown>): Promise<void> {
-  try {
-    const snapshot = snapshotOf(payload)
-    await new Promise<void>((resolve) => {
-      const child = spawn(process.env.PYTHON || process.env.WORKFLOW_PYTHON || "python3", [helper, ...args], {
-        stdio: ["pipe", "ignore", "ignore"],
-      })
-      const timeout = setTimeout(() => { child.kill("SIGKILL"); resolve() }, 5000)
-      const finish = () => { clearTimeout(timeout); resolve() }
-      child.on("error", finish)
-      child.on("close", finish)
-      child.stdin?.on("error", () => {})
-      child.stdin?.end(snapshot)
-    })
-  } catch {
-    // submission is advisory — never throw into the hook chain
   }
 }
 
@@ -159,6 +163,7 @@ function sessionId(value: unknown, seen = new WeakSet<object>()): string | undef
 export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
   const enabled = process.env.WORKFLOW_OPENCODE_SIGNALS !== "0"
   const ctxDir = ctx.directory
+  if (kickEnabled()) spawnBin(["--version"]) // warm the binary cache; never awaited
   const pendingBySession = new Map<string, PendingCall[]>()
   const callsThisStep = new Map<string, string[]>()
   // Serial writes retain callback/marker order even when the bus dispatches concurrently.
@@ -216,7 +221,6 @@ export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
         tool_response: output.output ?? output.title ?? "", input, output,
       }
       await record(payload)
-      await submitArtifact({ cwd: ctxDir, ...payload })
       callsThisStep.set(input.sessionID, [...(callsThisStep.get(input.sessionID) || []), input.callID])
       if (!enabled) return
       const list = pendingBySession.get(input.sessionID) || []
