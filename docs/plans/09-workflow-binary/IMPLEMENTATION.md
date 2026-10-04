@@ -27,3 +27,16 @@ excludes `id` and `content`; a resent rejected fact is rejected again, not `dupl
 - Deviations: none. Known limits are in its report: the `.env`-style pattern is loose, and
   `RepoPath` errors for a directory that does not exist.
 - Agent: Sonnet, 10 tool calls, about 53k tokens.
+
+### 1-02-store (execution 15)
+
+- Built: `internal/store`: tenant directories, `ledger.db` (WAL), blobs and pending, the facts,
+  rejections, screens and scores tables, and one group-commit writer per tenant.
+- Commit: `8024966`. `go test ./...` passes, and the race tests pass with 50 concurrent appenders
+  and no `SQLITE_BUSY`.
+- Writer burst (8 tenants, 4,800 facts, 20-fact requests): p50 11 ms, p99 20–30 ms, ledger 6 MB.
+  Reported only; there is no threshold.
+- Deviations: an empty `Raw` errors explicitly, because `INSERT OR IGNORE` swallows the NOT NULL
+  violation; a `tmp/` directory was added to each tenant directory; index names are the worker's
+  own.
+- Agent: Sonnet, 9 tool calls, about 58k tokens.
