@@ -13,3 +13,6 @@ tools/driver/.assert-log.jsonl
 tools/driver/.run-record.jsonl
 tools/driver/.jev-signal-log.jsonl
 tools/driver/.jev-signal-audit.jsonl
+
+# Release build output
+tools/release/dist/

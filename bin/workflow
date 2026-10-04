@@ -1,0 +1,118 @@
+#!/bin/bash
+# Resolves a workflow binary (override, cache, verified download, locked source build) and execs it.
+# bash 3.2 compatible; mkdir lock. See docs/design/05-distribution.md.
+ROOT=$(cd "$(dirname "$0")/.." && pwd -P) || exit 1
+export WORKFLOW_ROOT="$ROOT"
+VERSION=$(tr -d ' \n\r' < "$ROOT/bin/VERSION")
+
+# 1. development override
+if [ -n "${WORKFLOW_BIN:-}" ] && [ -x "$WORKFLOW_BIN" ]; then
+  exec "$WORKFLOW_BIN" "$@"
+fi
+
+OS=$(uname -s | tr 'A-Z' 'a-z')
+case "$OS" in linux|darwin) ;; *) OS="" ;; esac
+case "$(uname -m)" in
+  x86_64|amd64) ARCH=amd64 ;;
+  arm64|aarch64) ARCH=arm64 ;;
+  *) ARCH="" ;;
+esac
+if [ -z "$OS" ] || [ -z "$ARCH" ]; then
+  echo "workflow: unsupported platform $(uname -s)/$(uname -m)" >&2
+  exit 1
+fi
+NAME="workflow-$OS-$ARCH"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/workflow/$VERSION"
+FINAL="$CACHE/$NAME"
+LOCK="$CACHE/.build.lock"
+TMP="$CACHE/tmp.$$"
+
+# 2. cache
+if [ -x "$FINAL" ]; then
+  exec "$FINAL" "$@"
+fi
+mkdir -p "$CACHE" || { echo "workflow: cannot create $CACHE" >&2; exit 1; }
+
+# 3. verified download
+sum_for() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | awk '{print $1}'
+  else
+    shasum -a 256 "$1" | awk '{print $1}'
+  fi
+}
+WANT=""
+if [ -f "$ROOT/bin/SHA256SUMS" ]; then
+  WANT=$(awk -v n="$NAME" '$2 == n {print $1; exit}' "$ROOT/bin/SHA256SUMS")
+fi
+if [ -n "$WANT" ] && [ ! -d "$LOCK" ]; then
+  BASE="${WORKFLOW_RELEASE_URL:-$(cat "$ROOT/bin/RELEASE_URL" 2>/dev/null)}"
+  URL="$BASE/v$VERSION/$NAME"
+  got=0
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL --max-time 60 -o "$TMP" "$URL" 2>/dev/null && got=1
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -T 60 -O "$TMP" "$URL" 2>/dev/null && got=1
+  fi
+  if [ "$got" = 1 ]; then
+    if [ "$(sum_for "$TMP")" = "$WANT" ]; then
+      chmod 0755 "$TMP" && mv -f "$TMP" "$FINAL" && exec "$FINAL" "$@"
+    else
+      echo "workflow: checksum mismatch for $NAME; ignoring download" >&2
+    fi
+  fi
+  rm -f "$TMP"
+fi
+
+# 4. source build under a mkdir lock
+GO=""
+if command -v go >/dev/null 2>&1; then
+  GO=$(command -v go)
+else
+  for c in "$HOME/.local/go/bin/go" /usr/local/go/bin/go /opt/homebrew/bin/go; do
+    if [ -x "$c" ]; then GO="$c"; break; fi
+  done
+fi
+if [ -z "$GO" ] || [ ! -f "$ROOT/tools/workflow/go.mod" ]; then
+  echo "workflow: no release asset and no Go toolchain (or module source); cannot resolve a binary" >&2
+  exit 1
+fi
+
+lock_stale() {
+  local pid
+  pid=$(cat "$LOCK/pid" 2>/dev/null)
+  if [ -n "$pid" ] && ! kill -0 "$pid" 2>/dev/null; then return 0; fi
+  if [ -n "$(find "$LOCK" -maxdepth 0 -mmin +10 2>/dev/null)" ]; then return 0; fi
+  return 1
+}
+
+tries=0
+while ! mkdir "$LOCK" 2>/dev/null; do
+  if [ -x "$FINAL" ]; then exec "$FINAL" "$@"; fi
+  if [ -d "$LOCK" ] && lock_stale; then
+    rm -rf "$LOCK"
+    continue
+  fi
+  tries=$((tries + 1))
+  if [ "$tries" -gt 600 ]; then
+    echo "workflow: timed out waiting for another build" >&2
+    exit 1
+  fi
+  sleep 0.5
+done
+echo $$ > "$LOCK/pid"
+trap 'rm -f "$TMP"; rm -rf "$LOCK"' EXIT
+
+if [ ! -x "$FINAL" ]; then
+  COMMIT=$(git -C "$ROOT" rev-parse --short=12 HEAD 2>/dev/null) || COMMIT=""
+  [ -n "$COMMIT" ] || COMMIT=unknown
+  if ! (cd "$ROOT/tools/workflow" && CGO_ENABLED=0 GOTOOLCHAIN=local "$GO" build -trimpath \
+        -ldflags "-X main.version=$VERSION -X main.commit=$COMMIT" -o "$TMP" ./cmd/workflow) >&2; then
+    echo "workflow: build failed" >&2
+    exit 1
+  fi
+  mv -f "$TMP" "$FINAL" || exit 1
+fi
+rm -rf "$LOCK"
+trap - EXIT
+exec "$FINAL" "$@"
