@@ -1,5 +1,6 @@
 import hashlib
 import os
+import pwd
 import re
 import shutil
 import subprocess
@@ -17,7 +18,9 @@ LINE = re.compile(r"^workflow 0\.1\.0 [0-9a-f]{12}$")
 
 
 def goenv(name):
-    out = subprocess.run([os.path.join(GOBIN, "go"), "env", name], capture_output=True, text=True)
+    # Ask with the real home so a caller's temp HOME does not move the caches.
+    env = dict(os.environ, HOME=pwd.getpwuid(os.getuid()).pw_dir)
+    out = subprocess.run([os.path.join(GOBIN, "go"), "env", name], capture_output=True, text=True, env=env)
     return out.stdout.strip()
 
 
@@ -45,6 +48,9 @@ class Base(unittest.TestCase):
         e = {"HOME": self.home, "XDG_CACHE_HOME": self.cache, "PATH": path,
              "TYPESAFE_API_KEY": "", "GOCACHE": goenv("GOCACHE"),
              "GOMODCACHE": goenv("GOMODCACHE")}
+        for k in ("TMPDIR", "GOTMPDIR"):  # let a full /tmp be avoided
+            if os.environ.get(k):
+                e[k] = os.environ[k]
         e.update(extra)
         return e
 

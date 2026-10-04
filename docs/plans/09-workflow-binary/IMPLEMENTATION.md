@@ -291,3 +291,119 @@ running. The live dirs do not exist. The phase outcome holds.
    - the phase 5 items;
    - `screen_gaps` only falls on restart.
 2. Commit-path matching in the shim's queue check.
+
+## Phase 5 — Distribution and retirement
+
+Refine split the phase into five units (briefs 225 to 229), committed in `eb9e954`. 5-01 and 5-04 ran
+in parallel, then 5-03 and 5-02, then 5-05 last. Refine settled these decisions:
+
+- The wrapper `bin/workflow` resolves the binary in this order:
+  1. `WORKFLOW_BIN`;
+  2. the cache `${XDG_CACHE_HOME:-~/.cache}/workflow/<VERSION>/`;
+  3. a checksummed download from `bin/RELEASE_URL` (overridden by `WORKFLOW_RELEASE_URL`);
+  4. a source build.
+
+  Go is found on `PATH` or in `~/.local/go/bin`. Builds take an `mkdir` lock holding a pid, which
+  goes stale after 10 minutes. `bin/VERSION` is 0.1.0.
+- `workflow init` writes `client.toml`, `serve.env` and the user unit, mode 0600, and only files
+  that are missing. The unit reads an optional `serve.secrets.env`, which the user creates to hold
+  the key; `init` never writes it. `init` runs no `systemctl`.
+- `spool.sh` writes only to the queue. Payloads with no conversation ID are dropped, and a missing or
+  `auto` harness spools nothing. Each hook kicks `bin/workflow drain`. Without `flock`, or with
+  `WORKFLOW_SPOOL_NOFLOCK=1`, the kick uses an `mkdir` lock. The script runs under bash 3.2.
+- Every shipped config runs the `--version` prefetch detached at session start, registers stdio
+  `bin/workflow mcp`, and drops `artifact_submit`. The units retired `drain.py`, its timer and
+  `install-drain.sh`.
+
+### 5-01-version-init (execution 27)
+
+- Built: `--version`/`version` and `workflow init`, with `TestVersion` and `TestInit` (including a
+  fake `systemctl` that must not be called).
+- Commit: `102a719`. The full race suite passes.
+- Departures: the `init` tests use a minimal explicit child environment.
+- Agent: Sonnet.
+
+### 5-04-opencode-plugin (execution 29)
+
+- Built: the OpenCode plugin writes `.evt` files to the queue in the same format as `spool.sh`.
+  It kicks the drain at most once per 10 s and runs the prefetch at load. The submit and spool
+  helpers are removed. 6 of 6 tests pass.
+- Commit: `6ba9457`.
+- Departures: the envelope event is the payload's `hook_event_name`.
+- Agent: Sonnet.
+
+### 5-03-spool-flip-retire (execution 28)
+
+- Built: the queue-only `spool.sh` with the `mkdir` lock fallback. Retired `drain.py`,
+  `install-drain.sh` and the drain units. `test_spool_queue.py` passes 20 tests and
+  `test_hooklog.py` passes 11.
+- Commit: `122556a`.
+- Departures: a stale `drain.py` mention in the `hooklog.py` docstring was out of scope. The
+  orchestrator fixed it in `7e3211e`, which also routes the `hooklog.py record` shim to `spool.sh`.
+  The shim had been writing to the legacy spool, which nothing drains any more.
+- Agent: Sonnet, 17 tool calls, about 72k tokens.
+
+### 5-02-wrapper-release (execution 30)
+
+- Built: `bin/workflow`, `bin/VERSION`, `bin/RELEASE_URL`, `bin/SHA256SUMS`,
+  `tools/release/build.sh` and `test_release.py`, which passes 10 tests. Every download test
+  uses `file://`.
+- Commit: `8dc45fa`.
+- Departures: a stale lock is retaken whenever a waiter sees one, so two waiters can race. The worst
+  case is a duplicate build, which is safe because the final step is an atomic rename.
+- Agent: Sonnet, 7 tool calls, about 54k tokens.
+
+### 5-05-configs-outcome (execution 31)
+
+- Built:
+  - the four hook configs on `spool.sh --harness <name>` with the prefetch;
+  - stdio MCP in `.mcp.json`, plus Cursor and Codex MCP examples;
+  - the README;
+  - `test_surfaces.py` and `test_write_surfaces.py`, with `test_artifact_submit_surfaces.py`
+    deleted;
+  - `tools/release/phase5_outcome.py`.
+- Commit: `4031e9f`.
+- Departures: Codex configs pass no `--event`. OpenCode fixtures replay through `spool.sh`.
+- Problem hit: `/tmp` is a tmpfs with a per-user quota, and it ran out mid-run, so three gate
+  clauses failed with `disk quota exceeded`.
+- Orchestrator fix: `test_release.py` now passes `TMPDIR` and `GOTMPDIR` through, and `goenv` asks Go
+  with the real home, so its caches are not moved under a temp `HOME`. This fixes the defect
+  5-05 reported.
+- Agent: Sonnet, 60 tool calls, about 41k tokens.
+
+### Phase 5 verification
+
+- **Gate:** the orchestrator ran `python3 tools/release/phase5_outcome.py` with `TMPDIR` and
+  `GOTMPDIR` in a `mktemp -d` dir under `$HOME`. All seven clauses pass: version-clean-build,
+  concurrent-first-runs, release-build, init, write-replay, no-retired-refs and
+  retired-files-gone.
+- **Full suites:** all pass, run with the key blank and temp files off `/tmp`:
+  - `go vet` and `go test -race -count=1 ./...` (12 packages);
+  - the hooklog suite (34 tests);
+  - `test_release.py` (cold build 0.9 s with a warm `GOCACHE`);
+  - OpenCode `test_hooks.mjs` (6 of 6).
+- **Processes:** no workflow processes are left running.
+- **Live dirs** (read only):
+  - `~/.local/share/workflow` does not exist, so nothing is queued yet.
+  - `~/.cache/workflow/0.1.0/` exists but is empty. It was created at 04:11, during 5-05's runs and
+    before its commit, probably by a build that hit the `/tmp` quota.
+- **Feedback:** `artifact_feedback` was not run on the phase's reports. This session has no
+  `client.toml` and no `serve`, so the shim answers `no config`.
+- **Result:** the phase outcome holds.
+
+### Carried
+
+1. From phases 2 to 4:
+   - no `repo_id` before a repo's first commit;
+   - synthesized commit fixtures;
+   - mode 0600 not checked on read;
+   - `screen_gaps` only falls on restart;
+   - commit-path matching in the shim's queue check.
+2. No release has been published, so `bin/RELEASE_URL` points at nothing yet. Every first run builds
+   from source and needs Go.
+3. bash 3.2 compliance is checked statically only; no macOS run.
+4. The cache key is the version, not the commit. After a code change, use `WORKFLOW_BIN` or clear
+   the cache.
+5. Codex hook events carry an empty `--event`. The event comes from the payload's
+   `hook_event_name`.
+6. One legacy spool file under `~/.local/share/workflow-plugin/hooklog/spool` will never be drained.
