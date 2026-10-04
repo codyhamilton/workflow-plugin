@@ -43,7 +43,9 @@ TypeSafe's choice and is not part of any contract here.
 7. **An output exists only if something consumes it as input.** This is why the execution report is
    a handoff for the next phase, not an admin record.
 8. **The drain and the remote are separate services.** The drain never starts or manages the
-   quality service. The quality service is a remote; the drain is a client of it.
+   quality service. The quality service is a remote; the drain is a client of it. The drain and
+   ingest are separated by a module boundary, not a process boundary: a local service may host the
+   drain in-process ([design 3](03-remote-service.md#local-serve-hosts-the-drain)).
 9. **Secret checks are layered.** A light client scrub runs before anything leaves the machine, on
    every path that sends content. The server runs a deterministic precheck on arrival, and Jev is
    the last check before content is persisted.
@@ -70,9 +72,9 @@ are maintainer operations and move to the REST API or CLI.
 |---|---|---|
 | 1 | [Event model and ingest contract](01-event-model-and-ingest.md) | join keys, artifact identity, derived execution view, execution report, envelope types |
 | 2 | [Edge capture](02-edge-capture.md) | spool, drain daemon, client config, MCP shim plumbing, per-harness install and trust |
-| 3 | Remote service | API versioning, auth and tenancy, where the scrub runs, offline behaviour, scorer backend |
-| 4 | Agent advisory surface | the read-only MCP, hook feedback, behaviour when the remote is unreachable |
-| 5 | Distribution and monorepo | plugin layout, per-harness packaging, the pinned Codex copy |
+| 3 | [Remote service](03-remote-service.md) | runtime (Go `workflow` binary), API versioning, auth and tenancy, precheck, storage, screening and scoring, local drain hosting |
+| 4 | [Agent advisory surface](04-advisory-surface.md) | the read-only MCP, hook feedback, behaviour when the remote is unreachable |
+| 5 | [Distribution](05-distribution.md) | plugin layout, per-harness packaging, the pinned Codex copy |
 | 6 | Lab and analysis | held-out set, white paper, check-to-cost revisit |
 
 Order: 1 first, since the rest depend on its keys and envelope types. 2 and 3 can then proceed

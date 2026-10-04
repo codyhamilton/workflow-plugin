@@ -31,6 +31,17 @@ view, not submitted.
   is never written into an artifact.
 - **`repo_id`** is the normalised remote URL if one exists, otherwise the root commit SHA. A
   checkout path is never an identity.
+- **`repo_id` algorithm.** The URL of remote `origin`, else of the first remote by name. Normalised:
+  drop the scheme and any `user@`; rewrite `host:path` (scp form) to `host/path`; lowercase the
+  host; drop a trailing `/` and `.git`. `git@github.com:a/b.git` and `https://github.com/a/b` both
+  give `github.com/a/b`. With no remote: `root:` plus the lexically first root commit SHA.
+  Worktrees of one repo share remotes, so they share an ID.
+- **Path** is relative to the repo's top level (`git rev-parse --show-toplevel` from the file's
+  directory), with `/` separators. A path outside any repo yields no artifact.
+- **Content hash** is SHA-256 of the file's raw bytes, computed before any scrub, so the shim can
+  compare it with the file on disk.
+- **Row hash** is SHA-256 of the fact's canonical JSON, which includes the conversation ID, so the
+  same content written in a new conversation is a new row and a new edge.
 - **Artifact key** is `(repo_id, path)`. A version is keyed by content hash; re-posting identical
   content is a no-op. No frontmatter and no IDs inside files.
 - **Server IDs** are an index only. Clients never depend on them.
@@ -117,9 +128,9 @@ Envelope types accepted by the remote: `hook_event`, `artifact_version`, `commit
 
 ## Who does what
 
-- **Hooks** do cheap local work only: write the spool envelope; on `git commit`, run
-  `git rev-parse HEAD` and `git diff-tree -M --name-status`. No network, no file edits.
-- **Drain** reads artifact files and hashes them together, scrubs, delivers. For design, brief and
+- **Hooks** write the spool envelope and nothing else. No git, no network, no file edits.
+- **Drain** reads artifact files and hashes them together, scrubs, delivers. For a commit it runs
+  `git diff-tree -M --name-status` itself (rules in design 2, Commit facts). For design, brief and
   report paths touched by a commit it also sends the committed blob (source `commit`), so a missed
   worktree write is recovered when the agent commits it.
 - **No repair submit.** Dropped in [design 2](02-edge-capture.md#no-repair-submit): retries, commit

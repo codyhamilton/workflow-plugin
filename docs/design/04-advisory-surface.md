@@ -1,0 +1,104 @@
+# Design Intent 4: Agent Advisory Surface
+
+What the agent can ask the system, through the local shim. Part of
+[system-architecture.md](system-architecture.md); the shim's plumbing is in
+[02-edge-capture.md](02-edge-capture.md#mcp-shim) and the service it reads is
+[03-remote-service.md](03-remote-service.md).
+
+## Problem
+
+The current MCP has sixteen tools. Most exist to feed the dataset (`post_design`,
+`start_execution`, `complete_execution`, …), and the skills require the agent to call them, which is
+what principle 1 removes. The agent still benefits from a few answers that change what it does in
+this run: whether its artifact arrived and how it was judged, what it will be judged on, and what
+similar work exists.
+
+## Shape
+
+`workflow mcp` is a stdio MCP server, spawned by each harness, reading the client config
+(design 2). It forwards to the service's advisory reads and adds local queue state. Every tool is
+read-only.
+
+| Tool | Answers | Changes the agent's decision by |
+|---|---|---|
+| `artifact_feedback(path)` | for the file at `path`: delivery state of its current content, screen verdict, scores per check with the tenant's baseline for that kind | telling it to fix a refusal, or revise a criterion that is out of norm, before moving on |
+| `list_checks(kind)` | the checks a design, brief or report is scored against | letting it write to the rubric rather than discover it afterwards |
+| `search_artifacts(query, kind?)` | similar past designs, briefs and reports in this tenant, with path, repo and a snippet | reusing or contrasting prior work |
+
+Nothing else is exposed. Maintainer operations (defining checks, rescoring, rating) are CLI or REST
+only.
+
+## `artifact_feedback`
+
+The shim resolves `path` against the working directory, reads the file, and hashes it. Then, in
+order:
+
+1. **Queued.** Any queue file whose envelope refers to `path` after normalisation (resolved
+   against the envelope's `cwd`, then made repo-relative with the drain's function). The shim parses
+   each queue file to check; the queue is normally a handful of files, so this is accepted. If present, the shim kicks the drain,
+   waits up to about 1.5 s, and re-checks. Still queued: report count, oldest age, and why
+   (`no config`, `remote unreachable`, `draining`).
+2. **Rejected.** Any `rejected/` file for `path`: report the reason. The fix is to rewrite the file;
+   that fires a new hook.
+3. **Delivered.** Ask the service for `(repo_id, path)`: the latest version's hash, its screen
+   verdict, and its scores. If that hash differs from the file's current hash, say the current
+   content is not yet delivered, which is normally a write still in the batch window.
+
+Matching is by path and content hash, not by conversation. The shim is not told which conversation
+spawned it, and an artifact written in an earlier conversation is still answerable.
+
+The repo ID is computed by the shim the same way the drain computes it (design 1).
+
+## API
+
+Service reads behind the tools. All need the key, all are scoped to the key's tenant.
+
+| Request | Response |
+|---|---|
+| `GET /v1/artifacts?repo_id=&path=` | `{"repo_id","path","kind","versions":n,"latest":{"content_hash","received_at","conversation_id","source","screen":{"verdict","scorer","at"}\|null,"scores":[{"check","score"}]}}`, or 404 |
+| `GET /v1/checks?kind=` | `{"checks":[{"kind","name","q","levels","invert"}]}` |
+| `GET /v1/baselines?kind=` | `{"kind","checks":{"<name>":{"n","p25","median","p75"}}}` over the latest version of each artifact of that kind |
+| `GET /v1/search?q=&kind=&limit=` | `{"hits":[{"repo_id","path","kind","content_hash","snippet","rank"}]}` |
+
+`search` is SQLite FTS5 over the latest screened content of each artifact (`passed` or
+`unscreened`), ranked by `bm25`, with `snippet()` for the excerpt; `limit` defaults to 10. Nothing
+smarter in this round.
+
+## Scores and baselines
+
+Scores are per check, 0 to 1, as the scorer returns them. The baseline is the tenant's median and
+interquartile range per check for the same kind. A check below the lower quartile is flagged. As in
+the current skills, ratings are comparative: the outlier is the signal, not the number.
+
+## Unreachable service
+
+The shim never fails a tool call because the service is down. It answers with what it knows locally
+(queued, rejected) and says the service is unreachable. A missing config says so and names the
+file.
+
+## What changes in the skills
+
+- `design`, `refine` and `execute` stop requiring `post_design`, `post_brief`, `patch_*`,
+  `start_execution`, `patch_execution` and `complete_execution`. Writing the file is the
+  submission (principle 1).
+- Where a skill required ratings to be reported, it calls `artifact_feedback` after writing and
+  reports flagged checks.
+- Frontmatter IDs (`design_id`, `brief_id`) are dropped from templates; the artifact key is
+  `(repo_id, path)`.
+- Commit titles drop `[exec <id>]`. The execution is a derived view keyed by conversation
+  (design 1); `Workflow-Phase:` trailers stay, since phase closure is a repo fact.
+- The execution report at `docs/plans/<plan>/reports/<brief-name>.md` becomes a required output of
+  each worker (design 1).
+
+## Registration
+
+Every harness registers the shim as a stdio command through the wrapper (design 5):
+`bin/workflow mcp`. The HTTP registration of `127.0.0.1:8765/mcp` is removed.
+
+## Tests
+
+1. Over stdio against a temp service: `initialize`, `tools/list` shows exactly the three tools,
+   each call returns.
+2. `artifact_feedback` for a file that is queued, rejected, delivered, and delivered at an older
+   hash gives the four distinct answers.
+3. Service down: the call returns local state and says so, with no MCP error.

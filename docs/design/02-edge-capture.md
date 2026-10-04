@@ -21,7 +21,8 @@ remote by config, may be down, and may refuse content.
                          └── reads queue/ and rejected/ for this conversation
 ```
 
-One queue directory per user serves every harness. The harness is in the envelope, not the path.
+One queue directory per user serves every harness: `$WORKFLOW_QUEUE`, default
+`~/.local/share/workflow/queue`, with `tmp/` and `rejected/` inside it. The harness is in the envelope, not the path.
 The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Spool
@@ -39,13 +40,15 @@ The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Drain
 
-Python, stdlib only. One instance per user, holding an exclusive flock on `queue/.drain.lock` for
-its lifetime.
+`workflow drain`, part of the `workflow` binary ([design 3](03-remote-service.md#runtime)). One
+instance per user, holding an exclusive flock on `queue/.drain.lock` for its lifetime. In local mode
+the lock may instead be held by `workflow serve`, which hosts the same drain module
+([design 3](03-remote-service.md#local-serve-hosts-the-drain)).
 
 **Start.** After its rename, a hook probes the lock non-blocking. Held means a drain is running and
-the hook returns. Free means it starts `setsid drain.py --daemon` in the background. The probe takes
+the hook returns. Free means it starts `setsid bin/workflow drain` in the background. The probe takes
 the lock for an instant, so the drain acquires with a short blocking wait (about 1 s), not `-n`. A
-burst that beats the first drain to the lock starts a few extra Pythons that fail to acquire and
+burst that beats the first drain to the lock starts a few extra processes that fail to acquire and
 exit; this is accepted, and measured (see Tests).
 
 **Batch window.** After the first file appears, wait about 1.5 s before building a batch. This turns
@@ -65,20 +68,34 @@ probes, either the hook sees the lock free or the rescan sees the file.
 - `hook_event` from each envelope, normalised and scrubbed.
 - `artifact_version` for write events on the write-surface table below whose path matches a kind
   pattern. Content is read and hashed at drain time. A missing file produces nothing.
-- `commit` from `git commit` tool calls: SHA, touched paths, rename pairs from
-  `git diff-tree -M --name-status`, run by the drain against the repo in the envelope's `cwd`.
+- `commit` from `git commit` tool calls (below).
 - **Commit catch-up.** For every design, brief or report path touched by a commit, the drain also
   sends an `artifact_version` with source `commit`, read from the committed blob. A worktree write
   that was missed is recovered when the agent commits it, with the right conversation ID.
 
-**Delivery.**
+Keys, paths and hashes follow design 1 (Keys). The drain and the shim use the same functions.
+
+**Commit facts.** A shell tool call is a commit when its command matches `git` (with any `-C dir`
+or `-c k=v` options) followed by `commit`, anywhere in the command, including after `&&` or `;`.
+The SHA comes from the tool's output (`[branch abc1234] …`), resolved to a full SHA with
+`git rev-parse` in the envelope's `cwd` (or the `-C` directory). No SHA in the output, or a failed
+tool call, means no commit fact; the drain never guesses from `HEAD`. Touched paths and rename
+pairs come from `git diff-tree -M --name-status -r --root <sha>`, run by the drain.
+
+**Scrub outcome.** Hook event payloads are redacted in place before sending. Artifact content is
+never redacted: a hit means the artifact is not sent, and its file moves to `rejected/` with the
+pattern name and line, so the agent can rewrite it. Content hashes are always of the raw file.
+
+**Delivery.** One queue file can yield several facts (a write yields `hook_event` and
+`artifact_version`; a commit yields `hook_event`, `commit` and catch-up versions). Each fact's ID is
+`<file name>#<n>`. A file's outcome is its worst fact's.
 
 | Response | Action |
 |---|---|
-| 2xx | delete the files in the batch |
+| 200 with per-fact results | a file whose facts are all `accepted` or `duplicate` is deleted; a file with any `rejected` fact moves to `rejected/` with those reasons (its accepted facts are already stored, and a resend dedupes) |
 | 5xx, network error, 401/403/408 | retry with backoff; files stay |
 | 429 | retry after `Retry-After` |
-| other 4xx | move each file to `rejected/` with a `.reason` sidecar |
+| 400, 413 | split the batch and resend in halves; a single file that still gets 400 or 413 moves to `rejected/` with the status as its reason |
 
 Backoff is exponential with jitter, capped at about 5 min, and held in memory only. "Idle" means an
 empty queue, so a backlog keeps the drain alive, and while it lives its lock stops hooks starting
@@ -95,18 +112,18 @@ assignments) runs on every fact before it leaves the machine.
 **No local archive.** The remote is the record. The per-session JSONL archive via `hooklog.append`
 is dropped from the drain path. `rejected/` is the only thing kept locally.
 
-**No queue cap** for now, since all data is kept. `drain.py status` reports queue size, oldest file,
+**No queue cap** for now, since all data is kept. `workflow status` reports queue size, oldest file,
 `rejected/` count and whether a drain is running.
 
 **macOS.** No `flock(1)`. The hook-side probe falls back to a `mkdir` lock with a PID check; the
-drain uses `fcntl.flock` as on Linux.
+drain uses `flock(2)` as on Linux.
 
 ## Config
 
 One file, read by both the drain and the shim: `~/.config/workflow/client.toml`, mode 0600.
 
 ```toml
-endpoint = "https://quality.example"   # or "http://127.0.0.1:8765"
+endpoint = "https://quality.example"   # or "http://127.0.0.1:8770"
 key = "…"                              # write-and-read client key for the quality service
 ```
 
@@ -128,11 +145,13 @@ design 2 fixes two things it relies on:
 
 - **Endpoint by config.** Local or remote is one setting in one file. No harness config holds an
   endpoint or a key.
-- **Queue awareness.** Before answering, the shim lists `queue/<conversation_id>-*` and
-  `rejected/<conversation_id>-*`. If files are pending, it kicks the drain and waits up to about
-  1.5 s. If they are still pending, the answer says so ("3 events from this conversation still
-  queued, oldest 40 s, remote unreachable"). If any are in `rejected/`, the answer gives the reason;
-  the agent's fix is to rewrite the file, which fires a new hook. The rewrite is the repair.
+- **Queue awareness.** Before answering about a file, the shim checks `queue/` and `rejected/` for
+  envelopes that refer to it. If files are pending, it kicks the drain and waits up to about 1.5 s.
+  If they are still pending, the answer says so ("3 events for this file still queued, oldest 40 s,
+  remote unreachable"). If any are in `rejected/`, the answer gives the reason; the agent's fix is
+  to rewrite the file, which fires a new hook. The rewrite is the repair. Matching is by path, not
+  conversation, because an MCP server is not told which conversation spawned it
+  ([design 4](04-advisory-surface.md#artifact_feedback)).
 
 A pre-tool hook could do the same check, but whether MCP calls reach `PreToolUse` differs per
 harness, and the shim behaves identically everywhere.
@@ -186,8 +205,9 @@ but until updated they keep running the old hooks.
 
 ## Changes from what exists
 
-`spool.sh` and `drain.py` already do one file per event, the tmp-then-rename write, the flock probe
-and kick, and a `bad/` folder. Remaining:
+`spool.sh` and the Python `drain.py` already do one file per event, the tmp-then-rename write, the
+flock probe and kick, and a `bad/` folder. The drain is rewritten as `workflow drain` in Go
+(design 3); `drain.py` is removed once it lands. Remaining:
 
 - File names lead with the conversation ID; payloads without one are not spooled.
 - `--harness auto` removed.
