@@ -1,10 +1,12 @@
 """Replay native write envelopes through shipped registrations and the real HTTP handler."""
 import json
 import os
+import socket
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools/quality/tests"))
@@ -117,6 +119,20 @@ class ArtifactSurfaceTests(ArtifactServiceFixture, unittest.TestCase):
         self.assertIn("posted design_id=", json.loads(result.stdout)["hookSpecificOutput"]["additionalContext"])
         self.assertFalse(Path(os.environ["WORKFLOW_QUALITY_DIR"]).exists())
         self.assertEqual(sum(method == "POST" and path == "/v1/designs" for method, path, _ in self.requests), 1)
+
+    def test_shipped_claude_command_fails_open_when_service_is_unavailable(self):
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        original = self.design.read_bytes()
+        with patch.dict(os.environ, {"WORKFLOW_QUALITY_URL": f"http://127.0.0.1:{port}"}):
+            responses = self.replay("claude", self.payload())
+        self.assertIn("posting still owed", responses[-1]["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self.design.read_bytes(), original)
+        spool = Path(os.environ["WORKFLOW_HOOKLOG_DIR"]) / "claude/session.jsonl"
+        rows = [json.loads(line) for line in spool.read_text().splitlines()]
+        self.assertEqual(rows[-1]["tool_name"], "artifact_submit")
+        self.assertFalse(rows[-1]["ok"])
 
 
 if __name__ == "__main__":

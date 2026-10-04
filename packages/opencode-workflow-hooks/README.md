@@ -11,6 +11,12 @@ OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus ty
 
 **Advisory only** — never blocks tools or changes exit codes. Does not call `assert_phase --deterministic` or enforce Flash review guidance.
 
+After logging a write/edit `tool.execute.after`, the plugin invokes the shared
+[artifact submission backstop](../../docs/lab/QUALITY-SERVICE.md#hook-backstop).
+It checks and posts plan designs/briefs to `WORKFLOW_QUALITY_URL`, records an
+outcome, and preserves tool inputs and outputs. `file.edited` bus capture does
+not submit. Submission is independent of capture and soft-signal switches.
+
 Threshold constants for documentation: `workflow-signals.json` (source of truth remains `gate_thresholds.py` in the workflow-plugin lab).
 
 ## Install (workflow-plugin checkout)
@@ -62,6 +68,10 @@ git pull origin master
 | `WORKFLOW_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
 | `WORKFLOW_HOOKLOG_DIR` | shared local store | Override JSONL root |
 | `WORKFLOW_HOOKLOG_CLI` | repo `tools/hooklog/hooklog.py` | Override capture helper |
+| `WORKFLOW_ARTIFACT_SUBMIT_CLI` | repo `tools/quality/artifact_submit.py` | Override submission helper |
+| `WORKFLOW_QUALITY_URL` | `http://127.0.0.1:8765` | Shared check/post ledger endpoint |
+| `WORKFLOW_QUALITY_TOKEN` | unset | Bearer token for the quality service |
+| `WORKFLOW_QUALITY_TIMEOUT` | 2 seconds | Per-request timeout within the four-second submit HTTP budget |
 | `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
 | `WORKFLOW_REPO_ROOT` | auto (package → repo root) | Python gate imports |
 | `WORKFLOW_JEV_SIGNAL_LOG` | `tools/driver/.jev-signal-log.jsonl` | Signal JSONL path |

@@ -76,6 +76,12 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 
 ## PR Artifact Seam
 
+Skills own deliberate design/brief `post_*` calls, patches, ratings review and
+identity frontmatter. After plan file writes, the shared artifact-submit hook
+backstops submission to the same workflow-quality HTTP ledger, checking the latest
+body hash and current conversation evidence. It never mutates plan files or blocks
+writes; outcomes flow through hooklog. See [Hook backstop](lab/QUALITY-SERVICE.md#hook-backstop).
+
 - **Location**: `docs/plans/<NN>-<slug>/` on the PR branch. The PR body's first line, `Workflow-Plan: docs/plans/<NN>-<slug>/`, is the only mechanical locator. `NN` is best-effort ordering; the slug is the key.
 - **Build-stage contents**: `DESIGN.md` (required; phases carry their Units lists once refined), `briefs/` (amended in place on reported contradictions), `IMPLEMENTATION.md` (required; per-unit outcomes, per-phase verification and Carried sections), optional `PROVENANCE.md`.
 - **Pipeline-stage contents**, committed before the candidate SHA: `REVIEW.md`, `QA.md` (matrix only, omitted when QA does not apply), `briefs/remediation-<NN>.md`.

@@ -63,6 +63,67 @@ connection handling are filtered during regression runs.
 
 None.
 
+## Phase 3 — Operator docs and skill seam
+
+Documented HTTP store selection, exact submission evidence, harness surfaces,
+advisory responses, outcome spooling, and a no-MCP smoke replay. Both design and
+refine skills retain deliberate posting/patching and frontmatter adoption. Added
+the artifact seam to architecture/overview and aligned hooklog/OpenCode guides.
+
+Verified the shipped Claude commands against an unavailable endpoint: both exit
+zero, the file remains unchanged, the submit command prints “posting still owed”,
+and a failed artifact_submit row reaches the isolated hooklog spool. The running
+test service exposes posted_design through the session API without any MCP call.
+
+Final verification:
+
+- Named design command (`python3 -m unittest discover -s tools/quality/tests -p
+  'test_artifact_submit*.py'`): 17 tests passed (earlier 15 passed after correcting
+  the initial two fixture failures).
+- `python3 -m unittest discover -s tools/quality/tests`: 26 passed on both final
+  runs (earlier full run: 24 passed).
+- `python3 -m unittest discover -s tools/hooklog/tests`: 22 passed on the final
+  run (earlier full runs: 21 passed).
+- Focused `test_artifact_submit_surfaces.py` discovery: 5 passed on both runs;
+  the added unavailable-service replay is included in the final 22-test suite.
+- `python3 -m unittest discover -s packages/opencode-workflow-hooks/tests`:
+  5 passed.
+- `node --experimental-strip-types --test
+  packages/opencode-workflow-hooks/tests/test_hooks.mjs`: 2 passed on both runs.
+- `git diff --check`: passed at each gate.
+- Python AST parsing for all seven changed Python modules/tests and JSON parsing
+  for all four manifests: passed.
+- Byte comparison with starting HEAD confirms signed DESIGN.md unchanged;
+  branch and SSH-origin assertions passed. Static assertions confirm no local
+  submission store in the helper and both required skill seam statements.
+
+All regression processes started with WORKFLOW_QUALITY_URL explicitly empty;
+the integration fixtures selected their own ephemeral URLs. No live service,
+design 172 ledger row, app/server process, or other checkout was operated on.
+
+Self-review against all design contracts found no outstanding blocker. Independent
+agent review and folder close-out were omitted to honor the user's no-agents and
+unchanged-signed-design instructions. The service/host daemon was not restarted;
+the new session metadata takes effect when operators load the updated service.
+
+## Changed files across the build
+
+- `tools/quality/artifact_submit.py`, `bodies.py`, `hookevents.py`, `quality.py`,
+  `server.py`, `tests/test_artifact_submit.py`.
+- `hooks/hooks.json`, `hooks/cursor.json`.
+- `tools/hooklog/codex-hooks.example.json`, `cursor-hooks.example.json`,
+  `tests/fixtures/artifact_writes.json`, `tests/test_artifact_submit_surfaces.py`,
+  `README.md`.
+- `packages/opencode-workflow-hooks/src/index.ts`, `tests/test_hooks.mjs`,
+  `README.md`.
+- `skills/design/SKILL.md`, `skills/refine/SKILL.md`.
+- `docs/ARCHITECTURE.md`, `docs/OVERVIEW.md`, `docs/lab/QUALITY-SERVICE.md`,
+  `docs/plans/08-artifact-submit-hooks/IMPLEMENTATION.md`.
+
+## Phase 3 Carried
+
+None.
+
 ## Carried
 
 None.

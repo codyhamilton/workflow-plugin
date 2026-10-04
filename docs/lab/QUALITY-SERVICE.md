@@ -35,6 +35,71 @@ design_id: 17
 - The design and refine skills make obtaining ratings a required output, so the service call is part of the deliverable rather than optional.
 - The response also carries `breakdown` (per criterion: score, how, and the repo's mean, stdev, z and `outlier` high/low at |z| >= 2), `baseline` (scope `repo:<project>`, peer count) and a short `summary`. Peers are the latest version of every other artifact of the same kind in the same repo under the current criteria registry. With fewer than 5 peers the response says `not enough history` instead of comparing. A single rating means little; one well outside the repo's norm is the signal.
 
+### Hook backstop
+
+[`tools/quality/artifact_submit.py`](../../tools/quality/artifact_submit.py) checks
+`docs/plans/<plan>/DESIGN.md` and `docs/plans/<plan>/briefs/*.md` after agent writes.
+Skills still own deliberate `post_design` / `post_brief` calls, later patches,
+ratings review, and writing returned identity frontmatter. Hooks only backstop
+submission; they never edit files or start executions. The signed contracts are
+in [plan 08](../plans/08-artifact-submit-hooks/DESIGN.md).
+
+The check and post both use `WORKFLOW_QUALITY_URL` (default
+`http://127.0.0.1:8765`), `WORKFLOW_QUALITY_TOKEN` as a bearer token when set, and
+`WORKFLOW_QUALITY_TIMEOUT` (default 2 seconds per request). There is no
+`WORKFLOW_QUALITY_DIR` check or fallback, even for a co-located service. An explicit
+empty URL makes submission unavailable; it does not select a local ledger.
+The hook caps its total HTTP budget at four seconds inside the five-second host
+timeout. The service must run the corresponding session API update below.
+
+Submission requires the same kind, project, path and latest stored body hash
+(SHA-256 after stripping identity frontmatter, first 16 hex characters), plus a
+score, artifact conversation bind, or post/patch event in the current conversation.
+The helper reads `GET /v1/sessions/{conversation_id}` and the matching
+`GET /v1/designs/{id}/body` or brief body. Session artifacts expose
+`submission_bound`, which excludes execution-only joins; `submission_events`
+lists the conversation's `posted_design`, `patched_design`, `posted_brief` and
+`patched_brief` events. Frontmatter ids alone and manual rating calls do not
+substitute for a stored submission. A new conversation intentionally posts again
+to bind the session; identical content is not re-scored by the service upsert.
+
+| Harness | Backstop surface | Advisory output |
+|---|---|---|
+| Claude Code | `PostToolUse`, write/edit tools | `hookSpecificOutput.additionalContext` |
+| Cursor | `postToolUse`, write/edit tools; `afterFileEdit`, payload `file_path` | `additionalContext` on `postToolUse`; `{}` on `afterFileEdit` |
+| OpenCode | `tool.execute.after`, write/edit tools | No tool output changes |
+| Codex | `PostToolUse`, write/edit tools, including `apply_patch` paths | No stdout |
+
+Each invocation follows hooklog. No submit handler is registered on watchers,
+Tab edits, failure events, pre-action hooks, or OpenCode's `file.edited` bus.
+Successful posts surface returned ids for the agent to adopt; failures say
+“posting still owed” where the harness supports advisory context. Every artifact
+attempt emits an `artifact_submit` tool-call row to `/v1/hook-events`. On a service
+failure that outcome row spools through hooklog for later backfill. A spooled row
+is visibility only: it does not submit the artifact or invent an id. All command
+hooks exit zero, including on malformed payloads, timeouts and HTTP errors.
+Cloud agents whose configured service is unreachable use the same failure path.
+
+To smoke-test without MCP, write a sample design through a supported harness with
+the service running and inspect `/v1/sessions/<conversation_id>` for its
+`posted_design` submission event. The following also replays the same Claude
+post-write entrypoint from the repository root (with no bearer token configured):
+
+```sh
+mkdir -p docs/plans/artifact-submit-smoke
+printf '# Hook smoke\n\n## Intent\nVerify automatic submission.\n' > docs/plans/artifact-submit-smoke/DESIGN.md
+python3 tools/quality/artifact_submit.py hook --harness claude <<'JSON'
+{"hook_event_name":"PostToolUse","tool_name":"Write","session_id":"artifact-submit-smoke","tool_input":{"file_path":"docs/plans/artifact-submit-smoke/DESIGN.md"}}
+JSON
+curl -s "${WORKFLOW_QUALITY_URL:-http://127.0.0.1:8765}/v1/sessions/artifact-submit-smoke"
+```
+
+With a configured bearer token, include the matching Authorization header on the
+inspection request; the Python helper sends it automatically. Replaying the same
+write checks the body and makes zero artifact posts. Replaying with an unavailable
+service still exits zero, leaves the design unchanged, and emits the Claude
+“posting still owed” context plus a failed hooklog outcome.
+
 ## Hook events
 
 The hooklog now lands in the same ledger (`hook_events` table), so hook activity joins plans through the harness conversation id: a hook row's `session_id` equals `scores.session_id` and the `conversation_id` on executions and events. The join needs no cooperation from the agent: when a hook `tool_call` row is the agent talking to the service (an MCP `post_*`/`patch_*`/`start_execution` call, or a shell `curl` to `/v1/briefs|designs|.../executions` with a body) and its response carries an `id`, ingest records `conversation_id <-> artifact/execution id` in `conversation_binds`. Passing `conversation_id` explicitly on post/start calls also works and is stored on the score, execution and event as before; sessions, plan joins and execution activity read both.
@@ -43,7 +108,7 @@ The hooklog now lands in the same ledger (`hook_events` table), so hook activity
 |---|---|
 | `POST /v1/hook-events` | body is `{rows:[...]}` (normalised hooklog rows, up to 5000), `{payload:{...}, harness?}` (a raw hook payload, normalised and scrubbed server-side) or a single row. Idempotent on a content hash. Returns `{inserted, duplicate, rejected}`. |
 | `GET /v1/hook-events?session_id=&kind=&limit=&offset=` | rows for a conversation, in time order. |
-| `GET /v1/sessions/{id}` | prompts, tool calls and failures, top tools, plus the artifacts scored and executions run in that conversation. |
+| `GET /v1/sessions/{id}` | prompts, tool calls and failures, top tools, artifacts with `submission_bound`, `submission_events`, and executions in that conversation. |
 | `GET /v1/executions/{id}/activity` | hook activity inside the execution window of its conversation. |
 | `GET /v1/plans/{project}/{plan}/sessions` | every conversation that scored the plan's artifacts or executed its briefs, with activity. |
 
