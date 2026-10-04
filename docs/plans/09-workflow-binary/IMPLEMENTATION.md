@@ -76,3 +76,91 @@ Outcome holds.
    nor a blob as a screen gap.
 3. The service never sends `429` yet. The drain must still honour it (design 2).
 4. `TestServeOutcome` picks a free port by binding and releasing it, which is a small race.
+
+## Phase 2 — Capture
+
+Refined into four units (briefs 215, 217, 218 and 219), committed in `8add2a0`. 2-01 and 2-02 ran in
+parallel; 2-03 and 2-04 ran after them. Refine decisions:
+
+- Payloads without a conversation ID are still spooled on the legacy path, as `unknown-…`, until
+  phase 5. The Go path drops them.
+- The client-config override variable is `WORKFLOW_CLIENT_CONFIG`.
+- The hook-side `mkdir` lock and kqueue are deferred.
+
+### 2-01-spool-coexistence (execution 18)
+
+- Built: `spool.sh` names queue files `<conversation_id>-<ts>-<pid>-<rand>.evt` and kicks
+  `$WORKFLOW_BIN drain` only when `WORKFLOW_BIN` is set; otherwise it uses the legacy spool dir and
+  `drain.py --daemon` as before. Adds `test_spool_queue.py`.
+- Commit: `546b5d0`. 36 hooklog tests pass.
+- Deviations: on the Go path the kick is skipped when the event was not spooled. The worker briefly
+  copied `spool.sh` into an existing `/tmp/x` and removed the copy; that directory's other files
+  are untouched.
+- This change is live for Cursor at once, since Cursor's hooks run from this checkout. With
+  `WORKFLOW_BIN` unset, behaviour is unchanged apart from file names.
+- Agent: Sonnet, 11 tool calls, about 50k tokens.
+
+### 2-02-facts-clientconfig (execution 19)
+
+- Built: `internal/facts` (hook events, artifact versions from the write surfaces, commit facts
+  from `git commit` tool output with `diff-tree`, commit catch-up, client scrub) and
+  `internal/clientconfig`. Adds a synthesized `commit_calls.json` fixture, marked unverified.
+- Commit: `87ec4b6`. `go test ./...` passes; every built fact is accepted by `ingest.Ingest`.
+- Deviations: `diff-tree` runs with `-z --no-commit-id`; copies add to `paths` only; the commit fact
+  goes on the first file in a batch that names a given `(conversation, repo, sha)`; a commit with no
+  usable cwd gives no fact.
+- Not done: the config's 0600 mode is not enforced on read; one file read per `Build` is not tested.
+- Agent: Sonnet, 10 tool calls, about 73k tokens.
+
+### 2-03-drain-status (execution 20)
+
+- Built: `internal/drain` (lock, batch window, linger, idle exit with rescan, in-memory backoff,
+  `Retry-After`, 400/413 split, `rejected/` with reasons) and `workflow drain` / `workflow status`.
+- Commit: `f41ba63`. `go test -race ./...` passes. Burst: 20 spools gave 14 process starts, one lock
+  holder, and 20 rows.
+- Deviations: removed three lines of `TestServeOutcome` that expected a non-zero exit with no
+  config and ran with the real `HOME`; 404, 3xx and a malformed 200 are retried like a 5xx;
+  backoff starts at 500 ms.
+- Agent: Sonnet, 13 tool calls, about 90k tokens.
+
+### 2-04-serve-hosted-drain (execution 21)
+
+- Built: `serve` holds the drain lock and drains the queue in process when the client endpoint is
+  itself, rechecking every 3 s; `TestCaptureOutcome` has one clause per outcome item.
+- Commit: `d1c177a`.
+- Deviations: a wildcard bind counts as loopback; `WORKFLOW_SERVE_POLL` was added for tests; tests
+  now set `WORKFLOW_QUEUE` and `WORKFLOW_CLIENT_CONFIG` to temp paths.
+- Agent: Sonnet, 19 tool calls, about 81k tokens.
+
+### Phase 2 verification
+
+The orchestrator ran `go vet` and `go test -race -count=1 ./...` (all nine packages pass), then
+`go test -v -run TestCaptureOutcome ./cmd/workflow`:
+
+```
+outcome hosted-burst           PASS
+outcome write                  PASS
+outcome commit-and-join        PASS
+outcome secret                 PASS
+outcome endpoint-elsewhere     PASS
+outcome kill-and-recover       PASS
+outcome status                 PASS
+```
+
+The standalone 20-spool burst and the down-then-up case pass in 2-03's binary tests. The hooklog
+Python suite passes. `~/.local/share/workflow` and `~/.config/workflow` still do not exist, and no
+`serve` or `drain` process is left running. Outcome holds.
+
+### Carried
+
+1. From phase 1: a crash in `Promote` between blob and screen row; re-screen anything not screened
+   when the worker starts (phase 3).
+2. From phase 1: a fact whose content has neither a pending file nor a blob is a screen gap
+   (phase 3).
+3. A repo with no commits has no `repo_id`, so its writes give no `artifact_version` until its
+   first commit. Accepted; note it in the morning report.
+4. The commit fixtures are synthesized. A real `git commit` payload per harness is still to be
+   captured.
+5. Deferred to phase 5: the hook-side `mkdir` lock and kqueue on macOS; dropping `unknown-`
+   spooling when the default flips.
+6. The client config's 0600 mode is not checked on read.
