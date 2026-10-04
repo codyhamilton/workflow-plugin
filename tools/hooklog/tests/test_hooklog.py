@@ -18,7 +18,8 @@ DRAIN = SCRIPT.parent / "drain.py"
 
 
 def env_for(d, **kw):
-    e = dict(os.environ, WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_HOOKLOG_KICK="0", WORKFLOW_QUALITY_URL="")
+    e = {k: v for k, v in os.environ.items() if k not in ("WORKFLOW_BIN", "WORKFLOW_QUEUE")}
+    e.update(WORKFLOW_HOOKLOG_DIR=d, WORKFLOW_HOOKLOG_KICK="0", WORKFLOW_QUALITY_URL="")
     e.update(kw)
     return e
 
