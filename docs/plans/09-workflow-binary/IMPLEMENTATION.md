@@ -407,3 +407,47 @@ in parallel, then 5-03 and 5-02, then 5-05 last. Refine settled these decisions:
 5. Codex hook events carry an empty `--event`. The event comes from the payload's
    `hook_event_name`.
 6. One legacy spool file under `~/.local/share/workflow-plugin/hooklog/spool` will never be drained.
+
+## Phase 6 — Skills and templates
+
+One unit, written inline as brief 230 (`6-01-skills-templates`) and committed in `225bd32`. It ran
+alongside 5-05; their paths did not overlap.
+
+### 6-01-skills-templates (execution 32)
+
+- **Built:**
+  - `design` and `refine` call `artifact_feedback(path)` after writing. A rejection is fixed first;
+    a check flagged out of norm is addressed or named. `queued`, `unreachable` or `no config` is
+    reported in one line.
+  - The hook-backstop bullets are removed.
+  - `execute` requires each worker's report at `docs/plans/<plan>/reports/<brief-name>.md`, with
+    `tools/quality/checks/execution-report.json` as the rubric. The runner calls
+    `artifact_feedback` on the reports and briefs before it closes a phase.
+  - Commit titles are plain summaries.
+  - The templates have no frontmatter.
+- **Commit:** `1bd361c`.
+- **Departures:** none. The before grep found 9 lines, not the brief's 11, because some lines hold
+  more than one term. `comprehensive-review`, `close-out` and `post-build` needed no change.
+- **Agent:** Sonnet, 5 tool calls, about 49k tokens.
+
+### Phase 6 verification
+
+The orchestrator checked the phase outcome against `skills/` and `plugins/`:
+
+- The grep for `post_design`, `post_brief`, `patch_design`, `patch_brief`, `start_execution`,
+  `patch_execution`, `complete_execution`, `design_id`, `brief_id` and `[exec` returns nothing
+  (exit 1).
+- `skills/execute/SKILL.md` line 16 names `artifact_feedback` and requires
+  `docs/plans/<plan>/reports/<brief-name>.md`.
+- There are 3 `Workflow-Phase` lines before and after.
+
+The phase outcome holds.
+
+This run kept logging to the legacy service and kept `[exec]` titles, so its dataset stays linked.
+Later runs follow the new skills.
+
+### Carried
+
+1. Existing plans' briefs and designs keep their `brief_id` and `design_id` frontmatter as history.
+2. The skills now rely on `artifact_feedback`. It answers `no config` until `workflow init` has been
+   run and `serve` is enabled.
