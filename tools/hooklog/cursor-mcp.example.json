@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "workflow": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/bin/workflow",
+      "command": "/ABS/PATH/workflow-plugin/bin/workflow",
       "args": ["mcp"]
     }
   }

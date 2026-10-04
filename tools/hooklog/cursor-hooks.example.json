@@ -5,6 +5,10 @@
       {
         "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness cursor --event sessionStart",
         "timeout": 5
+      },
+      {
+        "command": "nohup bash \"/ABS/PATH/workflow-plugin/bin/workflow\" --version </dev/null >/dev/null 2>&1 & exit 0",
+        "timeout": 5
       }
     ],
     "sessionEnd": [
@@ -22,10 +26,6 @@
     "postToolUse": [
       {
         "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness cursor --event postToolUse",
-        "timeout": 5
-      },
-      {
-        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/quality/artifact_submit.py\" hook --harness cursor --event postToolUse",
         "timeout": 5
       }
     ],
@@ -80,10 +80,6 @@
     "afterFileEdit": [
       {
         "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness cursor --event afterFileEdit",
-        "timeout": 5
-      },
-      {
-        "command": "python3 \"/ABS/PATH/workflow-plugin/tools/quality/artifact_submit.py\" hook --harness cursor --event afterFileEdit",
         "timeout": 5
       }
     ],

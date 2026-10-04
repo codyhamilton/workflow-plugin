@@ -1,9 +1,10 @@
-"""Registration smoke: run every shipped command against an isolated spool, drain it, check the archive."""
+"""Registration smoke: run every shipped command against a temp queue and check the envelopes."""
 import json
 import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -11,6 +12,12 @@ CLAUDE = set('SessionStart Setup InstructionsLoaded UserPromptSubmit UserPromptE
 # The supplied catalog's 22 subtotal enumerates only these 21 names; see README caveat.
 CURSOR = set('sessionStart sessionEnd preToolUse postToolUse postToolUseFailure subagentStart subagentStop beforeShellExecution afterShellExecution beforeMCPExecution afterMCPExecution beforeReadFile afterFileEdit beforeSubmitPrompt preCompact stop afterAgentResponse afterAgentThought beforeTabFileRead afterTabFileEdit workspaceOpen'.split())
 CODEX = set('SessionStart SessionEnd SubagentStart SubagentStop PreToolUse PermissionRequest PostToolUse PreCompact PostCompact UserPromptSubmit Stop Interrupt'.split())
+START = {'claude': 'SessionStart', 'cursor': 'sessionStart', 'codex': 'SessionStart'}
+
+
+def is_prefetch(command):
+    return 'bin/workflow' in command
+
 
 class SurfaceTests(unittest.TestCase):
     def test_shipped_registrations_capture_all_events(self):
@@ -21,28 +28,49 @@ class SurfaceTests(unittest.TestCase):
             with self.subTest(file=file), tempfile.TemporaryDirectory() as tmp:
                 config = json.loads((ROOT / file).read_text())
                 self.assertEqual(set(config['hooks']), expected)
-                env = dict(os.environ, WORKFLOW_HOOKLOG_DIR=tmp, WORKFLOW_HOOKLOG='on', WORKFLOW_HOOKLOG_KICK='0', WORKFLOW_QUALITY_URL='',
-                           CLAUDE_PLUGIN_ROOT=str(ROOT), CURSOR_PLUGIN_ROOT=str(ROOT))
+                queue = Path(tmp) / 'queue'
+                env = dict(os.environ, HOME=tmp, WORKFLOW_QUEUE=str(queue), WORKFLOW_HOOKLOG_KICK='0', TYPESAFE_API_KEY='',
+                           WORKFLOW_BIN=str(Path(tmp) / 'stub'), CLAUDE_PLUGIN_ROOT=str(ROOT), CURSOR_PLUGIN_ROOT=str(ROOT))
+                stub = Path(tmp) / 'stub'
+                stub.write_text(f'#!/bin/sh\necho "$@" >> "{tmp}/stub.calls"\n')
+                stub.chmod(0o755)
+                prefetch_seen = 0
                 for event, groups in config['hooks'].items():
                     if harness == 'claude' and event in ('WorktreeCreate', 'WorktreeRemove'):
                         self.assertEqual(groups, [])  # logger must not replace host operations
-                        command = f'bash "{ROOT}/tools/hooklog/spool.sh" --harness claude --event {event}'
-                        # Existing worktree handlers can call this command with their payload.
+                        commands = [f'bash "{ROOT}/tools/hooklog/spool.sh" --harness claude --event {event}']
                     else:
-                        hook = groups[0] if harness == 'cursor' else groups[0]['hooks'][0]
-                        command = hook['command'].replace('/ABS/PATH/workflow-plugin', str(ROOT))
-                    payload = {'hook_event_name': event, 'session_id': 'surface-test', 'prompt': 'smoke'}
+                        hooks = groups if harness == 'cursor' else [h for g in groups for h in g['hooks']]
+                        commands = [h['command'].replace('/ABS/PATH/workflow-plugin', str(ROOT)) for h in hooks]
+                    payload = {'hook_event_name': event, 'session_id': 'surface-test', 'conversation_id': 'surface-test',
+                               'prompt': 'smoke'}
                     if harness == 'claude':
                         payload['transcript_path'] = '/tmp/transcript.jsonl'
-                    result = subprocess.run(command, shell=True, input=json.dumps(payload), text=True,
-                                            capture_output=True, env=env, cwd='/tmp')
-                    self.assertEqual(result.returncode, 0, (event, result.stderr))
-                    if harness != 'cursor':
-                        self.assertEqual(result.stdout, '')
-                subprocess.run(['python3', str(ROOT / 'tools/hooklog/drain.py'), '--once'], env=env, check=True, capture_output=True)
-                rows = [json.loads(line) for line in (Path(tmp) / harness / 'surface-test.jsonl').read_text().splitlines()]
-                self.assertEqual({row['hook_event'] for row in rows}, expected)
-                self.assertEqual(len(rows), len(expected))
+                    before = set(queue.glob('*.evt')) if queue.exists() else set()
+                    for command in commands:
+                        result = subprocess.run(command, shell=True, input=json.dumps(payload), text=True,
+                                                capture_output=True, env=env, cwd=tmp, timeout=10)
+                        self.assertEqual(result.returncode, 0, (event, result.stderr))
+                        if is_prefetch(command):
+                            prefetch_seen += 1
+                            self.assertEqual(event, START[harness])
+                            self.assertEqual((result.stdout, result.stderr), ('', ''))
+                        elif harness != 'cursor':
+                            self.assertEqual(result.stdout, '')
+                    new = set(queue.glob('*.evt')) - before
+                    self.assertEqual(len(new), 1, (event, new))
+                    lines = next(iter(new)).read_text().splitlines()
+                    envelope = json.loads(lines[0])
+                    # Codex registers no --event: its event is the payload's hook_event_name.
+                    self.assertEqual(envelope['event'] or json.loads(lines[1])['hook_event_name'], event)
+                    if harness != 'codex':
+                        self.assertEqual(envelope['event'], event)
+                    self.assertEqual(envelope['harness'], harness)
+                self.assertEqual(prefetch_seen, 1)
+                deadline = time.time() + 5
+                while not (Path(tmp) / 'stub.calls').exists() and time.time() < deadline:
+                    time.sleep(0.05)
+                self.assertEqual((Path(tmp) / 'stub.calls').read_text().strip(), '--version')
 
     def test_cursor_manifest_selects_native_registration(self):
         manifest = json.loads((ROOT / '.cursor-plugin/plugin.json').read_text())

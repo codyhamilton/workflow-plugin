@@ -1,12 +1,10 @@
 # hooklog
 
 Local, advisory capture of hook payloads as a session happens. All command hooks exit 0;
-OpenCode observers leave inputs and outputs unchanged. The store remains
-`~/.local/share/workflow-plugin/hooklog/<harness>/<session>.jsonl`.
-Override it with `WORKFLOW_HOOKLOG_DIR`, or disable capture with `WORKFLOW_HOOKLOG=off`.
-Secret patterns and credential/header keys are redacted; string fields are clipped at 2 KB,
-user prompts at 20 KB, and collections at 40 items. Capture failures never deny or rewrite
-an action. Cursor receives the permissive response required by its pre-action schema.
+OpenCode observers leave inputs and outputs unchanged. Captured events go to a queue directory,
+`${WORKFLOW_QUEUE:-~/.local/share/workflow/queue}`; `bin/workflow drain` ships them to the
+workflow service. Capture failures never deny or rewrite an action. Cursor receives the
+permissive response required by its pre-action schema.
 
 | Harness | Catalog requirement | Registration |
 |---------|---------------------|--------------|
@@ -20,31 +18,44 @@ The [official plugin reference](https://cursor.com/docs/reference/plugins#availa
 also lists those 18, plus 2 Tab hooks and workspaceOpen: **21 distinct names**. Every named
 catalog event is registered. The 22nd name needs a catalog correction; it is not fabricated.
 
-## Capture path: spool, then drain
+## Capture path: queue, then drain
 
-Hooks run `spool.sh` (bash): it writes the raw payload plus a small envelope (`ts` = when the hook fired, harness, event) to
-`<store>/spool/<ts>-<pid>-<rand>.evt` via tmp-then-rename, then exits. No python, no network, no waiting. Cursor
-hooks get their permissive reply (`{"permission":"allow"}` etc.); capture can never block or fail the agent.
+Hooks run `spool.sh` (bash): it writes a small envelope (`ts` = when the hook fired, harness, event)
+plus the raw payload to `<queue>/<conversation>-<ts>-<pid>-<rand>.evt` via tmp-then-rename, then
+exits. No python, no network, no waiting. Payloads with no conversation id are dropped. Cursor hooks
+get their permissive reply (`{"permission":"allow"}` etc.); capture can never block or fail the agent.
+The OpenCode plugin writes the same files itself.
 
-`drain.py` does everything else, outside the hot path: it normalises and scrubs each file, posts batches (500) to the
-quality service (`WORKFLOW_QUALITY_URL`, default `http://127.0.0.1:8765`, empty = local only; `WORKFLOW_QUALITY_TOKEN` is sent as a
-bearer token), archives each row to the per-session JSONL above, and deletes the spool file. If the service is down, throttled or
-rejects credentials, files stay and the next pass retries; the service dedupes by content hash, so re-delivery is harmless. Files that
-cannot be parsed, or that the service refuses outright, move to `spool/bad/`. An explicit `WORKFLOW_HOOKLOG_DIR` without a URL means
-local only. A crash between archive and delete can duplicate archive lines (never service rows). `WORKFLOW_HOOKLOG_ARCHIVE=0` skips the archive.
+After spooling, `spool.sh` starts one detached `bin/workflow drain` (a lock keeps it to one;
+`WORKFLOW_HOOKLOG_KICK=0` disables, `WORKFLOW_BIN` names the binary). The drain posts the queued files
+to the endpoint in `client.toml` and deletes them; files the service refuses move to `rejected/`.
+With no `client.toml` the drain exits and the files wait. A running `workflow serve` on the same
+machine hosts the drain itself. `workflow drain --status` reports the queue.
 
-It runs when a session ends (`spool.sh` kicks a background `drain.py --once` on Stop/SessionEnd; `WORKFLOW_HOOKLOG_KICK=0` disables), or
-continuously via `tools/hooklog/install-drain.sh` (systemd user timer, every 15 s), or by hand: `drain.py --once | --watch | --status`.
-`hooklog.py record` remains as a compatibility shim that spools the same way. See `docs/lab/QUALITY-SERVICE.md`.
+`bin/workflow` is a wrapper: it uses `WORKFLOW_BIN`, then the cached binary under
+`${XDG_CACHE_HOME:-~/.cache}/workflow/<version>/`, then a checksummed download, then a source build.
+A `SessionStart` hook in each shipped config runs `bin/workflow --version` in the background so the
+first real call finds a warm cache.
 
-Plan file writes also run the [artifact submission backstop](../../docs/lab/QUALITY-SERVICE.md#hook-backstop)
-after capture. Its HTTP predicate and posts use the same `WORKFLOW_QUALITY_URL`,
-independently of the hooklog spool setting; it never checks `WORKFLOW_QUALITY_DIR`.
+## Setup
+
+`bin/workflow init` writes `~/.config/workflow/client.toml` and `serve.env` (mode 0600) and the user
+unit `workflow-serve.service`, and enables nothing. To turn on screening, put
+`TYPESAFE_API_KEY=...` in `~/.config/workflow/serve.secrets.env` (mode 0600); it is never written by
+`init` and never goes in a hook config.
+
+## MCP
+
+The advisory shim is the stdio command `bin/workflow mcp`. Claude Code picks it up from the
+repo's [`.mcp.json`](../../.mcp.json). For Cursor, merge
+[`cursor-mcp.example.json`](cursor-mcp.example.json) into `~/.cursor/mcp.json`; for Codex, merge
+[`codex-mcp.example.toml`](codex-mcp.example.toml) into `~/.codex/config.toml`. Replace
+`/ABS/PATH/workflow-plugin` with the checkout path.
 
 ## Claude Code
 
 Load the checkout as a plugin (`claude --plugin-dir /absolute/path/workflow-plugin`), or use
-the marketplace plugin. `hooks/hooks.json` records with `--harness auto` and resolves its
+the marketplace plugin. `hooks/hooks.json` records with `--harness claude` and resolves its
 script from `${CLAUDE_PLUGIN_ROOT}` (with `$PLUGIN_ROOT` fallback).
 
 **Worktree integration caveat:** [Claude's WorktreeCreate contract](https://code.claude.com/docs/en/hooks#worktreecreate)
@@ -84,12 +95,10 @@ afterAgentResponse, afterAgentThought. Tab: beforeTabFileRead, afterTabFileEdit.
 Cloud agents omit sessionStart/sessionEnd, beforeMCPExecution/afterMCPExecution, both Tab hooks,
 and workspaceOpen according to the supplied catalog. Registration cannot create events the
 host omits. Headless `agent -p` can also omit beforeSubmitPrompt and stop (observed in the
-2.6.0 smoke); interactive coverage needs a host run. workspaceOpen has no session and writes
-`cursor/unknown.jsonl`.
+2.6.0 smoke); interactive coverage needs a host run. workspaceOpen has no session and is dropped by the spooler.
 
 Permission hooks print `{"permission":"allow"}`; beforeSubmitPrompt prints `{"continue":true}`;
-other Cursor capture hooks print `{}`. The separate artifact-submit command may
-emit advisory `additionalContext` on `postToolUse`; `afterFileEdit` remains `{}`.
+other Cursor capture hooks print `{}`.
 
 ## OpenCode
 
@@ -102,7 +111,7 @@ all 28 catalog bus names, plus future types. Older runtimes may not invoke newer
 Rows preserve native hook names and `source: hook|bus|derived`. Bus tool/shell events are
 observations; dedicated tool callbacks provide completed tool calls. Derived PostToolBatch and
 Stop rows retain existing turn markers. Nested session/message/part envelopes resolve to the
-owning session; callbacks with no session write `opencode/unknown.jsonl`.
+owning session; callbacks with no session are dropped.
 
 `WORKFLOW_OPENCODE_SIGNALS=0` disables soft signals independently of hooklog. Writes are ordered
 and teardown awaits capture; logger errors are swallowed. Callbacks never change permissions,
@@ -118,10 +127,9 @@ not bypass that review. See [official OpenAI documentation](https://developers.o
 
 All 12 names use `spool.sh --harness codex`: SessionStart, SessionEnd, SubagentStart,
 SubagentStop, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact,
-UserPromptSubmit, Stop, Interrupt. Explicit `codex` avoids ambiguity with Claude's common
-payload fields; `auto` only distinguishes Cursor from Claude. Codex is **not N/A**.
+UserPromptSubmit, Stop, Interrupt. Codex is **not N/A**. Every Codex timeout is at most 3 s.
 Hosted tools such as WebSearch skip PreToolUse/PostToolUse, so their absence is a host gap.
-Codex capture and artifact-submit command hooks emit no stdout or control decision.
+Codex capture hooks emit no stdout or control decision.
 
 ## Rows and turns
 
@@ -152,7 +160,7 @@ python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
 node --experimental-strip-types --test packages/opencode-workflow-hooks/tests/test_hooks.mjs
 ```
 
-The command smoke executes every active shipped registration in a temporary store, plus
+The command smoke executes every active shipped registration against a temporary queue, plus
 manual logger payloads for both integration-only worktree names, including all
 12 Codex names. OpenCode's callback smoke invokes all 18 keys and 28 bus types, verifies
 unchanged permission/args/headers/compaction outputs, nested session IDs, redaction, boundary

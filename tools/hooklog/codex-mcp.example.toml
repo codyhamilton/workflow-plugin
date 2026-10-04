@@ -1,0 +1,4 @@
+# Merge into ~/.codex/config.toml; replace /ABS/PATH/workflow-plugin with the checkout path.
+[mcp_servers.workflow]
+command = "/ABS/PATH/workflow-plugin/bin/workflow"
+args = ["mcp"]
