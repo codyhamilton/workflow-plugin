@@ -1,0 +1,10 @@
+{
+ "note": "Execution report rubric, design 1 (docs/design/01-event-model-and-ingest.md, Execution report, Rubric). Each q is the rubric line verbatim; this file is the one definition the skill and the service share.",
+ "checks": [
+  {"kind": "report", "name": "r.done_verifiable", "q": "Says what was done against the brief, verifiably (commits, test results).", "levels": ["Does not say what was done", "Says what was done, with no evidence", "Says what was done, with evidence for some of it", "Says what was done against each part of the brief, with commits or test results"], "invert": false, "basis": "Design 1, Execution report, Rubric."},
+  {"kind": "report", "name": "r.departures_named", "q": "Names every departure from the brief with its reason.", "levels": ["Departures are evident but not named", "Some departures named, without reasons", "Departures named, some reasons missing", "Every departure named with its reason, or says there were none"], "invert": false, "basis": "Design 1, Execution report, Rubric."},
+  {"kind": "report", "name": "r.unfinished_actionable", "q": "Leaves unfinished work specific enough to act on without reopening the whole execution.", "levels": ["Unfinished work is evident but not mentioned", "Mentioned only vaguely", "Mostly specific; some items need the execution reopened", "Every unfinished item can be acted on as written, or says there is none"], "invert": false, "basis": "Design 1, Execution report, Rubric."},
+  {"kind": "report", "name": "r.problems_plain", "q": "States known problems plainly.", "levels": ["Known problems omitted or hidden", "Hinted at or hedged", "Stated, some softened or buried", "Every known problem stated plainly, or says there are none"], "invert": false, "basis": "Design 1, Execution report, Rubric."},
+  {"kind": "report", "name": "r.nothing_unusable", "q": "Contains nothing the consumer cannot use.", "levels": ["Mostly narration or derivable facts", "Much the consumer cannot use", "A little the consumer cannot use", "Nothing the consumer cannot use"], "invert": false, "basis": "Design 1, Execution report, Rubric."}
+ ]
+}
