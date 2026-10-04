@@ -29,6 +29,40 @@ directory cannot suppress posting to that HTTP store. No live ledger was used.
 Execution id: none; lifecycle logging was not attempted because this direct
 build explicitly forbids ledger work for design 172.
 
+## Phase 2 — Harness wiring
+
+Built registrations after hooklog on Claude/Codex PostToolUse, Cursor postToolUse
+and afterFileEdit, including the standalone Cursor example. OpenCode invokes the
+same Python helper after its tool log and leaves tool outputs unchanged. Its bus
+events never invoke submission. `quality.py hook` delegates to the HTTP helper;
+manual score remains available. Native fixture replay covers both designs and
+briefs, including encoded Cursor args and Codex apply_patch input. Duplicate
+Cursor surfaces and repeated MultiEdit paths are suppressed by the same predicate.
+
+Session HTTP responses expose submission events, including posted_design, and
+decode URL-encoded conversation ids. These small service changes make the
+design's predicate and operator visibility observable through the named API.
+
+Verification (WORKFLOW_QUALITY_URL empty at test-process start; all integration
+tests select isolated ephemeral servers):
+
+- Hook surface fixture suite: 5 tests passed.
+- Full quality suite: 24 passed; after adding real HTTP error/timeout and encoded
+  conversation coverage, 26 passed.
+- Full hooklog suite: 21 passed, including all shipped registration smoke checks.
+- OpenCode Python batch suite: 5 passed.
+- OpenCode Node callbacks: 2 passed, including actual Python helper spawning,
+  exactly one post then zero, bus/read exclusion, and helper failure handling.
+- `git diff --check`: passed.
+
+The HTTP fixture drains in-flight handlers before restoring store/environment
+patches, keeping timeout tests isolated. ResourceWarnings from existing SQLite
+connection handling are filtered during regression runs.
+
+## Phase 2 Carried
+
+None.
+
 ## Carried
 
 None.

@@ -33,6 +33,17 @@ function hooklogPath(): string {
 
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
   if (/^(0|off|false)$/i.test(process.env.WORKFLOW_HOOKLOG || "")) return
+  await runPythonHook(hooklogPath(), ["record", "--harness", "opencode"], payload)
+}
+
+async function submitArtifact(payload: Record<string, unknown>): Promise<void> {
+  const tool = String(payload.tool_name || "").split(".").at(-1) || ""
+  if (!/^(write|edit|multiedit|write_file|edit_file|create_file|str_replace_editor|apply_patch|applypatch)$/i.test(tool)) return
+  const helper = process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI || path.join(packageRoot(), "..", "..", "tools", "quality", "artifact_submit.py")
+  await runPythonHook(helper, ["hook", "--harness", "opencode"], payload)
+}
+
+async function runPythonHook(helper: string, args: string[], payload: Record<string, unknown>): Promise<void> {
   try {
     // Providers/config can contain cycles; capture a snapshot without touching live objects.
     const seen = new WeakSet<object>()
@@ -44,7 +55,7 @@ async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
       return value
     })
     await new Promise<void>((resolve) => {
-      const child = spawn(process.env.PYTHON || process.env.WORKFLOW_PYTHON || "python3", [hooklogPath(), "record", "--harness", "opencode"], {
+      const child = spawn(process.env.PYTHON || process.env.WORKFLOW_PYTHON || "python3", [helper, ...args], {
         stdio: ["pipe", "ignore", "ignore"],
       })
       const timeout = setTimeout(() => { child.kill("SIGKILL"); resolve() }, 5000)
@@ -174,11 +185,13 @@ export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
                      tool_input: output.args, input, output })
     },
     "tool.execute.after": async (input, output) => {
-      await record({
+      const payload = {
         hook_event_name: "tool.execute.after", session_id: input.sessionID, source: "hook",
         tool_name: input.tool, tool_use_id: input.callID, tool_input: input.args ?? {},
         tool_response: output.output ?? output.title ?? "", input, output,
-      })
+      }
+      await record(payload)
+      await submitArtifact({ cwd: ctxDir, ...payload })
       callsThisStep.set(input.sessionID, [...(callsThisStep.get(input.sessionID) || []), input.callID])
       if (!enabled) return
       const list = pendingBySession.get(input.sessionID) || []

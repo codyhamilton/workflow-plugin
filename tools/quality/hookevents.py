@@ -133,8 +133,13 @@ def session(session_id: str) -> dict[str, Any]:
             " UNION SELECT artifact_id FROM conversation_binds WHERE conversation_id=? AND artifact_id IS NOT NULL"
             " UNION SELECT artifact_id FROM events WHERE conversation_id=? AND event IN"
             " ('posted_design','patched_design','posted_brief','patched_brief')", (session_id,) * 3)}
+        submission_events = [dict(r) for r in c.execute(
+            "SELECT ts,event,artifact_id FROM events WHERE conversation_id=?"
+            " AND event IN ('posted_design','patched_design','posted_brief','patched_brief') ORDER BY ts,id",
+            (session_id,))]
     return {"session_id": session_id, "activity": dict(st), "top_tools": [dict(r) for r in top],
-            "artifacts": [{**dict(r), "submission_bound": r["id"] in submitted} for r in arts], "executions": [dict(r) for r in ex]}
+            "artifacts": [{**dict(r), "submission_bound": r["id"] in submitted} for r in arts],
+            "submission_events": submission_events, "executions": [dict(r) for r in ex]}
 
 
 def execution_activity(exec_id: int) -> dict[str, Any]:

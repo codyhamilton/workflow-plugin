@@ -23,6 +23,10 @@
       {
         "command": "python3 \"${CURSOR_PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness cursor --event postToolUse",
         "timeout": 5
+      },
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/tools/quality/artifact_submit.py\" hook --harness cursor --event postToolUse",
+        "timeout": 5
       }
     ],
     "postToolUseFailure": [
@@ -76,6 +80,10 @@
     "afterFileEdit": [
       {
         "command": "python3 \"${CURSOR_PLUGIN_ROOT}/tools/hooklog/hooklog.py\" record --harness cursor --event afterFileEdit",
+        "timeout": 5
+      },
+      {
+        "command": "python3 \"${CURSOR_PLUGIN_ROOT}/tools/quality/artifact_submit.py\" hook --harness cursor --event afterFileEdit",
         "timeout": 5
       }
     ],

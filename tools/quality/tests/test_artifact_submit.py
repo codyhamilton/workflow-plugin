@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -21,7 +22,7 @@ import server
 ROOT = Path(__file__).resolve().parents[3]
 
 
-class SubmitTests(unittest.TestCase):
+class ArtifactServiceFixture:
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -31,17 +32,30 @@ class SubmitTests(unittest.TestCase):
         self.design.write_text("# Design\n\n## Intent\nTest hook submission.\n")
         self.store = Path(self.temp.name) / "service-store"
         self.requests = []
+        self.http_failure = None
+        self.http_delay = 0
         owner = self
 
         class Handler(server.H):
             def _rest(self, method):
                 owner.requests.append((method, self.path, self.headers.get("Authorization")))
+                if owner.http_delay:
+                    time.sleep(owner.http_delay)
+                if owner.http_failure:
+                    self._send(owner.http_failure, b'{"error":"fixture failure"}')
+                    return
                 super()._rest(method)
 
+            def _send(self, *args):
+                try:
+                    super()._send(*args)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass  # timeout tests deliberately abandon their HTTP response
+
         self.srv = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.srv.daemon_threads = False  # server_close drains requests before isolation is removed
         self.thread = threading.Thread(target=self.srv.serve_forever, daemon=True)
         self.thread.start()
-        self.addCleanup(self.close_server)
         self.env = patch.dict(os.environ, {
             "WORKFLOW_QUALITY_URL": f"http://127.0.0.1:{self.srv.server_port}",
             "WORKFLOW_QUALITY_TOKEN": "test-bearer", "WORKFLOW_QUALITY_TIMEOUT": "0.5",
@@ -56,6 +70,7 @@ class SubmitTests(unittest.TestCase):
         jev_patch = patch.object(q, "jev_scores", return_value=({}, None))
         jev_patch.start()
         self.addCleanup(jev_patch.stop)
+        self.addCleanup(self.close_server)  # run before restoring store and environment patches
 
     def close_server(self):
         self.srv.shutdown()
@@ -76,6 +91,8 @@ class SubmitTests(unittest.TestCase):
         return {"hook_event_name": event, "tool_name": "Write", "session_id": "session",
                 "cwd": str(self.repo), "tool_input": {"file_path": str(file or self.design)}, **changes}
 
+
+class SubmitTests(ArtifactServiceFixture, unittest.TestCase):
     def test_design_frontmatter_hash_and_idempotence(self):
         artifact = self.artifact()
         self.assertFalse(submit.is_submitted(artifact, "session"))
@@ -99,6 +116,12 @@ class SubmitTests(unittest.TestCase):
         self.assertFalse(second["response"]["scored"])
         self.assertTrue(submit.is_submitted(self.artifact(), "second"))
         self.assertEqual(len(q.rows("design")), 1)
+
+    def test_conversation_id_is_url_encoded_and_decoded(self):
+        conversation = "session/with spaces?and=query"
+        self.post(conversation)
+        self.assertTrue(submit.is_submitted(self.artifact(), conversation))
+        self.assertFalse(self.post(conversation)["posted"])
 
     def test_brief_parent_from_design_or_own_frontmatter(self):
         design = self.post()["response"]
@@ -185,7 +208,9 @@ class SubmitTests(unittest.TestCase):
         rows = hookevents.events("session")
         self.assertEqual(len(rows), 1)
         self.assertEqual((rows[0]["tool_name"], rows[0]["ok"]), ("artifact_submit", 1))
-        self.assertTrue(hookevents.session("session")["artifacts"])
+        session = submit.Client().request("GET", "/v1/sessions/session")
+        self.assertTrue(session["artifacts"])
+        self.assertEqual(session["submission_events"][0]["event"], "posted_design")
         self.assertTrue(hookevents.plan_sessions(self.artifact().project, "example")["sessions"])
 
     def test_check_error_still_attempts_post(self):
@@ -217,16 +242,27 @@ class SubmitTests(unittest.TestCase):
         self.assertEqual(row["tool_name"], "artifact_submit")
 
     def test_http_errors_fail_open_and_record_failure(self):
-        for error in ("401", "500", "timeout"):
-            with self.subTest(error=error), patch.object(submit.Client, "request", side_effect=TimeoutError(error)):
+        for error in (400, 500):
+            self.http_failure = error
+            with self.subTest(error=error):
                 result = submit.ensure_posted(self.artifact(), "session", "claude")
                 self.assertFalse(result["ok"])
-                self.assertIn(error, result["reason"])
+                self.assertIn(str(error), result["reason"])
+        self.http_failure = None
         client = submit.Client()
         client.token = "wrong-token"
         result = submit.ensure_posted(self.artifact(), "session", "claude", client)
         self.assertFalse(result["ok"])
         self.assertIn("401", result["reason"])
+
+    def test_http_timeout_fails_open_and_keeps_write(self):
+        self.http_delay = 0.05
+        original = self.design.read_bytes()
+        with patch.dict(os.environ, {"WORKFLOW_QUALITY_TIMEOUT": "0.01"}):
+            result = submit.ensure_posted(self.artifact(), "session", "claude")
+        self.assertFalse(result["ok"])
+        self.assertIn("timed out", result["reason"])
+        self.assertEqual(self.design.read_bytes(), original)
 
     def test_cli_always_exits_zero_for_bad_payload_and_config(self):
         for payload in ("not json", "[]", "null", "{}"):

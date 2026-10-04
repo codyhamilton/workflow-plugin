@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:http'
+import { createHash } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 import { test } from 'node:test'
@@ -53,6 +55,82 @@ test('18 callbacks and 28 bus types preserve payloads, outputs, sessions and bou
     assert.equal(output.status, 'ask')
   } finally {
     delete process.env.WORKFLOW_HOOKLOG_CLI
+    await rm(tmp, { recursive: true, force: true })
+  }
+})
+
+test('artifact backstop follows tool logging, deduplicates, and preserves tool outputs', async () => {
+  const tmp = await mkdtemp(path.join(os.tmpdir(), 'workflow-artifact-hooks-'))
+  const saved = { ...process.env }
+  const requests = []
+  const artifacts = new Map()
+  const outcomes = []
+  const server = createServer(async (req, res) => {
+    let raw = ''
+    for await (const chunk of req) raw += chunk
+    requests.push([req.method, req.url])
+    let response = {}
+    if (req.method === 'POST' && ['/v1/designs', '/v1/briefs'].includes(req.url)) {
+      const body = JSON.parse(raw)
+      const sha = createHash('sha256').update(body.text).digest('hex').slice(0, 16)
+      const id = artifacts.get(body.path)?.id || artifacts.size + 1
+      const kind = req.url === '/v1/designs' ? 'design' : 'brief'
+      const artifact = { id, kind, project: body.project, path: body.path, sha, text: body.text,
+                         conversation: body.conversation_id, submission_bound: true }
+      artifacts.set(body.path, artifact)
+      response = { id, frontmatter: `---\n${kind}_id: ${id}\n---\n` }
+    } else if (req.url.startsWith('/v1/sessions/')) {
+      const conversation = decodeURIComponent(req.url.split('/').at(-1))
+      response = { artifacts: [...artifacts.values()].filter(a => a.conversation === conversation) }
+    } else if (/\/v1\/(designs|briefs)\/\d+\/body/.test(req.url)) {
+      response = [...artifacts.values()].find(a => a.id === Number(req.url.split('/')[3]))
+    } else if (req.url === '/v1/hook-events') {
+      outcomes.push(...JSON.parse(raw).rows)
+      response = { inserted: 1 }
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(response))
+  })
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+  process.env.WORKFLOW_QUALITY_URL = `http://127.0.0.1:${server.address().port}`
+  process.env.WORKFLOW_HOOKLOG_DIR = path.join(tmp, 'spool')
+  process.env.WORKFLOW_OPENCODE_SIGNALS = '0'
+  process.env.WORKFLOW_HOOKLOG = 'on'
+  delete process.env.WORKFLOW_HOOKLOG_CLI
+  delete process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI
+  try {
+    await mkdir(path.join(tmp, 'docs/plans/example/briefs'), { recursive: true })
+    const hooks = await plugin({ directory: tmp })
+    for (const [tool, filePath, endpoint] of [
+      ['write', 'docs/plans/example/DESIGN.md', '/v1/designs'],
+      ['edit', 'docs/plans/example/briefs/01.md', '/v1/briefs'],
+    ]) {
+      await writeFile(path.join(tmp, filePath), '# Fixture\n')
+      const input = { sessionID: 'artifact-session', tool, callID: tool, args: { filePath } }
+      const output = { title: 'written', output: 'unchanged tool result' }
+      const original = JSON.stringify({ input, output })
+      await hooks['tool.execute.after'](input, output)
+      await hooks['tool.execute.after'](input, output)
+      assert.equal(JSON.stringify({ input, output }), original)
+      assert.equal(requests.filter(([method, url]) => method === 'POST' && url === endpoint).length, 1)
+    }
+    assert.equal(requests[0][1], '/v1/hook-events') // hooklog precedes submission
+    assert.equal(outcomes.filter(row => row.tool_name === 'artifact_submit').length, 4)
+    assert(outcomes.filter(row => row.tool_name === 'artifact_submit').every(row => row.ok))
+    const postCount = requests.filter(([method, url]) => method === 'POST' && ['/v1/designs', '/v1/briefs'].includes(url)).length
+    await hooks.event({ event: { type: 'file.edited', properties: { sessionID: 'other-session', file: 'docs/plans/example/DESIGN.md' } } })
+    await hooks['tool.execute.after']({ sessionID: 'other-session', tool: 'read', callID: 'read', args: { filePath: 'docs/plans/example/DESIGN.md' } }, { output: '# Fixture' })
+    assert.equal(requests.filter(([method, url]) => method === 'POST' && ['/v1/designs', '/v1/briefs'].includes(url)).length, postCount)
+    process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI = path.join(tmp, 'missing.py')
+    const output = { title: 'written', output: 'preserved through helper failure' }
+    await hooks['tool.execute.after']({ sessionID: 'failure-session', tool: 'write', callID: 'failure', args: { filePath: 'docs/plans/example/DESIGN.md' } }, output)
+    assert.equal(output.output, 'preserved through helper failure')
+    assert.equal(await readFile(path.join(tmp, 'docs/plans/example/DESIGN.md'), 'utf8'), '# Fixture\n')
+    await hooks.dispose()
+  } finally {
+    await new Promise(resolve => server.close(resolve))
+    for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key]
+    Object.assign(process.env, saved)
     await rm(tmp, { recursive: true, force: true })
   }
 })

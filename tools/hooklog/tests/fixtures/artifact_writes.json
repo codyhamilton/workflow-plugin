@@ -1,0 +1,13 @@
+[
+  {"harness": "claude", "payload": {"hook_event_name": "PostToolUse", "tool_name": "Write", "session_id": "fixture-claude", "tool_input": {"file_path": "docs/plans/example/DESIGN.md", "content": "# Design"}, "tool_response": {"type": "create"}}},
+  {"harness": "claude", "payload": {"hook_event_name": "PostToolUse", "tool_name": "Edit", "session_id": "fixture-claude-edit", "tool_input": {"file_path": "docs/plans/example/briefs/01.md", "old_string": "before", "new_string": "after"}}},
+  {"harness": "claude", "payload": {"hook_event_name": "PostToolUse", "tool_name": "MultiEdit", "session_id": "fixture-claude-multi", "tool_input": {"file_path": "docs/plans/example/DESIGN.md", "edits": [{"old_string": "before", "new_string": "after"}]}}},
+  {"harness": "cursor", "payload": {"hook_event_name": "postToolUse", "tool_name": "edit_file", "conversation_id": "fixture-cursor", "cursor_version": "2.0", "tool_input": "{\"target_file\":\"docs/plans/example/DESIGN.md\",\"code_edit\":\"# Design\"}"}},
+  {"harness": "cursor", "payload": {"hook_event_name": "postToolUse", "tool_name": "write", "conversation_id": "fixture-cursor-brief", "tool_input": {"file_path": "docs/plans/example/briefs/01.md"}}},
+  {"harness": "cursor", "payload": {"hook_event_name": "afterFileEdit", "conversation_id": "fixture-cursor-file", "file_path": "docs/plans/example/DESIGN.md", "edits": [{"old_string": "before", "new_string": "after"}]}},
+  {"harness": "cursor", "payload": {"hook_event_name": "afterFileEdit", "conversation_id": "fixture-cursor-file-brief", "file_path": "docs/plans/example/briefs/01.md"}},
+  {"harness": "codex", "payload": {"hook_event_name": "PostToolUse", "tool_name": "functions.apply_patch", "session_id": "fixture-codex", "tool_input": "*** Begin Patch\n*** Update File: docs/plans/example/DESIGN.md\n@@\n-before\n+after\n*** End Patch"}},
+  {"harness": "codex", "payload": {"hook_event_name": "PostToolUse", "tool_name": "apply_patch", "session_id": "fixture-codex-brief", "tool_input": {"input": "*** Begin Patch\n*** Add File: docs/plans/example/briefs/01.md\n+# Brief\n*** End Patch"}}},
+  {"harness": "opencode", "payload": {"hook_event_name": "tool.execute.after", "session_id": "fixture-opencode", "source": "hook", "tool_name": "write", "tool_use_id": "call-1", "tool_input": {"filePath": "docs/plans/example/DESIGN.md", "content": "# Design"}, "tool_response": "written"}},
+  {"harness": "opencode", "payload": {"hook_event_name": "tool.execute.after", "session_id": "fixture-opencode-brief", "source": "hook", "tool_name": "edit", "tool_input": {"filePath": "docs/plans/example/briefs/01.md", "oldString": "before", "newString": "after"}}}
+]
