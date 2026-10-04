@@ -15,8 +15,7 @@ Produce `docs/plans/<NN>-<slug>/DESIGN.md`: the bounding document every later st
 - The work is cut into phases, each closed by a provable outcome, each naming its surfaces and whether its approach is known or open. Phase count and order are fixed at sign-off.
 - Every scope-shaping decision was asked (interactive) or ledgered (headless). Questions execution will answer by itself were not.
 - A clean context has run one adversarial pass over value, intent alignment, scope, contracts, phase outcomes, ordering, and the ledger. Its findings are reported; those that improve the design are applied.
-- Ratings are obtained: the design is posted to the `workflow-quality` service (`post_design`; `patch_design` on later revisions) and the returned `design_id` is written to the design's frontmatter. The returned ratings are reported with their repo baseline, and any criterion flagged out of the repo's norm is addressed or named. The ratings are comparative and uninformative on their own; an outlier is the signal. If the service is unreachable or returns an error, that is reported. It is never skipped silently.
-- File-write hooks auto-post missing designs to the same service as a backstop. The agent must still post or patch deliberately, review the ratings, and write the returned `design_id` into frontmatter; hooks only surface ids and never edit the file. If a hook posted first, adopt that returned id. See [Hook backstop](../../docs/lab/QUALITY-SERVICE.md#hook-backstop).
+- Feedback is obtained: after writing the file, call `artifact_feedback(path)`. A rejection is fixed before moving on (the reason names a pattern and line, never the secret). A check flagged out of the tenant's norm is addressed or named. `queued`, `unreachable` or `no config` is reported in one line and the work continues. It is never skipped silently. Ratings are comparative and uninformative on their own; the outlier is the signal.
 - Interactive: the checkpoint is held, with the design and any ledger presented before anything is built. Headless: waved through; downstream review challenges the ledger.
 
 ## Phases
@@ -56,4 +55,4 @@ Declared by the invoker, never inferred. Default: interactive.
 - Ask or ledger only what changes scope, boundaries, sequencing, compatibility, non-goals, or a phase outcome.
 - Preserve the purpose of a section over its template shape.
 - Provenance records substance in the user's words, not a transcript. No credentials, tokens, or dumps in any artifact.
-- No status, progress, or version fields in any artifact. Frontmatter carries identity only (`design_id`), never scores or status.
+- No status, progress, or version fields in any artifact. No frontmatter fields for identity, status, scores or progress; the artifact key is the repo and path.

@@ -1,7 +1,3 @@
----
-design_id: <assigned by the quality service on first post>
----
-
 # <Title>
 
 ## Intent
