@@ -2,6 +2,7 @@ package serve
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
 )
 
 func do(t *testing.T, h http.Handler, method, url, key, body string) (int, string) {
@@ -138,5 +140,39 @@ func TestParseKeys(t *testing.T) {
 	}
 	if kp, err := ParseKeys("a=ka,b.c-d=kb"); err != nil || len(kp) != 2 {
 		t.Fatal(kp, err)
+	}
+}
+
+// Close must not wait out a scorer call in flight: the worker's context is cancelled.
+func TestCloseCancelsInFlightScreen(t *testing.T) {
+	dir := t.TempDir()
+	started := make(chan struct{}, 1)
+	step := func(ctx context.Context, _ *store.Tenant, _ string) error {
+		select {
+		case started <- struct{}{}:
+		default:
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(30 * time.Second):
+			return nil
+		}
+	}
+	s := New(Config{Data: dir, Keys: []KeyPair{{"a", "ka"}}}, Options{PollInterval: 20 * time.Millisecond, ScreenStep: step})
+	content := "# d\n"
+	body := `{"facts":[{"id":"q#0","type":"artifact_version","conversation_id":"c","harness":"h","event":"w","ts":1,"repo_id":"r","path":"docs/plans/01-x/DESIGN.md","content":"# d\n","content_hash":"` + keys.ContentHash([]byte(content)) + `","source":"worktree"}]}`
+	if code, b := do(t, s.Handler(), "POST", "/v1/ingest", "ka", body); code != 200 {
+		t.Fatal(code, b)
+	}
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("screen step never ran")
+	}
+	t0 := time.Now()
+	s.Close()
+	if d := time.Since(t0); d > 5*time.Second {
+		t.Fatalf("Close took %v with a screen in flight", d)
 	}
 }

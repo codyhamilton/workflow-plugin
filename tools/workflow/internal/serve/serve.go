@@ -116,6 +116,8 @@ type Server struct {
 	tenants map[string]*tenantState
 	closed  bool
 	stop    chan struct{}
+	ctx     context.Context // cancelled by Close, so an in-flight screen does not hold up shutdown
+	cancel  context.CancelFunc
 	wg      sync.WaitGroup
 }
 
@@ -131,6 +133,7 @@ func New(cfg Config, opts Options) *Server {
 		opts.Version = "dev"
 	}
 	s := &Server{cfg: cfg, opts: opts, tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
+	s.ctx, s.cancel = context.WithCancel(context.Background())
 	if s.screen == nil {
 		s.screen = unscreened
 	}
@@ -202,7 +205,7 @@ func (s *Server) worker(ts *tenantState) {
 // the store lost) and screens blobs that were promoted without a screens row (a crash between the
 // two). done is false when the scorer was unreachable and the blobs need another try.
 func (s *Server) reconcile(ts *tenantState) (done, unreachable bool) {
-	ctx := context.Background()
+	ctx := s.ctx
 	if n, err := ts.t.ScreenGaps(ctx); err == nil {
 		ts.gaps.Store(int64(n))
 	}
@@ -230,7 +233,10 @@ func (s *Server) drainPending(ts *tenantState) (unreachable bool) {
 		return false
 	}
 	for _, h := range hashes {
-		if err := s.screen(context.Background(), ts.t, h); err != nil {
+		if s.ctx.Err() != nil {
+			return false
+		}
+		if err := s.screen(s.ctx, ts.t, h); err != nil {
 			fmt.Fprintf(os.Stderr, "workflow serve: pending %s: %v\n", h, err)
 			if errors.Is(err, scorer.ErrUnreachable) {
 				return true
@@ -268,6 +274,7 @@ func (s *Server) Close() error {
 	}
 	s.closed = true
 	close(s.stop)
+	s.cancel()
 	s.mu.Unlock()
 	s.wg.Wait()
 	var first error
