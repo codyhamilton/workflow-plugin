@@ -106,6 +106,11 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness auto --event PostToolUse",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/quality/artifact_submit.py\" hook --harness claude --event PostToolUse",
+            "timeout": 5
           }
         ]
       }

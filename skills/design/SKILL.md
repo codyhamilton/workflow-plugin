@@ -16,6 +16,7 @@ Produce `docs/plans/<NN>-<slug>/DESIGN.md`: the bounding document every later st
 - Every scope-shaping decision was asked (interactive) or ledgered (headless). Questions execution will answer by itself were not.
 - A clean context has run one adversarial pass over value, intent alignment, scope, contracts, phase outcomes, ordering, and the ledger. Its findings are reported; those that improve the design are applied.
 - Ratings are obtained: the design is posted to the `workflow-quality` service (`post_design`; `patch_design` on later revisions) and the returned `design_id` is written to the design's frontmatter. The returned ratings are reported with their repo baseline, and any criterion flagged out of the repo's norm is addressed or named. The ratings are comparative and uninformative on their own; an outlier is the signal. If the service is unreachable or returns an error, that is reported. It is never skipped silently.
+- File-write hooks auto-post missing designs to the same service as a backstop. The agent must still post or patch deliberately, review the ratings, and write the returned `design_id` into frontmatter; hooks only surface ids and never edit the file. If a hook posted first, adopt that returned id. See [Hook backstop](../../docs/lab/QUALITY-SERVICE.md#hook-backstop).
 - Interactive: the checkpoint is held, with the design and any ledger presented before anything is built. Headless: waved through; downstream review challenges the ledger.
 
 ## Phases

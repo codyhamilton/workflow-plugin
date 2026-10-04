@@ -39,18 +39,22 @@ function spoolDir(): string {
 let lastSpoolTs = 0
 let spoolSeq = 0
 
+// Providers/config can contain cycles; capture a snapshot without touching live objects.
+function snapshotOf(payload: Record<string, unknown>): string {
+  const seen = new WeakSet<object>()
+  return JSON.stringify(payload, (_key, value) => {
+    if (value && typeof value === "object") {
+      if (seen.has(value)) return "[Circular]"
+      seen.add(value)
+    }
+    return value
+  })
+}
+
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
   if (/^(0|off|false)$/i.test(process.env.WORKFLOW_HOOKLOG || "")) return
   try {
-    // Providers/config can contain cycles; capture a snapshot without touching live objects.
-    const seen = new WeakSet<object>()
-    const snapshot = JSON.stringify(payload, (_key, value) => {
-      if (value && typeof value === "object") {
-        if (seen.has(value)) return "[Circular]"
-        seen.add(value)
-      }
-      return value
-    })
+    const snapshot = snapshotOf(payload)
     // ts is when the hook fired and must stay strictly increasing: the drain orders and turn-counts by it.
     lastSpoolTs = Math.max(Date.now() / 1000, lastSpoolTs + 1e-6)
     const ts = lastSpoolTs.toFixed(6)
@@ -62,6 +66,32 @@ async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
     await rename(tmp, path.join(dir, `${name}.evt`))
   } catch {
     // capture is advisory — never throw into the hook chain
+  }
+}
+
+async function submitArtifact(payload: Record<string, unknown>): Promise<void> {
+  const tool = String(payload.tool_name || "").split(".").at(-1) || ""
+  if (!/^(write|edit|multiedit|write_file|edit_file|create_file|str_replace_editor|apply_patch|applypatch)$/i.test(tool)) return
+  const helper = process.env.WORKFLOW_ARTIFACT_SUBMIT_CLI || path.join(packageRoot(), "..", "..", "tools", "quality", "artifact_submit.py")
+  await runPythonHook(helper, ["hook", "--harness", "opencode"], payload)
+}
+
+async function runPythonHook(helper: string, args: string[], payload: Record<string, unknown>): Promise<void> {
+  try {
+    const snapshot = snapshotOf(payload)
+    await new Promise<void>((resolve) => {
+      const child = spawn(process.env.PYTHON || process.env.WORKFLOW_PYTHON || "python3", [helper, ...args], {
+        stdio: ["pipe", "ignore", "ignore"],
+      })
+      const timeout = setTimeout(() => { child.kill("SIGKILL"); resolve() }, 5000)
+      const finish = () => { clearTimeout(timeout); resolve() }
+      child.on("error", finish)
+      child.on("close", finish)
+      child.stdin?.on("error", () => {})
+      child.stdin?.end(snapshot)
+    })
+  } catch {
+    // submission is advisory — never throw into the hook chain
   }
 }
 
@@ -180,11 +210,13 @@ export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
                      tool_input: output.args, input, output })
     },
     "tool.execute.after": async (input, output) => {
-      await record({
+      const payload = {
         hook_event_name: "tool.execute.after", session_id: input.sessionID, source: "hook",
         tool_name: input.tool, tool_use_id: input.callID, tool_input: input.args ?? {},
         tool_response: output.output ?? output.title ?? "", input, output,
-      })
+      }
+      await record(payload)
+      await submitArtifact({ cwd: ctxDir, ...payload })
       callsThisStep.set(input.sessionID, [...(callsThisStep.get(input.sessionID) || []), input.callID])
       if (!enabled) return
       const list = pendingBySession.get(input.sessionID) || []

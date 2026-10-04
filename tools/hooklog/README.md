@@ -37,6 +37,10 @@ It runs when a session ends (`spool.sh` kicks a background `drain.py --once` on 
 continuously via `tools/hooklog/install-drain.sh` (systemd user timer, every 15 s), or by hand: `drain.py --once | --watch | --status`.
 `hooklog.py record` remains as a compatibility shim that spools the same way. See `docs/lab/QUALITY-SERVICE.md`.
 
+Plan file writes also run the [artifact submission backstop](../../docs/lab/QUALITY-SERVICE.md#hook-backstop)
+after capture. Its HTTP predicate and posts use the same `WORKFLOW_QUALITY_URL`,
+independently of the hooklog spool setting; it never checks `WORKFLOW_QUALITY_DIR`.
+
 ## Claude Code
 
 Load the checkout as a plugin (`claude --plugin-dir /absolute/path/workflow-plugin`), or use
@@ -84,7 +88,8 @@ host omits. Headless `agent -p` can also omit beforeSubmitPrompt and stop (obser
 `cursor/unknown.jsonl`.
 
 Permission hooks print `{"permission":"allow"}`; beforeSubmitPrompt prints `{"continue":true}`;
-other Cursor hooks print `{}`. No follow-up prompt, argument rewrite, or content injection is emitted.
+other Cursor capture hooks print `{}`. The separate artifact-submit command may
+emit advisory `additionalContext` on `postToolUse`; `afterFileEdit` remains `{}`.
 
 ## OpenCode
 
@@ -116,7 +121,7 @@ SubagentStop, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompac
 UserPromptSubmit, Stop, Interrupt. Explicit `codex` avoids ambiguity with Claude's common
 payload fields; `auto` only distinguishes Cursor from Claude. Codex is **not N/A**.
 Hosted tools such as WebSearch skip PreToolUse/PostToolUse, so their absence is a host gap.
-Codex command hooks emit no stdout or control decision.
+Codex capture and artifact-submit command hooks emit no stdout or control decision.
 
 ## Rows and turns
 

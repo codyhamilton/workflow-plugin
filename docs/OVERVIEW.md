@@ -53,6 +53,7 @@ Optimize for outcome quality per token. Prevent:
 
 ## Key Design Decisions
 
+- Plan artifacts are submitted deliberately by skills to the workflow-quality service. File-write hooks backstop missing design/brief submissions to that same HTTP ledger, bind the current conversation, and report success or failure without blocking writes or injecting frontmatter. See [Hook backstop](lab/QUALITY-SERVICE.md#hook-backstop).
 - Design, refine, and execute are separate contexts composed at the run level, never fused. Each stage reads the committed artifacts cold.
 - A phase is defined by a provable outcome, not by a surface. Outcomes close phases; surfaces define units inside them. The phase count is fixed at design sign-off, so the refine/execute loop is bounded by construction.
 - Refinement is per phase, against real code. Carried items live in the closed phase's record in `IMPLEMENTATION.md`, consumed by the next refinement — never in a backlog file.

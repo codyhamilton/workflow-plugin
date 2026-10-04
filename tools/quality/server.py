@@ -24,7 +24,7 @@ import bodies
 import hookevents as he  # noqa: E402
 import lifecycle as lc  # noqa: E402
 import quality as q  # noqa: E402
-from urllib.parse import parse_qs, urlparse  # noqa: E402
+from urllib.parse import parse_qs, unquote, urlparse  # noqa: E402
 
 PROTOCOL = "2025-03-26"
 MAX_BODY = 16 * 1024 * 1024
@@ -179,7 +179,7 @@ ROUTES = [  # (method, pattern, handler(body, query, *ids))
     ("GET", r"/v1/executions/(\d+)", lambda b, qs, i: lc.get("execution", int(i))),
     ("POST", r"/v1/hook-events", lambda b, qs: he.post(b)),
     ("GET", r"/v1/hook-events", lambda b, qs: he.events(he.need(qs, "session_id"), qs.get("kind"), qs.get("limit", 500), qs.get("offset", 0))),
-    ("GET", r"/v1/sessions/([^/]+)", lambda b, qs, i: he.session(i)),
+    ("GET", r"/v1/sessions/([^/]+)", lambda b, qs, i: he.session(unquote(i))),
     ("GET", r"/v1/executions/(\d+)/activity", lambda b, qs, i: he.execution_activity(int(i))),
     ("GET", r"/v1/plans/([^/]+)/([^/]+)/sessions", lambda b, qs, p, n: he.plan_sessions(p, n)),
     ("GET", r"/v1/outcomes", lambda b, qs: lc.outcomes(qs.get("by", "project"))),

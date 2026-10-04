@@ -415,17 +415,21 @@ def cmd_link(frm: str | None, to: str, typ: str, note: str, evidence: str) -> in
 
 
 def cmd_hook() -> int:
+    # Compatibility for existing installs: no local score/log on plan writes.
+    # New manifests register artifact_submit.py directly after hooklog.
+    import artifact_submit
+    import hooklog
     try:
-        p = json.loads(sys.stdin.read() or "{}")
-    except json.JSONDecodeError:
-        return 0
-    ti = p.get("tool_input") or {}
-    fp = ti.get("file_path") or ti.get("path") or ti.get("filePath")
-    if not fp or not Path(fp).exists() or kind_of(Path(fp).resolve()) is None:
-        return 0
-    harness = "cursor" if (p.get("cursor_version") or p.get("conversation_id")) else "claude"
-    r = score_path(Path(fp), None, True, True, harness, str(p.get("session_id") or p.get("conversation_id") or "unknown"))
-    print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": summary(r)}}))
+        payload = json.loads(sys.stdin.read() or "{}")
+        if not isinstance(payload, dict):
+            return 0
+        harness = hooklog.detect_harness(payload)
+        payload.setdefault("hook_event_name", "postToolUse" if harness == "cursor" else "PostToolUse")
+        response = artifact_submit.run_hook(payload, harness)
+        if response is not None:
+            print(json.dumps(response))
+    except Exception:
+        pass
     return 0
 
 

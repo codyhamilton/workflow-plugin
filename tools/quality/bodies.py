@@ -35,7 +35,11 @@ def put(artifact_id: int, sha: str, text: str, ctx: dict[str, Any]) -> bool:
         c.execute("INSERT OR IGNORE INTO body(sha,text,size,ts) VALUES(?,?,?,?)", (sha, scrub(text, 10**9), len(text), time.time()))
         cur = c.execute("INSERT OR IGNORE INTO ref(artifact_id,sha,ts,conversation_id,workflow_version,harness) VALUES(?,?,?,?,?,?)",
                         (artifact_id, sha, time.time(), ctx.get("conversation_id"), ctx.get("workflow_version"), ctx.get("harness")))
-        return bool(cur.rowcount)
+        inserted = bool(cur.rowcount)
+        # Reposting a previously seen body makes it current again (A -> B -> A).
+        # Preserve first-seen correlation while keeping the latest-body predicate accurate.
+        c.execute("UPDATE ref SET ts=? WHERE artifact_id=? AND sha=?", (time.time(), artifact_id, sha))
+        return inserted
 
 
 def versions(artifact_id: int) -> list[dict[str, Any]]:
