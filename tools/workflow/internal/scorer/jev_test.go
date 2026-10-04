@@ -39,6 +39,9 @@ type fakeAPI struct {
 	body   string // if set, returned verbatim
 	screen float64
 	raw    map[string]int
+	marker string // when set, a snapshot holding it is answered with screen level 3
+	snaps  []string
+	withQs []int // question count of each request
 }
 
 func newAPI(t *testing.T) *fakeAPI {
@@ -49,12 +52,20 @@ func newAPI(t *testing.T) *fakeAPI {
 		b, _ := io.ReadAll(r.Body)
 		f.last = nil
 		_ = json.Unmarshal(b, &f.last)
+		snap, _ := f.last["state"].(map[string]any)["snapshot"].(string)
+		qn, _ := f.last["questions"].(map[string]any)
+		f.snaps = append(f.snaps, snap)
+		f.withQs = append(f.withQs, len(qn))
+		screenScore := f.screen
+		if f.marker != "" && strings.Contains(snap, f.marker) {
+			screenScore = 3
+		}
 		w.WriteHeader(f.status)
 		if f.body != "" {
 			io.WriteString(w, f.body)
 			return
 		}
-		ans := map[string]any{"screen_credential": map[string]any{"score": f.screen}}
+		ans := map[string]any{"screen_credential": map[string]any{"score": screenScore}}
 		for k, v := range f.raw {
 			ans[k] = map[string]any{"score": v}
 		}
@@ -76,7 +87,7 @@ func TestJev(t *testing.T) {
 		f := newAPI(t)
 		f.raw = map[string]int{"b.one": 3, "b.two": 2, "d.one": 1}
 		j := f.jev(t)
-		content := []byte(strings.Repeat("x", 70000))
+		content := []byte(strings.Repeat("x", 60000))
 		v, err := j.Screen(ctx, content, []string{"brief", "design"})
 		if err != nil || v.Flag {
 			t.Fatalf("screen = %+v, %v", v, err)
@@ -213,6 +224,73 @@ func TestJev(t *testing.T) {
 		}
 	})
 }
+
+// Content past the first window is screened too, in overlapping screen-only windows.
+func TestJevScreensPastFirstWindow(t *testing.T) {
+	ctx := context.Background()
+	body := func(n, at int, marker string) []byte {
+		r := []rune(strings.Repeat("x", n))
+		copy(r[at:], []rune(marker))
+		return []byte(string(r))
+	}
+	const marker = "LIVE-KEY-PAST-THE-CUT"
+	t.Run("marker at rune 65000 flags", func(t *testing.T) {
+		f := newAPI(t)
+		f.marker = marker
+		v, err := f.jev(t).Screen(ctx, body(70000, 65000, marker), []string{"brief"})
+		if err != nil || !v.Flag {
+			t.Fatalf("verdict = %+v, %v; want flag", v, err)
+		}
+	})
+	t.Run("marker straddling a window edge flags", func(t *testing.T) {
+		f := newAPI(t)
+		f.marker = marker
+		// the first window ends at rune 60000; the marker spans 59990..60011
+		v, err := f.jev(t).Screen(ctx, body(130000, 59990, marker), []string{"brief"})
+		if err != nil || !v.Flag {
+			t.Fatalf("verdict = %+v, %v; want flag", v, err)
+		}
+	})
+	t.Run("only the first window carries checks", func(t *testing.T) {
+		f := newAPI(t)
+		f.raw = map[string]int{"b.one": 1, "b.two": 2}
+		j := f.jev(t)
+		v, err := j.Screen(ctx, body(130000, 0, ""), []string{"brief"})
+		if err != nil || v.Flag {
+			t.Fatalf("verdict = %+v, %v", v, err)
+		}
+		if len(f.withQs) < 3 || f.withQs[0] != 3 || f.withQs[1] != 1 || f.withQs[2] != 1 {
+			t.Errorf("questions per request = %v, want [3 1 1 ...]", f.withQs)
+		}
+		if sc, err := j.Score(ctx, body(130000, 0, ""), []string{"brief"}); err != nil || len(sc) != 2 {
+			t.Errorf("score = %v, %v", sc, err)
+		}
+	})
+	t.Run("content within the first window makes one request", func(t *testing.T) {
+		f := newAPI(t)
+		if _, err := f.jev(t).Screen(ctx, body(60000, 0, ""), []string{"brief"}); err != nil || f.calls.Load() != 1 {
+			t.Fatalf("calls = %d, %v", f.calls.Load(), err)
+		}
+	})
+	t.Run("a later window that fails keeps the content unanswered", func(t *testing.T) {
+		f := newAPI(t)
+		j := f.jev(t)
+		n := 0
+		j.Client = &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			if n++; n == 2 {
+				return nil, errors.New("boom")
+			}
+			return http.DefaultTransport.RoundTrip(r)
+		})}
+		if _, err := j.Screen(ctx, body(70000, 0, ""), []string{"brief"}); !errors.Is(err, ErrUnreachable) {
+			t.Fatalf("err = %v, want ErrUnreachable", err)
+		}
+	})
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func TestFake(t *testing.T) {
 	var s Scorer = &Fake{Scores: []Score{{Check: "x", Result: 1}}}

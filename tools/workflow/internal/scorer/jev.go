@@ -22,6 +22,7 @@ const (
 	screenName     = "screen_credential"
 	screenFlagAt   = 2
 	maxText        = 60000
+	windowOverlap  = 200 // runes shared by consecutive screen windows, so a credential is not split
 	maxKept        = 4
 	screenQuestion = "Does this text contain a credential: an API key, token, password, private key or connection string with a live secret?"
 )
@@ -93,7 +94,8 @@ func (j *Jev) checksFor(kinds []string) []Check {
 // and keeps the check answers for the following Score of the same content.
 func (j *Jev) Screen(ctx context.Context, content []byte, kinds []string) (Verdict, error) {
 	cks := j.checksFor(kinds)
-	answers, err := j.ask(ctx, content, kinds, cks, true)
+	runes := []rune(string(content))
+	answers, err := j.ask(ctx, windowText(runes, 0), kinds, cks, true)
 	if err != nil {
 		return Verdict{}, err
 	}
@@ -102,6 +104,19 @@ func (j *Jev) Screen(ctx context.Context, content []byte, kinds []string) (Verdi
 		return Verdict{}, errors.New("scorer: response has no screen_credential answer")
 	}
 	j.keep(content, scoresOf(cks, answers))
+	// Content past the first window is screened in overlapping screen-only windows. Any flagged
+	// window flags the content; a window that fails fails the whole screen, so it stays pending.
+	for end := maxText; end < len(runes) && raw < screenFlagAt; end += maxText - windowOverlap {
+		a, err := j.ask(ctx, windowText(runes, end-windowOverlap), kinds, nil, true)
+		if err != nil {
+			return Verdict{}, err
+		}
+		r, ok := a[screenName]
+		if !ok {
+			return Verdict{}, errors.New("scorer: response has no screen_credential answer")
+		}
+		raw = math.Max(raw, r)
+	}
 	// Jev answers fractionally; round to the nearest level so 1.9 flags.
 	level := int(math.Round(raw))
 	if level >= screenFlagAt {
@@ -117,7 +132,7 @@ func (j *Jev) Score(ctx context.Context, content []byte, kinds []string) ([]Scor
 		return s, nil
 	}
 	cks := j.checksFor(kinds)
-	answers, err := j.ask(ctx, content, kinds, cks, false)
+	answers, err := j.ask(ctx, windowText([]rune(string(content)), 0), kinds, cks, false)
 	if err != nil {
 		return nil, err
 	}
@@ -171,13 +186,18 @@ func (j *Jev) take(content []byte) ([]Score, bool) {
 	return s, ok
 }
 
+// windowText is the window of at most maxText runes that starts at rune start.
+func windowText(runes []rune, start int) string {
+	end := start + maxText
+	if end > len(runes) {
+		end = len(runes)
+	}
+	return string(runes[start:end])
+}
+
 // ask makes one System One request and returns raw numeric scores by question.
 // Errors carry a status or short cause only, never the key, request or body.
-func (j *Jev) ask(ctx context.Context, content []byte, kinds []string, cks []Check, screen bool) (map[string]float64, error) {
-	text := string(content)
-	if r := []rune(text); len(r) > maxText {
-		text = string(r[:maxText])
-	}
+func (j *Jev) ask(ctx context.Context, text string, kinds []string, cks []Check, screen bool) (map[string]float64, error) {
 	qs := map[string]any{}
 	if screen {
 		qs[screenName] = map[string]any{"type": "score", "instructions": screenQuestion, "criteria": screenLevels}
