@@ -103,7 +103,15 @@ type tenantState struct {
 	t       *store.Tenant
 	wake    chan struct{}
 	started bool
-	gaps    atomic.Int64 // screen gaps counted at worker start
+	gaps    atomic.Int64            // screen gaps counted at worker start
+	fails   map[string]*hashFailure // worker-only: pending hashes whose screen step keeps failing
+}
+
+// hashFailure is the in-memory retry state of one pending hash. A restart forgets it, which gives
+// the hash another bounded run of attempts.
+type hashFailure struct {
+	attempts int
+	next     time.Time
 }
 
 // Server is the HTTP service.
@@ -161,6 +169,8 @@ func (s *Server) startWorkerLocked(ts *tenantState) {
 }
 
 const maxBackoff = 5 * time.Minute
+
+const maxScreenAttempts = 5
 
 func (s *Server) worker(ts *tenantState) {
 	defer s.wg.Done()
@@ -236,14 +246,65 @@ func (s *Server) drainPending(ts *tenantState) (unreachable bool) {
 		if s.ctx.Err() != nil {
 			return false
 		}
-		if err := s.screen(s.ctx, ts.t, h); err != nil {
-			fmt.Fprintf(os.Stderr, "workflow serve: pending %s: %v\n", h, err)
-			if errors.Is(err, scorer.ErrUnreachable) {
-				return true
-			}
+		if f := ts.fails[h]; f != nil && time.Now().Before(f.next) {
+			continue
 		}
+		err := s.screen(s.ctx, ts.t, h)
+		if err == nil {
+			delete(ts.fails, h)
+			continue
+		}
+		fmt.Fprintf(os.Stderr, "workflow serve: pending %s: %v\n", h, err)
+		if errors.Is(err, scorer.ErrUnreachable) {
+			return true
+		}
+		if s.ctx.Err() != nil {
+			return false
+		}
+		s.noteFailure(ts, h, err)
 	}
 	return false
+}
+
+// noteFailure counts a non-unreachable screen failure. It backs the hash off exponentially, and
+// after maxScreenAttempts it rejects the content at stage "screen" so the reads show an answer.
+func (s *Server) noteFailure(ts *tenantState, h string, cause error) {
+	if ts.fails == nil {
+		ts.fails = map[string]*hashFailure{}
+	}
+	f := ts.fails[h]
+	if f == nil {
+		f = &hashFailure{}
+		ts.fails[h] = f
+	}
+	f.attempts++
+	if f.attempts < maxScreenAttempts {
+		wait := s.opts.ScreenBackoff << (f.attempts - 1)
+		if wait > maxBackoff || wait <= 0 {
+			wait = maxBackoff
+		}
+		f.next = time.Now().Add(wait)
+		return
+	}
+	reason := "screen error: " + shortCause(cause)
+	r := store.Rejection{Stage: "screen", Pattern: "screen_error", Reason: reason, FactType: "artifact_version", ContentHash: h}
+	if ci, err := ts.t.ContentFacts(s.ctx, h); err == nil {
+		r.Path, r.ConversationID = ci.LatestPath, ci.ConversationID
+	}
+	if err := ts.t.DropPending(s.ctx, h, r); err != nil {
+		fmt.Fprintf(os.Stderr, "workflow serve: pending %s: cannot record rejection: %v\n", h, err)
+		f.next = time.Now().Add(maxBackoff) // keep it pending, but do not spin on the write
+		return
+	}
+	delete(ts.fails, h)
+}
+
+func shortCause(err error) string {
+	m := strings.Join(strings.Fields(err.Error()), " ")
+	if r := []rune(m); len(r) > 120 {
+		m = string(r[:120]) + "..."
+	}
+	return m
 }
 
 func (s *Server) tenant(name string) (*tenantState, error) {

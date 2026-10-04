@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -174,5 +176,32 @@ func TestCloseCancelsInFlightScreen(t *testing.T) {
 	s.Close()
 	if d := time.Since(t0); d > 5*time.Second {
 		t.Fatalf("Close took %v with a screen in flight", d)
+	}
+}
+
+// A screen error that is not "unreachable" repeats for the same input. It must be retried a
+// bounded number of times, then end in a rejection the artifact read shows.
+func TestPermanentScreenErrorIsBounded(t *testing.T) {
+	dir := t.TempDir()
+	var calls atomic.Int64
+	step := func(ctx context.Context, _ *store.Tenant, _ string) error {
+		calls.Add(1)
+		return errors.New("scorer: HTTP 400")
+	}
+	s := New(Config{Data: dir, Keys: []KeyPair{{"a", "ka"}}}, Options{PollInterval: 10 * time.Millisecond, ScreenBackoff: 5 * time.Millisecond, ScreenStep: step})
+	t.Cleanup(func() { s.Close() })
+	if code, b := do(t, s.Handler(), "POST", "/v1/ingest", "ka", artBody("# d\n")); code != 200 {
+		t.Fatal(code, b)
+	}
+	time.Sleep(time.Second)
+	if n := calls.Load(); n > maxScreenAttempts+2 {
+		t.Fatalf("screen step called %d times in 1s, want at most %d", n, maxScreenAttempts+2)
+	}
+	_, body := do(t, s.Handler(), "GET", "/v1/artifacts?repo_id=r&path=docs/plans/01-x/DESIGN.md", "ka", "")
+	if !strings.Contains(body, `"stage":"screen"`) || !strings.Contains(body, "screen error") {
+		t.Fatalf("no screen rejection in read: %s", body)
+	}
+	if ents, _ := os.ReadDir(filepath.Join(dir, "a", "pending")); len(ents) != 0 {
+		t.Fatal("pending not cleared")
 	}
 }
