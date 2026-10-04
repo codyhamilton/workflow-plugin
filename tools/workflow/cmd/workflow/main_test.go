@@ -34,7 +34,7 @@ func TestServeOutcome(t *testing.T) {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
 	data := filepath.Join(tmp, "data")
-	env := append(os.Environ(), "HOME="+tmp, "WORKFLOW_SERVE_DATA="+data, "WORKFLOW_SERVE_ADDR=127.0.0.1:0",
+	env := append(os.Environ(), "TYPESAFE_API_KEY=", "HOME="+tmp, "WORKFLOW_SERVE_DATA="+data, "WORKFLOW_SERVE_ADDR=127.0.0.1:0",
 		"WORKFLOW_QUEUE="+filepath.Join(tmp, "queue"), "WORKFLOW_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"))
 
 	// no keys: refuses to start

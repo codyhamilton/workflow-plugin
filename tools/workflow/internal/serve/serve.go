@@ -14,10 +14,12 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
 )
 
@@ -86,7 +88,8 @@ type Options struct {
 	DisableWorker bool          // tests: leave pending/ alone
 	PollInterval  time.Duration // default 3s
 	GroupWindow   time.Duration
-	ScreenStep    ScreenFunc // default: promote as unscreened
+	ScreenStep    ScreenFunc    // default: promote as unscreened
+	ScreenBackoff time.Duration // first wait after an unreachable scorer; default 5s, doubles to 5 min
 }
 
 // ScreenFunc is the screen step applied to one pending hash. Phase 3 replaces it.
@@ -100,6 +103,7 @@ type tenantState struct {
 	t       *store.Tenant
 	wake    chan struct{}
 	started bool
+	gaps    atomic.Int64 // screen gaps counted at worker start
 }
 
 // Server is the HTTP service.
@@ -119,6 +123,9 @@ type Server struct {
 func New(cfg Config, opts Options) *Server {
 	if opts.PollInterval <= 0 {
 		opts.PollInterval = 3 * time.Second
+	}
+	if opts.ScreenBackoff <= 0 {
+		opts.ScreenBackoff = 5 * time.Second
 	}
 	if opts.Version == "" {
 		opts.Version = "dev"
@@ -150,12 +157,38 @@ func (s *Server) startWorkerLocked(ts *tenantState) {
 	go s.worker(ts)
 }
 
+const maxBackoff = 5 * time.Minute
+
 func (s *Server) worker(ts *tenantState) {
 	defer s.wg.Done()
 	tick := time.NewTicker(s.opts.PollInterval)
 	defer tick.Stop()
+	reconciled := false
+	var backoff time.Duration
 	for {
-		s.drainPending(ts)
+		unreachable := false
+		if !reconciled {
+			var done bool
+			done, unreachable = s.reconcile(ts)
+			reconciled = done
+		}
+		if !unreachable {
+			unreachable = s.drainPending(ts)
+		}
+		if unreachable {
+			if backoff == 0 {
+				backoff = s.opts.ScreenBackoff
+			} else if backoff *= 2; backoff > maxBackoff {
+				backoff = maxBackoff
+			}
+			select { // wakes are ignored while backing off
+			case <-s.stop:
+				return
+			case <-time.After(backoff):
+			}
+			continue
+		}
+		backoff = 0
 		select {
 		case <-s.stop:
 			return
@@ -165,18 +198,46 @@ func (s *Server) worker(ts *tenantState) {
 	}
 }
 
+// reconcile runs once per tenant start: it counts screen gaps (content the ledger knows of that
+// the store lost) and screens blobs that were promoted without a screens row (a crash between the
+// two). done is false when the scorer was unreachable and the blobs need another try.
+func (s *Server) reconcile(ts *tenantState) (done, unreachable bool) {
+	ctx := context.Background()
+	if n, err := ts.t.ScreenGaps(ctx); err == nil {
+		ts.gaps.Store(int64(n))
+	}
+	blobs, err := ts.t.UnscreenedBlobs(ctx)
+	if err != nil {
+		return false, false
+	}
+	for _, h := range blobs {
+		if err := s.screen(ctx, ts.t, h); err != nil {
+			fmt.Fprintf(os.Stderr, "workflow serve: unscreened blob %s: %v\n", h, err)
+			if errors.Is(err, scorer.ErrUnreachable) {
+				return false, true
+			}
+		}
+	}
+	return true, false
+}
+
 // drainPending applies the screen step to everything pending, in order. A failure leaves the file
-// pending; the next wake or poll retries it (Promote is safe to repeat).
-func (s *Server) drainPending(ts *tenantState) {
+// pending; the next wake or poll retries it. It reports whether the scorer was unreachable, which
+// ends the pass.
+func (s *Server) drainPending(ts *tenantState) (unreachable bool) {
 	hashes, err := ts.t.PendingHashes()
 	if err != nil {
-		return
+		return false
 	}
 	for _, h := range hashes {
 		if err := s.screen(context.Background(), ts.t, h); err != nil {
 			fmt.Fprintf(os.Stderr, "workflow serve: pending %s: %v\n", h, err)
+			if errors.Is(err, scorer.ErrUnreachable) {
+				return true
+			}
 		}
 	}
+	return false
 }
 
 func (s *Server) tenant(name string) (*tenantState, error) {
@@ -290,13 +351,14 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 		list = append(list, ts)
 	}
 	s.mu.Unlock()
-	n := 0
+	n, gaps := 0, 0
 	for _, ts := range list {
+		gaps += int(ts.gaps.Load())
 		if h, err := ts.t.PendingHashes(); err == nil {
 			n += len(h)
 		}
 	}
-	writeJSON(w, 200, map[string]any{"ok": true, "version": s.opts.Version, "pending": n})
+	writeJSON(w, 200, map[string]any{"ok": true, "version": s.opts.Version, "pending": n, "screen_gaps": gaps})
 }
 
 func (s *Server) ingest(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {

@@ -9,10 +9,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/serve"
 )
 
@@ -61,12 +64,17 @@ func runServe() int {
 		fmt.Fprintln(os.Stderr, "workflow serve: data directory:", err)
 		return 1
 	}
+	step, err := screenStep(os.Getenv("TYPESAFE_API_KEY"), os.Getenv("WORKFLOW_CHECKS_DIR"))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "workflow serve:", err)
+		return 1
+	}
 	ln, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)
 		return 1
 	}
-	s := serve.New(cfg, serve.Options{Version: version})
+	s := serve.New(cfg, serve.Options{Version: version, ScreenStep: step})
 	srv := &http.Server{Handler: s.Handler(), ReadHeaderTimeout: 10 * time.Second}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -102,4 +110,27 @@ func runServe() int {
 		code = 1
 	}
 	return code
+}
+
+// screenStep builds the screen step from the environment. No key: nil, so verdicts are
+// "unscreened". The key is used only to build the scorer; it is never printed.
+func screenStep(key, checksDir string) (serve.ScreenFunc, error) {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		fmt.Fprintln(os.Stderr, "workflow serve: scorer none; verdicts are unscreened")
+		return nil, nil
+	}
+	var checks scorer.Checks
+	if checksDir == "" {
+		fmt.Fprintln(os.Stderr, "workflow serve: scoring is off because WORKFLOW_CHECKS_DIR is unset; screening only")
+	} else {
+		var err error
+		if checks, err = scorer.LoadChecks(checksDir); err != nil {
+			return nil, fmt.Errorf("checks: %w", err)
+		}
+	}
+	sc := scorer.NewJev(key, checks)
+	fmt.Fprintf(os.Stderr, "workflow serve: scorer %s; checks design=%d brief=%d report=%d\n", sc.Name(),
+		checks.Count("design"), checks.Count("brief"), checks.Count("report"))
+	return screen.Step(sc), nil
 }

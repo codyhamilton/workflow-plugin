@@ -412,9 +412,10 @@ func (t *Tenant) ReadBlob(hash string) ([]byte, error) {
 // Screen is a screen verdict.
 type Screen struct{ Verdict, Scorer string }
 
-// Promote moves pending content to blobs/<aa>/<hash> and records the screen.
-// If the blob already exists it only records the screen (and clears any pending file).
-func (t *Tenant) Promote(ctx context.Context, hash string, s Screen) error {
+// Promote moves pending content to blobs/<aa>/<hash> and records the screen and its scores in one
+// transaction (scores take the screen's scorer name). If the blob already exists it only records
+// the screen (and clears any pending file).
+func (t *Tenant) Promote(ctx context.Context, hash string, s Screen, scores ...Score) error {
 	if err := validHash(hash); err != nil {
 		return err
 	}
@@ -429,10 +430,149 @@ func (t *Tenant) Promote(ctx context.Context, hash string, s Screen) error {
 		return err
 	}
 	return t.submit(ctx, func(tx *sql.Tx) error {
-		_, err := tx.Exec(`INSERT INTO screens (content_hash,verdict,scorer,at) VALUES (?,?,?,?)`,
-			hash, s.Verdict, s.Scorer, time.Now().UnixNano())
-		return err
+		now := time.Now().UnixNano()
+		if _, err := tx.Exec(`INSERT INTO screens (content_hash,verdict,scorer,at) VALUES (?,?,?,?)`,
+			hash, s.Verdict, s.Scorer, now); err != nil {
+			return err
+		}
+		for _, x := range scores {
+			if _, err := tx.Exec(`INSERT INTO scores (content_hash,check_name,result,scorer,at) VALUES (?,?,?,?,?)`,
+				hash, x.Check, x.Result, s.Scorer, now); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
+}
+
+// DropBlob deletes stored content and records the rejection (the flag path for a blob that was
+// promoted but never screened).
+func (t *Tenant) DropBlob(ctx context.Context, hash string, r Rejection) error {
+	if err := validHash(hash); err != nil {
+		return err
+	}
+	if err := os.Remove(t.blobPath(hash)); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if r.ContentHash == "" {
+		r.ContentHash = hash
+	}
+	return t.AppendRejection(ctx, r)
+}
+
+// PendingPath is the pending file's path (tests set its mod time).
+func (t *Tenant) PendingPath(hash string) string { return t.pendingPath(hash) }
+
+// HasPending reports whether a pending file exists for hash.
+func (t *Tenant) HasPending(hash string) bool {
+	return validHash(hash) == nil && exists(t.pendingPath(hash))
+}
+
+// PendingModTime is the pending file's modification time.
+func (t *Tenant) PendingModTime(hash string) (time.Time, error) {
+	if err := validHash(hash); err != nil {
+		return time.Time{}, err
+	}
+	fi, err := os.Stat(t.pendingPath(hash))
+	if err != nil {
+		return time.Time{}, err
+	}
+	return fi.ModTime(), nil
+}
+
+// ContentInfo describes the artifact_version facts carrying one content hash.
+type ContentInfo struct {
+	Paths                      []string // distinct, in path order
+	LatestPath, ConversationID string   // from the latest such fact
+}
+
+// ContentFacts reads the artifact_version facts with content hash; Paths is empty when none.
+func (t *Tenant) ContentFacts(ctx context.Context, hash string) (ContentInfo, error) {
+	var ci ContentInfo
+	rows, err := t.rdb.QueryContext(ctx, `SELECT DISTINCT path FROM facts WHERE type='artifact_version' AND content_hash=? ORDER BY path`, hash)
+	if err != nil {
+		return ci, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var p string
+		if err := rows.Scan(&p); err != nil {
+			return ci, err
+		}
+		ci.Paths = append(ci.Paths, p)
+	}
+	if err := rows.Err(); err != nil {
+		return ci, err
+	}
+	if len(ci.Paths) == 0 {
+		return ci, nil
+	}
+	err = t.rdb.QueryRowContext(ctx, `SELECT path, conversation_id FROM facts WHERE type='artifact_version' AND content_hash=?
+		ORDER BY received_at DESC, rowid DESC LIMIT 1`, hash).Scan(&ci.LatestPath, &ci.ConversationID)
+	return ci, err
+}
+
+// UnscreenedBlobs lists blobs on disk with no screens row (a crash between the move and the row).
+func (t *Tenant) UnscreenedBlobs(ctx context.Context) ([]string, error) {
+	screened := map[string]bool{}
+	rows, err := t.rdb.QueryContext(ctx, `SELECT DISTINCT content_hash FROM screens`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var h string
+		if err := rows.Scan(&h); err != nil {
+			return nil, err
+		}
+		screened[h] = true
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	var out []string
+	dirs, err := os.ReadDir(filepath.Join(t.dir, "blobs"))
+	if err != nil {
+		return nil, err
+	}
+	for _, d := range dirs {
+		if !d.IsDir() {
+			continue
+		}
+		ents, err := os.ReadDir(filepath.Join(t.dir, "blobs", d.Name()))
+		if err != nil {
+			return nil, err
+		}
+		for _, e := range ents {
+			if validHash(e.Name()) == nil && !screened[e.Name()] {
+				out = append(out, e.Name())
+			}
+		}
+	}
+	sort.Strings(out)
+	return out, nil
+}
+
+// ScreenGaps counts content hashes of artifact_version facts that have no pending file, no blob
+// and no rejection: content the ledger knows of but the store lost.
+func (t *Tenant) ScreenGaps(ctx context.Context) (int, error) {
+	rows, err := t.rdb.QueryContext(ctx, `SELECT DISTINCT content_hash FROM facts WHERE type='artifact_version'
+		AND content_hash NOT IN (SELECT content_hash FROM rejections)`)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+	n := 0
+	for rows.Next() {
+		var h string
+		if err := rows.Scan(&h); err != nil {
+			return 0, err
+		}
+		if validHash(h) == nil && !exists(t.blobPath(h)) && !exists(t.pendingPath(h)) {
+			n++
+		}
+	}
+	return n, rows.Err()
 }
 
 // DropPending deletes pending content and records the rejection (phase 3's flag path).
