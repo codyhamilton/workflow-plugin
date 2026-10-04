@@ -305,3 +305,22 @@ func assertIngest(t *testing.T, facts []json.RawMessage) {
 		}
 	}
 }
+
+func TestWritePaths(t *testing.T) {
+	r := newRepo(t)
+	p := map[string]any{"hook_event_name": "postToolUse", "tool_name": "write", "conversation_id": "c", "cwd": r.dir,
+		"tool_input": map[string]any{"file_path": "docs/plans/x/DESIGN.md"}}
+	f := queueFile(t, "a", "cursor", p)
+	got := WritePaths(f.Data)
+	want := filepath.Join(r.dir, "docs/plans/x/DESIGN.md")
+	if len(got) != 1 || got[0] != want {
+		t.Fatalf("WritePaths = %v, want [%s]", got, want)
+	}
+	if WritePaths([]byte("not json\n{}")) != nil || WritePaths(nil) != nil {
+		t.Fatal("unparseable must give nil")
+	}
+	bash := queueFile(t, "b", "cursor", map[string]any{"hook_event_name": "postToolUse", "tool_name": "shell", "conversation_id": "c", "cwd": r.dir})
+	if WritePaths(bash.Data) != nil {
+		t.Fatal("non-write tool must give nil")
+	}
+}

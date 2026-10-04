@@ -542,3 +542,15 @@ func buildCommits(ctx context.Context, p *parsed, done map[string]bool, common f
 		return
 	}
 }
+
+// WritePaths returns the cleaned absolute write paths of one queue file's
+// bytes, exactly as Build derives them (the MCP shim matches queue files with
+// it). It returns nil for a file that does not parse or writes nothing.
+// Commit tool calls are not covered: their paths come from git at drain time.
+func WritePaths(raw []byte) []string {
+	p := parseFile(File{Data: raw})
+	if p.bad {
+		return nil
+	}
+	return writePaths(p)
+}
