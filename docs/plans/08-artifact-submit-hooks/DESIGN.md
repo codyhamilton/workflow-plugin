@@ -1,5 +1,5 @@
 ---
-design_id:
+design_id: 172
 ---
 
 # Artifact submit hooks
@@ -44,7 +44,7 @@ After this change is built, every supported harness runs an **artifact-submit** 
     3. An `events` row with `event` ∈ `{posted_design, patched_design, posted_brief, patched_brief}` for that artifact id and the same `conversation_id`.
   - A frontmatter `design_id` / `brief_id` alone does **not** imply submitted; the predicate ignores frontmatter ids unless backed by the rows above.
   - A prior post in **another** conversation for the same path and hash counts as submitted for ledger completeness but does **not** bind this conversation; the hook still calls `post_*` with this `conversation_id` so session/plan joins stay correct (service upsert: identical content is not re-scored; context and binds still update).
-  - **Check order:** resolve path → read file → hash → query service (read-only SQL against `WORKFLOW_QUALITY_DIR` when the hook runs co-located with the service, otherwise `GET /v1/sessions/{conversation_id}` plus artifact body/hash comparison — exact transport is an implementation choice; the predicate above is normative).
+  - **Check order:** resolve path → read file → hash → query the same service at `WORKFLOW_QUALITY_URL` used by the auto-post client (`GET /v1/sessions/{conversation_id}` plus artifact body/hash comparison, using the same default URL, authentication, and timeout as the post; the predicate above is normative). Co-location does not change the store selection; do not use `WORKFLOW_QUALITY_DIR` as a separate check store or fallback.
 - Non-goals: treating `rate_artifact` MCP calls as submission; treating local-only `quality.py score --no-log` or the current `cmd_hook` local `log_row` as submission.
 
 ### Domain: Auto-post client
@@ -118,8 +118,8 @@ After this change is built, every supported harness runs an **artifact-submit** 
 ### Assumption 3
 
 - Question: How does the hook check “submitted” when the service is remote from the hook process?
-- Answer chosen: Prefer read-only access to the service DB path when co-located; otherwise `GET /v1/sessions/{conversation_id}` and compare artifact paths and body hashes from the response.
-- Rationale: No new read API is required for the common case (local quality service on the same host as the harness).
+- Answer chosen: Use `GET /v1/sessions/{conversation_id}` at the same `WORKFLOW_QUALITY_URL` used for posting and compare artifact paths and body hashes from the response, whether the service is co-located or remote. Use the post client's default URL, authentication, and timeout; do not check a separate database via `WORKFLOW_QUALITY_DIR`.
+- Rationale: The check and post must use the same authoritative store; a co-located database can differ from the service selected by `WORKFLOW_QUALITY_URL`.
 - If wrong: Add `GET /v1/artifacts?project=&path=` in a small follow-up.
 
 ### Assumption 4
