@@ -4,7 +4,6 @@ package serve
 
 import (
 	"context"
-	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -312,22 +311,13 @@ func (s *Server) method(m string, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// tenantFor compares the bearer token against every key with no early exit.
+// tenantFor maps the bearer token to its tenant (see tenantForKey).
 func (s *Server) tenantFor(r *http.Request) (string, bool) {
-	h := r.Header.Get("Authorization")
-	tok, ok := strings.CutPrefix(h, "Bearer ")
+	tok, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
 	if !ok {
-		tok = ""
+		return "", false
 	}
-	found, match := "", 0
-	for _, kp := range s.cfg.Keys {
-		eq := subtle.ConstantTimeCompare([]byte(tok), []byte(kp.Key))
-		if eq == 1 {
-			found = kp.Tenant
-		}
-		match |= eq
-	}
-	return found, ok && match == 1
+	return s.tenantForKey(tok)
 }
 
 type tenantHandler func(w http.ResponseWriter, r *http.Request, name string, ts *tenantState)

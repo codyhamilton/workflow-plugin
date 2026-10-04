@@ -2,6 +2,7 @@ package serve
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
@@ -73,11 +74,14 @@ func pointsHere(endpoint, bound string) bool {
 	return h == bh || (isLoopback(h) && (isLoopback(bh) || isWildcard(bh)))
 }
 
-// tenantForKey maps a client key to its tenant, comparing against every key with no early exit.
+// tenantForKey maps a key to its tenant. It compares SHA-256 digests in constant time against
+// every key with no early exit, so neither the key's content nor its length shows in the timing.
 func (s *Server) tenantForKey(key string) (string, bool) {
+	kh := sha256.Sum256([]byte(key))
 	found, match := "", 0
 	for _, kp := range s.cfg.Keys {
-		eq := subtle.ConstantTimeCompare([]byte(key), []byte(kp.Key))
+		ph := sha256.Sum256([]byte(kp.Key))
+		eq := subtle.ConstantTimeCompare(kh[:], ph[:])
 		if eq == 1 {
 			found = kp.Tenant
 		}
