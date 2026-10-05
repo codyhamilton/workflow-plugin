@@ -113,3 +113,19 @@ Run identity: Claude Code headless background job `88c3a6c8` (Opus 5.5 orchestra
 Units: 3-01, then 3-02 (sequential). Sonnet workers.
 
 Refine feedback (artifact_feedback): brief 3-01 delivered, screen pass, no check below p25. Brief 3-02 delivered, awaiting screen at refine time.
+
+### 3-01-serve-site — done (a09e962)
+
+- Built: `serve/site.go` (`//go:embed all:site`, `siteHandler(fs.FS)`, package var `siteFS` as the test seam); catch-all `/` in `Handler` is now the site handler behind `cors`/`localGuard`; placeholder `site/index.html`; `site_test.go` (5 tests: placeholder, missing index, built FS in local and keyed mode, real embedded placeholder via `Handler()`, localGuard 403).
+- Surfaces: `internal/serve/site.go`, `internal/serve/site_test.go`, `internal/serve/site/index.html`, `internal/serve/serve.go` (one line), `reports/3-01-serve-site.md`.
+- Checks: tests failed to build first (`undefined: siteFS`), then pass; `go vet`, `go test ./...`, `gofmt -l` clean.
+- Deviations: none. Note: in local mode a non-JSON `POST /` is 415 from `localGuard` before the site's 405.
+- Agent: Sonnet, 14 tool uses, ~54k tokens, 3.7 min.
+
+### 3-02-release-build — done (06f17bc)
+
+- Built: `build.sh` finds `npm` (else `build.sh: no Node toolchain`), `npm ci` only without `node_modules/`, `npm run build`, fails on missing or placeholder `build/index.html`, copies `build/` into `site/` before the four `go build`s, `trap … EXIT` restores the placeholder; `test_7_build_sh` gets npm on `PATH` plus `npm_config_cache` and asserts a clean `site/`; `wrangler.toml` (`pages_build_output_dir = "./build"`); `@perspective-dev/server@^5.5.1` declared (Phase 2 Carried item 3); `test:hosted` script, `playwright.hosted.config.ts`, `tests/hosted/` (global setup + 6 tests).
+- Surfaces: `tools/release/build.sh`, `tools/release/test_release.py`, `packages/workflow-analytics/{package.json,package-lock.json,wrangler.toml,playwright.hosted.config.ts,tests/hosted/}`, `reports/3-02-release-build.md`.
+- Checks: hosted spec against a placeholder binary 5 fail / 1 pass, then 6/6 against `build.sh`'s `workflow-linux-amd64`; `test:e2e` 26/26; `BuildTests` ok; stub-failing `npm` → `build.sh` exit 1 with `site/` still the placeholder.
+- Deviations: failure path tested with a stub `npm` (host has `/usr/bin/npm`), so the `no Node toolchain` branch is unexercised; hosted `baseURL` set via `test.use` from `HOSTED_BASE`. Worker rewrote `bin/SHA256SUMS` once while probing and restored it (not committed).
+- Agent: Sonnet, 43 tool uses, ~86k tokens, 4.0 min.
