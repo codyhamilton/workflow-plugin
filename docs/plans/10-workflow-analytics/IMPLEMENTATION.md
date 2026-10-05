@@ -129,3 +129,23 @@ Refine feedback (artifact_feedback): brief 3-01 delivered, screen pass, no check
 - Checks: hosted spec against a placeholder binary 5 fail / 1 pass, then 6/6 against `build.sh`'s `workflow-linux-amd64`; `test:e2e` 26/26; `BuildTests` ok; stub-failing `npm` → `build.sh` exit 1 with `site/` still the placeholder.
 - Deviations: failure path tested with a stub `npm` (host has `/usr/bin/npm`), so the `no Node toolchain` branch is unexercised; hosted `baseURL` set via `test.use` from `HOSTED_BASE`. Worker rewrote `bin/SHA256SUMS` once while probing and restored it (not committed).
 - Agent: Sonnet, 43 tool uses, ~86k tokens, 4.0 min.
+
+### Verification
+
+Cheap-tier check by the orchestrator, against the Phase 3 Outcome:
+
+- `tools/workflow`: `go vet ./...`, `go test ./...` all ok; `gofmt -l .` prints nothing.
+- `OUT_DIR=<tmp>/dist SUMS_FILE=<tmp>/SUMS tools/release/build.sh`: exit 0, four binaries (`workflow-{darwin,linux}-{amd64,arm64}`); afterwards `git status --porcelain` is empty (`site/` restored to the placeholder, `bin/` untouched).
+- `workflow-linux-amd64 serve` on `127.0.0.1:18799`, local mode, fresh data dir, no token: `GET /` 200 `text/html; charset=utf-8`, `Cache-Control: no-cache`, built `index.html` with no placeholder marker; `GET /quality` the same `index.html`; `GET /v1/health` 200 `{"ok":true,"pending":0,...}`; `GET /v1/not-a-route` 404 `application/json` `{"error":"not found"}`; `GET /_app/immutable/entry/start.*.js` 200 `text/javascript`, `public, max-age=31536000, immutable`.
+- `WORKFLOW_BIN=<that binary> npm run test:hosted`: 6/6 (built site revalidated, `/v1` stays JSON, overview counts same-origin with no token, `/quality` survives reload, immutable caching, `/explore` loads Perspective WASM from the binary).
+- Result: phase outcome holds.
+
+Feedback (artifact_feedback), all delivered with screen pass: report 3-01 (no check below p25; `r.done_verifiable` 0.88 at p25), report 3-02 (none below p25), brief 3-02 (none below p25). Phase 2 Carried item 5, now reachable: reports 2-01, 2-02, 2-04 pass with none below p25; report 2-03 passes with `r.problems_plain` 0.94 (p25 0.95) and `r.departures_named` 0.85 (p25 0.92) below p25. Report 1-02 is still not delivered; the service has no version of it.
+
+### Carried
+
+1. `rejWhere` in `tools/workflow/internal/store/analytics.go` drops precheck rejections under any `repo_id`/`harness` filter (Phase 2 Carried item 1). Needs a contract decision on whether a rejection belongs to a repo; not placed in this design.
+2. Executions and conversations paging is unmeasured at scale (Phase 2 Carried item 2).
+3. `build.sh`'s `no Node toolchain` branch is unexercised (the host has `/usr/bin/npm`; the failure path was tested with a stub `npm`).
+4. Chart rendering beyond the hosted spec's counts is not visually checked; `svelte-check` is not installed.
+5. Report 2-03 scores below p25 on `r.problems_plain` and `r.departures_named`; report 1-02 has never been delivered to the feedback service.
