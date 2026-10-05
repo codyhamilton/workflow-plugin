@@ -308,6 +308,10 @@ Three phases. More than one unit, so `refine` runs before each is built. The pha
 - Surfaces: `tools/workflow/internal/serve/serve.go`, `tools/workflow/internal/serve/site/`, `tools/release/build.sh`, `packages/workflow-analytics/` Pages output config.
 - Approach: known
 - Depends on: Phase 2
+- Units:
+  - 3-01 Serve the embedded site — `briefs/3-01-serve-site.md` — depends on: nothing — alongside: nothing
+  - 3-02 Release build embeds the site; Pages output — `briefs/3-02-release-build.md` — depends on: 3-01 — alongside: nothing
+- Phase 2 Carried, placed: item 3 (`@perspective-dev/server` undeclared) is absorbed by 3-02 decision 5. Item 4 (chart rendering not visually checked) is partly covered by 3-02's hosted browser spec (overview, quality, explore load from the binary); `svelte-check` stays out of scope. Item 1 (`rejWhere` drops precheck rejections under a `repo_id`/`harness` filter) needs a contract decision on whether a rejection belongs to a repo; it touches the Analytics reads contract, not this phase's outcome, so it is not placed here and stays open for close-out to record as a follow-up. Item 2 (paging unmeasured at scale) stays a note. Item 5 (artifact feedback outstanding) is orchestrator housekeeping, not a unit.
 
 ## Provenance Notes
 
