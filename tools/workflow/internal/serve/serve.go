@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -31,6 +32,9 @@ var tenantRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
 type Config struct {
 	Addr, Data string
 	Keys       []KeyPair
+	// CORSOrigins are the exact origins allowed to read a keyed server from a browser. Local mode
+	// ignores it and allows loopback origins.
+	CORSOrigins []string
 }
 
 // KeyPair maps one key to one tenant.
@@ -55,6 +59,11 @@ func ConfigFromEnv(getenv func(string) string) (Config, error) {
 			return c, errors.New("WORKFLOW_SERVE_DATA unset and no home directory")
 		}
 		c.Data = filepath.Join(home, ".local/share/workflow/serve")
+	}
+	for _, o := range strings.Split(getenv("WORKFLOW_SERVE_CORS_ORIGINS"), ",") {
+		if o = strings.TrimSpace(o); o != "" {
+			c.CORSOrigins = append(c.CORSOrigins, o)
+		}
 	}
 	ks, err := ParseKeys(getenv("WORKFLOW_SERVE_KEYS"))
 	c.Keys = ks
@@ -386,15 +395,51 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not found"})
 	})
+	h := s.cors(mux)
 	if s.cfg.Local() {
-		return localGuard(mux)
+		return localGuard(h)
 	}
-	return mux
+	return h
+}
+
+// cors lets a browser on an allowed origin read the API: loopback origins in local mode, exact
+// entries of Config.CORSOrigins in keyed mode. An allowed OPTIONS is answered 204 before auth,
+// since a preflight carries no Authorization. Other requests reach h unchanged. No credentials.
+func (s *Server) cors(h http.Handler) http.Handler {
+	allowed := func(origin string) bool {
+		if origin == "" || origin == "null" {
+			return false
+		}
+		if s.cfg.Local() {
+			u, err := url.Parse(origin)
+			return err == nil && (u.Scheme == "http" || u.Scheme == "https") && loopbackHost(u.Hostname())
+		}
+		for _, o := range s.cfg.CORSOrigins {
+			if o == origin {
+				return true
+			}
+		}
+		return false
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); allowed(origin) {
+			hd := w.Header()
+			hd.Set("Access-Control-Allow-Origin", origin)
+			hd.Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+			hd.Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+			hd.Add("Vary", "Origin")
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+		}
+		h.ServeHTTP(w, r)
+	})
 }
 
 // localGuard keeps browsers out of a keyless service. A Host that is not loopback is refused, which
 // stops DNS rebinding, and a POST must be JSON, which a cross-origin page cannot send without a
-// preflight that this service never answers.
+// preflight. The service answers a preflight only for GET (see cors), so a POST preflight fails.
 func localGuard(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host := r.Host

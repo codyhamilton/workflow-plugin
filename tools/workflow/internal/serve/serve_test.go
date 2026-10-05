@@ -274,3 +274,105 @@ func TestPermanentScreenErrorIsBounded(t *testing.T) {
 		t.Fatal("pending not cleared")
 	}
 }
+
+func corsReq(h http.Handler, method, path, origin, key string) *httptest.ResponseRecorder {
+	r := httptest.NewRequest(method, "http://127.0.0.1:8770"+path, nil)
+	if origin != "" {
+		r.Header.Set("Origin", origin)
+	}
+	if key != "" {
+		r.Header.Set("Authorization", "Bearer "+key)
+	}
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	return w
+}
+
+func assertCORS(t *testing.T, w *httptest.ResponseRecorder, origin string) {
+	t.Helper()
+	hd := w.Header()
+	if hd.Get("Access-Control-Allow-Origin") != origin ||
+		hd.Get("Access-Control-Allow-Headers") != "Authorization, Content-Type" ||
+		hd.Get("Access-Control-Allow-Methods") != "GET, OPTIONS" ||
+		!strings.Contains(strings.Join(hd.Values("Vary"), ","), "Origin") {
+		t.Errorf("origin %q: headers %v", origin, hd)
+	}
+	if hd.Get("Access-Control-Allow-Credentials") != "" {
+		t.Error("credentials header set")
+	}
+}
+
+func assertNoCORS(t *testing.T, w *httptest.ResponseRecorder, what string) {
+	t.Helper()
+	for k := range w.Header() {
+		if strings.HasPrefix(k, "Access-Control-") {
+			t.Errorf("%s: unexpected %s", what, k)
+		}
+	}
+}
+
+func TestCORSLocalMode(t *testing.T) {
+	s := New(Config{Data: t.TempDir()}, Options{DisableWorker: true})
+	t.Cleanup(func() { s.Close() })
+	h := s.Handler()
+	for _, o := range []string{"http://127.0.0.1:5173", "http://localhost:4000", "http://[::1]:9000"} {
+		w := corsReq(h, "GET", "/v1/health", o, "")
+		if w.Code != 200 {
+			t.Fatal(o, w.Code)
+		}
+		assertCORS(t, w, o)
+		w = corsReq(h, "OPTIONS", "/v1/artifacts", o, "")
+		if w.Code != 204 || w.Body.Len() != 0 {
+			t.Fatal(o, w.Code, w.Body.String())
+		}
+		assertCORS(t, w, o)
+	}
+	for _, o := range []string{"https://evil.example", "null", "", "http://localhost.evil.example", "ftp://127.0.0.1"} {
+		assertNoCORS(t, corsReq(h, "GET", "/v1/health", o, ""), "GET "+o)
+	}
+	// A disallowed OPTIONS keeps today's answer.
+	w := corsReq(h, "OPTIONS", "/v1/artifacts", "https://evil.example", "")
+	if w.Code != 405 {
+		t.Error(w.Code)
+	}
+	assertNoCORS(t, w, "evil OPTIONS")
+}
+
+func TestCORSKeyedMode(t *testing.T) {
+	s := New(Config{Data: t.TempDir(), Keys: []KeyPair{{"a", "ka"}}, CORSOrigins: []string{"https://wf.pages.dev"}}, Options{DisableWorker: true})
+	t.Cleanup(func() { s.Close() })
+	h := s.Handler()
+	w := corsReq(h, "GET", "/v1/checks", "https://wf.pages.dev", "ka")
+	if w.Code != 200 {
+		t.Fatal(w.Code)
+	}
+	assertCORS(t, w, "https://wf.pages.dev")
+	w = corsReq(h, "OPTIONS", "/v1/artifacts", "https://wf.pages.dev", "")
+	if w.Code != 204 {
+		t.Fatal(w.Code)
+	}
+	assertCORS(t, w, "https://wf.pages.dev")
+	for _, o := range []string{"https://other.pages.dev", "http://127.0.0.1:5173", "https://wf.pages.dev.evil.example", "null"} {
+		assertNoCORS(t, corsReq(h, "GET", "/v1/checks", o, "ka"), o)
+		w := corsReq(h, "OPTIONS", "/v1/artifacts", o, "")
+		assertNoCORS(t, w, "OPTIONS "+o)
+		if w.Code == 204 {
+			t.Error("OPTIONS answered for", o)
+		}
+	}
+	s2 := New(Config{Data: t.TempDir(), Keys: []KeyPair{{"a", "ka"}}}, Options{DisableWorker: true})
+	t.Cleanup(func() { s2.Close() })
+	assertNoCORS(t, corsReq(s2.Handler(), "GET", "/v1/checks", "https://wf.pages.dev", "ka"), "no CORSOrigins")
+}
+
+func TestCORSConfig(t *testing.T) {
+	env := map[string]string{"WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka", "WORKFLOW_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
+	c, err := ConfigFromEnv(func(k string) string { return env[k] })
+	if err != nil || len(c.CORSOrigins) != 2 || c.CORSOrigins[0] != "https://a.example" || c.CORSOrigins[1] != "https://b.example" {
+		t.Fatal(c.CORSOrigins, err)
+	}
+	delete(env, "WORKFLOW_SERVE_CORS_ORIGINS")
+	if c, _ := ConfigFromEnv(func(k string) string { return env[k] }); len(c.CORSOrigins) != 0 {
+		t.Fatal(c.CORSOrigins)
+	}
+}
