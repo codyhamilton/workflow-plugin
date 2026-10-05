@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.2 — 2026-10-05
+
+- Codex gets its own MCP config, `.codex-mcp.json` (`./bin/workflow mcp`, `cwd` the plugin root). Codex does not expand
+  `${CLAUDE_PLUGIN_ROOT}` in `.mcp.json`, so 2.9.1's workflow MCP server never started under Codex. Remove any
+  user-level `[mcp_servers.workflow]` from `~/.codex/config.toml`; the plugin provides it.
+
 ## 2.9.1 — 2026-10-05
 
 - Codex hooks ship with the plugin. `.codex-plugin/plugin.json` selects `hooks/codex.json` (`spool.sh --harness codex`,
