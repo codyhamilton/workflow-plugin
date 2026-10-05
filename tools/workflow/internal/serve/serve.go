@@ -399,9 +399,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/analytics/executions", s.method(http.MethodGet, s.auth(s.analyticsExecutions)))
 	mux.HandleFunc("/v1/analytics/conversations", s.method(http.MethodGet, s.auth(s.analyticsConversations)))
 	mux.HandleFunc("/v1/analytics/explore", s.method(http.MethodGet, s.auth(s.analyticsExplore)))
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 404, map[string]string{"error": "not found"})
-	})
+	mux.HandleFunc("/", siteHandler(siteFS))
 	h := s.cors(mux)
 	if s.cfg.Local() {
 		return localGuard(h)
