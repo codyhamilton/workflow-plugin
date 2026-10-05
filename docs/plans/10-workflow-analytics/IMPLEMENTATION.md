@@ -56,3 +56,11 @@ Run identity: Claude Code headless background job `1cc7d595` (Opus 5.5 orchestra
 Units: 2-01, then 2-02, 2-03, 2-04 one at a time (shared e2e build dir and ports). Sonnet workers.
 
 Refine feedback (artifact_feedback, all four delivered, screen pass): `b.ac_why` below p25 on 2-02 → addressed before commit (per-check why lines; re-scored 0.64). Nothing else below p25.
+
+### 2-01-site-shell — done with concerns (8e761df)
+
+- Built: `packages/workflow-analytics` (Svelte 5.57 / Kit 2.70 / adapter-static 3, SPA fallback `index.html`, output `build/`); `src/lib/{api,filters,types,format}.ts`, `FilterBar.svelte` (empty facet values hidden — carried item 2), layout with nav and error panel, overview `/`, `/settings`; `scripts/check-bundle.mjs`; Playwright harness (local + keyed `workflow serve` seeded with `tests/e2e/fixture.ts`, vite preview). Deps for the whole phase installed (layerchart 2.5.1, @perspective-dev/* 5.5.1, @playwright/test 1.63.0).
+- Checks: `npm test` 7 pass; `npm run test:e2e` 6 pass; `check:bundle` ok and fails on a planted string.
+- Deviations: build + bundle check run inside the Playwright `webServer` command (`scripts/e2e-build.mjs`) because webServer starts before globalSetup; global setup clears `TYPESAFE_API_KEY` so the fixture never reaches the live screening service; vitest limited to `src/**/*.test.ts`.
+- Concern (phase-1 store, not fixed): `rejWhere` in `tools/workflow/internal/store/analytics.go` (~line 114) matches rejection rows' `repo_id`/`harness` against the filter, and precheck rejection rows carry empty values, so any `repo_id`/`harness` filter drops rejections to 0.
+- Agent: Sonnet, 62 tool uses, ~114k tokens, 6.7 min.
