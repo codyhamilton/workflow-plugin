@@ -280,6 +280,10 @@ Three phases. More than one unit, so `refine` runs before each is built. The pha
 - Surfaces: `tools/workflow/internal/serve/serve.go`, `tools/workflow/internal/serve/reads.go`, `tools/workflow/internal/store/reads.go`, `tools/workflow/internal/store/store.go`, and the tests next to those files.
 - Approach: known
 - Depends on: nothing
+- Units:
+  - 1-01 Browser access (CORS) — `briefs/1-01-browser-access.md` — depends on: nothing — alongside: 1-02
+  - 1-02 Store analytics queries — `briefs/1-02-store-analytics.md` — depends on: nothing — alongside: 1-01
+  - 1-03 `/v1/analytics/*` routes — `briefs/1-03-analytics-routes.md` — depends on: 1-01, 1-02 — alongside: nothing
 
 ### Phase 2 — Report views
 
