@@ -53,4 +53,11 @@ describe('apiGet', () => {
 		});
 		await expect(apiGet('analytics/summary')).rejects.toBeInstanceOf(ApiError);
 	});
+
+	it('names a non-JSON 200 (a static host without the API) as a connection problem', async () => {
+		fetchMock.mockImplementation(() => Promise.resolve(new Response('<!doctype html><html></html>', { status: 200 })));
+		const err = await apiGet('analytics/summary').catch((e) => e);
+		expect(err).not.toBeInstanceOf(ApiError);
+		expect(String(err.message)).toContain('/v1/analytics/summary did not return JSON');
+	});
 });

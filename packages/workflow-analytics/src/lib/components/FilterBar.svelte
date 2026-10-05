@@ -9,11 +9,14 @@
 	const filter = $derived(parseFilter(page.url.searchParams));
 	let facets = $state<Facets | null>(null);
 
-	// Facets follow the window only (dimension filters do not narrow them).
+	// Facets follow the window only (dimension filters do not narrow them), so only a change of
+	// from/to refetches them; primitive deriveds keep a repo/harness/kind/plan change from doing so.
+	const from = $derived(filter.from);
+	const to = $derived(filter.to);
 	$effect(() => {
 		const q = new URLSearchParams();
-		if (filter.from) q.set('from', filter.from);
-		if (filter.to) q.set('to', filter.to);
+		if (from) q.set('from', from);
+		if (to) q.set('to', to);
 		let live = true;
 		apiGet<Facets>('analytics/facets', q).then(
 			(f) => live && (facets = f),

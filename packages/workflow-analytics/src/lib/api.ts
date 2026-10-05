@@ -38,5 +38,11 @@ export async function apiGet<T = unknown>(path: string, params?: URLSearchParams
 		}
 		throw new ApiError(res.status, msg);
 	}
-	return (await res.json()) as T;
+	// /v1 is never HTML. A static host without the API (Pages with an empty base URL) answers with
+	// its SPA index.html; say so instead of surfacing a JSON parse error.
+	try {
+		return (await res.json()) as T;
+	} catch {
+		throw new Error(`${url} did not return JSON: this origin does not serve the workflow API. Set the API base URL.`);
+	}
 }

@@ -487,11 +487,16 @@ func TestAnalyticsOutcome(t *testing.T) {
 	})
 
 	t.Run("access", func(t *testing.T) {
-		if code, _ := do(t, s.Handler(), "GET", A+"summary", "", ""); code != 401 {
-			t.Errorf("no key: %d", code)
-		}
-		if code, _ := do(t, s.Handler(), "GET", A+"summary", "wrong", ""); code != 401 {
-			t.Errorf("bad key: %d", code)
+		// Every analytics route refuses a keyed request without a valid key: tenant data is never
+		// served unauthenticated.
+		for _, rt := range []string{"facets", "summary", "series?metric=hook_events&bucket=day", "scores?kind=design",
+			"executions", "conversations", "explore"} {
+			if code, _ := do(t, s.Handler(), "GET", A+rt, "", ""); code != 401 {
+				t.Errorf("%s no key: %d", rt, code)
+			}
+			if code, _ := do(t, s.Handler(), "GET", A+rt, "wrong", ""); code != 401 {
+				t.Errorf("%s bad key: %d", rt, code)
+			}
 		}
 		code, body := do(t, s.Handler(), "GET", A+"nope", "ka", "")
 		if code != 404 || body != "{\"error\":\"not found\"}\n" {

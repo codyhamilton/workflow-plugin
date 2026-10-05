@@ -191,7 +191,12 @@ class BuildTests(Base):
         # sums hold bare names; check in OUT_DIR
         self.assertEqual(c.returncode, 0, c.stderr)
         for n in names:
-            magic = open(os.path.join(out, n), "rb").read(4)
+            with open(os.path.join(out, n), "rb") as fh:
+                data = fh.read()
+            magic = data[:4]
+            # The built site is embedded, not the placeholder (whose marker is also a Go string
+            # constant, so assert on a built-asset path instead).
+            self.assertIn(b"site/_app/immutable", data, n)
             if "linux" in n:
                 self.assertEqual(magic, b"\x7fELF")
             else:

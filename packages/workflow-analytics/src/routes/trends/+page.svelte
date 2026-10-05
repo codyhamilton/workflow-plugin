@@ -87,7 +87,7 @@
 </div>
 
 {#if data}
-	<LineSeries series={data.series} />
+	<LineSeries series={data.series} bucket={data.bucket} />
 	<table>
 		<thead>
 			<tr><th>{data.bucket}</th>{#each data.series as s (s.key)}<th>{label(s.key)}</th>{/each}</tr>
