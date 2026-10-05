@@ -1,0 +1,497 @@
+package serve
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"net/http"
+	"net/url"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+)
+
+// The analytics reads (DESIGN.md plan 10, "Domain: Analytics reads"). Each handler resolves the
+// shared filter, calls one store query and shapes the JSON; tenant auth is the same as /v1/artifacts.
+
+const (
+	maxBuckets   = 400
+	defaultLimit = 100
+	maxLimit     = 500
+)
+
+// exploreCap is the most rows /explore returns. A variable so the test can lower it.
+var exploreCap = 20000
+
+func errJSON(w http.ResponseWriter, code int, msg string) {
+	writeJSON(w, code, map[string]string{"error": msg})
+}
+
+func readFailed(w http.ResponseWriter) { errJSON(w, 500, "read failed") }
+
+// cursor is the opaque paging token: the route and filter it was issued for, the first page's
+// resolved window, and the sort key of the last row returned.
+type cursor struct {
+	Route  string   `json:"r"`
+	Filter string   `json:"f"`
+	From   int64    `json:"from"`
+	To     int64    `json:"to"`
+	TS     float64  `json:"ts"`
+	Key    []string `json:"k"`
+}
+
+func (c cursor) encode() string {
+	b, _ := json.Marshal(c)
+	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+func decodeCursor(s string) (*cursor, bool) {
+	b, err := base64.RawURLEncoding.DecodeString(s)
+	if err != nil {
+		return nil, false
+	}
+	var c cursor
+	if json.Unmarshal(b, &c) != nil {
+		return nil, false
+	}
+	return &c, true
+}
+
+// canonFilter is the filter parameters as sent, with repeated values sorted.
+func canonFilter(q url.Values) string {
+	out := url.Values{}
+	for _, k := range []string{"from", "to", "repo_id", "harness", "kind", "plan"} {
+		if v, ok := q[k]; ok {
+			c := append([]string(nil), v...)
+			sort.Strings(c)
+			out[k] = c
+		}
+	}
+	return out.Encode()
+}
+
+func utcDay(t time.Time) time.Time {
+	t = t.UTC()
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+// tooWide reports whether [from, to] spans more than maxBuckets UTC days, or ISO weeks.
+func tooWide(from, to time.Time, weeks bool) bool {
+	a, b := utcDay(from), utcDay(to)
+	if weeks {
+		a = a.AddDate(0, 0, -((int(a.Weekday()) + 6) % 7))
+		b = b.AddDate(0, 0, -((int(b.Weekday()) + 6) % 7))
+		return int(b.Sub(a).Hours()/24)/7+1 > maxBuckets
+	}
+	return int(b.Sub(a).Hours()/24)+1 > maxBuckets
+}
+
+type filterOpts struct {
+	weeks      bool    // count the cap in ISO weeks
+	scoresKind bool    // exactly one kind required
+	route      string  // set with cur
+	cur        *cursor // paged routes: the request's cursor
+}
+
+// parseFilter resolves the shared filter, or writes the 400 and returns false. With a cursor it
+// must match this route and these filter parameters, and its window replaces from/to.
+func parseFilter(w http.ResponseWriter, r *http.Request, o filterOpts) (store.AnalyticsFilter, bool) {
+	q := r.URL.Query()
+	var f store.AnalyticsFilter
+	var from, to time.Time
+	var hasFrom, hasTo bool
+	var err error
+	if v := q.Get("from"); v != "" {
+		if from, err = time.Parse(time.RFC3339, v); err != nil {
+			errJSON(w, 400, "from and to must be RFC3339")
+			return f, false
+		}
+		hasFrom = true
+	}
+	if v := q.Get("to"); v != "" {
+		if to, err = time.Parse(time.RFC3339, v); err != nil {
+			errJSON(w, 400, "from and to must be RFC3339")
+			return f, false
+		}
+		hasTo = true
+	}
+	if o.cur != nil {
+		if o.cur.Route != o.route || o.cur.Filter != canonFilter(q) {
+			errJSON(w, 400, "cursor mismatch")
+			return f, false
+		}
+		from, to = time.Unix(0, o.cur.From).UTC(), time.Unix(0, o.cur.To).UTC()
+	} else {
+		if !hasTo {
+			to = time.Now().UTC()
+		}
+		if !hasFrom {
+			from = to.AddDate(0, 0, -30)
+		}
+	}
+	if from.After(to) {
+		errJSON(w, 400, "from is after to")
+		return f, false
+	}
+	if tooWide(from, to, o.weeks) {
+		errJSON(w, 400, "range too wide")
+		return f, false
+	}
+	f = store.AnalyticsFilter{From: from.UTC(), To: to.UTC(), Repos: q["repo_id"], Harnesses: q["harness"], Kinds: q["kind"], Plans: q["plan"]}
+	if o.scoresKind && len(f.Kinds) != 1 {
+		errJSON(w, 400, "kind required")
+		return f, false
+	}
+	for _, k := range f.Kinds {
+		if !validKind(k) {
+			badKind(w)
+			return f, false
+		}
+	}
+	return f, true
+}
+
+// pageParams reads limit (clamped to 1..500) and cursor.
+func pageParams(w http.ResponseWriter, r *http.Request) (int, *cursor, bool) {
+	q := r.URL.Query()
+	limit := defaultLimit
+	if v := q.Get("limit"); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil {
+			errJSON(w, 400, "limit must be an integer")
+			return 0, nil, false
+		}
+		limit = min(max(n, 1), maxLimit)
+	}
+	var cur *cursor
+	if v := q.Get("cursor"); v != "" {
+		c, ok := decodeCursor(v)
+		if !ok {
+			errJSON(w, 400, "cursor mismatch")
+			return 0, nil, false
+		}
+		cur = c
+	}
+	return limit, cur, true
+}
+
+func rfc(ts float64) string { return time.Unix(int64(ts), 0).UTC().Format(time.RFC3339) }
+
+func nz(s []string) []string {
+	if s == nil {
+		return []string{}
+	}
+	return s
+}
+
+// counts returns m with every key present, zero when absent.
+func counts(m map[string]int, keys ...string) map[string]int {
+	out := map[string]int{}
+	for _, k := range keys {
+		out[k] = m[k]
+	}
+	return out
+}
+
+// catalogChecks lists the loaded checks per kind in kindOrder; nil when none are loaded.
+func (s *Server) catalogChecks(kinds ...string) []struct{ Kind, Name string } {
+	var out []struct{ Kind, Name string }
+	if s.opts.Checks == nil {
+		return out
+	}
+	for _, k := range kinds {
+		for _, c := range s.opts.Checks.For(k) {
+			out = append(out, struct{ Kind, Name string }{c.Kind, c.Name})
+		}
+	}
+	return out
+}
+
+func (s *Server) analyticsFacets(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	f, ok := parseFilter(w, r, filterOpts{})
+	if !ok {
+		return
+	}
+	fc, err := ts.t.Facets(r.Context(), store.AnalyticsFilter{From: f.From, To: f.To})
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	tools := []map[string]any{}
+	for _, t := range fc.Tools {
+		tools = append(tools, map[string]any{"name": t.Name, "n": t.N})
+	}
+	checks := []map[string]string{}
+	for _, c := range s.catalogChecks(kindOrder...) {
+		checks = append(checks, map[string]string{"kind": c.Kind, "name": c.Name})
+	}
+	writeJSON(w, 200, map[string]any{"repos": nz(fc.Repos), "harnesses": nz(fc.Harnesses), "kinds": nz(fc.Kinds),
+		"plans": nz(fc.Plans), "events": nz(fc.Events), "tools": tools, "checks": checks})
+}
+
+func (s *Server) analyticsSummary(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	f, ok := parseFilter(w, r, filterOpts{})
+	if !ok {
+		return
+	}
+	sm, err := ts.t.Summary(r.Context(), f)
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	writeJSON(w, 200, map[string]any{"from": f.From.Format(time.RFC3339), "to": f.To.Format(time.RFC3339),
+		"conversations": sm.Conversations, "hook_events": sm.HookEvents, "artifact_versions": sm.ArtifactVersions,
+		"distinct_content": sm.DistinctContent,
+		"by_kind":          counts(sm.ByKind, "design", "brief", "report", "other"),
+		"by_source":        counts(sm.BySource, "worktree", "commit"),
+		"commits":          sm.Commits,
+		"rejections":       counts(sm.Rejections, "precheck", "screen"),
+		"screens":          counts(sm.Screens, "pass", "unscreened")})
+}
+
+var seriesGroups = map[string][]string{
+	"hook_events":       {"harness", "repo_id", "event", "tool"},
+	"artifact_versions": {"harness", "repo_id", "kind", "plan", "source"},
+	"commits":           {"harness", "repo_id"},
+	"conversations":     {"harness"},
+	"rejections":        {"stage"},
+}
+
+func (s *Server) analyticsSeries(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	q := r.URL.Query()
+	metric, bucket, group := q.Get("metric"), q.Get("bucket"), q.Get("group")
+	allowed, ok := seriesGroups[metric]
+	if !ok {
+		errJSON(w, 400, "metric must be hook_events, artifact_versions, commits, conversations or rejections")
+		return
+	}
+	if bucket != "day" && bucket != "week" {
+		errJSON(w, 400, "bucket must be day or week")
+		return
+	}
+	if group == "" {
+		group = "none"
+	}
+	if group != "none" {
+		found := false
+		for _, g := range allowed {
+			found = found || g == group
+		}
+		if !found {
+			errJSON(w, 400, "group not allowed for metric")
+			return
+		}
+	}
+	f, ok := parseFilter(w, r, filterOpts{weeks: bucket == "week"})
+	if !ok {
+		return
+	}
+	pts, err := ts.t.Series(r.Context(), f, metric, bucket, group)
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	type point struct {
+		T string `json:"t"`
+		N int    `json:"n"`
+	}
+	type entry struct {
+		Key    string  `json:"key"`
+		Points []point `json:"points"`
+	}
+	byKey := map[string]*entry{}
+	var list []*entry
+	for _, p := range pts {
+		e := byKey[p.Key]
+		if e == nil {
+			e = &entry{Key: p.Key, Points: []point{}}
+			byKey[p.Key] = e
+			list = append(list, e)
+		}
+		e.Points = append(e.Points, point{p.T, p.N})
+	}
+	if len(list) == 0 && group == "none" {
+		list = append(list, &entry{Key: "all", Points: []point{}})
+	}
+	sort.SliceStable(list, func(i, j int) bool { return list[i].Key < list[j].Key })
+	if list == nil {
+		list = []*entry{}
+	}
+	writeJSON(w, 200, map[string]any{"bucket": bucket, "series": list})
+}
+
+func (s *Server) analyticsScores(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	f, ok := parseFilter(w, r, filterOpts{scoresKind: true})
+	if !ok {
+		return
+	}
+	kind := f.Kinds[0]
+	f.Kinds = nil
+	vals, err := ts.t.WindowScores(r.Context(), f, kind)
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	out := []map[string]any{}
+	for _, c := range s.catalogChecks(kind) {
+		v := vals[c.Name]
+		sort.Float64s(v)
+		out = append(out, map[string]any{"name": c.Name, "n": len(v), "min": round3(percentile(v, 0)),
+			"p25": round3(percentile(v, .25)), "median": round3(percentile(v, .5)),
+			"p75": round3(percentile(v, .75)), "max": round3(percentile(v, 1))})
+	}
+	writeJSON(w, 200, map[string]any{"kind": kind, "checks": out})
+}
+
+// pageOf returns the slice of n sorted rows after the cursor (after reports row i is past it) and
+// at most limit long, and whether more follow.
+func pageOf(n, limit int, cur *cursor, after func(i int) bool) (lo, hi int, more bool) {
+	if cur != nil {
+		for lo < n && !after(lo) {
+			lo++
+		}
+	}
+	hi = min(lo+limit, n)
+	return lo, hi, hi < n
+}
+
+func (s *Server) analyticsExecutions(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	limit, cur, ok := pageParams(w, r)
+	if !ok {
+		return
+	}
+	f, ok := parseFilter(w, r, filterOpts{route: "executions", cur: cur})
+	if !ok {
+		return
+	}
+	rows, err := ts.t.Executions(r.Context(), f)
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	// the store's order: ts desc, conversation_id, brief path, repo_id (1-02 decision 8)
+	key := func(x store.ExecRow) []string { return []string{x.ConversationID, x.BriefPath, x.RepoID} }
+	sort.SliceStable(rows, func(i, j int) bool {
+		if rows[i].TS != rows[j].TS {
+			return rows[i].TS > rows[j].TS
+		}
+		return strings.Join(key(rows[i]), "\x00") < strings.Join(key(rows[j]), "\x00")
+	})
+	cnt := map[string]int{"complete": 0, "unreported": 0, "started": 0}
+	for _, x := range rows {
+		cnt[x.Shape]++
+	}
+	lo, hi, more := pageOf(len(rows), limit, cur, func(i int) bool {
+		if rows[i].TS != cur.TS {
+			return rows[i].TS < cur.TS
+		}
+		return strings.Join(key(rows[i]), "\x00") > strings.Join(cur.Key, "\x00")
+	})
+	type row struct {
+		RepoID         string `json:"repo_id"`
+		Plan           string `json:"plan"`
+		ConversationID string `json:"conversation_id"`
+		BriefPath      string `json:"brief_path"`
+		Harness        string `json:"harness"`
+		Shape          string `json:"shape"`
+		TS             string `json:"ts"`
+	}
+	out := []row{}
+	for _, x := range rows[lo:hi] {
+		out = append(out, row{x.RepoID, x.Plan, x.ConversationID, x.BriefPath, x.Harness, x.Shape, rfc(x.TS)})
+	}
+	resp := map[string]any{"counts": cnt, "rows": out}
+	if more {
+		last := rows[hi-1]
+		resp["next"] = cursor{Route: "executions", Filter: canonFilter(r.URL.Query()), From: f.From.UnixNano(), To: f.To.UnixNano(),
+			TS: last.TS, Key: key(last)}.encode()
+	}
+	writeJSON(w, 200, resp)
+}
+
+func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	limit, cur, ok := pageParams(w, r)
+	if !ok {
+		return
+	}
+	f, ok := parseFilter(w, r, filterOpts{route: "conversations", cur: cur})
+	if !ok {
+		return
+	}
+	rows, err := ts.t.Conversations(r.Context(), f)
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	sort.SliceStable(rows, func(i, j int) bool {
+		if rows[i].LastTS != rows[j].LastTS {
+			return rows[i].LastTS > rows[j].LastTS
+		}
+		return rows[i].ConversationID < rows[j].ConversationID
+	})
+	lo, hi, more := pageOf(len(rows), limit, cur, func(i int) bool {
+		if rows[i].LastTS != cur.TS {
+			return rows[i].LastTS < cur.TS
+		}
+		return len(cur.Key) > 0 && rows[i].ConversationID > cur.Key[0]
+	})
+	type row struct {
+		ConversationID   string   `json:"conversation_id"`
+		Harness          string   `json:"harness"`
+		Repos            []string `json:"repos"`
+		FirstTS          string   `json:"first_ts"`
+		LastTS           string   `json:"last_ts"`
+		HookEvents       int      `json:"hook_events"`
+		ArtifactVersions int      `json:"artifact_versions"`
+		Commits          int      `json:"commits"`
+		Kinds            []string `json:"kinds"`
+	}
+	out := []row{}
+	for _, x := range rows[lo:hi] {
+		out = append(out, row{x.ConversationID, x.Harness, nz(x.Repos), rfc(x.FirstTS), rfc(x.LastTS),
+			x.HookEvents, x.ArtifactVersions, x.Commits, nz(x.Kinds)})
+	}
+	resp := map[string]any{"rows": out}
+	if more {
+		last := rows[hi-1]
+		resp["next"] = cursor{Route: "conversations", Filter: canonFilter(r.URL.Query()), From: f.From.UnixNano(), To: f.To.UnixNano(),
+			TS: last.LastTS, Key: []string{last.ConversationID}}.encode()
+	}
+	writeJSON(w, 200, resp)
+}
+
+func (s *Server) analyticsExplore(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
+	f, ok := parseFilter(w, r, filterOpts{})
+	if !ok {
+		return
+	}
+	rows, truncated, err := ts.t.Explore(r.Context(), f, exploreCap)
+	if err != nil {
+		readFailed(w)
+		return
+	}
+	type row struct {
+		Type           string `json:"type"`
+		TS             string `json:"ts"`
+		Harness        string `json:"harness"`
+		RepoID         string `json:"repo_id"`
+		Plan           string `json:"plan"`
+		Kind           string `json:"kind"`
+		Event          string `json:"event"`
+		Tool           string `json:"tool"`
+		Path           string `json:"path"`
+		ConversationID string `json:"conversation_id"`
+		Source         string `json:"source"`
+		SHA            string `json:"sha"`
+		ScreenVerdict  string `json:"screen_verdict"`
+		RejectionStage string `json:"rejection_stage"`
+	}
+	out := make([]row, 0, len(rows))
+	for _, x := range rows {
+		out = append(out, row{x.Type, rfc(x.TS), x.Harness, x.RepoID, x.Plan, x.Kind, x.Event, x.Tool, x.Path,
+			x.ConversationID, x.Source, x.SHA, x.ScreenVerdict, x.RejectionStage})
+	}
+	writeJSON(w, 200, map[string]any{"rows": out, "truncated": truncated})
+}

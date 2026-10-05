@@ -392,6 +392,13 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/checks", s.method(http.MethodGet, s.auth(s.checks)))
 	mux.HandleFunc("/v1/baselines", s.method(http.MethodGet, s.auth(s.baselines)))
 	mux.HandleFunc("/v1/search", s.method(http.MethodGet, s.auth(s.search)))
+	mux.HandleFunc("/v1/analytics/facets", s.method(http.MethodGet, s.auth(s.analyticsFacets)))
+	mux.HandleFunc("/v1/analytics/summary", s.method(http.MethodGet, s.auth(s.analyticsSummary)))
+	mux.HandleFunc("/v1/analytics/series", s.method(http.MethodGet, s.auth(s.analyticsSeries)))
+	mux.HandleFunc("/v1/analytics/scores", s.method(http.MethodGet, s.auth(s.analyticsScores)))
+	mux.HandleFunc("/v1/analytics/executions", s.method(http.MethodGet, s.auth(s.analyticsExecutions)))
+	mux.HandleFunc("/v1/analytics/conversations", s.method(http.MethodGet, s.auth(s.analyticsConversations)))
+	mux.HandleFunc("/v1/analytics/explore", s.method(http.MethodGet, s.auth(s.analyticsExplore)))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 404, map[string]string{"error": "not found"})
 	})
