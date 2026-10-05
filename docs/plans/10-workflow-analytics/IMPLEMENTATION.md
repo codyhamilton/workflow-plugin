@@ -105,3 +105,11 @@ Feedback (artifact_feedback): not run — the `workflow` MCP server failed to co
 3. `@perspective-dev/server` is used by `/explore` but not declared in `package.json`; add it as a direct dependency.
 4. Chart rendering is not visually checked (specs read the tables); `svelte-check` is not installed.
 5. `artifact_feedback` for phase 2 reports and briefs, and report 1-02's re-delivery, are outstanding because the feedback server was unreachable.
+
+## Phase 3 — Local serve hosts the site
+
+Run identity: Claude Code headless background job `88c3a6c8` (Opus 5.5 orchestrator), worktree branch `worktree-wa-phase3`, started 2026-10-06 from master @ 5178686. Refine commit b13ae9f.
+
+Units: 3-01, then 3-02 (sequential). Sonnet workers.
+
+Refine feedback (artifact_feedback): brief 3-01 delivered, screen pass, no check below p25. Brief 3-02 delivered, awaiting screen at refine time.
