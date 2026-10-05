@@ -76,6 +76,7 @@ are maintainer operations and move to the REST API or CLI.
 | 4 | [Agent advisory surface](04-advisory-surface.md) | the read-only MCP, hook feedback, behaviour when the remote is unreachable |
 | 5 | [Distribution](05-distribution.md) | plugin layout, per-harness packaging, the pinned Codex copy |
 | 6 | Lab and analysis | held-out set, white paper, check-to-cost revisit |
+| 7 | [Analytics site](07-analytics-site.md) | person-facing `/v1/analytics` reads, browser CORS, the static Svelte site, local and Pages hosting |
 
 Order: 1 first, since the rest depend on its keys and envelope types. 2 and 3 can then proceed
 together.

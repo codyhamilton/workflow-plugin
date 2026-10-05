@@ -55,6 +55,7 @@ Server configuration is environment only:
 | `WORKFLOW_SERVE_ADDR` | listen address, default `127.0.0.1:8770` |
 | `WORKFLOW_SERVE_DATA` | data directory |
 | `WORKFLOW_SERVE_KEYS` | `tenant=key[,tenant=key…]`; unset or empty means keyless local mode |
+| `WORKFLOW_SERVE_CORS_ORIGINS` | comma-separated exact origins allowed to read a keyed server from a browser; unset or empty means no CORS headers; ignored in local mode, which allows loopback origins ([design 7](07-analytics-site.md#browser-access)) |
 | `TYPESAFE_API_KEY` | scorer credential; server side only, never in any client config |
 
 Registration, key issue and rotation are out of scope. A key maps to exactly one tenant; the client
@@ -79,6 +80,10 @@ endpoints. Unknown fields in a fact are kept in its raw payload, never rejected.
 | `GET /v1/health` | none | liveness, version |
 | `POST /v1/ingest` | key | a batch of facts from a drain |
 | advisory reads (`/v1/artifacts`, `/v1/checks`, `/v1/baselines`, `/v1/search`) | key | defined by [design 4](04-advisory-surface.md#api) |
+| analytics reads (`/v1/analytics/*`) | key | defined by [design 7](07-analytics-site.md#analytics-reads) |
+
+Outside `/v1`, the binary serves the embedded analytics site at `/` and answers browsers with the
+CORS rules in [design 7](07-analytics-site.md#browser-access). `/v1` paths are never HTML.
 
 ### Ingest
 
@@ -142,8 +147,10 @@ Ingest is append-only (principle 6): `INSERT OR IGNORE` keyed by row hash, never
 | `screens` | content hash, verdict, scorer, at |
 | `scores` | content hash, check, result, scorer, at |
 
-Derived views (execution, gaps, moves) are built by a reader into separate tables and never on the
-ingest path. Their definition belongs to design 4 and the lab.
+Derived views (execution, gaps, moves) are never built on the ingest path. The execution view is a
+read: `/v1/analytics/executions` computes it per brief from `facts` at request time
+([design 7](07-analytics-site.md#routes), following design 1). Any other derived view belongs to
+design 4 and the lab.
 
 ### Behind an interface
 
