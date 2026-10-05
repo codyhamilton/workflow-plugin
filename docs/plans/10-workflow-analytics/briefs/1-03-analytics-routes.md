@@ -51,6 +51,7 @@ Decisions settled at refine (do not re-derive):
 7. **Executions `counts`** cover every matching brief regardless of page, with all three keys present.
 8. **JSON lists are never `null`:** empty slices encode as `[]`. Explore rows are objects with exactly the 14 contract columns, strings throughout (`ts` RFC3339). The explore cap is an unexported package variable `exploreCap = 20000` so the test can lower it.
 9. **Checks catalog absent** (`Options.Checks == nil`): facets `checks` and scores `checks` are `[]`.
+10. **Facets scope** (amended after 1-02): the contract says facets are "every distinct value on facts in the window", so `/facets` validates the full shared filter but calls `store.Facets` with only `From` and `To` set. `store.Series` already rejects unknown metric/bucket/group; validate the pairing table in the handler anyway so error bodies are the ones in decision 1.
 
 ## Changes
 
