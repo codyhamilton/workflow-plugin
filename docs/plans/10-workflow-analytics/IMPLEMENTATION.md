@@ -64,3 +64,11 @@ Refine feedback (artifact_feedback, all four delivered, screen pass): `b.ac_why`
 - Deviations: build + bundle check run inside the Playwright `webServer` command (`scripts/e2e-build.mjs`) because webServer starts before globalSetup; global setup clears `TYPESAFE_API_KEY` so the fixture never reaches the live screening service; vitest limited to `src/**/*.test.ts`.
 - Concern (phase-1 store, not fixed): `rejWhere` in `tools/workflow/internal/store/analytics.go` (~line 114) matches rejection rows' `repo_id`/`harness` against the filter, and precheck rejection rows carry empty values, so any `repo_id`/`harness` filter drops rejections to 0.
 - Agent: Sonnet, 62 tool uses, ~114k tokens, 6.7 min.
+
+### 2-02-chart-reports — done (844a6ef)
+
+- Built: `/trends` (metric/bucket/group controls limited to the contract's pairings), `/repos` (per-repo summaries in parallel), `/hooks` (event/tool/harness from grouped series) with LayerChart wrappers in `src/lib/charts/`; specs `trends`, `repos`, `hooks` (7 tests).
+- Checks: the 7 specs failed first, then pass; whole e2e suite 13/13; build + `check:bundle` ok.
+- Deviations: series are sparse, so a filtered-out day has no cell (spec asserts absence, not `0`); `by_kind` test ids are `repo-<repo>-by_kind-<kind>`.
+- Open: chart rendering not visually checked (specs read the tables); `svelte-check` not installed.
+- Agent: Sonnet, 26 tool uses, ~81k tokens, 3.9 min.
