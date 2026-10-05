@@ -198,7 +198,7 @@ Each harness ships its own hook config, passing a literal `--harness`.
 | Harness | Config | Trust step |
 |---|---|---|
 | Claude Code | plugin `hooks/hooks.json` | none beyond plugin install |
-| Codex | `hooks.json` | the user approves hooks in `/hooks`; until then nothing is captured |
+| Codex | plugin `hooks/codex.json`, selected by `.codex-plugin/plugin.json` | the user approves hooks in `/hooks`; until then nothing is captured |
 | Cursor | `hooks/cursor.json` | none |
 | OpenCode | plugin calling `spool.sh` | none |
 

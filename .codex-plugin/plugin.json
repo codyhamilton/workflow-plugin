@@ -1,0 +1,12 @@
+{
+  "name": "workflow",
+  "description": "Cloud-safe core workflow skills for Codex: design, refine, execute, comprehensive-review, close-out, post-build",
+  "version": "2.9.1",
+  "author": {
+    "name": "William Hamilton",
+    "email": "codyh@ctzns.net"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "hooks": "./hooks/codex.json"
+}

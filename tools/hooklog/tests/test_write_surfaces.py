@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[3]
 GOBIN = os.path.join(pwd.getpwuid(os.getuid()).pw_dir, ".local/go/bin")  # HOME may be a temp dir
 CONFIGS = {"claude": ["hooks/hooks.json"],
            "cursor": ["hooks/cursor.json", "tools/hooklog/cursor-hooks.example.json"],
-           "codex": ["tools/hooklog/codex-hooks.example.json"]}
+           "codex": ["hooks/codex.json"]}
 GIT_ENV = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
 
 

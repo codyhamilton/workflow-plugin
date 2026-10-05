@@ -11,7 +11,7 @@ permissive response required by its pre-action schema.
 | Claude Code | 33 catalog keys; 31 active + 2 integration-only | [`hooks/hooks.json`](../../hooks/hooks.json), command handlers |
 | Cursor | 22 claimed; 21 enumerated | [`hooks/cursor.json`](../../hooks/cursor.json), selected by `.cursor-plugin/plugin.json` |
 | OpenCode | 18 Hooks + 28 bus types | [`packages/opencode-workflow-hooks`](../../packages/opencode-workflow-hooks), JS callbacks |
-| Codex | 12 events | [`codex-hooks.example.json`](codex-hooks.example.json), command handlers |
+| Codex | 12 events | [`hooks/codex.json`](../../hooks/codex.json), selected by `.codex-plugin/plugin.json` |
 
 The supplied 2026-10-03 catalog's Cursor subtotal says 19 agent hooks but lists 18.
 The [official plugin reference](https://cursor.com/docs/reference/plugins#available-hook-events)
@@ -126,11 +126,13 @@ arguments, prompts, headers, config, environment, tool definitions or experiment
 
 ## Codex
 
-Merge [`codex-hooks.example.json`](codex-hooks.example.json) into **`~/.codex/hooks.json`** or
-**`<project>/.codex/hooks.json`**, replacing `/ABS/PATH/workflow-plugin` with the absolute checkout
-path. Preserve existing hooks. Codex also supports inline `[hooks]` in `config.toml`.
-Non-managed hooks need the host's trust review before execution; installing a definition does
-not bypass that review. See [official OpenAI documentation](https://developers.openai.com/codex/hooks).
+The plugin registers Codex hooks itself: `.codex-plugin/plugin.json` points Codex at
+[`hooks/codex.json`](../../hooks/codex.json), whose commands use `$PLUGIN_ROOT`. Without that
+manifest Codex falls back to `hooks/hooks.json` and records every Codex event as `claude`. Do not
+also register these hooks in `~/.codex/hooks.json` or `<project>/.codex/hooks.json`: Codex runs
+every source, so each event would be captured twice. Plugin hooks need the host's trust review in
+`/hooks` before they run, and again whenever the file changes. See
+[official OpenAI documentation](https://developers.openai.com/codex/hooks).
 
 All 12 names use `spool.sh --harness codex`: SessionStart, SessionEnd, SubagentStart,
 SubagentStop, PreToolUse, PermissionRequest, PostToolUse, PreCompact, PostCompact,

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.9.1 — 2026-10-05
+
+- Codex hooks ship with the plugin. `.codex-plugin/plugin.json` selects `hooks/codex.json` (`spool.sh --harness codex`,
+  `$PLUGIN_ROOT` paths) and declares the skills and `.mcp.json`. Before this, Codex fell back to `hooks/hooks.json`, so
+  every Codex event was recorded twice when `~/.codex/hooks.json` was also set up, once mislabelled `claude`.
+  `tools/hooklog/codex-hooks.example.json` is removed; delete its entries from `~/.codex/hooks.json` and re-trust the
+  plugin hooks in `/hooks`.
+
 ## 2.9.0 — 2026-10-04
 
 - Hooklog capture is now a bash spooler plus an async drain. Hooks run `tools/hooklog/spool.sh`, which writes the raw payload

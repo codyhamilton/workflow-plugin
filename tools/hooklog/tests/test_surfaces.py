@@ -23,14 +23,15 @@ class SurfaceTests(unittest.TestCase):
     def test_shipped_registrations_capture_all_events(self):
         registrations = [('claude', 'hooks/hooks.json', CLAUDE), ('cursor', 'hooks/cursor.json', CURSOR),
                          ('cursor', 'tools/hooklog/cursor-hooks.example.json', CURSOR),
-                         ('codex', 'tools/hooklog/codex-hooks.example.json', CODEX)]
+                         ('codex', 'hooks/codex.json', CODEX)]
         for harness, file, expected in registrations:
             with self.subTest(file=file), tempfile.TemporaryDirectory() as tmp:
                 config = json.loads((ROOT / file).read_text())
                 self.assertEqual(set(config['hooks']), expected)
                 queue = Path(tmp) / 'queue'
                 env = dict(os.environ, HOME=tmp, WORKFLOW_QUEUE=str(queue), WORKFLOW_HOOKLOG_KICK='0', TYPESAFE_API_KEY='',
-                           WORKFLOW_BIN=str(Path(tmp) / 'stub'), CLAUDE_PLUGIN_ROOT=str(ROOT), CURSOR_PLUGIN_ROOT=str(ROOT))
+                           WORKFLOW_BIN=str(Path(tmp) / 'stub'), CLAUDE_PLUGIN_ROOT=str(ROOT), CURSOR_PLUGIN_ROOT=str(ROOT),
+                           PLUGIN_ROOT=str(ROOT))
                 stub = Path(tmp) / 'stub'
                 stub.write_text(f'#!/bin/sh\necho "$@" >> "{tmp}/stub.calls"\n')
                 stub.chmod(0o755)
@@ -76,6 +77,19 @@ class SurfaceTests(unittest.TestCase):
         manifest = json.loads((ROOT / '.cursor-plugin/plugin.json').read_text())
         self.assertEqual(manifest['hooks'], './hooks/cursor.json')
         self.assertTrue((ROOT / manifest['hooks']).is_file())
+
+    def test_codex_manifest_selects_native_registration(self):
+        # Without a Codex manifest, Codex loads hooks/hooks.json and records Codex events as claude.
+        manifest = json.loads((ROOT / '.codex-plugin/plugin.json').read_text())
+        self.assertEqual(manifest['hooks'], './hooks/codex.json')
+        for key in ('hooks', 'skills', 'mcpServers'):
+            self.assertTrue((ROOT / manifest[key]).exists(), key)
+        self.assertNotIn('--harness claude', (ROOT / manifest['hooks']).read_text())
+
+    def test_manifest_versions_match(self):
+        versions = {f: json.loads((ROOT / f).read_text())['version']
+                    for f in ('.claude-plugin/plugin.json', '.cursor-plugin/plugin.json', '.codex-plugin/plugin.json')}
+        self.assertEqual(len(set(versions.values())), 1, versions)
 
 if __name__ == '__main__':
     unittest.main()

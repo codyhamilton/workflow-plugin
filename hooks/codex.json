@@ -5,12 +5,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           },
           {
             "type": "command",
-            "command": "nohup bash \"/ABS/PATH/workflow-plugin/bin/workflow\" --version </dev/null >/dev/null 2>&1 & exit 0",
+            "command": "nohup bash \"${PLUGIN_ROOT}/bin/workflow\" --version </dev/null >/dev/null 2>&1 & exit 0",
             "timeout": 3
           }
         ]
@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -120,7 +120,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]
@@ -131,7 +131,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"/ABS/PATH/workflow-plugin/tools/hooklog/spool.sh\" --harness codex",
+            "command": "bash \"${PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness codex",
             "timeout": 3
           }
         ]

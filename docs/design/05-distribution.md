@@ -72,7 +72,7 @@ maintainer's agreement. Until a release exists, the wrapper's step 4 is the work
 |---|---|---|
 | Claude Code | `hooks/hooks.json`, `.mcp.json` | `spool.sh --harness claude`; shim as stdio |
 | Cursor | `hooks/cursor.json`, `tools/hooklog/cursor-hooks.example.json` | `spool.sh --harness cursor` |
-| Codex | `tools/hooklog/codex-hooks.example.json` | `spool.sh --harness codex` |
+| Codex | `hooks/codex.json` | `spool.sh --harness codex` |
 | OpenCode | `packages/opencode-workflow-hooks` | writes spool files with the design 2 name; kicks `bin/workflow drain` |
 
 All four drop the `artifact_submit.py` registration.
