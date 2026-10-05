@@ -77,8 +77,8 @@ type ConvRow struct {
 	HookEvents, ArtifactVersions, Commits int
 }
 type ExploreRow struct {
-	Type                                                                                                                string
-	TS                                                                                                                  float64
+	Type                                                                                                       string
+	TS                                                                                                         float64
 	Harness, RepoID, Plan, Kind, Event, Tool, Path, ConversationID, Source, SHA, ScreenVerdict, RejectionStage string
 }
 

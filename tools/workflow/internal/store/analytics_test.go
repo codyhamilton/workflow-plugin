@@ -96,7 +96,7 @@ func fixture(t *testing.T) (*Tenant, AnalyticsFilter) {
 		av("c3", "claude", ad(10, 2, 9, 0), "repoB", "docs/plans/p1/briefs/b1.md", "H2", "worktree", ""),
 		av("c4", "cursor", ad(10, 2, 9, 0), "repoA", "docs/plans/p2/briefs/b3.md", "H7", "commit", ""),
 		av("c6", "cursor", ad(9, 10, 0, 0), "repoA", "docs/plans/p3/DESIGN.md", "H8", "worktree", ""), // out
-		cm("c1", "cursor", ad(10, 20, 0, 0), "repoA", "c1sha"),                                       // out
+		cm("c1", "cursor", ad(10, 20, 0, 0), "repoA", "c1sha"),                                        // out
 		cm("c4", "codex", ad(10, 3, 12, 0), "repoA", "def"),
 		cm("c5", "cursor", ad(10, 1, 10, 0), "repoB", "ghi"),
 	)
