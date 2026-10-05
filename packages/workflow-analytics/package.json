@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:hosted": "playwright test -c playwright.hosted.config.ts",
     "check:bundle": "node scripts/check-bundle.mjs"
   },
   "devDependencies": {
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "@perspective-dev/client": "^5.5.1",
+    "@perspective-dev/server": "^5.5.1",
     "@perspective-dev/viewer": "^5.5.1",
     "@perspective-dev/viewer-datagrid": "^5.5.1",
     "layerchart": "^2.5.1"

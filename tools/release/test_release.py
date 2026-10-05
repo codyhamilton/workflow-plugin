@@ -170,9 +170,17 @@ class BuildTests(Base):
     def test_7_build_sh(self):
         out = os.path.join(self.tmp, "dist")
         sums = os.path.join(self.tmp, "SUMS")
-        r = subprocess.run(["bash", BUILD], env=self.env(OUT_DIR=out, SUMS_FILE=sums),
+        npm = shutil.which("npm")
+        self.assertTrue(npm, "npm is needed to run build.sh")
+        env = self.env(OUT_DIR=out, SUMS_FILE=sums)
+        env["PATH"] = os.path.dirname(npm) + ":" + env["PATH"]
+        env["npm_config_cache"] = os.environ.get("npm_config_cache") or os.path.expanduser("~/.npm")
+        r = subprocess.run(["bash", BUILD], env=env,
                            capture_output=True, text=True, timeout=600, cwd=ROOT)
         self.assertEqual(r.returncode, 0, r.stderr)
+        dirty = subprocess.run(["git", "status", "--porcelain", "tools/workflow/internal/serve/site"],
+                               capture_output=True, text=True, cwd=ROOT)
+        self.assertEqual(dirty.stdout, "")
         names = sorted(os.listdir(out))
         self.assertEqual(names, ["workflow-darwin-amd64", "workflow-darwin-arm64",
                                  "workflow-linux-amd64", "workflow-linux-arm64"])
