@@ -79,3 +79,29 @@ Refine feedback (artifact_feedback, all four delivered, screen pass): `b.ac_why`
 - Checks: the 9 specs failed first, then pass; whole e2e suite 22/22; build ok; `check:bundle` passed inside the e2e webServer command.
 - Deviations: no chart on `/quality` (optional per brief); the stubbed quality spec adds `access-control-allow-origin: *` to fulfilled responses (cross-origin page and serve); table rows keyed by index (no unique field).
 - Agent: Sonnet, 20 tool uses, ~73k tokens, 3.3 min.
+
+### 2-04-explore — done with concerns (1d083ab)
+
+- Built: `/explore` dynamically imports Perspective client, viewer, datagrid and theme on mount (WASM via `?url`), builds a 14-column table (`ts` datetime, rest string), `table.replace` on filter change; `explore-count`, and an `explore-truncated` banner only when `truncated`. Spec `explore` (4 tests: 17 rows unfiltered, `repo_id=r1` → 12 surviving reload, stubbed `truncated:true` banner, `/` requests no Perspective or `.wasm`).
+- Checks: 3 of 4 failed first (the no-Perspective-on-`/` test passes trivially), then 4 pass; whole e2e suite 26/26; build ok; `check:bundle` ok (79 files).
+- Deviations: none; `vite.config.ts` unchanged.
+- Concerns: `@perspective-dev/server` is imported by path but only resolves transitively through `@perspective-dev/client` (not in `package.json`); the `r1` count of 12 reflects the `rejWhere` quirk 2-01 reported.
+- Agent: Sonnet, 17 tool uses, ~60k tokens, 2.5 min.
+
+### Verification
+
+Cheap-tier check by the orchestrator, against the Phase 2 Outcome, from `packages/workflow-analytics`:
+
+- `npm test`: 7/7. `npm run test:e2e` (whole suite, which builds and runs `check:bundle` with the live tenant key and token as `E2E_FORBIDDEN` before previewing `build/`): 26/26, covering `/`, `/trends`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/explore` against local and keyed phase-1 serves seeded with the fixture, URL filters surviving reload, `/quality` window beside `/v1/baselines` with GET-only requests, `/explore` Perspective plus `truncated`, `/settings` localStorage keys and bearer header.
+- `npm run build`: emits `build/index.html` and `build/_app/` (HTML/JS/CSS). Perspective appears in one route node chunk only; LayerChart is imported only through `src/lib/charts/` by the fixed routes.
+- Result: phase outcome holds.
+
+Feedback (artifact_feedback): not run — the `workflow` MCP server failed to connect in this session (ENOENT on its binary), so reports 2-01..2-04 and the four briefs were not scored at close, and Phase 1 carried item 3 (re-deliver report 1-02) was not done. Refine-time brief feedback is recorded above.
+
+### Carried
+
+1. `rejWhere` in `tools/workflow/internal/store/analytics.go` (~line 114) matches precheck rejection rows' empty `repo_id`/`harness` against the filter, so any `repo_id` or `harness` filter drops rejections to 0 (summary `precheck`, explore rows). Phase-1 store bug; needs a contract decision on whether rejections belong to a repo.
+2. Executions and conversations paging loads the store's full sorted set and slices in Go (Phase 1 carried item 1). Unmeasured at scale; the site's Pager follows the cursor unchanged.
+3. `@perspective-dev/server` is used by `/explore` but not declared in `package.json`; add it as a direct dependency.
+4. Chart rendering is not visually checked (specs read the tables); `svelte-check` is not installed.
+5. `artifact_feedback` for phase 2 reports and briefs, and report 1-02's re-delivery, are outstanding because the feedback server was unreachable.
