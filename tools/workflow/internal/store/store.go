@@ -44,6 +44,8 @@ var migrations = []string{
 	CREATE INDEX scores_hash ON scores(content_hash, check_name);`,
 	// 2: full-text index of screened content, one row per content hash.
 	`CREATE VIRTUAL TABLE search USING fts5(content_hash UNINDEXED, body, tokenize='porter unicode61');`,
+	// 3: analytics window scans by event time.
+	`CREATE INDEX IF NOT EXISTS facts_ts ON facts(ts);`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
