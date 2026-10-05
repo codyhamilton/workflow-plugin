@@ -293,6 +293,12 @@ Three phases. More than one unit, so `refine` runs before each is built. The pha
 - Surfaces: `packages/workflow-analytics/` (`package.json`, SvelteKit config, and the route modules under that package).
 - Approach: known
 - Depends on: Phase 1
+- Units:
+  - 2-01 Site shell, API client, filters, overview and settings — `briefs/2-01-site-shell.md` — depends on: nothing — alongside: nothing
+  - 2-02 Trends, repos and hooks reports — `briefs/2-02-chart-reports.md` — depends on: 2-01 — alongside: nothing (shares the e2e build dir and ports)
+  - 2-03 Quality, executions and conversations reports — `briefs/2-03-table-reports.md` — depends on: 2-01, 2-02 — alongside: nothing (same reason)
+  - 2-04 Explore pivot (Perspective) — `briefs/2-04-explore.md` — depends on: 2-01, 2-02, 2-03 — alongside: nothing (same reason)
+- Phase 1 Carried, placed: item 2 (empty facet values) is absorbed by 2-01 decision 6 (hidden in filter controls, shown as `(none)` elsewhere). Item 1 (paging and aggregation unmeasured at scale) stays a note: no unit changes paging, and measuring a large tenant is not in this phase's outcome. Item 3 (re-deliver report 1-02 to feedback) is orchestrator housekeeping, not a unit.
 
 ### Phase 3 — Local serve hosts the site
 
