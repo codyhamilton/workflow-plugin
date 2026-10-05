@@ -72,3 +72,10 @@ Refine feedback (artifact_feedback, all four delivered, screen pass): `b.ac_why`
 - Deviations: series are sparse, so a filtered-out day has no cell (spec asserts absence, not `0`); `by_kind` test ids are `repo-<repo>-by_kind-<kind>`.
 - Open: chart rendering not visually checked (specs read the tables); `svelte-check` not installed.
 - Agent: Sonnet, 26 tool uses, ~81k tokens, 3.9 min.
+
+### 2-03-table-reports — done (2d8f783)
+
+- Built: `Pager.svelte` (in-memory cursor, same params plus `cursor`, hidden without `next`, stale responses dropped on filter change); `/quality` (first valid `kind`, default `design`, multi-kind note, kind buttons; scores and `/v1/baselines?kind=` in parallel, GET only; window and all-time baseline columns, blank baseline cells when absent); `/executions` (three count tiles, `exec-row` table, Pager); `/conversations` (`conv-row` table, `conv-<id>-<field>` counts, Pager); `limit` URL param passed through. Specs `quality`, `executions`, `conversations` (9 tests).
+- Checks: the 9 specs failed first, then pass; whole e2e suite 22/22; build ok; `check:bundle` passed inside the e2e webServer command.
+- Deviations: no chart on `/quality` (optional per brief); the stubbed quality spec adds `access-control-allow-origin: *` to fulfilled responses (cross-origin page and serve); table rows keyed by index (no unique field).
+- Agent: Sonnet, 20 tool uses, ~73k tokens, 3.3 min.
