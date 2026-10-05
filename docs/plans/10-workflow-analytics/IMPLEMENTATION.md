@@ -23,3 +23,28 @@ Refine feedback (artifact_feedback, all delivered, screen pass): `b.ac_why` belo
 - Concerns: `Facets` applies the whole filter it is given; `Conversations` aggregates in Go and `Executions` uses a per-brief correlated `EXISTS` — neither measured on a large tenant.
 - Brief amendment: 1-03 decision 10 (facets called with the window only, per the contract's "in the window").
 - Agent: Sonnet, 21 tool uses, ~99k tokens, 5.8 min.
+
+### 1-03-analytics-routes — done with concerns (0932914)
+
+- Built: `serve/analytics.go` (shared filter parser, seven handlers, base64url cursor, `exploreCap`), seven registrations in `Handler`; `TestAnalyticsOutcome` (fixture via `POST /v1/ingest`, 9 subtests) and `TestAnalyticsEmptyTenant`.
+- Surfaces: `internal/serve/analytics.go`, `internal/serve/analytics_test.go`, `internal/serve/serve.go`, `reports/1-03-analytics-routes.md`.
+- Deviations: scores fixture uses a local `qaScorer` (catalog-named checks) since `contentScorer` files under `q.a`, absent from the catalog; nested brief paths are not executions (store lists `briefs/<stem>.md` only) and count under summary `other`.
+- Concerns: paging slices the store's full sorted set in Go (no offset in the store API); facets `plans` includes `""`. Both follow the contract; noted for phase 2.
+- Agent: Sonnet, 24 tool uses, ~112k tokens, 5.8 min.
+- Orchestrator follow-up: `gofmt -w` on 1-02's two store files (c19262f, formatting only).
+
+### Verification
+
+Cheap-tier check by the orchestrator, against the Phase 1 Outcome:
+
+- `go vet ./... && go test ./...` in `tools/workflow`: all packages ok; `gofmt -l .` clean after c19262f.
+- Live: built `workflow serve`, ran it in local mode on `127.0.0.1:18765` with a fresh data dir, posted a 7-fact fixture (2 repos, 2 harnesses, 3 conversations, one precheck-rejected hook event) through `POST /v1/ingest`, then asserted over HTTP — 22/22 pass: summary counts (hook_events 2, artifact_versions 3, commits 1, conversations 2, precheck 1, by_kind brief 2/report 1, screens settling to unscreened 3); executions shapes complete/started, a `limit=1` two-page walk equal to the one-page result with `next` absent on the last page, `cursor mismatch` on a changed `repo_id`; facets, series (hook_events/day/tool), scores, conversations, explore all 200; explore 7 rows `truncated:false`; `kind required`; `range too wide`; `Origin: http://127.0.0.1:5173` GET and OPTIONS (204, empty body) carry the origin and no credentials header; `Origin: https://evil.example` gets no `Access-Control-*`; `/v1/health` and `/v1/artifacts` keep their shapes; `/v1/analytics/nope` JSON 404. Keyed-mode CORS and `truncated:true` are covered by `TestCORSKeyedMode` and `TestAnalyticsOutcome`.
+- Result: phase outcome holds.
+
+Feedback (artifact_feedback): reports 1-01 and 1-03 delivered, screen pass, no check below p25. Report 1-02: not delivered (the service has no version and nothing queued; the worker's write did not reach the hook) — recorded, not rewritten. Brief 1-03 (amended, v3): delivered, nothing below p25. Briefs 1-01/1-02: see refine feedback above.
+
+### Carried
+
+1. Executions and conversations paging loads the full sorted set from the store and slices in Go; `Conversations` aggregates in Go and `Executions` uses a per-brief correlated `EXISTS`. Unmeasured at scale — measure on a large tenant before relying on it remotely.
+2. `/facets` `plans` (and `repos`/`harnesses`/`events`) include `""`; phase 2's filter controls decide whether to hide or label the empty value.
+3. Report `reports/1-02-store-analytics.md` never reached the feedback service; re-deliver it (touch through the hook) if its scores are wanted.
