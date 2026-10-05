@@ -48,3 +48,11 @@ Feedback (artifact_feedback): reports 1-01 and 1-03 delivered, screen pass, no c
 1. Executions and conversations paging loads the full sorted set from the store and slices in Go; `Conversations` aggregates in Go and `Executions` uses a per-brief correlated `EXISTS`. Unmeasured at scale — measure on a large tenant before relying on it remotely.
 2. `/facets` `plans` (and `repos`/`harnesses`/`events`) include `""`; phase 2's filter controls decide whether to hide or label the empty value.
 3. Report `reports/1-02-store-analytics.md` never reached the feedback service; re-deliver it (touch through the hook) if its scores are wanted.
+
+## Phase 2 — Report views
+
+Run identity: Claude Code headless background job `1cc7d595` (Opus 5.5 orchestrator), worktree branch `worktree-analytics-phase-2`, started 2026-10-06 from master @ c931ae5. Refine commit 66c47de.
+
+Units: 2-01, then 2-02, 2-03, 2-04 one at a time (shared e2e build dir and ports). Sonnet workers.
+
+Refine feedback (artifact_feedback, all four delivered, screen pass): `b.ac_why` below p25 on 2-02 → addressed before commit (per-check why lines; re-scored 0.64). Nothing else below p25.
