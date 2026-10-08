@@ -331,6 +331,14 @@ Each criterion is tagged with where it comes from:
   - `tools/workflow/cmd/workflow/drain_test.go`.
 - Approach: known
 - Depends on: nothing
+- Units:
+  - 1-01 Event archive package: `briefs/1-01-archive-package.md`. Depends on nothing. Alongside 1-02, 1-03, 1-04.
+  - 1-02 Ledger columns, indexes and Append: `briefs/1-02-store-columns.md`. Depends on nothing. Alongside 1-01, 1-03, 1-04.
+  - 1-03 OpenCode plugin remove list: `briefs/1-03-plugin-remove-list.md`. Depends on nothing. Alongside 1-01, 1-02, 1-04.
+  - 1-04 Normalised event table, usage extraction and shared fixture: `briefs/1-04-normalise-and-extract.md`. Depends on nothing. Alongside 1-01, 1-02, 1-03.
+  - 1-05 Ingest policy, collapse, slim facts and archive wiring: `briefs/1-05-ingest-policy.md`. Depends on 1-01, 1-02, 1-03, 1-04. Alongside nothing.
+  - 1-06 End-to-end Phase 1 proof and delta-key share: `briefs/1-06-end-to-end-and-delta-share.md`. Depends on 1-05. Alongside nothing.
+- Placement notes: the tenant lock named in the surfaces above is proved by Phase 2's outcome and is built there. The route is `POST /v1/ingest`, not `/v1/facts`.
 
 ### Phase 2 — Historical compaction and reclaim
 
