@@ -55,3 +55,8 @@ Under 1,500 tokens. Status: `done` | `done with concerns` | `blocked` | `needs c
 A non-trivial bug outside your done evidence: report symptom, location, and root cause if found. Do not fix it here.
 
 Do not spawn agents beyond read-only research helpers. If this unit needs one, it was mis-sized: report `blocked` and say so.
+
+## Amendments from unit 1-05 (do these too)
+
+- The shared fixture's expected statuses are wrong for collapsed deltas: later deltas of one part (`fx-opencode-43`, `-44`, `-46`) return `duplicate` on first send, because the part already has its row. Correct the fixture's expectations to that rule.
+- `internal/archive/archive.go` encodes JSON with HTML escaping, so `<`, `>` and `&` in an archived fact become `<` etc. and the archive is not verbatim. Encode with HTML escaping off. Add a test with those characters in a body, round-tripped through `Append` and `Read`.
