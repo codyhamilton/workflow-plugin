@@ -119,7 +119,20 @@ func TestAnalyticsOutcome(t *testing.T) {
 		}
 		add(conv, harness, repo, "artifact_version", event, ts, x)
 	}
-	tool := func(name string) fx { return fx{"payload": fx{"tool_name": name}} }
+	// Hook events with a tool are inserted with store.Append and a payload-bearing raw (the shape of
+	// an uncompacted ledger): ingest now stores hook facts without payload, and these analytics still
+	// read payload.tool_name from raw until Phase 3 moves them to the tool column.
+	var direct []store.FactRow
+	addTool := func(conv, harness, repo, event string, ts float64, name string) {
+		raw := mustJSON(fx{"type": "hook_event", "conversation_id": conv, "harness": harness, "repo_id": repo,
+			"event": event, "ts": ts, "payload": fx{"tool_name": name}})
+		rh, err := keys.RowHash(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		direct = append(direct, store.FactRow{RowHash: rh, Type: "hook_event", ConversationID: conv, Harness: harness,
+			Event: event, TS: ts, RepoID: repo, Raw: raw, Tool: name})
+	}
 	const (
 		d1 = "docs/plans/01-x/DESIGN.md"
 		b1 = "docs/plans/01-x/briefs/1-01-a.md"
@@ -130,8 +143,8 @@ func TestAnalyticsOutcome(t *testing.T) {
 	)
 	// Days are offsets from base (20 days ago, UTC midnight); the window starts at base.
 	// c1: claude, r1. Its report is before the window, its commit inside.
-	add("c1", "claude", "r1", "hook_event", "PreToolUse", at(1, 10, 0), tool("Bash"))
-	add("c1", "claude", "r1", "hook_event", "PreToolUse", at(1, 10, 5), tool("Bash"))
+	addTool("c1", "claude", "r1", "PreToolUse", at(1, 10, 0), "Bash")
+	addTool("c1", "claude", "r1", "PreToolUse", at(1, 10, 5), "Bash")
 	add("c1", "claude", "r1", "hook_event", "Stop", at(2, 9, 0), nil)
 	art("c1", "claude", "r1", "Write", at(1, 11, 0), d1, "# d1 score=0.2\n", "worktree")
 	art("c1", "claude", "r1", "Write", at(2, 10, 0), b1, "# b1\n", "worktree")
@@ -139,7 +152,7 @@ func TestAnalyticsOutcome(t *testing.T) {
 	art("c1", "claude", "r1", "commit", at(3, 12, 0), d1, "# d1 score=0.2\n", "commit")
 	art("c1", "claude", "r1", "Write", at(-10, 9, 0), r1, "# rep1\n", "worktree")
 	// c2: cursor, r2. Its commit is before the window and it has no report.
-	add("c2", "cursor", "r2", "hook_event", "PostToolUse", at(5, 8, 0), tool("Read"))
+	addTool("c2", "cursor", "r2", "PostToolUse", at(5, 8, 0), "Read")
 	art("c2", "cursor", "r2", "Write", at(6, 9, 0), b2, "# b2\n", "worktree")
 	art("c2", "cursor", "r2", "Write", at(6, 9, 30), "docs/plans/02-y/DESIGN.md", "# d2 score=0.6\n", "worktree")
 	art("c2", "cursor", "r2", "Write", at(7, 9, 0), "docs/plans/03-z/DESIGN.md", "# d3 score=0.9\n", "worktree")
@@ -149,11 +162,16 @@ func TestAnalyticsOutcome(t *testing.T) {
 	art("c3", "claude", "r1", "Write", at(10, 9, 10), bn, "# nest\n", "worktree")
 	add("c3", "claude", "r1", "hook_event", "Stop", at(10, 9, 20), nil)
 	// c4: cursor, r1. One hook event is rejected by precheck for carrying a secret.
-	add("c4", "cursor", "r1", "hook_event", "PreToolUse", at(12, 8, 0), tool("Bash"))
+	addTool("c4", "cursor", "r1", "PreToolUse", at(12, 8, 0), "Bash")
 	add("c4", "cursor", "r1", "hook_event", "PreToolUse", at(12, 8, 30), fx{"payload": fx{"tool_name": "Bash", "cmd": "AKIA" + "IOSFODNN7" + "EXAMPLE"}})
 	body, _ := json.Marshal(fx{"facts": facts})
 	if code, out := do(t, s.Handler(), "POST", "/v1/ingest", "ka", string(body)); code != 200 || !strings.Contains(out, "rejected") {
 		t.Fatal(code, out)
+	}
+	if ts, err := s.tenant("a"); err != nil {
+		t.Fatal(err)
+	} else if _, err := ts.t.Append(context.Background(), direct); err != nil {
+		t.Fatal(err)
 	}
 	win := "from=" + url.QueryEscape(base.Format(time.RFC3339)) + "&to=" + url.QueryEscape(time.Now().UTC().Add(time.Hour).Format(time.RFC3339))
 	A := "/v1/analytics/"

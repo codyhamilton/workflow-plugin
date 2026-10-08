@@ -165,8 +165,8 @@ func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) 
 			out.Kinds = append(out.Kinds, k)
 		}
 	}
-	rows, err := t.rdb.QueryContext(ctx, `SELECT `+toolExpr+` AS tool, count(*) AS n FROM facts
-		WHERE type='hook_event' AND `+w+` GROUP BY tool HAVING tool != '' ORDER BY n DESC, tool ASC LIMIT 100`, args...)
+	rows, err := t.rdb.QueryContext(ctx, `SELECT `+toolExpr+` AS tname, count(*) AS n FROM facts
+		WHERE type='hook_event' AND `+w+` GROUP BY tname HAVING tname != '' ORDER BY n DESC, tname ASC LIMIT 100`, args...)
 	if err != nil {
 		return out, err
 	}

@@ -9,9 +9,12 @@
 //	                  source ("worktree" | "commit")
 //	commit:           repo_id, sha, paths ([]string), renames ([]{"from","to"})
 //
-// Unknown keys are kept in the stored raw JSON. Per fact the order is: validate, precheck every
-// string leaf with secrets.Scan, row hash, WritePending for artifact content; then one Append for
-// the batch's accepted rows.
+// Unknown keys are kept in the stored raw JSON. Per fact the order is: validate; for hook_event the
+// event policy (policy.go: a Remove fact is answered accepted and leaves nothing); precheck every
+// string leaf with secrets.Scan; row hash (the collapse hash for a Collapse fact); WritePending for
+// artifact content; an archive entry for hook events. Then one archive.Append for the batch's hook
+// events, then one Append for its rows. A stored hook_event raw is the canonical envelope without
+// payload; the archive line holds the full canonical received fact.
 package ingest
 
 import (
@@ -21,7 +24,9 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"time"
 
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/archive"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/secrets"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
@@ -167,6 +172,8 @@ func Ingest(ctx context.Context, tenant *store.Tenant, facts []json.RawMessage) 
 	results := make([]Result, len(facts))
 	var rows []store.FactRow
 	var rowIdx []int
+	var entries []archive.Entry
+	receivedAt := time.Now().UnixNano()
 	for i, raw := range facts {
 		dec := json.NewDecoder(bytes.NewReader(raw))
 		dec.UseNumber()
@@ -182,6 +189,17 @@ func Ingest(ctx context.Context, tenant *store.Tenant, facts []json.RawMessage) 
 			continue
 		}
 		typ, _ := str(obj, "type")
+		harness, _ := str(obj, "harness")
+		event, _ := str(obj, "event")
+		payload, _ := obj["payload"].(map[string]any)
+		action := Keep
+		if typ == "hook_event" {
+			action = Policy(harness, event, payload)
+			if action == Remove {
+				results[i].Status = Accepted
+				continue
+			}
+		}
 		conv, _ := str(obj, "conversation_id")
 		path, _ := str(obj, "path")
 		chash, _ := str(obj, "content_hash")
@@ -216,16 +234,41 @@ func Ingest(ctx context.Context, tenant *store.Tenant, facts []json.RawMessage) 
 				return nil, err
 			}
 		}
-		harness, _ := str(obj, "harness")
-		event, _ := str(obj, "event")
 		var ts float64
 		if n, ok := obj["ts"].(json.Number); ok {
 			ts, _ = n.Float64()
 		}
 		repo, _ := str(obj, "repo_id")
-		rows = append(rows, store.FactRow{RowHash: rh, Type: typ, ConversationID: conv, Harness: harness,
-			Event: event, TS: ts, RepoID: repo, Path: path, ContentHash: chash, Raw: canon})
+		row := store.FactRow{RowHash: rh, Type: typ, ConversationID: conv, Harness: harness,
+			Event: event, TS: ts, RepoID: repo, Path: path, ContentHash: chash, Raw: canon}
+		if typ == "hook_event" {
+			slim, err := envelope(obj)
+			if err != nil {
+				results[i].Status, results[i].Reason = Rejected, invalid("cannot canonicalise fact")
+				continue
+			}
+			if action == Collapse {
+				row.RowHash, _ = CollapseHash(typ, harness, event, conv, payload)
+			}
+			row.Raw = slim
+			d := Derive(harness, event, payload)
+			row.NormEvent, row.Tool, row.Model = d.NormEvent, d.Tool, d.Model
+			row.TokIn, row.TokOut, row.TokCacheRead, row.TokCacheWrite, row.TokReasoning =
+				d.TokIn, d.TokOut, d.TokCacheRead, d.TokCacheWrite, d.TokReasoning
+			row.CostReported = d.CostReported
+			entries = append(entries, archive.Entry{ConversationID: conv, TS: ts,
+				Line: archive.Line{RowHash: rh, ReceivedAt: receivedAt, Fact: canon}})
+		} else {
+			row.Source, _ = str(obj, "source")
+			row.SHA, _ = str(obj, "sha")
+		}
+		rows = append(rows, row)
 		rowIdx = append(rowIdx, i)
+	}
+	if len(entries) > 0 {
+		if err := archive.Append(tenant.Dir(), entries); err != nil {
+			return nil, err
+		}
 	}
 	if len(rows) > 0 {
 		ins, err := tenant.Append(ctx, rows)
@@ -241,4 +284,24 @@ func Ingest(ctx context.Context, tenant *store.Tenant, facts []json.RawMessage) 
 		}
 	}
 	return results, nil
+}
+
+// envelope is the canonical JSON of a hook fact as stored: the received object without its
+// top-level id, content and payload keys, encoded as keys.Canonical does.
+func envelope(obj map[string]any) ([]byte, error) {
+	m := make(map[string]any, len(obj))
+	for k, v := range obj {
+		switch k {
+		case "id", "content", "payload":
+		default:
+			m[k] = v
+		}
+	}
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(m); err != nil {
+		return nil, err
+	}
+	return bytes.TrimRight(buf.Bytes(), "\n"), nil
 }

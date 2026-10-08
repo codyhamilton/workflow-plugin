@@ -340,7 +340,14 @@ func TestAdvisoryReads(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, q := range []string{`DROP TABLE search`, `PRAGMA user_version = 1`} {
+		// undo migrations 2-4 so the file is a real version-1 database
+		steps := []string{`DROP TABLE search`, `DROP INDEX facts_ts`, `DROP INDEX facts_type_ts`,
+			`DROP INDEX facts_ts_harness_event`, `DROP INDEX rejections_at`}
+		for _, c := range []string{"norm_event", "tool", "model", "kind", "plan", "source", "sha", "tok_in", "tok_out",
+			"tok_cache_read", "tok_cache_write", "tok_reasoning", "cost_reported"} {
+			steps = append(steps, `ALTER TABLE facts DROP COLUMN `+c)
+		}
+		for _, q := range append(steps, `PRAGMA user_version = 1`) {
 			if _, err := db.Exec(q); err != nil {
 				t.Fatal(q, err)
 			}
