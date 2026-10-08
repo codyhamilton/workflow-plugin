@@ -77,8 +77,14 @@ function snapshotOf(payload: Record<string, unknown>): string {
   })
 }
 
+// Secret-bearing or redundant events are never forwarded. Mirrored by the Go policy; a test asserts equality.
+// remove-list:begin
+const REMOVE_EVENTS = ["experimental.chat.system.transform", "chat.params", "chat.headers", "shell.env"] as const
+// remove-list:end
+
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
   if (/^(0|off|false)$/i.test(process.env.WORKFLOW_HOOKLOG || "")) return
+  if ((REMOVE_EVENTS as readonly string[]).includes(String(payload.hook_event_name || ""))) return
   try {
     const sid = typeof payload.session_id === "string" ? payload.session_id.replace(/[^A-Za-z0-9._-]/g, "_") : ""
     if (!sid) return

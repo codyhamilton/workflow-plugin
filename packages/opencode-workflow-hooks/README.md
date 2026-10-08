@@ -11,11 +11,17 @@ OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus ty
 
 **Advisory only** — never blocks tools or changes exit codes. Does not call `assert_phase --deterministic` or enforce Flash review guidance.
 
-Every hook and bus event is written as one file in the queue (`WORKFLOW_QUEUE`), named and wrapped
+Every hook and bus event except four is written as one file in the queue (`WORKFLOW_QUEUE`), named and wrapped
 as `tools/hooklog/spool.sh --harness opencode` does; an event with no session ID is dropped. After a
 write the plugin kicks `bin/workflow drain` (detached, at most once per 10 s) and warms the binary
 with `bin/workflow --version` once at load. Capture never waits on the binary or the network, and
 failures never reach OpenCode.
+
+Not forwarded: `experimental.chat.system.transform`, `chat.params`, `chat.headers` and `shell.env`
+(by event name, so hook and bus forms alike). The first carries redundant prompt bodies; the other
+three carry secrets (API keys, auth headers, environment). Their hooks stay registered and write
+nothing. The list is declared once in `src/index.ts` between `remove-list` markers, and the Go
+capture policy must carry an equal list.
 
 Threshold constants for documentation: `workflow-signals.json` (source of truth remains `gate_thresholds.py` in the workflow-plugin lab).
 
