@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +12,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/klauspost/compress/zstd"
 )
 
 func ent(conv string, ts float64, hash string) Entry {
@@ -156,5 +159,45 @@ func TestConcurrentAppend(t *testing.T) {
 	}
 	if bytes.Contains(got[0].Fact, []byte("\n")) {
 		t.Fatal("newline in fact")
+	}
+}
+
+func TestAppendVerbatimHTMLChars(t *testing.T) {
+	dir := t.TempDir()
+	fact := json.RawMessage(`{"conversation_id":"c","ts":1,"body":"a <b> & c > d"}`)
+	if err := Append(dir, []Entry{{ConversationID: "c", TS: 1, Line: Line{RowHash: "h", ReceivedAt: 1, Fact: fact}}}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Read(dir, "c")
+	if err != nil || len(got) != 1 {
+		t.Fatalf("got %v err %v", got, err)
+	}
+	if !bytes.Equal(got[0].Fact, fact) {
+		t.Fatalf("round-trip fact = %s, want %s", got[0].Fact, fact)
+	}
+	files, _ := filepath.Glob(filepath.Join(dir, "archive", "*", "*.jsonl.zst"))
+	if len(files) != 1 {
+		t.Fatalf("files = %v", files)
+	}
+	raw, err := os.ReadFile(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	zr, err := zstd.NewReader(bytes.NewReader(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dec, err := io.ReadAll(zr)
+	zr.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, esc := range []string{`\u003c`, `\u003e`, `\u0026`} {
+		if bytes.Contains(dec, []byte(esc)) {
+			t.Fatalf("archive escaped %s: %s", esc, dec)
+		}
+	}
+	if !bytes.Contains(dec, []byte("<b> & c > d")) {
+		t.Fatalf("archive body not verbatim: %s", dec)
 	}
 }

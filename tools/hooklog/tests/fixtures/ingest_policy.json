@@ -1710,7 +1710,7 @@
    "tok_cache_write": 0,
    "tok_reasoning": 0,
    "cost_reported": null,
-   "first_status": "accepted",
+   "first_status": "duplicate",
    "resend_status": "duplicate"
   },
   {
@@ -1725,7 +1725,7 @@
    "tok_cache_write": 0,
    "tok_reasoning": 0,
    "cost_reported": null,
-   "first_status": "accepted",
+   "first_status": "duplicate",
    "resend_status": "duplicate"
   },
   {
@@ -1755,7 +1755,7 @@
    "tok_cache_write": 0,
    "tok_reasoning": 0,
    "cost_reported": null,
-   "first_status": "accepted",
+   "first_status": "duplicate",
    "resend_status": "duplicate"
   },
   {

@@ -80,12 +80,11 @@ func Append(tenantDir string, entries []Entry) error {
 			groups[k] = buf
 			order = append(order, k)
 		}
-		b, err := json.Marshal(e.Line)
-		if err != nil {
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		if err := enc.Encode(e.Line); err != nil {
 			return fmt.Errorf("archive: encode line: %w", err)
 		}
-		buf.Write(b)
-		buf.WriteByte('\n')
 	}
 	mu.Lock()
 	defer mu.Unlock()
