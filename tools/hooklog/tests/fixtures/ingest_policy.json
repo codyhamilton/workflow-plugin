@@ -1,0 +1,1972 @@
+{
+ "note": "Derived from real payload shapes (trimmed) in the local ledger; values synthesized, FAKE-NOT-A-SECRET marks fake remove-event payloads. expect_totals.claude come from tools/transcript/lib/usage.py::dedupe_usage, run as: cd tools/transcript && python3 -I (sys.path insert of '.') over assistant messages built from the claude usage facts (msg_B is repeated once on purpose: 4 usage facts, 3 api calls, 1 duplicate message_id); thinking_tokens are not in dedupe_usage so they are summed once per message_id by the same rule. Codex hand totals: input 61138+62000=123138, output 232+100=332, cached 60928+61000=121928, cache_write 400, reasoning 45+10=55; read from usage, never total. OpenCode hand totals: input 1000+11233+7=12240, output 200+53+3=256, reasoning 50, cache read 3000+0+1=3001, cache write 400+0+2=402. Cursor has no usage facts: totals are zero. Test dedupes Claude totals by payload.message_id. policy is the Phase 1 ingest policy for unit 1-05; first_status/resend_status are for unit 1-06 (remove events are accepted on resend, others duplicate).",
+ "facts": [
+  {
+   "id": "fx-claude-01",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "SessionStart",
+   "ts": 1791100000.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "SessionStart",
+    "source": "startup"
+   }
+  },
+  {
+   "id": "fx-claude-02",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "UserPromptSubmit",
+   "ts": 1791100001.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "fix the bug"
+   }
+  },
+  {
+   "id": "fx-claude-03",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "PreToolUse",
+   "ts": 1791100002.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "ls"
+    },
+    "tool_use_id": "tu1"
+   }
+  },
+  {
+   "id": "fx-claude-04",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "PostToolUse",
+   "ts": 1791100003.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_input": {
+     "command": "ls"
+    },
+    "tool_response": "a\nb\n",
+    "tool_use_id": "tu1"
+   }
+  },
+  {
+   "id": "fx-claude-05",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "postToolUse",
+   "ts": 1791100004.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "postToolUse",
+    "tool_name": "Read",
+    "tool_input": {
+     "file_path": "/work/fixture/a"
+    },
+    "tool_use_id": "tu2"
+   }
+  },
+  {
+   "id": "fx-claude-06",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "PostToolUseFailure",
+   "ts": 1791100005.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "Edit",
+    "tool_use_id": "tu3",
+    "error": "no match"
+   }
+  },
+  {
+   "id": "fx-claude-07",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "PostToolBatch",
+   "ts": 1791100006.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "PostToolBatch",
+    "tool_calls": [
+     {
+      "tool_use_id": "tu1"
+     },
+     {
+      "tool_use_id": "tu2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "fx-claude-08",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "SubagentStart",
+   "ts": 1791100007.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "SubagentStart",
+    "agent_id": "ag1"
+   }
+  },
+  {
+   "id": "fx-claude-09",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "SubagentStop",
+   "ts": 1791100008.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "SubagentStop",
+    "agent_id": "ag1"
+   }
+  },
+  {
+   "id": "fx-claude-10",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "PreCompact",
+   "ts": 1791100009.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "PreCompact",
+    "trigger": "auto"
+   }
+  },
+  {
+   "id": "fx-claude-11",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "PostCompact",
+   "ts": 1791100010.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "PostCompact",
+    "trigger": "auto"
+   }
+  },
+  {
+   "id": "fx-claude-12",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "MessageDisplay",
+   "ts": 1791100011.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "MessageDisplay",
+    "text": "Done."
+   }
+  },
+  {
+   "id": "fx-claude-13",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "Stop",
+   "ts": 1791100012.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "Stop"
+   }
+  },
+  {
+   "id": "fx-claude-14",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "Notification",
+   "ts": 1791100013.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "Notification",
+    "message": "idle"
+   }
+  },
+  {
+   "id": "fx-claude-15",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "SessionEnd",
+   "ts": 1791100014.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "SessionEnd",
+    "reason": "exit"
+   }
+  },
+  {
+   "id": "fx-claude-16",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "transcript.assistant_message",
+   "ts": 1791100015.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_A",
+    "model": "claude-opus-5-5",
+    "stop_reason": "tool_use",
+    "text": "",
+    "tools": [
+     "Bash"
+    ],
+    "usage": {
+     "cache_creation_input_tokens": 922,
+     "cache_read_input_tokens": 96297,
+     "input_tokens": 2,
+     "output_tokens": 5505,
+     "output_tokens_details": {
+      "thinking_tokens": 5285
+     }
+    }
+   }
+  },
+  {
+   "id": "fx-claude-17",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "transcript.assistant_message",
+   "ts": 1791100016.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_B",
+    "model": "claude-opus-5-5",
+    "stop_reason": "tool_use",
+    "text": "",
+    "tools": [
+     "Bash"
+    ],
+    "usage": {
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 98000,
+     "input_tokens": 3,
+     "output_tokens": 120,
+     "output_tokens_details": {
+      "thinking_tokens": 0
+     }
+    }
+   }
+  },
+  {
+   "id": "fx-claude-18",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "transcript.assistant_message",
+   "ts": 1791100017.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_B",
+    "model": "claude-opus-5-5",
+    "stop_reason": "tool_use",
+    "text": "",
+    "tools": [
+     "Bash"
+    ],
+    "usage": {
+     "cache_creation_input_tokens": 0,
+     "cache_read_input_tokens": 98000,
+     "input_tokens": 3,
+     "output_tokens": 120,
+     "output_tokens_details": {
+      "thinking_tokens": 0
+     }
+    }
+   }
+  },
+  {
+   "id": "fx-claude-19",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-claude",
+   "harness": "claude",
+   "event": "transcript.assistant_message",
+   "ts": 1791100018.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-claude",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_C",
+    "model": "claude-opus-5-5",
+    "stop_reason": "tool_use",
+    "text": "",
+    "tools": [
+     "Bash"
+    ],
+    "usage": {
+     "cache_creation_input_tokens": 10000,
+     "cache_read_input_tokens": 50,
+     "input_tokens": 1,
+     "output_tokens": 800,
+     "output_tokens_details": {
+      "thinking_tokens": 300
+     }
+    }
+   }
+  },
+  {
+   "id": "fx-codex-20",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "SessionStart",
+   "ts": 1791100019.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "SessionStart"
+   }
+  },
+  {
+   "id": "fx-codex-21",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "UserPromptSubmit",
+   "ts": 1791100020.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "hi"
+   }
+  },
+  {
+   "id": "fx-codex-22",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "PreToolUse",
+   "ts": 1791100021.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "shell",
+    "tool_use_id": "x1"
+   }
+  },
+  {
+   "id": "fx-codex-23",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "PostToolUse",
+   "ts": 1791100022.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "shell",
+    "tool_use_id": "x1"
+   }
+  },
+  {
+   "id": "fx-codex-24",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "transcript.assistant_message",
+   "ts": 1791100023.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "transcript.assistant_message",
+    "model": "gpt-5.4",
+    "phase": "commentary",
+    "text": "Looking."
+   }
+  },
+  {
+   "id": "fx-codex-25",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "transcript.token_count",
+   "ts": 1791100024.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "transcript.token_count",
+    "model": "gpt-5.4",
+    "turn_id": "t1",
+    "usage": {
+     "cached_input_tokens": 60928,
+     "input_tokens": 61138,
+     "output_tokens": 232,
+     "reasoning_output_tokens": 45,
+     "total_tokens": 61370
+    },
+    "total": {
+     "cached_input_tokens": 60928,
+     "input_tokens": 61138,
+     "output_tokens": 232,
+     "reasoning_output_tokens": 45,
+     "total_tokens": 61370
+    }
+   }
+  },
+  {
+   "id": "fx-codex-26",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "transcript.token_count",
+   "ts": 1791100025.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "transcript.token_count",
+    "model": "gpt-5.4",
+    "turn_id": "t1",
+    "usage": {
+     "cached_input_tokens": 61000,
+     "input_tokens": 62000,
+     "output_tokens": 100,
+     "reasoning_output_tokens": 10,
+     "cache_write_input_tokens": 400,
+     "total_tokens": 62100
+    },
+    "total": {
+     "cached_input_tokens": 121928,
+     "input_tokens": 123138,
+     "output_tokens": 332,
+     "reasoning_output_tokens": 55,
+     "total_tokens": 123470
+    }
+   }
+  },
+  {
+   "id": "fx-codex-27",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "Stop",
+   "ts": 1791100026.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "Stop"
+   }
+  },
+  {
+   "id": "fx-codex-28",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-codex",
+   "harness": "codex",
+   "event": "SessionEnd",
+   "ts": 1791100027.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-codex",
+    "hook_event_name": "SessionEnd"
+   }
+  },
+  {
+   "id": "fx-opencode-29",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "session.created",
+   "ts": 1791100028.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "session.created",
+    "source": "bus"
+   }
+  },
+  {
+   "id": "fx-opencode-30",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "chat.message",
+   "ts": 1791100029.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "chat.message",
+    "text": "plan it"
+   }
+  },
+  {
+   "id": "fx-opencode-31",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "tool.execute.before",
+   "ts": 1791100030.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "tool.execute.before",
+    "tool_name": "read",
+    "tool_call_id": "c1"
+   }
+  },
+  {
+   "id": "fx-opencode-32",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "tool.execute.after",
+   "ts": 1791100031.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "tool.execute.after",
+    "tool_name": "read",
+    "tool_call_id": "c1"
+   }
+  },
+  {
+   "id": "fx-opencode-33",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "PostToolBatch",
+   "ts": 1791100032.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "PostToolBatch",
+    "tool_calls": [
+     {
+      "tool_use_id": "c1"
+     }
+    ]
+   }
+  },
+  {
+   "id": "fx-opencode-34",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "experimental.text.complete",
+   "ts": 1791100033.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "experimental.text.complete",
+    "text": "ok"
+   }
+  },
+  {
+   "id": "fx-opencode-35",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "Stop",
+   "ts": 1791100034.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "Stop"
+   }
+  },
+  {
+   "id": "fx-opencode-36",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.updated",
+   "ts": 1791100035.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.updated",
+    "source": "bus",
+    "event": {
+     "type": "message.part.updated",
+     "properties": {
+      "part": {
+       "id": "prt_1",
+       "type": "text"
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-37",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.updated",
+   "ts": 1791100036.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.updated",
+    "source": "bus"
+   }
+  },
+  {
+   "id": "fx-opencode-38",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "experimental.chat.system.transform",
+   "ts": 1791100037.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "experimental.chat.system.transform",
+    "system": [
+     "FAKE system prompt text"
+    ]
+   }
+  },
+  {
+   "id": "fx-opencode-39",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "chat.params",
+   "ts": 1791100038.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "chat.params",
+    "temperature": 0.2,
+    "options": {
+     "apiKey": "FAKE-NOT-A-SECRET"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-40",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "chat.headers",
+   "ts": 1791100039.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "chat.headers",
+    "headers": {
+     "Authorization": "FAKE-NOT-A-SECRET"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-41",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "shell.env",
+   "ts": 1791100040.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "shell.env",
+    "env": {
+     "EXAMPLE_VAR": "FAKE-NOT-A-SECRET"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-42",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.delta",
+   "ts": 1791100041.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.delta",
+    "source": "bus",
+    "event": {
+     "id": "evt_Hel",
+     "properties": {
+      "delta": "Hel",
+      "field": "text",
+      "messageID": "msg_1",
+      "sessionID": "fx-conv-opencode",
+      "partID": "prt_A"
+     },
+     "type": "message.part.delta"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-43",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.delta",
+   "ts": 1791100042.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.delta",
+    "source": "bus",
+    "event": {
+     "id": "evt_lo ",
+     "properties": {
+      "delta": "lo ",
+      "field": "text",
+      "messageID": "msg_1",
+      "sessionID": "fx-conv-opencode",
+      "partID": "prt_A"
+     },
+     "type": "message.part.delta"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-44",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.delta",
+   "ts": 1791100043.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.delta",
+    "source": "bus",
+    "event": {
+     "id": "evt_wor",
+     "properties": {
+      "delta": "wor",
+      "field": "text",
+      "messageID": "msg_1",
+      "sessionID": "fx-conv-opencode",
+      "partID": "prt_A"
+     },
+     "type": "message.part.delta"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-45",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.delta",
+   "ts": 1791100044.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.delta",
+    "source": "bus",
+    "event": {
+     "id": "evt_ab",
+     "properties": {
+      "delta": "ab",
+      "field": "text",
+      "messageID": "msg_1",
+      "sessionID": "fx-conv-opencode",
+      "partID": "prt_B"
+     },
+     "type": "message.part.delta"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-46",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.delta",
+   "ts": 1791100045.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.delta",
+    "source": "bus",
+    "event": {
+     "id": "evt_cd",
+     "properties": {
+      "delta": "cd",
+      "field": "text",
+      "messageID": "msg_1",
+      "sessionID": "fx-conv-opencode",
+      "partID": "prt_B"
+     },
+     "type": "message.part.delta"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-47",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "message.part.delta",
+   "ts": 1791100046.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "message.part.delta",
+    "source": "bus",
+    "event": {
+     "id": "evt_orphan",
+     "properties": {
+      "delta": "orphan",
+      "field": "text",
+      "messageID": "msg_1",
+      "sessionID": "fx-conv-opencode"
+     },
+     "type": "message.part.delta"
+    }
+   }
+  },
+  {
+   "id": "fx-opencode-48",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "transcript.assistant_message",
+   "ts": 1791100047.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_o1",
+    "modelID": "claude-sonnet-5-5",
+    "providerID": "anthropic",
+    "cost": 0.0123,
+    "tokens": {
+     "cache": {
+      "read": 3000,
+      "write": 400
+     },
+     "input": 1000,
+     "output": 200,
+     "reasoning": 50
+    },
+    "text": "x",
+    "tools": [
+     "read"
+    ]
+   }
+  },
+  {
+   "id": "fx-opencode-49",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "transcript.assistant_message",
+   "ts": 1791100048.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_o2",
+    "modelID": "qwen3-coder:30b-a3b-q4_K_M",
+    "providerID": "ollama-maxctx",
+    "cost": 0,
+    "tokens": {
+     "cache": {
+      "read": 0,
+      "write": 0
+     },
+     "input": 11233,
+     "output": 53,
+     "reasoning": 0
+    },
+    "text": "x",
+    "tools": [
+     "read"
+    ]
+   }
+  },
+  {
+   "id": "fx-opencode-50",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-opencode",
+   "harness": "opencode",
+   "event": "transcript.assistant_message",
+   "ts": 1791100049.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "session_id": "fx-conv-opencode",
+    "hook_event_name": "transcript.assistant_message",
+    "message_id": "msg_o3",
+    "modelID": "bare-model",
+    "providerID": "",
+    "cost": 0.5,
+    "tokens": {
+     "cache": {
+      "read": 1,
+      "write": 2
+     },
+     "input": 7,
+     "output": 3,
+     "reasoning": 0
+    },
+    "text": "x",
+    "tools": [
+     "read"
+    ]
+   }
+  },
+  {
+   "id": "fx-cursor-51",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "sessionStart",
+   "ts": 1791100050.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "sessionStart"
+   }
+  },
+  {
+   "id": "fx-cursor-52",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "beforeSubmitPrompt",
+   "ts": 1791100051.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "beforeSubmitPrompt",
+    "prompt": "hello"
+   }
+  },
+  {
+   "id": "fx-cursor-53",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "afterFileEdit",
+   "ts": 1791100052.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "afterFileEdit",
+    "file_path": "/work/fixture/a.go",
+    "edits": [
+     {
+      "old_string": "a",
+      "new_string": "b"
+     }
+    ]
+   }
+  },
+  {
+   "id": "fx-cursor-54",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "afterShellExecution",
+   "ts": 1791100053.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "afterShellExecution",
+    "command": "ls"
+   }
+  },
+  {
+   "id": "fx-cursor-55",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "postToolUse",
+   "ts": 1791100054.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "postToolUse",
+    "tool_name": "Read",
+    "tool_use_id": "k1"
+   }
+  },
+  {
+   "id": "fx-cursor-56",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "afterAgentResponse",
+   "ts": 1791100055.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "afterAgentResponse",
+    "text": "Done"
+   }
+  },
+  {
+   "id": "fx-cursor-57",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "stop",
+   "ts": 1791100056.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "stop"
+   }
+  },
+  {
+   "id": "fx-cursor-58",
+   "type": "hook_event",
+   "conversation_id": "fx-conv-cursor",
+   "harness": "cursor",
+   "event": "somethingNew",
+   "ts": 1791100057.0,
+   "payload": {
+    "cwd": "/work/fixture",
+    "conversation_id": "fx-conv-cursor",
+    "hook_event_name": "somethingNew"
+   }
+  }
+ ],
+ "expect": [
+  {
+   "id": "fx-claude-01",
+   "policy": "keep",
+   "norm_event": "session_start",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-02",
+   "policy": "keep",
+   "norm_event": "prompt",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-03",
+   "policy": "keep",
+   "norm_event": "tool_pre",
+   "tool": "Bash",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-04",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "Bash",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-05",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "Read",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-06",
+   "policy": "keep",
+   "norm_event": "tool_fail",
+   "tool": "Edit",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-07",
+   "policy": "keep",
+   "norm_event": "batch_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-08",
+   "policy": "keep",
+   "norm_event": "subagent_start",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-09",
+   "policy": "keep",
+   "norm_event": "subagent_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-10",
+   "policy": "keep",
+   "norm_event": "compact",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-11",
+   "policy": "keep",
+   "norm_event": "compact",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-12",
+   "policy": "keep",
+   "norm_event": "assistant_message",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-13",
+   "policy": "keep",
+   "norm_event": "turn_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-14",
+   "policy": "keep",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-15",
+   "policy": "keep",
+   "norm_event": "session_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-16",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "claude-opus-5-5",
+   "tok_in": 2,
+   "tok_out": 5505,
+   "tok_cache_read": 96297,
+   "tok_cache_write": 922,
+   "tok_reasoning": 5285,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-17",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "claude-opus-5-5",
+   "tok_in": 3,
+   "tok_out": 120,
+   "tok_cache_read": 98000,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-18",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "claude-opus-5-5",
+   "tok_in": 3,
+   "tok_out": 120,
+   "tok_cache_read": 98000,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-claude-19",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "claude-opus-5-5",
+   "tok_in": 1,
+   "tok_out": 800,
+   "tok_cache_read": 50,
+   "tok_cache_write": 10000,
+   "tok_reasoning": 300,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-20",
+   "policy": "keep",
+   "norm_event": "session_start",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-21",
+   "policy": "keep",
+   "norm_event": "prompt",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-22",
+   "policy": "keep",
+   "norm_event": "tool_pre",
+   "tool": "shell",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-23",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "shell",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-24",
+   "policy": "keep",
+   "norm_event": "assistant_message",
+   "tool": "",
+   "model": "gpt-5.4",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-25",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "gpt-5.4",
+   "tok_in": 61138,
+   "tok_out": 232,
+   "tok_cache_read": 60928,
+   "tok_cache_write": 0,
+   "tok_reasoning": 45,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-26",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "gpt-5.4",
+   "tok_in": 62000,
+   "tok_out": 100,
+   "tok_cache_read": 61000,
+   "tok_cache_write": 400,
+   "tok_reasoning": 10,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-27",
+   "policy": "keep",
+   "norm_event": "turn_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-codex-28",
+   "policy": "keep",
+   "norm_event": "session_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-29",
+   "policy": "keep",
+   "norm_event": "session_start",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-30",
+   "policy": "keep",
+   "norm_event": "prompt",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-31",
+   "policy": "keep",
+   "norm_event": "tool_pre",
+   "tool": "read",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-32",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "read",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-33",
+   "policy": "keep",
+   "norm_event": "batch_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-34",
+   "policy": "keep",
+   "norm_event": "assistant_message",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-35",
+   "policy": "keep",
+   "norm_event": "turn_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-36",
+   "policy": "keep",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-37",
+   "policy": "keep",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-38",
+   "policy": "remove",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "accepted"
+  },
+  {
+   "id": "fx-opencode-39",
+   "policy": "remove",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "accepted"
+  },
+  {
+   "id": "fx-opencode-40",
+   "policy": "remove",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "accepted"
+  },
+  {
+   "id": "fx-opencode-41",
+   "policy": "remove",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "accepted"
+  },
+  {
+   "id": "fx-opencode-42",
+   "policy": "collapse",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-43",
+   "policy": "collapse",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-44",
+   "policy": "collapse",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-45",
+   "policy": "collapse",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-46",
+   "policy": "collapse",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-47",
+   "policy": "keep",
+   "norm_event": "message_part",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-48",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "anthropic/claude-sonnet-5-5",
+   "tok_in": 1000,
+   "tok_out": 200,
+   "tok_cache_read": 3000,
+   "tok_cache_write": 400,
+   "tok_reasoning": 50,
+   "cost_reported": 0.0123,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-49",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "ollama-maxctx/qwen3-coder:30b-a3b-q4_K_M",
+   "tok_in": 11233,
+   "tok_out": 53,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-opencode-50",
+   "policy": "keep",
+   "norm_event": "usage",
+   "tool": "",
+   "model": "bare-model",
+   "tok_in": 7,
+   "tok_out": 3,
+   "tok_cache_read": 1,
+   "tok_cache_write": 2,
+   "tok_reasoning": 0,
+   "cost_reported": 0.5,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-51",
+   "policy": "keep",
+   "norm_event": "session_start",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-52",
+   "policy": "keep",
+   "norm_event": "prompt",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-53",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-54",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-55",
+   "policy": "keep",
+   "norm_event": "tool_post",
+   "tool": "Read",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-56",
+   "policy": "keep",
+   "norm_event": "assistant_message",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-57",
+   "policy": "keep",
+   "norm_event": "turn_end",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  },
+  {
+   "id": "fx-cursor-58",
+   "policy": "keep",
+   "norm_event": "other",
+   "tool": "",
+   "model": "",
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0,
+   "cost_reported": null,
+   "first_status": "accepted",
+   "resend_status": "duplicate"
+  }
+ ],
+ "expect_totals": {
+  "claude": {
+   "tok_in": 6,
+   "tok_out": 6425,
+   "tok_cache_read": 194347,
+   "tok_cache_write": 10922,
+   "tok_reasoning": 5585
+  },
+  "codex": {
+   "tok_in": 123138,
+   "tok_out": 332,
+   "tok_cache_read": 121928,
+   "tok_cache_write": 400,
+   "tok_reasoning": 55
+  },
+  "opencode": {
+   "tok_in": 12240,
+   "tok_out": 256,
+   "tok_cache_read": 3001,
+   "tok_cache_write": 402,
+   "tok_reasoning": 50
+  },
+  "cursor": {
+   "tok_in": 0,
+   "tok_out": 0,
+   "tok_cache_read": 0,
+   "tok_cache_write": 0,
+   "tok_reasoning": 0
+  }
+ }
+}
