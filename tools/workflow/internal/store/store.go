@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
 	_ "modernc.org/sqlite"
 )
 
@@ -46,6 +47,23 @@ var migrations = []string{
 	`CREATE VIRTUAL TABLE search USING fts5(content_hash UNINDEXED, body, tokenize='porter unicode61');`,
 	// 3: analytics window scans by event time.
 	`CREATE INDEX IF NOT EXISTS facts_ts ON facts(ts);`,
+	// 4: extracted analytics columns (filled at insert; old rows keep defaults until compaction) and indexes.
+	`ALTER TABLE facts ADD COLUMN norm_event TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN tool TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN model TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN kind TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN plan TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN source TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN sha TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN tok_in INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_out INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_cache_read INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_cache_write INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_reasoning INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN cost_reported REAL;
+	CREATE INDEX facts_type_ts ON facts(type, ts);
+	CREATE INDEX facts_ts_harness_event ON facts(ts, harness, norm_event);
+	CREATE INDEX rejections_at ON rejections(at);`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -150,6 +168,9 @@ func (t *Tenant) migrate() (int, error) {
 	return from, nil
 }
 
+// Dir returns the tenant directory.
+func (t *Tenant) Dir() string { return t.dir }
+
 // Close finishes queued writes, then closes the databases.
 func (t *Tenant) Close() error {
 	t.mu.Lock()
@@ -250,6 +271,11 @@ type FactRow struct {
 	TS                                            float64
 	RepoID, Path, ContentHash                     string
 	Raw                                           []byte // canonical fact JSON without id or content
+
+	// Extracted analytics fields. kind and plan are computed from Path in Append.
+	NormEvent, Tool, Model, Source, SHA                      string
+	TokIn, TokOut, TokCacheRead, TokCacheWrite, TokReasoning int64
+	CostReported                                             *float64 // nil: not reported
 }
 
 // Append inserts rows (INSERT OR IGNORE by row hash) in one request and
@@ -266,8 +292,9 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 	err := t.submit(ctx, func(tx *sql.Tx) error {
 		now := time.Now().UnixNano()
 		st, err := tx.Prepare(`INSERT OR IGNORE INTO facts
-			(row_hash,type,conversation_id,harness,event,ts,received_at,repo_id,path,content_hash,raw)
-			VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+			(row_hash,type,conversation_id,harness,event,ts,received_at,repo_id,path,content_hash,raw,
+			 norm_event,tool,model,kind,plan,source,sha,tok_in,tok_out,tok_cache_read,tok_cache_write,tok_reasoning,cost_reported)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 		if err != nil {
 			return err
 		}
@@ -279,7 +306,9 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			}
 			var raw any = r.Raw
 			res, err := st.Exec(r.RowHash, r.Type, r.ConversationID, r.Harness, r.Event, r.TS, now,
-				r.RepoID, r.Path, r.ContentHash, raw)
+				r.RepoID, r.Path, r.ContentHash, raw,
+				r.NormEvent, r.Tool, r.Model, keys.Kind(r.Path), planOf(r.Path), r.Source, r.SHA,
+				r.TokIn, r.TokOut, r.TokCacheRead, r.TokCacheWrite, r.TokReasoning, r.CostReported)
 			if err != nil {
 				return err
 			}

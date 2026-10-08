@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
@@ -395,5 +396,130 @@ func TestSearchIndex(t *testing.T) {
 	}
 	if err := tn.DropBlob(ctx, h1, Rejection{Stage: "screen"}); err != nil || count() != 0 {
 		t.Fatalf("drop: %v %d", err, count())
+	}
+}
+
+func TestMigrationFromPreviousVersion(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "t")
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	db, err := sql.Open("sqlite", dsn(filepath.Join(dir, "ledger.db")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, m := range migrations[:len(migrations)-1] {
+		if _, err := db.Exec(m); err != nil {
+			t.Fatal(err)
+		}
+		db.Exec(fmt.Sprintf(`PRAGMA user_version = %d`, i+1))
+	}
+	r := row(1, "x")
+	if _, err := db.Exec(`INSERT INTO facts (row_hash,type,conversation_id,harness,event,ts,received_at,repo_id,path,content_hash,raw)
+		VALUES (?,?,?,?,?,?,?,?,?,?,?)`, r.RowHash, r.Type, "c", "h", "e", 1.0, 1, "", "", "", r.Raw); err != nil {
+		t.Fatal(err)
+	}
+	db.Close()
+	tn, err := Open(dir, Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tn.Close()
+	var ne, kind, plan string
+	var tin int64
+	var cost sql.NullFloat64
+	if err := tn.rdb.QueryRow(`SELECT norm_event,kind,plan,tok_in,cost_reported FROM facts`).Scan(&ne, &kind, &plan, &tin, &cost); err != nil {
+		t.Fatal(err)
+	}
+	if ne != "" || kind != "" || plan != "" || tin != 0 || cost.Valid {
+		t.Fatal(ne, kind, plan, tin, cost)
+	}
+}
+
+func TestAppendNewColumns(t *testing.T) {
+	tn := openT(t, Options{})
+	c := 0.25
+	r := row(1, "artifact_version")
+	r.Path = "docs/plans/01-x/DESIGN.md"
+	r.NormEvent, r.Tool, r.Model, r.Source, r.SHA = "ne", "Bash", "m", "src", "abc"
+	r.TokIn, r.TokOut, r.TokCacheRead, r.TokCacheWrite, r.TokReasoning = 1, 2, 3, 4, 5
+	r.CostReported = &c
+	h := row(2, "hook")
+	if _, err := tn.Append(context.Background(), []FactRow{r, h}); err != nil {
+		t.Fatal(err)
+	}
+	var ne, tool, model, src, sha, kind, plan string
+	var a, b, cr, cw, rs int64
+	var cost sql.NullFloat64
+	err := tn.rdb.QueryRow(`SELECT norm_event,tool,model,source,sha,kind,plan,tok_in,tok_out,tok_cache_read,tok_cache_write,tok_reasoning,cost_reported
+		FROM facts WHERE row_hash=?`, r.RowHash).Scan(&ne, &tool, &model, &src, &sha, &kind, &plan, &a, &b, &cr, &cw, &rs, &cost)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ne != "ne" || tool != "Bash" || model != "m" || src != "src" || sha != "abc" || a != 1 || b != 2 || cr != 3 || cw != 4 || rs != 5 || !cost.Valid || cost.Float64 != 0.25 {
+		t.Fatal(ne, tool, model, src, sha, a, b, cr, cw, rs, cost)
+	}
+	if kind == "" || plan != "01-x" {
+		t.Fatalf("kind=%q plan=%q", kind, plan)
+	}
+	if err := tn.rdb.QueryRow(`SELECT kind,plan,cost_reported FROM facts WHERE row_hash=?`, h.RowHash).Scan(&kind, &plan, &cost); err != nil {
+		t.Fatal(err)
+	}
+	if kind != "" || plan != "" || cost.Valid {
+		t.Fatal(kind, plan, cost)
+	}
+	ins, _ := tn.Append(context.Background(), []FactRow{r})
+	if ins[0] {
+		t.Fatal("re-append inserted")
+	}
+}
+
+func TestTypeTsIndexUsed(t *testing.T) {
+	tn := openT(t, Options{})
+	rows, err := tn.rdb.Query(`EXPLAIN QUERY PLAN SELECT * FROM facts WHERE type=? AND ts BETWEEN ? AND ?`, "hook", 1, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	var all string
+	for rows.Next() {
+		var a, b, c int
+		var d string
+		rows.Scan(&a, &b, &c, &d)
+		all += d
+	}
+	if !strings.Contains(all, "facts_type_ts") {
+		t.Fatal(all)
+	}
+}
+
+func TestMigrationFast100k(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "t")
+	tn, err := Open(dir, Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	tn.Close()
+	db, _ := sql.Open("sqlite", dsn(filepath.Join(dir, "ledger.db")))
+	// Rebuild at the previous version: drop the new indexes and columns' version marker is enough for timing the ALTERs.
+	db.Exec(`DROP TABLE facts; DROP TABLE rejections`)
+	db.Exec(migrations[0][:strings.Index(migrations[0], "CREATE INDEX facts_artifact")])
+	if _, err := db.Exec(`WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i+1 FROM n WHERE i<100000)
+		INSERT INTO facts SELECT i,'hook','c','h','e',i,i,'','','','x' FROM n`); err != nil {
+		t.Fatal(err)
+	}
+	db.Exec(`CREATE TABLE rejections (id INTEGER PRIMARY KEY, stage TEXT NOT NULL, fact_type TEXT NOT NULL, conversation_id TEXT NOT NULL,
+		path TEXT NOT NULL, content_hash TEXT NOT NULL, pattern TEXT NOT NULL, reason TEXT NOT NULL, at INTEGER NOT NULL)`)
+	db.Exec(`PRAGMA user_version = 3`)
+	db.Close()
+	start := time.Now()
+	tn, err = Open(dir, Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tn.Close()
+	t.Logf("migration of 100k rows: %v", time.Since(start))
+	if time.Since(start) > 3*time.Second {
+		t.Fatal("migration too slow")
 	}
 }
