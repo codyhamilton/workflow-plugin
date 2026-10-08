@@ -9,4 +9,8 @@
 
 ## Phase 1 — Event policy, archive and slim ingest
 
-Units: pending `refine` (Phase 1 has no Units list and spans ingest, store, archive and the plugin).
+Units: six, from `refine` (briefs in `briefs/`). 1-01 to 1-04 parallel; 1-05 then 1-06 in sequence.
+
+### 1-03-plugin-remove-list
+
+Built (9f2c7de): `recordHooklog` skips the four removed events by `hook_event_name`; the list sits in a marked `remove-list` block in `src/index.ts`; README updated. Plugin tests 7 pass, 0 fail (were 5 pass, 2 fail with tests updated first). Surfaces: `packages/opencode-workflow-hooks/{src/index.ts,tests/test_hooks.mjs,README.md}`. Deviations: none.
