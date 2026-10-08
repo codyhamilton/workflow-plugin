@@ -63,3 +63,9 @@ Under 1,500 tokens. Status: `done` | `done with concerns` | `blocked` | `needs c
 A non-trivial bug outside your done evidence: report symptom, location, and root cause if found. Do not fix it here.
 
 Do not spawn agents beyond read-only research helpers. If this unit needs one, it was mis-sized: report `blocked` and say so.
+
+## Amendment from unit 1-02 (do these too)
+
+Migration 4's new `tool` column breaks two existing tests outside 1-02's paths. Fix both here:
+- `TestAnalyticsFacets`: `internal/store/analytics.go:168-169` groups by the alias `tool`, which now resolves to the empty `facts.tool` column. Rename the alias (e.g. `tname`).
+- `TestAdvisoryReads/backfill` (serve test): it fakes an old database by resetting `user_version` to 1, so `ADD COLUMN` fails as a duplicate. Make it build a real version-1 database.
