@@ -159,35 +159,204 @@ func Read(tenantDir, conversationID string) ([]Line, error) {
 	return out, nil
 }
 
+// Repaired reports what Repair changed.
+type Repaired struct {
+	Files int // files rewritten because they ended in a torn tail
+	Lines int // complete lines dropped with those torn frames
+}
+
+// readFile decodes one archive file, delivering the lines of every frame
+// before the first torn frame. A torn tail (a partial final zstd frame or a
+// partial trailing line, left by a crash during Append) is not an error;
+// damage beyond that (a frame that fails its checksum, a complete line that is
+// not valid JSON) is returned as an error.
 func readFile(path string, fn func(Line)) error {
-	f, err := os.Open(path)
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil
 		}
 		return err
 	}
-	defer f.Close()
-	zr, err := zstd.NewReader(f)
+	if len(raw) == 0 {
+		return nil
+	}
+	if lines, err := linesOf(raw); err == nil {
+		for _, l := range lines {
+			fn(l)
+		}
+		return nil
+	}
+	for _, fr := range splitFrames(raw) {
+		lines, err := linesOf(fr)
+		if err != nil {
+			if errors.Is(err, io.ErrUnexpectedEOF) {
+				return nil
+			}
+			return err
+		}
+		for _, l := range lines {
+			fn(l)
+		}
+	}
+	return nil
+}
+
+// linesOf decodes raw as concatenated zstd frames of JSON lines. A truncated
+// stream (a torn frame or a torn trailing line) returns io.ErrUnexpectedEOF
+// with the lines decoded before the damage; any other decoder error, or a
+// complete line that is not valid JSON, is returned as-is.
+func linesOf(raw []byte) ([]Line, error) {
+	zr, err := zstd.NewReader(bytes.NewReader(raw))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer zr.Close()
+	var out []Line
 	br := bufio.NewReader(zr)
 	for {
 		b, err := br.ReadBytes('\n')
-		if len(bytes.TrimSpace(b)) > 0 {
+		complete := len(b) > 0 && b[len(b)-1] == '\n'
+		if complete {
 			var l Line
 			if jerr := json.Unmarshal(b, &l); jerr != nil {
-				return jerr
+				return out, jerr
 			}
-			fn(l)
+			out = append(out, l)
 		}
 		if err == io.EOF {
-			return nil
+			if !complete && len(b) > 0 {
+				return out, io.ErrUnexpectedEOF
+			}
+			return out, nil
 		}
 		if err != nil {
-			return err
+			return out, err
 		}
 	}
+}
+
+// splitFrames cuts raw into one slice per zstd frame, the later frames located
+// by their magic. raw must begin with a frame. It is only used on files whose
+// whole-stream decode failed, to tell a torn frame apart from checksum damage.
+func splitFrames(raw []byte) [][]byte {
+	cuts := make([]int, 0, 4)
+	for i := 0; i+5 <= len(raw); i++ {
+		if raw[i] == 0x28 && raw[i+1] == 0xb5 && raw[i+2] == 0x2f && raw[i+3] == 0xfd && raw[i+4]&0x08 == 0 {
+			cuts = append(cuts, i)
+		}
+	}
+	if len(cuts) == 0 || cuts[0] != 0 {
+		return [][]byte{raw}
+	}
+	frames := make([][]byte, len(cuts))
+	for i, c := range cuts {
+		end := len(raw)
+		if i+1 < len(cuts) {
+			end = cuts[i+1]
+		}
+		frames[i] = raw[c:end]
+	}
+	return frames
+}
+
+// Repair restores archive files left unreadable by a crash during Append. For
+// every file under <tenantDir>/archive/*/ it decodes the frames in order and
+// drops any that are torn, keeping the frames that decode cleanly; if it
+// dropped a torn frame it rewrites the file atomically as one fresh zstd frame
+// holding exactly the surviving lines in order, duplicates kept. A healthy file
+// is left untouched. Damage other than a torn frame is returned as an error.
+func Repair(tenantDir string) (Repaired, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	var rep Repaired
+	files, err := filepath.Glob(filepath.Join(tenantDir, "archive", "*", "*"+ext))
+	if err != nil {
+		return rep, err
+	}
+	sort.Strings(files)
+	for _, p := range files {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			return rep, err
+		}
+		if len(raw) == 0 {
+			continue
+		}
+		if _, err := linesOf(raw); err == nil {
+			continue // healthy: leave byte- and mtime-identical
+		}
+		lines, dropped, torn, err := repairFrames(raw)
+		if err != nil {
+			return rep, err
+		}
+		if !torn {
+			continue
+		}
+		if err := rewriteFile(p, lines); err != nil {
+			return rep, err
+		}
+		rep.Files++
+		rep.Lines += dropped
+	}
+	return rep, nil
+}
+
+func repairFrames(raw []byte) (lines []Line, dropped int, torn bool, err error) {
+	for _, fr := range splitFrames(raw) {
+		ls, ferr := linesOf(fr)
+		if ferr == nil {
+			lines = append(lines, ls...)
+			continue
+		}
+		if errors.Is(ferr, io.ErrUnexpectedEOF) {
+			torn = true
+			dropped += len(ls)
+			continue
+		}
+		return nil, 0, false, ferr
+	}
+	return lines, dropped, torn, nil
+}
+
+func rewriteFile(path string, lines []Line) error {
+	var plain bytes.Buffer
+	enc := json.NewEncoder(&plain)
+	enc.SetEscapeHTML(false)
+	for _, l := range lines {
+		if err := enc.Encode(l); err != nil {
+			return fmt.Errorf("archive: encode line: %w", err)
+		}
+	}
+	var frame bytes.Buffer
+	zw, err := zstd.NewWriter(&frame)
+	if err != nil {
+		return err
+	}
+	if _, err := zw.Write(plain.Bytes()); err != nil {
+		return err
+	}
+	if err := zw.Close(); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".repair-*")
+	if err != nil {
+		return err
+	}
+	name := tmp.Name()
+	if _, err := tmp.Write(frame.Bytes()); err != nil {
+		tmp.Close()
+		os.Remove(name)
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		os.Remove(name)
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(name)
+		return err
+	}
+	return os.Rename(name, path)
 }

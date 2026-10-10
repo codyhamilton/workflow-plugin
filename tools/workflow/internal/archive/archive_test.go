@@ -201,3 +201,159 @@ func TestAppendVerbatimHTMLChars(t *testing.T) {
 		t.Fatalf("archive body not verbatim: %s", dec)
 	}
 }
+
+func truncate(t *testing.T, path string, n int64) {
+	t.Helper()
+	fi, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Truncate(path, fi.Size()-n); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestReadToleratesTornLastFrame(t *testing.T) {
+	dir := t.TempDir()
+	if err := Append(dir, []Entry{ent("c", 1700000000, "h1")}); err != nil {
+		t.Fatal(err)
+	}
+	if err := Append(dir, []Entry{ent("c", 1700000001, "h2")}); err != nil {
+		t.Fatal(err)
+	}
+	files, _ := filepath.Glob(filepath.Join(dir, "archive", "*", "*.jsonl.zst"))
+	if len(files) != 1 {
+		t.Fatalf("files = %v", files)
+	}
+	truncate(t, files[0], 4)
+	got, err := Read(dir, "c")
+	if err != nil {
+		t.Fatalf("Read errored on a torn tail: %v", err)
+	}
+	if len(got) != 1 || got[0].RowHash != "h1" {
+		t.Fatalf("got %v", got)
+	}
+}
+
+func TestRepairAfterTornTailAndAppend(t *testing.T) {
+	dir := t.TempDir()
+	Append(dir, []Entry{ent("c", 1700000000, "h1")})
+	Append(dir, []Entry{ent("c", 1700000001, "h2")})
+	files, _ := filepath.Glob(filepath.Join(dir, "archive", "*", "*.jsonl.zst"))
+	truncate(t, files[0], 4) // a crash mid-Append tears the h2 frame
+	// A later Append lands after the torn bytes; its frame is intact.
+	if err := Append(dir, []Entry{ent("c", 1700000002, "h3")}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Read(dir, "c")
+	if err != nil {
+		t.Fatalf("Read errored: %v", err)
+	}
+	if len(got) != 1 || got[0].RowHash != "h1" {
+		t.Fatalf("before repair: got %v", got)
+	}
+	// h2 is unrecoverable: the torn frame decodes no complete line, so 0 lines
+	// are dropped; h3 (the frame appended after the tear) is recovered intact.
+	rep, err := Repair(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rep.Files != 1 || rep.Lines != 0 {
+		t.Fatalf("repaired = %+v", rep)
+	}
+	got, err = Read(dir, "c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 2 || got[0].RowHash != "h1" || got[1].RowHash != "h3" {
+		t.Fatalf("after repair: got %v", got)
+	}
+}
+
+func TestRepairLeavesHealthyFileUntouched(t *testing.T) {
+	dir := t.TempDir()
+	Append(dir, []Entry{ent("c", 1700000000, "h1")})
+	Append(dir, []Entry{ent("c", 1700000001, "h2")})
+	files, _ := filepath.Glob(filepath.Join(dir, "archive", "*", "*.jsonl.zst"))
+	before, err := os.ReadFile(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	fi0, _ := os.Stat(files[0])
+	rep, err := Repair(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rep.Files != 0 || rep.Lines != 0 {
+		t.Fatalf("repaired a healthy file: %+v", rep)
+	}
+	after, err := os.ReadFile(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(before, after) {
+		t.Fatal("Repair changed a healthy file")
+	}
+	fi1, _ := os.Stat(files[0])
+	if !fi0.ModTime().Equal(fi1.ModTime()) {
+		t.Fatal("Repair touched a healthy file's mtime")
+	}
+	if err := Append(dir, []Entry{ent("c", 1700000002, "h3")}); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Read(dir, "c")
+	if err != nil || len(got) != 3 || got[2].RowHash != "h3" {
+		t.Fatalf("got %v err %v", got, err)
+	}
+}
+
+func TestReadErrorsOnMidFileCorruption(t *testing.T) {
+	// A complete frame whose content is not valid JSON, followed by a good
+	// frame: damage that is not a torn tail, so Read must error naming the file.
+	dir := t.TempDir()
+	var bad bytes.Buffer
+	zw, err := zstd.NewWriter(&bad)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := zw.Write([]byte("this is not json\n")); err != nil {
+		t.Fatal(err)
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := Append(dir, []Entry{ent("c", 1700000000, "h2")}); err != nil {
+		t.Fatal(err)
+	}
+	files, _ := filepath.Glob(filepath.Join(dir, "archive", "*", "*.jsonl.zst"))
+	good, err := os.ReadFile(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(files[0], append(append([]byte{}, bad.Bytes()...), good...), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Read(dir, "c"); err == nil {
+		t.Fatal("Read accepted a complete but unparseable line")
+	} else if !strings.Contains(err.Error(), files[0]) {
+		t.Fatalf("error does not name the file: %v", err)
+	}
+
+	// A flipped byte in a frame's checksum is corruption, not a torn tail.
+	dir2 := t.TempDir()
+	if err := Append(dir2, []Entry{ent("c", 1700000000, "h1")}); err != nil {
+		t.Fatal(err)
+	}
+	fs2, _ := filepath.Glob(filepath.Join(dir2, "archive", "*", "*.jsonl.zst"))
+	raw2, err := os.ReadFile(fs2[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw2[len(raw2)-1] ^= 0xff
+	if err := os.WriteFile(fs2[0], raw2, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Read(dir2, "c"); err == nil {
+		t.Fatal("Read accepted a checksum-corrupt frame")
+	}
+}
