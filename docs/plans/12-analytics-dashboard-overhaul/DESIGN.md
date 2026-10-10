@@ -302,7 +302,7 @@ Each criterion is tagged with where it comes from:
 
 ### Phase 1 — Event policy, archive and slim ingest
 
-- Outcome: With an updated binary, the shared fixture batch is posted to `POST /v1/facts`. The batch contains, for every harness, removed, collapsible (including redelivered deltas) and kept events, plus usage events.
+- Outcome: With an updated binary, the shared fixture batch is posted to `POST /v1/ingest`. The batch contains, for every harness, removed, collapsible (including redelivered deltas) and kept events, plus usage events.
   - Removed events return `accepted` and leave no fact and no archive line.
     - Guards against secrets from `chat.headers` and `shell.env` reaching any store.
     - [user] Turn 5, plus the secret risk recorded in Problem.
@@ -367,6 +367,14 @@ Each criterion is tagged with where it comes from:
   - `tools/workflow/internal/archive/`.
 - Approach: known
 - Depends on: Phase 1
+- Units:
+  - 2-01 Tenant-dir lock, meta table and compaction state in health: `briefs/2-01-lock-meta-health.md`. Depends on nothing. Alongside 2-02.
+  - 2-02 Archive tolerates and repairs a torn last frame: `briefs/2-02-archive-torn-frame.md`. Depends on nothing. Alongside 2-01.
+  - 2-03 Compaction engine: `briefs/2-03-compact-engine.md`. Depends on 2-01, 2-02. Alongside nothing.
+  - 2-04 `workflow ledger compact` command: `briefs/2-04-ledger-compact-command.md`. Depends on 2-03. Alongside nothing.
+  - 2-05 Start compaction on a copy of the local ledger: `briefs/2-05-kickoff-compaction-on-copy.md`. Depends on 2-04. Alongside nothing.
+  - 2-06 Verify the compacted copy: `briefs/2-06-verify-compacted-copy.md`. Depends on 2-05. Alongside nothing.
+- Placement notes: the engine lives in a new `internal/compact` package, not in `store.go`, because the policy table is in `internal/ingest`, which imports `store`; `store` gains only the lock, `meta` and the `OpenExclusive`/`Raw` hooks. Compaction also backfills `kind`, `plan`, `source` and `sha` on artifact and commit facts, which Phase 3 reads. 2-05 and 2-06 are split at the kickoff because the compaction of the roughly 11.6 GB ledger runs for longer than a worker's turn budget; the copy lives in `/var/tmp/workflow-compact-copy/` (the `/home` disk has under 9 GB free) and is kept for Phase 3's benchmark.
 
 ### Phase 3 — Fast analytics API with usage and cost
 

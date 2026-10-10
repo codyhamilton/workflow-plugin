@@ -51,3 +51,10 @@ Run by the orchestrator after the delegated check agent was stopped. `go build .
 7. `TestMigrationFast100k` fails with "migration too slow" under `-race` only.
 8. The design text says `/v1/facts`; the real route is `/v1/ingest`.
 9. The workflow MCP server does not start (ENOENT), so `artifact_feedback` has not run on Phase 1 briefs or reports.
+
+## Phase 2 — Historical compaction and reclaim
+
+Units: six, from `refine` (briefs in `briefs/`). 2-01 and 2-02 parallel; then 2-03, 2-04, 2-05, 2-06 in sequence.
+
+Carried items from Phase 1 placed: 5 (tenant-dir lock) in 2-01; 6 (torn archive frame) in 2-02, with 2-03 repairing before it runs; 7 (`TestMigrationFast100k` under `-race`) in 2-01; 8 (`/v1/facts` naming) corrected in `DESIGN.md` at refine. Items 1 to 4 stay carried to Phase 3. Item 9 still applies: `artifact_feedback` has not run on the Phase 2 briefs (the workflow MCP server did not connect).
+
