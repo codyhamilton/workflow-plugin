@@ -117,6 +117,35 @@ func ParseKeys(s string) ([]KeyPair, error) {
 	return out, nil
 }
 
+// Preflight refuses to start serve on a data directory that compaction has locked. For every
+// tenant directory holding ledger.db it probes the shared lock (taking and releasing it); a locked
+// tenant returns an error naming it and telling the operator to wait for or stop compaction.
+func Preflight(dataDir string) error {
+	ents, err := os.ReadDir(dataDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	for _, e := range ents {
+		if !e.IsDir() {
+			continue
+		}
+		dir := filepath.Join(dataDir, e.Name())
+		if _, err := os.Stat(filepath.Join(dir, "ledger.db")); err != nil {
+			continue
+		}
+		if err := store.TrySharedLock(dir); err != nil {
+			if errors.Is(err, store.ErrLocked) {
+				return fmt.Errorf("workflow serve: tenant %q is locked by compaction; wait for or stop `workflow ledger compact` to finish", e.Name())
+			}
+			return err
+		}
+	}
+	return nil
+}
+
 // Options tunes a Server.
 type Options struct {
 	Version       string
@@ -511,6 +540,10 @@ func (s *Server) auth(h tenantHandler) http.HandlerFunc {
 		}
 		ts, err := s.tenant(name)
 		if err != nil {
+			if errors.Is(err, store.ErrLocked) {
+				writeJSON(w, 503, map[string]string{"error": err.Error()})
+				return
+			}
 			writeJSON(w, 503, map[string]string{"error": "tenant unavailable"})
 			return
 		}
@@ -526,13 +559,35 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.Unlock()
 	n, gaps := 0, 0
+	open := map[string]string{}
 	for _, ts := range list {
+		open[ts.t.Dir()] = ts.t.CompactionState()
 		gaps += int(ts.gaps.Load())
 		if h, err := ts.t.PendingHashes(); err == nil {
 			n += len(h)
 		}
 	}
-	writeJSON(w, 200, map[string]any{"ok": true, "version": s.opts.Version, "pending": n, "screen_gaps": gaps})
+	compaction := "complete"
+	if ents, err := os.ReadDir(s.cfg.Data); err == nil {
+		for _, e := range ents {
+			if !e.IsDir() {
+				continue
+			}
+			dir := filepath.Join(s.cfg.Data, e.Name())
+			if _, err := os.Stat(filepath.Join(dir, "ledger.db")); err != nil {
+				continue
+			}
+			state, ok := open[dir]
+			if !ok {
+				state = store.CompactionStateOf(dir)
+			}
+			if state != "complete" {
+				compaction = "required"
+				break
+			}
+		}
+	}
+	writeJSON(w, 200, map[string]any{"ok": true, "version": s.opts.Version, "pending": n, "screen_gaps": gaps, "compaction": compaction})
 }
 
 func (s *Server) ingest(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {

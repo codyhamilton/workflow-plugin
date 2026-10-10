@@ -86,6 +86,10 @@ func runServe() int {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)
 		return 1
 	}
+	if err := serve.Preflight(cfg.Data); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
 	ln, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)

@@ -519,7 +519,7 @@ func TestMigrationFast100k(t *testing.T) {
 	}
 	defer tn.Close()
 	t.Logf("migration of 100k rows: %v", time.Since(start))
-	if time.Since(start) > 3*time.Second {
+	if !raceEnabled && time.Since(start) > 3*time.Second {
 		t.Fatal("migration too slow")
 	}
 }

@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"sort"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
@@ -64,6 +65,11 @@ var migrations = []string{
 	CREATE INDEX facts_type_ts ON facts(type, ts);
 	CREATE INDEX facts_ts_harness_event ON facts(ts, harness, norm_event);
 	CREATE INDEX rejections_at ON rejections(at);`,
+	// 5: compaction state as a key/value table, seeded complete for a ledger that migrates empty
+	// (nothing to compact). A ledger with rows gets no seed, so it is "required". IF NOT EXISTS,
+	// as migration 3 does, keeps a test that rewinds user_version without dropping meta working.
+	`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+	INSERT INTO meta(key,value) SELECT 'compaction','complete' WHERE NOT EXISTS (SELECT 1 FROM facts);`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -85,10 +91,12 @@ type request struct {
 
 // Tenant is one open tenant directory.
 type Tenant struct {
-	dir    string
-	window time.Duration
-	wdb    *sql.DB // single writer connection
-	rdb    *sql.DB // readers
+	dir       string
+	window    time.Duration
+	wdb       *sql.DB // single writer connection
+	rdb       *sql.DB // readers
+	lock      *os.File
+	exclusive bool // opened with OpenExclusive; Raw is available only then
 
 	mu     sync.RWMutex // guards closed and sends on queue
 	closed bool
@@ -100,8 +108,21 @@ func dsn(path string) string {
 	return "file:" + path + "?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=busy_timeout(5000)"
 }
 
-// Open creates dir, blobs/, pending/, migrates ledger.db and starts the writer.
+// Open creates dir, blobs/, pending/, migrates ledger.db and starts the writer. It takes a shared
+// lock on the tenant directory before it touches SQLite and holds it until Close, so any number of
+// readers coexist while compaction's exclusive lock is refused.
 func Open(dir string, opts Options) (*Tenant, error) {
+	return open(dir, opts, syscall.LOCK_SH, false)
+}
+
+// OpenExclusive is Open but takes the directory's exclusive lock: it fails with ErrLocked while any
+// other holder (shared or exclusive, in this process or another) has the lock. It is for offline
+// compaction, which is the only writer allowed once serve is stopped; see Raw.
+func OpenExclusive(dir string, opts Options) (*Tenant, error) {
+	return open(dir, opts, syscall.LOCK_EX, true)
+}
+
+func open(dir string, opts Options, how int, exclusive bool) (*Tenant, error) {
 	if opts.GroupWindow <= 0 {
 		opts.GroupWindow = 2 * time.Millisecond
 	}
@@ -114,18 +135,24 @@ func Open(dir string, opts Options) (*Tenant, error) {
 			return nil, err
 		}
 	}
+	lock, err := acquireLock(dir, how)
+	if err != nil {
+		return nil, err
+	}
 	dbPath := filepath.Join(dir, "ledger.db")
 	wdb, err := sql.Open("sqlite", dsn(dbPath))
 	if err != nil {
+		releaseLock(lock)
 		return nil, err
 	}
 	wdb.SetMaxOpenConns(1)
 	rdb, err := sql.Open("sqlite", dsn(dbPath))
 	if err != nil {
 		wdb.Close()
+		releaseLock(lock)
 		return nil, err
 	}
-	t := &Tenant{dir: dir, window: opts.GroupWindow, wdb: wdb, rdb: rdb, queue: make(chan *request, 1024)}
+	t := &Tenant{dir: dir, window: opts.GroupWindow, wdb: wdb, rdb: rdb, lock: lock, exclusive: exclusive, queue: make(chan *request, 1024)}
 	from, err := t.migrate()
 	if err == nil && from == 1 {
 		err = t.reindex(context.Background()) // existing db gaining the search index; writer not started yet
@@ -133,6 +160,7 @@ func Open(dir string, opts Options) (*Tenant, error) {
 	if err != nil {
 		wdb.Close()
 		rdb.Close()
+		releaseLock(lock)
 		return nil, err
 	}
 	_ = os.Chmod(dbPath, 0o600)
@@ -184,10 +212,79 @@ func (t *Tenant) Close() error {
 	t.wg.Wait()
 	e1 := t.wdb.Close()
 	e2 := t.rdb.Close()
+	releaseLock(t.lock)
+	t.lock = nil
 	if e1 != nil {
 		return e1
 	}
 	return e2
+}
+
+// Raw returns the writer connection pool only when the tenant was opened with OpenExclusive, else
+// nil. It exists for offline compaction (which owns the exclusive lock); no other caller may use it.
+func (t *Tenant) Raw() *sql.DB {
+	if t.exclusive {
+		return t.wdb
+	}
+	return nil
+}
+
+// Meta reads a meta value; ok is false when the key is absent.
+func (t *Tenant) Meta(ctx context.Context, key string) (string, bool, error) {
+	var v string
+	err := t.rdb.QueryRowContext(ctx, `SELECT value FROM meta WHERE key=?`, key).Scan(&v)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", false, nil
+	}
+	if err != nil {
+		return "", false, err
+	}
+	return v, true, nil
+}
+
+// SetMeta upserts a meta value through the writer queue.
+func (t *Tenant) SetMeta(ctx context.Context, key, value string) error {
+	return t.submit(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`INSERT INTO meta(key,value) VALUES(?,?)
+			ON CONFLICT(key) DO UPDATE SET value=excluded.value`, key, value)
+		return err
+	})
+}
+
+// CompactionState reports "complete" when meta compaction is "complete", else "required".
+func (t *Tenant) CompactionState() string {
+	v, ok, err := t.Meta(context.Background(), "compaction")
+	if err != nil || !ok || v != "complete" {
+		return "required"
+	}
+	return "complete"
+}
+
+// CompactionStateOf answers CompactionState for a tenant directory that is not open. It opens
+// ledger.db read-only, treats a missing meta table or key as "required" unless facts has no rows
+// (then "complete"), and a missing ledger.db as "complete". It never migrates or writes.
+func CompactionStateOf(dir string) string {
+	dbPath := filepath.Join(dir, "ledger.db")
+	if !exists(dbPath) {
+		return "complete"
+	}
+	db, err := sql.Open("sqlite", "file:"+dbPath+"?mode=ro")
+	if err != nil {
+		return "required"
+	}
+	defer db.Close()
+	var v string
+	switch err := db.QueryRow(`SELECT value FROM meta WHERE key='compaction'`).Scan(&v); {
+	case err == nil && v == "complete":
+		return "complete"
+	case err == nil:
+		return "required"
+	}
+	var n int
+	if err := db.QueryRow(`SELECT count(*) FROM facts`).Scan(&n); err == nil && n == 0 {
+		return "complete"
+	}
+	return "required"
 }
 
 func (t *Tenant) writer() {
