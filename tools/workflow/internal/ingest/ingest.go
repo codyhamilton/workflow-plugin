@@ -286,6 +286,10 @@ func Ingest(ctx context.Context, tenant *store.Tenant, facts []json.RawMessage) 
 	return results, nil
 }
 
+// Envelope is the exported form of envelope for the offline compaction engine: the canonical JSON
+// of a hook fact as stored, the received object without its top-level id, content and payload keys.
+func Envelope(obj map[string]any) ([]byte, error) { return envelope(obj) }
+
 // envelope is the canonical JSON of a hook fact as stored: the received object without its
 // top-level id, content and payload keys, encoded as keys.Canonical does.
 func envelope(obj map[string]any) ([]byte, error) {
