@@ -9,12 +9,14 @@
 		series,
 		bucket,
 		stacked = false,
+		area = false,
 		onbrush
 	}: {
 		testid: string;
 		series: TimeSeries[];
 		bucket: 'hour' | 'day' | 'week' | 'month';
 		stacked?: boolean;
+		area?: boolean;
 		onbrush?: (d: { from: Date; to: Date }) => void;
 	} = $props();
 
@@ -23,7 +25,7 @@
 	let theme = $state('light');
 	let chart: any = null;
 
-	const build = (t: Tokens) => timeOption({ series, bucket, stacked }, t);
+	const build = (t: Tokens) => timeOption({ series, bucket, stacked, area }, t);
 
 	// Brush must be armed on mount so a horizontal drag fires brushEnd.
 	function oninit(c: any) {

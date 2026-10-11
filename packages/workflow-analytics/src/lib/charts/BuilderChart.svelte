@@ -50,7 +50,7 @@
 			testid="{testid}-chart"
 			series={lineSeries(resp!)}
 			bucket={timeBucket}
-			stacked={config.chart === 'area'}
+			area={config.chart === 'area'}
 			{onbrush}
 		/>
 	{:else if config.chart === 'bar' || config.chart === 'stackedbar'}
