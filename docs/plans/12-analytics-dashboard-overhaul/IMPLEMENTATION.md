@@ -406,3 +406,7 @@ Added by the orchestrator after 5-05 and 5-07 reported the area type and the sma
 ### 5-11-client-latency-and-inflight
 
 Built (e7d25c9, flash worker): `query.ts` debounce 100 ms (was 250) with `idleMs` 250 leading edge for a slot that has been idle; a released fetch no longer poisons the cache or duplicates a request (`dead` flag). 13 tests pass, e2e overview and usage 20 pass, fixture preset-click p50 46 to 34 ms. Contradictions: the brief's "never made" leading edge clashes with "a burst issues only the last request", so cold slots still debounce; the brief's joiner symptom did not reproduce, the real defect was a released fetch poisoning the cache. Large-ledger timing is re-measured at verification.
+
+### 5-18 outcome and 5-19-area-wiring
+
+5-18 built (01403f3, flash worker): `timeOption` gains an `area` option (line series with `areaStyle`, stacked) and `SmallMultiples` emits `data-ready` after its children mount; 156 tests pass, build clean. It found that `TimeChart` has no `area` prop and `BuilderChart` passes `stacked` for `area`, so the area chart stayed unreachable; and the multiples settle is not browser-validated. Placed in a new unit 5-19 (`briefs/5-19-area-wiring.md`, 5-17 depends on it).

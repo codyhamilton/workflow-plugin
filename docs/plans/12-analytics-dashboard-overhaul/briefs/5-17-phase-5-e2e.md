@@ -4,7 +4,7 @@ Consumer: a Svelte 5 / TypeScript worker (flash-tier).
 Owned paths: new `packages/workflow-analytics/tests/e2e/phase5.spec.ts`; append-only additions to `packages/workflow-analytics/tests/e2e/fixture.ts` (new exported constants and facts only; do not change an existing constant or fact) and to `tests/e2e/helpers.ts` (new helpers only). Touch nothing else.
 Commits: Commit to the current branch when done evidence passes, with a plain-summary title. Stage only the owned paths and the report.
 Report: before committing, write `docs/plans/12-analytics-dashboard-overhaul/reports/5-17-phase-5-e2e.md` (a handoff; rubric in `tools/quality/checks/execution-report.json`) and include it in the commit.
-Depends on: 5-04, 5-05, 5-06, 5-07, 5-08, 5-09, 5-10, 5-11, 5-14, 5-15, 5-16, 5-18 (5-12 and 5-13 are Go only and need not finish first).
+Depends on: 5-04, 5-05, 5-06, 5-07, 5-08, 5-09, 5-10, 5-11, 5-14, 5-15, 5-16, 5-18, 5-19 (5-12 and 5-13 are Go only and need not finish first).
 Runs alongside: nothing. The e2e suite binds a fixed port and builds once per run: if another worker runs at the same time, use your own `E2E_PORT` (for example `E2E_PORT=45NN`), ideally in a separate git worktree with its own `node_modules`; never run two `vite build`s in one tree.
 Budget: 8 files to read, about 250 lines to change, 60 tool turns. Past the budget, stop: write a handoff under this brief's name in `IMPLEMENTATION.md` (done, not done, what you learned), commit if this brief commits, and report `over budget`.
 
