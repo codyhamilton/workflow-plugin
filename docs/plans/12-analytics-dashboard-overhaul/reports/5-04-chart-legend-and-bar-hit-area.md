@@ -13,9 +13,9 @@ Status: done with concerns
 `npm test -- options`:
 ```
  Test Files  1 failed (1)
-      Tests  2 failed | 10 passed (12)
+      Tests  3 failed | 9 passed (12)
 ```
-Failures: "adds a full-width transparent overlay so the whole row is clickable", "keeps the __other__ overlay row inert". See concerns.
+Failures: "adds a full-width transparent overlay so the whole row is clickable", "keeps the __other__ overlay row inert", "reserves grid space so a multi-series legend cannot overlap the grid". See concerns.
 
 `E2E_PORT=4504 npm run test:e2e -- hooks.spec.ts`:
 ```
@@ -62,6 +62,7 @@ The Goal ("whole Hooks bar row clickable, including the label gutter") contradic
 ## Concerns / problems
 
 - Two of the four new `timeOption` tests did NOT fail before the change, contrary to the brief's expectation that all four would fail. Reason: the pre-change legend had no `top`, so `(option.legend.top ?? 0) + 24 === 24`, and the pre-change `grid.top` was already 24; the inequality `24 >= 24` passed. The multi-series test only becomes meaningful with an explicit `legend.top`. The tests were added verbatim as specified, so this is a weak assertion rather than a product defect, but it means the "reserve space" change had no failing test guarding it before implementation.
+- The multi-series legend test is strengthened (`expect(option.legend.top).toBe(0)` and `grid.top > 24`) so it fails on the pre-fix builder; the original assertion `24 >= 0 + 24` passed pre-fix, so it was not valid failing evidence.
 - No other non-trivial bug was found outside this scope.
 
 ## Unfinished

@@ -109,8 +109,10 @@ describe('timeOption', () => {
 			TOKENS
 		);
 		expect(option.legend.show).toBe(true);
+		expect(option.legend.top).toBe(0);
 		const LEGEND_HEIGHT = 24;
-		expect(option.grid.top).toBeGreaterThanOrEqual((option.legend.top ?? 0) + LEGEND_HEIGHT);
+		expect(option.grid.top).toBeGreaterThanOrEqual(option.legend.top + LEGEND_HEIGHT);
+		expect(option.grid.top).toBeGreaterThan(24);
 	});
 
 	it('hides the legend and leaves the grid unchanged for a single series', () => {
