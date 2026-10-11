@@ -26,7 +26,7 @@ var (
 	commit  = "unknown"
 )
 
-const usage = "usage: workflow serve | drain | mcp | status | version\n"
+const usage = "usage: workflow serve | drain | ledger compact --tenant-dir <dir> | mcp | status | version\n"
 
 func main() { os.Exit(run(os.Args[1:])) }
 
@@ -44,6 +44,8 @@ func run(args []string) int {
 		return drain.RunStandalone(ctx, os.Stderr)
 	case "status":
 		return drain.RunStatus(os.Stdout)
+	case "ledger":
+		return runLedger(args[1:])
 	case "mcp":
 		return runMCP(args[1:])
 	case "--version", "version":
