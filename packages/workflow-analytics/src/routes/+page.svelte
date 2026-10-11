@@ -31,6 +31,23 @@
 	let sparks = $state<Record<string, TimePoint[]>>({});
 	let heat = $state<HeatCell[]>([]);
 
+	// Secondary grouped rows, rendered from the same summary response. Nested keys are joined with
+	// "-" for the test id (summary-by_kind-brief), matching the ids the old page exposed.
+	const groups = $derived.by(() => {
+		if (!summary) return [];
+		const s = summary;
+		const group = (title: string, field: string, o: Record<string, number>) => ({
+			title,
+			items: Object.entries(o).map(([k, v]) => ({ id: `${field}-${k}`, name: k, value: v }))
+		});
+		return [
+			group('Artifacts by kind', 'by_kind', s.by_kind),
+			group('Artifacts by source', 'by_source', s.by_source),
+			group('Rejections', 'rejections', s.rejections),
+			group('Screens', 'screens', s.screens)
+		];
+	});
+
 	$effect(() => {
 		const state = view.state; // tracks the URL
 		const needsFacets = Object.keys(state.exclude).length > 0;
@@ -141,6 +158,19 @@
 			<Sparkline testid="overview-spark-unpriced_calls" points={sparks.unpriced_calls ?? []} />
 		</div>
 	</section>
+	{#each groups as g (g.title)}
+		<section class="group">
+			<h2>{g.title}</h2>
+			<div class="tiles">
+				{#each g.items as t (t.id)}
+					<div class="tile">
+						<span class="n" data-testid="summary-{t.id}">{t.value}</span>
+						<span class="name">{t.name}</span>
+					</div>
+				{/each}
+			</div>
+		</section>
+	{/each}
 {/if}
 
 <section class="heat">
@@ -174,6 +204,13 @@
 	.sub {
 		font-size: 0.75rem;
 		color: #777;
+	}
+	.group {
+		margin-top: 1.25rem;
+	}
+	.group h2 {
+		font-size: 0.95rem;
+		margin: 0 0 0.5rem;
 	}
 	.heat {
 		margin-top: 1.5rem;

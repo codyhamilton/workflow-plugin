@@ -5,32 +5,33 @@ Status: **done**
 ## What changed
 
 - `src/routes/+page.svelte`: rewritten on `view` and the `getJSON` client. One `analytics/summary` per window (slot `overview-summary`); nine `analytics/query` sparkline requests (slot `overview-spark-<id>`, bucket from `pickBucket(from, to, tz, …)`, `month` on `all`); one `analytics/query` heatmap (`measure=hook_events`, `dim=weekday`, `dim=hour_of_day`, `bucket=none`, slot `overview-heatmap`). Tiles: conversations, hook_events, artifact_versions, distinct_content, commits, model_calls, tokens (`tokens_in + tokens_out`) with a `summary-tokens_cache_read` element, cost (`costLabel`), unpriced_calls. `Heatmap testid="overview-heatmap"`, `xLabels` "00".."23", `yLabels` Sun..Sat. Ignore `Superseded`, `setError` otherwise, `clearError` on success.
-- `tests/e2e/overview.spec.ts`: 8 tests — whole-window tiles incl. tokens/cache-read/cost; `repo_id` in URL + reload; filter-bar select + goBack; non-empty filter options; cost never `$0.00` while unpriced (real `$0.02, 2 unpriced`, then a `page.route` summary with `cost_usd:0, model_calls:3, unpriced_calls:3` → `unpriced`); heatmap `data-ready="true"`; preset click → settled < 1 s; request count (≤1 summary, ≤10 query).
+- Restored the old page's grouped `summary-*` tiles. A secondary grouped section is derived from the same single `summary` response (no extra requests) and renders `summary-by_kind-{design,brief,report,other}`, `summary-by_source-{worktree,commit}`, `summary-rejections-{precheck,screen}` and `summary-screens-{pass,unscreened}` as plain number rows. The nine scalar tiles, the `overview-summary`/`overview-spark-*`/`overview-heatmap` slots, and every `summary-<id>` id are unchanged. This keeps the `summary-<id>` ids the brief's Contract line 33 requires to stay untouched.
+- `tests/e2e/overview.spec.ts`: 8 tests — whole-window (`expectNumbers(page, SUMMARY_ALL)` over the full map incl. the grouped ids, the `model_calls`/`unpriced_calls` usage tiles, then the dedicated `summary-tokens`, `summary-tokens_cache_read`, `summary-cost_usd` assertions); `repo_id` in URL + reload and filter-bar select + goBack, both over the full `SUMMARY_R1`; non-empty filter options; cost never `$0.00` while unpriced (real `$0.02, 2 unpriced`, then a `page.route` summary with `cost_usd:0, model_calls:3, unpriced_calls:3` → `unpriced`); heatmap `data-ready="true"`; preset click → settled < 1 s; request count (≤1 summary, ≤10 query).
+- The cost-unpriced mock now supplies the nested `by_kind`/`by_source`/`rejections`/`screens` shape the real serve returns (rebuilt from the flat fixture keys, no invented counts). The restored grouped render reads those nested fields, so a flat mocked body would have faulted and hidden the cost tile.
 - Reactivity trap: as briefed — track `view.state`, track `view.facets` only when `state.exclude` is non-empty, and compute every `view.paramsFor(…)` inside `untrack`.
 
 ## Check output
 
-**Before** (old spec against the new page): `E2E_PORT=4406 npx playwright test overview.spec.ts` → 4 failed / 0 passed. All four fail the same way: `expectNumbers` awaits `summary-by_kind-design` (and would then hit `by_source-*`, `rejections-*`, `screens-*`), which the new page does not render. Per test:
+All commands from `packages/workflow-analytics`.
 
-- `overview shows the fixture numbers for the whole window` (l.15) — `summary-by_kind-design` expected "3": element not found.
-- `repo_id in the URL filters, and survives a reload` (l.20) — `summary-by_kind-design` expected "2": element not found.
-- `choosing a repo in the filter bar changes the URL and the numbers` (l.28) — `summary-by_kind-design` expected "3": element not found.
-- `no filter control offers an empty option` (l.38) — `summary-by_kind-design` expected "3": element not found.
+**Before** (recorded at `eed814d`, old spec against the rewritten page): `E2E_PORT=4406 npx playwright test overview.spec.ts` → 4 failed / 0 passed, every failure `expectNumbers` awaiting `summary-by_kind-design` (then `by_source-*`, `rejections-*`, `screens-*`), which the page did not render.
 
 **After** (measured):
 
 - `npm test` → `Test Files 11 passed (11) / Tests 76 passed (76)`.
-- `npm run build` → exit 0 (`✓ built in 15.00s`, `Wrote site to "build"`).
-- `E2E_PORT=4406 npm run test:e2e -- overview.spec.ts` → `8 passed (25.7s)`; timing test 280 ms; request-count test passed.
+- `npm run build` → exit 0 (`✓ built in 10.71s`, `Wrote site to "build"`).
+- `E2E_PORT=4406 npm run test:e2e -- overview.spec.ts` → `8 passed (19.3s)`.
+- `E2E_PORT=4406 npm run test:e2e -- settings.spec.ts` → `1 passed (15.5s)`.
+- `E2E_PORT=4406 npm run test:e2e` (full suite) → `36 passed (29.3s)`, no failures.
 
 ## Deviations
 
-1. Test 4 ("no filter control offers an empty option") waits on `TILES_ALL`, not the old `SUMMARY_ALL`. `SUMMARY_ALL` carries `by_kind-*`/`by_source-*`/`rejections-*`/`screens-*` keys the new page no longer renders, so a verbatim copy would fail before the options loop. Loop body is otherwise identical.
-2. Tiles are the nine the brief lists; the old page's grouped tiles (`by_kind-*`, `by_source-*`, `rejections-*`, `screens-*`) are gone. Only the scalar `summary-<id>` ids both sets share were kept.
+1. Whole-window usage numbers: `USAGE_ALL` also carries `tokens_in`/`tokens_out`/`tokens_cache_read`/`tokens_cache_write`/`tokens_reasoning` and `cost_usd`, which the page renders through the dedicated `summary-tokens`/`summary-tokens_cache_read`/`summary-cost_usd` tiles, not as `summary-tokens_in`-style plain rows. So the usage portion asserts `model_calls`/`unpriced_calls` via `expectNumbers` and keeps the dedicated tiles for the rest, per the brief's parenthetical ("usage covers model_calls/unpriced_calls; do not assert cost_usd/tokens_* raw").
+2. The cost-unpriced mock body was given the nested grouped shape (see "What changed"). The test itself is unchanged; only the mocked response was completed to match the shape the serve returns.
 
 ## Contradictions
 
-- The brief's Contract line 33 ("Unchanged: the `summary-<id>` test ids for the tiles the old page had") conflicts with its Changes section and required-tile list, which omit the old grouped tiles. Those ids no longer exist, so their old assertions were dropped. Named, not resolved silently.
+- The brief's Contract line 33 ("Unchanged: the `summary-<id>` test ids for the tiles the old page had") conflicted with its Changes section and required-tile list, which omit the old grouped tiles (recorded when `eed814d` dropped them). Resolution: the Contract wins — the grouped `summary-*` ids were restored, rendered off the same `summary` response, and the old `SUMMARY_ALL` assertions are back. The ids are exercised by `tests/e2e/settings.spec.ts:23-24` (passing in this run) and `tests/hosted/hosted.spec.ts:33-34`, both of which assert every `SUMMARY_ALL` entry as `summary-<key>`. The hosted spec is not re-run here (it needs a `tools/release/build.sh` binary via `WORKFLOW_BIN`, absent in this worktree); it reads the same page and fixture.
 
 ## Non-trivial bugs outside done evidence
 

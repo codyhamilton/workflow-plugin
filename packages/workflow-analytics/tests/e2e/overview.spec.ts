@@ -6,22 +6,17 @@ type P = import('@playwright/test').Page;
 async function expectNumbers(page: P, want: Record<string, number>) {
 	for (const [k, v] of Object.entries(want)) await expect(page.getByTestId(`summary-${k}`), k).toHaveText(String(v));
 }
-const TILES_ALL = {
-	conversations: SUMMARY_ALL.conversations,
-	hook_events: SUMMARY_ALL.hook_events,
-	artifact_versions: SUMMARY_ALL.artifact_versions,
-	distinct_content: SUMMARY_ALL.distinct_content,
-	commits: SUMMARY_ALL.commits,
-	model_calls: USAGE_ALL.model_calls,
-	unpriced_calls: USAGE_ALL.unpriced_calls
-};
-const TILES_R1 = {
-	conversations: SUMMARY_R1.conversations,
-	hook_events: SUMMARY_R1.hook_events,
-	artifact_versions: SUMMARY_R1.artifact_versions,
-	distinct_content: SUMMARY_R1.distinct_content,
-	commits: SUMMARY_R1.commits
-};
+// The usage fields the page renders as plain number tiles; tokens/cost are asserted via their
+// dedicated tiles, so they are left out of this map.
+const USAGE_TILES = { model_calls: USAGE_ALL.model_calls, unpriced_calls: USAGE_ALL.unpriced_calls };
+// The fixture stores grouped summary counts flat ("by_kind-design"); the serve nests them. Rebuild
+// the nested shape for the mocked summary response.
+const nested = (field: string) =>
+	Object.fromEntries(
+		Object.entries(SUMMARY_ALL)
+			.filter(([k]) => k.startsWith(`${field}-`))
+			.map(([k, v]) => [k.slice(field.length + 1), v])
+	);
 
 test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
@@ -29,7 +24,8 @@ test.beforeEach(async ({ page }) => {
 
 test('overview shows the fixture numbers for the whole window', async ({ page }) => {
 	await page.goto('/');
-	await expectNumbers(page, TILES_ALL);
+	await expectNumbers(page, SUMMARY_ALL);
+	await expectNumbers(page, USAGE_TILES);
 	await expect(page.getByTestId('summary-tokens')).toHaveText(String(USAGE_ALL.tokens_in + USAGE_ALL.tokens_out));
 	await expect(page.getByTestId('summary-tokens_cache_read')).toHaveText(String(USAGE_ALL.tokens_cache_read));
 	await expect(page.getByTestId('summary-cost_usd')).toHaveText('$0.02, 2 unpriced');
@@ -37,25 +33,25 @@ test('overview shows the fixture numbers for the whole window', async ({ page })
 
 test('repo_id in the URL filters, and survives a reload', async ({ page }) => {
 	await page.goto(`/?repo_id=${FILTER_REPO}`);
-	await expectNumbers(page, TILES_R1);
+	await expectNumbers(page, SUMMARY_R1);
 	await page.reload();
 	expect(new URL(page.url()).searchParams.getAll('repo_id')).toEqual([FILTER_REPO]);
-	await expectNumbers(page, TILES_R1);
+	await expectNumbers(page, SUMMARY_R1);
 });
 
 test('choosing a repo in the filter bar changes the URL and the numbers', async ({ page }) => {
 	await page.goto('/');
-	await expectNumbers(page, TILES_ALL);
+	await expectNumbers(page, SUMMARY_ALL);
 	await page.getByTestId('filter-repo_id').selectOption(FILTER_REPO);
 	await expect(page).toHaveURL(new RegExp(`repo_id=${FILTER_REPO}`));
-	await expectNumbers(page, TILES_R1);
+	await expectNumbers(page, SUMMARY_R1);
 	await page.goBack();
-	await expectNumbers(page, TILES_ALL);
+	await expectNumbers(page, SUMMARY_ALL);
 });
 
 test('no filter control offers an empty option', async ({ page }) => {
 	await page.goto('/');
-	await expectNumbers(page, TILES_ALL);
+	await expectNumbers(page, SUMMARY_ALL);
 	for (const name of ['repo_id', 'harness', 'kind', 'plan']) {
 		const opts = await page.getByTestId(`filter-${name}`).locator('option').evaluateAll((os) =>
 			os.map((o) => ({ value: (o as HTMLOptionElement).value, text: (o.textContent ?? '').trim() }))
@@ -76,7 +72,17 @@ test('cost tile never shows $0.00 while calls are unpriced', async ({ page }) =>
 		route.fulfill({
 			status: 200,
 			contentType: 'application/json',
-			body: JSON.stringify({ ...SUMMARY_ALL, ...USAGE_ALL, cost_usd: 0, model_calls: 3, unpriced_calls: 3 })
+			body: JSON.stringify({
+				...SUMMARY_ALL,
+				...USAGE_ALL,
+				by_kind: nested('by_kind'),
+				by_source: nested('by_source'),
+				rejections: nested('rejections'),
+				screens: nested('screens'),
+				cost_usd: 0,
+				model_calls: 3,
+				unpriced_calls: 3
+			})
 		})
 	);
 	await page.reload();
@@ -102,7 +108,7 @@ test('one summary and at most ten query requests per load', async ({ page }) => 
 	const summary = trackRequests(page, /analytics\/summary/);
 	const query = trackRequests(page, /analytics\/query/);
 	await page.goto('/');
-	await expectNumbers(page, TILES_ALL);
+	await expectNumbers(page, SUMMARY_ALL);
 	await expectSettled(page);
 	await page.waitForTimeout(500);
 	expect(summary.count()).toBeLessThanOrEqual(1);
