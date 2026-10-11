@@ -32,6 +32,16 @@ test('totals equal USAGE_C5 and the cost carries the unpriced note', async ({ pa
 	await expect(cost).not.toHaveText('$0.00');
 });
 
+test('an unpriced usage event reads unpriced and no row shows $0', async ({ page }) => {
+	await page.goto('/conversation?id=c5');
+	const rows = page.getByTestId('timeline-row');
+	await expect(rows).toHaveCount(3);
+	await expect(rows.filter({ hasText: 'qwen3-coder' })).toContainText('unpriced');
+	const texts = await rows.allInnerTexts();
+	expect(texts.some((t) => t.includes('unpriced'))).toBe(true);
+	expect(texts.some((t) => t.includes('$0.00'))).toBe(false);
+});
+
 test('the timeline rows are in ts order, oldest first', async ({ page }) => {
 	await page.goto('/conversation?id=c5');
 	await expect(page.getByTestId('timeline-row')).toHaveCount(3);

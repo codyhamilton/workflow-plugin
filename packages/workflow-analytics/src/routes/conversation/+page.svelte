@@ -59,8 +59,11 @@
 				)} · reason ${num(e.tokens.reasoning)}`
 			: '';
 	const rowCost = (e: TimelineEvent) => {
+		// A usage event (tokens present) whose model is unpriced carries `cost_usd: 0`, not null, so
+		// only a positive cost is priced; everything else is "unpriced", never `$0.00`.
+		if (e.tokens && !(e.cost_usd != null && e.cost_usd > 0)) return 'unpriced';
 		if (e.cost_usd != null) return costLabel({ cost: e.cost_usd, unpriced: 0, calls: 1 });
-		return e.tokens ? 'unpriced' : '';
+		return '';
 	};
 </script>
 

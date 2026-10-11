@@ -135,7 +135,7 @@ describe('createClient.get', () => {
 		expect(peak).toBe(2);
 	});
 
-	it('defaults to six concurrent fetches', async () => {
+	it('defaults to four concurrent fetches', async () => {
 		let active = 0;
 		let peak = 0;
 		const pending: Array<() => void> = [];
@@ -154,15 +154,15 @@ describe('createClient.get', () => {
 			c.get('slot' + i, 'analytics/summary', new URLSearchParams(`a=${i}`))
 		);
 		await vi.advanceTimersByTimeAsync(0);
-		expect(fetcher).toHaveBeenCalledTimes(6);
-		expect(peak).toBe(6);
+		expect(fetcher).toHaveBeenCalledTimes(4);
+		expect(peak).toBe(4);
 		while (pending.length) {
 			pending.shift()!();
 			await vi.advanceTimersByTimeAsync(0);
 		}
 		await Promise.all(ps);
 		expect(fetcher).toHaveBeenCalledTimes(8);
-		expect(peak).toBe(6);
+		expect(peak).toBe(4);
 	});
 
 	it('does not cache an error', async () => {

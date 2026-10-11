@@ -87,6 +87,29 @@ test('one load issues seven /analytics/query requests, none per model', async ({
 	expect(reqs.count()).toBe(7);
 });
 
+test('switching 30d to 90d issues each distinct query once', async ({ page }) => {
+	// Slow responses as on the real ledger: a facet response landing after the window change must not
+	// re-run the effect and supersede queries already in flight.
+	await page.route('**/v1/analytics/query*', async (route) => {
+		await new Promise((r) => setTimeout(r, 700));
+		try {
+			await route.continue();
+		} catch {
+			/* the client aborts superseded requests */
+		}
+	});
+	const queries = trackRequests(page, /analytics\/query/);
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible({ timeout: 15000 });
+	await page.waitForTimeout(2500);
+	queries.reset();
+	await page.getByTestId('preset-90d').click();
+	await page.waitForTimeout(3500);
+	const urls = queries.urls().map((u) => new URL(u).pathname + new URL(u).search);
+	expect(urls.length).toBe(new Set(urls).size);
+	expect(urls.length).toBe(7);
+});
+
 test('a preset change settles within 1 s', async ({ page }) => {
 	await page.goto('/usage');
 	await expectSettled(page);

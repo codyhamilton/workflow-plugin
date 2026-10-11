@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { pickBucket } from '$lib/buckets';
 	import BarChart from '$lib/charts/BarChart.svelte';
 	import TimeChart from '$lib/charts/TimeChart.svelte';
@@ -54,9 +55,14 @@
 	$effect(() => {
 		const bkt = bucket;
 		const win = qwin;
+		// Wait for facets of the current window when an exclude needs their complement (as Overview
+		// does); `view.paramsFor` is otherwise read untracked so a late facet response cannot re-run
+		// this effect and supersede queries already in flight.
+		const needsFacets = Object.keys(view.state.exclude).length > 0;
+		if (needsFacets && !view.facetsReady) return;
 		let live = true;
 		const run = (slot: string, extra: Record<string, string>, set: (r: QueryResponse) => void) => {
-			const params = view.paramsFor('query', extra);
+			const params = untrack(() => view.paramsFor('query', extra));
 			if (!params) return;
 			if (win?.all) {
 				params.delete('all');

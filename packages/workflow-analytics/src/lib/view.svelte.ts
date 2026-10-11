@@ -20,6 +20,11 @@ import type { Facets } from './types';
 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 let facets = $state<Partial<Record<DimKey, string[]>> | null>(null);
+// The facetParams key `facets` was loaded for. Facets are window-filtered, so an exclude can only be
+// resolved to its complement once facets for the *current* window have arrived; `facetsReady` gates
+// the route effects on that, so a stale window's facets are never used and a late facet response for
+// the window in flight cannot re-trigger an effect (and supersede) requests already issued.
+let facetsKey = $state<string | null>(null);
 
 function currentState(): UrlState {
 	return parseUrlState(page.url.searchParams);
@@ -51,17 +56,32 @@ function facetParams(): URLSearchParams {
 	return params;
 }
 
+/** The key facets for the current window; stable within the hour (`presetWindow` rounds to the hour). */
+function facetKey(): string {
+	return facetParams().toString();
+}
+
+const facetsReady = $derived(facets !== null && facetsKey === facetKey());
+
 // One client owns debounce/cache, so re-requesting on every window change collapses bursts.
 $effect.root(() => {
 	$effect(() => {
 		let live = true;
-		getJSON<Facets>('facets', 'analytics/facets', facetParams()).then(
+		const params = facetParams();
+		const key = params.toString();
+		getJSON<Facets>('facets', 'analytics/facets', params).then(
 			(resp) => {
-				if (live) facets = mapFacets(resp);
+				if (live) {
+					facets = mapFacets(resp);
+					facetsKey = key;
+				}
 			},
 			(e) => {
 				// A superseded call is not an error; a real failure keeps the last facets.
-				if (live && !(e instanceof Superseded)) facets = null;
+				if (live && !(e instanceof Superseded)) {
+					facets = null;
+					facetsKey = null;
+				}
 			}
 		);
 		return () => {
@@ -135,6 +155,10 @@ export const view = {
 	tz,
 	get facets(): Partial<Record<DimKey, string[]>> | null {
 		return facets;
+	},
+	/** True once facets for the current window have loaded; false while they are stale or pending. */
+	get facetsReady(): boolean {
+		return facetsReady;
 	},
 	get empty(): boolean {
 		return 'empty' in apiParams(currentState(), resolveWindow(currentState(), new Date(), tz, 'rest'), facets, tz);

@@ -51,8 +51,9 @@
 	$effect(() => {
 		const state = view.state; // tracks the URL
 		const needsFacets = Object.keys(state.exclude).length > 0;
-		const ready = needsFacets ? view.facets !== null : true; // tracks facets only when needed
-		if (!ready) return;
+		// Wait for facets of the *current* window when an exclude needs their complement. `facetsReady`
+		// only flips on a genuine window change, so a late facet response does not re-run this effect.
+		if (needsFacets && !view.facetsReady) return;
 
 		let live = true;
 		const fail = (e: unknown) => {

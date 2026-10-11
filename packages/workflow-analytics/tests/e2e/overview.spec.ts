@@ -90,6 +90,31 @@ test('cost tile never shows $0.00 while calls are unpriced', async ({ page }) =>
 	await expect(page.getByTestId('summary-unpriced_calls')).toHaveText('3');
 });
 
+test('switching 30d to 90d issues each distinct query once', async ({ page }) => {
+	// Slow responses as on the real ledger: a facet response landing after the window change must not
+	// re-run the effect and supersede queries already in flight.
+	await page.route('**/v1/analytics/query*', async (route) => {
+		await new Promise((r) => setTimeout(r, 700));
+		try {
+			await route.continue();
+		} catch {
+			/* the client aborts superseded requests */
+		}
+	});
+	const queries = trackRequests(page, /analytics\/query/);
+	// An exclude makes the effect wait for the current window's facets; the switch must not then
+	// re-run it when the late facet response lands.
+	await page.goto(`/?x.repo_id=${FILTER_REPO}`);
+	await expect(page.getByTestId('summary-conversations')).toBeVisible({ timeout: 15000 });
+	await page.waitForTimeout(2500);
+	queries.reset();
+	await page.getByTestId('preset-90d').click();
+	await page.waitForTimeout(3500);
+	const urls = queries.urls().map((u) => new URL(u).pathname + new URL(u).search);
+	expect(urls.length).toBe(new Set(urls).size);
+	expect(urls.length).toBe(10);
+});
+
 test('heatmap reports ready', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.getByTestId('overview-heatmap')).toHaveAttribute('data-ready', 'true');
