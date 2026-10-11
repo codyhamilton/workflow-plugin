@@ -435,6 +435,24 @@ Each criterion is tagged with where it comes from:
   - `tests/e2e/*.spec.ts`.
 - Approach: known
 - Depends on: Phase 3
+- Units:
+  - 4-01 Data client: cancellation, debounce, cache, dedupe, concurrency: `briefs/4-01-data-client.md`. Depends on nothing. Alongside 4-02, 4-03, 4-04.
+  - 4-02 Filter model, presets, bucket choice and cost label: `briefs/4-02-filter-model-presets.md`. Depends on nothing. Alongside 4-01, 4-03, 4-04.
+  - 4-03 Fixture usage data and e2e helpers: `briefs/4-03-fixture-usage-e2e-helpers.md`. Depends on nothing. Alongside 4-01, 4-02, 4-04.
+  - 4-04 ECharts components, theme and data-table toggle: `briefs/4-04-echarts-components.md`. Depends on nothing. Alongside 4-01, 4-02, 4-03.
+  - 4-05 Shell, filter bar, chips and shared view state: `briefs/4-05-shell-filterbar-view.md`. Depends on 4-01, 4-02, 4-03, 4-04. Alongside nothing.
+  - 4-06 Overview: `briefs/4-06-overview.md`. Depends on 4-05. Alongside 4-07 to 4-15.
+  - 4-07 Trends with brush: `briefs/4-07-trends.md`. Depends on 4-05. Alongside 4-06, 4-08 to 4-15.
+  - 4-08 Usage & cost: `briefs/4-08-usage-cost.md`. Depends on 4-05. Alongside 4-06, 4-07, 4-09 to 4-15.
+  - 4-09 Repos: `briefs/4-09-repos.md`. Depends on 4-05. Alongside 4-06 to 4-08, 4-10 to 4-15.
+  - 4-10 Hooks: `briefs/4-10-hooks.md`. Depends on 4-05. Alongside 4-06 to 4-09, 4-11 to 4-15.
+  - 4-11 Quality: `briefs/4-11-quality.md`. Depends on 4-05. Alongside 4-06 to 4-10, 4-12 to 4-15.
+  - 4-12 Executions: `briefs/4-12-executions.md`. Depends on 4-05. Alongside 4-06 to 4-11, 4-13 to 4-15.
+  - 4-13 Conversations, virtualised: `briefs/4-13-conversations.md`. Depends on 4-05. Alongside 4-06 to 4-12, 4-14, 4-15.
+  - 4-14 Conversation timeline: `briefs/4-14-conversation-timeline.md`. Depends on 4-05. Alongside 4-06 to 4-13, 4-15.
+  - 4-15 Explore and Settings: `briefs/4-15-explore-settings.md`. Depends on 4-05. Alongside 4-06 to 4-14.
+  - 4-16 Retire LayerChart and the old filter model; cross-route interaction tests: `briefs/4-16-retire-layerchart-interactions.md`. Depends on 4-06 to 4-15. Alongside nothing.
+- Placement notes: every route unit owns one route directory and its spec; shared code is owned by 4-01 to 4-05 only, so 4-06 to 4-15 never share a file. The e2e suite binds a fixed port and builds once per run, so parallel route units run in separate git worktrees (each needs `node_modules`) with distinct `E2E_PORT` values (4-03 adds the variable, default 4391). The server has no exclude parameter: the site realises an exclude chip as the complement of the facet values (`apiParams` in 4-02), so an exclude on `conversation_id` is unsupported and is marked so on the chip. `/query` allows two dimensions, so the three-level harness, norm_event, tool treemap is two linked two-level treemaps (4-10), a deviation from the Solution Shape wording. "`/repos` issues one request, not one per repo" is realised as a fixed four `/query` requests with `dim=repo_id` and `top=100`, independent of repo count (4-09). Routes other than `/query` reject windows over 400 days, so All time is clamped to 399 days there with a visible notice, and `/query` takes `all=1`. Presets and buckets are chosen in range (4-02), `scores` always carries one `kind` (4-02, 4-11), and cost is shown through `costLabel` with `unpriced_calls`, never as `$0` (4-02, 4-06, 4-08, 4-14). The sankey, builder and saved views are Phase 5 and are not built here.
 
 ### Phase 5 — Chart builder and dashboards
 

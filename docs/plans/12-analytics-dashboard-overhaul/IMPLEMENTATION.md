@@ -218,3 +218,19 @@ Surfaces: `packages/opencode-workflow-hooks/`, `tools/hooklog/tests/fixtures/ing
 Deviations: the fix-02 worker delegated to a general subagent against the brief's no-agents line, and exceeded its line budget (about 790 lines, mostly tests). The ledger delta predicate is harness plus event while the archive predicate is event only (harmless on real data). `TestVerifyCopy`'s external precounts may need regeneration (env-gated, not run). `artifact_feedback` is reachable but returned "not delivered" for the fix briefs (the service had no copy yet); earlier phases' note stands.
 
 Verification (separate Sonnet subagent, fresh copy of the compacted real-ledger copy; the live ledger and the source copy were not touched): facts 450,510 to 435,608 (14,902 deltas removed, 0 left); archive 756,356,590 to 151,027,095 bytes (8,797,023 delta lines removed, 0 left, 5,137 files kept, 1,607 rewritten); `ledger.db` 318,734,336 bytes after VACUUM (larger than 295,919,616 because the three rollup tables were built; the copy had none); `purge-deltas` 1m33s; all three rollups equal base aggregates in both EXCEPT directions; `integrity_check` ok; a second run was a no-op with identical archive checksums. A posted fixture (58 facts, 6 deltas) twice to a running serve: deltas `accepted`, no fact, no archive line, `message.part.updated` stored. Benchmark on the purged copy (command as in 3-13): 2,063 cases all 200, max p95 483 ms (under 500 ms). `go build`, `go vet`, `go test -count=1 ./...`, `-race` on archive and compact, `gofmt` and the plugin tests (8 of 8) pass.
+
+## Phase 4 — Dashboard shell, filters and drill-down
+
+Units: sixteen, from `refine` (briefs in `briefs/`, named `4-NN-<slug>.md`). Order: 4-01, 4-02, 4-03, 4-04 parallel; then 4-05 (after all four); then 4-06 to 4-15 parallel (each owns one route directory and its spec; run in separate worktrees with distinct `E2E_PORT`); then 4-16 last (after all route units). There is no verification unit: the orchestrator verifies. `artifact_feedback` was not run on these briefs (the workflow MCP server failed to connect, ENOENT).
+
+### Carried items placed
+
+1. Cost 0 for unpriced models, site half: 4-02 (`costLabel`), 4-03 (fixture with priced and unpriced calls), 4-06, 4-08, 4-14 (show `unpriced_calls`, never `$0`). Adding rates to `tools/transcript/pricing.json` stays carried and out of scope.
+2. Little latency headroom: 4-01 (cache, in-flight dedupe, concurrency limit), 4-02 (`pickBucket`), 4-06 and 4-08 (totals from `summary`, few queries).
+3. Windows rejected with 400, and `scores` needing `kind`: 4-02 (`resolveWindow`, `pickBucket`, `scoresParams`), 4-07, 4-11.
+4. `ANALYZE` dependency of `scores`: server-side, the site makes none; stays carried.
+7. Live-captured Claude dedupe gap: only the footnote in 4-08; the gap itself stays carried.
+
+### Stays carried
+
+Items 4 (server side), 5, 6, 7 (the gap), 8, 9, 10 and 11 (`row_hash` BLOB). Items 12 and 13 are done.
