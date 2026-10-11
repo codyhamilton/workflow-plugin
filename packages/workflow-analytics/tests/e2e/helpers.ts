@@ -53,15 +53,18 @@ const BAR_GRID = { left: 120, right: 24, top: 8, bottom: 24 };
 
 /**
  * Clicks the centre of bar `index` of a horizontal `BarChart` (4-04's geometry). N comes from the
- * number of rows in `<testid>-table`. Written against 4-04's contract; unexercised until it lands.
+ * number of rows in `<testid>-table`. `BarChart` renders the chart and its table as alternatives,
+ * so read the count from the table, restore the chart, then click the real ECharts bar.
  */
 export async function clickBar(page: Page, testid: string, index: number, opts: { shift?: boolean } = {}): Promise<void> {
 	const table = page.getByTestId(`${testid}-table`);
-	let n = await table.locator('tbody tr').count();
-	if (n === 0) {
+	if ((await table.count()) === 0) {
 		await page.getByTestId(`${testid}-table-toggle`).click();
-		n = await table.locator('tbody tr').count();
+		await expect(table).toBeVisible();
 	}
+	const n = await table.locator('tbody tr').count();
+	await page.getByTestId(`${testid}-table-toggle`).click(); // back to the chart
+	await expect(page.getByTestId(testid).locator('.echart svg')).toBeVisible();
 	const box = await page.getByTestId(testid).boundingBox();
 	if (!box || n === 0) throw new Error(`clickBar: no chart box or table rows for ${testid}`);
 	const { left, right, top, bottom } = BAR_GRID;

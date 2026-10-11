@@ -13,8 +13,8 @@ async function openTable(page: import('@playwright/test').Page, testid: string) 
 	await expect(page.getByTestId(`${testid}-table`).locator('tbody tr').first()).toBeVisible();
 }
 
-// The priced Sonnet bar is first in `usage-cost-by-model`; clickBar's index is row + 1.
-const SONNET_BAR = 1;
+// The priced Sonnet bar is first in `usage-cost-by-model` (clickBar's index is the bar band, 0-based).
+const SONNET_BAR = 0;
 
 test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
