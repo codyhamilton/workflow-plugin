@@ -427,6 +427,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/analytics/scores", s.method(http.MethodGet, s.auth(s.analyticsScores)))
 	mux.HandleFunc("/v1/analytics/executions", s.method(http.MethodGet, s.auth(s.analyticsExecutions)))
 	mux.HandleFunc("/v1/analytics/conversations", s.method(http.MethodGet, s.auth(s.analyticsConversations)))
+	mux.HandleFunc("/v1/analytics/conversation", s.method(http.MethodGet, s.auth(s.analyticsConversation)))
 	mux.HandleFunc("/v1/analytics/explore", s.method(http.MethodGet, s.auth(s.analyticsExplore)))
 	mux.HandleFunc("/v1/analytics/schema", s.method(http.MethodGet, s.auth(s.analyticsSchema)))
 	mux.HandleFunc("/v1/analytics/query", s.method(http.MethodGet, s.auth(s.analyticsQuery)))
