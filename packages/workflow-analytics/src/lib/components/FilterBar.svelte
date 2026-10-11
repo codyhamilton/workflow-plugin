@@ -1,81 +1,97 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
-	import { apiGet } from '$lib/api';
-	import { dateToFrom, dateToTo, mergeQuery, parseFilter, toDate, type Filter } from '$lib/filters';
-	import { setError } from '$lib/state.svelte';
-	import type { Facets } from '$lib/types';
+	import { dateToFrom, dateToTo } from '$lib/filters';
+	import { PRESETS, presetWindow } from '$lib/presets';
+	import type { DimKey } from '$lib/urlstate';
+	import { view } from '$lib/view.svelte';
 
-	const filter = $derived(parseFilter(page.url.searchParams));
-	let facets = $state<Facets | null>(null);
+	const MULTIS: DimKey[] = ['repo_id', 'harness', 'kind', 'plan', 'model'];
+	const LABELS: Record<string, string> = {
+		repo_id: 'Repo',
+		harness: 'Harness',
+		kind: 'Kind',
+		plan: 'Plan',
+		model: 'Model'
+	};
 
-	// Facets follow the window only (dimension filters do not narrow them), so only a change of
-	// from/to refetches them; primitive deriveds keep a repo/harness/kind/plan change from doing so.
-	const from = $derived(filter.from);
-	const to = $derived(filter.to);
-	$effect(() => {
-		const q = new URLSearchParams();
-		if (from) q.set('from', from);
-		if (to) q.set('to', to);
-		let live = true;
-		apiGet<Facets>('analytics/facets', q).then(
-			(f) => live && (facets = f),
-			(e) => live && setError(e)
-		);
-		return () => (live = false);
+	// The window the date inputs display: the custom range, or the preset expanded at `now`.
+	const win = $derived.by(() => {
+		const s = view.state;
+		if (s.range === 'custom') {
+			return { from: s.from?.slice(0, 10) ?? '', to: s.to?.slice(0, 10) ?? '' };
+		}
+		const w = presetWindow(s.range, new Date(), view.tz);
+		return {
+			from: w ? w.from.toISOString().slice(0, 10) : '',
+			to: w ? w.to.toISOString().slice(0, 10) : ''
+		};
 	});
 
-	// "" means "missing" in the API; filtering on it is not offered. Keep a selected value visible.
-	function options(listed: string[] | undefined, selected: string[]): string[] {
-		const out = (listed ?? []).filter((v) => v !== '');
-		for (const s of selected) if (s !== '' && !out.includes(s)) out.push(s);
-		return out;
+	// "" means "missing" in the API; do not offer it, but keep a selected value visible.
+	function options(key: DimKey): string[] {
+		const selected = view.state.include[key] ?? [];
+		const listed = (view.facets?.[key] ?? []).filter((v) => v !== '');
+		return [...new Set([...listed, ...selected.filter((v) => v !== '')])];
 	}
 
-	function change(next: Filter) {
-		const qs = mergeQuery(page.url.searchParams, next).toString();
-		goto(`${page.url.pathname}${qs ? `?${qs}` : ''}`, { keepFocus: true, noScroll: true });
+	function keepFrom(v: string): Date {
+		const s = view.state;
+		if (s.range === 'custom' && s.from) return new Date(s.from);
+		const w = presetWindow(s.range, new Date(), view.tz);
+		return w ? w.from : new Date(dateToFrom(v)!);
+	}
+	function keepTo(v: string): Date {
+		const s = view.state;
+		if (s.range === 'custom' && s.to) return new Date(s.to);
+		const w = presetWindow(s.range, new Date(), view.tz);
+		return w ? w.to : new Date(dateToTo(v)!);
 	}
 
-	function pick(name: 'repo_id' | 'harness' | 'kind' | 'plan', e: Event) {
-		const sel = e.currentTarget as HTMLSelectElement;
-		const values = [...sel.selectedOptions].map((o) => o.value);
-		change({ ...filter, [name]: values } as Filter);
+	function onFrom(e: Event) {
+		const v = (e.currentTarget as HTMLInputElement).value;
+		if (!v) return;
+		view.setWindow(new Date(dateToFrom(v)!), keepTo(v));
+	}
+	function onTo(e: Event) {
+		const v = (e.currentTarget as HTMLInputElement).value;
+		if (!v) return;
+		view.setWindow(keepFrom(v), new Date(dateToTo(v)!));
 	}
 
-	const groups = $derived([
-		{ name: 'repo_id' as const, title: 'Repo', values: options(facets?.repos, filter.repo_id), selected: filter.repo_id },
-		{ name: 'harness' as const, title: 'Harness', values: options(facets?.harnesses, filter.harness), selected: filter.harness },
-		{ name: 'kind' as const, title: 'Kind', values: options(facets?.kinds, filter.kind), selected: filter.kind as string[] },
-		{ name: 'plan' as const, title: 'Plan', values: options(facets?.plans, filter.plan), selected: filter.plan }
-	]);
+	function onSelect(key: DimKey, e: Event) {
+		const sel = Array.from((e.currentTarget as HTMLSelectElement).selectedOptions, (o) => o.value);
+		const cur = view.state.include[key] ?? [];
+		for (const v of sel) if (!cur.includes(v)) view.drill(key, v);
+		for (const v of cur) if (!sel.includes(v)) view.removeChip(key, v);
+	}
 </script>
 
 <form class="filters" onsubmit={(e) => e.preventDefault()}>
+	<div class="presets" role="group" aria-label="Date range">
+		{#each PRESETS as p (p.id)}
+			<button
+				type="button"
+				data-testid="preset-{p.id}"
+				aria-pressed={view.state.range === p.id}
+				onclick={() => view.setPreset(p.id)}
+			>
+				{p.label}
+			</button>
+		{/each}
+	</div>
 	<label>
 		From
-		<input
-			type="date"
-			data-testid="filter-from"
-			value={toDate(filter.from)}
-			onchange={(e) => change({ ...filter, from: dateToFrom(e.currentTarget.value) })}
-		/>
+		<input type="date" data-testid="filter-from" value={win.from} onchange={onFrom} />
 	</label>
 	<label>
 		To
-		<input
-			type="date"
-			data-testid="filter-to"
-			value={toDate(filter.to)}
-			onchange={(e) => change({ ...filter, to: dateToTo(e.currentTarget.value) })}
-		/>
+		<input type="date" data-testid="filter-to" value={win.to} onchange={onTo} />
 	</label>
-	{#each groups as g (g.name)}
+	{#each MULTIS as key (key)}
 		<label>
-			{g.title}
-			<select multiple size="3" data-testid="filter-{g.name}" onchange={(e) => pick(g.name, e)}>
-				{#each g.values as v (v)}
-					<option value={v} selected={g.selected.includes(v)}>{v}</option>
+			{LABELS[key]}
+			<select multiple size="3" data-testid="filter-{key}" onchange={(e) => onSelect(key, e)}>
+				{#each options(key) as v (v)}
+					<option value={v} selected={(view.state.include[key] ?? []).includes(v)}>{v}</option>
 				{/each}
 			</select>
 		</label>
@@ -86,10 +102,20 @@
 	.filters {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
-		align-items: flex-start;
+		gap: 0.75rem 1rem;
+		align-items: flex-end;
 		padding: 0.75rem 0;
-		border-bottom: 1px solid #ddd;
+		border-bottom: 1px solid var(--border);
+	}
+	.presets {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+	}
+	.presets button[aria-pressed='true'] {
+		background: var(--accent);
+		color: #fff;
+		border-color: var(--accent);
 	}
 	label {
 		display: flex;

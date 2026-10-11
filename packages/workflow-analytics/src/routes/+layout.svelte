@@ -1,13 +1,17 @@
 <script lang="ts">
+	import '$lib/theme.css';
 	import { page } from '$app/state';
 	import FilterBar from '$lib/components/FilterBar.svelte';
-	import { clearError, fetchError } from '$lib/state.svelte';
+	import FilterChips from '$lib/components/FilterChips.svelte';
+	import Notices from '$lib/components/Notices.svelte';
+	import { clearError, clearNotices, fetchError } from '$lib/state.svelte';
 
 	let { children } = $props();
 
 	const nav = [
 		['/', 'Overview'],
 		['/trends', 'Trends'],
+		['/usage', 'Usage & cost'],
 		['/repos', 'Repos'],
 		['/hooks', 'Hooks'],
 		['/quality', 'Quality'],
@@ -16,13 +20,20 @@
 		['/explore', 'Explore'],
 		['/settings', 'Settings']
 	];
-	const onSettings = $derived(page.url.pathname === '/settings');
+	// Filters, chips and notices are shown everywhere except the settings and conversation pages.
+	const chrome = $derived(page.url.pathname !== '/settings' && page.url.pathname !== '/conversation');
 
-	// A new route or filter starts with a clean panel; the report that fails sets it again.
+	// Every link but Settings keeps the current filters in the query string.
+	function navHref(path: string): string {
+		return path === '/settings' ? path : path + page.url.search;
+	}
+
+	// A new route or filter starts with a clean panel; the request that fails sets it again.
 	$effect(() => {
 		page.url.pathname;
 		page.url.search;
 		clearError();
+		clearNotices();
 	});
 </script>
 
@@ -30,14 +41,16 @@
 	<strong>Workflow analytics</strong>
 	<nav>
 		{#each nav as [href, text] (href)}
-			<a {href} aria-current={page.url.pathname === href ? 'page' : undefined}>{text}</a>
+			<a href={navHref(href)} aria-current={page.url.pathname === href ? 'page' : undefined}>{text}</a>
 		{/each}
 	</nav>
 </header>
 
 <main>
-	{#if !onSettings}
+	{#if chrome}
 		<FilterBar />
+		<FilterChips />
+		<Notices />
 	{/if}
 	{#if fetchError.message}
 		<div class="error" role="alert" data-testid="error-panel">
@@ -53,29 +66,36 @@
 <style>
 	:global(body) {
 		margin: 0;
+		overflow-x: hidden;
 		font-family: system-ui, sans-serif;
-		color: #1a1a1a;
-		background: #fff;
+		color: var(--text);
+		background: var(--bg);
 	}
 	header {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1.5rem;
+		gap: 1rem 1.5rem;
 		align-items: baseline;
 		padding: 0.75rem 1.5rem;
-		background: #f3f4f6;
-		border-bottom: 1px solid #ddd;
+		background: var(--surface);
+		border-bottom: 1px solid var(--border);
 	}
 	nav {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: 0.5rem 1rem;
+	}
+	nav a {
+		color: var(--text);
+		text-decoration: none;
 	}
 	nav a[aria-current='page'] {
 		font-weight: 700;
+		color: var(--accent);
 	}
 	main {
 		padding: 0 1.5rem 2rem;
+		overflow-x: hidden;
 	}
 	.error {
 		margin: 1rem 0;
