@@ -77,7 +77,7 @@ endpoints. Unknown fields in a fact are kept in its raw payload, never rejected.
 
 | Method and path | Auth | Purpose |
 |---|---|---|
-| `GET /v1/health` | none | liveness, version |
+| `GET /v1/health` | none | liveness, version, pending count, screen gaps, `compaction` (`complete` or `required`) |
 | `POST /v1/ingest` | key | a batch of facts from a drain |
 | advisory reads (`/v1/artifacts`, `/v1/checks`, `/v1/baselines`, `/v1/search`) | key | defined by [design 4](04-advisory-surface.md#api) |
 | analytics reads (`/v1/analytics/*`) | key | defined by [design 7](07-analytics-site.md#analytics-reads) |
@@ -105,6 +105,7 @@ Response: `200` with one result per fact, in order:
   `413` (design 2), so a whole batch is never rejected for one file.
 
 The row hash is computed from the envelope alone (design 1), so a resent batch is all `duplicate`.
+A hook event on the policy's `remove` list is answered `accepted` and stored nowhere (design 1).
 
 ### Deterministic precheck
 
@@ -125,6 +126,11 @@ One directory per tenant: `<data>/<tenant>/`.
 - `ledger.db`: SQLite in WAL mode, `synchronous=NORMAL`.
 - `blobs/<aa>/<hash>`: content stored by SHA-256, written once. Rows hold the hash, never the bytes.
 - `pending/<hash>`: content awaiting the screen (below).
+- `archive/<YYYY-MM>/<conversation_id>.jsonl.zst`: received hook bodies (below).
+
+`workflow serve` takes a shared lock on the tenant directory while the tenant is open; offline
+compaction takes it exclusively. Serve refuses to start on a tenant that compaction holds, and
+compaction refuses while serve runs, so SQLite never has two writers.
 
 Per-tenant files mean writes for different tenants never share a lock, and deleting a tenant is
 deleting a directory.
@@ -139,13 +145,50 @@ Readers use separate connections and run alongside under WAL.
 ### Tables
 
 Ingest is append-only (principle 6): `INSERT OR IGNORE` keyed by row hash, never `UPDATE` on facts.
+The one sanctioned exception is offline compaction (below).
 
 | Table | Holds |
 |---|---|
-| `facts` | row hash, type, conversation ID, harness, event, ts, received at, repo ID, path, content hash, raw envelope JSON |
+| `facts` | row hash, type, conversation ID, harness, event, ts, received at, repo ID, path, content hash, raw envelope JSON, and the columns below |
 | `rejections` | the precheck and screen rejections described above |
 | `screens` | content hash, verdict, scorer, at |
 | `scores` | content hash, check, result, scorer, at |
+| `meta` | key/value store state; `compaction` is `complete` or absent |
+| `hook_events_hourly`, `conversations_hourly`, `facets_hourly` | hourly counts the analytics reads use for whole interior hours ([design 7](07-analytics-site.md#analytics-reads)); maintained in the fact insert's transaction and rebuilt by compaction |
+
+A hook fact's `raw` is its envelope with no payload (design 1). Its analytics columns are filled at
+insert: `norm_event`, `tool`, `model`, `tok_in`, `tok_out`, `tok_cache_read`, `tok_cache_write`,
+`tok_reasoning` and `cost_reported` (null unless the harness reported a cost). Artifact and commit
+facts carry `kind`, `plan`, `source` and `sha`. Schema migrations run in `Open()` and only add
+columns, indexes and tables, so they never rewrite rows.
+
+### Event archive
+
+Each received hook body is written verbatim, after secret redaction, to
+`archive/<YYYY-MM>/<conversation_id>.jsonl.zst`: one file per conversation per UTC month of the
+fact's `ts`, one zstd frame per append. A line is `{"row_hash","received_at","fact"}`. A `remove`
+event and artifact content (which lives in `pending/` and `blobs/`) are never archived. The archive
+is not served over HTTP; a store function reads one conversation's lines in time order.
+
+Delivery is at-least-once: ingest appends to the archive before it commits the fact rows, so a
+redelivered event can appear twice and readers deduplicate by `row_hash`. A crash can leave a torn
+final frame; readers ignore it and `archive.Repair` rewrites the file without it.
+
+### Compaction
+
+`workflow ledger compact --tenant-dir <dir>` brings a ledger written before the slim shape to it. It
+is offline, takes the tenant's exclusive lock, and is resumable: a rerun after an interruption ends
+in the same state. In batches it archives each body, deletes `remove` rows with no archive line,
+strips the payload, fills the columns (and `kind`, `plan`, `source`, `sha` on artifact and commit
+facts), then rebuilds the rollups, sets `meta.compaction` to `complete` and runs `VACUUM`. It prints
+the free space it needs and refuses when that is unavailable, and reports rows and bytes before and
+after. `workflow ledger purge-deltas --tenant-dir <dir>` is the same kind of offline pass for
+history that predates the `message.part.delta` removal: it deletes those facts and archive lines
+and rebuilds the rollups.
+
+These deletes and rewrites are the one exception to append-only. Until compaction completes,
+`/v1/health` reports `"compaction":"required"` and `/v1/analytics/query` responses carry `"partial": true`. A
+remote tenant is compacted during a maintenance stop.
 
 Derived views (execution, gaps, moves) are never built on the ingest path. The execution view is a
 read: `/v1/analytics/executions` computes it per brief from `facts` at request time
@@ -229,4 +272,7 @@ Cheap, in temp directories, never the live queue or data.
 5. Local hosting: while `serve` holds the lock, 20 concurrent spools start no drain; kill `serve`
    and a standalone drain delivers the rest; with the endpoint pointing elsewhere `serve` leaves the
    queue alone.
-6. Idle footprint: RSS and cold start of `workflow serve` and `workflow mcp`.
+6. Compaction: a legacy-shaped fixture compacts to no payloads, no `remove` rows and an archive whose
+   distinct row hashes equal the kept hook facts; an interrupted run resumes to the same state; serve
+   refuses to start while compaction holds the lock.
+7. Idle footprint: RSS and cold start of `workflow serve` and `workflow mcp`.

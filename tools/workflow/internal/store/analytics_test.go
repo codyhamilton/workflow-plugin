@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -52,7 +54,7 @@ func addFacts(t *testing.T, tn *Tenant, fs ...afx) {
 		raw, _ := json.Marshal(m)
 		rows = append(rows, FactRow{RowHash: keys.ContentHash(raw), Type: f.typ, ConversationID: f.conv,
 			Harness: f.harness, Event: f.event, TS: float64(f.ts.Unix()), RepoID: f.repo, Path: f.path,
-			ContentHash: f.hash, Raw: raw})
+			ContentHash: f.hash, Raw: raw, Tool: f.tool, Source: f.source, SHA: f.sha})
 	}
 	if _, err := tn.Append(context.Background(), rows); err != nil {
 		t.Fatal(err)
@@ -271,6 +273,133 @@ func TestAnalyticsExecutions(t *testing.T) {
 	}
 }
 
+// pageFixture makes 9 distinct conversations, each one brief, at 7 distinct ts: c08 and c09 share
+// the largest ts (the keyset tie). It backs both paging tests.
+func pageFixture(t *testing.T) (*Tenant, AnalyticsFilter, time.Time) {
+	tn := openT(t, Options{})
+	base := ad(10, 1, 0, 0)
+	var fs []afx
+	for i := 1; i <= 9; i++ {
+		conv := fmt.Sprintf("c%02d", i)
+		mins := i - 1
+		if i >= 8 {
+			mins = 7
+		}
+		fs = append(fs, afx{typ: "artifact_version", conv: conv, harness: "h", event: "artifact",
+			ts: base.Add(time.Duration(mins) * time.Minute), repo: "repoA",
+			path: fmt.Sprintf("docs/plans/p/briefs/%s.md", conv), hash: hx(conv), source: "worktree"})
+	}
+	addFacts(t, tn, fs...)
+	return tn, AnalyticsFilter{From: base, To: base.Add(time.Hour)}, base
+}
+
+func TestExecutionsPage(t *testing.T) {
+	tn, f, _ := pageFixture(t)
+	ctx := context.Background()
+	all, cntAll, moreAll, err := tn.ExecutionsPage(ctx, f, nil, 500)
+	if err != nil || moreAll || len(all) != 9 {
+		t.Fatalf("all: n=%d more=%v err=%v", len(all), moreAll, err)
+	}
+	if !reflect.DeepEqual(cntAll, map[string]int{"complete": 0, "unreported": 0, "started": 9}) {
+		t.Fatalf("counts %v", cntAll)
+	}
+	var walk []ExecRow
+	var cur *ExecCursor
+	for pages := 1; ; pages++ {
+		page, cnt, more, err := tn.ExecutionsPage(ctx, f, cur, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if pages == 1 && !reflect.DeepEqual(cnt, cntAll) {
+			t.Errorf("page 1 counts %v != all %v", cnt, cntAll)
+		}
+		if len(page) > 3 {
+			t.Fatalf("page %d has %d rows", pages, len(page))
+		}
+		walk = append(walk, page...)
+		if !more {
+			if pages != 3 {
+				t.Errorf("pages %d, want 3", pages)
+			}
+			break
+		}
+		last := page[len(page)-1]
+		cur = &ExecCursor{TS: last.TS, Key: []string{last.ConversationID, last.BriefPath, last.RepoID}}
+	}
+	if !reflect.DeepEqual(walk, all) {
+		t.Errorf("walk\n got %+v\nwant %+v", walk, all)
+	}
+	// The tie at the max ts is ordered c08 then c09 by conversation_id.
+	if walk[0].ConversationID != "c08" || walk[1].ConversationID != "c09" {
+		t.Errorf("tie order %+v", walk[:2])
+	}
+}
+
+func TestConversationsPage(t *testing.T) {
+	tn, f, _ := pageFixture(t)
+	ctx := context.Background()
+	all, moreAll, err := tn.ConversationsPage(ctx, f, nil, 500)
+	if err != nil || moreAll || len(all) != 9 {
+		t.Fatalf("all: n=%d more=%v err=%v", len(all), moreAll, err)
+	}
+	if all[0].ConversationID != "c08" || all[1].ConversationID != "c09" || all[0].LastTS != all[1].LastTS {
+		t.Fatalf("last_ts tie not first: %+v", all[:2])
+	}
+	var walk []ConvRow
+	var cur *ConvCursor
+	for pages := 1; ; pages++ {
+		page, more, err := tn.ConversationsPage(ctx, f, cur, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(page) > 3 {
+			t.Fatalf("page %d has %d rows", pages, len(page))
+		}
+		walk = append(walk, page...)
+		if !more {
+			if pages != 3 {
+				t.Errorf("pages %d, want 3", pages)
+			}
+			break
+		}
+		last := page[len(page)-1]
+		cur = &ConvCursor{TS: last.LastTS, ConversationID: last.ConversationID}
+	}
+	if !reflect.DeepEqual(walk, all) {
+		t.Errorf("walk\n got %+v\nwant %+v", walk, all)
+	}
+}
+
+func TestExecutionsPageTiming(t *testing.T) {
+	tn := openT(t, Options{})
+	ctx := context.Background()
+	base := ad(9, 1, 0, 0)
+	fs := make([]afx, 0, 20000)
+	for i := 0; i < 20000; i++ {
+		conv := fmt.Sprintf("c%05d", i)
+		fs = append(fs, afx{typ: "artifact_version", conv: conv, harness: "h", event: "artifact",
+			ts: base.Add(time.Duration(i) * time.Second), repo: "repoA",
+			path: fmt.Sprintf("docs/plans/p/briefs/%s.md", conv), hash: hx(conv), source: "worktree"})
+	}
+	addFacts(t, tn, fs...)
+	f := AnalyticsFilter{From: base, To: base.Add(48 * time.Hour)}
+	start := time.Now()
+	rows, _, more, err := tn.ExecutionsPage(ctx, f, nil, 5)
+	elapsed := time.Since(start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 5 || !more {
+		t.Fatalf("n=%d more=%v", len(rows), more)
+	}
+	for i := 1; i < len(rows); i++ {
+		if rows[i].TS > rows[i-1].TS {
+			t.Fatalf("not ts desc at %d", i)
+		}
+	}
+	t.Logf("ExecutionsPage limit=5 over 20000 facts: %v", elapsed)
+}
+
 func TestAnalyticsConversations(t *testing.T) {
 	tn, f := fixture(t)
 	got, err := tn.Conversations(context.Background(), f)
@@ -321,6 +450,79 @@ func TestAnalyticsFacets(t *testing.T) {
 	}
 }
 
+func TestAnalyticsColumnReads(t *testing.T) {
+	tn := openT(t, Options{})
+	ctx := context.Background()
+	mk := func(conv, repo, event, tool, norm, model, source string, ts time.Time) FactRow {
+		raw, _ := json.Marshal(map[string]any{"type": "hook_event", "conversation_id": conv}) // no payload
+		return FactRow{RowHash: keys.ContentHash([]byte(conv)), Type: "hook_event", ConversationID: conv,
+			Harness: "h", Event: event, TS: float64(ts.Unix()), RepoID: repo, Raw: raw,
+			Tool: tool, NormEvent: norm, Model: model, Source: source}
+	}
+	tsA, tsB := ad(9, 29, 10, 0), ad(9, 29, 11, 0)
+	if _, err := tn.Append(ctx, []FactRow{
+		mk("cA", "rA", "PreToolUse", "Read", "tool_use", "m1", "commit", tsA),
+		mk("cB", "rB", "PostToolUse", "Bash", "tool_result", "m2", "worktree", tsB),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	f := AnalyticsFilter{From: aFrom, To: aTo}
+	// Facets reads the tool column even though raw carries no payload.
+	fac, err := tn.Facets(ctx, f)
+	if err != nil || !reflect.DeepEqual(fac.Tools, []ToolCount{{"Bash", 1}, {"Read", 1}}) {
+		t.Fatalf("facets tools: %+v %v", fac.Tools, err)
+	}
+	// Series groups on tool and on each new group name.
+	for _, c := range []struct{ group, a, b string }{
+		{"tool", "Bash", "Read"},
+		{"norm_event", "tool_result", "tool_use"},
+		{"model", "m1", "m2"},
+		{"conversation_id", "cA", "cB"},
+	} {
+		got, err := tn.Series(ctx, f, "hook_events", "day", c.group)
+		want := pts(c.a, "2026-09-29", "1", c.b, "2026-09-29", "1")
+		if err != nil || !reflect.DeepEqual(got, want) {
+			t.Fatalf("series %s: %v %v", c.group, got, err)
+		}
+	}
+	// One assertion per new filter key, then an AND of two.
+	base := func() AnalyticsFilter { return AnalyticsFilter{From: aFrom, To: aTo} }
+	one := func(name string, f AnalyticsFilter) {
+		t.Helper()
+		s, err := tn.Summary(ctx, f)
+		if err != nil || s.HookEvents != 1 || s.Conversations != 1 {
+			t.Fatalf("%s: %+v %v", name, s, err)
+		}
+	}
+	fa := base()
+	fa.NormEvents = []string{"tool_use"}
+	one("norm_event", fa)
+	fa = base()
+	fa.Events = []string{"PreToolUse"}
+	one("event", fa)
+	fa = base()
+	fa.Tools = []string{"Read"}
+	one("tool", fa)
+	fa = base()
+	fa.Models = []string{"m1"}
+	one("model", fa)
+	fa = base()
+	fa.Sources = []string{"commit"}
+	one("source", fa)
+	fa = base()
+	fa.ConversationIDs = []string{"cA"}
+	one("conversation_id", fa)
+	fa = base()
+	fa.NormEvents = []string{"tool_use"}
+	fa.Tools = []string{"Read"}
+	one("norm_event AND tool", fa)
+	fa = base()
+	fa.Tools = []string{"Nope"}
+	if s, err := tn.Summary(ctx, fa); err != nil || s.HookEvents != 0 {
+		t.Fatalf("miss: %+v %v", s, err)
+	}
+}
+
 func TestAnalyticsExplore(t *testing.T) {
 	tn, f := fixture(t)
 	ctx := context.Background()
@@ -367,5 +569,172 @@ func TestAnalyticsExplore(t *testing.T) {
 	ff.Repos = []string{"repoB"}
 	if rows, _, _ := tn.Explore(ctx, ff, 100); len(rows) != 3 { // hook, version, commit; no rejections
 		t.Fatalf("repoB: %d", len(rows))
+	}
+}
+
+func TestAnalyticsSummaryUsage(t *testing.T) {
+	tn := usageFixture(t)
+	got, err := tn.Summary(context.Background(), usageFilter())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.ModelCalls != 3 || got.TokensIn != 1000 || got.TokensOut != 40 || got.TokensCacheRead != 400 ||
+		got.TokensCacheWrite != 0 || got.TokensReasoning != 0 || got.UnpricedCalls != 1 {
+		t.Fatalf("usage summary: %+v", got)
+	}
+	if math.Abs(got.CostUSD-0.2504) > 1e-9 {
+		t.Fatalf("cost_usd: %v", got.CostUSD)
+	}
+}
+
+func TestAnalyticsFacetsModels(t *testing.T) {
+	ctx := context.Background()
+	// The base fixture has no model or norm_event values, so both lists stay empty (empties
+	// are excluded, unlike repo_id).
+	tn, f := fixture(t)
+	got, err := tn.Facets(ctx, f)
+	if err != nil || got.Models != nil || got.NormEvents != nil {
+		t.Fatalf("empty: %+v %v", got, err)
+	}
+	tn2 := usageFixture(t)
+	got, err = tn2.Facets(ctx, usageFilter())
+	wantModels := []string{"claude-test-unpriced", "grok-4.5", "kimi-k2.5"}
+	if err != nil || !reflect.DeepEqual(got.Models, wantModels) ||
+		!reflect.DeepEqual(got.NormEvents, []string{"usage"}) {
+		t.Fatalf("models/norm: %+v %v", got, err)
+	}
+}
+
+// bruteExplore reproduces the pre-change whole-window ordering in SQL, for comparison.
+func bruteExplore(t *testing.T, tn *Tenant, f AnalyticsFilter, limit int) []struct {
+	typ  string
+	ts   float64
+	path string
+} {
+	t.Helper()
+	fw, fargs := f.factWhere()
+	rw, rargs := f.rejWhere()
+	args := append(append(fargs, rargs...), limit)
+	rows, err := tn.rdb.QueryContext(context.Background(), `
+		SELECT type, ts, path FROM (
+			SELECT type, ts, path, row_hash AS k FROM facts WHERE `+fw+`
+			UNION ALL
+			SELECT 'rejection', at/1e9, path, printf('rej-%020d', id) FROM rejections WHERE `+rw+`)
+		ORDER BY ts DESC, k ASC LIMIT ?`, args...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	var out []struct {
+		typ  string
+		ts   float64
+		path string
+	}
+	for rows.Next() {
+		var r struct {
+			typ  string
+			ts   float64
+			path string
+		}
+		if err := rows.Scan(&r.typ, &r.ts, &r.path); err != nil {
+			t.Fatal(err)
+		}
+		out = append(out, r)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return out
+}
+
+func TestAnalyticsExploreCap(t *testing.T) {
+	tn := openT(t, Options{})
+	ctx := context.Background()
+	base := ad(10, 1, 0, 0)
+	var fs []afx
+	for i := 0; i < 5; i++ {
+		fs = append(fs, afx{typ: "hook_event", conv: "c", harness: "h", event: "e",
+			ts: base.Add(time.Duration(i) * time.Minute), tool: "Bash"})
+	}
+	addFacts(t, tn, fs...)
+	rej := func(id int, at time.Time) {
+		mustExec(t, tn, `INSERT INTO rejections (stage,fact_type,conversation_id,path,content_hash,pattern,reason,at) VALUES (?,?,?,?,?,?,?,?)`,
+			"precheck", "artifact_version", "c", fmt.Sprintf("p%d", id), "", "p", "r", at.UnixNano())
+	}
+	rej(1, base.Add(4*time.Minute+30*time.Second))
+	rej(2, base.Add(2*time.Minute+30*time.Second))
+	f := AnalyticsFilter{From: base, To: base.Add(time.Hour)}
+
+	all, truncAll, err := tn.Explore(ctx, f, 100)
+	if err != nil || truncAll || len(all) != 7 {
+		t.Fatalf("all: n=%d trunc=%v err=%v", len(all), truncAll, err)
+	}
+	wantAll := bruteExplore(t, tn, f, 100)
+	for i := range all {
+		if all[i].Type != wantAll[i].typ || all[i].TS != wantAll[i].ts || all[i].Path != wantAll[i].path {
+			t.Fatalf("row %d got %+v want %+v", i, all[i], wantAll[i])
+		}
+		if all[i].CostUSD != nil {
+			t.Fatalf("row %d has cost for a non-usage fact", i)
+		}
+	}
+
+	page, trunc, err := tn.Explore(ctx, f, 3)
+	if err != nil || !trunc || len(page) != 3 {
+		t.Fatalf("page: n=%d trunc=%v err=%v", len(page), trunc, err)
+	}
+	want := bruteExplore(t, tn, f, 4)
+	for i := range page {
+		if page[i].Type != want[i].typ || page[i].TS != want[i].ts || page[i].Path != want[i].path {
+			t.Fatalf("page row %d got %+v want %+v", i, page[i], want[i])
+		}
+	}
+}
+
+func TestAnalyticsExploreUsageRow(t *testing.T) {
+	tn := usageFixture(t)
+	rows, trunc, err := tn.Explore(context.Background(), usageFilter(), 100)
+	if err != nil || trunc || len(rows) != 4 {
+		t.Fatalf("n=%d trunc=%v err=%v", len(rows), trunc, err)
+	}
+	var found bool
+	for i := range rows {
+		if rows[i].Model == "grok-4.5" {
+			found = true
+			if rows[i].NormEvent != "usage" || rows[i].CostUSD == nil || math.Abs(*rows[i].CostUSD-0.25) > 1e-9 {
+				t.Fatalf("opencode usage row: %+v", rows[i])
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("opencode row missing: %+v", rows)
+	}
+}
+
+func TestAnalyticsExploreFactsPlan(t *testing.T) {
+	tn := openT(t, Options{})
+	f := AnalyticsFilter{From: aFrom, To: aTo}
+	w, args := f.factWhere()
+	rows, err := tn.rdb.QueryContext(context.Background(), "EXPLAIN QUERY PLAN "+exploreFactsQuery(w), append(args, 3)...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	var details []string
+	for rows.Next() {
+		var id, parent, notused int
+		var detail string
+		if err := rows.Scan(&id, &parent, &notused, &detail); err != nil {
+			t.Fatal(err)
+		}
+		details = append(details, detail)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	plan := strings.Join(details, "\n")
+	t.Logf("explore facts plan:\n%s", plan)
+	if strings.Contains(plan, "USE TEMP B-TREE FOR ORDER BY") {
+		t.Fatalf("whole-window sort in plan: %s", plan)
 	}
 }

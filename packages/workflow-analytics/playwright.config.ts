@@ -1,8 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import { defineConfig } from '@playwright/test';
 
-// The preview origin is fixed so the keyed serve can list it in WORKFLOW_SERVE_CORS_ORIGINS.
-export const PREVIEW_PORT = 4391;
+// The preview origin is configurable (E2E_PORT, default 4391) so two worktrees can run at once; the
+// keyed serve lists the same origin in WORKFLOW_SERVE_CORS_ORIGINS.
+export const PREVIEW_PORT = Number(process.env.E2E_PORT) || 4391;
 
 // Generated once in the main process; workers inherit them through the environment.
 process.env.E2E_KEY ??= randomBytes(16).toString('hex'); // 32 hex chars: the keyed serve's tenant key

@@ -202,6 +202,12 @@ Each harness ships its own hook config, passing a literal `--harness`.
 | Cursor | `hooks/cursor.json` | none |
 | OpenCode | plugin calling `spool.sh` | none |
 
+The OpenCode plugin does not forward the `remove` events of the ingest policy
+([design 1](01-event-model-and-ingest.md#hook-event-policy)): `experimental.chat.system.transform`,
+`chat.params`, `chat.headers`, `shell.env` and `message.part.delta`, by event name, so hook and bus
+forms alike. The list is declared once in the plugin between `remove-list` markers, and a test
+asserts it equals the ingest table's.
+
 The `artifact_submit.py hook` registrations are removed from all four. Codex hook timeouts stay
 within its 3 s ceiling. Pinned plugin copies (the Codex copy at `451e009`) are design 5's problem,
 but until updated they keep running the old hooks.

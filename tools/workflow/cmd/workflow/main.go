@@ -26,7 +26,7 @@ var (
 	commit  = "unknown"
 )
 
-const usage = "usage: workflow serve | drain | mcp | status | version\n"
+const usage = "usage: workflow serve | drain | ledger compact --tenant-dir <dir> | ledger purge-deltas --tenant-dir <dir> | mcp | status | version\n"
 
 func main() { os.Exit(run(os.Args[1:])) }
 
@@ -44,6 +44,8 @@ func run(args []string) int {
 		return drain.RunStandalone(ctx, os.Stderr)
 	case "status":
 		return drain.RunStatus(os.Stdout)
+	case "ledger":
+		return runLedger(args[1:])
 	case "mcp":
 		return runMCP(args[1:])
 	case "--version", "version":
@@ -84,6 +86,10 @@ func runServe() int {
 	step, checks, err := screenStep(os.Getenv("TYPESAFE_API_KEY"), os.Getenv("WORKFLOW_CHECKS_DIR"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "workflow serve:", err)
+		return 1
+	}
+	if err := serve.Preflight(cfg.Data); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
 	ln, err := net.Listen("tcp", cfg.Addr)

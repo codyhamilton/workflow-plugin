@@ -20,14 +20,18 @@ function read(key: string): string {
 }
 
 /** GET <base>/v1/<path>?<params>. `path` is relative to /v1, e.g. "analytics/summary". */
-export async function apiGet<T = unknown>(path: string, params?: URLSearchParams | string): Promise<T> {
+export async function apiGet<T = unknown>(
+	path: string,
+	params?: URLSearchParams | string,
+	signal?: AbortSignal
+): Promise<T> {
 	const base = read(BASE_KEY).replace(/\/+$/, '');
 	const key = read(TOKEN_KEY);
 	const qs = params ? params.toString() : '';
 	const url = `${base}/v1/${path.replace(/^\/+/, '')}${qs ? `?${qs}` : ''}`;
 	const headers: Record<string, string> = { accept: 'application/json' };
 	if (key) headers.authorization = `Bearer ${key}`;
-	const res = await fetch(url, { headers });
+	const res = await fetch(url, { headers, signal });
 	if (!res.ok) {
 		let msg = res.statusText || `HTTP ${res.status}`;
 		try {

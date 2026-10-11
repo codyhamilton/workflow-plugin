@@ -18,7 +18,7 @@ Everything is a recorded fact with a join key. State is a view over facts.
 
 | Fact | Source | Carries |
 |---|---|---|
-| Hook event | harness hook → spool | conversation ID, harness, event, tool, timing, model and cost where the payload has them |
+| Hook event | harness hook → spool | conversation ID, harness, event, normalised event, tool, timing, model, token usage and cost where the payload has them |
 | Artifact version | write hook → drain reads file | `repo_id`, `path`, content hash, content, conversation ID, source (`worktree` or `commit`) |
 | Commit | hook on `git commit` | SHA, touched paths, rename pairs, conversation ID |
 
@@ -125,6 +125,46 @@ Envelope types accepted by the remote: `hook_event`, `artifact_version`, `commit
 - No session or lifecycle state on the server.
 - An execution report is an `artifact_version` whose kind is inferred from its path.
 - Artifact kind (design, brief, report) is inferred from path convention, not declared by the agent.
+
+### Hook-event policy
+
+One table in `internal/ingest` maps `(harness, event)` to `keep` or `remove`; a pair not listed is
+`keep`.
+
+- **`remove`** applies to OpenCode `experimental.chat.system.transform`, `chat.params`,
+  `chat.headers`, `shell.env` and `message.part.delta`. The first is a redundant prompt body, the
+  next two and `shell.env` carry request headers and environment secrets, and the streamed deltas
+  are redundant with `message.part.updated`, which carries the finished part. The OpenCode plugin
+  does not forward them ([design 2](02-edge-capture.md)); ingest answers any that arrive (older
+  plugins, other clients) `accepted` and stores nothing: no fact and no archive line. A test asserts
+  the plugin's remove list equals the table's.
+- **`keep`** stores the event as an envelope plus extracted fields. Row-hash identity is the
+  full received envelope's, as above.
+- **Stored form.** A hook fact's stored `raw` is its envelope (`type`, `harness`, `event`,
+  `conversation_id`, `ts`, `repo_id`) with no `payload`. The body goes verbatim, after secret
+  redaction, to the per-conversation archive ([design 3](03-remote-service.md#event-archive)), so
+  a session whose hooks are the only transcript keeps its source outside the database.
+  `artifact_version` and `commit` facts keep their full `raw`.
+
+**Normalised event.** Each stored hook event gets a `norm_event` shared by all harnesses:
+`session_start`, `session_end`, `prompt`, `tool_pre`, `tool_post`, `tool_fail`, `batch_end`,
+`assistant_message`, `usage`, `turn_end`, `subagent_start`, `subagent_end`, `compact`,
+`message_part` or `other`. The per-harness mapping is a table in `internal/ingest`, seeded from
+`tools/hooklog/hooklog.py`'s kinds; the native `event` is kept beside it. Tool names are not
+normalised across harnesses.
+
+**Model, usage and cost.** Extracted at ingest where the payload has them:
+
+| Harness | Source | Fields |
+|---|---|---|
+| Claude | `transcript.assistant_message` | `model`, `usage.{input,output,cache_read_input,cache_creation_input}_tokens`, `output_tokens_details.thinking_tokens` |
+| Codex | `transcript.token_count` | `model`, `usage.{input,cached_input,output,reasoning_output,cache_write_input}_tokens` (`input` includes cached input) |
+| OpenCode | `transcript.assistant_message` | `providerID`/`modelID` (as `provider/model`), `tokens.{input,output,reasoning,cache.read,cache.write}`, and `cost` as a harness-reported cost when above 0 |
+| Cursor | none | nothing |
+
+Tokens are stored as reported. Claude repeats a message ID on a few lines, so a call is counted
+once at read time. Cost is not stored except when the harness reports it; it is computed at read
+time ([design 7](07-analytics-site.md#analytics-reads)).
 
 ## Who does what
 

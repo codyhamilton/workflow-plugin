@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
-	import { apiGet } from '$lib/api';
-	import { filterParams, KINDS, mergeQuery, parseFilter, type Kind } from '$lib/filters';
+	import BoxChart from '$lib/charts/BoxChart.svelte';
+	import type { BoxRow } from '$lib/charts/box';
+	import { KINDS, type Kind } from '$lib/filters';
+	import { scoresParams } from '$lib/params';
+	import { getJSON, Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { Baselines, Scores } from '$lib/types';
+	import { view } from '$lib/view.svelte';
 
 	const W = ['n', 'min', 'p25', 'median', 'p75', 'max'] as const;
 	const B = ['n', 'p25', 'median', 'p75'] as const;
@@ -13,17 +15,39 @@
 	let baselines = $state<Baselines | null>(null);
 
 	// The first valid kind in the URL, default design.
-	const filter = $derived(parseFilter(page.url.searchParams));
-	const kind = $derived<Kind>(filter.kind[0] ?? 'design');
+	const include = $derived(view.state.include);
+	const kind = $derived<Kind>((include.kind?.[0] as Kind | undefined) ?? 'design');
+
+	// One box per scored check in the window, with the all-time baseline median marked on the same
+	// row. A check with no scored rows in the window is omitted; a check with no baseline still
+	// shows its box, unmarked.
+	const distRows = $derived<BoxRow[]>(
+		(scores?.checks ?? [])
+			.filter((c) => c.n > 0)
+			.map((c) => ({
+				name: c.name,
+				min: c.min,
+				p25: c.p25,
+				median: c.median,
+				p75: c.p75,
+				max: c.max,
+				marker: baselines?.checks?.[c.name]?.median
+			}))
+	);
 
 	$effect(() => {
-		const f = { ...filter, kind: [kind] };
+		const base = view.paramsFor('rest');
 		const k = kind;
+		if (!base) {
+			scores = null;
+			baselines = null;
+			return;
+		}
 		let live = true;
 		// Both reads are GETs; the baseline is all-time, so only `kind` is sent to it.
 		Promise.all([
-			apiGet<Scores>('analytics/scores', filterParams(f)),
-			apiGet<Baselines>('baselines', new URLSearchParams({ kind: k }))
+			getJSON<Scores>('quality-scores', 'analytics/scores', scoresParams(base, k)),
+			getJSON<Baselines>('quality-baselines', 'baselines', new URLSearchParams({ kind: k }))
 		]).then(
 			([s, b]) => {
 				if (!live) return;
@@ -32,32 +56,32 @@
 				baselines = b;
 			},
 			(e) => {
-				if (!live) return;
+				if (!live || e instanceof Superseded) return;
 				scores = null;
 				baselines = null;
 				setError(e);
 			}
 		);
-		return () => (live = false);
+		return () => {
+			live = false;
+		};
 	});
-
-	function pick(k: Kind) {
-		const q = mergeQuery(page.url.searchParams, { ...filter, kind: [k] });
-		goto(`?${q}`, { keepFocus: true });
-	}
 </script>
 
 <h1>Quality</h1>
 <p class="kinds">
 	Kind:
 	{#each KINDS as k (k)}
-		<button type="button" aria-pressed={k === kind} data-testid="quality-kind-{k}" onclick={() => pick(k)}>{k}</button>
+		<button type="button" aria-pressed={k === kind} data-testid="quality-kind-{k}" onclick={() => view.setInclude('kind', [k])}
+			>{k}</button
+		>
 	{/each}
 </p>
-{#if filter.kind.length > 1}
+{#if (include.kind?.length ?? 0) > 1}
 	<p data-testid="quality-kind-note">The URL names several kinds; showing {kind}.</p>
 {/if}
 {#if scores}
+	<BoxChart testid="quality-dist" rows={distRows} />
 	<table>
 		<thead>
 			<tr>

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { page } from '$app/state';
-	import { apiGet } from '$lib/api';
-	import { filterParams, parseFilter } from '$lib/filters';
+	import { getJSON, Superseded } from '$lib/query';
+	import { view } from '$lib/view.svelte';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { Explore } from '$lib/types';
 
@@ -72,10 +71,10 @@
 	});
 
 	$effect(() => {
-		const q = filterParams(parseFilter(page.url.searchParams));
-		if (!ready || !table) return;
+		const params = view.paramsFor('rest');
+		if (!ready || !table || params === null) return;
 		let live = true;
-		apiGet<Explore>('analytics/explore', q).then(
+		getJSON<Explore>('explore', 'analytics/explore', params).then(
 			async (r) => {
 				if (!live) return;
 				await table!.replace(toRows(r.rows));
@@ -85,6 +84,7 @@
 				count = r.rows.length;
 			},
 			(e) => {
+				if (e instanceof Superseded) return;
 				if (live) setError(e);
 			}
 		);

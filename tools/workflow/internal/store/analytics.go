@@ -8,8 +8,10 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"math"
 	"path"
 	"sort"
 	"strings"
@@ -44,6 +46,10 @@ func planOf(p string) string {
 type AnalyticsFilter struct {
 	From, To                       time.Time // inclusive
 	Repos, Harnesses, Kinds, Plans []string
+	NormEvents, Events             []string
+	Tools, Models, Sources         []string
+	ConversationIDs                []string
+	TZ                             *time.Location // nil means UTC
 }
 
 type ToolCount struct {
@@ -52,15 +58,19 @@ type ToolCount struct {
 }
 type Facets struct {
 	Repos, Harnesses, Kinds, Plans, Events []string
+	Models, NormEvents                     []string
 	Tools                                  []ToolCount
 }
 type Summary struct {
-	Conversations, HookEvents, ArtifactVersions, DistinctContent int
-	ByKind                                                       map[string]int
-	BySource                                                     map[string]int
-	Commits                                                      int
-	Rejections                                                   map[string]int
-	Screens                                                      map[string]int
+	Conversations, HookEvents, ArtifactVersions, DistinctContent            int
+	ByKind                                                                  map[string]int
+	BySource                                                                map[string]int
+	Commits                                                                 int
+	Rejections                                                              map[string]int
+	Screens                                                                 map[string]int
+	ModelCalls, UnpricedCalls                                               int
+	TokensIn, TokensOut, TokensCacheRead, TokensCacheWrite, TokensReasoning int
+	CostUSD                                                                 float64
 }
 type SeriesPoint struct {
 	Key, T string
@@ -76,17 +86,25 @@ type ConvRow struct {
 	FirstTS, LastTS                       float64
 	HookEvents, ArtifactVersions, Commits int
 }
-type ExploreRow struct {
-	Type                                                                                                       string
-	TS                                                                                                         float64
-	Harness, RepoID, Plan, Kind, Event, Tool, Path, ConversationID, Source, SHA, ScreenVerdict, RejectionStage string
+
+// ExecCursor is the keyset position in the executions order (ts desc, conversation_id, path, repo_id).
+type ExecCursor struct {
+	TS  float64
+	Key []string // conversation_id, path, repo_id
 }
 
-const (
-	toolExpr   = `COALESCE(CAST(json_extract(raw,'$.payload.tool_name') AS TEXT),'')`
-	sourceExpr = `COALESCE(CAST(json_extract(raw,'$.source') AS TEXT),'')`
-	shaExpr    = `COALESCE(CAST(json_extract(raw,'$.sha') AS TEXT),'')`
-)
+// ConvCursor is the keyset position in the conversations order (last_ts desc, conversation_id).
+type ConvCursor struct {
+	TS             float64
+	ConversationID string
+}
+
+type ExploreRow struct {
+	Type                                                                                                                         string
+	TS                                                                                                                           float64
+	Harness, RepoID, Plan, Kind, Event, Tool, NormEvent, Model, Path, ConversationID, Source, SHA, ScreenVerdict, RejectionStage string
+	CostUSD                                                                                                                      *float64
+}
 
 func inList(expr string, vals []string, args *[]any) string {
 	if len(vals) == 0 {
@@ -106,8 +124,14 @@ func (f AnalyticsFilter) factWhere() (string, []any) {
 	w := "ts >= ? AND ts <= ?"
 	w += inList("repo_id", f.Repos, &args)
 	w += inList("harness", f.Harnesses, &args)
-	w += inList("wf_kind(path)", f.Kinds, &args)
-	w += inList("wf_plan(path)", f.Plans, &args)
+	w += inList("kind", f.Kinds, &args)
+	w += inList("plan", f.Plans, &args)
+	w += inList("norm_event", f.NormEvents, &args)
+	w += inList("event", f.Events, &args)
+	w += inList("tool", f.Tools, &args)
+	w += inList("model", f.Models, &args)
+	w += inList("source", f.Sources, &args)
+	w += inList("conversation_id", f.ConversationIDs, &args)
 	return w, args
 }
 
@@ -140,19 +164,110 @@ func (t *Tenant) strings(ctx context.Context, q string, args ...any) ([]string, 
 	return out, rows.Err()
 }
 
+// rollupEligible reports whether f constrains only time. The facet rollup covers every dimension
+// value in the window but no non-time predicate, so a filter carrying any list falls back to base
+// rows and its results stay exactly as the base-only Facets produced them.
+func (f AnalyticsFilter) rollupEligible() bool {
+	return len(f.Repos) == 0 && len(f.Harnesses) == 0 && len(f.Kinds) == 0 && len(f.Plans) == 0 &&
+		len(f.NormEvents) == 0 && len(f.Events) == 0 && len(f.Tools) == 0 && len(f.Models) == 0 &&
+		len(f.Sources) == 0 && len(f.ConversationIDs) == 0
+}
+
+// Facets lists the distinct dimension values and the tool histogram over the window. With no
+// non-time filter it reads facets_hourly for the whole hours strictly inside the window and base
+// rows for the two partial edge hours (the rollup holds each dim's presence, so the union of the
+// distinct sets is exact); any other filter reads base rows alone via facetsBase.
 func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) {
+	if !f.rollupEligible() {
+		return t.facetsBase(ctx, f)
+	}
+	from, to := seconds(f.From), seconds(f.To)
+	hF := math.Floor(from/3600) * 3600
+	hT := math.Floor(to/3600) * 3600
+	if hF == hT {
+		// The whole window lies in one hour; there is no whole interior hour to read from the rollup.
+		return t.facetsBase(ctx, f)
+	}
+	var out Facets
+	var err error
+	var ks []string
+	for _, d := range []struct {
+		dst      *[]string
+		dim      string
+		expr     string
+		nonEmpty bool
+	}{
+		{&out.Repos, "repo_id", "repo_id", false}, {&out.Harnesses, "harness", "harness", false},
+		{&out.Plans, "plan", "plan", false}, {&out.Events, "event", "event", false},
+		{&out.Models, "model", "model", true}, {&out.NormEvents, "norm_event", "norm_event", true},
+		{&ks, "kind", "kind", false},
+	} {
+		extra, rollupExtra := "", ""
+		if d.nonEmpty {
+			extra = " AND " + d.expr + " != ''"
+			rollupExtra = " AND value != ''"
+		}
+		if *d.dst, err = t.strings(ctx, `SELECT value FROM (
+			SELECT value FROM facets_hourly WHERE dim=? AND hour > ? AND hour < ?`+rollupExtra+`
+			UNION SELECT `+d.expr+` FROM facts WHERE ts >= ? AND ts < ?`+extra+`
+			UNION SELECT `+d.expr+` FROM facts WHERE ts >= ? AND ts <= ?`+extra+`
+		) ORDER BY value`, d.dim, hF, hT, from, hF+3600, hT, to); err != nil {
+			return out, err
+		}
+	}
+	have := map[string]bool{}
+	for _, k := range ks {
+		have[k] = true
+	}
+	for _, k := range []string{"design", "brief", "report"} {
+		if have[k] {
+			out.Kinds = append(out.Kinds, k)
+		}
+	}
+	rows, err := t.rdb.QueryContext(ctx, `SELECT value AS tname, sum(n) AS n FROM (
+		SELECT value, sum(n) AS n FROM facets_hourly WHERE dim='tool' AND hour > ? AND hour < ? GROUP BY value
+		UNION ALL SELECT tool, count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts < ? AND tool != '' GROUP BY tool
+		UNION ALL SELECT tool, count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts <= ? AND tool != '' GROUP BY tool
+	) GROUP BY value HAVING value != '' ORDER BY n DESC, tname ASC LIMIT 100`,
+		hF, hT, from, hF+3600, hT, to)
+	if err != nil {
+		return out, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var c ToolCount
+		if err := rows.Scan(&c.Name, &c.N); err != nil {
+			return out, err
+		}
+		out.Tools = append(out.Tools, c)
+	}
+	return out, rows.Err()
+}
+
+// facetsBase is the base-row facets read: a DISTINCT scan per dimension and the tool histogram over
+// facts alone. It is exact for any filter and is the fallback for filtered or single-hour windows.
+func (t *Tenant) facetsBase(ctx context.Context, f AnalyticsFilter) (Facets, error) {
 	w, args := f.factWhere()
 	var out Facets
 	var err error
 	for _, d := range []struct {
-		dst  *[]string
-		expr string
-	}{{&out.Repos, "repo_id"}, {&out.Harnesses, "harness"}, {&out.Plans, "wf_plan(path)"}, {&out.Events, "event"}} {
-		if *d.dst, err = t.strings(ctx, `SELECT DISTINCT `+d.expr+` AS v FROM facts WHERE `+w+` ORDER BY v`, args...); err != nil {
+		dst      *[]string
+		expr     string
+		nonEmpty bool
+	}{
+		{&out.Repos, "repo_id", false}, {&out.Harnesses, "harness", false},
+		{&out.Plans, "plan", false}, {&out.Events, "event", false},
+		{&out.Models, "model", true}, {&out.NormEvents, "norm_event", true},
+	} {
+		extra := ""
+		if d.nonEmpty {
+			extra = " AND " + d.expr + " != ''"
+		}
+		if *d.dst, err = t.strings(ctx, `SELECT DISTINCT `+d.expr+` AS v FROM facts WHERE `+w+extra+` ORDER BY v`, args...); err != nil {
 			return out, err
 		}
 	}
-	ks, err := t.strings(ctx, `SELECT DISTINCT wf_kind(path) FROM facts WHERE `+w, args...)
+	ks, err := t.strings(ctx, `SELECT DISTINCT kind FROM facts WHERE `+w, args...)
 	if err != nil {
 		return out, err
 	}
@@ -165,8 +280,8 @@ func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) 
 			out.Kinds = append(out.Kinds, k)
 		}
 	}
-	rows, err := t.rdb.QueryContext(ctx, `SELECT `+toolExpr+` AS tool, count(*) AS n FROM facts
-		WHERE type='hook_event' AND `+w+` GROUP BY tool HAVING tool != '' ORDER BY n DESC, tool ASC LIMIT 100`, args...)
+	rows, err := t.rdb.QueryContext(ctx, `SELECT tool AS tname, count(*) AS n FROM facts
+		WHERE type='hook_event' AND `+w+` GROUP BY tname HAVING tname != '' ORDER BY n DESC, tname ASC LIMIT 100`, args...)
 	if err != nil {
 		return out, err
 	}
@@ -187,14 +302,45 @@ func (t *Tenant) Summary(ctx context.Context, f AnalyticsFilter) (Summary, error
 		Rejections: map[string]int{"precheck": 0, "screen": 0},
 		Screens:    map[string]int{"pass": 0, "unscreened": 0}}
 	w, args := f.factWhere()
-	err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT conversation_id),
-		COALESCE(SUM(type='hook_event'),0), COALESCE(SUM(type='artifact_version'),0),
-		count(DISTINCT CASE WHEN type='artifact_version' THEN content_hash END), COALESCE(SUM(type='commit'),0)
-		FROM facts WHERE `+w, args...).Scan(&s.Conversations, &s.HookEvents, &s.ArtifactVersions, &s.DistinctContent, &s.Commits)
-	if err != nil {
-		return s, err
+	from, to := seconds(f.From), seconds(f.To)
+	hF := int64(math.Floor(from/3600)) * 3600
+	hT := int64(math.Floor(to/3600)) * 3600
+	if f.rollupEligible() && hF != hT {
+		// Time-only window spanning whole interior hours: read the hook_events and conversations
+		// counts from their hourly rollups for the interior hours and base rows for the two partial
+		// edge hours (as Facets does), and the remaining per-type counts straight from base rows.
+		if err := t.rdb.QueryRowContext(ctx, `SELECT COALESCE(SUM(n),0) FROM (
+			SELECT n FROM hook_events_hourly WHERE hour > ? AND hour < ?
+			UNION ALL SELECT count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts < ?
+			UNION ALL SELECT count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts <= ?)`,
+			hF, hT, from, hF+3600, hT, to).Scan(&s.HookEvents); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT conversation_id) FROM (
+			SELECT conversation_id FROM conversations_hourly WHERE hour > ? AND hour < ?
+			UNION ALL SELECT conversation_id FROM facts WHERE ts >= ? AND ts < ?
+			UNION ALL SELECT conversation_id FROM facts WHERE ts >= ? AND ts <= ?)`,
+			hF, hT, from, hF+3600, hT, to).Scan(&s.Conversations); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(*) FROM facts WHERE type='artifact_version' AND `+w, args...).Scan(&s.ArtifactVersions); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(*) FROM facts WHERE type='commit' AND `+w, args...).Scan(&s.Commits); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT content_hash) FROM facts WHERE type='artifact_version' AND `+w, args...).Scan(&s.DistinctContent); err != nil {
+			return s, err
+		}
+	} else {
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT conversation_id),
+			COALESCE(SUM(type='hook_event'),0), COALESCE(SUM(type='artifact_version'),0),
+			count(DISTINCT CASE WHEN type='artifact_version' THEN content_hash END), COALESCE(SUM(type='commit'),0)
+			FROM facts WHERE `+w, args...).Scan(&s.Conversations, &s.HookEvents, &s.ArtifactVersions, &s.DistinctContent, &s.Commits); err != nil {
+			return s, err
+		}
 	}
-	rows, err := t.rdb.QueryContext(ctx, `SELECT COALESCE(NULLIF(wf_kind(path),''),'other'), `+sourceExpr+`, count(*)
+	rows, err := t.rdb.QueryContext(ctx, `SELECT COALESCE(NULLIF(kind,''),'other'), source, count(*)
 		FROM facts WHERE type='artifact_version' AND `+w+` GROUP BY 1, 2`, args...)
 	if err != nil {
 		return s, err
@@ -229,6 +375,23 @@ func (t *Tenant) Summary(ctx context.Context, f AnalyticsFilter) (Summary, error
 		}
 	}
 	rows.Close()
+	kept, err := t.usageKeptRows(ctx, f)
+	if err != nil {
+		return s, err
+	}
+	for _, u := range kept {
+		s.ModelCalls++
+		s.TokensIn += int(u.tokIn)
+		s.TokensOut += int(u.tokOut)
+		s.TokensCacheRead += int(u.tokCacheRead)
+		s.TokensCacheWrite += int(u.tokCacheWrite)
+		s.TokensReasoning += int(u.tokReasoning)
+		usd, priced := Cost(u.harness, u.model, u.tokens(), u.costReported)
+		s.CostUSD += usd
+		if !priced {
+			s.UnpricedCalls++
+		}
+	}
 	// Latest screen (by id) per distinct content hash of the filtered in-window versions.
 	rows, err = t.rdb.QueryContext(ctx, `SELECT v, count(*) FROM (
 		SELECT (SELECT verdict FROM screens s WHERE s.content_hash=h.content_hash ORDER BY s.id DESC LIMIT 1) AS v
@@ -281,7 +444,8 @@ func (t *Tenant) Series(ctx context.Context, f AnalyticsFilter, metric, bucket, 
 		q = `SELECT ` + key + ` AS k, ` + rb + ` AS t, count(*) FROM rejections WHERE ` + w + ` GROUP BY k, t ORDER BY k, t`
 	} else {
 		groups := map[string]string{"none": "'all'", "harness": "harness", "repo_id": "repo_id", "event": "event",
-			"tool": toolExpr, "kind": "wf_kind(path)", "plan": "wf_plan(path)", "source": sourceExpr}
+			"tool": "tool", "kind": "kind", "plan": "plan", "source": "source",
+			"norm_event": "norm_event", "model": "model", "conversation_id": "conversation_id"}
 		key, ok := groups[group]
 		if !ok {
 			return nil, fmt.Errorf("store: unknown group %q", group)
@@ -329,7 +493,7 @@ func (t *Tenant) WindowScores(ctx context.Context, f AnalyticsFilter, kind strin
 	args = append([]any{kind}, args...)
 	rows, err := t.rdb.QueryContext(ctx, `
 	WITH h AS (SELECT DISTINCT content_hash FROM facts
-		WHERE type='artifact_version' AND content_hash != '' AND wf_kind(path)=? AND `+w+`),
+		WHERE type='artifact_version' AND content_hash != '' AND kind=? AND `+w+`),
 	s AS (SELECT content_hash, check_name, result,
 		ROW_NUMBER() OVER (PARTITION BY content_hash, check_name ORDER BY id DESC) AS rn FROM scores)
 	SELECT s.check_name, s.result FROM s JOIN h ON h.content_hash = s.content_hash
@@ -350,21 +514,23 @@ func (t *Tenant) WindowScores(ctx context.Context, f AnalyticsFilter, kind strin
 	return out, rows.Err()
 }
 
+// execShapeSQL is the executions shape CASE expression, over the brief CTE alias b.
+const execShapeSQL = `CASE WHEN EXISTS (SELECT 1 FROM facts c WHERE c.type='commit' AND c.conversation_id=b.conversation_id AND c.repo_id=b.repo_id)
+			THEN CASE WHEN EXISTS (SELECT 1 FROM facts r WHERE r.type='artifact_version' AND r.conversation_id=b.conversation_id
+				AND r.repo_id=b.repo_id AND r.path = 'docs/plans/' || b.plan || '/reports/' || substr(b.path, length('docs/plans/' || b.plan || '/briefs/') + 1))
+				THEN 'complete' ELSE 'unreported' END
+			ELSE 'started' END`
+
 // Executions lists one row per in-window brief (repo, conversation, path). Commit and report facts
 // count whatever their ts; a report must be in the same conversation and repo as the brief.
 func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, error) {
 	w, args := f.factWhere()
 	rows, err := t.rdb.QueryContext(ctx, `
 	WITH b AS (
-		SELECT repo_id, conversation_id, path, harness, ts,
+		SELECT repo_id, conversation_id, path, harness, ts, plan,
 			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
-		FROM facts WHERE type='artifact_version' AND wf_kind(path)='brief' AND `+w+`)
-	SELECT repo_id, wf_plan(path), conversation_id, path, harness, ts,
-		CASE WHEN EXISTS (SELECT 1 FROM facts c WHERE c.type='commit' AND c.conversation_id=b.conversation_id AND c.repo_id=b.repo_id)
-			THEN CASE WHEN EXISTS (SELECT 1 FROM facts r WHERE r.type='artifact_version' AND r.conversation_id=b.conversation_id
-				AND r.repo_id=b.repo_id AND r.path = 'docs/plans/' || wf_plan(b.path) || '/reports/' || substr(b.path, length('docs/plans/' || wf_plan(b.path) || '/briefs/') + 1))
-				THEN 'complete' ELSE 'unreported' END
-			ELSE 'started' END
+		FROM facts WHERE type='artifact_version' AND kind='brief' AND `+w+`)
+	SELECT repo_id, plan, conversation_id, path, harness, ts, `+execShapeSQL+`
 	FROM b WHERE rn = 1 ORDER BY ts DESC, conversation_id, path, repo_id`, args...)
 	if err != nil {
 		return nil, err
@@ -381,10 +547,74 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 	return out, rows.Err()
 }
 
+// ExecutionsPage returns one keyset page of Executions (ts desc, conversation_id, path, repo_id),
+// the shape counts over the whole filtered window, and whether more rows follow. It reads at most
+// limit+1 rows and never loads the whole window into Go.
+func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, cur *ExecCursor, limit int) ([]ExecRow, map[string]int, bool, error) {
+	w, args := f.factWhere()
+	cte := `
+	WITH b AS (
+		SELECT repo_id, conversation_id, path, harness, ts, plan,
+			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
+		FROM facts WHERE type='artifact_version' AND kind='brief' AND ` + w + `)`
+	cnt := map[string]int{"complete": 0, "unreported": 0, "started": 0}
+	crows, err := t.rdb.QueryContext(ctx, cte+`
+	SELECT `+execShapeSQL+` AS shape, COUNT(*) FROM b WHERE rn = 1 GROUP BY shape`, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	for crows.Next() {
+		var shape string
+		var n int
+		if err := crows.Scan(&shape, &n); err != nil {
+			crows.Close()
+			return nil, nil, false, err
+		}
+		cnt[shape] = n
+	}
+	if err := crows.Err(); err != nil {
+		crows.Close()
+		return nil, nil, false, err
+	}
+	crows.Close()
+
+	q := cte + `
+	SELECT repo_id, plan, conversation_id, path, harness, ts, ` + execShapeSQL + `
+	FROM b WHERE rn = 1`
+	pargs := append([]any{}, args...)
+	if cur != nil && len(cur.Key) >= 3 {
+		q += ` AND (ts < ? OR (ts = ? AND (conversation_id, path, repo_id) > (?, ?, ?)))`
+		pargs = append(pargs, cur.TS, cur.TS, cur.Key[0], cur.Key[1], cur.Key[2])
+	}
+	q += ` ORDER BY ts DESC, conversation_id, path, repo_id LIMIT ?`
+	pargs = append(pargs, limit+1)
+	rows, err := t.rdb.QueryContext(ctx, q, pargs...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+	var out []ExecRow
+	for rows.Next() {
+		var r ExecRow
+		if err := rows.Scan(&r.RepoID, &r.Plan, &r.ConversationID, &r.BriefPath, &r.Harness, &r.TS, &r.Shape); err != nil {
+			return nil, nil, false, err
+		}
+		out = append(out, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+	more := len(out) > limit
+	if more {
+		out = out[:limit]
+	}
+	return out, cnt, more, nil
+}
+
 // Conversations aggregates the filtered in-window facts per conversation.
 func (t *Tenant) Conversations(ctx context.Context, f AnalyticsFilter) ([]ConvRow, error) {
 	w, args := f.factWhere()
-	rows, err := t.rdb.QueryContext(ctx, `SELECT conversation_id, harness, repo_id, type, ts, wf_kind(path) FROM facts WHERE `+w, args...)
+	rows, err := t.rdb.QueryContext(ctx, `SELECT conversation_id, harness, repo_id, type, ts, kind FROM facts WHERE `+w, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -452,46 +682,251 @@ func (t *Tenant) Conversations(ctx context.Context, f AnalyticsFilter) ([]ConvRo
 	return out, nil
 }
 
-// Explore returns filtered in-window facts and rejections, newest first (rejections by at). Ties
-// break by a stable key: row_hash for facts, "rej-<20-digit id>" for rejections, ascending (so at
-// the same instant facts precede rejections). It reads at most limit+1 rows and reports whether
-// more than limit matched.
-func (t *Tenant) Explore(ctx context.Context, f AnalyticsFilter, limit int) ([]ExploreRow, bool, error) {
-	fw, fargs := f.factWhere()
-	rw, rargs := f.rejWhere()
-	args := append(append(fargs, rargs...), limit+1)
-	rows, err := t.rdb.QueryContext(ctx, `
-	SELECT type, ts, harness, repo_id, plan, kind, event, tool, path, conversation_id, source, sha, verdict, stage FROM (
-		SELECT type, ts, harness, repo_id, wf_plan(path) AS plan, wf_kind(path) AS kind, event,
-			CASE WHEN type='hook_event' THEN `+toolExpr+` ELSE '' END AS tool, path, conversation_id,
-			`+sourceExpr+` AS source, `+shaExpr+` AS sha,
-			COALESCE((SELECT verdict FROM screens s WHERE s.content_hash=facts.content_hash AND facts.content_hash != '' ORDER BY s.id DESC LIMIT 1),'') AS verdict,
-			'' AS stage, row_hash AS k
-		FROM facts WHERE `+fw+`
-		UNION ALL
-		SELECT 'rejection', at/1e9, '', '', wf_plan(path), wf_kind(path), '', '', path, conversation_id, '', '', '', stage,
-			printf('rej-%020d', id)
-		FROM rejections WHERE `+rw+`)
-	ORDER BY ts DESC, k ASC LIMIT ?`, args...)
+// ConversationsPage returns one keyset page of per-conversation aggregates (last_ts desc,
+// conversation_id), and whether more rows follow. Aggregation and keyset run in SQL; the page's
+// harness histogram is fetched with one extra grouped query for the page's conversation ids.
+func (t *Tenant) ConversationsPage(ctx context.Context, f AnalyticsFilter, cur *ConvCursor, limit int) ([]ConvRow, bool, error) {
+	w, args := f.factWhere()
+	q := `SELECT conversation_id, MIN(ts), MAX(ts),
+		SUM(CASE WHEN type='hook_event' THEN 1 ELSE 0 END),
+		SUM(CASE WHEN type='artifact_version' THEN 1 ELSE 0 END),
+		SUM(CASE WHEN type='commit' THEN 1 ELSE 0 END),
+		group_concat(DISTINCT repo_id),
+		group_concat(DISTINCT CASE WHEN kind <> '' THEN kind END)
+	FROM facts WHERE ` + w + ` GROUP BY conversation_id`
+	pargs := append([]any{}, args...)
+	if cur != nil {
+		q += ` HAVING (MAX(ts) < ?) OR (MAX(ts) = ? AND conversation_id > ?)`
+		pargs = append(pargs, cur.TS, cur.TS, cur.ConversationID)
+	}
+	q += ` ORDER BY MAX(ts) DESC, conversation_id LIMIT ?`
+	pargs = append(pargs, limit+1)
+	rows, err := t.rdb.QueryContext(ctx, q, pargs...)
 	if err != nil {
 		return nil, false, err
 	}
 	defer rows.Close()
-	var out []ExploreRow
+	var out []ConvRow
 	for rows.Next() {
-		var r ExploreRow
-		if err := rows.Scan(&r.Type, &r.TS, &r.Harness, &r.RepoID, &r.Plan, &r.Kind, &r.Event, &r.Tool, &r.Path,
-			&r.ConversationID, &r.Source, &r.SHA, &r.ScreenVerdict, &r.RejectionStage); err != nil {
+		var r ConvRow
+		var repos, kinds sql.NullString
+		if err := rows.Scan(&r.ConversationID, &r.FirstTS, &r.LastTS, &r.HookEvents, &r.ArtifactVersions, &r.Commits, &repos, &kinds); err != nil {
 			return nil, false, err
 		}
+		r.Repos = splitConcat(repos)
+		r.Kinds = splitConcat(kinds)
+		sort.Strings(r.Repos)
+		sort.Strings(r.Kinds)
 		out = append(out, r)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, false, err
 	}
-	truncated := len(out) > limit
-	if truncated {
+	more := len(out) > limit
+	if more {
 		out = out[:limit]
 	}
-	return out, truncated, nil
+	if err := t.fillHarness(ctx, w, args, out); err != nil {
+		return nil, false, err
+	}
+	return out, more, nil
+}
+
+// splitConcat splits a group_concat(DISTINCT x) result on its default separator. NULL (no values)
+// is nil. The two-argument form with a custom separator is rejected by this driver when DISTINCT
+// is present, so the "," default is used; values are repo ids and the fixed kind vocabulary.
+func splitConcat(s sql.NullString) []string {
+	if !s.Valid {
+		return nil
+	}
+	return strings.Split(s.String, ",")
+}
+
+// fillHarness sets each row's Harness to the most frequent harness in the window, ties to the
+// smaller name, using one grouped query over just the page's conversation ids.
+func (t *Tenant) fillHarness(ctx context.Context, w string, wargs []any, out []ConvRow) error {
+	if len(out) == 0 {
+		return nil
+	}
+	ids := make([]string, len(out))
+	for i := range out {
+		ids[i] = out[i].ConversationID
+	}
+	args := append([]any{}, wargs...)
+	q := `SELECT conversation_id, harness, COUNT(*) FROM facts WHERE ` + w + inList("conversation_id", ids, &args) +
+		` GROUP BY conversation_id, harness`
+	rows, err := t.rdb.QueryContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	type hc struct {
+		name string
+		n    int
+	}
+	hist := map[string][]hc{}
+	for rows.Next() {
+		var conv, h string
+		var n int
+		if err := rows.Scan(&conv, &h, &n); err != nil {
+			return err
+		}
+		hist[conv] = append(hist[conv], hc{h, n})
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range out {
+		best, bestN := "", -1
+		for _, x := range hist[out[i].ConversationID] {
+			if x.n > bestN || (x.n == bestN && x.name < best) {
+				best, bestN = x.name, x.n
+			}
+		}
+		out[i].Harness = best
+	}
+	return nil
+}
+
+// exploreFactsQuery is the facts leg of Explore: newest first, ties by row_hash ascending. The
+// planner uses facts_ts or facts_ts_harness_event and only reorders ties ("USE TEMP B-TREE FOR
+// LAST TERM OF ORDER BY"), never the whole window.
+func exploreFactsQuery(where string) string {
+	return `SELECT type, ts, harness, repo_id, plan, kind, event,
+		CASE WHEN type='hook_event' THEN tool ELSE '' END AS tool,
+		norm_event, model, path, conversation_id, source, sha, content_hash,
+		tok_in, tok_out, tok_cache_read, tok_cache_write, tok_reasoning, cost_reported
+	FROM facts WHERE ` + where + `
+	ORDER BY ts DESC, row_hash ASC LIMIT ?`
+}
+
+// Explore returns filtered in-window facts and rejections, newest first (rejections by at). Ties
+// break by a stable key: row_hash for facts, id for rejections, ascending (so at the same instant
+// facts precede rejections). It fetches at most limit+1 from each side, merging them in Go with the
+// same tie rule, and reports whether more than limit matched.
+func (t *Tenant) Explore(ctx context.Context, f AnalyticsFilter, limit int) ([]ExploreRow, bool, error) {
+	fw, fargs := f.factWhere()
+	rw, rargs := f.rejWhere()
+
+	frows, err := t.rdb.QueryContext(ctx, exploreFactsQuery(fw), append(fargs, limit+1)...)
+	if err != nil {
+		return nil, false, err
+	}
+	defer frows.Close()
+	var facts []ExploreRow
+	var hashes []string
+	for frows.Next() {
+		var r ExploreRow
+		var contentHash string
+		var tokIn, tokOut, tokCR, tokCW, tokReas int64
+		var cost sql.NullFloat64
+		if err := frows.Scan(&r.Type, &r.TS, &r.Harness, &r.RepoID, &r.Plan, &r.Kind, &r.Event, &r.Tool,
+			&r.NormEvent, &r.Model, &r.Path, &r.ConversationID, &r.Source, &r.SHA, &contentHash,
+			&tokIn, &tokOut, &tokCR, &tokCW, &tokReas, &cost); err != nil {
+			return nil, false, err
+		}
+		if r.Type == "hook_event" && r.NormEvent == "usage" {
+			var reported *float64
+			if cost.Valid {
+				v := cost.Float64
+				reported = &v
+			}
+			usd, _ := Cost(r.Harness, r.Model, Tokens{In: tokIn, Out: tokOut, CacheRead: tokCR, CacheWrite: tokCW, Reasoning: tokReas}, reported)
+			r.CostUSD = &usd
+		}
+		facts = append(facts, r)
+		hashes = append(hashes, contentHash)
+	}
+	if err := frows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	rrows, err := t.rdb.QueryContext(ctx, `
+		SELECT at, wf_plan(path), wf_kind(path), path, conversation_id, stage
+		FROM rejections WHERE `+rw+`
+		ORDER BY at DESC, id ASC LIMIT ?`, append(rargs, limit+1)...)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rrows.Close()
+	var rejs []ExploreRow
+	for rrows.Next() {
+		var at int64
+		r := ExploreRow{Type: "rejection"}
+		if err := rrows.Scan(&at, &r.Plan, &r.Kind, &r.Path, &r.ConversationID, &r.RejectionStage); err != nil {
+			return nil, false, err
+		}
+		r.TS = float64(at) / 1e9
+		rejs = append(rejs, r)
+	}
+	if err := rrows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	page := make([]ExploreRow, 0, limit+1)
+	pageHashes := make([]string, 0, limit+1)
+	i, j := 0, 0
+	for len(page) < limit+1 && (i < len(facts) || j < len(rejs)) {
+		if i < len(facts) && (j >= len(rejs) || facts[i].TS >= rejs[j].TS) {
+			page = append(page, facts[i])
+			pageHashes = append(pageHashes, hashes[i])
+			i++
+		} else {
+			page = append(page, rejs[j])
+			pageHashes = append(pageHashes, "")
+			j++
+		}
+	}
+	if err := t.fillVerdicts(ctx, pageHashes, page); err != nil {
+		return nil, false, err
+	}
+	truncated := len(page) > limit
+	if truncated {
+		page = page[:limit]
+	}
+	return page, truncated, nil
+}
+
+// fillVerdicts sets each page row's ScreenVerdict to the latest screen (by id) for its content
+// hash, only for the rows actually on the page.
+func (t *Tenant) fillVerdicts(ctx context.Context, hashes []string, page []ExploreRow) error {
+	seen := map[string]bool{}
+	var uniq []string
+	for _, h := range hashes {
+		if h != "" && !seen[h] {
+			seen[h] = true
+			uniq = append(uniq, h)
+		}
+	}
+	if len(uniq) == 0 {
+		return nil
+	}
+	args := make([]any, len(uniq))
+	for i, h := range uniq {
+		args[i] = h
+	}
+	rows, err := t.rdb.QueryContext(ctx, `SELECT content_hash, verdict FROM screens s WHERE s.content_hash IN (?`+
+		strings.Repeat(",?", len(uniq)-1)+`)
+		AND s.id = (SELECT max(id) FROM screens WHERE content_hash = s.content_hash)`, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	verdict := map[string]string{}
+	for rows.Next() {
+		var h, v string
+		if err := rows.Scan(&h, &v); err != nil {
+			return err
+		}
+		verdict[h] = v
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range page {
+		if h := hashes[i]; h != "" {
+			page[i].ScreenVerdict = verdict[h]
+		}
+	}
+	return nil
 }

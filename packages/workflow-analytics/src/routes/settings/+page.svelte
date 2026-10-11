@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { BASE_KEY, TOKEN_KEY } from '$lib/api';
+	import { client } from '$lib/query';
 
 	function read(k: string): string {
 		try {
@@ -18,6 +19,7 @@
 		try {
 			localStorage.setItem(BASE_KEY, base.trim());
 			localStorage.setItem(TOKEN_KEY, key.trim());
+			client.clearCache();
 			status = 'Saved.';
 		} catch {
 			status = 'Could not write to localStorage in this browser.';

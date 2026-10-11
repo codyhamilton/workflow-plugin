@@ -5,10 +5,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
 import plugin from '../src/index.ts'
 
 const named = 'event config dispose chat.message chat.params chat.headers permission.ask command.execute.before tool.execute.before tool.execute.after tool.definition shell.env experimental.chat.messages.transform experimental.chat.system.transform experimental.session.compacting experimental.compaction.autocontinue experimental.text.complete experimental.provider.small_model'.split(' ')
 const bus = 'command.executed file.edited file.watcher.updated installation.updated lsp.client.diagnostics lsp.updated message.part.removed message.part.updated message.removed message.updated permission.asked permission.replied server.connected session.created session.compacted session.deleted session.diff session.error session.idle session.status session.updated todo.updated shell.env tool.execute.before tool.execute.after tui.prompt.append tui.command.execute tui.toast.show'.split(' ')
+const removed = ['experimental.chat.system.transform', 'chat.params', 'chat.headers', 'shell.env', 'message.part.delta']
 const spoolSh = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'tools', 'hooklog', 'spool.sh')
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
@@ -62,10 +64,11 @@ test('18 callbacks and 28 bus types queue payloads, sessions and boundaries', as
     const rows = []
     for (const n of await evts(sb.queue)) rows.push(await read(sb.queue, n))
     assert(rows.every(([env]) => env.harness === 'opencode'))
+    assert(rows.every(([env]) => !removed.includes(env.event)))
     const hookEvents = new Set(rows.filter(([, p]) => p.source === 'hook').map(([env]) => env.event))
-    assert.deepEqual(hookEvents, new Set(hookNames))
+    assert.deepEqual(hookEvents, new Set(hookNames.filter(n => !removed.includes(n))))
     const busEvents = new Set(rows.filter(([, p]) => p.source === 'bus').map(([env]) => env.event))
-    assert.deepEqual(busEvents, new Set(bus))
+    assert.deepEqual(busEvents, new Set(bus.filter(n => !removed.includes(n))))
     assert(rows.some(([env]) => env.event === 'PostToolBatch'))
     assert(rows.some(([env]) => env.event === 'Stop'))
     const ts = rows.map(([env]) => env.ts)
@@ -119,6 +122,20 @@ test('a record without a sessionID is dropped', async () => {
   } finally { await sb.done() }
 })
 
+test('message.part.delta queues nothing while message.part.updated still queues', async () => {
+  const sb = await sandbox()
+  try {
+    const hooks = await plugin({ directory: '/tmp/project' })
+    await hooks.event({ event: { type: 'message.part.delta', properties: { sessionID: 's', partID: 'p', field: 'text', delta: 'hi' } } })
+    assert.equal((await evts(sb.queue)).length, 0)
+    await hooks.event({ event: { type: 'message.part.updated', properties: { part: { id: 'part', sessionID: 's', type: 'text' } } } })
+    const names = await evts(sb.queue)
+    assert.equal(names.length, 1)
+    const [env] = await read(sb.queue, names[0])
+    assert.equal(env.event, 'message.part.updated')
+  } finally { await sb.done() }
+})
+
 test('kick runs WORKFLOW_BIN drain at most once per 10 s; load prefetches --version', async () => {
   const sb = await sandbox({ WORKFLOW_HOOKLOG_KICK: '1' })
   try {
@@ -156,4 +173,11 @@ test('no legacy submit helper spawn under any event', async () => {
     const src = await readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'index.ts'), 'utf8')
     assert(!/artifact.submit|runPythonHook/i.test(src))
   } finally { await sb.done() }
+})
+
+test('remove list block in src/index.ts is the stable source for the Go equality test', () => {
+  const src = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'index.ts'), 'utf8')
+  const m = src.match(/\/\/ remove-list:begin\n([\s\S]*?)\/\/ remove-list:end/)
+  assert(m, 'markers present')
+  assert.deepEqual([...m[1].matchAll(/"([^"]+)"/g)].map(x => x[1]), removed)
 })

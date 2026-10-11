@@ -13,8 +13,10 @@ import (
 	"regexp"
 	"sort"
 	"sync"
+	"syscall"
 	"time"
 
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
 	_ "modernc.org/sqlite"
 )
 
@@ -46,6 +48,62 @@ var migrations = []string{
 	`CREATE VIRTUAL TABLE search USING fts5(content_hash UNINDEXED, body, tokenize='porter unicode61');`,
 	// 3: analytics window scans by event time.
 	`CREATE INDEX IF NOT EXISTS facts_ts ON facts(ts);`,
+	// 4: extracted analytics columns (filled at insert; old rows keep defaults until compaction) and indexes.
+	`ALTER TABLE facts ADD COLUMN norm_event TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN tool TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN model TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN kind TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN plan TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN source TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN sha TEXT NOT NULL DEFAULT '';
+	ALTER TABLE facts ADD COLUMN tok_in INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_out INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_cache_read INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_cache_write INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN tok_reasoning INTEGER NOT NULL DEFAULT 0;
+	ALTER TABLE facts ADD COLUMN cost_reported REAL;
+	CREATE INDEX facts_type_ts ON facts(type, ts);
+	CREATE INDEX facts_ts_harness_event ON facts(ts, harness, norm_event);
+	CREATE INDEX rejections_at ON rejections(at);`,
+	// 5: compaction state as a key/value table, seeded complete for a ledger that migrates empty
+	// (nothing to compact). A ledger with rows gets no seed, so it is "required". IF NOT EXISTS,
+	// as migration 3 does, keeps a test that rewinds user_version without dropping meta working.
+	`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+	INSERT INTO meta(key,value) SELECT 'compaction','complete' WHERE NOT EXISTS (SELECT 1 FROM facts);`,
+	// 6: an hourly rollup of hook_events by every dimension the measure groups by. Aggregating over
+	// the base table scans one row per fact three times per query (a rank query per dim, then the
+	// final query) and misses the phase-3 bound on large windows; this collapses each distinct
+	// (hour, dims) tuple to one row with a count. Reads use it for whole interior hours and base rows
+	// for the two partial edge hours (query.go, measureDef.source); Append keeps it current in the
+	// same transaction as the fact insert. The table is created here but filled by backfillHookRollup
+	// in open: the fill selects facts columns that the pre-migration-4 layout a test constructs does
+	// not have, so it cannot be plain migration SQL. IF NOT EXISTS keeps a rewind test working.
+	`CREATE TABLE IF NOT EXISTS hook_events_hourly (
+		hour INTEGER NOT NULL, harness TEXT NOT NULL, repo_id TEXT NOT NULL, norm_event TEXT NOT NULL,
+		event TEXT NOT NULL, tool TEXT NOT NULL, conversation_id TEXT NOT NULL, n INTEGER NOT NULL,
+		PRIMARY KEY (hour, harness, repo_id, norm_event, event, tool, conversation_id)) WITHOUT ROWID;`,
+	// 7: an hourly rollup of conversations by the dimensions the distinct-conversations measure
+	// groups by plus the distinct column itself. The measure counts DISTINCT conversation_id over
+	// the window; aggregating 450k base rows for each rank and final query misses the phase-3
+	// bound, so this collapses each (hour, harness, repo_id, model, conversation_id) presence to
+	// one row. Reads use it for whole interior hours and base rows for the two partial edge hours
+	// (measureDef.source); Append keeps it current in the fact insert's transaction. It is filled
+	// by backfillConversationRollup in open, as migration 6 is, so a pre-migration-4 test layout
+	// (which lacks the columns) stays plain SQL. IF NOT EXISTS keeps a rewind test working.
+	`CREATE TABLE IF NOT EXISTS conversations_hourly (
+		hour INTEGER NOT NULL, harness TEXT NOT NULL, repo_id TEXT NOT NULL, model TEXT NOT NULL,
+		conversation_id TEXT NOT NULL, n INTEGER NOT NULL,
+		PRIMARY KEY (hour, harness, repo_id, model, conversation_id)) WITHOUT ROWID;`,
+	// 8: an hourly rollup of every fact dimension the facets read scans. /v1/analytics/facets runs
+	// seven DISTINCT scans plus a tool count over the whole facts window, each a full pass, and
+	// misses the phase-3 bound on 90d; this collapses each (dim, hour, value) presence to one
+	// counted row that Facets reads for whole interior hours with base rows for the two partial
+	// edge hours (analytics.go). The table is filled by backfillFacetRollup in open, as migration 6
+	// is, so a pre-migration-4 test layout (which lacks the columns) stays plain SQL. IF NOT EXISTS
+	// keeps a rewind test working.
+	`CREATE TABLE IF NOT EXISTS facets_hourly (
+    dim TEXT NOT NULL, hour INTEGER NOT NULL, value TEXT NOT NULL, n INTEGER NOT NULL,
+    PRIMARY KEY (dim, hour, value)) WITHOUT ROWID;`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -67,10 +125,12 @@ type request struct {
 
 // Tenant is one open tenant directory.
 type Tenant struct {
-	dir    string
-	window time.Duration
-	wdb    *sql.DB // single writer connection
-	rdb    *sql.DB // readers
+	dir       string
+	window    time.Duration
+	wdb       *sql.DB // single writer connection
+	rdb       *sql.DB // readers
+	lock      *os.File
+	exclusive bool // opened with OpenExclusive; Raw is available only then
 
 	mu     sync.RWMutex // guards closed and sends on queue
 	closed bool
@@ -82,8 +142,21 @@ func dsn(path string) string {
 	return "file:" + path + "?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=busy_timeout(5000)"
 }
 
-// Open creates dir, blobs/, pending/, migrates ledger.db and starts the writer.
+// Open creates dir, blobs/, pending/, migrates ledger.db and starts the writer. It takes a shared
+// lock on the tenant directory before it touches SQLite and holds it until Close, so any number of
+// readers coexist while compaction's exclusive lock is refused.
 func Open(dir string, opts Options) (*Tenant, error) {
+	return open(dir, opts, syscall.LOCK_SH, false)
+}
+
+// OpenExclusive is Open but takes the directory's exclusive lock: it fails with ErrLocked while any
+// other holder (shared or exclusive, in this process or another) has the lock. It is for offline
+// compaction, which is the only writer allowed once serve is stopped; see Raw.
+func OpenExclusive(dir string, opts Options) (*Tenant, error) {
+	return open(dir, opts, syscall.LOCK_EX, true)
+}
+
+func open(dir string, opts Options, how int, exclusive bool) (*Tenant, error) {
 	if opts.GroupWindow <= 0 {
 		opts.GroupWindow = 2 * time.Millisecond
 	}
@@ -96,25 +169,44 @@ func Open(dir string, opts Options) (*Tenant, error) {
 			return nil, err
 		}
 	}
+	lock, err := acquireLock(dir, how)
+	if err != nil {
+		return nil, err
+	}
 	dbPath := filepath.Join(dir, "ledger.db")
 	wdb, err := sql.Open("sqlite", dsn(dbPath))
 	if err != nil {
+		releaseLock(lock)
 		return nil, err
 	}
 	wdb.SetMaxOpenConns(1)
 	rdb, err := sql.Open("sqlite", dsn(dbPath))
 	if err != nil {
 		wdb.Close()
+		releaseLock(lock)
 		return nil, err
 	}
-	t := &Tenant{dir: dir, window: opts.GroupWindow, wdb: wdb, rdb: rdb, queue: make(chan *request, 1024)}
+	t := &Tenant{dir: dir, window: opts.GroupWindow, wdb: wdb, rdb: rdb, lock: lock, exclusive: exclusive, queue: make(chan *request, 1024)}
 	from, err := t.migrate()
 	if err == nil && from == 1 {
 		err = t.reindex(context.Background()) // existing db gaining the search index; writer not started yet
 	}
+	if err == nil && from < 6 {
+		err = t.backfillHookRollup() // existing db gaining the rollup table; writer not started yet
+	}
+	if err == nil && from < 7 {
+		err = t.backfillConversationRollup() // existing db gaining the conversations rollup; writer not started yet
+	}
+	if err == nil && from < 8 {
+		err = t.backfillFacetRollup() // existing db gaining the facets rollup; writer not started yet
+	}
+	if err == nil {
+		err = t.ensureConversationRollupIndex() // ensured on every open; ANALYZE only when the index is newly created
+	}
 	if err != nil {
 		wdb.Close()
 		rdb.Close()
+		releaseLock(lock)
 		return nil, err
 	}
 	_ = os.Chmod(dbPath, 0o600)
@@ -150,6 +242,9 @@ func (t *Tenant) migrate() (int, error) {
 	return from, nil
 }
 
+// Dir returns the tenant directory.
+func (t *Tenant) Dir() string { return t.dir }
+
 // Close finishes queued writes, then closes the databases.
 func (t *Tenant) Close() error {
 	t.mu.Lock()
@@ -163,10 +258,79 @@ func (t *Tenant) Close() error {
 	t.wg.Wait()
 	e1 := t.wdb.Close()
 	e2 := t.rdb.Close()
+	releaseLock(t.lock)
+	t.lock = nil
 	if e1 != nil {
 		return e1
 	}
 	return e2
+}
+
+// Raw returns the writer connection pool only when the tenant was opened with OpenExclusive, else
+// nil. It exists for offline compaction (which owns the exclusive lock); no other caller may use it.
+func (t *Tenant) Raw() *sql.DB {
+	if t.exclusive {
+		return t.wdb
+	}
+	return nil
+}
+
+// Meta reads a meta value; ok is false when the key is absent.
+func (t *Tenant) Meta(ctx context.Context, key string) (string, bool, error) {
+	var v string
+	err := t.rdb.QueryRowContext(ctx, `SELECT value FROM meta WHERE key=?`, key).Scan(&v)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", false, nil
+	}
+	if err != nil {
+		return "", false, err
+	}
+	return v, true, nil
+}
+
+// SetMeta upserts a meta value through the writer queue.
+func (t *Tenant) SetMeta(ctx context.Context, key, value string) error {
+	return t.submit(ctx, func(tx *sql.Tx) error {
+		_, err := tx.Exec(`INSERT INTO meta(key,value) VALUES(?,?)
+			ON CONFLICT(key) DO UPDATE SET value=excluded.value`, key, value)
+		return err
+	})
+}
+
+// CompactionState reports "complete" when meta compaction is "complete", else "required".
+func (t *Tenant) CompactionState() string {
+	v, ok, err := t.Meta(context.Background(), "compaction")
+	if err != nil || !ok || v != "complete" {
+		return "required"
+	}
+	return "complete"
+}
+
+// CompactionStateOf answers CompactionState for a tenant directory that is not open. It opens
+// ledger.db read-only, treats a missing meta table or key as "required" unless facts has no rows
+// (then "complete"), and a missing ledger.db as "complete". It never migrates or writes.
+func CompactionStateOf(dir string) string {
+	dbPath := filepath.Join(dir, "ledger.db")
+	if !exists(dbPath) {
+		return "complete"
+	}
+	db, err := sql.Open("sqlite", "file:"+dbPath+"?mode=ro")
+	if err != nil {
+		return "required"
+	}
+	defer db.Close()
+	var v string
+	switch err := db.QueryRow(`SELECT value FROM meta WHERE key='compaction'`).Scan(&v); {
+	case err == nil && v == "complete":
+		return "complete"
+	case err == nil:
+		return "required"
+	}
+	var n int
+	if err := db.QueryRow(`SELECT count(*) FROM facts`).Scan(&n); err == nil && n == 0 {
+		return "complete"
+	}
+	return "required"
 }
 
 func (t *Tenant) writer() {
@@ -250,6 +414,11 @@ type FactRow struct {
 	TS                                            float64
 	RepoID, Path, ContentHash                     string
 	Raw                                           []byte // canonical fact JSON without id or content
+
+	// Extracted analytics fields. kind and plan are computed from Path in Append.
+	NormEvent, Tool, Model, Source, SHA                      string
+	TokIn, TokOut, TokCacheRead, TokCacheWrite, TokReasoning int64
+	CostReported                                             *float64 // nil: not reported
 }
 
 // Append inserts rows (INSERT OR IGNORE by row hash) in one request and
@@ -266,12 +435,28 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 	err := t.submit(ctx, func(tx *sql.Tx) error {
 		now := time.Now().UnixNano()
 		st, err := tx.Prepare(`INSERT OR IGNORE INTO facts
-			(row_hash,type,conversation_id,harness,event,ts,received_at,repo_id,path,content_hash,raw)
-			VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+			(row_hash,type,conversation_id,harness,event,ts,received_at,repo_id,path,content_hash,raw,
+			 norm_event,tool,model,kind,plan,source,sha,tok_in,tok_out,tok_cache_read,tok_cache_write,tok_reasoning,cost_reported)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 		if err != nil {
 			return err
 		}
 		defer st.Close()
+		stRoll, err := tx.Prepare(hookRollupUpsert)
+		if err != nil {
+			return err
+		}
+		defer stRoll.Close()
+		stConv, err := tx.Prepare(convRollupUpsert)
+		if err != nil {
+			return err
+		}
+		defer stConv.Close()
+		stFacet, err := tx.Prepare(facetRollupUpsert)
+		if err != nil {
+			return err
+		}
+		defer stFacet.Close()
 		for i, r := range rows {
 			if len(r.Raw) == 0 {
 				// OR IGNORE would swallow the NOT NULL violation, so fail explicitly.
@@ -279,12 +464,34 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			}
 			var raw any = r.Raw
 			res, err := st.Exec(r.RowHash, r.Type, r.ConversationID, r.Harness, r.Event, r.TS, now,
-				r.RepoID, r.Path, r.ContentHash, raw)
+				r.RepoID, r.Path, r.ContentHash, raw,
+				r.NormEvent, r.Tool, r.Model, keys.Kind(r.Path), planOf(r.Path), r.Source, r.SHA,
+				r.TokIn, r.TokOut, r.TokCacheRead, r.TokCacheWrite, r.TokReasoning, r.CostReported)
 			if err != nil {
 				return err
 			}
 			n, _ := res.RowsAffected()
 			inserted[i] = n > 0
+			// A collapsed duplicate inserts no fact, so it must not touch the rollups either.
+			if inserted[i] {
+				hour := int64(r.TS) / 3600 * 3600
+				if r.Type == "hook_event" {
+					if _, err := stRoll.Exec(hour, r.Harness, r.RepoID, r.NormEvent, r.Event, r.Tool, r.ConversationID); err != nil {
+						return err
+					}
+				}
+				if _, err := stConv.Exec(hour, r.Harness, r.RepoID, r.Model, r.ConversationID); err != nil {
+					return err
+				}
+				for _, d := range facetDims {
+					if d.typ != "" && r.Type != d.typ {
+						continue
+					}
+					if _, err := stFacet.Exec(d.name, hour, d.val(r)); err != nil {
+						return err
+					}
+				}
+			}
 		}
 		return nil
 	})

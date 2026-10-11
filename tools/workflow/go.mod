@@ -3,6 +3,7 @@ module github.com/codyhamilton/workflow-plugin/tools/workflow
 go 1.27.1
 
 require (
+	github.com/klauspost/compress v1.20.1
 	golang.org/x/sys v0.48.0
 	modernc.org/sqlite v1.60.1
 )

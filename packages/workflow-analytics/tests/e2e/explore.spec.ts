@@ -35,6 +35,12 @@ test('repo_id filters the slice and survives a reload', async ({ page }) => {
 	await expect.poll(() => tableSize(page).catch(() => -1)).toBe(R1);
 });
 
+test('an exclude chip resolves to the complement and narrows the slice', async ({ page }) => {
+	await page.goto('/explore?x.repo_id=r2');
+	await expect(page.getByTestId('explore-count')).toHaveText(String(R1));
+	await expect.poll(() => tableSize(page).catch(() => -1)).toBe(R1);
+});
+
 test('a capped slice says so', async ({ page }) => {
 	await page.route('**/v1/analytics/explore*', (route) =>
 		route.fulfill({
