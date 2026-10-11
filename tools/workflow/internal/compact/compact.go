@@ -83,12 +83,12 @@ func Run(ctx context.Context, t *store.Tenant, o Options) (st Stats, err error) 
 	if db == nil {
 		return Stats{}, errors.New("compact: tenant must be opened with store.OpenExclusive")
 	}
-	// Only Append maintains the rollup, so the deletes and rewrites below would drift it. Rebuild it
-	// from base rows once here, at the end, whether or not this run changed any row (a resumed or
-	// no-op run still ends exact). A run that stops on an error leaves it for the next run.
+	// Only Append maintains the rollups, so the deletes and rewrites below would drift them. Rebuild
+	// every rollup from base rows once here, at the end, whether or not this run changed any row (a
+	// resumed or no-op run still ends exact). A run that stops on an error leaves it for the next run.
 	defer func() {
 		if err == nil {
-			err = t.RebuildHookRollup(ctx)
+			err = t.RebuildRollups(ctx)
 		}
 	}()
 	batch := o.Batch

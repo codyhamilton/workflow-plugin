@@ -264,6 +264,68 @@ func (t *Tenant) RebuildHookRollup(ctx context.Context) error {
 	return tx.Commit()
 }
 
+// RebuildConversationRollup deletes every conversations_hourly row and refills it from the base
+// facts in one transaction, so the rollup equals the base-row aggregate again after a writer that
+// bypasses Append (compaction). It is a no-op when facts predates the analytics columns.
+func (t *Tenant) RebuildConversationRollup(ctx context.Context) error {
+	ok, err := t.convRollupFillApplies()
+	if err != nil || !ok {
+		return err
+	}
+	tx, err := t.wdb.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM conversations_hourly`); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, convRollupFill); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+// RebuildFacetRollup deletes every facets_hourly row and refills it from the base rows in one
+// transaction, so the rollup equals the base-row aggregate again after a writer that bypasses
+// Append (compaction). It is a no-op when facts predates the analytics columns.
+func (t *Tenant) RebuildFacetRollup(ctx context.Context) error {
+	ok, err := t.facetRollupFillApplies()
+	if err != nil || !ok {
+		return err
+	}
+	tx, err := t.wdb.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM facets_hourly`); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, facetRollupFill); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+// RebuildRollups rebuilds every rollup table in the store from base rows: the hook_events, the
+// conversations and the facet rollup, in turn, returning the first error. It is the single
+// registration point for the rollups, so a new rollup is added by calling its Rebuild* method here
+// rather than at every caller. Compaction must call it because it deletes and rewrites facts
+// directly, bypassing Append, which is the only writer that maintains the rollups incrementally;
+// without this the rollups drift from their base-row aggregates.
+func (t *Tenant) RebuildRollups(ctx context.Context) error {
+	if err := t.RebuildHookRollup(ctx); err != nil {
+		return err
+	}
+	if err := t.RebuildConversationRollup(ctx); err != nil {
+		return err
+	}
+	return t.RebuildFacetRollup(ctx)
+}
+
 // columns returns the set of column names of a table.
 func (t *Tenant) columns(table string) (map[string]bool, error) {
 	rows, err := t.wdb.Query(`SELECT name FROM pragma_table_info(?)`, table)

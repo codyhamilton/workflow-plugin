@@ -208,6 +208,106 @@ func TestRollupBackfilledOnMigrate(t *testing.T) {
 	}
 }
 
+// assertHookRollupExactBothWays asserts hook_events_hourly is exactly the base hook_event
+// aggregate, in both directions, so no tuple is missing or double-counted.
+func assertHookRollupExactBothWays(t *testing.T, tn *Tenant) {
+	t.Helper()
+	rollup := `SELECT hour,harness,repo_id,norm_event,event,tool,conversation_id,n FROM hook_events_hourly`
+	base := `SELECT CAST(ts/3600 AS INTEGER)*3600, harness, repo_id, norm_event, event, tool, conversation_id, count(*)
+		FROM facts WHERE type='hook_event' GROUP BY 1,2,3,4,5,6,7`
+	exceptBothWays(t, tn, rollup, base, "hook_events")
+}
+
+// assertConvRollupExactBothWays asserts conversations_hourly is exactly the base-row aggregate, in
+// both directions, so no tuple is missing or double-counted.
+func assertConvRollupExactBothWays(t *testing.T, tn *Tenant) {
+	t.Helper()
+	rollup := `SELECT hour,harness,repo_id,model,conversation_id,n FROM conversations_hourly`
+	base := `SELECT CAST(ts/3600 AS INTEGER)*3600, harness, repo_id, model, conversation_id, count(*)
+		FROM facts GROUP BY 1,2,3,4,5`
+	exceptBothWays(t, tn, rollup, base, "conversations")
+}
+
+// facetBaseAggregate mirrors facetRollupFill exactly: 8 UNION ALL branches producing (dim, hour,
+// value, count(*)) for every dimension, the tool branch restricted to hook_event.
+const facetBaseAggregate = `SELECT 'repo_id', CAST(ts/3600 AS INTEGER)*3600, repo_id, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'harness', CAST(ts/3600 AS INTEGER)*3600, harness, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'plan', CAST(ts/3600 AS INTEGER)*3600, plan, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'event', CAST(ts/3600 AS INTEGER)*3600, event, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'model', CAST(ts/3600 AS INTEGER)*3600, model, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'norm_event', CAST(ts/3600 AS INTEGER)*3600, norm_event, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'kind', CAST(ts/3600 AS INTEGER)*3600, kind, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'tool', CAST(ts/3600 AS INTEGER)*3600, tool, count(*) FROM facts WHERE type='hook_event' GROUP BY 2,3`
+
+// assertFacetRollupExactBothWays asserts facets_hourly is exactly the base-row aggregate, in both
+// directions, so no tuple is missing or double-counted.
+func assertFacetRollupExactBothWays(t *testing.T, tn *Tenant) {
+	t.Helper()
+	exceptBothWays(t, tn, `SELECT dim,hour,value,n FROM facets_hourly`, facetBaseAggregate, "facets")
+}
+
+// exceptBothWays asserts two row sets (rollup rows and base aggregate rows) are identical in both
+// directions, naming name in the failure.
+func exceptBothWays(t *testing.T, tn *Tenant, rollupSel, baseSel, name string) {
+	t.Helper()
+	var diff int
+	sub := func(s string) string { return "SELECT * FROM (" + s + ")" }
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM (` + sub(rollupSel) + ` EXCEPT ` + sub(baseSel) + `)`).Scan(&diff); err != nil {
+		t.Fatal(err)
+	}
+	if diff != 0 {
+		t.Fatalf("%s rollup has %d tuples not in the base aggregate", name, diff)
+	}
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM (` + sub(baseSel) + ` EXCEPT ` + sub(rollupSel) + `)`).Scan(&diff); err != nil {
+		t.Fatal(err)
+	}
+	if diff != 0 {
+		t.Fatalf("%s base aggregate has %d tuples not in the rollup", name, diff)
+	}
+}
+
+// TestRebuildConversationRollup changes base rows behind the conversations rollup's back the way
+// compaction does, then asserts the exported rebuild makes the table the base aggregate again in
+// both directions.
+func TestRebuildConversationRollup(t *testing.T) {
+	tn, _, _ := convRollupFixture(t)
+	if _, err := tn.wdb.Exec(`DELETE FROM facts WHERE harness='codex'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.RebuildConversationRollup(context.Background()); err != nil {
+		t.Fatalf("RebuildConversationRollup: %v", err)
+	}
+	assertConvRollupExactBothWays(t, tn)
+}
+
+// TestRebuildFacetRollup changes base rows behind the facets rollup's back the way compaction does,
+// then asserts the exported rebuild makes the table the base aggregate again in both directions.
+func TestRebuildFacetRollup(t *testing.T) {
+	tn, _, _ := facetFixture(t)
+	if _, err := tn.wdb.Exec(`DELETE FROM facts WHERE harness='codex'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.RebuildFacetRollup(context.Background()); err != nil {
+		t.Fatalf("RebuildFacetRollup: %v", err)
+	}
+	assertFacetRollupExactBothWays(t, tn)
+}
+
+// TestRebuildRollups changes base rows behind every rollup's back, then asserts the single
+// RebuildRollups entry point makes all three tables the base aggregate again in both directions.
+func TestRebuildRollups(t *testing.T) {
+	tn, _, _ := facetFixture(t)
+	if _, err := tn.wdb.Exec(`DELETE FROM facts WHERE harness='codex'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.RebuildRollups(context.Background()); err != nil {
+		t.Fatalf("RebuildRollups: %v", err)
+	}
+	assertHookRollupExactBothWays(t, tn)
+	assertConvRollupExactBothWays(t, tn)
+	assertFacetRollupExactBothWays(t, tn)
+}
+
 // TestRebuildHookRollup changes base rows behind the rollup's back the way compaction does, then
 // asserts the exported rebuild makes the table the base aggregate again in both directions.
 func TestRebuildHookRollup(t *testing.T) {
@@ -716,6 +816,93 @@ func TestSummaryRollupEqualsBase(t *testing.T) {
 			t.Fatalf("window %q: rollup {conv %d hook %d av %d distinct %d commits %d} != base {conv %d hook %d av %d distinct %d commits %d}",
 				w.name, got.Conversations, got.HookEvents, got.ArtifactVersions, got.DistinctContent, got.Commits,
 				wantConv, wantHook, wantAV, wantDistinct, wantCommits)
+		}
+	}
+}
+
+// queryMeasureNoRollup is the "forced off" oracle: it mirrors Query's normalization (bucket "" ->
+// "none", top default 20 / cap 100) and then calls the unexported queryMeasure with the measure's
+// rollup cleared, so source reads base `facts` rows alone. Query exposes no rollup-off toggle and
+// query.go is not an owned path, so the base-only path is reached directly from this same-package
+// test.
+func queryMeasureNoRollup(t *testing.T, tn *Tenant, f AnalyticsFilter, p QueryParams) QueryResult {
+	t.Helper()
+	def, ok := measureByName(p.Measure)
+	if !ok {
+		t.Fatalf("unknown measure %q", p.Measure)
+	}
+	bucket := p.Bucket
+	if bucket == "" {
+		bucket = "none"
+	}
+	top := p.Top
+	if top <= 0 {
+		top = 20
+	}
+	if top > 100 {
+		top = 100
+	}
+	def.rollup = ""
+	res, err := tn.queryMeasure(context.Background(), f, p, def, top, bucket)
+	if err != nil {
+		t.Fatalf("queryMeasure(no rollup) measure=%q: %v", p.Measure, err)
+	}
+	return res
+}
+
+// convBucketedFixture spans about 20 hours across a Sydney (UTC+11) day boundary: 2026-03-03
+// 20:00 UTC is 2026-03-04 07:00 in Sydney, and Sydney midnight 2026-03-04 is 13:00 UTC, so facts
+// sit just before and just after it. Several harness/repo_id values and repeated conversations make
+// DISTINCT and the two interpreted dimensions non-trivial.
+func convBucketedFixture(t *testing.T) (*Tenant, int64, int64) {
+	t.Helper()
+	tn := openT(t, Options{})
+	base := time.Date(2026, 3, 3, 20, 0, 0, 0, time.UTC).Unix()
+	rows := []FactRow{
+		convFact(1, base-8*3600, "hook_event", "claude", "r1", "m1", "c1"),
+		convFact(2, base-7*3600-120, "hook_event", "codex", "r2", "m2", "c2"),
+		convFact(3, base-7*3600+120, "artifact_version", "claude", "r1", "m1", "c1"),
+		convFact(4, base-6*3600, "hook_event", "claude", "r2", "m1", "c1"),
+		convFact(5, base-4*3600+30*60, "commit", "codex", "r1", "m3", "c3"),
+		convFact(6, base-2*3600, "hook_event", "codex", "r2", "m2", "c2"),
+		convFact(7, base, "artifact_version", "claude", "r1", "m1", "c1"),
+		convFact(8, base+2*3600+10*60, "hook_event", "claude", "r2", "m1", "c4"),
+		convFact(9, base+5*3600, "commit", "codex", "r1", "m3", "c3"),
+		convFact(10, base+8*3600, "hook_event", "codex", "r2", "m2", "c1"),
+		convFact(11, base+11*3600+30*60, "artifact_version", "claude", "r1", "m1", "c2"),
+	}
+	if _, err := tn.Append(context.Background(), rows); err != nil {
+		t.Fatal(err)
+	}
+	return tn, base - 8*3600, base + 12*3600
+}
+
+// TestConversationRollupBucketedLocalTwoDim drives the conversations measure with two dimensions,
+// a day/week bucket and both UTC and Australia/Sydney (UTC+11) time zones through the rolled-up
+// read path, and asserts the rows equal the same query with the rollup path forced off. The
+// non-UTC, bucketed and two-dimensional cases cross the interior-hour and day-boundary logic the
+// single-dimension UTC tests never exercise.
+func TestConversationRollupBucketedLocalTwoDim(t *testing.T) {
+	tn, from, to := convBucketedFixture(t)
+	syd, err := time.LoadLocation("Australia/Sydney")
+	if err != nil {
+		t.Fatalf("LoadLocation: %v", err)
+	}
+	for _, loc := range []*time.Location{time.UTC, syd} {
+		for _, bucket := range []string{"day", "week"} {
+			f := AnalyticsFilter{From: time.Unix(from, 0).UTC(), To: time.Unix(to, 0).UTC(), TZ: loc}
+			p := QueryParams{Measure: "conversations", Dims: []string{"harness", "repo_id"}, Bucket: bucket, Top: 100}
+			got, err := tn.Query(context.Background(), f, p)
+			if err != nil {
+				t.Fatalf("Query tz=%v bucket=%s: %v", loc, bucket, err)
+			}
+			want := queryMeasureNoRollup(t, tn, f, p)
+			if len(got.Rows) == 0 {
+				t.Fatalf("tz=%v bucket=%s: no rows, test is vacuous", loc, bucket)
+			}
+			if !reflect.DeepEqual(got.Rows, want.Rows) {
+				t.Fatalf("tz=%v bucket=%s: rollup rows %+v != base-only rows %+v", loc, bucket, got.Rows, want.Rows)
+			}
 		}
 	}
 }
