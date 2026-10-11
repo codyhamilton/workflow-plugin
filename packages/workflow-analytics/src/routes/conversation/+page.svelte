@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { ApiError } from '$lib/api';
 	import { costLabel, label, num } from '$lib/format';
@@ -16,6 +17,50 @@
 	let viewportH = $state(600);
 
 	const id = $derived(page.url.searchParams.get('id') ?? '');
+
+	// The list the user came from: kept in memory for the session and in sessionStorage so a reload
+	// keeps it. Only known site routes count; /conversation and /settings are excluded (the layout
+	// hides the chrome on /conversation, and /settings is not a list).
+	const ROUTE_NAMES: Record<string, string> = {
+		'/': 'Overview',
+		'/trends': 'Trends',
+		'/usage': 'Usage',
+		'/repos': 'Repos',
+		'/hooks': 'Hooks',
+		'/quality': 'Quality',
+		'/executions': 'Executions',
+		'/conversations': 'Conversations',
+		'/explore': 'Explore'
+	};
+	const LAST_LIST_KEY = 'workflow-analytics-last-list';
+
+	function readLastList(): { href: string; name: string } | null {
+		try {
+			const raw = sessionStorage.getItem(LAST_LIST_KEY);
+			if (!raw) return null;
+			const v = JSON.parse(raw);
+			if (v && typeof v.href === 'string' && typeof v.name === 'string') return v;
+		} catch {
+			// sessionStorage can be unavailable (privacy mode); fall through to the default.
+		}
+		return null;
+	}
+
+	let lastList = $state<{ href: string; name: string } | null>(null);
+
+	afterNavigate(({ from }) => {
+		const name = from ? ROUTE_NAMES[from.url.pathname] : undefined;
+		if (from && name) {
+			lastList = { href: from.url.pathname + from.url.search, name };
+			try {
+				sessionStorage.setItem(LAST_LIST_KEY, JSON.stringify(lastList));
+			} catch {
+				// A failed write only loses the reload case.
+			}
+		} else if (!lastList) {
+			lastList = readLastList();
+		}
+	});
 
 	// One request for this conversation; the window and filters do not apply here.
 	$effect(() => {
@@ -59,15 +104,18 @@
 				)} · reason ${num(e.tokens.reasoning)}`
 			: '';
 	const rowCost = (e: TimelineEvent) => {
-		// A usage event (tokens present) whose model is unpriced carries `cost_usd: 0`, not null, so
-		// only a positive cost is priced; everything else is "unpriced", never `$0.00`.
-		if (e.tokens && !(e.cost_usd != null && e.cost_usd > 0)) return 'unpriced';
-		if (e.cost_usd != null) return costLabel({ cost: e.cost_usd, unpriced: 0, calls: 1 });
+		// Tokens in or out make this a usage event; an unpriced model carries `cost_usd: 0`, not null.
+		// A row with no tokens in or out is not a usage row, so it shows no cost text at all.
+		const used = (e.tokens?.in ?? 0) + (e.tokens?.out ?? 0);
+		if (used > 0 && !(e.cost_usd != null && e.cost_usd > 0)) return 'unpriced';
+		if (e.cost_usd != null && e.cost_usd > 0) return costLabel({ cost: e.cost_usd, unpriced: 0, calls: 1 });
 		return '';
 	};
 </script>
 
-<a data-testid="back-to-conversations" href="/conversations">← back to conversations</a>
+<a data-testid="back-to-conversations" href={lastList?.href ?? '/conversations'}
+	>← Back to {lastList?.name ?? 'Conversations'}</a
+>
 
 {#if message}
 	<p data-testid="conversation-message">{message}</p>

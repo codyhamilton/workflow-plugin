@@ -123,6 +123,81 @@ test('the totals render within 1s of navigation', async ({ page }) => {
 	expect(Date.now() - t0).toBeLessThan(1000);
 });
 
+test('the back link returns to the exact list it was opened from', async ({ page }) => {
+	await page.goto('/conversations?range=7d&harness=claude');
+	const link = page.locator('a[href^="/conversation?id="]').first();
+	await expect(link).toBeVisible();
+	await link.click();
+	await expect(page).toHaveURL(/\/conversation\?id=/);
+	await page.getByTestId('back-to-conversations').click();
+	await expect(page).toHaveURL(/\/conversations\?range=7d&harness=claude$/);
+});
+
+test('a zero-token zero-cost row shows no cost text, an unpriced tokenized row reads unpriced', async ({
+	page
+}) => {
+	const events = [
+		{
+			ts: '2026-01-01T00:00:00Z',
+			type: 'hook_event',
+			norm_event: 'usage',
+			event: 'usage',
+			tool: '',
+			model: 'm1',
+			path: '',
+			kind: '',
+			source: '',
+			sha: '',
+			tokens: { in: 0, out: 0, cache_read: 0, cache_write: 0, reasoning: 0 },
+			cost_usd: 0
+		},
+		{
+			ts: '2026-01-01T00:01:00Z',
+			type: 'hook_event',
+			norm_event: 'usage',
+			event: 'usage',
+			tool: '',
+			model: 'qwen3-coder',
+			path: '',
+			kind: '',
+			source: '',
+			sha: '',
+			tokens: { in: 5, out: 5, cache_read: 0, cache_write: 0, reasoning: 0 },
+			cost_usd: 0
+		}
+	];
+	await page.route('**/v1/analytics/conversation*', (r) =>
+		r.fulfill({
+			contentType: 'application/json',
+			headers: { 'access-control-allow-origin': '*' },
+			body: JSON.stringify({
+				conversation_id: 'z',
+				harness: 'claude',
+				repos: [],
+				models: ['m1', 'qwen3-coder'],
+				first_ts: events[0].ts,
+				last_ts: events[1].ts,
+				totals: {
+					model_calls: 2,
+					tokens_in: 5,
+					tokens_out: 5,
+					tokens_cache_read: 0,
+					tokens_cache_write: 0,
+					tokens_reasoning: 0,
+					cost_usd: 0,
+					unpriced_calls: 1
+				},
+				events
+			})
+		})
+	);
+	await page.goto('/conversation?id=z');
+	const rows = page.getByTestId('timeline-row');
+	await expect(rows).toHaveCount(2);
+	await expect(rows.nth(0)).not.toContainText('unpriced');
+	await expect(rows.nth(1)).toContainText('unpriced');
+});
+
 test('a truncated timeline says so', async ({ page }) => {
 	await page.goto('/conversation?id=c5');
 	await expect(page.getByTestId('timeline-truncated')).toHaveCount(0);
