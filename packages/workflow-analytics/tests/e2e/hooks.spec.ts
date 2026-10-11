@@ -2,11 +2,12 @@ import { expect, test, type Page } from '@playwright/test';
 import { FILTER_REPO, HOOKS_BY_EVENT, HOOKS_BY_HARNESS, HOOKS_BY_TOOL } from './fixture';
 import { useServe } from './helpers';
 
-// repo r1 only: c1 (2 Bash PreToolUse, Stop), c3 (Stop), c4 (1 Bash PreToolUse; the secret one is rejected).
+// repo r1 only: c1 (2 Bash PreToolUse, Stop, 1 usage), c3 (Stop), c4 (1 Bash PreToolUse; the secret
+// one is rejected), c5 (3 usage). Usage events have no tool_name, so the '' row is Stop plus usage.
 const R1 = {
-	event: { PreToolUse: 3, Stop: 2 },
-	tool: { Bash: 3, '': 2 },
-	harness: { claude: 4, cursor: 1 }
+	event: { PreToolUse: 3, Stop: 2, 'transcript.assistant_message': 4 },
+	tool: { Bash: 3, '': 6 },
+	harness: { claude: 5, cursor: 1, opencode: 3 }
 };
 
 async function expectGroups(page: Page, want: Record<string, Record<string, number>>) {

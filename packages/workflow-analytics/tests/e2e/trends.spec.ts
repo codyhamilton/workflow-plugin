@@ -4,11 +4,11 @@ import { useServe } from './helpers';
 
 // Hand-counted from the fixture facts: hook events per harness per day (whole window, then repo r1).
 const BY_HARNESS = {
-	claude: { [DAYS.d5]: 2, [DAYS.d4]: 1, [DAYS.d1]: 1 },
+	claude: { [DAYS.d5]: 3, [DAYS.d4]: 1, [DAYS.d1]: 1 },
 	cursor: { [DAYS.d2]: 1, [DAYS.d1]: 1 }
 };
 const BY_HARNESS_R1 = {
-	claude: { [DAYS.d5]: 2, [DAYS.d4]: 1, [DAYS.d1]: 1 },
+	claude: { [DAYS.d5]: 3, [DAYS.d4]: 1, [DAYS.d1]: 1 },
 	cursor: { [DAYS.d1]: 1 }
 };
 
@@ -33,16 +33,16 @@ test('group=harness shows one series per harness; repo_id filters and survives a
 	await expectCells(page, 'cursor', BY_HARNESS.cursor);
 	await page.goto(`/trends?metric=hook_events&group=harness&repo_id=${FILTER_REPO}`);
 	await expectCells(page, 'cursor', BY_HARNESS_R1.cursor);
-	await expect(page.getByTestId(`series-cursor-${DAYS.d2}`)).toHaveCount(0); // r2's day has no r1 point
+	await expect(page.getByTestId(`series-cursor-${DAYS.d2}`)).toHaveText('0'); // cursor's r2 point is filtered out
 	await page.reload();
 	expect(new URL(page.url()).searchParams.getAll('repo_id')).toEqual([FILTER_REPO]);
 	await expectCells(page, 'claude', BY_HARNESS_R1.claude);
-	await expect(page.getByTestId(`series-cursor-${DAYS.d2}`)).toHaveCount(0); // r2's day has no r1 point
+	await expect(page.getByTestId(`series-cursor-${DAYS.d2}`)).toHaveText('0'); // cursor's r2 point is filtered out
 });
 
 test('metric=conversations leaves only none and harness selectable for group', async ({ page }) => {
 	await page.goto('/trends?group=repo_id');
-	await expectCells(page, 'r1', { [DAYS.d5]: 2 });
+	await expectCells(page, 'r1', { [DAYS.d5]: 3 });
 	await page.getByTestId('trends-metric').selectOption('conversations');
 	await expect(page).toHaveURL(/metric=conversations/);
 	const opts = await page

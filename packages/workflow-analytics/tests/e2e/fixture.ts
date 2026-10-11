@@ -16,7 +16,7 @@ const dayStr = (daysAgo: number) => new Date(at(daysAgo, 0) * 1000).toISOString(
 export const DAYS = { d1: dayStr(1), d2: dayStr(2), d3: dayStr(3), d4: dayStr(4), d5: dayStr(5) };
 
 export const REPOS = ['r1', 'r2'];
-export const HARNESSES = ['claude', 'cursor'];
+export const HARNESSES = ['claude', 'cursor', 'opencode'];
 /** The one repo the filtered lens uses. */
 export const FILTER_REPO = 'r1';
 
@@ -62,14 +62,54 @@ art('c3', 'claude', 'r1', 'Write', at(1, 10), P_NESTED, '# nest\n', 'worktree');
 add('c3', 'claude', 'r1', 'hook_event', 'Stop', at(1, 9));
 // c4: cursor, r1. One good hook event; one rejected by precheck for carrying a secret (not stored as a fact).
 add('c4', 'cursor', 'r1', 'hook_event', 'PreToolUse', at(1, 8), tool('Bash'));
-add('c4', 'cursor', 'r1', 'hook_event', 'PreToolUse', at(1, 8), {
-	payload: { tool_name: 'Bash', cmd: 'AKIA' + 'IOSFODNN7' + 'EXAMPLE' }
+	add('c4', 'cursor', 'r1', 'hook_event', 'PreToolUse', at(1, 8), {
+		payload: { tool_name: 'Bash', cmd: 'AKIA' + 'IOSFODNN7' + 'EXAMPLE' }
+	});
+// c5: opencode, r1. Three usage calls: two priced Sonnet calls on different days and one unpriced
+// local call. The ingest normaliser stores the model as providerID/modelID.
+add('c5', 'opencode', 'r1', 'hook_event', 'transcript.assistant_message', at(4, 7), {
+	payload: {
+		hook_event_name: 'transcript.assistant_message',
+		message_id: 'msg_c5_1',
+		modelID: 'claude-sonnet-5-5',
+		providerID: 'anthropic',
+		cost: 0.0123,
+		tokens: { cache: { read: 3000, write: 400 }, input: 1000, output: 200, reasoning: 50 }
+	}
+});
+add('c5', 'opencode', 'r1', 'hook_event', 'transcript.assistant_message', at(2, 7), {
+	payload: {
+		hook_event_name: 'transcript.assistant_message',
+		message_id: 'msg_c5_2',
+		modelID: 'qwen3-coder:30b-a3b-q4_K_M',
+		providerID: 'ollama-maxctx',
+		tokens: { cache: { read: 0, write: 0 }, input: 500, output: 100, reasoning: 0 }
+	}
+});
+add('c5', 'opencode', 'r1', 'hook_event', 'transcript.assistant_message', at(1, 7), {
+	payload: {
+		hook_event_name: 'transcript.assistant_message',
+		message_id: 'msg_c5_3',
+		modelID: 'claude-sonnet-5-5',
+		providerID: 'anthropic',
+		cost: 0.01,
+		tokens: { cache: { read: 100, write: 50 }, input: 2000, output: 300, reasoning: 10 }
+	}
+});
+// c1: claude, r1. One assistant usage message with a distinct id (Opus has no price row, so unpriced).
+add('c1', 'claude', 'r1', 'hook_event', 'transcript.assistant_message', at(5, 13), {
+	payload: {
+		hook_event_name: 'transcript.assistant_message',
+		message_id: 'msg_c1_usage_1',
+		model: 'claude-opus-5-5',
+		usage: { input_tokens: 2, output_tokens: 5505, cache_read_input_tokens: 96297, cache_creation_input_tokens: 922 }
+	}
 });
 
 /** Summary expectations, all hand-counted from the facts above. */
 export const SUMMARY_ALL = {
-	conversations: 4,
-	hook_events: 6,
+	conversations: 5,
+	hook_events: 10,
 	artifact_versions: 8,
 	distinct_content: 7, // d1 worktree and d1 commit share a hash
 	commits: 2,
@@ -86,8 +126,8 @@ export const SUMMARY_ALL = {
 };
 /** Summary with repo_id=r1 (c1, c3, c4). Rejections carry no repo_id, so they drop out of any repo filter. */
 export const SUMMARY_R1 = {
-	conversations: 3,
-	hook_events: 5,
+	conversations: 4,
+	hook_events: 9,
 	artifact_versions: 6,
 	distinct_content: 5,
 	commits: 1,
@@ -103,17 +143,46 @@ export const SUMMARY_R1 = {
 	'screens-unscreened': 5
 };
 
-/** Hook events (whole window): 6 in total. The empty tool key is the Stop events (no tool_name). */
-export const HOOKS_BY_REPO = { r1: 5, r2: 1 };
-export const HOOKS_BY_HARNESS = { claude: 4, cursor: 2 };
-export const HOOKS_BY_EVENT = { PreToolUse: 3, Stop: 2, PostToolUse: 1 };
-export const HOOKS_BY_TOOL = { Bash: 3, Read: 1, '': 2 };
+/** Whole-window usage measures: 4 calls, 2 priced by a reported cost (both Sonnet), 2 unpriced. */
+export const USAGE_ALL = {
+	model_calls: 4,
+	unpriced_calls: 2,
+	tokens_in: 3502, // 1000 + 500 + 2000 + 2
+	tokens_out: 6105, // 200 + 100 + 300 + 5505
+	tokens_cache_read: 99397, // 3000 + 0 + 100 + 96297
+	tokens_cache_write: 1372, // 400 + 0 + 50 + 922
+	tokens_reasoning: 60, // 50 + 0 + 10 + 0
+	cost_usd: 0.0223 // 0.0123 + 0.0100
+};
+/** Per-model usage, keyed by the derived model name the ingest normaliser stores. */
+export const USAGE_BY_MODEL = {
+	'anthropic/claude-sonnet-5-5': { calls: 2, unpriced: 0, cost_usd: 0.0223 },
+	'ollama-maxctx/qwen3-coder:30b-a3b-q4_K_M': { calls: 1, unpriced: 1, cost_usd: 0 },
+	'claude-opus-5-5': { calls: 1, unpriced: 1, cost_usd: 0 }
+};
+/** The `/conversation?id=c5` totals: c5's three OpenCode calls. */
+export const USAGE_C5 = {
+	model_calls: 3,
+	tokens_in: 3500, // 1000 + 500 + 2000
+	tokens_out: 600, // 200 + 100 + 300
+	tokens_cache_read: 3100, // 3000 + 0 + 100
+	tokens_cache_write: 450, // 400 + 0 + 50
+	tokens_reasoning: 60, // 50 + 0 + 10
+	cost_usd: 0.0223, // 0.0123 + 0.0100
+	unpriced_calls: 1
+};
+
+/** Hook events (whole window): 10 in total. The empty tool key is the Stop and usage events (no tool_name). */
+export const HOOKS_BY_REPO = { r1: 9, r2: 1 };
+export const HOOKS_BY_HARNESS = { claude: 5, cursor: 2, opencode: 3 };
+export const HOOKS_BY_EVENT = { PreToolUse: 3, Stop: 2, PostToolUse: 1, 'transcript.assistant_message': 4 };
+export const HOOKS_BY_TOOL = { Bash: 3, Read: 1, '': 6 };
 /** series metric=hook_events bucket=day group=none: key "all". */
 export const HOOK_EVENTS_BY_DAY: Record<string, number> = {
-	[DAYS.d5]: 2,
-	[DAYS.d4]: 1,
-	[DAYS.d2]: 1,
-	[DAYS.d1]: 2
+	[DAYS.d5]: 3,
+	[DAYS.d4]: 2,
+	[DAYS.d2]: 2,
+	[DAYS.d1]: 3
 };
 
 /** /executions, ts descending. ts is the earliest in-window brief ts, as epoch seconds. */
@@ -128,6 +197,7 @@ export const EXECUTION_ROWS = [
 export const CONVERSATION_ROWS = [
 	{ conversation_id: 'c3', harness: 'claude', repos: ['r1'], first_ts: at(1, 9), last_ts: at(1, 10), hook_events: 1, artifact_versions: 2, commits: 0, kinds: ['brief'] },
 	{ conversation_id: 'c4', harness: 'cursor', repos: ['r1'], first_ts: at(1, 8), last_ts: at(1, 8), hook_events: 1, artifact_versions: 0, commits: 0, kinds: [] },
+	{ conversation_id: 'c5', harness: 'opencode', repos: ['r1'], first_ts: at(4, 7), last_ts: at(1, 7), hook_events: 3, artifact_versions: 0, commits: 0, kinds: [] },
 	{ conversation_id: 'c2', harness: 'cursor', repos: ['r2'], first_ts: at(2, 8), last_ts: at(2, 12), hook_events: 1, artifact_versions: 2, commits: 1, kinds: ['brief', 'design'] },
-	{ conversation_id: 'c1', harness: 'claude', repos: ['r1'], first_ts: at(5, 10), last_ts: at(3, 13), hook_events: 3, artifact_versions: 4, commits: 1, kinds: ['brief', 'design', 'report'] }
+	{ conversation_id: 'c1', harness: 'claude', repos: ['r1'], first_ts: at(5, 10), last_ts: at(3, 13), hook_events: 4, artifact_versions: 4, commits: 1, kinds: ['brief', 'design', 'report'] }
 ];

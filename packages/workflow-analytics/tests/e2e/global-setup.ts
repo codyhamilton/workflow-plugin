@@ -7,7 +7,7 @@ import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { FACTS } from './fixture';
 
-const PREVIEW_PORT = 4391; // keep in step with playwright.config.ts
+const PREVIEW_PORT = Number(process.env.E2E_PORT) || 4391; // keep in step with playwright.config.ts
 const repoRoot = path.resolve(import.meta.dirname, '../../../..');
 
 function freePort(): Promise<number> {
