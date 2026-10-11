@@ -1,6 +1,10 @@
 package store
 
-import "context"
+import (
+	"context"
+
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+)
 
 // The hourly hook_events rollup (migration 6): one row per distinct (hour, dimension tuple) with
 // the count of facts that collapsed into it. It exists because aggregating the base table for the
@@ -107,6 +111,93 @@ func (t *Tenant) backfillConversationRollup() error {
 		return err
 	}
 	if _, err := tx.ExecContext(ctx, convRollupFill); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
+}
+
+// The hourly facet rollup (migration 8): one row per distinct (dim, hour, value) with the number of
+// facts that carried that value, for every dimension the /v1/analytics/facets read lists. Facets
+// otherwise runs a DISTINCT scan per dimension over the whole facts window, each a full pass that
+// misses the phase-3 bound on 90d; the rollup collapses the interior whole hours to one counted row
+// per value and Facets reads base rows only for the two partial edge hours (analytics.go), so the
+// distinct sets match the base rows exactly.
+
+// facetRollupUpsert increments the (dim, hour, value) row for one inserted fact. Append runs it in
+// the same transaction as the fact insert, only for a fact that was actually inserted, so a
+// duplicate that collapses on the fact row-hash primary key adds nothing to the rollup.
+const facetRollupUpsert = `INSERT INTO facets_hourly
+	(dim,hour,value,n) VALUES (?,?,?,1)
+	ON CONFLICT(dim,hour,value) DO UPDATE SET n=n+1`
+
+// facetDims are the dimensions the facets read lists, each with the FactRow field it reads and the
+// fact type it applies to ("" for every type). The tool histogram counts only hook_event facts, as
+// the base query does.
+var facetDims = []struct {
+	name, typ string
+	val       func(FactRow) string
+}{
+	{"repo_id", "", func(r FactRow) string { return r.RepoID }},
+	{"harness", "", func(r FactRow) string { return r.Harness }},
+	{"plan", "", func(r FactRow) string { return planOf(r.Path) }},
+	{"event", "", func(r FactRow) string { return r.Event }},
+	{"model", "", func(r FactRow) string { return r.Model }},
+	{"norm_event", "", func(r FactRow) string { return r.NormEvent }},
+	{"kind", "", func(r FactRow) string { return keys.Kind(r.Path) }},
+	{"tool", "hook_event", func(r FactRow) string { return r.Tool }},
+}
+
+// facetRollupFill refills facets_hourly from the base rows: one grouped branch per dimension, the
+// tool branch restricted to hook_event as the base histogram is. It is the aggregate the open-time
+// backfill rebuilds the table from.
+const facetRollupFill = `INSERT INTO facets_hourly (dim,hour,value,n)
+	SELECT 'repo_id', CAST(ts/3600 AS INTEGER)*3600, repo_id, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'harness', CAST(ts/3600 AS INTEGER)*3600, harness, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'plan', CAST(ts/3600 AS INTEGER)*3600, plan, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'event', CAST(ts/3600 AS INTEGER)*3600, event, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'model', CAST(ts/3600 AS INTEGER)*3600, model, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'norm_event', CAST(ts/3600 AS INTEGER)*3600, norm_event, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'kind', CAST(ts/3600 AS INTEGER)*3600, kind, count(*) FROM facts GROUP BY 2,3
+	UNION ALL SELECT 'tool', CAST(ts/3600 AS INTEGER)*3600, tool, count(*) FROM facts WHERE type='hook_event' GROUP BY 2,3`
+
+// facetRollupColumns are the facts columns facetRollupFill selects. A pre-migration-4 layout (which
+// a test constructs) lacks them, so the fill is skipped there.
+var facetRollupColumns = []string{"ts", "repo_id", "harness", "plan", "event", "model", "norm_event", "kind", "tool"}
+
+// facetRollupFillApplies reports whether facts has every column the facet rollup fill needs.
+func (t *Tenant) facetRollupFillApplies() (bool, error) {
+	have, err := t.columns("facts")
+	if err != nil {
+		return false, err
+	}
+	for _, c := range facetRollupColumns {
+		if !have[c] {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+// backfillFacetRollup fills facets_hourly from base rows for a tenant that just gained the table. It
+// is a no-op when facts predates the extracted columns, so migration 8 can stay plain SQL and this
+// runs from open instead. The DELETE and the fill run in one transaction, as backfillConversationRollup's
+// do, so a crash between them cannot leave the table empty.
+func (t *Tenant) backfillFacetRollup() error {
+	ok, err := t.facetRollupFillApplies()
+	if err != nil || !ok {
+		return err
+	}
+	ctx := context.Background()
+	tx, err := t.wdb.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM facets_hourly`); err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, facetRollupFill); err != nil {
 		tx.Rollback()
 		return err
 	}

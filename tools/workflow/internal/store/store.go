@@ -94,6 +94,16 @@ var migrations = []string{
 		hour INTEGER NOT NULL, harness TEXT NOT NULL, repo_id TEXT NOT NULL, model TEXT NOT NULL,
 		conversation_id TEXT NOT NULL, n INTEGER NOT NULL,
 		PRIMARY KEY (hour, harness, repo_id, model, conversation_id)) WITHOUT ROWID;`,
+	// 8: an hourly rollup of every fact dimension the facets read scans. /v1/analytics/facets runs
+	// seven DISTINCT scans plus a tool count over the whole facts window, each a full pass, and
+	// misses the phase-3 bound on 90d; this collapses each (dim, hour, value) presence to one
+	// counted row that Facets reads for whole interior hours with base rows for the two partial
+	// edge hours (analytics.go). The table is filled by backfillFacetRollup in open, as migration 6
+	// is, so a pre-migration-4 test layout (which lacks the columns) stays plain SQL. IF NOT EXISTS
+	// keeps a rewind test working.
+	`CREATE TABLE IF NOT EXISTS facets_hourly (
+    dim TEXT NOT NULL, hour INTEGER NOT NULL, value TEXT NOT NULL, n INTEGER NOT NULL,
+    PRIMARY KEY (dim, hour, value)) WITHOUT ROWID;`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -186,6 +196,9 @@ func open(dir string, opts Options, how int, exclusive bool) (*Tenant, error) {
 	}
 	if err == nil && from < 7 {
 		err = t.backfillConversationRollup() // existing db gaining the conversations rollup; writer not started yet
+	}
+	if err == nil && from < 8 {
+		err = t.backfillFacetRollup() // existing db gaining the facets rollup; writer not started yet
 	}
 	if err == nil {
 		err = t.ensureConversationRollupIndex() // ensured on every open; ANALYZE only when the index is newly created
@@ -439,6 +452,11 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			return err
 		}
 		defer stConv.Close()
+		stFacet, err := tx.Prepare(facetRollupUpsert)
+		if err != nil {
+			return err
+		}
+		defer stFacet.Close()
 		for i, r := range rows {
 			if len(r.Raw) == 0 {
 				// OR IGNORE would swallow the NOT NULL violation, so fail explicitly.
@@ -454,15 +472,24 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			}
 			n, _ := res.RowsAffected()
 			inserted[i] = n > 0
-			// A collapsed duplicate inserts no fact, so it must not touch the rollup either.
-			if inserted[i] && r.Type == "hook_event" {
-				if _, err := stRoll.Exec(int64(r.TS)/3600*3600, r.Harness, r.RepoID, r.NormEvent, r.Event, r.Tool, r.ConversationID); err != nil {
+			// A collapsed duplicate inserts no fact, so it must not touch the rollups either.
+			if inserted[i] {
+				hour := int64(r.TS) / 3600 * 3600
+				if r.Type == "hook_event" {
+					if _, err := stRoll.Exec(hour, r.Harness, r.RepoID, r.NormEvent, r.Event, r.Tool, r.ConversationID); err != nil {
+						return err
+					}
+				}
+				if _, err := stConv.Exec(hour, r.Harness, r.RepoID, r.Model, r.ConversationID); err != nil {
 					return err
 				}
-			}
-			if inserted[i] {
-				if _, err := stConv.Exec(int64(r.TS)/3600*3600, r.Harness, r.RepoID, r.Model, r.ConversationID); err != nil {
-					return err
+				for _, d := range facetDims {
+					if d.typ != "" && r.Type != d.typ {
+						continue
+					}
+					if _, err := stFacet.Exec(d.name, hour, d.val(r)); err != nil {
+						return err
+					}
 				}
 			}
 		}

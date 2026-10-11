@@ -430,3 +430,292 @@ func rollupFixtureOn(t *testing.T, tn *Tenant) (*Tenant, []FactRow, int64) {
 	}
 	return tn, rows, base
 }
+
+// facetFact builds a fact of any type with a repo-relative path so kind and plan are exercised.
+func facetFact(i int, ts int64, typ, harness, repo, event, norm, tool, model, conv, p string) FactRow {
+	raw := []byte(fmt.Sprintf(`{"facet":%d}`, i))
+	return FactRow{RowHash: keys.ContentHash(raw), Type: typ, ConversationID: conv,
+		Harness: harness, Event: event, NormEvent: norm, Tool: tool, Model: model,
+		RepoID: repo, Path: p, TS: float64(ts), Raw: raw}
+}
+
+// facetFixture plants facts over four hours and every type, with design/brief/report paths and
+// several repos, harnesses, models and tools so each facet dimension has a non-trivial distinct set.
+func facetFixture(t *testing.T) (*Tenant, []FactRow, int64) {
+	t.Helper()
+	tn := openT(t, Options{})
+	base := time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC).Unix()
+	rows := []FactRow{
+		facetFact(1, base+10*60, "hook_event", "claude", "r1", "PostToolUse", "tool_post", "Read", "m1", "c1", "docs/plans/p1/briefs/b1.md"),
+		facetFact(2, base+20*60, "hook_event", "codex", "r1", "PostToolUse", "tool_post", "Bash", "m2", "c2", "docs/plans/p1/briefs/b1.md"),
+		facetFact(3, base+40*60, "artifact_version", "claude", "r2", "artifact", "", "", "m1", "c1", "docs/plans/p1/briefs/b1.md"),
+		facetFact(4, base+3600+15*60, "hook_event", "claude", "r2", "PreToolUse", "tool_pre", "Bash", "m1", "c1", "docs/plans/p2/DESIGN.md"),
+		facetFact(5, base+3600+45*60, "commit", "codex", "r1", "commit", "", "", "", "c2", ""),
+		facetFact(6, base+2*3600+5*60, "hook_event", "codex", "r1", "PostToolUse", "tool_post", "Read", "m2", "c3", "docs/plans/p2/reports/r1.md"),
+		facetFact(7, base+2*3600+35*60, "artifact_version", "claude", "r2", "artifact", "", "", "m1", "c2", "docs/plans/p2/reports/r1.md"),
+		facetFact(8, base+3*3600+10*60, "hook_event", "claude", "r1", "Stop", "stop", "", "m1", "c1", "docs/plans/p1/briefs/b2.md"),
+		facetFact(9, base+3*3600+50*60, "commit", "codex", "r2", "commit", "", "", "", "c4", ""),
+		facetFact(10, base+3*3600+55*60, "hook_event", "claude", "r2", "PostToolUse", "tool_post", "Read", "m1", "c1", "docs/plans/p1/briefs/b2.md"),
+	}
+	if _, err := tn.Append(context.Background(), rows); err != nil {
+		t.Fatal(err)
+	}
+	return tn, rows, base
+}
+
+// facetsBaseOracle computes the Facets result directly from base rows over [from,to], the oracle the
+// rollup path must equal for an unfiltered window.
+func facetsBaseOracle(t *testing.T, tn *Tenant, from, to int64) Facets {
+	t.Helper()
+	return facetsOracle(t, tn, AnalyticsFilter{From: time.Unix(from, 0).UTC(), To: time.Unix(to, 0).UTC()})
+}
+
+// facetsOracle computes the Facets result directly from base rows for any filter, the oracle both
+// the rollup path and the filtered fallback (rollupEligible()==false) path must equal.
+func facetsOracle(t *testing.T, tn *Tenant, f AnalyticsFilter) Facets {
+	t.Helper()
+	w, args := f.factWhere()
+	distinct := func(expr string, nonEmpty bool) []string {
+		extra := ""
+		if nonEmpty {
+			extra = " AND " + expr + " != ''"
+		}
+		rows, err := tn.rdb.Query("SELECT DISTINCT "+expr+" AS v FROM facts WHERE "+w+extra+" ORDER BY v", args...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer rows.Close()
+		var out []string
+		for rows.Next() {
+			var s string
+			if err := rows.Scan(&s); err != nil {
+				t.Fatal(err)
+			}
+			out = append(out, s)
+		}
+		if err := rows.Err(); err != nil {
+			t.Fatal(err)
+		}
+		return out
+	}
+	var want Facets
+	want.Repos = distinct("repo_id", false)
+	want.Harnesses = distinct("harness", false)
+	want.Plans = distinct("plan", false)
+	want.Events = distinct("event", false)
+	want.Models = distinct("model", true)
+	want.NormEvents = distinct("norm_event", true)
+	have := map[string]bool{}
+	for _, k := range distinct("kind", false) {
+		have[k] = true
+	}
+	for _, k := range []string{"design", "brief", "report"} {
+		if have[k] {
+			want.Kinds = append(want.Kinds, k)
+		}
+	}
+	rows, err := tn.rdb.Query(`SELECT tool AS tname, count(*) AS n FROM facts
+		WHERE type='hook_event' AND `+w+` GROUP BY tname HAVING tname != '' ORDER BY n DESC, tname ASC LIMIT 100`, args...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var c ToolCount
+		if err := rows.Scan(&c.Name, &c.N); err != nil {
+			t.Fatal(err)
+		}
+		want.Tools = append(want.Tools, c)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return want
+}
+
+// TestFacetRollupEqualsBaseRows drives the rolled-up facets read over windows that start and end
+// mid-hour and compares it, dimension by dimension, with distinct sets over base rows alone.
+func TestFacetRollupEqualsBaseRows(t *testing.T) {
+	tn, _, base := facetFixture(t)
+	windows := []struct {
+		name     string
+		from, to int64
+	}{
+		{"whole hours", base, base + 3*3600 + 3599},
+		{"mid start", base + 1800, base + 3*3600 + 1800},
+		{"mid end", base, base + 2*3600 + 1800},
+		{"single hour mid", base + 3600 + 600, base + 3600 + 3000},
+		{"exact hour edges", base + 3600, base + 2*3600},
+		{"all", 0, base + 10*3600},
+	}
+	for _, w := range windows {
+		f := AnalyticsFilter{From: time.Unix(w.from, 0).UTC(), To: time.Unix(w.to, 0).UTC()}
+		got, err := tn.Facets(context.Background(), f)
+		if err != nil {
+			t.Fatalf("window %q: %v", w.name, err)
+		}
+		want := facetsBaseOracle(t, tn, w.from, w.to)
+		if !reflect.DeepEqual(got, want) {
+			t.Fatalf("window %q: rollup %+v != base %+v", w.name, got, want)
+		}
+	}
+}
+
+// TestFacetsFilteredFallback covers the rollupEligible()==false path: any non-time filter makes
+// Facets read base rows alone (facetsBase), and the result must equal the base-row oracle under that
+// filter for multi-hour windows that would otherwise take the rollup fast path.
+func TestFacetsFilteredFallback(t *testing.T) {
+	tn, _, base := facetFixture(t)
+	windows := []struct {
+		name     string
+		from, to int64
+	}{
+		{"whole hours", base, base + 3*3600 + 3599},
+		{"mid start", base + 1800, base + 3*3600 + 1800},
+	}
+	for _, w := range windows {
+		for _, repos := range [][]string{{"r1"}, {"r2"}, {"r1", "r2"}} {
+			f := AnalyticsFilter{From: time.Unix(w.from, 0).UTC(), To: time.Unix(w.to, 0).UTC(), Repos: repos}
+			if f.rollupEligible() {
+				t.Fatalf("window %q repos %v: filter unexpectedly rollup-eligible", w.name, repos)
+			}
+			got, err := tn.Facets(context.Background(), f)
+			if err != nil {
+				t.Fatalf("window %q repos %v: %v", w.name, repos, err)
+			}
+			want := facetsOracle(t, tn, f)
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("window %q repos %v: fallback %+v != base %+v", w.name, repos, got, want)
+			}
+		}
+	}
+}
+
+// TestFacetRollupDuplicateAppend: re-appending the same facts (identical row hashes) inserts no row,
+// so it must leave the facets output unchanged, and the rollup weight per dimension must still equal
+// the base-row count.
+func TestFacetRollupDuplicateAppend(t *testing.T) {
+	tn, rows, base := facetFixture(t)
+	ctx := context.Background()
+	f := AnalyticsFilter{From: time.Unix(base, 0).UTC(), To: time.Unix(base+3*3600+3599, 0).UTC()}
+	before, err := tn.Facets(ctx, f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ins, err := tn.Append(ctx, rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, ok := range ins {
+		if ok {
+			t.Fatalf("duplicate row %d reported inserted", i)
+		}
+	}
+	after, err := tn.Facets(ctx, f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(before, after) {
+		t.Fatalf("duplicate append changed facets: %+v -> %+v", before, after)
+	}
+	for _, d := range []struct {
+		dim, where string
+	}{
+		{"repo_id", ""}, {"harness", ""}, {"plan", ""}, {"event", ""},
+		{"model", ""}, {"norm_event", ""}, {"kind", ""}, {"tool", "type='hook_event'"},
+	} {
+		var rn, bn int
+		if err := tn.rdb.QueryRow(`SELECT sum(n) FROM facets_hourly WHERE dim=?`, d.dim).Scan(&rn); err != nil {
+			t.Fatal(err)
+		}
+		q := `SELECT count(*) FROM facts`
+		if d.where != "" {
+			q += " WHERE " + d.where
+		}
+		if err := tn.rdb.QueryRow(q).Scan(&bn); err != nil {
+			t.Fatal(err)
+		}
+		if rn != bn {
+			t.Fatalf("dim %q: rollup sum %d != base count %d", d.dim, rn, bn)
+		}
+	}
+}
+
+// summaryFact builds a fact of any type with a content hash so the summary's distinct-content count
+// is exercised.
+func summaryFact(i int, ts int64, typ, harness, repo, conv, content string) FactRow {
+	raw := []byte(fmt.Sprintf(`{"summary":%d}`, i))
+	return FactRow{RowHash: keys.ContentHash(raw), Type: typ, ConversationID: conv,
+		Harness: harness, RepoID: repo, ContentHash: content, TS: float64(ts), Raw: raw}
+}
+
+// summaryFixture plants hook_event, artifact_version and commit facts across four hours, reusing
+// conversations and content hashes so the summary distinct counts are non-trivial.
+func summaryFixture(t *testing.T) (*Tenant, int64) {
+	t.Helper()
+	tn := openT(t, Options{})
+	base := time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC).Unix()
+	h := func(n int) string { return fmt.Sprintf("%064x", n) }
+	rows := []FactRow{
+		summaryFact(1, base+15*60, "hook_event", "claude", "r1", "c1", ""),
+		summaryFact(2, base+45*60, "hook_event", "codex", "r1", "c2", ""),
+		summaryFact(3, base+50*60, "artifact_version", "claude", "r2", "c1", h(1)),
+		// An artifact_version with an empty content_hash: Append allows it, and it must count as one
+		// distinct content value (the '' string), matching the old count(DISTINCT CASE ...) branch.
+		summaryFact(10, base+55*60, "artifact_version", "claude", "r2", "c1", ""),
+		summaryFact(4, base+3600+5*60, "hook_event", "claude", "r2", "c1", ""),
+		summaryFact(5, base+3600+59*60, "commit", "claude", "r1", "c3", ""),
+		summaryFact(6, base+2*3600, "artifact_version", "codex", "r2", "c1", h(1)),
+		summaryFact(7, base+2*3600+30*60, "artifact_version", "claude", "r1", "c2", h(2)),
+		summaryFact(8, base+3*3600+10*60, "hook_event", "codex", "r1", "c4", ""),
+		summaryFact(9, base+3*3600+40*60, "commit", "claude", "r2", "c1", ""),
+	}
+	if _, err := tn.Append(context.Background(), rows); err != nil {
+		t.Fatal(err)
+	}
+	return tn, base
+}
+
+// summaryBaseOracle computes the five summary count fields directly from base rows over [from,to].
+func summaryBaseOracle(t *testing.T, tn *Tenant, from, to int64) (conv, hook, av, distinct, commits int) {
+	t.Helper()
+	if err := tn.rdb.QueryRow(`SELECT count(DISTINCT conversation_id),
+		COALESCE(SUM(type='hook_event'),0), COALESCE(SUM(type='artifact_version'),0),
+		count(DISTINCT CASE WHEN type='artifact_version' THEN content_hash END), COALESCE(SUM(type='commit'),0)
+		FROM facts WHERE ts>=? AND ts<=?`, float64(from), float64(to)).Scan(&conv, &hook, &av, &distinct, &commits); err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
+// TestSummaryRollupEqualsBase drives the summary rollup fast path (a time-only filter) over several
+// windows, including ones that start and end mid-hour, and asserts the five count fields equal an
+// aggregate computed directly from base rows.
+func TestSummaryRollupEqualsBase(t *testing.T) {
+	tn, base := summaryFixture(t)
+	windows := []struct {
+		name     string
+		from, to int64
+	}{
+		{"whole hours", base, base + 3*3600 + 3599},
+		{"mid start", base + 1800, base + 3*3600 + 1800},
+		{"mid end", base, base + 2*3600 + 1800},
+		{"mid both", base + 1800, base + 2*3600 + 1800},
+		{"single hour mid", base + 1500, base + 3300},
+		{"all", 0, base + 10*3600},
+	}
+	for _, w := range windows {
+		f := AnalyticsFilter{From: time.Unix(w.from, 0).UTC(), To: time.Unix(w.to, 0).UTC()}
+		got, err := tn.Summary(context.Background(), f)
+		if err != nil {
+			t.Fatalf("window %q: %v", w.name, err)
+		}
+		wantConv, wantHook, wantAV, wantDistinct, wantCommits := summaryBaseOracle(t, tn, w.from, w.to)
+		if got.Conversations != wantConv || got.HookEvents != wantHook || got.ArtifactVersions != wantAV ||
+			got.DistinctContent != wantDistinct || got.Commits != wantCommits {
+			t.Fatalf("window %q: rollup {conv %d hook %d av %d distinct %d commits %d} != base {conv %d hook %d av %d distinct %d commits %d}",
+				w.name, got.Conversations, got.HookEvents, got.ArtifactVersions, got.DistinctContent, got.Commits,
+				wantConv, wantHook, wantAV, wantDistinct, wantCommits)
+		}
+	}
+}

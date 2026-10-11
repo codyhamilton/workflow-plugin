@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"math"
 	"path"
 	"sort"
 	"strings"
@@ -163,7 +164,89 @@ func (t *Tenant) strings(ctx context.Context, q string, args ...any) ([]string, 
 	return out, rows.Err()
 }
 
+// rollupEligible reports whether f constrains only time. The facet rollup covers every dimension
+// value in the window but no non-time predicate, so a filter carrying any list falls back to base
+// rows and its results stay exactly as the base-only Facets produced them.
+func (f AnalyticsFilter) rollupEligible() bool {
+	return len(f.Repos) == 0 && len(f.Harnesses) == 0 && len(f.Kinds) == 0 && len(f.Plans) == 0 &&
+		len(f.NormEvents) == 0 && len(f.Events) == 0 && len(f.Tools) == 0 && len(f.Models) == 0 &&
+		len(f.Sources) == 0 && len(f.ConversationIDs) == 0
+}
+
+// Facets lists the distinct dimension values and the tool histogram over the window. With no
+// non-time filter it reads facets_hourly for the whole hours strictly inside the window and base
+// rows for the two partial edge hours (the rollup holds each dim's presence, so the union of the
+// distinct sets is exact); any other filter reads base rows alone via facetsBase.
 func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) {
+	if !f.rollupEligible() {
+		return t.facetsBase(ctx, f)
+	}
+	from, to := seconds(f.From), seconds(f.To)
+	hF := math.Floor(from/3600) * 3600
+	hT := math.Floor(to/3600) * 3600
+	if hF == hT {
+		// The whole window lies in one hour; there is no whole interior hour to read from the rollup.
+		return t.facetsBase(ctx, f)
+	}
+	var out Facets
+	var err error
+	var ks []string
+	for _, d := range []struct {
+		dst      *[]string
+		dim      string
+		expr     string
+		nonEmpty bool
+	}{
+		{&out.Repos, "repo_id", "repo_id", false}, {&out.Harnesses, "harness", "harness", false},
+		{&out.Plans, "plan", "plan", false}, {&out.Events, "event", "event", false},
+		{&out.Models, "model", "model", true}, {&out.NormEvents, "norm_event", "norm_event", true},
+		{&ks, "kind", "kind", false},
+	} {
+		extra, rollupExtra := "", ""
+		if d.nonEmpty {
+			extra = " AND " + d.expr + " != ''"
+			rollupExtra = " AND value != ''"
+		}
+		if *d.dst, err = t.strings(ctx, `SELECT value FROM (
+			SELECT value FROM facets_hourly WHERE dim=? AND hour > ? AND hour < ?`+rollupExtra+`
+			UNION SELECT `+d.expr+` FROM facts WHERE ts >= ? AND ts < ?`+extra+`
+			UNION SELECT `+d.expr+` FROM facts WHERE ts >= ? AND ts <= ?`+extra+`
+		) ORDER BY value`, d.dim, hF, hT, from, hF+3600, hT, to); err != nil {
+			return out, err
+		}
+	}
+	have := map[string]bool{}
+	for _, k := range ks {
+		have[k] = true
+	}
+	for _, k := range []string{"design", "brief", "report"} {
+		if have[k] {
+			out.Kinds = append(out.Kinds, k)
+		}
+	}
+	rows, err := t.rdb.QueryContext(ctx, `SELECT value AS tname, sum(n) AS n FROM (
+		SELECT value, sum(n) AS n FROM facets_hourly WHERE dim='tool' AND hour > ? AND hour < ? GROUP BY value
+		UNION ALL SELECT tool, count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts < ? AND tool != '' GROUP BY tool
+		UNION ALL SELECT tool, count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts <= ? AND tool != '' GROUP BY tool
+	) GROUP BY value HAVING value != '' ORDER BY n DESC, tname ASC LIMIT 100`,
+		hF, hT, from, hF+3600, hT, to)
+	if err != nil {
+		return out, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var c ToolCount
+		if err := rows.Scan(&c.Name, &c.N); err != nil {
+			return out, err
+		}
+		out.Tools = append(out.Tools, c)
+	}
+	return out, rows.Err()
+}
+
+// facetsBase is the base-row facets read: a DISTINCT scan per dimension and the tool histogram over
+// facts alone. It is exact for any filter and is the fallback for filtered or single-hour windows.
+func (t *Tenant) facetsBase(ctx context.Context, f AnalyticsFilter) (Facets, error) {
 	w, args := f.factWhere()
 	var out Facets
 	var err error
@@ -219,12 +302,43 @@ func (t *Tenant) Summary(ctx context.Context, f AnalyticsFilter) (Summary, error
 		Rejections: map[string]int{"precheck": 0, "screen": 0},
 		Screens:    map[string]int{"pass": 0, "unscreened": 0}}
 	w, args := f.factWhere()
-	err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT conversation_id),
-		COALESCE(SUM(type='hook_event'),0), COALESCE(SUM(type='artifact_version'),0),
-		count(DISTINCT CASE WHEN type='artifact_version' THEN content_hash END), COALESCE(SUM(type='commit'),0)
-		FROM facts WHERE `+w, args...).Scan(&s.Conversations, &s.HookEvents, &s.ArtifactVersions, &s.DistinctContent, &s.Commits)
-	if err != nil {
-		return s, err
+	from, to := seconds(f.From), seconds(f.To)
+	hF := int64(math.Floor(from/3600)) * 3600
+	hT := int64(math.Floor(to/3600)) * 3600
+	if f.rollupEligible() && hF != hT {
+		// Time-only window spanning whole interior hours: read the hook_events and conversations
+		// counts from their hourly rollups for the interior hours and base rows for the two partial
+		// edge hours (as Facets does), and the remaining per-type counts straight from base rows.
+		if err := t.rdb.QueryRowContext(ctx, `SELECT COALESCE(SUM(n),0) FROM (
+			SELECT n FROM hook_events_hourly WHERE hour > ? AND hour < ?
+			UNION ALL SELECT count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts < ?
+			UNION ALL SELECT count(*) FROM facts WHERE type='hook_event' AND ts >= ? AND ts <= ?)`,
+			hF, hT, from, hF+3600, hT, to).Scan(&s.HookEvents); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT conversation_id) FROM (
+			SELECT conversation_id FROM conversations_hourly WHERE hour > ? AND hour < ?
+			UNION ALL SELECT conversation_id FROM facts WHERE ts >= ? AND ts < ?
+			UNION ALL SELECT conversation_id FROM facts WHERE ts >= ? AND ts <= ?)`,
+			hF, hT, from, hF+3600, hT, to).Scan(&s.Conversations); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(*) FROM facts WHERE type='artifact_version' AND `+w, args...).Scan(&s.ArtifactVersions); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(*) FROM facts WHERE type='commit' AND `+w, args...).Scan(&s.Commits); err != nil {
+			return s, err
+		}
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT content_hash) FROM facts WHERE type='artifact_version' AND `+w, args...).Scan(&s.DistinctContent); err != nil {
+			return s, err
+		}
+	} else {
+		if err := t.rdb.QueryRowContext(ctx, `SELECT count(DISTINCT conversation_id),
+			COALESCE(SUM(type='hook_event'),0), COALESCE(SUM(type='artifact_version'),0),
+			count(DISTINCT CASE WHEN type='artifact_version' THEN content_hash END), COALESCE(SUM(type='commit'),0)
+			FROM facts WHERE `+w, args...).Scan(&s.Conversations, &s.HookEvents, &s.ArtifactVersions, &s.DistinctContent, &s.Commits); err != nil {
+			return s, err
+		}
 	}
 	rows, err := t.rdb.QueryContext(ctx, `SELECT COALESCE(NULLIF(kind,''),'other'), source, count(*)
 		FROM facts WHERE type='artifact_version' AND `+w+` GROUP BY 1, 2`, args...)
