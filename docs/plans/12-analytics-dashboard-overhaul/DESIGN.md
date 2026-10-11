@@ -463,3 +463,8 @@ Each criterion is tagged with where it comes from:
   - server-side dashboards (no user identity);
   - keeping LayerChart (sankey, heatmap, treemap and brush would all be hand-built);
   - an approximate seen-id window for chunk counts (the user dropped the measure instead).
+
+## Amendments after sign-off
+
+- **`message.part.delta` is removed, not collapsed.** The user decided (during Phase 3) that streamed deltas are dropped at the source. The OpenCode plugin and ingest both list `message.part.delta` as `remove`: no fact and no archive line. The `collapse` outcome and the "every delta is still archived" rule above no longer apply to new data. The historical ledger and archive are rewritten offline to delete every delta fact and archive line, since the message parts remain in `message.part.updated`. Closed Phases 1 to 3 are not edited; a fixer unit after Phase 3 makes the change.
+- **`hook_events` counts parts from `message.part.updated`.** It no longer counts a collapsed delta part. The Phase 4 and Phase 5 measures and any chart that offers `hook_events` use this meaning.
