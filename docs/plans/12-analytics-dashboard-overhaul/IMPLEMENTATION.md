@@ -114,3 +114,11 @@ Units: thirteen, from `refine` (briefs in `briefs/`, named `3-NN-<slug>.md`). Or
 8. `artifact_feedback` not run on earlier briefs and reports: stays carried (infrastructure).
 
 New, from refine: `tools/transcript/pricing.json` holds only seven Cursor models, so most local calls will be unpriced unless a cost was reported. 3-11 records the share. Adding rates is outside this plan's scope and is left to the user.
+
+### 3-02-filter-columns
+
+Built (702ba01, flash worker): `AnalyticsFilter` gained `NormEvents`, `Events`, `Tools`, `Models`, `Sources`, `ConversationIDs`, `TZ`; `factWhere` filters real columns; `Facets`, `Summary`, `Series`, `WindowScores`, `Executions`, `Conversations`, `Explore` read the `tool/source/sha/kind/plan/norm_event/model/conversation_id` columns, with no `json_extract` left (carried item 4). New `TestAnalyticsColumnReads`; `go test ./internal/store ./internal/serve`, vet and gofmt pass. Surfaces: `internal/store/{analytics.go,analytics_test.go}`. Deviations: none beyond fixture adjustments. `TZ` and serve wiring are left to 3-06.
+
+### 3-03-collapse-survivor-ts
+
+Built (d1af2e2, flash worker): compaction keeps the first-arriving part's `ts` as ingest does (carried item 5); `minInto` and the retime op removed. `TestCollapseSurvivorFirstArrival` added, `TestPreexistingSurvivor` updated; compact and ingest tests, vet and gofmt pass. Surfaces: `internal/compact/`. Deviations: none.
