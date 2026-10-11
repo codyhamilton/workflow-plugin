@@ -10,18 +10,17 @@ import (
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
 )
 
-// rollupLedger appends a small hook_event ledger holding removable (opencode Remove-policy) and
-// collapsible (opencode message.part.delta) rows as well as kept rows, so compaction both deletes
-// and rewrites base rows. Append maintains the rollup, so it starts exact and compaction is what
-// would drift it. Returns the hour-aligned base ts.
+// rollupLedger appends a small hook_event ledger holding removable (opencode Remove-policy) rows
+// as well as kept rows, so compaction both deletes and rewrites base rows. Append maintains the
+// rollup, so it starts exact and compaction is what would drift it. Returns the hour-aligned base ts.
 func rollupLedger(t *testing.T, tn *store.Tenant) int64 {
 	t.Helper()
 	base := int64(1791072000)
 	rows := []store.FactRow{
 		hookRow(t, 1, base+60, "opencode", "chat.params", "c1", map[string]any{}),
 		hookRow(t, 2, base+120, "claude", "PreToolUse", "c1", map[string]any{"tool_name": "Read"}),
-		hookRow(t, 3, base+3600+60, "opencode", "message.part.delta", "c1", delta("m1", "p1", "text")),
-		hookRow(t, 4, base+3600+120, "opencode", "message.part.delta", "c1", delta("m1", "p1", "text")),
+		hookRow(t, 3, base+3600+60, "opencode", "chat.params", "c1", map[string]any{}),
+		hookRow(t, 4, base+3600+120, "opencode", "chat.params", "c1", map[string]any{}),
 		hookRow(t, 5, base+7200+60, "claude", "PostToolUse", "c2", map[string]any{"tool_name": "Bash"}),
 		hookRow(t, 6, base+7200+120, "opencode", "shell.env", "c2", map[string]any{}),
 		hookRow(t, 7, base+60, "claude", "UserPromptSubmit", "c2", map[string]any{}),
@@ -30,11 +29,6 @@ func rollupLedger(t *testing.T, tn *store.Tenant) int64 {
 		t.Fatalf("append ledger: %v", err)
 	}
 	return base
-}
-
-func delta(messageID, partID, field string) map[string]any {
-	return map[string]any{"event": map[string]any{"properties": map[string]any{
-		"messageID": messageID, "partID": partID, "field": field}}}
 }
 
 func hookRow(t *testing.T, i int, ts int64, harness, event, conv string, payload map[string]any) store.FactRow {
@@ -205,8 +199,8 @@ func allRollupsLedger(t *testing.T, tn *store.Tenant) int64 {
 	return base
 }
 
-// TestCompactRebuildsRollup runs one compaction over a ledger that contains removable and
-// collapsible hooks and asserts the rollup is back to the base-row aggregate afterwards.
+// TestCompactRebuildsRollup runs one compaction over a ledger that contains removable hooks and
+// asserts the rollup is back to the base-row aggregate afterwards.
 func TestCompactRebuildsRollup(t *testing.T) {
 	tn := openExclusive(t)
 	rollupLedger(t, tn)
@@ -216,7 +210,7 @@ func TestCompactRebuildsRollup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run: %v", err)
 	}
-	if !st.Complete || st.Removed == 0 || st.Collapsed == 0 {
+	if !st.Complete || st.Removed == 0 {
 		t.Fatalf("compaction did not do the expected work: %+v", st)
 	}
 	assertRollupExact(t, tn)

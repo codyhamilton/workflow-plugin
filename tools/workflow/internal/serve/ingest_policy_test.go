@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
 )
 
@@ -162,8 +161,8 @@ func TestIngestPolicy(t *testing.T) {
 				t.Errorf("%s: %d facts for a removed event", d.Expect.ID, n)
 			}
 		}
-		if removed != 4 {
-			t.Fatalf("fixture has %d remove facts, want 4", removed)
+		if removed != 10 {
+			t.Fatalf("fixture has %d remove facts, want 10", removed)
 		}
 		lines := readArchive(t, dir, ds)
 		if len(lines) != len(ds)-removed {
@@ -188,42 +187,7 @@ func TestIngestPolicy(t *testing.T) {
 		}
 	})
 
-	t.Run("deltas_of_one_part_leave_one_fact", func(t *testing.T) {
-		parts := map[string][]int{}
-		for i, d := range ds {
-			if d.Expect.Policy != "collapse" {
-				continue
-			}
-			rh, ok := ingest.CollapseHash(d.Fact.Type, d.Fact.Harness, d.Fact.Event, d.Fact.ConversationID, d.Fact.Payload)
-			if !ok {
-				t.Fatalf("%s: no collapse key", d.Expect.ID)
-			}
-			parts[rh] = append(parts[rh], i)
-			var n int
-			if err := db.QueryRow(`SELECT count(*) FROM facts WHERE row_hash=?`, rh).Scan(&n); err != nil {
-				t.Fatal(err)
-			}
-			if n != 1 {
-				t.Errorf("%s: %d facts for the part, want 1", d.Expect.ID, n)
-			}
-		}
-		if len(parts) != 2 {
-			t.Fatalf("%d collapse parts, want 2", len(parts))
-		}
-		for rh, idxs := range parts {
-			accepted := 0
-			for _, i := range idxs {
-				if first[i].Status == "accepted" {
-					accepted++
-				}
-			}
-			if accepted != 1 {
-				t.Errorf("part %s: %d accepted of %d deltas, want 1", rh, accepted, len(idxs))
-			}
-		}
-	})
-
-	t.Run("kept_and_collapsed_events_have_verbatim_archive_line", func(t *testing.T) {
+	t.Run("kept_events_have_verbatim_archive_line", func(t *testing.T) {
 		lines := readArchive(t, dir, ds)
 		for _, d := range ds {
 			if d.Expect.Policy == "remove" {
@@ -259,21 +223,10 @@ func TestIngestPolicy(t *testing.T) {
 	})
 
 	t.Run("columns_match_fixture_expected", func(t *testing.T) {
-		seenPart := map[string]bool{}
 		checked := 0
 		for _, d := range ds {
 			if d.Expect.Policy == "remove" {
 				continue
-			}
-			if d.Expect.Policy == "collapse" {
-				rh, ok := ingest.CollapseHash(d.Fact.Type, d.Fact.Harness, d.Fact.Event, d.Fact.ConversationID, d.Fact.Payload)
-				if !ok {
-					t.Fatalf("%s: no collapse key", d.Expect.ID)
-				}
-				if seenPart[rh] {
-					continue
-				}
-				seenPart[rh] = true
 			}
 			var (
 				norm, tool, model            string
@@ -306,8 +259,8 @@ func TestIngestPolicy(t *testing.T) {
 				t.Errorf("%s: cost %v, want %v", d.Expect.ID, cost.Float64, *d.Expect.CostReported)
 			}
 		}
-		if checked != 51 {
-			t.Errorf("checked %d rows, want 51", checked)
+		if checked != 48 {
+			t.Errorf("checked %d rows, want 48", checked)
 		}
 	})
 

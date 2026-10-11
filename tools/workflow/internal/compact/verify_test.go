@@ -57,18 +57,14 @@ func TestVerifyCopy(t *testing.T) {
 	})
 
 	t.Run("b_delta_rows", func(t *testing.T) {
-		want := c["delta_parts"] + (c["delta_total"] - c["delta_with_key"])
-		var rows, distinct int64
-		if err := db.QueryRow(`SELECT COUNT(*), COUNT(DISTINCT row_hash) FROM facts
-			WHERE type='hook_event' AND event='message.part.delta'`).Scan(&rows, &distinct); err != nil {
+		var rows int64
+		if err := db.QueryRow(`SELECT COUNT(*) FROM facts
+			WHERE type='hook_event' AND event='message.part.delta'`).Scan(&rows); err != nil {
 			t.Fatalf("query: %v", err)
 		}
-		t.Logf("delta rows=%d distinct=%d want=%d", rows, distinct, want)
-		if rows != want {
-			t.Errorf("delta rows = %d, want %d", rows, want)
-		}
-		if distinct != want {
-			t.Errorf("distinct delta row_hash = %d, want %d", distinct, want)
+		t.Logf("delta rows=%d want=0", rows)
+		if rows != 0 {
+			t.Errorf("delta rows = %d, want 0", rows)
 		}
 	})
 
@@ -147,7 +143,7 @@ func TestVerifyCopy(t *testing.T) {
 	t.Run("f_facts_by_type", func(t *testing.T) {
 		total := count(t, `SELECT COUNT(*) FROM facts`)
 		hooks := count(t, `SELECT COUNT(*) FROM facts WHERE type='hook_event'`)
-		wantTotal := c["facts_total"] - c["removed_total"] - (c["delta_total"] - c["delta_parts"])
+		wantTotal := c["facts_total"] - c["removed_total"] - c["delta_total"]
 		wantHooks := c["expected_surviving_hook_rows"]
 		t.Logf("facts total=%d want=%d; hook rows=%d want=%d", total, wantTotal, hooks, wantHooks)
 		if total != wantTotal {

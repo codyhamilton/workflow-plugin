@@ -1,6 +1,6 @@
 // Package compact rewrites an existing ledger to the Phase 1 shape in resumable batches. In one
-// pass over existing hook facts it archives each body, applies the event policy (removing and
-// collapsing), strips the payload and fills the analytics columns, so that history and new ingest
+// pass over existing hook facts it archives each body, applies the event policy (removing listed
+// events), strips the payload and fills the analytics columns, so that history and new ingest
 // agree. It is offline: the tenant must be opened with store.OpenExclusive. It neither vacuums nor
 // parses flags; the caller does that.
 package compact
@@ -33,14 +33,13 @@ type Options struct {
 	AfterCommit  func(batch int) error
 }
 
-// Stats reports what a Run did. Scanned is the rows examined this run; Removed, Collapsed,
-// Stripped and Backfilled are the hook and non-hook rows handled; Archived is the archive entries
-// written (a resumed run may archive a batch twice). Complete is true when the scan reached the
-// end of the table and meta compaction was set to "complete".
+// Stats reports what a Run did. Scanned is the rows examined this run; Removed, Stripped and
+// Backfilled are the hook and non-hook rows handled; Archived is the archive entries written (a
+// resumed run may archive a batch twice). Complete is true when the scan reached the end of the
+// table and meta compaction was set to "complete".
 type Stats struct {
 	Scanned    int64
 	Removed    int64
-	Collapsed  int64
 	Stripped   int64
 	Archived   int64
 	Backfilled int64
@@ -179,7 +178,6 @@ func Run(ctx context.Context, t *store.Tenant, o Options) (st Stats, err error) 
 		}
 		st.Scanned += int64(len(rows))
 		st.Removed += ps.Removed
-		st.Collapsed += ps.Collapsed
 		st.Stripped += ps.Stripped
 		st.Backfilled += ps.Backfilled
 		st.Archived += int64(len(entries))
@@ -194,21 +192,18 @@ func Run(ctx context.Context, t *store.Tenant, o Options) (st Stats, err error) 
 			_, _ = db.ExecContext(ctx, `PRAGMA wal_checkpoint(TRUNCATE)`)
 		}
 		if batches%50 == 0 && o.Progress != nil {
-			fmt.Fprintf(o.Progress, "compact: scanned=%d removed=%d collapsed=%d archived=%d elapsed=%s\n",
-				st.Scanned, st.Removed, st.Collapsed, st.Archived, time.Since(start).Round(time.Millisecond))
+			fmt.Fprintf(o.Progress, "compact: scanned=%d removed=%d archived=%d elapsed=%s\n",
+				st.Scanned, st.Removed, st.Archived, time.Since(start).Round(time.Millisecond))
 		}
 	}
 }
 
 // processBatch plans the batch: it decodes each row, applies the policy, and builds the archive
-// entries and SQL ops. Entries carry the in-memory original raw (the received fact verbatim). A
-// survivor in an earlier batch is found with a read; survivors created within this batch are
-// tracked in memory, because no SQL has been applied yet.
+// entries and SQL ops. Entries carry the in-memory original raw (the received fact verbatim).
 func processBatch(ctx context.Context, tx *sql.Tx, rows []row) ([]archive.Entry, []op, Stats, error) {
 	var ps Stats
 	var entries []archive.Entry
 	var ops []op
-	survivors := map[string]struct{}{}
 
 	for _, r := range rows {
 		dec := json.NewDecoder(bytes.NewReader(r.raw))
@@ -230,39 +225,12 @@ func processBatch(ctx context.Context, tx *sql.Tx, rows []row) ([]archive.Entry,
 				TS:             r.ts,
 				Line:           archive.Line{RowHash: r.rowHash, ReceivedAt: r.receivedAt, Fact: r.raw},
 			})
-			newHash := r.rowHash
-			if action == ingest.Collapse {
-				if ch, ok := ingest.CollapseHash(r.typ, r.harness, r.event, r.conv, payload); ok {
-					if _, ok := survivors[ch]; ok {
-						ops = append(ops, op{kind: 'd', rowid: r.rowid})
-						ps.Collapsed++
-						continue
-					}
-					var sid int64
-					err := tx.QueryRowContext(ctx, `SELECT rowid FROM facts WHERE row_hash=? AND rowid<>? ORDER BY rowid LIMIT 1`, ch, r.rowid).
-						Scan(&sid)
-					switch {
-					case err == nil:
-						ops = append(ops, op{kind: 'd', rowid: r.rowid})
-						survivors[ch] = struct{}{}
-						ps.Collapsed++
-						continue
-					case errors.Is(err, sql.ErrNoRows):
-						newHash = ch
-					default:
-						return nil, nil, ps, err
-					}
-				}
-			}
 			env, err := ingest.Envelope(obj)
 			if err != nil {
 				return nil, nil, ps, fmt.Errorf("compact: row %d: envelope: %w", r.rowid, err)
 			}
-			ops = append(ops, op{kind: 'h', rowid: r.rowid, newHash: newHash, raw: env,
+			ops = append(ops, op{kind: 'h', rowid: r.rowid, newHash: r.rowHash, raw: env,
 				d: ingest.Derive(r.harness, r.event, payload)})
-			if _, ok := survivors[newHash]; !ok {
-				survivors[newHash] = struct{}{}
-			}
 			ps.Stripped++
 			continue
 		}

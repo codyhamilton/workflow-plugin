@@ -47,35 +47,6 @@ func TestRemoveListMatchesPlugin(t *testing.T) {
 	}
 }
 
-func TestPolicyCollapseNeedsKey(t *testing.T) {
-	full := map[string]any{"event": map[string]any{"properties": map[string]any{"messageID": "m", "partID": "p", "field": "text"}}}
-	if a := Policy("opencode", "message.part.delta", full); a != Collapse {
-		t.Fatalf("full key: %v", a)
-	}
-	for _, drop := range []string{"messageID", "partID", "field"} {
-		props := map[string]any{"messageID": "m", "partID": "p", "field": "text"}
-		props[drop] = ""
-		if a := Policy("opencode", "message.part.delta", map[string]any{"event": map[string]any{"properties": props}}); a != Keep {
-			t.Fatalf("empty %s: %v", drop, a)
-		}
-		delete(props, drop)
-		if a := Policy("opencode", "message.part.delta", map[string]any{"event": map[string]any{"properties": props}}); a != Keep {
-			t.Fatalf("missing %s: %v", drop, a)
-		}
-	}
-	if a := Policy("opencode", "message.part.delta", nil); a != Keep {
-		t.Fatalf("nil payload: %v", a)
-	}
-	if a := Policy("claude", "chat.params", nil); a != Keep {
-		t.Fatalf("other harness: %v", a)
-	}
-	h1, _ := CollapseHash("hook_event", "opencode", "message.part.delta", "c", full)
-	want := keys.ContentHash([]byte(`["hook_event","opencode","message.part.delta","c","m","p","text"]`))
-	if h1 != want {
-		t.Fatalf("collapse hash %s want %s", h1, want)
-	}
-}
-
 type rawFixture struct {
 	Facts  []json.RawMessage `json:"facts"`
 	Expect []struct {
@@ -159,25 +130,10 @@ func TestIngestPolicyFixture(t *testing.T) {
 	}
 	removeEvents := map[string]bool{}
 	var nonRemove int
-	// A later delta of a part already stored (here, earlier in the same batch) hits the part's row
-	// and is answered duplicate; every other fact is accepted.
-	seenPart := map[string]bool{}
 	for i, r := range res {
 		f := full.Facts[i]
-		want := Accepted
-		if policy[f.ID] == "collapse" {
-			var cv struct {
-				C string `json:"conversation_id"`
-			}
-			json.Unmarshal(fx.Facts[i], &cv)
-			h, _ := CollapseHash("hook_event", f.Harness, f.Event, cv.C, f.Payload)
-			if seenPart[h] {
-				want = Duplicate
-			}
-			seenPart[h] = true
-		}
-		if r.Status != want || r.ID != f.ID {
-			t.Fatalf("first send %d: %+v want %s", i, r, want)
+		if r.Status != Accepted || r.ID != f.ID {
+			t.Fatalf("first send %d: %+v want accepted", i, r)
 		}
 		if p := policy[f.ID]; p == "remove" {
 			removeEvents[f.Event] = true
@@ -185,7 +141,7 @@ func TestIngestPolicyFixture(t *testing.T) {
 			nonRemove++
 		}
 	}
-	if len(removeEvents) != 4 {
+	if len(removeEvents) != 5 {
 		t.Fatalf("remove events in fixture: %v", removeEvents)
 	}
 
@@ -201,50 +157,9 @@ func TestIngestPolicyFixture(t *testing.T) {
 		}
 	}
 
-	// (b) deltas collapse to one row per part; keyless delta is kept.
-	type part struct {
-		n  int
-		ts float64
-	}
-	parts := map[string]*part{}
-	var keyless int
-	for i, f := range full.Facts {
-		if f.Event != "message.part.delta" {
-			continue
-		}
-		var ts struct {
-			TS   float64 `json:"ts"`
-			Conv string  `json:"conversation_id"`
-		}
-		json.Unmarshal(fx.Facts[i], &ts)
-		h, ok := CollapseHash("hook_event", f.Harness, f.Event, ts.Conv, f.Payload)
-		if !ok {
-			keyless++
-			continue
-		}
-		if parts[h] == nil {
-			parts[h] = &part{ts: ts.TS}
-		}
-		parts[h].n++
-	}
-	var sizes []int
-	for h, p := range parts {
-		sizes = append(sizes, p.n)
-		var ts float64
-		if n := count(`SELECT count(*) FROM facts WHERE row_hash=?`, h); n != 1 {
-			t.Fatalf("part %s rows %d", h, n)
-		}
-		db.QueryRowContext(ctx, `SELECT ts FROM facts WHERE row_hash=?`, h).Scan(&ts)
-		if ts != p.ts {
-			t.Fatalf("part ts %v want first delta %v", ts, p.ts)
-		}
-	}
-	sort.Ints(sizes)
-	if len(sizes) != 2 || sizes[0] != 2 || sizes[1] != 3 || keyless != 1 {
-		t.Fatalf("parts %v keyless %d", sizes, keyless)
-	}
-	if n := count(`SELECT count(*) FROM facts WHERE event='message.part.delta'`); n != 3 {
-		t.Fatalf("delta rows %d want 3", n)
+	// (b) message.part.delta is removed: no fact row and no archive line, keyed or keyless.
+	if n := count(`SELECT count(*) FROM facts WHERE event='message.part.delta'`); n != 0 {
+		t.Fatalf("delta rows %d want 0", n)
 	}
 
 	// (e) no stored hook fact carries a payload.
@@ -262,13 +177,6 @@ func TestIngestPolicyFixture(t *testing.T) {
 			continue
 		}
 		rh, _ := keys.RowHash(fx.Facts[i])
-		if e.Policy == "collapse" {
-			var cv struct {
-				C string `json:"conversation_id"`
-			}
-			json.Unmarshal(fx.Facts[i], &cv)
-			rh, _ = CollapseHash("hook_event", f.Harness, f.Event, cv.C, f.Payload)
-		}
 		var ne, tool, model string
 		var in, out, cr, cw, rs int64
 		var cost *float64
@@ -377,7 +285,7 @@ func TestIngestPolicyFixture(t *testing.T) {
 // (g) a hook body containing a secret is rejected and not archived.
 func TestIngestSecretHookNotArchived(t *testing.T) {
 	tn := open(t)
-	f := map[string]any{"id": "s#0", "type": "hook_event", "conversation_id": "sec", "harness": "opencode", "event": "message.part.delta", "ts": 5,
+	f := map[string]any{"id": "s#0", "type": "hook_event", "conversation_id": "sec", "harness": "opencode", "event": "session.status", "ts": 5,
 		"payload": map[string]any{"event": map[string]any{"properties": map[string]any{"messageID": "m", "partID": "p", "field": "text", "delta": "k " + secretText()}}}}
 	res, err := Ingest(context.Background(), tn, marshal(t, f))
 	if err != nil {

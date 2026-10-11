@@ -119,7 +119,7 @@ func TestNormaliseTable(t *testing.T) {
 		"codex|PostCompact": "compact", "codex|PreCompact": "compact",
 		"claude|PostModelSwitch": "other", "claude|PreModelSwitch": "other",
 		"claude|UserPromptExpansion": "other", "opencode|PostToolUse": "tool_post",
-		"opencode|UserPromptSubmit": "prompt", "opencode|message.part.delta": "message_part",
+		"opencode|UserPromptSubmit": "prompt",
 		"cursor|beforeSubmitPrompt": "prompt", "cursor|afterShellExecution": "tool_post",
 		"cursor|stop": "turn_end", "cursor|afterAgentResponse": "assistant_message",
 		"nobody|Whatever": "other", "claude|": "other",

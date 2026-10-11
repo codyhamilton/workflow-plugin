@@ -79,7 +79,7 @@ function snapshotOf(payload: Record<string, unknown>): string {
 
 // Secret-bearing or redundant events are never forwarded. Mirrored by the Go policy; a test asserts equality.
 // remove-list:begin
-const REMOVE_EVENTS = ["experimental.chat.system.transform", "chat.params", "chat.headers", "shell.env"] as const
+const REMOVE_EVENTS = ["experimental.chat.system.transform", "chat.params", "chat.headers", "shell.env", "message.part.delta"] as const
 // remove-list:end
 
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {

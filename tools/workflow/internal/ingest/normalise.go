@@ -28,7 +28,7 @@ var normTable = map[string]string{
 	"stop":                       "turn_end", "stopfailure": "turn_end",
 	"subagentstart": "subagent_start", "subagentstop": "subagent_end",
 	"precompact": "compact", "postcompact": "compact",
-	"message.part.delta": "message_part", "message.part.updated": "message_part",
+	"message.part.updated": "message_part",
 }
 
 var knownHarness = map[string]bool{"claude": true, "codex": true, "opencode": true, "cursor": true}

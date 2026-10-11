@@ -11,8 +11,8 @@
 //
 // Unknown keys are kept in the stored raw JSON. Per fact the order is: validate; for hook_event the
 // event policy (policy.go: a Remove fact is answered accepted and leaves nothing); precheck every
-// string leaf with secrets.Scan; row hash (the collapse hash for a Collapse fact); WritePending for
-// artifact content; an archive entry for hook events. Then one archive.Append for the batch's hook
+// string leaf with secrets.Scan; row hash; WritePending for artifact content; an archive entry for
+// hook events. Then one archive.Append for the batch's hook
 // events, then one Append for its rows. A stored hook_event raw is the canonical envelope without
 // payload; the archive line holds the full canonical received fact.
 package ingest
@@ -246,9 +246,6 @@ func Ingest(ctx context.Context, tenant *store.Tenant, facts []json.RawMessage) 
 			if err != nil {
 				results[i].Status, results[i].Reason = Rejected, invalid("cannot canonicalise fact")
 				continue
-			}
-			if action == Collapse {
-				row.RowHash, _ = CollapseHash(typ, harness, event, conv, payload)
 			}
 			row.Raw = slim
 			d := Derive(harness, event, payload)
