@@ -342,7 +342,7 @@ func TestAdvisoryReads(t *testing.T) {
 		}
 		// undo migrations 2-4 so the file is a real version-1 database
 		steps := []string{`DROP TABLE search`, `DROP INDEX facts_ts`, `DROP INDEX facts_type_ts`,
-			`DROP INDEX facts_ts_harness_event`, `DROP INDEX rejections_at`}
+			`DROP INDEX facts_ts_harness_event`, `DROP INDEX facts_usage_ts`, `DROP INDEX rejections_at`}
 		for _, c := range []string{"norm_event", "tool", "model", "kind", "plan", "source", "sha", "tok_in", "tok_out",
 			"tok_cache_read", "tok_cache_write", "tok_reasoning", "cost_reported"} {
 			steps = append(steps, `ALTER TABLE facts DROP COLUMN `+c)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -145,5 +146,33 @@ func TestUsageLiveClaudeWithoutIdIsNotDeduped(t *testing.T) {
 	}
 	if !reflect.DeepEqual(r.Rows, []QueryRow{{K: []string{}, V: 2}}) {
 		t.Fatalf("model_calls: %#v", r.Rows)
+	}
+}
+
+// TestUsageIndexDrivesUsageRead: the usage CTE must be served by facts_usage_ts, not a walk of
+// facts_conv_page over every base row, and the index must be created on open.
+func TestUsageIndexDrivesUsageRead(t *testing.T) {
+	tn := usageFixture(t)
+	var n int
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM sqlite_master WHERE type='index' AND name='facts_usage_ts'`).Scan(&n); err != nil || n != 1 {
+		t.Fatalf("facts_usage_ts present = %d, err %v", n, err)
+	}
+	cte, args := usageRowsWhere(AnalyticsFilter{From: time.Unix(0, 0), To: time.Unix(4e9, 0)})
+	rs, err := tn.rdb.Query("EXPLAIN QUERY PLAN "+cte+" SELECT harness FROM kept", args...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rs.Close()
+	var plan string
+	for rs.Next() {
+		var a, b, c int
+		var d string
+		if err := rs.Scan(&a, &b, &c, &d); err != nil {
+			t.Fatal(err)
+		}
+		plan += d + "\n"
+	}
+	if !strings.Contains(plan, "facts_usage_ts") {
+		t.Fatalf("usage CTE does not use facts_usage_ts:\n%s", plan)
 	}
 }

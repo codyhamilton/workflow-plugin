@@ -232,12 +232,41 @@ func (t *Tenant) ensureConversationRollupIndex() error {
 		return err
 	}
 	if n > 0 {
-		return nil
+		return t.ensureUsageIndex()
 	}
 	if _, err := t.wdb.Exec(`CREATE INDEX IF NOT EXISTS facts_conv_page ON facts(conversation_id, ts, type, repo_id)`); err != nil {
 		return err
 	}
-	_, err = t.wdb.Exec(`ANALYZE facts`)
+	if _, err := t.wdb.Exec(`ANALYZE facts`); err != nil {
+		return err
+	}
+	return t.ensureUsageIndex()
+}
+
+// ensureUsageIndex creates, once, facts(type, norm_event, ts), the three columns the usage CTE
+// filters on. Without it the planner walks facts_conv_page over every base row (to avoid a sort)
+// and looks each row up in the table. The index is ANALYZEd on its own at creation: without a
+// stat row the planner also picks it for other type= queries (WindowScores went from 33 ms to 5 s).
+// It is a no-op once the index exists or when facts predates norm_event. On a large uncompacted
+// ledger the first open pays a one-time build (about 0.7 s for 435k rows).
+func (t *Tenant) ensureUsageIndex() error {
+	have, err := t.columns("facts")
+	if err != nil {
+		return err
+	}
+	for _, c := range []string{"type", "norm_event", "ts"} {
+		if !have[c] {
+			return nil
+		}
+	}
+	var n int
+	if err := t.wdb.QueryRow(`SELECT count(*) FROM sqlite_master WHERE type='index' AND name='facts_usage_ts'`).Scan(&n); err != nil || n > 0 {
+		return err
+	}
+	if _, err := t.wdb.Exec(`CREATE INDEX IF NOT EXISTS facts_usage_ts ON facts(type, norm_event, ts)`); err != nil {
+		return err
+	}
+	_, err = t.wdb.Exec(`ANALYZE facts_usage_ts`) // stats for this index only; a full ANALYZE would rescan facts
 	return err
 }
 

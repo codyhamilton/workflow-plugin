@@ -24,7 +24,8 @@ func init() { usageQuery = usageQueryImpl }
 func usageRowsWhere(f AnalyticsFilter) (string, []any) {
 	where, args := f.factWhere()
 	mid := "CASE WHEN harness = 'claude' THEN json_extract(raw, '$.backfill.ref') END"
-	q := "WITH usage_u AS (SELECT *, " + mid + " AS _mid FROM facts " +
+	q := "WITH usage_u AS (SELECT row_hash, harness, repo_id, model, conversation_id, ts, tok_in, tok_out, " +
+		"tok_cache_read, tok_cache_write, tok_reasoning, cost_reported, " + mid + " AS _mid FROM facts " +
 		"WHERE type = 'hook_event' AND norm_event = 'usage' AND " + where + "), " +
 		"kept AS (SELECT * FROM (" +
 		"SELECT *, ROW_NUMBER() OVER (PARTITION BY conversation_id, _mid " +
