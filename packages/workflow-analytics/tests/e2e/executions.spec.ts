@@ -91,3 +91,26 @@ test('a drill interaction renders within 1 s', async ({ page }) => {
 	await expectRows(page, EXECUTION_ROWS.filter((r) => r.repo_id === 'r2'));
 	expect(Date.now() - start).toBeLessThan(1000);
 });
+
+test('shows the execution sankey and its link controls', async ({ page }) => {
+	await page.goto('/executions');
+	await expect(page.getByTestId('exec-sankey')).toBeVisible();
+	for (const id of ['exec-link-design-brief', 'exec-link-brief-commit', 'exec-link-brief-nocommit', 'exec-link-commit-report', 'exec-link-commit-noreport']) {
+		await expect(page.getByTestId(id)).toBeVisible();
+	}
+});
+
+test('clicking a sankey link filters the table and toggles off', async ({ page }) => {
+	await page.goto('/executions');
+	await expectRows(page, EXECUTION_ROWS);
+	await page.getByTestId('exec-link-commit-report').click();
+	await expect(page).toHaveURL(/shape=complete/);
+	await expect(page.getByTestId('exec-link-commit-report')).toHaveAttribute('aria-pressed', 'true');
+	await expectRows(page, EXECUTION_ROWS.filter((r) => r.shape === 'complete'));
+	await page.reload();
+	await expect(page).toHaveURL(/shape=complete/);
+	await expectRows(page, EXECUTION_ROWS.filter((r) => r.shape === 'complete'));
+	await page.getByTestId('exec-link-commit-report').click();
+	await expect(page).not.toHaveURL(/shape=complete/);
+	await expectRows(page, EXECUTION_ROWS);
+});
