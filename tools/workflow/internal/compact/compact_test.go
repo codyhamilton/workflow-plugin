@@ -403,10 +403,10 @@ func TestPreexistingSurvivor(t *testing.T) {
 	if !ok {
 		t.Fatal("test part has no collapse key")
 	}
-	// A post-Phase-1 survivor already holds the collapse hash, earlier ts 70, raw without payload.
+	// A post-Phase-1 survivor already holds the collapse hash, ts 70, raw without payload.
 	survRaw := []byte(`{"type":"hook_event","conversation_id":"c","harness":"opencode","event":"message.part.delta","ts":70}`)
 	insertRow(t, tn, h, "hook_event", "c", "opencode", "message.part.delta", 70, survRaw)
-	// A legacy delta with the same part key and earlier ts 40.
+	// A legacy delta with the same part key and later ts 40.
 	delta := []byte(`{"id":"d1","type":"hook_event","conversation_id":"c","harness":"opencode","event":"message.part.delta","ts":40,"payload":{"cwd":"/x","session_id":"c","hook_event_name":"message.part.delta","event":{"type":"message.part.delta","properties":{"delta":"hi","field":"text","messageID":"m","partID":"p","sessionID":"c"}}}}`)
 	deltaCanon, err := keys.Canonical(delta)
 	if err != nil {
@@ -432,8 +432,73 @@ func TestPreexistingSurvivor(t *testing.T) {
 	if err := tn.Raw().QueryRow(`SELECT ts FROM facts WHERE row_hash=?`, h).Scan(&ts); err != nil {
 		t.Fatal(err)
 	}
-	if ts != 40 {
-		t.Fatalf("survivor ts = %v, want minimum 40", ts)
+	if ts != 70 {
+		t.Fatalf("survivor ts = %v, want first-arriving 70", ts)
+	}
+}
+
+func TestCollapseSurvivorFirstArrival(t *testing.T) {
+	tn := openExclusive(t)
+	ctx := context.Background()
+	// Three parts of one collapse group arrive out of ts order: 30, then 10, then 20.
+	raws := [][]byte{
+		[]byte(`{"id":"d0","type":"hook_event","conversation_id":"c","harness":"opencode","event":"message.part.delta","ts":30,"payload":{"cwd":"/x","session_id":"c","hook_event_name":"message.part.delta","event":{"type":"message.part.delta","properties":{"delta":"hi","field":"text","messageID":"m","partID":"p","sessionID":"c"}}}}`),
+		[]byte(`{"id":"d1","type":"hook_event","conversation_id":"c","harness":"opencode","event":"message.part.delta","ts":10,"payload":{"cwd":"/x","session_id":"c","hook_event_name":"message.part.delta","event":{"type":"message.part.delta","properties":{"delta":"hi","field":"text","messageID":"m","partID":"p","sessionID":"c"}}}}`),
+		[]byte(`{"id":"d2","type":"hook_event","conversation_id":"c","harness":"opencode","event":"message.part.delta","ts":20,"payload":{"cwd":"/x","session_id":"c","hook_event_name":"message.part.delta","event":{"type":"message.part.delta","properties":{"delta":"hi","field":"text","messageID":"m","partID":"p","sessionID":"c"}}}}`),
+	}
+	tsFor := func(raw []byte) float64 {
+		var v struct {
+			TS float64 `json:"ts"`
+		}
+		if err := json.Unmarshal(raw, &v); err != nil {
+			t.Fatal(err)
+		}
+		return v.TS
+	}
+	for _, raw := range raws {
+		canon, err := keys.Canonical(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rh, err := keys.RowHash(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		insertRow(t, tn, rh, "hook_event", "c", "opencode", "message.part.delta", tsFor(raw), canon)
+	}
+
+	if _, err := Run(ctx, tn, Options{}); err != nil {
+		t.Fatal(err)
+	}
+	var count int
+	if err := tn.Raw().QueryRow(`SELECT count(*) FROM facts`).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 1 {
+		t.Fatalf("want one collapsed survivor, got %d rows", count)
+	}
+	var ts float64
+	if err := tn.Raw().QueryRow(`SELECT ts FROM facts`).Scan(&ts); err != nil {
+		t.Fatal(err)
+	}
+	if ts != 30 {
+		t.Fatalf("survivor ts = %v, want first-arriving 30", ts)
+	}
+
+	if _, err := Run(ctx, tn, Options{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.Raw().QueryRow(`SELECT count(*) FROM facts`).Scan(&count); err != nil {
+		t.Fatal(err)
+	}
+	if count != 1 {
+		t.Fatalf("second Run changed the row count: %d", count)
+	}
+	if err := tn.Raw().QueryRow(`SELECT ts FROM facts`).Scan(&ts); err != nil {
+		t.Fatal(err)
+	}
+	if ts != 30 {
+		t.Fatalf("second Run changed the survivor ts: %v", ts)
 	}
 }
 

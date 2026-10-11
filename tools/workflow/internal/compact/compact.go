@@ -75,12 +75,6 @@ type op struct {
 	sha      string
 }
 
-// surv is a collapsed part's survivor tracked while a batch is planned.
-type surv struct {
-	rowid int64
-	ts    float64
-}
-
 // Run compacts t (must be opened with store.OpenExclusive). It repairs the archive, resumes from
 // meta compact_cursor, walks facts by rowid in batches, and records completion in meta
 // compaction. It never loads the table: memory is bounded by Batch.
@@ -207,15 +201,7 @@ func processBatch(ctx context.Context, tx *sql.Tx, rows []row) ([]archive.Entry,
 	var ps Stats
 	var entries []archive.Entry
 	var ops []op
-	survivors := map[string]*surv{}
-
-	minInto := func(h string, ts float64) {
-		s := survivors[h]
-		if s != nil && ts < s.ts {
-			s.ts = ts
-			ops = append(ops, op{kind: 't', rowid: s.rowid, ts: ts})
-		}
-	}
+	survivors := map[string]struct{}{}
 
 	for _, r := range rows {
 		dec := json.NewDecoder(bytes.NewReader(r.raw))
@@ -242,25 +228,16 @@ func processBatch(ctx context.Context, tx *sql.Tx, rows []row) ([]archive.Entry,
 				if ch, ok := ingest.CollapseHash(r.typ, r.harness, r.event, r.conv, payload); ok {
 					if _, ok := survivors[ch]; ok {
 						ops = append(ops, op{kind: 'd', rowid: r.rowid})
-						minInto(ch, r.ts)
 						ps.Collapsed++
 						continue
 					}
 					var sid int64
-					var sts float64
-					err := tx.QueryRowContext(ctx, `SELECT rowid,ts FROM facts WHERE row_hash=? AND rowid<>?`, ch, r.rowid).
-						Scan(&sid, &sts)
+					err := tx.QueryRowContext(ctx, `SELECT rowid FROM facts WHERE row_hash=? AND rowid<>? ORDER BY rowid LIMIT 1`, ch, r.rowid).
+						Scan(&sid)
 					switch {
 					case err == nil:
 						ops = append(ops, op{kind: 'd', rowid: r.rowid})
-						m := r.ts
-						if sts < m {
-							m = sts
-						}
-						survivors[ch] = &surv{rowid: sid, ts: m}
-						if m < sts {
-							ops = append(ops, op{kind: 't', rowid: sid, ts: m})
-						}
+						survivors[ch] = struct{}{}
 						ps.Collapsed++
 						continue
 					case errors.Is(err, sql.ErrNoRows):
@@ -276,12 +253,8 @@ func processBatch(ctx context.Context, tx *sql.Tx, rows []row) ([]archive.Entry,
 			}
 			ops = append(ops, op{kind: 'h', rowid: r.rowid, newHash: newHash, raw: env,
 				d: ingest.Derive(r.harness, r.event, payload)})
-			if s, ok := survivors[newHash]; ok {
-				if r.ts < s.ts {
-					s.ts = r.ts
-				}
-			} else {
-				survivors[newHash] = &surv{rowid: r.rowid, ts: r.ts}
+			if _, ok := survivors[newHash]; !ok {
+				survivors[newHash] = struct{}{}
 			}
 			ps.Stripped++
 			continue
