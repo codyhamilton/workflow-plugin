@@ -138,3 +138,11 @@ Built (c80be8e, flash worker): `internal/store/usage.go` registers the usage exe
 ### 3-06-serve-query-routes
 
 Built (60f1e42, flash worker): `GET /v1/analytics/schema` and `GET /v1/analytics/query` (`internal/serve/analytics_query.go`), `parseFilter`/`canonFilter`/`filterOpts` extended for the six filter keys, `tz`, `all=1` and the query bucket cap, routes registered in `serve.go`. Store and serve tests, vet and gofmt pass. Deviations: none. Known: the `legacyLedger` serve fixture is not a real v4 schema.
+
+### 3-07-keyset-paging
+
+Built (dc8e481, flash worker): `Executions` and `Conversations` page by keyset in SQL, with whole-window counts; `sort.Slice` remains only in `analyticsSeries`. Store and serve tests, vet and gofmt pass. Concerns from the report: page-1 over 20k rows takes about 153 ms (the whole-window `counts` aggregate; the benchmark in 3-11 is the real judge); `splitConcat` splits `group_concat` on `,` so a repo id containing a comma would mis-split; the paging walk tests are store-level, not HTTP.
+
+### 3-09-conversation-route
+
+Built (3f28cbc, flash worker): `Tenant.Conversation(ctx, id)` and `GET /v1/analytics/conversation` (400 missing `id`, 404 unknown, 5,000-event cap with `truncated`), reusing 3-05's deduped call selection; 6 files, store and serve tests, vet and gofmt pass. Interpretation: unpriced kept usage events emit `cost_usd: 0`.
