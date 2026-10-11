@@ -55,6 +55,8 @@ function seriesColor(t: Tokens, i: number): string {
 export function barOption(p: BarProps, t: Tokens) {
 	const rows = p.rows ?? [];
 	const selectable = p.selectable !== false;
+	const max = rows.reduce((m, r) => Math.max(m, r.value), 0);
+	const clickable = (key: string) => selectable && key !== '__other__';
 	return {
 		animation: false,
 		backgroundColor: 'transparent',
@@ -65,6 +67,7 @@ export function barOption(p: BarProps, t: Tokens) {
 		},
 		xAxis: {
 			type: 'value',
+			max: max > 0 ? max : undefined,
 			axisLabel: { color: t.muted },
 			splitLine: { lineStyle: { color: t.border } }
 		},
@@ -79,13 +82,21 @@ export function barOption(p: BarProps, t: Tokens) {
 		series: [
 			{
 				type: 'bar',
+				barWidth: '100%',
+				barGap: '-100%',
 				itemStyle: { color: t.series[0] },
 				emphasis: { itemStyle: { color: t.accent } },
-				data: rows.map((r) => ({
-					value: r.value,
-					key: r.key,
-					clickable: selectable && r.key !== '__other__'
-				}))
+				data: rows.map((r) => ({ value: r.value, key: r.key, clickable: clickable(r.key) }))
+			},
+			{
+				type: 'bar',
+				z: -1,
+				barWidth: '100%',
+				barGap: '-100%',
+				itemStyle: { color: 'transparent' },
+				emphasis: { disabled: true },
+				tooltip: { show: false },
+				data: rows.map((r) => ({ value: max, key: r.key, clickable: clickable(r.key) }))
 			}
 		]
 	};
@@ -103,11 +114,12 @@ export function timeOption(p: TimeProps, t: Tokens) {
 		itemStyle: { color: seriesColor(t, i) },
 		data: (s.points ?? []).map((pt) => [pt.t, pt.v])
 	}));
+	const showLegend = series.length > 1;
 	return {
 		animation: false,
 		backgroundColor: 'transparent',
-		grid: { left: 48, right: 24, top: 24, bottom: 32, containLabel: false },
-		legend: { show: series.length > 1, textStyle: { color: t.text } },
+		grid: { left: 48, right: 24, top: showLegend ? 48 : 24, bottom: 32, containLabel: false },
+		legend: { show: showLegend, top: 0, textStyle: { color: t.text } },
 		tooltip: { trigger: 'axis' },
 		brush: {
 			brushType: 'lineX',

@@ -40,7 +40,7 @@ async function counts(page: Page, testid: string): Promise<Record<string, number
 // the row count from the table, restores the chart, then clicks the real ECharts bar.
 const BAR_GRID = { left: 120, right: 24, top: 8, bottom: 24 };
 
-async function clickHarnessBar(page: Page, index: number, opts: { shift?: boolean } = {}) {
+async function clickHarnessBar(page: Page, index: number, opts: { shift?: boolean; frac?: number } = {}) {
 	const testid = 'hooks-harness';
 	const table = page.getByTestId(`${testid}-table`);
 	if ((await table.count()) === 0) {
@@ -53,7 +53,8 @@ async function clickHarnessBar(page: Page, index: number, opts: { shift?: boolea
 	const box = await page.getByTestId(testid).boundingBox();
 	if (!box) throw new Error(`clickHarnessBar: no chart box for ${testid}`);
 	const { left, right, top, bottom } = BAR_GRID;
-	const x = box.x + left + (box.width - left - right) / 2;
+	const frac = opts.frac ?? 0.5;
+	const x = box.x + left + (box.width - left - right) * frac;
 	const y = box.y + top + ((index + 0.5) * (box.height - top - bottom)) / n;
 	if (opts.shift) await page.keyboard.down('Shift');
 	await page.mouse.click(x, y);
@@ -87,6 +88,15 @@ test('clicking a harness bar adds an include chip and narrows the other bars', a
 	await expect(page).toHaveURL(/harness=claude/);
 	await expectSettled(page);
 	expect(await counts(page, 'hooks-repo_id')).toEqual({ r1: 5 });
+});
+
+test('clicking the empty track of a short bar drills that row', async ({ page }) => {
+	await page.goto('/hooks');
+	await expectSettled(page);
+	await clickHarnessBar(page, 1, { frac: 0.9 }); // cursor: 2 of a max 5, empty track to its right
+	await expect(page.getByTestId('chip-harness-cursor')).toHaveAttribute('data-mode', 'include');
+	await expect(page).toHaveURL(/harness=cursor/);
+	await expectSettled(page);
 });
 
 test('shift-clicking a harness bar adds an exclude chip the bar then omits', async ({ page }) => {

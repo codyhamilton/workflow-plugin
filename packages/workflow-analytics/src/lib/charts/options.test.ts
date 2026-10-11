@@ -41,6 +41,40 @@ describe('barOption', () => {
 		const option = barOption({ rows: [{ key: 'a', value: 1 }], selectable: false }, TOKENS);
 		expect(option.series[0].data[0].clickable).toBe(false);
 	});
+
+	it('adds a full-width transparent overlay so the whole row is clickable', () => {
+		const option = barOption(
+			{
+				rows: [
+					{ key: 'a', value: 1 },
+					{ key: 'b', value: 5 }
+				]
+			},
+			TOKENS
+		);
+		expect(option.series).toHaveLength(2);
+		const overlay = option.series[1];
+		expect(overlay.type).toBe('bar');
+		expect(overlay.barWidth).toBe('100%');
+		expect(overlay.itemStyle.color).toBe('transparent');
+		expect(overlay.data.map((d) => d.value)).toEqual([5, 5]);
+		expect(overlay.data.map((d) => d.key)).toEqual(['a', 'b']);
+		expect(overlay.data.map((d) => d.clickable)).toEqual([true, true]);
+	});
+
+	it('keeps the __other__ overlay row inert', () => {
+		const option = barOption(
+			{
+				rows: [
+					{ key: 'a', value: 1 },
+					{ key: '__other__', value: 5 }
+				]
+			},
+			TOKENS
+		);
+		expect(option.series[1].data[0].clickable).toBe(true);
+		expect(option.series[1].data[1].clickable).toBe(false);
+	});
 });
 
 describe('timeOption', () => {
@@ -61,6 +95,31 @@ describe('timeOption', () => {
 		);
 		expect(option.series[0].type).toBe('bar');
 		expect(option.series[0].stack).toBeTruthy();
+	});
+
+	it('reserves grid space so a multi-series legend cannot overlap the grid', () => {
+		const option = timeOption(
+			{
+				series: [
+					{ name: 'a', points: [{ t: '2024-01-01', v: 1 }] },
+					{ name: 'b', points: [{ t: '2024-01-01', v: 2 }] }
+				],
+				bucket: 'day'
+			},
+			TOKENS
+		);
+		expect(option.legend.show).toBe(true);
+		const LEGEND_HEIGHT = 24;
+		expect(option.grid.top).toBeGreaterThanOrEqual((option.legend.top ?? 0) + LEGEND_HEIGHT);
+	});
+
+	it('hides the legend and leaves the grid unchanged for a single series', () => {
+		const option = timeOption(
+			{ series: [{ name: 'a', points: [{ t: '2024-01-01', v: 1 }] }], bucket: 'day' },
+			TOKENS
+		);
+		expect(option.legend.show).toBe(false);
+		expect(option.grid.top).toBe(24);
 	});
 });
 
