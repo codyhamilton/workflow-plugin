@@ -135,6 +135,36 @@ describe('createClient.get', () => {
 		expect(peak).toBe(2);
 	});
 
+	it('defaults to six concurrent fetches', async () => {
+		let active = 0;
+		let peak = 0;
+		const pending: Array<() => void> = [];
+		const fetcher = vi.fn(() => {
+			active++;
+			peak = Math.max(peak, active);
+			return new Promise<unknown>((res) => {
+				pending.push(() => {
+					active--;
+					res({});
+				});
+			});
+		});
+		const c = createClient({ debounceMs: 0, fetcher: fetcher as unknown as Fetch });
+		const ps = [1, 2, 3, 4, 5, 6, 7, 8].map((i) =>
+			c.get('slot' + i, 'analytics/summary', new URLSearchParams(`a=${i}`))
+		);
+		await vi.advanceTimersByTimeAsync(0);
+		expect(fetcher).toHaveBeenCalledTimes(6);
+		expect(peak).toBe(6);
+		while (pending.length) {
+			pending.shift()!();
+			await vi.advanceTimersByTimeAsync(0);
+		}
+		await Promise.all(ps);
+		expect(fetcher).toHaveBeenCalledTimes(8);
+		expect(peak).toBe(6);
+	});
+
 	it('does not cache an error', async () => {
 		let fail = true;
 		const fetcher = vi.fn(() => (fail ? Promise.reject(new Error('boom')) : Promise.resolve({ v: 1 })));

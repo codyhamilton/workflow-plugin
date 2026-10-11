@@ -114,3 +114,29 @@ test('one summary and at most ten query requests per load', async ({ page }) => 
 	expect(summary.count()).toBeLessThanOrEqual(1);
 	expect(query.count()).toBeLessThanOrEqual(10);
 });
+
+test('All time: every query carries from/to, none carries all=1, none is a 400', async ({ page }) => {
+	const queries: string[] = [];
+	const statuses: { url: string; status: number }[] = [];
+	page.on('request', (r) => {
+		if (/analytics\/query/.test(r.url())) queries.push(r.url());
+	});
+	page.on('response', (r) => {
+		if (/analytics\/query/.test(r.url())) statuses.push({ url: r.url(), status: r.status() });
+	});
+	await page.goto('/');
+	await expectSettled(page);
+	queries.length = 0;
+	statuses.length = 0;
+	await page.getByTestId('preset-all').click();
+	await expectSettled(page);
+	await page.waitForTimeout(1000);
+	expect(queries.length).toBeGreaterThan(0);
+	for (const url of queries) {
+		const u = new URL(url);
+		expect(u.searchParams.get('all'), url).toBeNull();
+		expect(u.searchParams.get('from'), url).not.toBeNull();
+		expect(u.searchParams.get('to'), url).not.toBeNull();
+	}
+	for (const { url, status } of statuses) expect(status, `${url} -> ${status}`).not.toBe(400);
+});

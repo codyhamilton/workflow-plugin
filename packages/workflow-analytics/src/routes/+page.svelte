@@ -69,15 +69,32 @@
 			}, fail);
 		}
 
-		const win = resolveWindow(state, new Date(), view.tz, 'query');
-		const bucket = win.all
-			? 'month'
-			: win.from && win.to
-				? (pickBucket(win.from, win.to, view.tz, ['hour', 'day', 'week', 'month']) ?? 'day')
-				: 'day';
+		const now = new Date();
+		const q = resolveWindow(state, now, view.tz, 'query');
+		// Over the whole ledger every time bucket exceeds the API's 400-bucket cap, so All time uses
+		// the same 399-day clamp the rest routes (and Trends) take: `all` becomes from/to.
+		const clamped = q.all ? resolveWindow(state, now, view.tz, 'rest') : null;
+		const bounds =
+			clamped && clamped.from && clamped.to
+				? { from: clamped.from, to: clamped.to }
+				: q.from && q.to
+					? { from: q.from, to: q.to }
+					: null;
+		const bucket = bounds
+			? (pickBucket(bounds.from, bounds.to, view.tz, ['hour', 'day', 'week', 'month']) ?? 'day')
+			: 'day';
+		const query = (extra: Record<string, string | string[]>) => {
+			const p = untrack(() => view.paramsFor('query', extra));
+			if (p && clamped && bounds) {
+				p.delete('all');
+				p.set('from', bounds.from.toISOString());
+				p.set('to', bounds.to.toISOString());
+			}
+			return p;
+		};
 
 		for (const [id, measure] of SPARKS) {
-			const p = untrack(() => view.paramsFor('query', { measure, bucket }));
+			const p = query({ measure, bucket });
 			if (!p) continue;
 			getJSON<QueryResponse>(`overview-spark-${id}`, 'analytics/query', p).then((r) => {
 				if (!live) return;
@@ -89,9 +106,7 @@
 			}, fail);
 		}
 
-		const hp = untrack(() =>
-			view.paramsFor('query', { measure: 'hook_events', dim: ['weekday', 'hour_of_day'], bucket: 'none' })
-		);
+		const hp = query({ measure: 'hook_events', dim: ['weekday', 'hour_of_day'], bucket: 'none' });
 		if (hp) {
 			getJSON<QueryResponse>('overview-heatmap', 'analytics/query', hp).then((r) => {
 				if (!live) return;

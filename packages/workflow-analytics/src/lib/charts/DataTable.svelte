@@ -1,17 +1,29 @@
 <script lang="ts">
+	import { costLabel } from '$lib/format';
+
 	// One row per data row; a row whose `selectable` is false is drawn but inert
 	// (the `__other__` bucket). A click fires the same select event as the chart mark.
+	// Numeric cells are formatted by the chart `unit`; the exact number is kept in `data-value`.
 	let {
 		testid,
 		columns,
 		rows,
+		unit,
 		onrow
 	}: {
 		testid: string;
 		columns: string[];
 		rows: { cells: (string | number)[]; selectable?: boolean }[];
+		unit?: string;
 		onrow?: (index: number, shift: boolean) => void;
 	} = $props();
+
+	function cellText(cell: string | number): string {
+		if (typeof cell !== 'number') return cell;
+		if (unit === 'usd') return costLabel({ cost: cell, unpriced: cell === 0 ? 1 : 0 });
+		if (unit === 'tokens' || unit === 'count') return cell.toLocaleString('en-US');
+		return String(cell);
+	}
 </script>
 
 <table class="data-table" data-testid={testid}>
@@ -38,7 +50,9 @@
 				}}
 				tabindex={row.selectable === false ? -1 : 0}
 			>
-				{#each row.cells as cell}<td>{cell}</td>{/each}
+				{#each row.cells as cell}
+					<td data-value={typeof cell === 'number' ? cell : undefined}>{cellText(cell)}</td>
+				{/each}
 			</tr>
 		{/each}
 	</tbody>

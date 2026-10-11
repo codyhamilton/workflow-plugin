@@ -55,7 +55,7 @@
 		{showTable ? 'Chart' : 'Table'}
 	</button>
 	{#if showTable}
-		<DataTable testid="{testid}-table" columns={['Label', unit ?? 'Value']} rows={tableRows} onrow={pickRow} />
+		<DataTable testid="{testid}-table" columns={['Label', unit ?? 'Value']} rows={tableRows} {unit} onrow={pickRow} />
 	{:else}
 		<EChart
 			{build}

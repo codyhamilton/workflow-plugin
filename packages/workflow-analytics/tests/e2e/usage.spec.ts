@@ -95,3 +95,42 @@ test('a preset change settles within 1 s', async ({ page }) => {
 	await expectSettled(page);
 	expect(Date.now() - t0).toBeLessThan(1000);
 });
+
+test('All time: every query carries from/to, none carries all=1, none is a 400', async ({ page }) => {
+	const queries: string[] = [];
+	const statuses: { url: string; status: number }[] = [];
+	page.on('request', (r) => {
+		if (/analytics\/query/.test(r.url())) queries.push(r.url());
+	});
+	page.on('response', (r) => {
+		if (/analytics\/query/.test(r.url())) statuses.push({ url: r.url(), status: r.status() });
+	});
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
+	queries.length = 0;
+	statuses.length = 0;
+	await page.getByTestId('preset-all').click();
+	await expectSettled(page);
+	await page.waitForTimeout(1000);
+	expect(queries.length).toBeGreaterThan(0);
+	for (const url of queries) {
+		const u = new URL(url);
+		expect(u.searchParams.get('all'), url).toBeNull();
+		expect(u.searchParams.get('from'), url).not.toBeNull();
+		expect(u.searchParams.get('to'), url).not.toBeNull();
+	}
+	for (const { url, status } of statuses) expect(status, `${url} -> ${status}`).not.toBe(400);
+});
+
+test('cost-by-model table formats cost by unit and keeps exact values', async ({ page }) => {
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
+	await openTable(page, 'usage-cost-by-model');
+	const table = page.getByTestId('usage-cost-by-model-table');
+	const priced = table.locator('tbody tr', { hasText: SONNET }).locator('td').nth(1);
+	await expect(priced).toHaveText('$0.02');
+	expect(Number(await priced.getAttribute('data-value'))).toBeCloseTo(0.0223, 6);
+	const unpriced = table.locator('tbody tr', { hasText: QWEN }).locator('td').nth(1);
+	await expect(unpriced).toHaveText('unpriced');
+	await expect(unpriced).toHaveAttribute('data-value', '0');
+});

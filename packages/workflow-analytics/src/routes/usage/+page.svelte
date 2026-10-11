@@ -38,19 +38,31 @@
 	let costTimeResp = $state<QueryResponse | null>(null);
 	let tokensTimeResp = $state<QueryResponse | null>(null);
 
-	// `all` has no edges, so pickBucket cannot size it: a month bucket keeps that query in range.
-	const bucket = $derived.by(() => {
-		const w = resolveWindow(view.state, new Date(), view.tz, 'query');
-		if (!w.from || !w.to) return 'month' as const;
-		return pickBucket(w.from, w.to, view.tz) ?? 'month';
+	// Over the whole ledger every time bucket exceeds the API's 400-bucket cap, so All time uses the
+	// same 399-day clamp the rest routes take (as Trends does): `all` becomes explicit from/to.
+	const qwin = $derived.by(() => {
+		const now = new Date();
+		const q = resolveWindow(view.state, now, view.tz, 'query');
+		if (q.all) {
+			const r = resolveWindow(view.state, now, view.tz, 'rest');
+			return r.from && r.to ? { from: r.from, to: r.to, all: true } : null;
+		}
+		return q.from && q.to ? { from: q.from, to: q.to, all: false } : null;
 	});
+	const bucket = $derived(qwin ? (pickBucket(qwin.from, qwin.to, view.tz) ?? 'month') : 'month');
 
 	$effect(() => {
 		const bkt = bucket;
+		const win = qwin;
 		let live = true;
 		const run = (slot: string, extra: Record<string, string>, set: (r: QueryResponse) => void) => {
 			const params = view.paramsFor('query', extra);
 			if (!params) return;
+			if (win?.all) {
+				params.delete('all');
+				params.set('from', win.from.toISOString());
+				params.set('to', win.to.toISOString());
+			}
 			getJSON<QueryResponse>(slot, 'analytics/query', params).then(
 				(r) => {
 					if (!live) return;

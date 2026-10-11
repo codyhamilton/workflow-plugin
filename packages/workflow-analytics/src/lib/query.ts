@@ -57,7 +57,7 @@ export function createClient(
 	opts: { debounceMs?: number; maxConcurrent?: number; fetcher?: typeof apiGet } = {}
 ) {
 	const debounceMs = opts.debounceMs ?? 250;
-	const maxConcurrent = opts.maxConcurrent ?? 3;
+	const maxConcurrent = opts.maxConcurrent ?? 6;
 	const fetcher = opts.fetcher ?? apiGet;
 	const cache = new Map<string, unknown>();
 	const inflight = new Map<string, Fetch>();
