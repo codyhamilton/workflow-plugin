@@ -24,3 +24,14 @@ export function clearError() {
 	fetchError.status = 0;
 	fetchError.network = false;
 }
+
+/** Per-slot `partial`/`ignored_filters` notices, keyed by slot. Written by the data client. */
+export const notices = $state<Record<string, { partial: boolean; ignored: string[] }>>({});
+
+export function setNotice(slot: string, resp: { partial?: boolean; ignored_filters?: string[] }) {
+	notices[slot] = { partial: !!resp.partial, ignored: resp.ignored_filters ?? [] };
+}
+
+export function clearNotices() {
+	for (const k of Object.keys(notices)) delete notices[k];
+}
