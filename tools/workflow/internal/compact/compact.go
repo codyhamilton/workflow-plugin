@@ -78,16 +78,23 @@ type op struct {
 // Run compacts t (must be opened with store.OpenExclusive). It repairs the archive, resumes from
 // meta compact_cursor, walks facts by rowid in batches, and records completion in meta
 // compaction. It never loads the table: memory is bounded by Batch.
-func Run(ctx context.Context, t *store.Tenant, o Options) (Stats, error) {
+func Run(ctx context.Context, t *store.Tenant, o Options) (st Stats, err error) {
 	db := t.Raw()
 	if db == nil {
 		return Stats{}, errors.New("compact: tenant must be opened with store.OpenExclusive")
 	}
+	// Only Append maintains the rollup, so the deletes and rewrites below would drift it. Rebuild it
+	// from base rows once here, at the end, whether or not this run changed any row (a resumed or
+	// no-op run still ends exact). A run that stops on an error leaves it for the next run.
+	defer func() {
+		if err == nil {
+			err = t.RebuildHookRollup(ctx)
+		}
+	}()
 	batch := o.Batch
 	if batch <= 0 {
 		batch = 5000
 	}
-	var st Stats
 	if _, err := archive.Repair(t.Dir()); err != nil {
 		return st, fmt.Errorf("compact: repair archive: %w", err)
 	}

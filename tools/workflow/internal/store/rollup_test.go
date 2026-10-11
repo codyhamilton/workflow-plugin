@@ -208,6 +208,36 @@ func TestRollupBackfilledOnMigrate(t *testing.T) {
 	}
 }
 
+// TestRebuildHookRollup changes base rows behind the rollup's back the way compaction does, then
+// asserts the exported rebuild makes the table the base aggregate again in both directions.
+func TestRebuildHookRollup(t *testing.T) {
+	tn, _, _ := rollupFixture(t)
+	if _, err := tn.wdb.Exec(`DELETE FROM facts WHERE type='hook_event' AND event='Stop'`); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.RebuildHookRollup(context.Background()); err != nil {
+		t.Fatalf("RebuildHookRollup: %v", err)
+	}
+	sel := `SELECT CAST(ts/3600 AS INTEGER)*3600, harness, repo_id, norm_event, event, tool, conversation_id, count(*)
+		FROM facts WHERE type='hook_event' GROUP BY 1,2,3,4,5,6,7`
+	var diff int
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM (
+		SELECT hour,harness,repo_id,norm_event,event,tool,conversation_id,n FROM hook_events_hourly
+		EXCEPT ` + sel + `)`).Scan(&diff); err != nil {
+		t.Fatal(err)
+	}
+	if diff != 0 {
+		t.Fatalf("rollup has %d tuples not in the base aggregate", diff)
+	}
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM (` + sel + `
+		EXCEPT SELECT hour,harness,repo_id,norm_event,event,tool,conversation_id,n FROM hook_events_hourly)`).Scan(&diff); err != nil {
+		t.Fatal(err)
+	}
+	if diff != 0 {
+		t.Fatalf("base aggregate has %d tuples not in the rollup", diff)
+	}
+}
+
 // rollupFixtureOn appends the standard fixture to an already-open tenant.
 func rollupFixtureOn(t *testing.T, tn *Tenant) (*Tenant, []FactRow, int64) {
 	t.Helper()
