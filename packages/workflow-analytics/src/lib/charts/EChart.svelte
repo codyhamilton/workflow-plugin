@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import * as echarts from 'echarts/core';
-	import { BarChart, HeatmapChart, LineChart, TreemapChart } from 'echarts/charts';
+	import {
+		BarChart,
+		BoxplotChart,
+		HeatmapChart,
+		LineChart,
+		SankeyChart,
+		ScatterChart,
+		TreemapChart
+	} from 'echarts/charts';
 	import {
 		AriaComponent,
 		BrushComponent,
@@ -15,8 +23,11 @@
 
 	echarts.use([
 		BarChart,
+		BoxplotChart,
 		HeatmapChart,
 		LineChart,
+		SankeyChart,
+		ScatterChart,
 		TreemapChart,
 		AriaComponent,
 		BrushComponent,
