@@ -458,3 +458,8 @@ Run by a separate Sonnet subagent with Playwright Chromium against a binary buil
 10. `artifact_feedback` returns `not delivered` and the workflow MCP server fails to start (ENOENT); Phase 5 briefs and reports are unscored.
 11. `internal/secrets` `TestEnvAssignmentCorpus` fails on false positives in `reports/4-04-echarts-components.md:26`; the check or the report text needs adjusting.
 12. 5-13 report ends in a half-sentence about index size (unmeasured); the first open of an existing ledger builds `facts_usage_ts` (about 0.7 s on the 435k-row copy).
+
+
+## Terminal review
+
+REVIEW.md written against the whole design: verdict PASS_WITH_FOLLOWUPS, no blocker or high finding both in scope and non-architectural, so no fixer agent ran. Fixed in review: the `internal/secrets` corpus false positive by rewording `reports/4-04-echarts-components.md:26` (test passes with `-count=1`). The leftover `vite preview` (port 4591) and workflow serve (port 18790) verifier processes were stopped.

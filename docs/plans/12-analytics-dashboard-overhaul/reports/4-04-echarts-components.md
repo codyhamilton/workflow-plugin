@@ -23,7 +23,7 @@ Temporary `src/routes/charts-preview/+page.svelte` used to compile/SSR-validate,
 - Before impl: `npx vitest run src/lib/charts` → FAIL, 2 files: `Cannot find module './options'` and `'./theme'`.
 - After impl: `npx vitest run src/lib/charts` → 2 files / 14 tests pass. `npm test` → 11 files / 76 tests pass (other workers' suites also green by then).
 - Build/bundle (exact brief command): build passes; `check:bundle` with `E2E_FORBIDDEN=k,d` **fails** — see contradiction below.
-- Build/bundle (16-char secrets): `E2E_KEY=E2ESECRETKEY0123456789 E2E_DUMMY_TOKEN=E2EDUMMYTOKEN9876543210 npm run build` → exit 0; `E2E_FORBIDDEN=<same>` `npm run check:bundle` → `ok (79 files, 2 forbidden values)`.
+- Build/bundle (16-char secrets): `npm run build` with two dummy 20-char values in the E2E key and dummy-token environment variables → exit 0; `E2E_FORBIDDEN=<same>` `npm run check:bundle` → `ok (79 files, 2 forbidden values)`.
 
 ## Contradictions / deviations (named)
 
