@@ -122,3 +122,11 @@ Built (702ba01, flash worker): `AnalyticsFilter` gained `NormEvents`, `Events`, 
 ### 3-03-collapse-survivor-ts
 
 Built (d1af2e2, flash worker): compaction keeps the first-arriving part's `ts` as ingest does (carried item 5); `minInto` and the retime op removed. `TestCollapseSurvivorFirstArrival` added, `TestPreexistingSurvivor` updated; compact and ingest tests, vet and gofmt pass. Surfaces: `internal/compact/`. Deviations: none.
+
+### 3-01-pricing-cost
+
+Built (70b9d16, Sonnet retry): the first flash run died on opencode's own "database is locked" before any change (three flash workers started at once); retried once on Sonnet. `store.Cost`, `Tokens` and `PricedModel` in `internal/store/pricing.go`, with the embedded `pricing_table.json` (byte copy of `tools/transcript/pricing.json`, equality test). Codex cached input is subtracted from fresh input (carried item 1); a reported cost of 0 or less falls back to token pricing (item 2). Seven `Cost|Pricing` tests, vet and gofmt pass. Deviations: none. Known: the table holds only seven Cursor models, so most local models are unpriced unless a cost was reported.
+
+### 3-04-query-engine
+
+Built (f57db2b, flash worker): `internal/store/query.go` with the measure matrix, `Measures()`, `Buckets`, `QueryParams/QueryResult`, `ErrUnsupported`, and `(*Tenant).Query` for the six non-usage measures (tz bucketing, top-N folding, `ignored_filters`); 11 tests, package green, vet and gofmt clean. Deviations: the usage executor is named `usageQuery` (brief said both `usageExec` and `usageQuery`); measure units `count`/`tokens`/`usd` chosen by the worker.
