@@ -150,3 +150,7 @@ Built (3f28cbc, flash worker): `Tenant.Conversation(ctx, id)` and `GET /v1/analy
 ### 3-08-summary-facets-explore
 
 Built (a13d3aa, flash worker): `Summary` gains `model_calls`, `unpriced_calls`, `cost_usd` and the five token sums; `Facets` gains `models` and `norm_events`; `Explore` fetches `limit+1` from facts and rejections separately, merges in Go, and looks up screen verdicts only for the page, with `norm_event`, `model`, `cost_usd` on rows. Store and serve tests, vet and gofmt pass. Deviations: the serve explore exact-column assertion gained `norm_event`/`model`; the `row_hash` tie still uses a temp b-tree (no `(ts DESC, row_hash ASC)` index), a candidate for 3-12 if the benchmark flags Explore.
+
+### 3-10-benchmark-harness
+
+Built (86bde56, flash worker): `internal/serve/analytics_bench_test.go` with env-gated `TestAnalyticsBench` (`WORKFLOW_BENCH_DIR`; copies only `ledger.db` to a temp dir and opens the copy) plus ungated smoke and non-mutation self-tests; vet, gofmt and `go test ./internal/serve` pass. Deviation: the `all` preset is covered on `/query` cases only, because `parseFilter` caps every other route at 400 UTC days and `all=1` returns `400 range too wide`.
