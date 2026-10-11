@@ -70,6 +70,18 @@ var migrations = []string{
 	// as migration 3 does, keeps a test that rewinds user_version without dropping meta working.
 	`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 	INSERT INTO meta(key,value) SELECT 'compaction','complete' WHERE NOT EXISTS (SELECT 1 FROM facts);`,
+	// 6: an hourly rollup of hook_events by every dimension the measure groups by. Aggregating over
+	// the base table scans one row per fact three times per query (a rank query per dim, then the
+	// final query) and misses the phase-3 bound on large windows; this collapses each distinct
+	// (hour, dims) tuple to one row with a count. Reads use it for whole interior hours and base rows
+	// for the two partial edge hours (query.go, measureDef.source); Append keeps it current in the
+	// same transaction as the fact insert. The table is created here but filled by backfillHookRollup
+	// in open: the fill selects facts columns that the pre-migration-4 layout a test constructs does
+	// not have, so it cannot be plain migration SQL. IF NOT EXISTS keeps a rewind test working.
+	`CREATE TABLE IF NOT EXISTS hook_events_hourly (
+		hour INTEGER NOT NULL, harness TEXT NOT NULL, repo_id TEXT NOT NULL, norm_event TEXT NOT NULL,
+		event TEXT NOT NULL, tool TEXT NOT NULL, conversation_id TEXT NOT NULL, n INTEGER NOT NULL,
+		PRIMARY KEY (hour, harness, repo_id, norm_event, event, tool, conversation_id)) WITHOUT ROWID;`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -156,6 +168,9 @@ func open(dir string, opts Options, how int, exclusive bool) (*Tenant, error) {
 	from, err := t.migrate()
 	if err == nil && from == 1 {
 		err = t.reindex(context.Background()) // existing db gaining the search index; writer not started yet
+	}
+	if err == nil && from < 6 {
+		err = t.backfillHookRollup() // existing db gaining the rollup table; writer not started yet
 	}
 	if err != nil {
 		wdb.Close()
@@ -396,6 +411,11 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			return err
 		}
 		defer st.Close()
+		stRoll, err := tx.Prepare(hookRollupUpsert)
+		if err != nil {
+			return err
+		}
+		defer stRoll.Close()
 		for i, r := range rows {
 			if len(r.Raw) == 0 {
 				// OR IGNORE would swallow the NOT NULL violation, so fail explicitly.
@@ -411,6 +431,12 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			}
 			n, _ := res.RowsAffected()
 			inserted[i] = n > 0
+			// A collapsed duplicate inserts no fact, so it must not touch the rollup either.
+			if inserted[i] && r.Type == "hook_event" {
+				if _, err := stRoll.Exec(int64(r.TS)/3600*3600, r.Harness, r.RepoID, r.NormEvent, r.Event, r.Tool, r.ConversationID); err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	})
