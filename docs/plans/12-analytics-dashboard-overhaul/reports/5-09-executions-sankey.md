@@ -2,7 +2,7 @@
 
 Status: **done**
 
-Commit: `ffbe274` (this commit; HEAD after embedding is the amended hash).
+Commit: `e10b812` — "Add executions sankey with link-filtered table".
 
 ## What changed
 
