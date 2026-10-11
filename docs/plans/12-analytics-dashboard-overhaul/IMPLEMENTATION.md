@@ -312,3 +312,32 @@ artifact_feedback: the service answered `not delivered` ("no version of this fil
 10. Saved views (Phase 5).
 11. Pricing rates (Phase 3 item 1): the site now shows unpriced explicitly, but 74% of calls are unpriced until rates for Claude and Codex are added to `tools/transcript/pricing.json` and `internal/store/pricing_table.json`.
 12. Phase 3 items 4 to 9 still open as written above; item 10 is superseded by the artifact_feedback note in the verification; item 11 (`row_hash` BLOB) stays carried. Items 12 and 13 are done.
+
+
+## Phase 5 — Chart builder and dashboards (refined)
+
+Verdict: Proceed. 17 units; briefs in `briefs/5-01-*.md` to `5-17-*.md`; the Units list is in `DESIGN.md` under Phase 5.
+
+### Carried items placed
+
+- Latency over 1 s (Carried 4.1): 5-11 (debounce 100 ms, leading edge after idle), 5-12 (profile the page request sets), 5-13 (speed up the three slowest requests). The orchestrator re-times on `/var/tmp/p4verify/data/local`.
+- Usage table merge (4.2): 5-10.
+- Back link loses range and filters (4.3): 5-14. Zero-token rows reading "unpriced" (4.4) and `costLabel` `$0.00` (4.8): 5-14.
+- Quality distribution charts (4.5): 5-03 (box chart) and 5-15.
+- Executions sankey (4.6): 5-03 and 5-09.
+- Conversations swallowed errors (4.7): 5-16.
+- Client bugs (4.8): notices self-clear in 5-06; `query.ts` shared in-flight entry in 5-11.
+- Usage legend overlap and Hooks bar hit area (4.9): 5-04.
+- Saved views (4.10): 5-01, 5-06, 5-08; the builder is 5-02, 5-05, 5-07; proof is 5-17.
+
+### Stays carried
+
+- Pricing rates (4.11; Phase 3 item 1): data, not site code.
+- Phase 3 items 4 to 9 (server-side), item 11 (`row_hash` BLOB); item 2 (benchmark headroom) is only partly addressed by 5-13.
+- Ledger compact CLI, keyless deltas, and the `artifact_feedback` / workflow MCP infrastructure (the MCP server fails to start with ENOENT in this session).
+
+### Notes for the orchestrator
+
+- `artifact_feedback` results for the Phase 5 briefs are recorded below once obtained.
+- Worktrees are required for parallel e2e units (distinct `E2E_PORT`).
+- artifact_feedback on the Phase 5 briefs (checked 5-01 and 5-07): `not delivered`, the service has no version until pushed; unscored.

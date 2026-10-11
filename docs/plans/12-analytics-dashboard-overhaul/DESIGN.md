@@ -468,6 +468,25 @@ Each criterion is tagged with where it comes from:
   - `tests/e2e/` (new `builder.spec.ts` and `dashboards.spec.ts`).
 - Approach: known
 - Depends on: Phase 4
+- Units:
+  - 5-01 — Saved-view and dashboard store (`views.ts`). Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-01-saved-view-store.md`. Depends on: none. Alongside: all wave-1.
+  - 5-02 — Chart-builder config model (`builder.ts`). Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-02-builder-spec.md`. Depends on: none. Alongside: all wave-1.
+  - 5-03 — Sankey and box-plot components, `EChart.svelte` registration. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-03-sankey-boxplot-charts.md`. Depends on: none. Alongside: all wave-1.
+  - 5-04 — Usage legend overlap, Hooks bar hit area (`options.ts`, `BarChart.svelte`). Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-04-chart-legend-and-bar-hit-area.md`. Depends on: none. Alongside: all wave-1.
+  - 5-05 — `BuilderChart`, grouped bar, small multiples. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-05-builder-chart-components.md`. Depends on: 5-02. Alongside: 5-01, 5-03, 5-04, 5-06, 5-09, 5-10, 5-11 to 5-16.
+  - 5-06 — Layout: save-view control, nav, embed mode, notices fix. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-06-shell-saved-views-embed-notices.md`. Depends on: 5-01. Alongside: 5-02 to 5-05, 5-10 to 5-16.
+  - 5-07 — `/builder` route and spec. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-07-builder-route.md`. Depends on: 5-02, 5-05. Alongside: 5-08, 5-09, 5-10, 5-14, 5-15, 5-16.
+  - 5-08 — `/dashboards` route, export, import. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-08-dashboards-route.md`. Depends on: 5-01, 5-06. Alongside: 5-07, 5-09, 5-10, 5-14, 5-15, 5-16.
+  - 5-09 — Executions sankey and link filter. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-09-executions-sankey.md`. Depends on: 5-03. Alongside: 5-07, 5-08, 5-10, 5-14, 5-15, 5-16.
+  - 5-10 — Usage table consistent key set. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-10-usage-table-merge.md`. Depends on: none. Alongside: all other units.
+  - 5-11 — `query.ts` debounce and in-flight entry. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-11-client-latency-and-inflight.md`. Depends on: none. Alongside: all wave-1.
+  - 5-12 — Go: profile Overview and Usage request sets on the large ledger. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-12-page-request-set-profile.md`. Depends on: none. Alongside: all site units.
+  - 5-13 — Go: speed up the three slowest requests. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-13-api-slowest-cases.md`. Depends on: 5-12. Alongside: all site units.
+  - 5-14 — Back link, zero-token rows, `costLabel`. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-14-conversation-page-fixes.md`. Depends on: none. Alongside: all other units.
+  - 5-15 — Quality box plots beside the baseline. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-15-quality-distribution-charts.md`. Depends on: 5-03. Alongside: 5-07, 5-08, 5-09, 5-10, 5-14, 5-16.
+  - 5-16 — Conversations error panel. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-16-conversations-fetch-errors.md`. Depends on: none. Alongside: all other units.
+  - 5-17 — Phase 5 end-to-end proof and 1 s timing. Brief: `docs/plans/12-analytics-dashboard-overhaul/briefs/5-17-phase-5-e2e.md`. Depends on: 5-04 to 5-11, 5-14 to 5-16. Alongside: nothing.
+- Placement notes: wave 1 (no dependencies, disjoint paths) is 5-01, 5-02, 5-03, 5-04, 5-10, 5-11, 5-12, 5-14, 5-16; then 5-05 (after 5-02), 5-06 (after 5-01), 5-09 and 5-15 (after 5-03), 5-13 (after 5-12); then 5-07 (after 5-02, 5-05) and 5-08 (after 5-01, 5-06); 5-17 last. Each route unit owns one route directory and its spec; `+layout.svelte` is owned by 5-06 alone, `EChart.svelte` by 5-03 alone, `query.ts` by 5-11 alone, `format.ts` by 5-14 alone. Parallel e2e units use separate git worktrees and distinct `E2E_PORT` values. Deviations from the wording above: `/query` takes one measure, so the Usage table fix (5-10) is five requests with `top=100` returning one key set, not literally one `/query`; `/executions` rows carry no design reference, so the sankey (5-09) takes its design node from the executions total and its links from `counts` only; dashboard tiles (5-08) are iframes of the saved URL with `embed=1`, which 5-06 supports; the sankey link click is a page-local `shape` URL parameter filtering the table client side. The 1 s timing assertion holds on the fixture (5-17); the large-ledger figure is re-measured by the orchestrator, with 5-11 (debounce) and 5-12/5-13 (API) as the levers.
 
 ## Provenance Notes
 
