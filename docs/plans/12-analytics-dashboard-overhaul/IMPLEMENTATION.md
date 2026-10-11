@@ -271,3 +271,7 @@ Ten flash workers ran in parallel in separate git worktrees (`E2E_PORT` 4406 to 
 - 4-15-explore-settings (9f3efb3): Explore follows the shared window and filters (exclude as complement); Settings clears the client cache on save.
 
 Contradiction for 4-16, found by 4-10: `helpers.clickBar` cannot click a `BarChart` (it leaves the table showing, which unmounts the chart). Amended into `briefs/4-16-retire-layerchart-interactions.md` (4-16 now owns `helpers.ts`).
+
+### 4-16-retire-layerchart-interactions
+
+Built (a11e80d, flash worker): `layerchart` removed from `package.json` and the lockfile; `Bars.svelte`, `LineSeries.svelte`, `palette.ts`, `filters.ts` and `series.ts` (with their tests) deleted once nothing imported them; `clickBar` fixed in `helpers.ts`; new `interactions.spec.ts` covers the cross-route bullets (7d persists from Overview to Hooks, brush narrows the window, harness bar include and shift-exclude chips, conversation timeline totals, cost by model, themes and table toggles). Departure: `usage.spec.ts` `SONNET_BAR` changed 1 to 0 because the old index had been calibrated to the broken helper. Known (not fixed): notices self-clear in 4-05; `query.ts` can drop a shared in-flight entry for same-key joiners; `costLabel` can emit `$0.00` when `unpriced < calls` (not reachable in the fixture).
