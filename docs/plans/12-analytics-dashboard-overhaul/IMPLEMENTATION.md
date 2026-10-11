@@ -275,3 +275,11 @@ Contradiction for 4-16, found by 4-10: `helpers.clickBar` cannot click a `BarCha
 ### 4-16-retire-layerchart-interactions
 
 Built (a11e80d, flash worker): `layerchart` removed from `package.json` and the lockfile; `Bars.svelte`, `LineSeries.svelte`, `palette.ts`, `filters.ts` and `series.ts` (with their tests) deleted once nothing imported them; `clickBar` fixed in `helpers.ts`; new `interactions.spec.ts` covers the cross-route bullets (7d persists from Overview to Hooks, brush narrows the window, harness bar include and shift-exclude chips, conversation timeline totals, cost by model, themes and table toggles). Departure: `usage.spec.ts` `SONNET_BAR` changed 1 to 0 because the old index had been calibrated to the broken helper. Known (not fixed): notices self-clear in 4-05; `query.ts` can drop a shared in-flight entry for same-key joiners; `costLabel` can emit `$0.00` when `unpriced < calls` (not reachable in the fixture).
+
+### 4-17-fix-verification-defects
+
+Built (18f36b3, flash worker), from verification 1 on a copy of the purged real ledger: All time on non-`/query` routes is clamped to 399 days (was a 400), the usage data table formats cost and unpriced instead of raw values, and the client default `maxConcurrent` went 3 to 6. Verification 2 showed the first two held; latency and the timeline `$0.00` did not.
+
+### 4-18-fix-timeline-cost-and-request-storm
+
+Built (7aecc95, flash worker): timeline rows of a usage event with `cost_usd` null or 0 read "unpriced" (the API sends 0 for unpriced models). `view.svelte.ts` keys facets to their window and exposes `facetsReady`, which Overview and Usage gate on; Usage reads `paramsFor` untracked. `maxConcurrent` is 4. Fixture e2e, 30d to 90d: Usage 10 requests (7 distinct) to 7/7, Overview with an exclude 12/10 to 10/10. Contradiction reported: plain Overview did not storm in the fixture; the storm needs an exclude, so the Overview regression spec uses one. Tests: npm test 74, e2e 90, build clean.
