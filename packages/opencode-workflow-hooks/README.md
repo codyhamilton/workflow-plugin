@@ -22,7 +22,7 @@ Not forwarded: `experimental.chat.system.transform`, `chat.params`, `chat.header
 prompt bodies; the next three carry secrets (API keys, auth headers, environment); the streamed
 `message.part.delta` chunks are redundant with `message.part.updated`, which carries the finished
 part. Their hooks stay registered and write nothing. The list is declared once in `src/index.ts`
-between `remove-list` markers, and the Go capture policy must carry an equal list.
+between `remove-list` markers, and a test asserts the Go ingest policy carries an equal list.
 
 Threshold constants for documentation: `workflow-signals.json` (source of truth remains `gate_thresholds.py` in the workflow-plugin lab).
 

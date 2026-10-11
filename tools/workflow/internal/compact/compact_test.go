@@ -130,9 +130,9 @@ const hexA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 func extraFacts() []json.RawMessage {
 	return []json.RawMessage{
-		json.RawMessage(`{"id":"art-1","type":"artifact_version","conversation_id":"fx-conv-claude","harness":"claude","event":"","ts":1791100200.0,"repo_id":"github.com/codyhamilton/workflow-plugin","path":"docs/plans/12-analytics-dashboard-overhaul/reports/2-03-compact-engine.md","content_hash":"` + hexA + `","source":"worktree"}`),
-		json.RawMessage(`{"id":"art-2","type":"artifact_version","conversation_id":"fx-conv-codex","harness":"codex","event":"","ts":1791100201.0,"repo_id":"github.com/codyhamilton/workflow-plugin","path":"docs/plans/12-analytics-dashboard-overhaul/briefs/2-03-compact-engine.md","content_hash":"` + hexA + `","source":"commit"}`),
-		json.RawMessage(`{"id":"art-3","type":"artifact_version","conversation_id":"fx-conv-opencode","harness":"opencode","event":"","ts":1791100202.0,"repo_id":"github.com/codyhamilton/workflow-plugin","path":"docs/plans/12-analytics-dashboard-overhaul/DESIGN.md","content_hash":"` + hexA + `","source":"worktree"}`),
+		json.RawMessage(`{"id":"art-1","type":"artifact_version","conversation_id":"fx-conv-claude","harness":"claude","event":"","ts":1791100200.0,"repo_id":"github.com/codyhamilton/workflow-plugin","path":"docs/plans/99-fixture-plan/reports/2-03-compact-engine.md","content_hash":"` + hexA + `","source":"worktree"}`),
+		json.RawMessage(`{"id":"art-2","type":"artifact_version","conversation_id":"fx-conv-codex","harness":"codex","event":"","ts":1791100201.0,"repo_id":"github.com/codyhamilton/workflow-plugin","path":"docs/plans/99-fixture-plan/briefs/2-03-compact-engine.md","content_hash":"` + hexA + `","source":"commit"}`),
+		json.RawMessage(`{"id":"art-3","type":"artifact_version","conversation_id":"fx-conv-opencode","harness":"opencode","event":"","ts":1791100202.0,"repo_id":"github.com/codyhamilton/workflow-plugin","path":"docs/plans/99-fixture-plan/DESIGN.md","content_hash":"` + hexA + `","source":"worktree"}`),
 		json.RawMessage(`{"id":"com-1","type":"commit","conversation_id":"fx-conv-claude","harness":"claude","event":"","ts":1791100203.0,"repo_id":"github.com/codyhamilton/workflow-plugin","sha":"deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"}`),
 	}
 }
