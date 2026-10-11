@@ -14,7 +14,12 @@ export interface BoxRow {
 export function boxOption(p: { rows: BoxRow[] }, t: Tokens) {
 	const rows = p.rows ?? [];
 	const marked = rows.filter((r) => typeof r.marker === 'number');
-	const series: object[] = [
+	const series: {
+		type: string;
+		data: unknown[];
+		itemStyle?: Record<string, string>;
+		emphasis?: { itemStyle?: Record<string, string> };
+	}[] = [
 		{
 			type: 'boxplot',
 			itemStyle: { color: t.surface, borderColor: t.series[0] },
