@@ -3,6 +3,7 @@
 	import Pager from '$lib/components/Pager.svelte';
 	import VirtualRows from '$lib/components/VirtualRows.svelte';
 	import { getJSON, Superseded } from '$lib/query';
+	import { clearError, setError } from '$lib/state.svelte';
 	import { view } from '$lib/view.svelte';
 	import type { Conversations } from '$lib/types';
 
@@ -25,12 +26,17 @@
 		getJSON<Conversations>('conversations', 'analytics/conversations', p).then(
 			(r) => {
 				if (!live) return;
+				clearError();
 				loaded = true;
 				rows = r.rows;
 				next = r.next;
 			},
 			(e) => {
 				if (!live || e instanceof Superseded) return;
+				rows = [];
+				next = undefined;
+				loaded = false;
+				setError(e);
 			}
 		);
 		return () => (live = false);

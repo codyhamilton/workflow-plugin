@@ -85,3 +85,44 @@ test('virtualises 5000 rows: under 100 in the DOM, last row reachable', async ({
 	});
 	await expect(page.getByTestId('conv-gen-4999-conversation_id')).toBeVisible();
 });
+
+test('a 500 from the conversations API shows the error panel, not an empty page', async ({ page }) => {
+	await page.route('**/v1/analytics/conversations*', (route) =>
+		route.fulfill({
+			status: 500,
+			json: { error: 'boom' },
+			headers: { 'access-control-allow-origin': '*' }
+		})
+	);
+	await page.goto('/conversations');
+	await expect(page.getByTestId('error-panel')).toBeVisible();
+	await expect(page.getByTestId('error-panel')).toContainText('boom');
+	await expect(page.getByTestId('conv-row')).toHaveCount(0);
+});
+
+test('a network failure shows the connection message in the error panel', async ({ page }) => {
+	await page.route('**/v1/analytics/conversations*', (route) => route.abort());
+	await page.goto('/conversations');
+	await expect(page.getByTestId('error-panel')).toBeVisible();
+	await expect(page.getByTestId('error-panel')).toContainText('Check the connection');
+	await expect(page.getByTestId('error-panel')).toContainText('/settings');
+});
+
+test('changing the preset retries and clears the error panel', async ({ page }) => {
+	let fail = true;
+	await page.route('**/v1/analytics/conversations*', (route) =>
+		fail
+			? route.fulfill({
+					status: 500,
+					json: { error: 'boom' },
+					headers: { 'access-control-allow-origin': '*' }
+				})
+			: route.continue()
+	);
+	await page.goto('/conversations');
+	await expect(page.getByTestId('error-panel')).toBeVisible();
+	fail = false;
+	await page.getByTestId('preset-7d').click();
+	await expect(page.getByTestId('error-panel')).toHaveCount(0);
+	await expect(page.getByTestId('conv-row').first()).toBeVisible();
+});
