@@ -373,3 +373,16 @@ Built (4e1a264, flash worker): `BuilderChart`, grouped bar and small-multiples c
 ### 5-12-page-request-set-profile
 
 First run (flash) found no `go` on PATH and stopped without a change; relaunched with `~/.local/go/bin` on PATH.
+Built (7bd46ed, flash worker, second run): gated `internal/serve/analytics_pageset_test.go` profiles the Overview and Usage request sets on `/var/tmp/p4verify/data/local` (72 requests, 0 non-200). Slowest p50/max ms: usage `bucket=week&measure=tokens_out` 613/678, overview `bucket=week&measure=cost_usd` 596/620, usage `bucket=none&dim=model&measure=unpriced_calls` 590/623, all in the base-row usage CTE scan (`SCAN facts` plus temp b-tree). Contradiction: both pages clamp All time to 399 days on `/query` too, contrary to the brief. Feeds 5-13.
+
+### 5-04-chart-legend-and-bar-hit-area
+
+Built (075cce9, 5b51b0e, flash worker): chart legend reserves space above the grid (no axis overlap); Hooks bar rows clickable across the grid. Not met: the y-axis label gutter stays non-clickable (overlay covers the grid only).
+
+### 5-06-shell-saved-views-embed-notices
+
+Built (88cdd37, flash worker): `SaveView.svelte`, Builder and Dashboards nav, `embed=1` mode rendering children only, notices keyed to `pathname+search` with `pruneNotices` (notices no longer self-clear; `query.ts` untouched). `shell.spec.ts` 10 pass, `npm test` 117 pass.
+
+### 5-15-quality-distribution-charts
+
+Built (a62d133, flash worker): `BoxChart` of per-check score distribution above the Quality table with the baseline median as marker; three e2e tests (rows and marker, kind switch, dark theme). Contradiction: the e2e serve has no scorer, so tests stub scored rows.
