@@ -146,3 +146,7 @@ Built (dc8e481, flash worker): `Executions` and `Conversations` page by keyset i
 ### 3-09-conversation-route
 
 Built (3f28cbc, flash worker): `Tenant.Conversation(ctx, id)` and `GET /v1/analytics/conversation` (400 missing `id`, 404 unknown, 5,000-event cap with `truncated`), reusing 3-05's deduped call selection; 6 files, store and serve tests, vet and gofmt pass. Interpretation: unpriced kept usage events emit `cost_usd: 0`.
+
+### 3-08-summary-facets-explore
+
+Built (a13d3aa, flash worker): `Summary` gains `model_calls`, `unpriced_calls`, `cost_usd` and the five token sums; `Facets` gains `models` and `norm_events`; `Explore` fetches `limit+1` from facts and rejections separately, merges in Go, and looks up screen verdicts only for the page, with `norm_event`, `model`, `cost_usd` on rows. Store and serve tests, vet and gofmt pass. Deviations: the serve explore exact-column assertion gained `norm_event`/`model`; the `row_hash` tie still uses a temp b-tree (no `(ts DESC, row_hash ASC)` index), a candidate for 3-12 if the benchmark flags Explore.
