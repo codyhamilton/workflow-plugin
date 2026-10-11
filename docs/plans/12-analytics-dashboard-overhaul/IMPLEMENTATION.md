@@ -164,3 +164,11 @@ Brief 3-12 was written for one flash worker and says to stop after the first mea
 ### 3-12-fix-misses-indexes-rollups
 
 Built (80181fe, flash worker): hook_events fixed with an hourly rollup, `hook_events_hourly` (migration 6; keyed hour, harness, repo_id, norm_event, event, tool, conversation_id; filled by a Go backfill in `open()`, maintained in `Append`'s transaction, read for whole interior hours with the two edge hours from base rows). The covering index was tried first and left 139 of 213 cases over, so it was dropped. Rerun on the compacted copy: 213 of 213 `query/hook_events/` cases under 500 ms p95 (max 146.5 ms, was up to 1,500 ms). Rollup equals base rows over mid-hour windows and duplicate appends (`rollup_test.go`); store, serve and compact tests, vet and gofmt pass. Defect found, outside the unit's owned paths: compaction deletes and rewrites hook_event rows without touching the rollup, so it drifts after any compaction. Placed in new unit 3-16 (phase proof 3-13 now depends on it).
+
+### 3-16-compact-keeps-rollup-exact
+
+Built (132dce4, flash worker): `compact.Run` rebuilds `hook_events_hourly` from base rows in a deferred step on any successful finish (normal, resumed or no-op), via a new `RebuildHookRollup` in `store/rollup.go`. Tests `TestCompactRebuildsRollup`, `TestCompactRebuildsRollupOnResume` (proves drift after a committed first batch, then exactness after resume) and `TestRebuildHookRollup` assert rollup equals base aggregates both ways; store, compact and serve tests, vet and gofmt pass. Deviations: none.
+
+### 3-14-fix-conversations-misses
+
+Built (498e66c, flash worker): migration 7 `conversations_hourly(hour, harness, repo_id, model, conversation_id, n)`, kept current in `Append`, backfilled at open, read with base-row edge hours through the generalized rollup path in `query.go`; plus a page index for the bare `conversations/<preset>` route. Rerun on the compacted copy: 112 of 112 conversations cases under 500 ms p95 (worst 389 ms, was up to 1,855 ms); store, serve and compact tests, vet and gofmt pass. Concerns: `conversations_hourly` is not rebuilt after compaction (placed in unit 3-17); the first upgraded start pays a one-time `ANALYZE facts` and index build on a large uncompacted ledger; the rollup test has no bucket, tz or two-dimension case (placed in 3-17).
