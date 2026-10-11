@@ -283,3 +283,32 @@ Built (18f36b3, flash worker), from verification 1 on a copy of the purged real 
 ### 4-18-fix-timeline-cost-and-request-storm
 
 Built (7aecc95, flash worker): timeline rows of a usage event with `cost_usd` null or 0 read "unpriced" (the API sends 0 for unpriced models). `view.svelte.ts` keys facets to their window and exposes `facetsReady`, which Overview and Usage gate on; Usage reads `paramsFor` untracked. `maxConcurrent` is 4. Fixture e2e, 30d to 90d: Usage 10 requests (7 distinct) to 7/7, Overview with an exclude 12/10 to 10/10. Contradiction reported: plain Overview did not storm in the fixture; the storm needs an exclude, so the Overview regression spec uses one. Tests: npm test 74, e2e 90, build clean.
+
+### Phase 4 verification
+
+Run by a Sonnet subagent with Playwright Chromium against a fresh copy of the purged real-ledger copy (`purge-deltas` run on it), served on a scratch port. The live ledger was not touched. Results:
+
+- Pass: eight presets across ten routes (80 page loads) with no 4xx and no console errors, All time clamped with a notice on non-`/query` routes; include and shift-exclude chips; reload, back and cross-route URL state; brush narrows the window; harness bar drill-down; conversation timeline totals.
+- Pass: timeline rows of unpriced models read "unpriced" in four conversations (including one with 2,322 unpriced rows); none shows `$0.00`; header totals agree with the API.
+- Pass: each interaction issues no duplicate or aborted requests (Overview 12, Usage 7 to 8 requests, all distinct).
+- Fail, latency: the 1 s target is missed on the large copy. Settled time (3 runs): Overview 30d to 90d 1.16 s, Usage 30d to 90d 1.20 s, Overview to Usage 1.21 s, Usage to Overview 1.13 s, All time 1.31 s (Overview) and 1.36 s (Usage); filter add 0.99 to 1.00 s (Overview) and 1.04 to 1.06 s (Usage). That is the 250 ms debounce plus the slowest API call of 0.45 to 0.62 s, which is itself at or past the 500 ms API budget. The site no longer adds load; the remaining overrun is the API (see Carried 1).
+- Fail, Usage table: merging five top-20 lists by key leaves rows with `calls 0` beside tokens or cost; `__other__` shows `215 calls, 107 unpriced, $0.00`; the empty model key renders as a blank label.
+- Not applicable: saved views are Phase 5 per DESIGN.md.
+- Measured at the fixture level, the 1 s assertion in the e2e suite holds; it does not on the large copy.
+
+artifact_feedback: the service answered `not delivered` ("no version of this file") for every report checked, so none were scored; briefs 4-01 to 4-05 and others were checked earlier and returned scores, with some metrics below the p25 baseline. Briefs 4-17 and 4-18 and reports 4-17 and 4-18 were not delivered. The workflow MCP server itself does not start in this session (ENOENT); the plugin's feedback tool did answer.
+
+### Carried (Phase 4)
+
+1. Interaction latency over 1 s on the large ledger: preset change, navigation and All time settle in 1.1 to 1.4 s, filter add at about 1 s. The cause is the API, whose slowest call is 0.45 to 0.62 s (Phase 3 item 2, no headroom) on top of the 250 ms debounce. Next: cut the slowest `summary` and `query` cases in the API, or drop the debounce to 100 ms for preset clicks (only typing needs it), or show cached results first.
+2. Usage table merges five separate top-20 lists by key, giving `calls 0` rows, an `__other__` row with `$0.00` and 107 unpriced calls, a blank label for the empty model key, and a "unpriced of calls" banner that sums mismatched rows. Fix: one `/query` over the page's measures for the table, `__other__` worded "other models" and shown unpriced, empty key as "(none)".
+3. The conversation page's back link is hard-coded to `/conversations` and drops the range and filters.
+4. Timeline rows with 0 tokens in and out and cost 0 read "unpriced"; they should be blank or "free".
+5. Quality is table-only; DESIGN.md says "distribution charts beside the baseline" (4-11 followed its brief).
+6. Executions has no sankey (Phase 5).
+7. Conversations swallows non-`Superseded` fetch errors and renders nothing.
+8. Client bugs: notices self-clear (4-05); `query.ts` can drop a shared in-flight entry for same-key joiners; `costLabel` can emit `$0.00` when `unpriced < calls`.
+9. Usage cost-over-time legend overlaps the x-axis labels; the Hooks clickable bar covers only the bar.
+10. Saved views (Phase 5).
+11. Pricing rates (Phase 3 item 1): the site now shows unpriced explicitly, but 74% of calls are unpriced until rates for Claude and Codex are added to `tools/transcript/pricing.json` and `internal/store/pricing_table.json`.
+12. Phase 3 items 4 to 9 still open as written above; item 10 is superseded by the artifact_feedback note in the verification; item 11 (`row_hash` BLOB) stays carried. Items 12 and 13 are done.
