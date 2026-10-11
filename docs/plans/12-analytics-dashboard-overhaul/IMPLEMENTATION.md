@@ -414,3 +414,7 @@ Built (e7d25c9, flash worker): `query.ts` debounce 100 ms (was 250) with `idleMs
 ### 5-19-area-wiring
 
 Built (b9a9dac, flash worker): `TimeChart` takes `area`; `BuilderChart` passes `area` for the area chart; `tests/e2e/area.spec.ts` asserts the SVG render (filled path plus stroked line) since `EChart` keeps its instance private. It found a 5-18 regression: `bind:ready={panelReady[panel.key]}` throws `props_invalid_value` in the browser, so no small multiples render and the multiples `expectSettled` assertion fails. Placed in a new unit 5-20 (`briefs/5-20-fix-multiples-bind-ready.md`); 5-17 depends on it. Known: the area e2e assertion on multiples is red until 5-20 lands.
+
+### 5-20-fix-multiples-bind-ready
+
+Built (5dcdba2, flash worker): `SmallMultiples` readiness no longer crashes in the browser; builder and area e2e 7 pass (2 failed before), `npm test` 161 pass, build clean. Deviation: no client-mount unit test is possible (node-only vitest, no jsdom), so an SSR two-panel test plus the e2e cover it.
