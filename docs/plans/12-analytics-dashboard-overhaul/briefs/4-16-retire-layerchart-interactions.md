@@ -1,7 +1,7 @@
 # Brief: 4-16 — Retire LayerChart and the old filter model; prove the cross-route interactions
 
 Consumer: a TypeScript worker (flash-tier). This is the last unit of Phase 4; it writes tests, not a verification report.
-Owned paths: `packages/workflow-analytics/package.json`, `package-lock.json`, `src/lib/filters.ts`, `src/lib/filters.test.ts`, `src/lib/charts/Bars.svelte`, `src/lib/charts/LineSeries.svelte`, `src/lib/charts/palette.ts`, `src/lib/series.ts`, `src/lib/series.test.ts` (only if nothing imports them any more), `tests/e2e/interactions.spec.ts` (new). Touch nothing else.
+Owned paths: `packages/workflow-analytics/package.json`, `package-lock.json`, `src/lib/filters.ts`, `src/lib/filters.test.ts`, `src/lib/charts/Bars.svelte`, `src/lib/charts/LineSeries.svelte`, `src/lib/charts/palette.ts`, `src/lib/series.ts`, `src/lib/series.test.ts` (only if nothing imports them any more), `tests/e2e/interactions.spec.ts` (new), `tests/e2e/helpers.ts` (amended: fix `clickBar`). Touch nothing else.
 Commits: Commit to the current branch when done evidence passes, with a plain-summary title. Stage only the owned paths and the report.
 Report: before committing, write `docs/plans/12-analytics-dashboard-overhaul/reports/4-16-retire-layerchart-interactions.md` (a handoff; rubric in `tools/quality/checks/execution-report.json`) and include it in the commit.
 Depends on: 4-06, 4-07, 4-08, 4-09, 4-10, 4-11, 4-12, 4-13, 4-14, 4-15.
@@ -59,3 +59,7 @@ Under 1,500 tokens. Status: `done` | `done with concerns` | `blocked` | `needs c
 A non-trivial bug outside your done evidence: report symptom, location, and root cause if found. Do not fix it here.
 
 Do not spawn agents beyond read-only research helpers. If this unit needs one, it was mis-sized: report `blocked` and say so.
+
+## Amendment (from the 4-10 report)
+
+`helpers.ts` `clickBar` cannot click a `BarChart`: it toggles to the table to count rows and leaves the table showing, but `BarChart` renders the table and the chart as alternatives, so the geometry click lands on nothing. Fix it first, inside `tests/e2e/helpers.ts`, by copying the working `clickHarnessBar` in `tests/e2e/hooks.spec.ts` (read the row count from the table, toggle back to the chart, wait for `.echart svg`, then click the band centre). Bar and table order is key-ascending, so harness index 0 is `claude`. Keep the existing `clickBar` signature. Then use it in the `/hooks` interaction test as written above.

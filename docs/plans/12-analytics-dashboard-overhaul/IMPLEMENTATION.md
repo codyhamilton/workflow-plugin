@@ -254,3 +254,20 @@ Built (8cc8631, flash worker): ECharts bar, time (with brush), heatmap and treem
 ### 4-05-shell-filterbar-view
 
 Built (d607aa1, flash worker): `+layout.svelte` shell, `FilterBar.svelte` (presets, custom range, chips, exclude shown as complement) and the shared view-state module; the filter selection lives in the URL and survives navigation. Checks by the worker: `npm test` 76 pass, `npm run build` passes, `shell.spec.ts` 6 passed, full e2e 31 of 32. Known: `overview.spec.ts:38` fails because the facet selects now load through the debounced client; 4-06 fixes it. Units 4-06 to 4-15 run in separate git worktrees (`/home/codyh/workspace/wt/<NN>`, branch `wt/<NN>`, `E2E_PORT` 44NN) and are cherry-picked back by the orchestrator.
+
+### 4-06 to 4-15 (route units)
+
+Ten flash workers ran in parallel in separate git worktrees (`E2E_PORT` 4406 to 4415) and were cherry-picked onto the plan branch (conflict-free, owned paths disjoint). Three workers (4-09, 4-11, 4-14) finished their work and report but were denied the commit step (permission auto-rejected on a `/tmp` write); the orchestrator committed their owned paths unchanged. Orchestrator check on the merged branch: `npm test` 76 pass, `npm run build` passes, `npm run test:e2e` 76 passed.
+
+- 4-06-overview (53f0eaf, 7e3034a): Overview on the shared view: KPI tiles with sparklines (cost via `costLabel`, `unpriced_calls` beside it), weekday by hour heatmap; the grouped `summary-*` ids restored; fixes the `overview.spec.ts:38` failure from 4-05.
+- 4-07-trends (b4044e9): any measure over time, schema-driven lists, in-range bucket, brush narrows the window and clears the preset. Departure: `all=1` with a time bucket is not issued (the API benchmark skips it).
+- 4-08-usage-cost (d7b1cbf): new `usage/` route, seven `/query` requests, per-model calls, tokens and cost, unpriced banner, `__other__` inert; a window with only unpriced calls never shows `$0`. Footnote on the live-captured Claude dedupe gap.
+- 4-09-repos (a68cdda, committed by the orchestrator): four fixed `/query` requests (`top=100`), independent of repo count; the page waits for facets so a facets arrival does not re-send the queries.
+- 4-10-hooks (7aa826f): four bars and two linked two-level treemaps (`/query` allows two dimensions); drill-down adds chips. Bar order is key-ascending.
+- 4-11-quality (26cc678, committed by the orchestrator): `scores` always carries one `kind` via `scoresParams`; kind selector in the URL. Contradiction: the brief says table only; DESIGN.md says "distribution charts beside the baseline". Followed the brief; see Carried.
+- 4-12-executions (036591a): shared client, drill-down cells. Deviation: `ev.shiftKey` mapped to `{shift}`.
+- 4-13-conversations (4f9a29e): virtualised rows (`VirtualRows.svelte`), ids open the timeline, 1 s timing assertion on a 5,000-row case. Known: a non-`Superseded` fetch error renders nothing (no error panel).
+- 4-14-conversation-timeline (406ded2, committed by the orchestrator): `/conversation?id=` with header, token and cost totals (`unpriced_calls` shown, no `$0`), event list.
+- 4-15-explore-settings (9f3efb3): Explore follows the shared window and filters (exclude as complement); Settings clears the client cache on save.
+
+Contradiction for 4-16, found by 4-10: `helpers.clickBar` cannot click a `BarChart` (it leaves the table showing, which unmounts the chart). Amended into `briefs/4-16-retire-layerchart-interactions.md` (4-16 now owns `helpers.ts`).
