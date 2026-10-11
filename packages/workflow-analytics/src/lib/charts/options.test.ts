@@ -123,6 +123,34 @@ describe('timeOption', () => {
 		expect(option.legend.show).toBe(false);
 		expect(option.grid.top).toBe(24);
 	});
+
+	it('renders area as stacked line series with an areaStyle', () => {
+		const option = timeOption(
+			{
+				series: [
+					{ name: 'a', points: [{ t: '2024-01-01', v: 1 }] },
+					{ name: 'b', points: [{ t: '2024-01-01', v: 2 }] }
+				],
+				bucket: 'day',
+				area: true
+			},
+			TOKENS
+		);
+		expect(option.series[0].type).toBe('line');
+		expect(option.series[0].stack).toBe('total');
+		expect((option.series[0] as { areaStyle?: unknown }).areaStyle).toBeTruthy();
+		expect(option.series[1].stack).toBe(option.series[0].stack);
+	});
+
+	it('keeps stacked bars without areaStyle when only stacked is set', () => {
+		const option = timeOption(
+			{ series: [{ name: 'x', points: [{ t: '2024-01-01', v: 1 }] }], bucket: 'day', stacked: true },
+			TOKENS
+		);
+		expect(option.series[0].type).toBe('bar');
+		expect(option.series[0].stack).toBe('total');
+		expect((option.series[0] as { areaStyle?: unknown }).areaStyle).toBeUndefined();
+	});
 });
 
 describe('heatmapOption', () => {

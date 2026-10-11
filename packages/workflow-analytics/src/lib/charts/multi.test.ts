@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { render } from 'svelte/server';
+import SmallMultiples from './SmallMultiples.svelte';
 import {
 	groupedBarOption,
 	groupedBarProps,
@@ -97,5 +99,28 @@ describe('groupedBarProps', () => {
 		expect(p.categories.map((c) => c.key)).toEqual(['alpha', 'zeta', '__other__']);
 		expect(p.categories[2].clickable).toBe(false);
 		expect(orderKeys('model', ['__other__', 'b', 'a'])).toEqual(['a', 'b', '__other__']);
+	});
+});
+
+describe('SmallMultiples data-ready', () => {
+	it('is ready on the root when there are zero panels', () => {
+		const { body } = render(SmallMultiples, {
+			props: { testid: 'x', panels: [], yMax: 0, bucket: 'day' }
+		});
+		expect(body).toContain('data-ready="true"');
+	});
+
+	it('is not ready before its child charts mount', () => {
+		const panels = [
+			{
+				key: 'a',
+				title: 'A',
+				series: [{ name: 's', points: [{ t: '2024-01-01', v: 1 }] }]
+			}
+		];
+		const { body } = render(SmallMultiples, {
+			props: { testid: 'x', panels, yMax: 1, bucket: 'day' }
+		});
+		expect(body).toContain('data-ready="false"');
 	});
 });

@@ -25,6 +25,7 @@ export interface TimeProps {
 	series: TimeSeries[];
 	bucket: 'hour' | 'day' | 'week' | 'month';
 	stacked?: boolean;
+	area?: boolean;
 }
 
 export interface HeatCell {
@@ -104,10 +105,12 @@ export function barOption(p: BarProps, t: Tokens) {
 
 export function timeOption(p: TimeProps, t: Tokens) {
 	const stacked = p.stacked === true;
+	const area = p.area === true;
 	const series = (p.series ?? []).map((s, i) => ({
 		name: s.name,
-		type: stacked ? 'bar' : 'line',
-		stack: stacked ? 'total' : undefined,
+		type: area ? 'line' : stacked ? 'bar' : 'line',
+		stack: area || stacked ? 'total' : undefined,
+		...(area ? { areaStyle: {} } : {}),
 		showSymbol: false,
 		smooth: false,
 		lineStyle: { width: 2, color: seriesColor(t, i) },

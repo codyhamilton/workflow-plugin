@@ -19,6 +19,12 @@
 	} = $props();
 
 	let showTable = $state(false);
+	let panelReady = $state<Record<string, boolean>>({});
+
+	// Ready once every child EChart for the current panels has reported, and immediately with no panels.
+	const ready = $derived(
+		panels.length === 0 || panels.every((p) => panelReady[p.key] === true)
+	);
 
 	// Brush must be armed on mount so a horizontal drag fires brushEnd.
 	function oninit(c: any) {
@@ -49,7 +55,7 @@
 	});
 </script>
 
-<div class="multiples">
+<div class="multiples" data-ready={ready ? 'true' : 'false'}>
 	<button
 		type="button"
 		class="toggle"
@@ -70,6 +76,7 @@
 						height={200}
 						{oninit}
 						{onbrushend}
+						bind:ready={panelReady[panel.key]}
 					/>
 				</div>
 			{/each}
