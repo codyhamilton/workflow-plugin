@@ -29,8 +29,8 @@ func usageFixture(t *testing.T) *Tenant {
 	rows := []FactRow{
 		// Claude pair: same conversation and backfill.ref msg-A, tok_out 10 then 40. The model is
 		// not in pricing_table.json and no cost is reported, so the single kept call is unpriced.
-		ufact(1, "claude", "claude-sonnet-5-5", "c1", `{"backfill":{"ref":"msg-A"},"n":1}`, aFrom, 0, 10, 0, 0, 0, nil),
-		ufact(2, "claude", "claude-sonnet-5-5", "c1", `{"backfill":{"ref":"msg-A"},"n":2}`, aFrom, 0, 40, 0, 0, 0, nil),
+		ufact(1, "claude", "claude-test-unpriced", "c1", `{"backfill":{"ref":"msg-A"},"n":1}`, aFrom, 0, 10, 0, 0, 0, nil),
+		ufact(2, "claude", "claude-test-unpriced", "c1", `{"backfill":{"ref":"msg-A"},"n":2}`, aFrom, 0, 40, 0, 0, 0, nil),
 		// Codex: input_tokens include cached input, so fresh = 1000-400 = 600; kimi-k2.5 rates
 		// are input 0.6 and cache_read 0.1, giving (600*0.6 + 400*0.1)/1e6 = 0.0004.
 		ufact(3, "codex", "kimi-k2.5", "c1", `{"n":3}`, aFrom, 1000, 0, 400, 0, 0, nil),
@@ -91,7 +91,7 @@ func TestUsageGroupByHarnessAndModel(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []QueryRow{
-		{K: []string{"claude", "claude-sonnet-5-5"}, V: 1},
+		{K: []string{"claude", "claude-test-unpriced"}, V: 1},
 		{K: []string{"codex", "kimi-k2.5"}, V: 1},
 		{K: []string{"opencode", "grok-4.5"}, V: 1},
 	}
@@ -106,8 +106,8 @@ func TestUsageClaudeDedupeKeepsLargestOut(t *testing.T) {
 	// Same conversation and id, different tok_out; only the 40-output row survives, so
 	// tokens_out is 40 (not 50) and model_calls is 1.
 	rows := []FactRow{
-		ufact(1, "claude", "claude-sonnet-5-5", "c1", `{"backfill":{"ref":"m"},"n":1}`, aFrom, 0, 10, 0, 0, 0, nil),
-		ufact(2, "claude", "claude-sonnet-5-5", "c1", `{"backfill":{"ref":"m"},"n":2}`, aFrom, 0, 40, 0, 0, 0, nil),
+		ufact(1, "claude", "claude-test-unpriced", "c1", `{"backfill":{"ref":"m"},"n":1}`, aFrom, 0, 10, 0, 0, 0, nil),
+		ufact(2, "claude", "claude-test-unpriced", "c1", `{"backfill":{"ref":"m"},"n":2}`, aFrom, 0, 40, 0, 0, 0, nil),
 	}
 	if _, err := tn.Append(ctx, rows); err != nil {
 		t.Fatal(err)
@@ -134,8 +134,8 @@ func TestUsageLiveClaudeWithoutIdIsNotDeduped(t *testing.T) {
 	tn := openT(t, Options{})
 	// Live-captured Claude facts carry no id in the stored envelope, so each is its own call.
 	rows := []FactRow{
-		ufact(1, "claude", "claude-sonnet-5-5", "c1", `{"n":1}`, aFrom, 0, 10, 0, 0, 0, nil),
-		ufact(2, "claude", "claude-sonnet-5-5", "c1", `{"n":2}`, aFrom, 0, 40, 0, 0, 0, nil),
+		ufact(1, "claude", "claude-test-unpriced", "c1", `{"n":1}`, aFrom, 0, 10, 0, 0, 0, nil),
+		ufact(2, "claude", "claude-test-unpriced", "c1", `{"n":2}`, aFrom, 0, 40, 0, 0, 0, nil),
 	}
 	if _, err := tn.Append(ctx, rows); err != nil {
 		t.Fatal(err)

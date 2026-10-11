@@ -598,7 +598,7 @@ func TestAnalyticsFacetsModels(t *testing.T) {
 	}
 	tn2 := usageFixture(t)
 	got, err = tn2.Facets(ctx, usageFilter())
-	wantModels := []string{"claude-sonnet-5-5", "grok-4.5", "kimi-k2.5"}
+	wantModels := []string{"claude-test-unpriced", "grok-4.5", "kimi-k2.5"}
 	if err != nil || !reflect.DeepEqual(got.Models, wantModels) ||
 		!reflect.DeepEqual(got.NormEvents, []string{"usage"}) {
 		t.Fatalf("models/norm: %+v %v", got, err)

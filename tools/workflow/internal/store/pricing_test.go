@@ -73,12 +73,30 @@ func TestCostPrefixRule(t *testing.T) {
 }
 
 func TestCostUnknownModel(t *testing.T) {
-	for _, m := range []string{"", "claude-sonnet-5", "a/b/kimi-k2.5", "x/unknown"} {
+	for _, m := range []string{"", "claude-test-unpriced", "a/b/kimi-k2.5", "x/unknown"} {
 		if usd, ok := Cost("claude", m, Tokens{In: 1000}, nil); ok || usd != 0 {
 			t.Fatalf("%q: got %v %v", m, usd, ok)
 		}
 		if PricedModel(m) {
 			t.Fatalf("%q should not be priced", m)
+		}
+	}
+}
+
+func TestCostVendorRates(t *testing.T) {
+	// Claude sonnet-5-5: 1M fresh in $2 + 1M cache read $0.10 + 1M out $10 + 1M cache write $2.50.
+	usd, ok := Cost("claude", "claude-sonnet-5-5", Tokens{In: 1e6, CacheRead: 1e6, CacheWrite: 1e6, Out: 1e6}, nil)
+	if !ok || !near(usd, 14.60) {
+		t.Fatalf("claude-sonnet-5-5: got %v %v", usd, ok)
+	}
+	// Codex input includes cached input: 1M in with 400k cached = 600k fresh.
+	usd, ok = Cost("codex", "gpt-5.4", Tokens{In: 1e6, CacheRead: 4e5, Out: 1e5}, nil)
+	if !ok || !near(usd, 0.6*2.5+0.4*0.25+0.1*15) {
+		t.Fatalf("gpt-5.4: got %v %v", usd, ok)
+	}
+	for _, m := range []string{"claude-haiku-4-5-20251001", "claude-opus-5-5", "gpt-6.1-sol", "gpt-6-luna"} {
+		if !PricedModel(m) {
+			t.Fatalf("%s should be priced", m)
 		}
 	}
 }
