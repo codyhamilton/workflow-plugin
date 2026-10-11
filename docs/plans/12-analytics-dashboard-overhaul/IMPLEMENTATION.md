@@ -386,3 +386,19 @@ Built (88cdd37, flash worker): `SaveView.svelte`, Builder and Dashboards nav, `e
 ### 5-15-quality-distribution-charts
 
 Built (a62d133, flash worker): `BoxChart` of per-check score distribution above the Quality table with the baseline median as marker; three e2e tests (rows and marker, kind switch, dark theme). Contradiction: the e2e serve has no scorer, so tests stub scored rows.
+
+### 5-07-builder-route
+
+Built (a11314c, flash worker): `/builder` route, schema-driven controls, URL as view state via `parseConfig`, one `/query`, unsupported pairings not selectable, bucket clamp with `builder-notice-range`, drill and brush; five e2e cases (5 failed before, 5 passed after), `npm test` 148 pass. Deviations: explicit `b=none` handling; chart re-defaults on a pairing change. Defect found: `SmallMultiples` emits no `data-ready` (placed in 5-18).
+
+### 5-08-dashboards-route
+
+Built (f2c7d78, flash worker): `/dashboards` route: list and create, ordered grid of saved-view iframes with `embed=1`, reorder and remove, JSON export (Blob) and import (file or textarea) with `dash-import-error`; two e2e tests, `npm test` 152 pass.
+
+### 5-09-executions-sankey
+
+Built (b22233b, df88f60, flash worker): Executions sankey with links `exec-link-<source>-<target>`; clicking a link sets the page-local `shape` parameter and filters the table client side (second click clears; counts tiles unfiltered). Deviation as briefed: no per-row design reference, so `design -> brief` is the whole set; fetch-key guard replaces `params`-identity refetch. 9 e2e pass, `npm test` 148 pass.
+
+### 5-18-stacked-area-and-multiples-ready
+
+Added by the orchestrator after 5-05 and 5-07 reported the area type and the small-multiples settle defects (`briefs/5-18-stacked-area-and-multiples-ready.md`); 5-17 now also depends on it.
