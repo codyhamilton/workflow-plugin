@@ -1,4 +1,6 @@
 <script lang="ts">
+	import BoxChart from '$lib/charts/BoxChart.svelte';
+	import type { BoxRow } from '$lib/charts/box';
 	import { KINDS, type Kind } from '$lib/filters';
 	import { scoresParams } from '$lib/params';
 	import { getJSON, Superseded } from '$lib/query';
@@ -15,6 +17,23 @@
 	// The first valid kind in the URL, default design.
 	const include = $derived(view.state.include);
 	const kind = $derived<Kind>((include.kind?.[0] as Kind | undefined) ?? 'design');
+
+	// One box per scored check in the window, with the all-time baseline median marked on the same
+	// row. A check with no scored rows in the window is omitted; a check with no baseline still
+	// shows its box, unmarked.
+	const distRows = $derived<BoxRow[]>(
+		(scores?.checks ?? [])
+			.filter((c) => c.n > 0)
+			.map((c) => ({
+				name: c.name,
+				min: c.min,
+				p25: c.p25,
+				median: c.median,
+				p75: c.p75,
+				max: c.max,
+				marker: baselines?.checks?.[c.name]?.median
+			}))
+	);
 
 	$effect(() => {
 		const base = view.paramsFor('rest');
@@ -62,6 +81,7 @@
 	<p data-testid="quality-kind-note">The URL names several kinds; showing {kind}.</p>
 {/if}
 {#if scores}
+	<BoxChart testid="quality-dist" rows={distRows} />
 	<table>
 		<thead>
 			<tr>
