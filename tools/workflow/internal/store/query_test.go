@@ -229,10 +229,9 @@ func TestQueryEveryMeasure(t *testing.T) {
 	}
 }
 
-func TestQueryUsageUnavailable(t *testing.T) {
+func TestQueryUsageAvailable(t *testing.T) {
 	tn, f := fixture(t)
-	_, err := tn.Query(context.Background(), f, QueryParams{Measure: "model_calls"})
-	if err == nil || err.Error() != "measure not available" {
-		t.Fatalf("err = %v", err)
+	if _, err := tn.Query(context.Background(), f, QueryParams{Measure: "model_calls"}); err != nil {
+		t.Fatalf("model_calls: %v", err)
 	}
 }

@@ -153,7 +153,7 @@ func TestAnalyticsQuery(t *testing.T) {
 		aerr(t, s, A+"measure=hook_events&dim=harness&dim=tool&dim=repo_id", 400, "at most two dim")
 		aerr(t, s, A+"measure=conversations&dim=tool", 400, "unsupported dimension tool for conversations")
 		aerr(t, s, A+"measure=hook_events&tz=Not%2FAZone", 400, "invalid tz")
-		aerr(t, s, A+"measure=model_calls", 400, "measure not available")
+		aerr(t, s, A+"measure=model_calls&dim=tool", 400, "unsupported dimension tool for model_calls")
 	})
 
 	t.Run("ignored_filters", func(t *testing.T) {
