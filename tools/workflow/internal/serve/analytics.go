@@ -62,7 +62,8 @@ func decodeCursor(s string) (*cursor, bool) {
 // canonFilter is the filter parameters as sent, with repeated values sorted.
 func canonFilter(q url.Values) string {
 	out := url.Values{}
-	for _, k := range []string{"from", "to", "repo_id", "harness", "kind", "plan"} {
+	for _, k := range []string{"from", "to", "repo_id", "harness", "kind", "plan",
+		"norm_event", "event", "tool", "model", "source", "conversation_id", "tz", "all"} {
 		if v, ok := q[k]; ok {
 			c := append([]string(nil), v...)
 			sort.Strings(c)
@@ -91,6 +92,7 @@ func tooWide(from, to time.Time, weeks bool) bool {
 type filterOpts struct {
 	weeks      bool    // count the cap in ISO weeks
 	scoresKind bool    // exactly one kind required
+	query      bool    // /query validates the bucket cap itself, so skip the day/week cap here
 	route      string  // set with cur
 	cur        *cursor // paged routes: the request's cursor
 }
@@ -117,6 +119,19 @@ func parseFilter(w http.ResponseWriter, r *http.Request, o filterOpts) (store.An
 		}
 		hasTo = true
 	}
+	var loc *time.Location
+	if v := q.Get("tz"); v != "" {
+		if loc, err = time.LoadLocation(v); err != nil {
+			errJSON(w, 400, "invalid tz")
+			return f, false
+		}
+	}
+	if q.Get("all") == "1" {
+		from, hasFrom = time.Unix(0, 0), true
+		if !hasTo {
+			to = time.Now().UTC()
+		}
+	}
 	if o.cur != nil {
 		if o.cur.Route != o.route || o.cur.Filter != canonFilter(q) {
 			errJSON(w, 400, "cursor mismatch")
@@ -135,11 +150,12 @@ func parseFilter(w http.ResponseWriter, r *http.Request, o filterOpts) (store.An
 		errJSON(w, 400, "from is after to")
 		return f, false
 	}
-	if tooWide(from, to, o.weeks) {
+	if !o.query && tooWide(from, to, o.weeks) {
 		errJSON(w, 400, "range too wide")
 		return f, false
 	}
-	f = store.AnalyticsFilter{From: from.UTC(), To: to.UTC(), Repos: q["repo_id"], Harnesses: q["harness"], Kinds: q["kind"], Plans: q["plan"]}
+	f = store.AnalyticsFilter{From: from.UTC(), To: to.UTC(), Repos: q["repo_id"], Harnesses: q["harness"], Kinds: q["kind"], Plans: q["plan"],
+		NormEvents: q["norm_event"], Events: q["event"], Tools: q["tool"], Models: q["model"], Sources: q["source"], ConversationIDs: q["conversation_id"], TZ: loc}
 	if o.scoresKind && len(f.Kinds) != 1 {
 		errJSON(w, 400, "kind required")
 		return f, false
