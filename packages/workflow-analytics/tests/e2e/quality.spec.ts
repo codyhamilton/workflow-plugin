@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { serveState, useServe } from './helpers';
+import { serveState, trackRequests, useServe } from './helpers';
 
 const F = ['n', 'min', 'p25', 'median', 'p75', 'max'] as const;
 const BF = ['n', 'p25', 'median', 'p75'] as const;
@@ -31,6 +31,31 @@ test('?kind=brief switches to the brief checks', async ({ page }) => {
 	await expect(page.getByTestId('q-row')).toHaveCount(brief.length);
 	await expect(page.getByTestId(`q-${brief[0]}-w-n`)).toBeVisible();
 	if (!design.includes(brief[0])) await expect(page.getByTestId(`q-${design[0]}-w-n`)).toHaveCount(0);
+});
+
+test('a kind tab sets the URL kind and every scores request carries exactly one kind', async ({ page }) => {
+	const brief = await catalog('brief');
+	const seen = trackRequests(page, '/v1/analytics/scores');
+	await page.goto('/quality');
+	await expect(page.getByTestId('q-row').first()).toBeVisible();
+	for (const u of seen.urls()) expect(new URL(u).searchParams.getAll('kind')).toEqual(['design']);
+	seen.reset();
+	await page.getByTestId('quality-kind-brief').click();
+	await expect(page).toHaveURL(/kind=brief/);
+	await expect(page.getByTestId('quality-kind-brief')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId(`q-${brief[0]}-w-n`)).toBeVisible();
+	expect(seen.count()).toBe(1);
+	expect(new URL(seen.urls()[0]).searchParams.getAll('kind')).toEqual(['brief']);
+});
+
+test('switching kind renders within 1 s', async ({ page }) => {
+	const brief = await catalog('brief');
+	await page.goto('/quality');
+	await expect(page.getByTestId('q-row').first()).toBeVisible();
+	const t0 = Date.now();
+	await page.getByTestId('quality-kind-brief').click();
+	await expect(page.getByTestId(`q-${brief[0]}-w-n`)).toBeVisible();
+	expect(Date.now() - t0).toBeLessThan(1000);
 });
 
 test('stubbed responses: every cell shows its own field; only GETs are made', async ({ page }) => {
