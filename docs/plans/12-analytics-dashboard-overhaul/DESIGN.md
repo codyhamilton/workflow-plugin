@@ -395,6 +395,21 @@ Each criterion is tagged with where it comes from:
   - a new embedded pricing table in `tools/workflow/internal/store/`, with a test asserting it equals `tools/transcript/pricing.json`.
 - Approach: known. Rollups are conditional (Open Question 1).
 - Depends on: Phase 2
+- Units:
+  - 3-01 Embedded pricing table and cost function: `briefs/3-01-pricing-cost.md`. Depends on nothing. Alongside 3-02, 3-03.
+  - 3-02 Shared filter keys and column-based reads: `briefs/3-02-filter-columns.md`. Depends on nothing. Alongside 3-01, 3-03.
+  - 3-03 One survivor-ts rule for ingest and compaction: `briefs/3-03-collapse-survivor-ts.md`. Depends on nothing. Alongside any unit up to 3-10 (it owns only `internal/compact`).
+  - 3-04 Measure matrix and query engine, non-usage measures: `briefs/3-04-query-engine.md`. Depends on 3-02. Alongside 3-01, 3-03.
+  - 3-05 Usage measures, cost and Claude message dedupe: `briefs/3-05-usage-measures.md`. Depends on 3-01, 3-04. Alongside 3-06.
+  - 3-06 Filter parsing, `schema` and `query` routes: `briefs/3-06-serve-query-routes.md`. Depends on 3-02, 3-04. Alongside 3-05.
+  - 3-07 Keyset paging for executions and conversations: `briefs/3-07-keyset-paging.md`. Depends on 3-02, 3-06. Alongside 3-09.
+  - 3-08 Summary, facets and Explore additions: `briefs/3-08-summary-facets-explore.md`. Depends on 3-05, 3-07. Alongside 3-09.
+  - 3-09 `conversation` route: `briefs/3-09-conversation-route.md`. Depends on 3-05, 3-06. Alongside 3-07, 3-08.
+  - 3-10 Env-gated benchmark harness: `briefs/3-10-benchmark-harness.md`. Depends on 3-08, 3-09. Alongside nothing.
+  - 3-11 Run the benchmark on the compacted copy and decide rollups: `briefs/3-11-run-benchmark-on-copy.md`. Depends on 3-10. Alongside nothing.
+  - 3-12 Conditional: indexes, then hourly rollups, for the cases that missed: `briefs/3-12-fix-misses-indexes-rollups.md`. Depends on 3-11. Runs only if 3-11 reports misses (Open Question 1). Alongside nothing.
+  - 3-13 Phase 3 outcome check: `briefs/3-13-phase-proof.md`. Depends on 3-03, 3-11, and 3-12 when it ran. Alongside nothing.
+- Placement notes: files are owned so that parallel units never share one: `store/analytics.go` belongs to 3-02, then 3-07, then 3-08 in turn, and `serve/analytics.go` to 3-06, 3-07, 3-08 in turn; new files (`pricing.go`, `query.go`, `usage.go`, `conversation.go`, `analytics_query.go`, `analytics_conversation.go`) carry the rest. The benchmark is in `internal/serve` (not `store`, as the surfaces list says) because it drives HTTP routes. It copies `ledger.db` from `/var/tmp/workflow-compact-copy/data/local` to a temp dir and opens the copy, so neither the compacted copy nor the live ledger is written. Whether 3-12 runs is decided by 3-11's report: no case over 500 ms p95 answers Open Question 1 "no rollup", and any miss is fixed first by an index and only then by a rollup; more than three missed measures sends 3-12 back to the orchestrator to split per measure. Local models are mostly absent from `tools/transcript/pricing.json` (7 Cursor models), so most calls will show as `unpriced_calls` unless the harness reported a cost; 3-11 records the share.
 
 ### Phase 4 — Dashboard shell, filters and drill-down
 

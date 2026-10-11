@@ -97,3 +97,20 @@ Run by a separate Sonnet subagent against a small legacy-shaped copy (30,401 row
 6. `workflow ledger compact` creates and migrates a non-existent `--tenant-dir` (exit 0, rows=0) instead of failing; it also skips when meta is `complete` while `compact.Run` would still repair leftover payload rows (unreachable on a genuine ledger).
 7. The keyless-delta keep path (delta without a collapse key) is covered by unit tests only; the real ledger has none.
 8. The workflow MCP server does not start (ENOENT), so `artifact_feedback` has not run on Phase 1 or Phase 2 briefs or reports.
+
+## Phase 3 — Fast analytics API with usage and cost
+
+Units: thirteen, from `refine` (briefs in `briefs/`, named `3-NN-<slug>.md`). Order: 3-01, 3-02, 3-03 parallel; then 3-04 (after 3-02); then 3-05 and 3-06 parallel; then 3-07 (after 3-06), with 3-09 (after 3-05 and 3-06) alongside it; 3-08 after 3-05 and 3-07; 3-10; 3-11; 3-12 only if 3-11 finds a miss; 3-13 last. `artifact_feedback` was not run on these briefs (the workflow MCP server failed to connect, ENOENT).
+
+### Carried items placed
+
+1. Cached input double charge: 3-01 (`Cost` subtracts Codex cached input from fresh input; hand-computed test); checked again in 3-13.
+2. OpenCode `cost` of 0 as not reported: 3-01 (a reported value of 0 or less falls back to token pricing; `extract.go` already stores nil).
+3. Repeated Claude `message_id`: 3-05 (one call per conversation and message id, keeping the row with the largest output; reused by 3-08 and 3-09). Limit: the id exists only in `backfill.ref` on backfilled rows; live-captured Claude facts have no stored id, so repeats among them are not deduped unless 3-05 finds the id in the envelope.
+4. Tool and source reads off `json_extract`: 3-02 (all facts reads use the `tool`, `source`, `sha`, `kind`, `plan` columns).
+5. Collapse survivor `ts`: 3-03 (rule chosen at refine: first-arriving, so compaction changes to match ingest).
+6. `ledger compact` creating a non-existent `--tenant-dir` and skipping on `complete` meta: stays carried (compaction CLI, no analytics reader).
+7. Keyless-delta keep path covered by unit tests only: stays carried (the real ledger has none, and no Phase 3 read depends on it).
+8. `artifact_feedback` not run on earlier briefs and reports: stays carried (infrastructure).
+
+New, from refine: `tools/transcript/pricing.json` holds only seven Cursor models, so most local calls will be unpriced unless a cost was reported. 3-11 records the share. Adding rates is outside this plan's scope and is left to the user.
