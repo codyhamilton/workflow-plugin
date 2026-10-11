@@ -349,3 +349,27 @@ Built (892130a, flash worker, worktree wt/5-01): `src/lib/views.ts` saved-view a
 ### 5-02-builder-spec
 
 Built (90ea220, flash worker, worktree wt/5-02): `src/lib/builder.ts` config model (`parseConfig`, `configToParams`, `allowedDims`, `allowedBuckets`, `allowedCharts`, `defaultConfig`, `isRangeOk`), schema-driven and non-throwing; 23 tests, `npm test` 97 pass. Deviations: none. Concern: no standalone typecheck was run.
+
+### 5-03-sankey-boxplot-charts
+
+Built (e960563, eccd6ce, flash worker): sankey and box-plot ECharts components, `EChart.svelte` registration (also `ScatterChart` for box markers: brief named only Sankey and Boxplot, named in the report); `npm test` 83 pass, build passes, no `layerchart`. Not browser-rendered by the worker.
+
+### 5-10-usage-table-merge
+
+Built (bf9cb04, flash worker): the Usage table reads five `/query` requests with `top=100` so every measure returns one key set; `__other__` reads "other models", the empty key "(none)" and is inert. Contradictions reported: the cost-by-model chart shares the table's responses so it sees up to 100 keys (brief said top=20); the backend accepts an empty `model` filter; the 3-model fixture cannot reproduce the merge defect, so the `top=100` assertion is the guard. Real-copy check is left to phase verification.
+
+### 5-14-conversation-page-fixes
+
+Built (f63136e, flash worker): back link restores the last list route with its query (mirrored in `sessionStorage`); zero-token and zero-cost rows show no cost text, `unpriced` only for rows with tokens and no positive cost; `costLabel` returns `N unpriced` instead of `$0.00` when priced cost is 0. Tests 89 pass, conversation e2e 11 pass.
+
+### 5-16-conversations-fetch-errors
+
+Built (ccf2481, flash worker): Conversations shows the shell `error-panel` on a non-`Superseded` fetch failure and clears it on success; three e2e tests (500, network abort, preset retry).
+
+### 5-05-builder-chart-components
+
+Built (4e1a264, flash worker): `BuilderChart`, grouped bar and small-multiples components; 7 tests, build passes. Deviations: `area` renders stacked bars (no area type in `timeOption`, `options.ts:94`, owned by 5-04); heatmap y-axis uses the time bucket for the single-dimension case. Carried into the phase: area chart type.
+
+### 5-12-page-request-set-profile
+
+First run (flash) found no `go` on PATH and stopped without a change; relaunched with `~/.local/go/bin` on PATH.
