@@ -238,6 +238,180 @@ func TestRebuildHookRollup(t *testing.T) {
 	}
 }
 
+// convFact builds a fact of any type at second ts for the conversations-rollup tests.
+func convFact(i int, ts int64, typ, harness, repo, model, conv string) FactRow {
+	raw := []byte(fmt.Sprintf(`{"conv":%d}`, i))
+	return FactRow{RowHash: keys.ContentHash(raw), Type: typ, ConversationID: conv,
+		Harness: harness, RepoID: repo, Model: model, TS: float64(ts), Raw: raw}
+}
+
+// convRollupFixture plants facts of every type the conversations measure counts, reusing
+// conversations across hours so DISTINCT is exercised.
+func convRollupFixture(t *testing.T) (*Tenant, []FactRow, int64) {
+	t.Helper()
+	tn := openT(t, Options{})
+	base := time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC).Unix()
+	rows := []FactRow{
+		convFact(1, base+15*60, "hook_event", "claude", "r1", "m1", "c1"),
+		convFact(2, base+45*60, "hook_event", "codex", "r1", "m2", "c2"),
+		convFact(3, base+50*60, "artifact_version", "claude", "r2", "m1", "c1"),
+		convFact(4, base+3600+5*60, "hook_event", "claude", "r2", "m1", "c1"),
+		convFact(5, base+3600+59*60, "commit", "claude", "r1", "m3", "c3"),
+		convFact(6, base+2*3600, "hook_event", "codex", "r2", "m2", "c1"),
+		convFact(7, base+2*3600+30*60, "artifact_version", "claude", "r1", "m1", "c2"),
+		convFact(8, base+3*3600+10*60, "hook_event", "codex", "r1", "m2", "c4"),
+		convFact(9, base+3*3600+40*60, "commit", "claude", "r2", "m3", "c1"),
+	}
+	if _, err := tn.Append(context.Background(), rows); err != nil {
+		t.Fatal(err)
+	}
+	return tn, rows, base
+}
+
+// baseConvAgg is the base-row oracle: distinct conversation_id by one dimension over [from,to],
+// dim "" for the total, time dims via strftime. It counts a conversation once per dimension value.
+func baseConvAgg(t *testing.T, tn *Tenant, from, to int64, dim string) map[string]float64 {
+	t.Helper()
+	var sel string
+	switch dim {
+	case "":
+		sel = "''"
+	case "hour_of_day":
+		sel = "strftime('%H', ts, 'unixepoch')"
+	case "weekday":
+		sel = "strftime('%w', ts, 'unixepoch')"
+	default:
+		sel = dim
+	}
+	q := "SELECT " + sel + " AS k, count(DISTINCT conversation_id) FROM facts WHERE ts>=? AND ts<=? GROUP BY k"
+	rows, err := tn.rdb.Query(q, float64(from), float64(to))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	out := map[string]float64{}
+	if dim == "" {
+		out[""] = 0 // an ungrouped distinct count is 0, not absent, over an empty window
+	}
+	for rows.Next() {
+		var k string
+		var v float64
+		if err := rows.Scan(&k, &v); err != nil {
+			t.Fatal(err)
+		}
+		out[k] = v
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return out
+}
+
+func queryConvAgg(t *testing.T, tn *Tenant, from, to int64, dim string) map[string]float64 {
+	t.Helper()
+	var dims []string
+	if dim != "" {
+		dims = []string{dim}
+	}
+	res, err := tn.Query(context.Background(),
+		AnalyticsFilter{From: time.Unix(from, 0).UTC(), To: time.Unix(to, 0).UTC()},
+		QueryParams{Measure: "conversations", Dims: dims, Top: 100})
+	if err != nil {
+		t.Fatalf("query from=%d to=%d dim=%q: %v", from, to, dim, err)
+	}
+	out := map[string]float64{}
+	for _, r := range res.Rows {
+		k := ""
+		if dim != "" {
+			k = r.K[0]
+		}
+		out[k] = r.V
+	}
+	return out
+}
+
+// TestConversationRollupEqualsBaseRows drives the distinct-rollup read path over windows that start
+// and end mid-hour and compares it, dimension by dimension, with an aggregate over base rows alone.
+func TestConversationRollupEqualsBaseRows(t *testing.T) {
+	tn, _, base := convRollupFixture(t)
+	windows := []struct {
+		name     string
+		from, to int64
+	}{
+		{"whole hours", base, base + 3*3600 + 3599},
+		{"mid start", base + 1800, base + 3*3600 + 1800},
+		{"mid end", base, base + 2*3600 + 1800},
+		{"single hour mid", base + 3600 + 600, base + 3600 + 3000},
+		{"exact hour edges", base + 3600, base + 2*3600},
+		{"one second in", base + 1, base + 3600 - 1},
+		{"all", 0, base + 10*3600},
+	}
+	dims := []string{"", "harness", "repo_id", "model", "hour_of_day", "weekday"}
+	for _, w := range windows {
+		for _, d := range dims {
+			want := baseConvAgg(t, tn, w.from, w.to, d)
+			got := queryConvAgg(t, tn, w.from, w.to, d)
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("window %q dim %q: rollup %v != base %v", w.name, d, got, want)
+			}
+		}
+	}
+}
+
+// TestConversationRollupEqualsBaseSQL asserts the conversations rollup is exactly the base
+// aggregate, in both directions, so no tuple is missing or double-counted.
+func TestConversationRollupEqualsBaseSQL(t *testing.T) {
+	tn, _, _ := convRollupFixture(t)
+	sel := `SELECT CAST(ts/3600 AS INTEGER)*3600, harness, repo_id, model, conversation_id, count(*)
+		FROM facts GROUP BY 1,2,3,4,5`
+	var diff int
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM (
+		SELECT hour,harness,repo_id,model,conversation_id,n FROM conversations_hourly
+		EXCEPT ` + sel + `)`).Scan(&diff); err != nil {
+		t.Fatal(err)
+	}
+	if diff != 0 {
+		t.Fatalf("rollup has %d tuples not in the base aggregate", diff)
+	}
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM (` + sel + `
+		EXCEPT SELECT hour,harness,repo_id,model,conversation_id,n FROM conversations_hourly)`).Scan(&diff); err != nil {
+		t.Fatal(err)
+	}
+	if diff != 0 {
+		t.Fatalf("base aggregate has %d tuples not in the rollup", diff)
+	}
+}
+
+// TestConversationRollupDuplicateAppend: re-appending the same facts (identical row hashes) inserts
+// no row, so it must leave both the base aggregate and the conversations rollup unchanged.
+func TestConversationRollupDuplicateAppend(t *testing.T) {
+	tn, rows, base := convRollupFixture(t)
+	before := queryConvAgg(t, tn, base, base+3*3600+3599, "model")
+	ins, err := tn.Append(context.Background(), rows)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, ok := range ins {
+		if ok {
+			t.Fatalf("duplicate row %d reported inserted", i)
+		}
+	}
+	after := queryConvAgg(t, tn, base, base+3*3600+3599, "model")
+	if !reflect.DeepEqual(before, after) {
+		t.Fatalf("duplicate append changed counts: %v -> %v", before, after)
+	}
+	var rollupN, baseN int
+	if err := tn.rdb.QueryRow(`SELECT sum(n) FROM conversations_hourly`).Scan(&rollupN); err != nil {
+		t.Fatal(err)
+	}
+	if err := tn.rdb.QueryRow(`SELECT count(*) FROM facts`).Scan(&baseN); err != nil {
+		t.Fatal(err)
+	}
+	if rollupN != baseN || baseN != len(rows) {
+		t.Fatalf("rollup sum %d, base %d, fixture %d", rollupN, baseN, len(rows))
+	}
+}
+
 // rollupFixtureOn appends the standard fixture to an already-open tenant.
 func rollupFixtureOn(t *testing.T, tn *Tenant) (*Tenant, []FactRow, int64) {
 	t.Helper()

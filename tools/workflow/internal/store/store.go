@@ -82,6 +82,18 @@ var migrations = []string{
 		hour INTEGER NOT NULL, harness TEXT NOT NULL, repo_id TEXT NOT NULL, norm_event TEXT NOT NULL,
 		event TEXT NOT NULL, tool TEXT NOT NULL, conversation_id TEXT NOT NULL, n INTEGER NOT NULL,
 		PRIMARY KEY (hour, harness, repo_id, norm_event, event, tool, conversation_id)) WITHOUT ROWID;`,
+	// 7: an hourly rollup of conversations by the dimensions the distinct-conversations measure
+	// groups by plus the distinct column itself. The measure counts DISTINCT conversation_id over
+	// the window; aggregating 450k base rows for each rank and final query misses the phase-3
+	// bound, so this collapses each (hour, harness, repo_id, model, conversation_id) presence to
+	// one row. Reads use it for whole interior hours and base rows for the two partial edge hours
+	// (measureDef.source); Append keeps it current in the fact insert's transaction. It is filled
+	// by backfillConversationRollup in open, as migration 6 is, so a pre-migration-4 test layout
+	// (which lacks the columns) stays plain SQL. IF NOT EXISTS keeps a rewind test working.
+	`CREATE TABLE IF NOT EXISTS conversations_hourly (
+		hour INTEGER NOT NULL, harness TEXT NOT NULL, repo_id TEXT NOT NULL, model TEXT NOT NULL,
+		conversation_id TEXT NOT NULL, n INTEGER NOT NULL,
+		PRIMARY KEY (hour, harness, repo_id, model, conversation_id)) WITHOUT ROWID;`,
 }
 
 var hashRE = regexp.MustCompile(`^[0-9a-f]{64}$`)
@@ -171,6 +183,12 @@ func open(dir string, opts Options, how int, exclusive bool) (*Tenant, error) {
 	}
 	if err == nil && from < 6 {
 		err = t.backfillHookRollup() // existing db gaining the rollup table; writer not started yet
+	}
+	if err == nil && from < 7 {
+		err = t.backfillConversationRollup() // existing db gaining the conversations rollup; writer not started yet
+	}
+	if err == nil {
+		err = t.ensureConversationRollupIndex() // ensured on every open; ANALYZE only when the index is newly created
 	}
 	if err != nil {
 		wdb.Close()
@@ -416,6 +434,11 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			return err
 		}
 		defer stRoll.Close()
+		stConv, err := tx.Prepare(convRollupUpsert)
+		if err != nil {
+			return err
+		}
+		defer stConv.Close()
 		for i, r := range rows {
 			if len(r.Raw) == 0 {
 				// OR IGNORE would swallow the NOT NULL violation, so fail explicitly.
@@ -434,6 +457,11 @@ func (t *Tenant) Append(ctx context.Context, rows []FactRow) ([]bool, error) {
 			// A collapsed duplicate inserts no fact, so it must not touch the rollup either.
 			if inserted[i] && r.Type == "hook_event" {
 				if _, err := stRoll.Exec(int64(r.TS)/3600*3600, r.Harness, r.RepoID, r.NormEvent, r.Event, r.Tool, r.ConversationID); err != nil {
+					return err
+				}
+			}
+			if inserted[i] {
+				if _, err := stConv.Exec(int64(r.TS)/3600*3600, r.Harness, r.RepoID, r.Model, r.ConversationID); err != nil {
 					return err
 				}
 			}

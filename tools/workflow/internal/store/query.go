@@ -94,13 +94,15 @@ var usageQuery func(ctx context.Context, t *Tenant, f AnalyticsFilter, p QueryPa
 var queryRowCap = 20000
 
 type measureDef struct {
-	table    string
-	pred     string
-	value    string
-	distinct string
-	dims     []string
-	usage    bool
-	rollup   string // hourly rollup table read for whole interior hours; "" reads table alone
+	table      string
+	pred       string
+	value      string
+	distinct   string
+	dims       []string
+	usage      bool
+	rollup     string   // hourly rollup table read for whole interior hours; "" reads table alone
+	rollupCols []string // base/rollup columns the union exposes beside the time column
+	rollupType string   // constant exposed as `type` when the outer WHERE filters on it; "" otherwise
 }
 
 var factColumns = map[string]string{
@@ -112,9 +114,13 @@ var factColumns = map[string]string{
 func measureByName(name string) (measureDef, bool) {
 	switch name {
 	case "hook_events":
-		return measureDef{table: "facts", pred: "type='hook_event'", dims: []string{"harness", "repo_id", "norm_event", "event", "tool", "conversation_id"}, rollup: "hook_events_hourly"}, true
+		return measureDef{table: "facts", pred: "type='hook_event'", dims: []string{"harness", "repo_id", "norm_event", "event", "tool", "conversation_id"},
+			rollup: "hook_events_hourly", rollupType: "hook_event",
+			rollupCols: []string{"harness", "repo_id", "norm_event", "event", "tool", "conversation_id"}}, true
 	case "conversations":
-		return measureDef{table: "facts", distinct: "conversation_id", dims: []string{"harness", "repo_id", "model"}}, true
+		return measureDef{table: "facts", distinct: "conversation_id", dims: []string{"harness", "repo_id", "model"},
+			rollup:     "conversations_hourly",
+			rollupCols: []string{"harness", "repo_id", "model", "conversation_id"}}, true
 	case "artifact_versions":
 		return measureDef{table: "facts", pred: "type='artifact_version'", dims: []string{"harness", "repo_id", "kind", "plan", "source", "conversation_id"}}, true
 	case "distinct_content":
@@ -166,10 +172,12 @@ func (d measureDef) agg() string {
 	return "count(*)"
 }
 
-// aggSQL is the aggregation over the query's FROM source: one per fact normally, but the sum of the
-// rollup weights when reading the hourly rollup, whose rows stand for n facts each.
+// aggSQL is the aggregation over the query's FROM source: one per fact normally, the sum of the
+// rollup weights when reading a counting rollup whose rows stand for n facts each, and the plain
+// distinct count when reading a distinct-count rollup (summing weights would overcount there; the
+// union's count(DISTINCT ...) dedupes across base edge rows and interior rollup rows).
 func (d measureDef) aggSQL() string {
-	if d.rollup != "" {
+	if d.rollup != "" && d.distinct == "" {
 		return "coalesce(sum(w),0)"
 	}
 	return d.agg()
@@ -177,8 +185,10 @@ func (d measureDef) aggSQL() string {
 
 // source returns the FROM source for a measure. A rolled-up measure reads its rollup table for whole
 // hours strictly inside the window and base rows for the two partial edge hours the window cuts, so
-// the result is identical to aggregating base rows alone. It exposes the base columns (plus type and
-// a weight w) so the rank and final queries are unchanged. Other measures read their table.
+// the result is identical to aggregating base rows alone. It exposes the base columns (plus a weight
+// w for a counting rollup) so the rank and final queries are unchanged. The projection is shared: a
+// counting rollup sums w, a distinct rollup counts DISTINCT over the union. Other measures read
+// their table.
 func (d measureDef) source(f AnalyticsFilter) string {
 	if d.rollup == "" {
 		return d.table
@@ -187,9 +197,28 @@ func (d measureDef) source(f AnalyticsFilter) string {
 	hF := math.Floor(from/3600) * 3600
 	hT := math.Floor(to/3600) * 3600
 	num := func(x float64) string { return strconv.FormatFloat(x, 'f', -1, 64) }
+	cols := strings.Join(d.rollupCols, ", ")
+	weighted := d.distinct == "" // a counting rollup exposes and sums a per-row weight
+	proj := func(timeExpr, weight string) string {
+		var b strings.Builder
+		if d.rollupType != "" {
+			b.WriteString("'" + d.rollupType + "' AS type, ")
+		}
+		b.WriteString(timeExpr + " AS ts, " + cols)
+		if weighted {
+			b.WriteString(", " + weight + " AS w")
+		}
+		return b.String()
+	}
+	baseWhere := func(lo, hi string) string {
+		p := ""
+		if d.pred != "" {
+			p = d.pred + " AND "
+		}
+		return p + "ts" + lo + " AND ts" + hi
+	}
 	base := func(lo, hi string) string {
-		return "SELECT 'hook_event' AS type, ts, harness, repo_id, norm_event, event, tool, conversation_id, " +
-			"1 AS w FROM facts WHERE type='hook_event' AND ts" + lo + " AND ts" + hi
+		return "SELECT " + proj("ts", "1") + " FROM facts WHERE " + baseWhere(lo, hi)
 	}
 	if hF == hT {
 		// The whole window lies in one hour; there is no whole interior hour to read from the rollup.
@@ -199,7 +228,7 @@ func (d measureDef) source(f AnalyticsFilter) string {
 	// between them. Each base range is a narrow index seek rather than a scan of the whole window.
 	b1 := base(" >= "+num(from), " < "+num(hF+3600))
 	b2 := base(" >= "+num(hT), " <= "+num(to))
-	roll := "SELECT 'hook_event' AS type, hour AS ts, harness, repo_id, norm_event, event, tool, conversation_id, n AS w FROM " + d.rollup +
+	roll := "SELECT " + proj("hour", "n") + " FROM " + d.rollup +
 		" WHERE hour > " + num(hF) + " AND hour < " + num(hT)
 	return "(" + b1 + " UNION ALL " + b2 + " UNION ALL " + roll + ")"
 }
