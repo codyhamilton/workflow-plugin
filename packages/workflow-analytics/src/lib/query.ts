@@ -125,7 +125,10 @@ export function createClient(
 			(data) => {
 				if (call.settled) return;
 				call.settled = true;
-				setNotice(call.slot, data as { partial?: boolean; ignored_filters?: string[] });
+				const resp = data as { partial?: boolean; ignored_filters?: string[] };
+				if (resp && (resp.partial || (resp.ignored_filters && resp.ignored_filters.length > 0))) {
+					setNotice(call.slot, resp);
+				}
 				call.resolve(data);
 			},
 			(e) => {
@@ -152,7 +155,12 @@ export function createClient(
 			bySlot.set(slot, call);
 			if (cache.has(key)) {
 				call.settled = true;
-				resolve(cache.get(key) as T);
+				const data = cache.get(key);
+				const resp = data as { partial?: boolean; ignored_filters?: string[] };
+				if (resp && (resp.partial || (resp.ignored_filters && resp.ignored_filters.length > 0))) {
+					setNotice(slot, resp);
+				}
+				resolve(data as T);
 				return;
 			}
 			call.timer = setTimeout(() => {
