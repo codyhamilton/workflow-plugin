@@ -21,6 +21,14 @@
 	let showTable = $state(false);
 	let panelReady = $state<Record<string, boolean>>({});
 
+	// Panels are re-derived in place on each query, so seed any new key before its chart mounts;
+	// `bind:ready` cannot bind an undefined key of a prop that has a fallback (`props_invalid_value`).
+	$effect.pre(() => {
+		for (const p of panels) {
+			if (panelReady[p.key] === undefined) panelReady[p.key] = false;
+		}
+	});
+
 	// Ready once every child EChart for the current panels has reported, and immediately with no panels.
 	const ready = $derived(
 		panels.length === 0 || panels.every((p) => panelReady[p.key] === true)

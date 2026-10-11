@@ -123,4 +123,16 @@ describe('SmallMultiples data-ready', () => {
 		});
 		expect(body).toContain('data-ready="false"');
 	});
+
+	it('renders multiple panels without throwing before their charts mount', () => {
+		const panels = [
+			{ key: 'a', title: 'A', series: [{ name: 's', points: [{ t: '2024-01-01', v: 1 }] }] },
+			{ key: 'b', title: 'B', series: [{ name: 's', points: [{ t: '2024-01-01', v: 2 }] }] }
+		];
+		const { body } = render(SmallMultiples, {
+			props: { testid: 'x', panels, yMax: 2, bucket: 'day' }
+		});
+		expect(body).toContain('data-ready="false"');
+		expect(body).toContain('data-testid="x-panel"');
+	});
 });
