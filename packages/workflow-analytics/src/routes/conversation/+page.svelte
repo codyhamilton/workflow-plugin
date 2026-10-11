@@ -193,6 +193,9 @@
 		font-size: 0.8rem;
 		color: #555;
 	}
+	.spacer {
+		position: relative;
+	}
 	.timeline {
 		height: 600px;
 		margin-top: 1rem;

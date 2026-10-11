@@ -426,3 +426,35 @@ Flash worker ran out without committing; one Sonnet retry landed it (75b8922). N
 ### 5-17-phase-5-e2e
 
 Built (flash worker): `tests/e2e/phase5.spec.ts`, seven tests: small multiples cost_usd x model x harness at day bucket (panels derived from a live API query), heatmap hour_of_day x weekday (cells sum to the API total), no unsupported pairing across every schema measure at 0, 1 and 2 dims, save to dashboard surviving reload, export then import into a fresh browser context, sankey link filter, and five input-to-settle timings (25 to 152 ms on the fixture, all under 1 s, three runs). Full e2e 125 pass, `npm test` 161 pass, build clean. Deviations: the dashboard timing measures click to tile visible because `/dashboards` has no `data-ready`; settle waits hardened against the stale chart; the sankey test overlaps `executions.spec.ts`. Large-ledger timing is not covered here and is re-measured at verification.
+
+### 5-21 fix: conversation timeline overlay
+
+Found by verification and fixed by the orchestrator directly (no worker running): `.spacer` in `routes/conversation/+page.svelte` lacked `position: relative`, so absolutely positioned timeline rows covered the header and back link on long conversations. Added the rule and a geometry assertion to the back-link e2e (fails without the fix, passes with it; conversation e2e 11 pass). Re-checked in a real browser on the large copy: the back link is unblocked on all four sampled conversations (three opencode with 153 to 1150 events, one claude).
+
+## Phase 5 verification
+
+Run by a separate Sonnet subagent with Playwright Chromium against a binary built from HEAD, served on a fresh copy of `/var/tmp/p4verify/data/local` at `/var/tmp/p5verify/data` (the live ledger was not touched; the serve binary reported its analytics bundle as not embedded, so the built site was served with `vite preview` against the API).
+
+- Chart builder: small multiples `cost_usd` x model x harness at a day bucket gives 3 panels (claude, codex, opencode); heatmap `hour_of_day` x weekday gives 150 cells summing to the API total (395,816 for `hook_events`); the area chart renders filled paths. No unsupported pairing is selectable: chart types follow dims and bucket, `model_calls` offers no `tool` or `hour_of_day`, `hook_events` offers no `tool`; a 2,038-combination walk of the real UI had no 4xx and no console errors. A standalone API sweep script timed out and was dropped; the phase5 e2e pairing test covers it.
+- Saved views and dashboards: two views saved, added to dashboard `ops` (2 tiles), reload unchanged; export gives `{"version":1,"name":"ops","views":[...]}`; import by text and by file into a fresh browser context reproduces 2 tiles and renders the multiples tile; 0 console errors.
+- Executions sankey: clicking a link filters (`shape=started` 31 rows, `commit-report` 62 rows) and a second click restores.
+- Usage table: no `$0.00` or blank-label cells; `unpriced` and `$x, n unpriced` read correctly. Quality: the copy has no scores, so the chart is blank on real data; with stubbed scores the box plot renders. Conversations errors: a 500 and a network failure show a message, recovery clears it, a failed Load more keeps rows. Conversation back link: FAILED at first (timeline overlay), fixed as 5-21 above and re-verified.
+- Latency on the large copy, input to settled chart, 5 runs each, all under 1 s (Phase 4 was 1.1 to 1.4 s). p50/max ms: builder measure change 156/164, add second dimension 198/199, heatmap switch 33/34, preset 30d to 90d 194/199, Overview 30d to 90d 430/448, 90d to All 564/581, 30d to 7d 164/165, Usage 30d to 90d 418/448, 90d to All 580/597, 30d to 7d 74/82. Slowest single request 323 ms.
+- API: `TestAnalyticsBench` 2,063 cases all 200, max p95 464.0 ms (`series` 90d) under 500 ms. The three slowest requests moved from 579/518/516 ms p50 to 284/280/274 ms with 5-13.
+- Suites: `go vet` clean; `go test -count=1 ./...` passes except the known `internal/secrets` `TestEnvAssignmentCorpus` (false positives in a report file); `npm test` 161 pass; build clean; `npm run test:e2e` 125 pass (before the 5-21 assertion was added; conversation spec 11 pass after).
+- `artifact_feedback`: returned `not delivered` for brief 5-17 (the service has no version of the file); not run for the rest. The workflow MCP server also failed to connect (ENOENT) in this session.
+
+### Carried (Phase 5)
+
+1. `data-ready` on the builder is true while the chart is stale: after changing selects it flips true within about 58 ms while the previous chart is still shown, until the new response lands. Anything waiting on `data-ready` can read a stale chart; the 5-17 timing hardening works around it in tests only. Fix in `BuilderChart` readiness.
+2. Executions sankey link filtering runs client-side over the loaded first page of 100 rows, so counts (62, 31) are below the tile counts (110, 264) until the user pages on. Needs a server-side filter or loading all rows.
+3. Pricing rates (Phase 3 item 1): about 74% of calls stay unpriced until Claude and Codex rates are added to `tools/transcript/pricing.json` and `internal/store/pricing_table.json`; data, not site code.
+4. Phase 3 items 4 to 9 (server-side) and item 11 (`row_hash` BLOB) stay open as written in the Phase 3 Carried section. Benchmark headroom is better (max p95 464 ms) but thin; a usage rollup would remove the remaining ~250 ms sort and `json_extract` in the usage read (5-13).
+5. `/dashboards` has no `data-ready`, so its tile timing measures click to tile visible; add a settle signal.
+6. Area-chart multiples legend markers use line symbols; cosmetic.
+7. 5-04: the y-axis label gutter on the Hooks bar stays non-clickable.
+8. 5-10: the cost chart shares the table's top=100 responses. 5-11: a leading edge for a never-made slot clashes with the burst guard, so cold slots still debounce. 5-12: All time on `/query` is also clamped to 399 days. 5-15: the e2e serve has no scorer, so scored rows are stubbed and Quality is unverified on real scores.
+9. The `serve` binary reports "analytics bundle not embedded" when built from HEAD in this tree; the site was served with `vite preview` for verification. Embedding needs the build step before `go build`.
+10. `artifact_feedback` returns `not delivered` and the workflow MCP server fails to start (ENOENT); Phase 5 briefs and reports are unscored.
+11. `internal/secrets` `TestEnvAssignmentCorpus` fails on false positives in `reports/4-04-echarts-components.md:26`; the check or the report text needs adjusting.
+12. 5-13 report ends in a half-sentence about index size (unmeasured); the first open of an existing ledger builds `facts_usage_ts` (about 0.7 s on the 435k-row copy).

@@ -129,6 +129,9 @@ test('the back link returns to the exact list it was opened from', async ({ page
 	await expect(link).toBeVisible();
 	await link.click();
 	await expect(page).toHaveURL(/\/conversation\?id=/);
+	const back = await page.getByTestId('back-to-conversations').boundingBox();
+	const row = await page.getByTestId('timeline-row').first().boundingBox();
+	if (back && row) expect(row.y).toBeGreaterThan(back.y + back.height); // rows stay inside the timeline, below the header
 	await page.getByTestId('back-to-conversations').click();
 	await expect(page).toHaveURL(/\/conversations\?range=7d&harness=claude$/);
 });
