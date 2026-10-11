@@ -410,3 +410,7 @@ Built (e7d25c9, flash worker): `query.ts` debounce 100 ms (was 250) with `idleMs
 ### 5-18 outcome and 5-19-area-wiring
 
 5-18 built (01403f3, flash worker): `timeOption` gains an `area` option (line series with `areaStyle`, stacked) and `SmallMultiples` emits `data-ready` after its children mount; 156 tests pass, build clean. It found that `TimeChart` has no `area` prop and `BuilderChart` passes `stacked` for `area`, so the area chart stayed unreachable; and the multiples settle is not browser-validated. Placed in a new unit 5-19 (`briefs/5-19-area-wiring.md`, 5-17 depends on it).
+
+### 5-19-area-wiring
+
+Built (b9a9dac, flash worker): `TimeChart` takes `area`; `BuilderChart` passes `area` for the area chart; `tests/e2e/area.spec.ts` asserts the SVG render (filled path plus stroked line) since `EChart` keeps its instance private. It found a 5-18 regression: `bind:ready={panelReady[panel.key]}` throws `props_invalid_value` in the browser, so no small multiples render and the multiples `expectSettled` assertion fails. Placed in a new unit 5-20 (`briefs/5-20-fix-multiples-bind-ready.md`); 5-17 depends on it. Known: the area e2e assertion on multiples is red until 5-20 lands.
