@@ -82,3 +82,18 @@ Built (7e78aa1, flash worker): copied the live ledger (11.6 GB) with SQLite onli
 ### 2-06-verify-compacted-copy
 
 Built (cf457ea, flash worker): `internal/compact/verify_test.go` `TestVerifyCopy` (env-gated, skipped without `WORKFLOW_VERIFY_DIR` and `WORKFLOW_VERIFY_PRE`), subtests a to g. Against the compacted copy all pass: 0 removed events; 14,902 delta rows = 14,902 distinct = `delta_parts`; 0 hook rows with a payload; 9,226,198 distinct archive hashes = expected; `/v1/health` reports `compaction: complete`; facts 450,510 (hook 448,897) as predicted; meta `complete`. Compaction took 12m52s on the resumed run. `ledger.db` 295,919,616 bytes (from 11,618,521,088), archive 756,356,590 bytes; Open Question 3: the 1.5 GB estimate held with about 5x headroom. The copy (about 1.0 GiB now) stays at `/var/tmp/workflow-compact-copy/` for Phase 3's benchmark. Surfaces: `internal/compact/verify_test.go`. Deviations: none. Known: the log `before:` line is from the resumed run and does not equal the true pre-compaction size.
+
+### Phase 2 verification
+
+Run by a separate Sonnet subagent against a small legacy-shaped copy (30,401 rows, built read-only from the live ledger; the live ledger was never modified) and a read-only spot check of the compacted real copy. Every bullet of the Phase 2 outcome passed. `ledger compact` reported before and after rows and bytes (30,401 to 1,846 rows). 192 removed-event rows became 0. 28,418 delta rows became 55, the distinct key count. 0 hook rows carried a payload. 29,809 distinct archive hashes matched the pre-compaction non-removed set exactly. `/v1/health` went from `required` to `complete`. A running compaction made `serve` refuse to start and a second compaction fail with the lock error. SIGINT then rerun produced the same facts and archive hashes as an uninterrupted run, and a third run was a no-op. On the real copy: 450,510 facts, 448,897 hook rows, `ledger.db` 295,919,616 bytes (from 11,618,521,088, under 1.5 GB), archive 756,356,590 bytes, compaction 12m52s on the resumed run. `go build`, `go vet`, `go test ./...` and `-race` on the touched packages pass. `artifact_feedback` on the Phase 2 briefs and reports was not run: the workflow MCP server failed to connect (ENOENT). The compacted copy remains at `/var/tmp/workflow-compact-copy/` for Phase 3's benchmark.
+
+### Carried
+
+1. Phase 3: cost must not double-charge cached input; Codex `input_tokens` already includes it.
+2. Phase 3: OpenCode `cost` of 0 is treated as not reported.
+3. Phase 3: 8 of 13,612 local Claude `message_id`s repeat, so reads need dedupe.
+4. Phase 3: analytics tool and source reads still use `json_extract` on `payload`; they return no tools for newly ingested hook facts until moved to the `tool` column. The compacted ledger has no payloads, so this is now also true of every historical row.
+5. Collapse survivor `ts`: compaction uses the minimum over the part, ingest keeps the first-arriving part's `ts`; they differ when parts arrive out of order. Pick one rule.
+6. `workflow ledger compact` creates and migrates a non-existent `--tenant-dir` (exit 0, rows=0) instead of failing; it also skips when meta is `complete` while `compact.Run` would still repair leftover payload rows (unreachable on a genuine ledger).
+7. The keyless-delta keep path (delta without a collapse key) is covered by unit tests only; the real ledger has none.
+8. The workflow MCP server does not start (ENOENT), so `artifact_feedback` has not run on Phase 1 or Phase 2 briefs or reports.
