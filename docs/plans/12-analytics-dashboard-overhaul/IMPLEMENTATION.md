@@ -250,3 +250,7 @@ Built (b983345, flash worker): fixture gains usage facts (conversation c5, price
 ### 4-04-echarts-components
 
 Built (8cc8631, flash worker): ECharts bar, time (with brush), heatmap and treemap components, sparkline, data-table toggle and theme tokens following the system preference, with `data-testid`, `data-ready`, `data-theme`. Known: concurrent `vite build` in one tree clobbers `.svelte-kit/output` (ENOENT manifest); run builds one at a time or in separate worktrees.
+
+### 4-05-shell-filterbar-view
+
+Built (d607aa1, flash worker): `+layout.svelte` shell, `FilterBar.svelte` (presets, custom range, chips, exclude shown as complement) and the shared view-state module; the filter selection lives in the URL and survives navigation. Checks by the worker: `npm test` 76 pass, `npm run build` passes, `shell.spec.ts` 6 passed, full e2e 31 of 32. Known: `overview.spec.ts:38` fails because the facet selects now load through the debounced client; 4-06 fixes it. Units 4-06 to 4-15 run in separate git worktrees (`/home/codyh/workspace/wt/<NN>`, branch `wt/<NN>`, `E2E_PORT` 44NN) and are cherry-picked back by the orchestrator.
