@@ -234,3 +234,19 @@ Units: sixteen, from `refine` (briefs in `briefs/`, named `4-NN-<slug>.md`). Ord
 ### Stays carried
 
 Items 4 (server side), 5, 6, 7 (the gap), 8, 9, 10 and 11 (`row_hash` BLOB). Items 12 and 13 are done.
+
+### 4-01-data-client
+
+Built (d9c5100, 54de8ba, flash worker): `query.ts` client (`createClient`, `normalise`, `Superseded`) with a 250 ms per-slot debounce, abort of superseded calls, session cache, in-flight dedupe and a concurrency limit of 3; `api.ts` takes a `signal`; `state.svelte.ts` gains `notices`; new response types. A corrective commit scoped notices to `partial`/`ignored_filters` and fixed an overstated handoff. Known: a notice for a slot can go stale (route units must clear it). Orchestrator check: `npm test` 76 pass across 11 files, `npm run build` passes.
+
+### 4-02-filter-model-presets
+
+Built (5a2540b, flash worker): pure modules for URL view state, presets, in-range `pickBucket`/`resolveWindow`, `apiParams` (exclude as facet complement), `scoresParams` and `costLabel` (never `$0` for unpriced); 43 owned tests pass. Deviation: the `hour` bucket cap formula (about 16.6 days) is authoritative over the brief's "about 16 days".
+
+### 4-03-fixture-usage-e2e-helpers
+
+Built (b983345, flash worker): fixture gains usage facts (conversation c5, priced and unpriced calls) with exported hand-counted constants; helpers `trackRequests`, `expectSettled`, `clickBar`, `brush`; `E2E_PORT` (default 4391). Suite 26 passed on 4391 and on 4393. Concern: `clickBar` reads the row count from `<testid>-table` and clicks the toggle when it is not mounted; unexercised until route units use it.
+
+### 4-04-echarts-components
+
+Built (8cc8631, flash worker): ECharts bar, time (with brush), heatmap and treemap components, sparkline, data-table toggle and theme tokens following the system preference, with `data-testid`, `data-ready`, `data-theme`. Known: concurrent `vite build` in one tree clobbers `.svelte-kit/output` (ENOENT manifest); run builds one at a time or in separate worktrees.
