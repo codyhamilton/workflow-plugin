@@ -221,6 +221,11 @@ func TestAnalyticsOutcome(t *testing.T) {
 		if k["artifact_versions"] != 2.0 || k["hook_events"] != 0.0 {
 			t.Errorf("kind+plan summary: %v", k)
 		}
+		if m["model_calls"] != 0.0 || m["unpriced_calls"] != 0.0 || m["cost_usd"] != 0.0 ||
+			m["tokens_in"] != 0.0 || m["tokens_out"] != 0.0 || m["tokens_cache_read"] != 0.0 ||
+			m["tokens_cache_write"] != 0.0 || m["tokens_reasoning"] != 0.0 {
+			t.Errorf("summary usage fields: %v", m)
+		}
 	})
 
 	t.Run("errors", func(t *testing.T) {
@@ -270,6 +275,12 @@ func TestAnalyticsOutcome(t *testing.T) {
 		cs := rowsOf(m, "checks")
 		if len(cs) != checks.Count("design")+checks.Count("brief")+checks.Count("report") || cs[0]["kind"] != "design" || cs[0]["name"] != dcheck || len(cs[0]) != 2 {
 			t.Errorf("checks %v", cs)
+		}
+		if got := strs(m["models"]); len(got) != 0 {
+			t.Errorf("models %v", got)
+		}
+		if got := strs(m["norm_events"]); !reflect.DeepEqual(got, []string{"turn_end"}) {
+			t.Errorf("norm_events %v", got)
 		}
 	})
 
@@ -455,7 +466,7 @@ func TestAnalyticsOutcome(t *testing.T) {
 		if len(rows) != 16 || m["truncated"] != false {
 			t.Fatalf("rows %d truncated %v", len(rows), m["truncated"])
 		}
-		cols := []string{"type", "ts", "harness", "repo_id", "plan", "kind", "event", "tool", "path", "conversation_id", "source", "sha", "screen_verdict", "rejection_stage"}
+		cols := []string{"type", "ts", "harness", "repo_id", "plan", "kind", "event", "tool", "norm_event", "model", "path", "conversation_id", "source", "sha", "screen_verdict", "rejection_stage"}
 		sort.Strings(cols)
 		for _, r := range rows {
 			var ks []string

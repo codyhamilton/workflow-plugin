@@ -57,15 +57,19 @@ type ToolCount struct {
 }
 type Facets struct {
 	Repos, Harnesses, Kinds, Plans, Events []string
+	Models, NormEvents                     []string
 	Tools                                  []ToolCount
 }
 type Summary struct {
-	Conversations, HookEvents, ArtifactVersions, DistinctContent int
-	ByKind                                                       map[string]int
-	BySource                                                     map[string]int
-	Commits                                                      int
-	Rejections                                                   map[string]int
-	Screens                                                      map[string]int
+	Conversations, HookEvents, ArtifactVersions, DistinctContent            int
+	ByKind                                                                  map[string]int
+	BySource                                                                map[string]int
+	Commits                                                                 int
+	Rejections                                                              map[string]int
+	Screens                                                                 map[string]int
+	ModelCalls, UnpricedCalls                                               int
+	TokensIn, TokensOut, TokensCacheRead, TokensCacheWrite, TokensReasoning int
+	CostUSD                                                                 float64
 }
 type SeriesPoint struct {
 	Key, T string
@@ -95,9 +99,10 @@ type ConvCursor struct {
 }
 
 type ExploreRow struct {
-	Type                                                                                                       string
-	TS                                                                                                         float64
-	Harness, RepoID, Plan, Kind, Event, Tool, Path, ConversationID, Source, SHA, ScreenVerdict, RejectionStage string
+	Type                                                                                                                         string
+	TS                                                                                                                           float64
+	Harness, RepoID, Plan, Kind, Event, Tool, NormEvent, Model, Path, ConversationID, Source, SHA, ScreenVerdict, RejectionStage string
+	CostUSD                                                                                                                      *float64
 }
 
 func inList(expr string, vals []string, args *[]any) string {
@@ -163,10 +168,19 @@ func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) 
 	var out Facets
 	var err error
 	for _, d := range []struct {
-		dst  *[]string
-		expr string
-	}{{&out.Repos, "repo_id"}, {&out.Harnesses, "harness"}, {&out.Plans, "plan"}, {&out.Events, "event"}} {
-		if *d.dst, err = t.strings(ctx, `SELECT DISTINCT `+d.expr+` AS v FROM facts WHERE `+w+` ORDER BY v`, args...); err != nil {
+		dst      *[]string
+		expr     string
+		nonEmpty bool
+	}{
+		{&out.Repos, "repo_id", false}, {&out.Harnesses, "harness", false},
+		{&out.Plans, "plan", false}, {&out.Events, "event", false},
+		{&out.Models, "model", true}, {&out.NormEvents, "norm_event", true},
+	} {
+		extra := ""
+		if d.nonEmpty {
+			extra = " AND " + d.expr + " != ''"
+		}
+		if *d.dst, err = t.strings(ctx, `SELECT DISTINCT `+d.expr+` AS v FROM facts WHERE `+w+extra+` ORDER BY v`, args...); err != nil {
 			return out, err
 		}
 	}
@@ -247,6 +261,23 @@ func (t *Tenant) Summary(ctx context.Context, f AnalyticsFilter) (Summary, error
 		}
 	}
 	rows.Close()
+	kept, err := t.usageKeptRows(ctx, f)
+	if err != nil {
+		return s, err
+	}
+	for _, u := range kept {
+		s.ModelCalls++
+		s.TokensIn += int(u.tokIn)
+		s.TokensOut += int(u.tokOut)
+		s.TokensCacheRead += int(u.tokCacheRead)
+		s.TokensCacheWrite += int(u.tokCacheWrite)
+		s.TokensReasoning += int(u.tokReasoning)
+		usd, priced := Cost(u.harness, u.model, u.tokens(), u.costReported)
+		s.CostUSD += usd
+		if !priced {
+			s.UnpricedCalls++
+		}
+	}
 	// Latest screen (by id) per distinct content hash of the filtered in-window versions.
 	rows, err = t.rdb.QueryContext(ctx, `SELECT v, count(*) FROM (
 		SELECT (SELECT verdict FROM screens s WHERE s.content_hash=h.content_hash ORDER BY s.id DESC LIMIT 1) AS v
@@ -643,46 +674,145 @@ func (t *Tenant) fillHarness(ctx context.Context, w string, wargs []any, out []C
 	return nil
 }
 
+// exploreFactsQuery is the facts leg of Explore: newest first, ties by row_hash ascending. The
+// planner uses facts_ts or facts_ts_harness_event and only reorders ties ("USE TEMP B-TREE FOR
+// LAST TERM OF ORDER BY"), never the whole window.
+func exploreFactsQuery(where string) string {
+	return `SELECT type, ts, harness, repo_id, plan, kind, event,
+		CASE WHEN type='hook_event' THEN tool ELSE '' END AS tool,
+		norm_event, model, path, conversation_id, source, sha, content_hash,
+		tok_in, tok_out, tok_cache_read, tok_cache_write, tok_reasoning, cost_reported
+	FROM facts WHERE ` + where + `
+	ORDER BY ts DESC, row_hash ASC LIMIT ?`
+}
+
 // Explore returns filtered in-window facts and rejections, newest first (rejections by at). Ties
-// break by a stable key: row_hash for facts, "rej-<20-digit id>" for rejections, ascending (so at
-// the same instant facts precede rejections). It reads at most limit+1 rows and reports whether
-// more than limit matched.
+// break by a stable key: row_hash for facts, id for rejections, ascending (so at the same instant
+// facts precede rejections). It fetches at most limit+1 from each side, merging them in Go with the
+// same tie rule, and reports whether more than limit matched.
 func (t *Tenant) Explore(ctx context.Context, f AnalyticsFilter, limit int) ([]ExploreRow, bool, error) {
 	fw, fargs := f.factWhere()
 	rw, rargs := f.rejWhere()
-	args := append(append(fargs, rargs...), limit+1)
-	rows, err := t.rdb.QueryContext(ctx, `
-	SELECT type, ts, harness, repo_id, plan, kind, event, tool, path, conversation_id, source, sha, verdict, stage FROM (
-		SELECT type, ts, harness, repo_id, plan, kind, event,
-			CASE WHEN type='hook_event' THEN tool ELSE '' END AS tool, path, conversation_id,
-			source, sha,
-			COALESCE((SELECT verdict FROM screens s WHERE s.content_hash=facts.content_hash AND facts.content_hash != '' ORDER BY s.id DESC LIMIT 1),'') AS verdict,
-			'' AS stage, row_hash AS k
-		FROM facts WHERE `+fw+`
-		UNION ALL
-		SELECT 'rejection', at/1e9, '', '', wf_plan(path), wf_kind(path), '', '', path, conversation_id, '', '', '', stage,
-			printf('rej-%020d', id)
-		FROM rejections WHERE `+rw+`)
-	ORDER BY ts DESC, k ASC LIMIT ?`, args...)
+
+	frows, err := t.rdb.QueryContext(ctx, exploreFactsQuery(fw), append(fargs, limit+1)...)
 	if err != nil {
 		return nil, false, err
 	}
-	defer rows.Close()
-	var out []ExploreRow
-	for rows.Next() {
+	defer frows.Close()
+	var facts []ExploreRow
+	var hashes []string
+	for frows.Next() {
 		var r ExploreRow
-		if err := rows.Scan(&r.Type, &r.TS, &r.Harness, &r.RepoID, &r.Plan, &r.Kind, &r.Event, &r.Tool, &r.Path,
-			&r.ConversationID, &r.Source, &r.SHA, &r.ScreenVerdict, &r.RejectionStage); err != nil {
+		var contentHash string
+		var tokIn, tokOut, tokCR, tokCW, tokReas int64
+		var cost sql.NullFloat64
+		if err := frows.Scan(&r.Type, &r.TS, &r.Harness, &r.RepoID, &r.Plan, &r.Kind, &r.Event, &r.Tool,
+			&r.NormEvent, &r.Model, &r.Path, &r.ConversationID, &r.Source, &r.SHA, &contentHash,
+			&tokIn, &tokOut, &tokCR, &tokCW, &tokReas, &cost); err != nil {
 			return nil, false, err
 		}
-		out = append(out, r)
+		if r.Type == "hook_event" && r.NormEvent == "usage" {
+			var reported *float64
+			if cost.Valid {
+				v := cost.Float64
+				reported = &v
+			}
+			usd, _ := Cost(r.Harness, r.Model, Tokens{In: tokIn, Out: tokOut, CacheRead: tokCR, CacheWrite: tokCW, Reasoning: tokReas}, reported)
+			r.CostUSD = &usd
+		}
+		facts = append(facts, r)
+		hashes = append(hashes, contentHash)
 	}
-	if err := rows.Err(); err != nil {
+	if err := frows.Err(); err != nil {
 		return nil, false, err
 	}
-	truncated := len(out) > limit
-	if truncated {
-		out = out[:limit]
+
+	rrows, err := t.rdb.QueryContext(ctx, `
+		SELECT at, wf_plan(path), wf_kind(path), path, conversation_id, stage
+		FROM rejections WHERE `+rw+`
+		ORDER BY at DESC, id ASC LIMIT ?`, append(rargs, limit+1)...)
+	if err != nil {
+		return nil, false, err
 	}
-	return out, truncated, nil
+	defer rrows.Close()
+	var rejs []ExploreRow
+	for rrows.Next() {
+		var at int64
+		r := ExploreRow{Type: "rejection"}
+		if err := rrows.Scan(&at, &r.Plan, &r.Kind, &r.Path, &r.ConversationID, &r.RejectionStage); err != nil {
+			return nil, false, err
+		}
+		r.TS = float64(at) / 1e9
+		rejs = append(rejs, r)
+	}
+	if err := rrows.Err(); err != nil {
+		return nil, false, err
+	}
+
+	page := make([]ExploreRow, 0, limit+1)
+	pageHashes := make([]string, 0, limit+1)
+	i, j := 0, 0
+	for len(page) < limit+1 && (i < len(facts) || j < len(rejs)) {
+		if i < len(facts) && (j >= len(rejs) || facts[i].TS >= rejs[j].TS) {
+			page = append(page, facts[i])
+			pageHashes = append(pageHashes, hashes[i])
+			i++
+		} else {
+			page = append(page, rejs[j])
+			pageHashes = append(pageHashes, "")
+			j++
+		}
+	}
+	if err := t.fillVerdicts(ctx, pageHashes, page); err != nil {
+		return nil, false, err
+	}
+	truncated := len(page) > limit
+	if truncated {
+		page = page[:limit]
+	}
+	return page, truncated, nil
+}
+
+// fillVerdicts sets each page row's ScreenVerdict to the latest screen (by id) for its content
+// hash, only for the rows actually on the page.
+func (t *Tenant) fillVerdicts(ctx context.Context, hashes []string, page []ExploreRow) error {
+	seen := map[string]bool{}
+	var uniq []string
+	for _, h := range hashes {
+		if h != "" && !seen[h] {
+			seen[h] = true
+			uniq = append(uniq, h)
+		}
+	}
+	if len(uniq) == 0 {
+		return nil
+	}
+	args := make([]any, len(uniq))
+	for i, h := range uniq {
+		args[i] = h
+	}
+	rows, err := t.rdb.QueryContext(ctx, `SELECT content_hash, verdict FROM screens s WHERE s.content_hash IN (?`+
+		strings.Repeat(",?", len(uniq)-1)+`)
+		AND s.id = (SELECT max(id) FROM screens WHERE content_hash = s.content_hash)`, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	verdict := map[string]string{}
+	for rows.Next() {
+		var h, v string
+		if err := rows.Scan(&h, &v); err != nil {
+			return err
+		}
+		verdict[h] = v
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range page {
+		if h := hashes[i]; h != "" {
+			page[i].ScreenVerdict = verdict[h]
+		}
+	}
+	return nil
 }

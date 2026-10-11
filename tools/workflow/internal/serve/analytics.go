@@ -243,7 +243,8 @@ func (s *Server) analyticsFacets(w http.ResponseWriter, r *http.Request, _ strin
 		checks = append(checks, map[string]string{"kind": c.Kind, "name": c.Name})
 	}
 	writeJSON(w, 200, map[string]any{"repos": nz(fc.Repos), "harnesses": nz(fc.Harnesses), "kinds": nz(fc.Kinds),
-		"plans": nz(fc.Plans), "events": nz(fc.Events), "tools": tools, "checks": checks})
+		"plans": nz(fc.Plans), "events": nz(fc.Events), "models": nz(fc.Models), "norm_events": nz(fc.NormEvents),
+		"tools": tools, "checks": checks})
 }
 
 func (s *Server) analyticsSummary(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
@@ -263,7 +264,10 @@ func (s *Server) analyticsSummary(w http.ResponseWriter, r *http.Request, _ stri
 		"by_source":        counts(sm.BySource, "worktree", "commit"),
 		"commits":          sm.Commits,
 		"rejections":       counts(sm.Rejections, "precheck", "screen"),
-		"screens":          counts(sm.Screens, "pass", "unscreened")})
+		"screens":          counts(sm.Screens, "pass", "unscreened"),
+		"model_calls":      sm.ModelCalls, "unpriced_calls": sm.UnpricedCalls, "cost_usd": sm.CostUSD,
+		"tokens_in": sm.TokensIn, "tokens_out": sm.TokensOut, "tokens_cache_read": sm.TokensCacheRead,
+		"tokens_cache_write": sm.TokensCacheWrite, "tokens_reasoning": sm.TokensReasoning})
 }
 
 var seriesGroups = map[string][]string{
@@ -454,25 +458,28 @@ func (s *Server) analyticsExplore(w http.ResponseWriter, r *http.Request, _ stri
 		return
 	}
 	type row struct {
-		Type           string `json:"type"`
-		TS             string `json:"ts"`
-		Harness        string `json:"harness"`
-		RepoID         string `json:"repo_id"`
-		Plan           string `json:"plan"`
-		Kind           string `json:"kind"`
-		Event          string `json:"event"`
-		Tool           string `json:"tool"`
-		Path           string `json:"path"`
-		ConversationID string `json:"conversation_id"`
-		Source         string `json:"source"`
-		SHA            string `json:"sha"`
-		ScreenVerdict  string `json:"screen_verdict"`
-		RejectionStage string `json:"rejection_stage"`
+		Type           string   `json:"type"`
+		TS             string   `json:"ts"`
+		Harness        string   `json:"harness"`
+		RepoID         string   `json:"repo_id"`
+		Plan           string   `json:"plan"`
+		Kind           string   `json:"kind"`
+		Event          string   `json:"event"`
+		Tool           string   `json:"tool"`
+		NormEvent      string   `json:"norm_event"`
+		Model          string   `json:"model"`
+		Path           string   `json:"path"`
+		ConversationID string   `json:"conversation_id"`
+		Source         string   `json:"source"`
+		SHA            string   `json:"sha"`
+		ScreenVerdict  string   `json:"screen_verdict"`
+		RejectionStage string   `json:"rejection_stage"`
+		CostUSD        *float64 `json:"cost_usd,omitempty"`
 	}
 	out := make([]row, 0, len(rows))
 	for _, x := range rows {
-		out = append(out, row{x.Type, rfc(x.TS), x.Harness, x.RepoID, x.Plan, x.Kind, x.Event, x.Tool, x.Path,
-			x.ConversationID, x.Source, x.SHA, x.ScreenVerdict, x.RejectionStage})
+		out = append(out, row{x.Type, rfc(x.TS), x.Harness, x.RepoID, x.Plan, x.Kind, x.Event, x.Tool,
+			x.NormEvent, x.Model, x.Path, x.ConversationID, x.Source, x.SHA, x.ScreenVerdict, x.RejectionStage, x.CostUSD})
 	}
 	writeJSON(w, 200, map[string]any{"rows": out, "truncated": truncated})
 }
