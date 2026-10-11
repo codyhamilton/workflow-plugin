@@ -341,3 +341,11 @@ Verdict: Proceed. 17 units; briefs in `briefs/5-01-*.md` to `5-17-*.md`; the Uni
 - `artifact_feedback` results for the Phase 5 briefs are recorded below once obtained.
 - Worktrees are required for parallel e2e units (distinct `E2E_PORT`).
 - artifact_feedback on the Phase 5 briefs (checked 5-01 and 5-07): `not delivered`, the service has no version until pushed; unscored.
+
+### 5-01-saved-view-store
+
+Built (892130a, flash worker, worktree wt/5-01): `src/lib/views.ts` saved-view and dashboard store in `localStorage` under `workflow-analytics-views`, export and import JSON with `ImportError` cases, in-memory fallback, `subscribe`; 20 tests, `npm test` 94 pass, build passes. Deviations: none.
+
+### 5-02-builder-spec
+
+Built (90ea220, flash worker, worktree wt/5-02): `src/lib/builder.ts` config model (`parseConfig`, `configToParams`, `allowedDims`, `allowedBuckets`, `allowedCharts`, `defaultConfig`, `isRangeOk`), schema-driven and non-throwing; 23 tests, `npm test` 97 pass. Deviations: none. Concern: no standalone typecheck was run.
