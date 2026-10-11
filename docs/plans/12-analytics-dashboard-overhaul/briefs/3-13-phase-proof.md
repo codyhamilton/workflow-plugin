@@ -4,7 +4,7 @@ Consumer: a shell and Go worker (flash-tier) producing the evidence that closes 
 Owned paths: `docs/plans/12-analytics-dashboard-overhaul/reports/3-13-phase-proof.md` only. No source changes; if something fails, report it, do not fix it. Touch nothing else.
 Commits: Commit to the current branch when done evidence passes, with a plain-summary title. Stage only the owned paths and the report.
 Report: before committing, write `docs/plans/12-analytics-dashboard-overhaul/reports/3-13-phase-proof.md` (a handoff; rubric in `tools/quality/checks/execution-report.json`) and include it in the commit.
-Depends on: 3-03, 3-11, and 3-12 when it ran.
+Depends on: 3-03, 3-11, 3-12, 3-14 and 3-15 (3-11 found 243 misses, so the fix units ran).
 Runs alongside: nothing.
 Budget: 4 files to read, no code, 40 tool turns. Past the budget, stop: write a handoff under this brief's name in `IMPLEMENTATION.md` (done, not done, what you learned), commit if this brief commits, and report `over budget`.
 

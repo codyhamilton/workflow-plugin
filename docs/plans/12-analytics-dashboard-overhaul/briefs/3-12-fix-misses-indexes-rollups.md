@@ -1,4 +1,4 @@
-# Brief: 3-12 — Conditional: fix benchmark misses with indexes, then hourly rollups
+# Brief: 3-12 — Fix the hook_events misses (indexes, then the hourly rollup)
 
 Consumer: a Go worker (flash-tier); the orchestrator (closes Open Question 1 and the Phase 3 bound).
 Owned paths: `tools/workflow/internal/store/store.go` (a new migration only, appended), `tools/workflow/internal/store/rollup.go` (new), `rollup_test.go` (new), `tools/workflow/internal/store/query.go` and `usage.go` (only the read paths for the missed measures). Touch nothing else.
@@ -6,14 +6,14 @@ Commits: Commit to the current branch when done evidence passes, with a plain-su
 Report: before committing, write `docs/plans/12-analytics-dashboard-overhaul/reports/3-12-fix-misses-indexes-rollups.md` (a handoff; rubric in `tools/quality/checks/execution-report.json`) and include it in the commit.
 Depends on: 3-11.
 Runs alongside: nothing.
-Budget: 6 files to read, about 400 lines to change, 60 tool turns. If more than 3 measures missed, stop after the first and report `needs context` so the orchestrator splits the rest into one unit per measure. Past the budget, stop: write a handoff under this brief's name in `IMPLEMENTATION.md` (done, not done, what you learned), commit if this brief commits, and report `over budget`.
+Scope (amended after 3-11, which found 243 misses over five measures): this unit fixes ONLY the `hook_events` measure (152 cases, all `/query`). Units 3-14 (conversations) and 3-15 (facets, summary, scores) follow and may reuse the rollup you build. Budget: 8 files to read, about 500 lines to change, 80 tool turns. Past the budget, stop: write a handoff under this brief's name in `IMPLEMENTATION.md` (done, not done, what you learned), commit if this brief commits, and report `over budget`.
 
 Go is at `$HOME/.local/go/bin`; run Go commands as `cd tools/workflow && PATH=$HOME/.local/go/bin:$PATH go ...` from the repo root.
 
 ## Required reading, in order
 
 1. `docs/plans/12-analytics-dashboard-overhaul/DESIGN.md` — Analytics reads: **Rollups are conditional** (binding) and Open Question 1.
-2. `docs/plans/12-analytics-dashboard-overhaul/reports/3-11-run-benchmark-on-copy.md` — the list of missed cases. **If it says no case missed, this unit does nothing: write the report `not needed`, commit it and stop.**
+2. `docs/plans/12-analytics-dashboard-overhaul/reports/3-11-run-benchmark-on-copy.md` — the list of missed cases. The report shows 3-11's misses; baseline is 520 to 1,500 ms for hook_events. A single case runs in seconds: `cd tools/workflow && WORKFLOW_BENCH_DIR=/var/tmp/workflow-compact-copy/data/local WORKFLOW_BENCH_FILTER='query/hook_events/' WORKFLOW_BENCH_RUNS=3 PATH=$HOME/.local/go/bin:$PATH go test ./internal/serve -run 'TestAnalyticsBench$' -v -count=1`. Profile first (a rank query plus a final query each scan the window).
 3. `tools/workflow/internal/store/store.go` lines 28-90 (migrations) and the `Append` path (grep `func (t *Tenant) Append`).
 4. `tools/workflow/internal/store/query.go` and `usage.go` — the measures that missed.
 5. `tools/workflow/internal/serve/analytics_bench_test.go` — `WORKFLOW_BENCH_FILTER`.
@@ -22,7 +22,7 @@ Read ranges and grep; do not read a whole file to find one section, do not re-re
 
 ## Goal
 
-Every case 3-11 listed is under 500 ms p95 on the compacted copy, with the smallest change that does it, indexes first and a rollup only if an index cannot.
+Every `query/hook_events/...` case 3-11 listed (hook_events ones: dims=one to two of harness, repo_id, norm_event, event, tool, conversation_id, hour_of_day, weekday; buckets none and hour/day/week/month with harness; presets 7d, 30d, 90d, all) is under 500 ms p95 on the compacted copy, with the smallest change that does it, indexes first and a rollup only if an index cannot.
 
 ## Contract
 

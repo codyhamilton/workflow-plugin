@@ -154,3 +154,9 @@ Built (a13d3aa, flash worker): `Summary` gains `model_calls`, `unpriced_calls`, 
 ### 3-10-benchmark-harness
 
 Built (86bde56, flash worker): `internal/serve/analytics_bench_test.go` with env-gated `TestAnalyticsBench` (`WORKFLOW_BENCH_DIR`; copies only `ledger.db` to a temp dir and opens the copy) plus ungated smoke and non-mutation self-tests; vet, gofmt and `go test ./internal/serve` pass. Deviation: the `all` preset is covered on `/query` cases only, because `parseFilter` caps every other route at 400 UTC days and `all=1` returns `400 range too wide`.
+
+### 3-11-run-benchmark-on-copy
+
+Run (flash worker; report in b3145ea): the benchmark on the compacted copy ran 2,063 cases in 38 m 8 s and **243 missed the 500 ms p95 bound**, none returned non-200. Misses by measure: `hook_events` 152 (520 to 1,500 ms), `conversations` 80 (520 to 1,900 ms) plus bare `conversations/30d` and `/90d` (about 570 ms), `facets` (1.5 to 1.8 s), `summary` (530 to 780 ms), `scores` (4.9 to 6.6 s). Everything with `bucket=none` plus a dimension pair is slow; usage measures, `executions`, `explore`, `rejections` and `timeline`-style cases passed. Open Question 1 is answered: a read-side fix is needed (indexes first, then the hourly rollup). Unpriced share: 28,342 of 33,464 usage rows (pricing.json holds seven Cursor models; adding rates is outside this plan). Departure: the live ledger mtime changed during the run because a live `serve` writes it; the benchmark itself only touched the copy.
+
+Brief 3-12 was written for one flash worker and says to stop after the first measure when more than three miss, and five did. The orchestrator split it by measure group: 3-12 (`hook_events`, builds the shared rollup), 3-14 (`conversations`), 3-15 (`facets`, `summary`, `scores`), run in that order; 3-13 now depends on all three. 3-12's budget and scope were amended in its brief.
