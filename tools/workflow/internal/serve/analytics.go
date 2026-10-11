@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
@@ -361,18 +360,6 @@ func (s *Server) analyticsScores(w http.ResponseWriter, r *http.Request, _ strin
 	writeJSON(w, 200, map[string]any{"kind": kind, "checks": out})
 }
 
-// pageOf returns the slice of n sorted rows after the cursor (after reports row i is past it) and
-// at most limit long, and whether more follow.
-func pageOf(n, limit int, cur *cursor, after func(i int) bool) (lo, hi int, more bool) {
-	if cur != nil {
-		for lo < n && !after(lo) {
-			lo++
-		}
-	}
-	hi = min(lo+limit, n)
-	return lo, hi, hi < n
-}
-
 func (s *Server) analyticsExecutions(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
 	limit, cur, ok := pageParams(w, r)
 	if !ok {
@@ -382,29 +369,15 @@ func (s *Server) analyticsExecutions(w http.ResponseWriter, r *http.Request, _ s
 	if !ok {
 		return
 	}
-	rows, err := ts.t.Executions(r.Context(), f)
+	var ec *store.ExecCursor
+	if cur != nil {
+		ec = &store.ExecCursor{TS: cur.TS, Key: cur.Key}
+	}
+	rows, cnt, more, err := ts.t.ExecutionsPage(r.Context(), f, ec, limit)
 	if err != nil {
 		readFailed(w)
 		return
 	}
-	// the store's order: ts desc, conversation_id, brief path, repo_id (1-02 decision 8)
-	key := func(x store.ExecRow) []string { return []string{x.ConversationID, x.BriefPath, x.RepoID} }
-	sort.SliceStable(rows, func(i, j int) bool {
-		if rows[i].TS != rows[j].TS {
-			return rows[i].TS > rows[j].TS
-		}
-		return strings.Join(key(rows[i]), "\x00") < strings.Join(key(rows[j]), "\x00")
-	})
-	cnt := map[string]int{"complete": 0, "unreported": 0, "started": 0}
-	for _, x := range rows {
-		cnt[x.Shape]++
-	}
-	lo, hi, more := pageOf(len(rows), limit, cur, func(i int) bool {
-		if rows[i].TS != cur.TS {
-			return rows[i].TS < cur.TS
-		}
-		return strings.Join(key(rows[i]), "\x00") > strings.Join(cur.Key, "\x00")
-	})
 	type row struct {
 		RepoID         string `json:"repo_id"`
 		Plan           string `json:"plan"`
@@ -415,14 +388,14 @@ func (s *Server) analyticsExecutions(w http.ResponseWriter, r *http.Request, _ s
 		TS             string `json:"ts"`
 	}
 	out := []row{}
-	for _, x := range rows[lo:hi] {
+	for _, x := range rows {
 		out = append(out, row{x.RepoID, x.Plan, x.ConversationID, x.BriefPath, x.Harness, x.Shape, rfc(x.TS)})
 	}
 	resp := map[string]any{"counts": cnt, "rows": out}
 	if more {
-		last := rows[hi-1]
+		last := rows[len(rows)-1]
 		resp["next"] = cursor{Route: "executions", Filter: canonFilter(r.URL.Query()), From: f.From.UnixNano(), To: f.To.UnixNano(),
-			TS: last.TS, Key: key(last)}.encode()
+			TS: last.TS, Key: []string{last.ConversationID, last.BriefPath, last.RepoID}}.encode()
 	}
 	writeJSON(w, 200, resp)
 }
@@ -436,23 +409,15 @@ func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, 
 	if !ok {
 		return
 	}
-	rows, err := ts.t.Conversations(r.Context(), f)
+	var cc *store.ConvCursor
+	if cur != nil && len(cur.Key) >= 1 {
+		cc = &store.ConvCursor{TS: cur.TS, ConversationID: cur.Key[0]}
+	}
+	rows, more, err := ts.t.ConversationsPage(r.Context(), f, cc, limit)
 	if err != nil {
 		readFailed(w)
 		return
 	}
-	sort.SliceStable(rows, func(i, j int) bool {
-		if rows[i].LastTS != rows[j].LastTS {
-			return rows[i].LastTS > rows[j].LastTS
-		}
-		return rows[i].ConversationID < rows[j].ConversationID
-	})
-	lo, hi, more := pageOf(len(rows), limit, cur, func(i int) bool {
-		if rows[i].LastTS != cur.TS {
-			return rows[i].LastTS < cur.TS
-		}
-		return len(cur.Key) > 0 && rows[i].ConversationID > cur.Key[0]
-	})
 	type row struct {
 		ConversationID   string   `json:"conversation_id"`
 		Harness          string   `json:"harness"`
@@ -465,13 +430,13 @@ func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, 
 		Kinds            []string `json:"kinds"`
 	}
 	out := []row{}
-	for _, x := range rows[lo:hi] {
+	for _, x := range rows {
 		out = append(out, row{x.ConversationID, x.Harness, nz(x.Repos), rfc(x.FirstTS), rfc(x.LastTS),
 			x.HookEvents, x.ArtifactVersions, x.Commits, nz(x.Kinds)})
 	}
 	resp := map[string]any{"rows": out}
 	if more {
-		last := rows[hi-1]
+		last := rows[len(rows)-1]
 		resp["next"] = cursor{Route: "conversations", Filter: canonFilter(r.URL.Query()), From: f.From.UnixNano(), To: f.To.UnixNano(),
 			TS: last.LastTS, Key: []string{last.ConversationID}}.encode()
 	}

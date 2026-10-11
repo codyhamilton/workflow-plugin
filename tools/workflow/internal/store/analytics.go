@@ -8,6 +8,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"path"
@@ -80,6 +81,19 @@ type ConvRow struct {
 	FirstTS, LastTS                       float64
 	HookEvents, ArtifactVersions, Commits int
 }
+
+// ExecCursor is the keyset position in the executions order (ts desc, conversation_id, path, repo_id).
+type ExecCursor struct {
+	TS  float64
+	Key []string // conversation_id, path, repo_id
+}
+
+// ConvCursor is the keyset position in the conversations order (last_ts desc, conversation_id).
+type ConvCursor struct {
+	TS             float64
+	ConversationID string
+}
+
 type ExploreRow struct {
 	Type                                                                                                       string
 	TS                                                                                                         float64
@@ -355,6 +369,13 @@ func (t *Tenant) WindowScores(ctx context.Context, f AnalyticsFilter, kind strin
 	return out, rows.Err()
 }
 
+// execShapeSQL is the executions shape CASE expression, over the brief CTE alias b.
+const execShapeSQL = `CASE WHEN EXISTS (SELECT 1 FROM facts c WHERE c.type='commit' AND c.conversation_id=b.conversation_id AND c.repo_id=b.repo_id)
+			THEN CASE WHEN EXISTS (SELECT 1 FROM facts r WHERE r.type='artifact_version' AND r.conversation_id=b.conversation_id
+				AND r.repo_id=b.repo_id AND r.path = 'docs/plans/' || b.plan || '/reports/' || substr(b.path, length('docs/plans/' || b.plan || '/briefs/') + 1))
+				THEN 'complete' ELSE 'unreported' END
+			ELSE 'started' END`
+
 // Executions lists one row per in-window brief (repo, conversation, path). Commit and report facts
 // count whatever their ts; a report must be in the same conversation and repo as the brief.
 func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, error) {
@@ -364,12 +385,7 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 		SELECT repo_id, conversation_id, path, harness, ts, plan,
 			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
 		FROM facts WHERE type='artifact_version' AND kind='brief' AND `+w+`)
-	SELECT repo_id, plan, conversation_id, path, harness, ts,
-		CASE WHEN EXISTS (SELECT 1 FROM facts c WHERE c.type='commit' AND c.conversation_id=b.conversation_id AND c.repo_id=b.repo_id)
-			THEN CASE WHEN EXISTS (SELECT 1 FROM facts r WHERE r.type='artifact_version' AND r.conversation_id=b.conversation_id
-				AND r.repo_id=b.repo_id AND r.path = 'docs/plans/' || b.plan || '/reports/' || substr(b.path, length('docs/plans/' || b.plan || '/briefs/') + 1))
-				THEN 'complete' ELSE 'unreported' END
-			ELSE 'started' END
+	SELECT repo_id, plan, conversation_id, path, harness, ts, `+execShapeSQL+`
 	FROM b WHERE rn = 1 ORDER BY ts DESC, conversation_id, path, repo_id`, args...)
 	if err != nil {
 		return nil, err
@@ -384,6 +400,70 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 		out = append(out, r)
 	}
 	return out, rows.Err()
+}
+
+// ExecutionsPage returns one keyset page of Executions (ts desc, conversation_id, path, repo_id),
+// the shape counts over the whole filtered window, and whether more rows follow. It reads at most
+// limit+1 rows and never loads the whole window into Go.
+func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, cur *ExecCursor, limit int) ([]ExecRow, map[string]int, bool, error) {
+	w, args := f.factWhere()
+	cte := `
+	WITH b AS (
+		SELECT repo_id, conversation_id, path, harness, ts, plan,
+			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
+		FROM facts WHERE type='artifact_version' AND kind='brief' AND ` + w + `)`
+	cnt := map[string]int{"complete": 0, "unreported": 0, "started": 0}
+	crows, err := t.rdb.QueryContext(ctx, cte+`
+	SELECT `+execShapeSQL+` AS shape, COUNT(*) FROM b WHERE rn = 1 GROUP BY shape`, args...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	for crows.Next() {
+		var shape string
+		var n int
+		if err := crows.Scan(&shape, &n); err != nil {
+			crows.Close()
+			return nil, nil, false, err
+		}
+		cnt[shape] = n
+	}
+	if err := crows.Err(); err != nil {
+		crows.Close()
+		return nil, nil, false, err
+	}
+	crows.Close()
+
+	q := cte + `
+	SELECT repo_id, plan, conversation_id, path, harness, ts, ` + execShapeSQL + `
+	FROM b WHERE rn = 1`
+	pargs := append([]any{}, args...)
+	if cur != nil && len(cur.Key) >= 3 {
+		q += ` AND (ts < ? OR (ts = ? AND (conversation_id, path, repo_id) > (?, ?, ?)))`
+		pargs = append(pargs, cur.TS, cur.TS, cur.Key[0], cur.Key[1], cur.Key[2])
+	}
+	q += ` ORDER BY ts DESC, conversation_id, path, repo_id LIMIT ?`
+	pargs = append(pargs, limit+1)
+	rows, err := t.rdb.QueryContext(ctx, q, pargs...)
+	if err != nil {
+		return nil, nil, false, err
+	}
+	defer rows.Close()
+	var out []ExecRow
+	for rows.Next() {
+		var r ExecRow
+		if err := rows.Scan(&r.RepoID, &r.Plan, &r.ConversationID, &r.BriefPath, &r.Harness, &r.TS, &r.Shape); err != nil {
+			return nil, nil, false, err
+		}
+		out = append(out, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, nil, false, err
+	}
+	more := len(out) > limit
+	if more {
+		out = out[:limit]
+	}
+	return out, cnt, more, nil
 }
 
 // Conversations aggregates the filtered in-window facts per conversation.
@@ -455,6 +535,112 @@ func (t *Tenant) Conversations(ctx context.Context, f AnalyticsFilter) ([]ConvRo
 		return out[i].ConversationID < out[j].ConversationID
 	})
 	return out, nil
+}
+
+// ConversationsPage returns one keyset page of per-conversation aggregates (last_ts desc,
+// conversation_id), and whether more rows follow. Aggregation and keyset run in SQL; the page's
+// harness histogram is fetched with one extra grouped query for the page's conversation ids.
+func (t *Tenant) ConversationsPage(ctx context.Context, f AnalyticsFilter, cur *ConvCursor, limit int) ([]ConvRow, bool, error) {
+	w, args := f.factWhere()
+	q := `SELECT conversation_id, MIN(ts), MAX(ts),
+		SUM(CASE WHEN type='hook_event' THEN 1 ELSE 0 END),
+		SUM(CASE WHEN type='artifact_version' THEN 1 ELSE 0 END),
+		SUM(CASE WHEN type='commit' THEN 1 ELSE 0 END),
+		group_concat(DISTINCT repo_id),
+		group_concat(DISTINCT CASE WHEN kind <> '' THEN kind END)
+	FROM facts WHERE ` + w + ` GROUP BY conversation_id`
+	pargs := append([]any{}, args...)
+	if cur != nil {
+		q += ` HAVING (MAX(ts) < ?) OR (MAX(ts) = ? AND conversation_id > ?)`
+		pargs = append(pargs, cur.TS, cur.TS, cur.ConversationID)
+	}
+	q += ` ORDER BY MAX(ts) DESC, conversation_id LIMIT ?`
+	pargs = append(pargs, limit+1)
+	rows, err := t.rdb.QueryContext(ctx, q, pargs...)
+	if err != nil {
+		return nil, false, err
+	}
+	defer rows.Close()
+	var out []ConvRow
+	for rows.Next() {
+		var r ConvRow
+		var repos, kinds sql.NullString
+		if err := rows.Scan(&r.ConversationID, &r.FirstTS, &r.LastTS, &r.HookEvents, &r.ArtifactVersions, &r.Commits, &repos, &kinds); err != nil {
+			return nil, false, err
+		}
+		r.Repos = splitConcat(repos)
+		r.Kinds = splitConcat(kinds)
+		sort.Strings(r.Repos)
+		sort.Strings(r.Kinds)
+		out = append(out, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, false, err
+	}
+	more := len(out) > limit
+	if more {
+		out = out[:limit]
+	}
+	if err := t.fillHarness(ctx, w, args, out); err != nil {
+		return nil, false, err
+	}
+	return out, more, nil
+}
+
+// splitConcat splits a group_concat(DISTINCT x) result on its default separator. NULL (no values)
+// is nil. The two-argument form with a custom separator is rejected by this driver when DISTINCT
+// is present, so the "," default is used; values are repo ids and the fixed kind vocabulary.
+func splitConcat(s sql.NullString) []string {
+	if !s.Valid {
+		return nil
+	}
+	return strings.Split(s.String, ",")
+}
+
+// fillHarness sets each row's Harness to the most frequent harness in the window, ties to the
+// smaller name, using one grouped query over just the page's conversation ids.
+func (t *Tenant) fillHarness(ctx context.Context, w string, wargs []any, out []ConvRow) error {
+	if len(out) == 0 {
+		return nil
+	}
+	ids := make([]string, len(out))
+	for i := range out {
+		ids[i] = out[i].ConversationID
+	}
+	args := append([]any{}, wargs...)
+	q := `SELECT conversation_id, harness, COUNT(*) FROM facts WHERE ` + w + inList("conversation_id", ids, &args) +
+		` GROUP BY conversation_id, harness`
+	rows, err := t.rdb.QueryContext(ctx, q, args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	type hc struct {
+		name string
+		n    int
+	}
+	hist := map[string][]hc{}
+	for rows.Next() {
+		var conv, h string
+		var n int
+		if err := rows.Scan(&conv, &h, &n); err != nil {
+			return err
+		}
+		hist[conv] = append(hist[conv], hc{h, n})
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range out {
+		best, bestN := "", -1
+		for _, x := range hist[out[i].ConversationID] {
+			if x.n > bestN || (x.n == bestN && x.name < best) {
+				best, bestN = x.name, x.n
+			}
+		}
+		out[i].Harness = best
+	}
+	return nil
 }
 
 // Explore returns filtered in-window facts and rejections, newest first (rejections by at). Ties

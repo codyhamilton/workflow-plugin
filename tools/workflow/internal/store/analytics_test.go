@@ -271,6 +271,133 @@ func TestAnalyticsExecutions(t *testing.T) {
 	}
 }
 
+// pageFixture makes 9 distinct conversations, each one brief, at 7 distinct ts: c08 and c09 share
+// the largest ts (the keyset tie). It backs both paging tests.
+func pageFixture(t *testing.T) (*Tenant, AnalyticsFilter, time.Time) {
+	tn := openT(t, Options{})
+	base := ad(10, 1, 0, 0)
+	var fs []afx
+	for i := 1; i <= 9; i++ {
+		conv := fmt.Sprintf("c%02d", i)
+		mins := i - 1
+		if i >= 8 {
+			mins = 7
+		}
+		fs = append(fs, afx{typ: "artifact_version", conv: conv, harness: "h", event: "artifact",
+			ts: base.Add(time.Duration(mins) * time.Minute), repo: "repoA",
+			path: fmt.Sprintf("docs/plans/p/briefs/%s.md", conv), hash: hx(conv), source: "worktree"})
+	}
+	addFacts(t, tn, fs...)
+	return tn, AnalyticsFilter{From: base, To: base.Add(time.Hour)}, base
+}
+
+func TestExecutionsPage(t *testing.T) {
+	tn, f, _ := pageFixture(t)
+	ctx := context.Background()
+	all, cntAll, moreAll, err := tn.ExecutionsPage(ctx, f, nil, 500)
+	if err != nil || moreAll || len(all) != 9 {
+		t.Fatalf("all: n=%d more=%v err=%v", len(all), moreAll, err)
+	}
+	if !reflect.DeepEqual(cntAll, map[string]int{"complete": 0, "unreported": 0, "started": 9}) {
+		t.Fatalf("counts %v", cntAll)
+	}
+	var walk []ExecRow
+	var cur *ExecCursor
+	for pages := 1; ; pages++ {
+		page, cnt, more, err := tn.ExecutionsPage(ctx, f, cur, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if pages == 1 && !reflect.DeepEqual(cnt, cntAll) {
+			t.Errorf("page 1 counts %v != all %v", cnt, cntAll)
+		}
+		if len(page) > 3 {
+			t.Fatalf("page %d has %d rows", pages, len(page))
+		}
+		walk = append(walk, page...)
+		if !more {
+			if pages != 3 {
+				t.Errorf("pages %d, want 3", pages)
+			}
+			break
+		}
+		last := page[len(page)-1]
+		cur = &ExecCursor{TS: last.TS, Key: []string{last.ConversationID, last.BriefPath, last.RepoID}}
+	}
+	if !reflect.DeepEqual(walk, all) {
+		t.Errorf("walk\n got %+v\nwant %+v", walk, all)
+	}
+	// The tie at the max ts is ordered c08 then c09 by conversation_id.
+	if walk[0].ConversationID != "c08" || walk[1].ConversationID != "c09" {
+		t.Errorf("tie order %+v", walk[:2])
+	}
+}
+
+func TestConversationsPage(t *testing.T) {
+	tn, f, _ := pageFixture(t)
+	ctx := context.Background()
+	all, moreAll, err := tn.ConversationsPage(ctx, f, nil, 500)
+	if err != nil || moreAll || len(all) != 9 {
+		t.Fatalf("all: n=%d more=%v err=%v", len(all), moreAll, err)
+	}
+	if all[0].ConversationID != "c08" || all[1].ConversationID != "c09" || all[0].LastTS != all[1].LastTS {
+		t.Fatalf("last_ts tie not first: %+v", all[:2])
+	}
+	var walk []ConvRow
+	var cur *ConvCursor
+	for pages := 1; ; pages++ {
+		page, more, err := tn.ConversationsPage(ctx, f, cur, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(page) > 3 {
+			t.Fatalf("page %d has %d rows", pages, len(page))
+		}
+		walk = append(walk, page...)
+		if !more {
+			if pages != 3 {
+				t.Errorf("pages %d, want 3", pages)
+			}
+			break
+		}
+		last := page[len(page)-1]
+		cur = &ConvCursor{TS: last.LastTS, ConversationID: last.ConversationID}
+	}
+	if !reflect.DeepEqual(walk, all) {
+		t.Errorf("walk\n got %+v\nwant %+v", walk, all)
+	}
+}
+
+func TestExecutionsPageTiming(t *testing.T) {
+	tn := openT(t, Options{})
+	ctx := context.Background()
+	base := ad(9, 1, 0, 0)
+	fs := make([]afx, 0, 20000)
+	for i := 0; i < 20000; i++ {
+		conv := fmt.Sprintf("c%05d", i)
+		fs = append(fs, afx{typ: "artifact_version", conv: conv, harness: "h", event: "artifact",
+			ts: base.Add(time.Duration(i) * time.Second), repo: "repoA",
+			path: fmt.Sprintf("docs/plans/p/briefs/%s.md", conv), hash: hx(conv), source: "worktree"})
+	}
+	addFacts(t, tn, fs...)
+	f := AnalyticsFilter{From: base, To: base.Add(48 * time.Hour)}
+	start := time.Now()
+	rows, _, more, err := tn.ExecutionsPage(ctx, f, nil, 5)
+	elapsed := time.Since(start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 5 || !more {
+		t.Fatalf("n=%d more=%v", len(rows), more)
+	}
+	for i := 1; i < len(rows); i++ {
+		if rows[i].TS > rows[i-1].TS {
+			t.Fatalf("not ts desc at %d", i)
+		}
+	}
+	t.Logf("ExecutionsPage limit=5 over 20000 facts: %v", elapsed)
+}
+
 func TestAnalyticsConversations(t *testing.T) {
 	tn, f := fixture(t)
 	got, err := tn.Conversations(context.Background(), f)
