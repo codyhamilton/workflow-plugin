@@ -39,12 +39,12 @@ describe('normalise', () => {
 describe('createClient.get', () => {
 	it('a burst of five calls on one slot fires once with the last params and supersedes the rest', async () => {
 		const fetcher = vi.fn(() => Promise.resolve({ ok: true }));
-		const c = createClient({ debounceMs: 250, fetcher: fetcher as unknown as Fetch });
+		const c = createClient({ fetcher: fetcher as unknown as Fetch });
 		const ps = [1, 2, 3, 4, 5].map((i) =>
 			c.get<{ ok: boolean }>('slot', 'analytics/summary', new URLSearchParams(`a=${i}`))
 		);
 		const superseded = ps.slice(0, 4).map((p) => p.catch((e) => e));
-		await vi.advanceTimersByTimeAsync(250);
+		await vi.advanceTimersByTimeAsync(100);
 		await expect(ps[4]).resolves.toEqual({ ok: true });
 		expect(fetcher).toHaveBeenCalledTimes(1);
 		expect((fetcher.mock.calls[0][1] as URLSearchParams).get('a')).toBe('5');
@@ -180,5 +180,89 @@ describe('createClient.get', () => {
 		await vi.advanceTimersByTimeAsync(250);
 		await expect(second).resolves.toEqual({ v: 1 });
 		expect(fetcher).toHaveBeenCalledTimes(2);
+	});
+
+	it('waits the 100 ms default debounce window for a single call', async () => {
+		const fetcher = vi.fn(() => Promise.resolve({ v: 1 }));
+		const c = createClient({ fetcher: fetcher as unknown as Fetch });
+		c.get('slot', 'analytics/summary', new URLSearchParams('a=1')).catch(() => {});
+		await vi.advanceTimersByTimeAsync(99);
+		expect(fetcher).not.toHaveBeenCalled();
+		await vi.advanceTimersByTimeAsync(1);
+		expect(fetcher).toHaveBeenCalledTimes(1);
+	});
+
+	it('fires on the leading edge with no wait when the slot has been idle', async () => {
+		const fetcher = vi.fn(() => Promise.resolve({ v: 1 }));
+		const c = createClient({ debounceMs: 100, idleMs: 250, fetcher: fetcher as unknown as Fetch });
+		const first = c.get('slot', 'analytics/summary', new URLSearchParams('a=1'));
+		await vi.advanceTimersByTimeAsync(100);
+		await expect(first).resolves.toEqual({ v: 1 });
+		expect(fetcher).toHaveBeenCalledTimes(1);
+
+		await vi.advanceTimersByTimeAsync(250);
+		const second = c.get('slot', 'analytics/summary', new URLSearchParams('a=2'));
+		expect(fetcher).toHaveBeenCalledTimes(2);
+		await expect(second).resolves.toEqual({ v: 1 });
+		expect((fetcher.mock.calls[1][1] as URLSearchParams).get('a')).toBe('2');
+	});
+
+	it('debounces and supersedes when a call arrives within the idle window', async () => {
+		const fetcher = vi.fn(() => Promise.resolve({ v: 1 }));
+		const c = createClient({ debounceMs: 100, idleMs: 250, fetcher: fetcher as unknown as Fetch });
+		const first = c.get('slot', 'analytics/summary', new URLSearchParams('a=1'));
+		await vi.advanceTimersByTimeAsync(100);
+		await expect(first).resolves.toEqual({ v: 1 });
+		expect(fetcher).toHaveBeenCalledTimes(1);
+
+		await vi.advanceTimersByTimeAsync(50);
+		const secondErr = c.get('slot', 'analytics/summary', new URLSearchParams('a=2')).catch((e) => e);
+		await vi.advanceTimersByTimeAsync(0);
+		expect(fetcher).toHaveBeenCalledTimes(1);
+		const third = c.get('slot', 'analytics/summary', new URLSearchParams('a=3'));
+		await vi.advanceTimersByTimeAsync(100);
+		await expect(secondErr).resolves.toBeInstanceOf(Superseded);
+		await expect(third).resolves.toEqual({ v: 1 });
+		expect((fetcher.mock.calls[1][1] as URLSearchParams).get('a')).toBe('3');
+		expect(fetcher).toHaveBeenCalledTimes(2);
+	});
+
+	it('keeps a shared entry correct for a same-key joiner when a superseded fetch releases it', async () => {
+		const calls: Array<{ params: string; resolve: (v: unknown) => void; signal?: AbortSignal }> = [];
+		const fetcher = vi.fn((_path: string, p: URLSearchParams, s?: AbortSignal) => {
+			return new Promise<unknown>((resolve) => {
+				calls.push({ params: p.toString(), resolve, signal: s });
+			});
+		});
+		const c = createClient({ debounceMs: 0, fetcher: fetcher as unknown as Fetch });
+
+		const a = c.get('slotA', 'analytics/summary', new URLSearchParams('a=1')).catch((e) => e);
+		await vi.advanceTimersByTimeAsync(0);
+		expect(fetcher).toHaveBeenCalledTimes(1);
+		const released = calls[0];
+		expect(released.params).toBe('a=1');
+
+		const a2 = c.get('slotA', 'analytics/summary', new URLSearchParams('a=2'));
+		a2.catch(() => {});
+		expect(await a).toBeInstanceOf(Superseded);
+		expect(released.signal?.aborted).toBe(true);
+		await vi.advanceTimersByTimeAsync(0);
+		expect(fetcher).toHaveBeenCalledTimes(2);
+
+		const b = c.get('slotB', 'analytics/summary', new URLSearchParams('a=1'));
+		await vi.advanceTimersByTimeAsync(0);
+		const fresh = calls[2];
+		expect(fresh.params).toBe('a=1');
+
+		fresh.resolve({ v: 'fresh' });
+		await vi.advanceTimersByTimeAsync(0);
+		await expect(b).resolves.toEqual({ v: 'fresh' });
+
+		released.resolve({ v: 'stale' });
+		await vi.advanceTimersByTimeAsync(0);
+
+		const later = c.get('slotC', 'analytics/summary', new URLSearchParams('a=1'));
+		await expect(later).resolves.toEqual({ v: 'fresh' });
+		expect(fetcher).toHaveBeenCalledTimes(3);
 	});
 });

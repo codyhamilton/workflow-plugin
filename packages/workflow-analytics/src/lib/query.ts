@@ -42,6 +42,8 @@ type Call = {
 	reject: (reason: unknown) => void;
 	timer?: ReturnType<typeof setTimeout>;
 	fetch?: Fetch;
+	/** When this call settled, used to decide whether its slot is idle enough to fire on the leading edge. */
+	settledAt?: number;
 };
 
 type Fetch = {
@@ -51,17 +53,26 @@ type Fetch = {
 	resolve: (value: unknown) => void;
 	reject: (reason: unknown) => void;
 	refs: number;
+	/** Set once the last interested slot releases it, so no joiner shares or caches an abandoned fetch. */
+	dead: boolean;
 };
 
 export function createClient(
-	opts: { debounceMs?: number; maxConcurrent?: number; fetcher?: typeof apiGet } = {}
+	opts: {
+		debounceMs?: number;
+		idleMs?: number;
+		maxConcurrent?: number;
+		fetcher?: typeof apiGet;
+	} = {}
 ) {
-	const debounceMs = opts.debounceMs ?? 250;
+	const debounceMs = opts.debounceMs ?? 100;
+	const idleMs = opts.idleMs ?? 250;
 	const maxConcurrent = opts.maxConcurrent ?? 4;
 	const fetcher = opts.fetcher ?? apiGet;
 	const cache = new Map<string, unknown>();
 	const inflight = new Map<string, Fetch>();
 	const bySlot = new Map<Slot, Call>();
+	const now = () => Date.now();
 	let running = 0;
 	const queue: (() => void)[] = [];
 
@@ -82,8 +93,11 @@ export function createClient(
 
 	async function perform(f: Fetch, path: string, params: URLSearchParams) {
 		try {
-			if (f.controller.signal.aborted) throw new Superseded();
+			if (f.dead || f.controller.signal.aborted) throw new Superseded();
 			const data = await fetcher(path, params, f.controller.signal);
+			// Abort is cooperative, so a released fetch can still resolve: never let it commit or a
+			// later same-key request would read a dead generation from the cache.
+			if (f.dead) throw new Superseded();
 			cache.set(f.key, data);
 			f.resolve(data);
 		} catch (e) {
@@ -98,6 +112,7 @@ export function createClient(
 	function release(f: Fetch) {
 		f.refs--;
 		if (f.refs <= 0) {
+			f.dead = true;
 			if (inflight.get(f.key) === f) inflight.delete(f.key);
 			f.controller.abort();
 		}
@@ -106,6 +121,10 @@ export function createClient(
 	function run(call: Call, path: string, params: URLSearchParams) {
 		if (call.settled) return;
 		let f = inflight.get(call.key);
+		if (f && f.dead) {
+			if (inflight.get(call.key) === f) inflight.delete(call.key);
+			f = undefined;
+		}
 		if (f) {
 			f.refs++;
 		} else {
@@ -115,7 +134,15 @@ export function createClient(
 				resolve = res;
 				reject = rej;
 			});
-			f = { key: call.key, controller: new AbortController(), promise, resolve, reject, refs: 1 };
+			f = {
+				key: call.key,
+				controller: new AbortController(),
+				promise,
+				resolve,
+				reject,
+				refs: 1,
+				dead: false
+			};
 			inflight.set(call.key, f);
 			const ff = f;
 			schedule(() => void perform(ff, path, params));
@@ -125,6 +152,7 @@ export function createClient(
 			(data) => {
 				if (call.settled) return;
 				call.settled = true;
+				call.settledAt = now();
 				const resp = data as { partial?: boolean; ignored_filters?: string[] };
 				if (resp && (resp.partial || (resp.ignored_filters && resp.ignored_filters.length > 0))) {
 					setNotice(call.slot, resp);
@@ -134,6 +162,7 @@ export function createClient(
 			(e) => {
 				if (call.settled) return;
 				call.settled = true;
+				call.settledAt = now();
 				call.reject(e);
 			}
 		);
@@ -143,6 +172,7 @@ export function createClient(
 		return new Promise<T>((resolve, reject) => {
 			const key = normalise(path, params);
 			const prev = bySlot.get(slot);
+			const prevWasSettled = prev?.settled ?? false;
 			if (prev) {
 				if (prev.timer != null) clearTimeout(prev.timer);
 				if (!prev.settled) {
@@ -155,12 +185,23 @@ export function createClient(
 			bySlot.set(slot, call);
 			if (cache.has(key)) {
 				call.settled = true;
+				call.settledAt = now();
 				const data = cache.get(key);
 				const resp = data as { partial?: boolean; ignored_filters?: string[] };
 				if (resp && (resp.partial || (resp.ignored_filters && resp.ignored_filters.length > 0))) {
 					setNotice(slot, resp);
 				}
 				resolve(data as T);
+				return;
+			}
+			// A slot idle for at least idleMs has no burst left to coalesce, so its next call fires
+			// on the leading edge with no wait; anything sooner (or still unsettled) debounces.
+			let leading = false;
+			if (prevWasSettled && prev && prev.settledAt != null) {
+				leading = now() - prev.settledAt >= idleMs;
+			}
+			if (leading) {
+				run(call, path, params);
 				return;
 			}
 			call.timer = setTimeout(() => {
