@@ -33,6 +33,17 @@ test('repo_id filters', async ({ page }) => {
 	await expect(page.getByTestId('conv-c2-commits')).toHaveCount(0);
 });
 
+test('conversation id links to the timeline', async ({ page }) => {
+	await page.goto('/conversations');
+	await expect(page.getByTestId('conv-c3-conversation_id')).toHaveAttribute('href', '/conversation?id=c3');
+});
+
+test('a harness cell click adds a chip', async ({ page }) => {
+	await page.goto('/conversations');
+	await page.getByTestId('conv-c3-harness').click();
+	await expect(page.getByTestId('chip-harness-claude')).toBeVisible();
+});
+
 test('limit=1 paging walk equals the unpaged rows', async ({ page }) => {
 	await page.goto('/conversations');
 	await expect(page.getByTestId('conv-row')).toHaveCount(CONVERSATION_ROWS.length);
@@ -46,4 +57,31 @@ test('limit=1 paging walk equals the unpaged rows', async ({ page }) => {
 	}
 	await expect(more).toHaveCount(0);
 	expect(await rowTexts(page)).toEqual(all);
+});
+
+test('virtualises 5000 rows: under 100 in the DOM, last row reachable', async ({ page }) => {
+	const rows = Array.from({ length: 5000 }, (_, i) => ({
+		conversation_id: `gen-${i}`,
+		harness: 'claude',
+		repos: ['r1'],
+		first_ts: '2025-01-01T00:00:00Z',
+		last_ts: '2025-01-01T00:00:00Z',
+		hook_events: 0,
+		artifact_versions: 0,
+		commits: 0,
+		kinds: []
+	}));
+	await page.route('**/v1/analytics/conversations*', (route) =>
+		route.fulfill({ json: { rows }, headers: { 'access-control-allow-origin': '*' } })
+	);
+	const t0 = Date.now();
+	await page.goto('/conversations');
+	await expect(page.getByTestId('conv-row').first()).toBeVisible({ timeout: 1000 });
+	expect(Date.now() - t0).toBeLessThan(1000);
+	expect(await page.getByTestId('conv-row').count()).toBeLessThan(100);
+	const container = page.getByTestId('virtual-scroll');
+	await container.evaluate((el) => {
+		(el as HTMLElement).scrollTop = (el as HTMLElement).scrollHeight;
+	});
+	await expect(page.getByTestId('conv-gen-4999-conversation_id')).toBeVisible();
 });
