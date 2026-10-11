@@ -130,3 +130,11 @@ Built (70b9d16, Sonnet retry): the first flash run died on opencode's own "datab
 ### 3-04-query-engine
 
 Built (f57db2b, flash worker): `internal/store/query.go` with the measure matrix, `Measures()`, `Buckets`, `QueryParams/QueryResult`, `ErrUnsupported`, and `(*Tenant).Query` for the six non-usage measures (tz bucketing, top-N folding, `ignored_filters`); 11 tests, package green, vet and gofmt clean. Deviations: the usage executor is named `usageQuery` (brief said both `usageExec` and `usageQuery`); measure units `count`/`tokens`/`usd` chosen by the worker.
+
+### 3-05-usage-measures
+
+Built (c80be8e, flash worker): `internal/store/usage.go` registers the usage executor so `model_calls`, `tokens_*`, `cost_usd`, `unpriced_calls` answer through `Query`; Claude rows dedupe on `raw.backfill.ref` keeping the largest `tok_out` (carried item 3); cost computed with `store.Cost`. `usage_test.go` fixture gives `model_calls=3`, `tokens_out=40` (not 50), `cost_usd=0.2504`, `unpriced_calls=1`; usage, query and cost tests pass. Deviations: refreshed 3-04's `TestQueryUsageUnavailable` and 3-06's matching serve assertion (registering the executor invalidates them; test-only edits outside owned paths); brief's "4 usage facts" reconciled to 4 rows. Limit as predicted: live-captured Claude facts have no stored message id, so repeats among them are not deduped.
+
+### 3-06-serve-query-routes
+
+Built (60f1e42, flash worker): `GET /v1/analytics/schema` and `GET /v1/analytics/query` (`internal/serve/analytics_query.go`), `parseFilter`/`canonFilter`/`filterOpts` extended for the six filter keys, `tz`, `all=1` and the query bucket cap, routes registered in `serve.go`. Store and serve tests, vet and gofmt pass. Deviations: none. Known: the `legacyLedger` serve fixture is not a real v4 schema.
