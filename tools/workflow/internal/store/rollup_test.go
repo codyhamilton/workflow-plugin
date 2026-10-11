@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
 )

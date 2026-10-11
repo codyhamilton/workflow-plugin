@@ -20,7 +20,9 @@ Status: **done**
   and boolean `allRollupsExact`; `allRollupsLedger` (row 1 = remove-listed opencode `chat.params`,
   only row of `cdrop`; row 2 = kept opencode `transcript.assistant_message` + `modelID`, so
   compaction fills `model`/`norm_event`); `TestCompactRebuildsAllRollups`,
-  `TestCompactRebuildsAllRollupsOnResume`.
+  `TestCompactRebuildsAllRollupsOnResume`. Both tests assert the fill directly: the kept
+  `transcript.assistant_message` row's base `model` column is empty before compaction and `"m1"`
+  after (`assertModelFill`), so the brief's named model fill is exercised, not merely present.
 
 Confirmed `Derive` combination: opencode `transcript.assistant_message` with payload `modelID`
 (`extract.go:74-79`) gives `Model="m1"`, and the event is not in `policyTable` ⇒ Keep.
@@ -47,8 +49,10 @@ New tests verbose: all PASS (store 4/4, compact 4/4).
    branch2 ...` mis-parsed and the first run failed (64 phantom tuples). Fixed by wrapping each side
    as `SELECT * FROM (<sel>)` in `exceptBothWays`/`exceptBothEmpty`. The hook/conversation helpers
    are unaffected (single-SELECT bases).
-3. **No `_ "time/tzdata"` added.** `query_test.go` already blank-imports it in the same package test
-   binary, so `time.LoadLocation("Australia/Sydney")` works; adding it was conditional in the brief.
+3. **`_ "time/tzdata"` is imported directly in `rollup_test.go`.** The earlier claim that the brief
+   made this conditional was wrong: the brief contains no such condition. The blank import now makes
+   `time.LoadLocation("Australia/Sydney")` in `TestConversationRollupBucketedLocalTwoDim`
+   self-contained rather than relying on `query_test.go`'s import in the same test binary.
 
 ## Contradictions
 

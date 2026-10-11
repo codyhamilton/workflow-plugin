@@ -169,6 +169,21 @@ func assertAllRollupsExact(t *testing.T, tn *store.Tenant) {
 	assertFacetRollupExact(t, tn)
 }
 
+// assertModelFill checks the kept transcript.assistant_message row in conversation ckeep has base
+// model want. The fixture never sets model on Append, so "" before compaction and the derived "m1"
+// after proves compaction filled it rather than merely preserving it.
+func assertModelFill(t *testing.T, tn *store.Tenant, want string) {
+	t.Helper()
+	var got string
+	if err := tn.Raw().QueryRow(`SELECT model FROM facts
+		WHERE conversation_id='ckeep' AND event='transcript.assistant_message'`).Scan(&got); err != nil {
+		t.Fatal(err)
+	}
+	if got != want {
+		t.Fatalf("base model = %q, want %q", got, want)
+	}
+}
+
 // allRollupsLedger appends a ledger whose first rows (lowest rowids) change under compaction: row 1
 // is a remove-listed opencode chat.params and the only row of conversation cdrop, and row 2 is a
 // kept opencode transcript.assistant_message carrying a modelID, so compaction fills its model and
@@ -246,6 +261,7 @@ func TestCompactRebuildsAllRollups(t *testing.T) {
 	tn := openExclusive(t)
 	allRollupsLedger(t, tn)
 	assertAllRollupsExact(t, tn) // Append kept them exact before compaction
+	assertModelFill(t, tn, "")   // Append left model empty; compaction is what fills it
 
 	st, err := Run(context.Background(), tn, Options{})
 	if err != nil {
@@ -255,6 +271,7 @@ func TestCompactRebuildsAllRollups(t *testing.T) {
 		t.Fatalf("compaction did not do the expected work: %+v", st)
 	}
 	assertAllRollupsExact(t, tn)
+	assertModelFill(t, tn, "m1")
 
 	var n int
 	if err := tn.Raw().QueryRow(`SELECT count(*) FROM facts WHERE conversation_id='cdrop'`).Scan(&n); err != nil {
@@ -277,6 +294,7 @@ func TestCompactRebuildsAllRollups(t *testing.T) {
 func TestCompactRebuildsAllRollupsOnResume(t *testing.T) {
 	tn := openExclusive(t)
 	allRollupsLedger(t, tn)
+	assertModelFill(t, tn, "")
 
 	_, err := Run(context.Background(), tn, Options{Batch: 2, AfterCommit: func(batch int) error {
 		if batch == 1 {
@@ -299,4 +317,5 @@ func TestCompactRebuildsAllRollupsOnResume(t *testing.T) {
 		t.Fatalf("resume did not complete: %+v", st)
 	}
 	assertAllRollupsExact(t, tn)
+	assertModelFill(t, tn, "m1")
 }
