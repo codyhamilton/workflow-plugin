@@ -1,14 +1,17 @@
 <script lang="ts">
-	import { notices } from '$lib/state.svelte';
+	import { noticeView, notices } from '$lib/state.svelte';
 	import { view } from '$lib/view.svelte';
+
+	// Only the notices for the view on screen; a notice left by a previous view is not shown.
+	const here = $derived(Object.values(notices).filter((n) => n.view === noticeView.key));
 
 	// One notice per ignored filter name across every slot, then the boolean notices.
 	const ignored = $derived.by(() => {
 		const names = new Set<string>();
-		for (const n of Object.values(notices)) for (const name of n.ignored) names.add(name);
+		for (const n of here) for (const name of n.ignored) names.add(name);
 		return [...names].sort();
 	});
-	const partial = $derived(Object.values(notices).some((n) => n.partial));
+	const partial = $derived(here.some((n) => n.partial));
 </script>
 
 {#each ignored as name (name)}

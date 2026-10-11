@@ -83,3 +83,42 @@ test('a burst of preset clicks reaches the facets endpoint at most twice', async
 	await page.waitForTimeout(600);
 	expect(facets.count()).toBeLessThanOrEqual(2);
 });
+
+test('a saved view is listed and survives a reload', async ({ page }) => {
+	await page.goto('/?range=7d');
+	await page.getByTestId('saveview-name').fill('weekly');
+	await page.getByTestId('saveview-save').click();
+	await page.getByTestId('saveview-menu-toggle').click();
+
+	const item = page.getByTestId('saveview-item').filter({ hasText: 'weekly' });
+	await expect(item).toBeVisible();
+	await expect(item).toHaveAttribute('href', /range=7d/);
+
+	await page.reload();
+	await page.getByTestId('saveview-menu-toggle').click();
+	await expect(page.getByTestId('saveview-item').filter({ hasText: 'weekly' })).toBeVisible();
+});
+
+test('embed mode renders the page without the shell', async ({ page }) => {
+	await page.goto('/trends?range=7d&embed=1');
+	await expect(page.locator('header')).toHaveCount(0);
+	await expect(page.getByTestId('preset-7d')).toHaveCount(0);
+	await expect(page.getByTestId('saveview-save')).toHaveCount(0);
+	await expect(page.getByTestId('trends-chart')).toBeVisible();
+});
+
+test('the nav links to Builder and Dashboards', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('link', { name: 'Builder' })).toHaveAttribute('href', /\/builder/);
+	await expect(page.getByRole('link', { name: 'Dashboards' })).toHaveAttribute('href', /\/dashboards/);
+});
+
+test('an ignored-filter notice survives a view change that re-requests it', async ({ page }) => {
+	await page.goto('/trends?kind=brief');
+	await expect(page.getByTestId('notice-ignored')).toBeVisible();
+
+	// Preset 30d is the default window, so this is a cache hit: the shell must not erase the notice.
+	await page.getByTestId('preset-30d').click();
+	await page.waitForTimeout(500);
+	await expect(page.getByTestId('notice-ignored')).toBeVisible();
+});
