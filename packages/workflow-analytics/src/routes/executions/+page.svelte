@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { apiGet } from '$lib/api';
 	import Pager from '$lib/components/Pager.svelte';
-	import { filterParams, parseFilter } from '$lib/filters';
 	import { label } from '$lib/format';
+	import { getJSON } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { Executions, Shape } from '$lib/types';
+	import { view } from '$lib/view.svelte';
 
 	const SHAPES: Shape[] = ['complete', 'unreported', 'started'];
 
@@ -13,20 +13,20 @@
 	let rows = $state<Executions['rows']>([]);
 	let next = $state<string | undefined>(undefined);
 
-	// First-page query: the shared filter plus an optional `limit` passed through to the API.
+	// First-page query: the shared view params plus an optional `limit` passed through to the API.
+	// `paramsFor` returns null while facets are pending or when an exclude matches nothing.
 	const params = $derived.by(() => {
-		const q = filterParams(parseFilter(page.url.searchParams));
-		const l = page.url.searchParams.get('limit');
-		if (l) q.set('limit', l);
-		return q;
+		const limit = page.url.searchParams.get('limit');
+		return view.paramsFor('rest', limit ? { limit } : undefined);
 	});
 
 	$effect(() => {
 		const q = params;
+		if (!q) return;
 		let live = true;
 		rows = [];
 		next = undefined;
-		apiGet<Executions>('analytics/executions', q).then(
+		getJSON<Executions>('executions', 'analytics/executions', q).then(
 			(r) => {
 				if (!live) return;
 				clearError();
@@ -45,7 +45,7 @@
 </script>
 
 <h1>Executions</h1>
-{#if counts}
+{#if counts && params}
 	<div class="tiles">
 		{#each SHAPES as s (s)}
 			<div class="tile">
@@ -61,11 +61,39 @@
 		<tbody>
 			{#each rows as r, i (i)}
 				<tr data-testid="exec-row">
-					<td>{label(r.repo_id)}</td>
-					<td>{label(r.plan)}</td>
-					<td>{label(r.conversation_id)}</td>
+					<td>
+						<button
+							type="button"
+							data-testid="exec-repo"
+							onclick={(ev) => view.drill('repo_id', r.repo_id, { shift: ev.shiftKey })}
+						>
+							{label(r.repo_id)}
+						</button>
+					</td>
+					<td>
+						<button
+							type="button"
+							data-testid="exec-plan"
+							onclick={(ev) => view.drill('plan', r.plan, { shift: ev.shiftKey })}
+						>
+							{label(r.plan)}
+						</button>
+					</td>
+					<td>
+						<a data-testid="exec-conversation" href={`/conversation?id=${encodeURIComponent(r.conversation_id)}`}>
+							{label(r.conversation_id)}
+						</a>
+					</td>
 					<td>{label(r.brief_path)}</td>
-					<td>{label(r.harness)}</td>
+					<td>
+						<button
+							type="button"
+							data-testid="exec-harness"
+							onclick={(ev) => view.drill('harness', r.harness, { shift: ev.shiftKey })}
+						>
+							{label(r.harness)}
+						</button>
+					</td>
 					<td>{r.shape}</td>
 					<td><time>{r.ts}</time></td>
 				</tr>
@@ -113,5 +141,14 @@
 		padding: 0.2rem 0.75rem;
 		text-align: left;
 		border-bottom: 1px solid #eee;
+	}
+	td button {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		color: var(--accent);
+		cursor: pointer;
+		text-decoration: underline;
 	}
 </style>
