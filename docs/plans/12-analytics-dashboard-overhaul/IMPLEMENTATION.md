@@ -58,3 +58,11 @@ Units: six, from `refine` (briefs in `briefs/`). 2-01 and 2-02 parallel; then 2-
 
 Carried items from Phase 1 placed: 5 (tenant-dir lock) in 2-01; 6 (torn archive frame) in 2-02, with 2-03 repairing before it runs; 7 (`TestMigrationFast100k` under `-race`) in 2-01; 8 (`/v1/facts` naming) corrected in `DESIGN.md` at refine. Items 1 to 4 stay carried to Phase 3. Item 9 still applies: `artifact_feedback` has not run on the Phase 2 briefs (the workflow MCP server did not connect).
 
+
+### 2-01-lock-meta-health
+
+Built (52e2358): tenant-dir `.lock` with shared `Open` and exclusive `OpenExclusive` (`ErrLocked`, `TrySharedLock`), migration 5 `meta` table seeded `compaction='complete'` for an empty ledger, `Meta`/`SetMeta`/`CompactionState`/`CompactionStateOf` (read-only), `Raw()` only under exclusive. `serve.Preflight` runs before listen; locked tenant requests return 503; `/v1/health` gains `compaction`. `TestMigrationFast100k` timing assertion gated off under `-race`. `go build`, `go vet`, `go test ./...` and `go test -race ./internal/store/` pass. Surfaces: `internal/store/{lock.go,store.go,store_test.go,lock_test.go,race_on_test.go,race_off_test.go}`, `internal/serve/{serve.go,compaction_state_test.go}`, `cmd/workflow/main.go`. Deviations: migration 5 uses `CREATE TABLE IF NOT EXISTS` because two tests rewind `user_version` without dropping `meta` (one outside owned paths); added exported `store.TrySharedLock`; serve legacy fixture hand-builds a version-4 `facts` table. Carried item 7 resolved. Worker: flash.
+
+### 2-02-archive-torn-frame
+
+Built (7d4b608): `archive.Read` tolerates a torn (truncated) last frame and returns earlier lines; checksum-corrupt frames, trailing garbage and non-JSON lines still error. New `Repair(tenantDir) (Repaired, error)` rewrites a damaged file atomically as one frame of surviving lines; healthy files are untouched. Archive tests pass, gofmt and vet clean. Surfaces: `internal/archive/{archive.go,archive_test.go}`. Deviation: brief's contract ("corruption followed by good data errors") and done-evidence conflict; resolved by treating truncated frames as torn and checksum-corrupt frames as corruption. Limit: until `Repair` runs, a frame appended after a torn tail is not visible to `Read`; 2-03 must call `Repair` first. Carried item 6 resolved.
