@@ -319,6 +319,87 @@ func repairFrames(raw []byte) (lines []Line, dropped int, torn bool, err error) 
 	return lines, dropped, torn, nil
 }
 
+// FilterStats reports what Filter changed.
+type FilterStats struct {
+	Dropped   int // lines removed across every file
+	Rewritten int // files rewritten because at least one line was dropped
+	Deleted   int // files deleted because no line survived
+}
+
+// Filter removes from every archive file the lines for which keep returns false. A changed file is
+// rewritten atomically as one fresh zstd frame holding the surviving lines in order, duplicates
+// kept; a file whose every line is dropped is deleted, and its month directory is removed when it
+// becomes empty. A file with no dropped line is left byte- and mtime-identical. Filter repairs
+// nothing itself: the caller runs Repair first, so no file has a torn tail. Memory is bounded by
+// one file's lines (one conversation-month); files are handled one at a time. It takes the package
+// mutex, as Repair does.
+func Filter(tenantDir string, keep func(Line) bool) (FilterStats, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	var st FilterStats
+	files, err := filepath.Glob(filepath.Join(tenantDir, "archive", "*", "*"+ext))
+	if err != nil {
+		return st, err
+	}
+	sort.Strings(files)
+	for _, p := range files {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			return st, err
+		}
+		if len(raw) == 0 {
+			continue
+		}
+		lines, err := linesOf(raw)
+		if err != nil {
+			return st, fmt.Errorf("archive: %s: %w", p, err)
+		}
+		dropped := 0
+		survivors := lines[:0] // in place: survivors[i] is written no later than line i is read
+		for _, l := range lines {
+			if keep(l) {
+				survivors = append(survivors, l)
+			} else {
+				dropped++
+			}
+		}
+		if dropped == 0 {
+			continue // byte- and mtime-identical
+		}
+		st.Dropped += dropped
+		if len(survivors) == 0 {
+			if err := os.Remove(p); err != nil {
+				return st, err
+			}
+			st.Deleted++
+			if err := removeIfEmpty(filepath.Dir(p)); err != nil {
+				return st, err
+			}
+			continue
+		}
+		if err := rewriteFile(p, survivors); err != nil {
+			return st, err
+		}
+		st.Rewritten++
+	}
+	return st, nil
+}
+
+// removeIfEmpty removes dir when it holds no entries; it is not an error for dir to be non-empty.
+func removeIfEmpty(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	if len(entries) == 0 {
+		return os.Remove(dir)
+	}
+	return nil
+}
+
 func rewriteFile(path string, lines []Line) error {
 	var plain bytes.Buffer
 	enc := json.NewEncoder(&plain)

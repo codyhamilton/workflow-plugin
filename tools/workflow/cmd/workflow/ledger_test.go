@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -199,6 +200,84 @@ func TestLedgerCompactSuccess(t *testing.T) {
 	}
 	if removed != 0 {
 		t.Fatalf("removed-event rows remain: %d", removed)
+	}
+}
+
+func TestLedgerPurgeDeltasSuccess(t *testing.T) {
+	dir := buildLegacyLedger(t)
+	tn, err := store.OpenExclusive(dir, store.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var deltas int
+	if err := tn.Raw().QueryRow(`SELECT count(*) FROM facts
+		WHERE harness='opencode' AND event='message.part.delta'`).Scan(&deltas); err != nil {
+		t.Fatal(err)
+	}
+	tn.Close()
+	if deltas == 0 {
+		t.Fatal("fixture has no delta facts; test proves nothing")
+	}
+
+	code, out := captureRun(t, "ledger", "purge-deltas", "--tenant-dir", dir)
+	if code != 0 {
+		t.Fatalf("exit %d:\n%s", code, out)
+	}
+	for _, want := range []string{"before: rows=", "purge: facts=", "archive-lines=", "after: rows=", "elapsed="} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("output missing %q:\n%s", want, out)
+		}
+	}
+	if got := rowCountAt(t, out, "purge: facts="); got != deltas {
+		t.Fatalf("purge reported facts=%d, want %d\n%s", got, deltas, out)
+	}
+	tn, err = store.OpenExclusive(dir, store.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tn.Close()
+	var left int
+	if err := tn.Raw().QueryRow(`SELECT count(*) FROM facts
+		WHERE harness='opencode' AND event='message.part.delta'`).Scan(&left); err != nil {
+		t.Fatal(err)
+	}
+	if left != 0 {
+		t.Fatalf("%d delta facts remain", left)
+	}
+}
+
+func TestLedgerPurgeDeltasMissingTenantDir(t *testing.T) {
+	if code, out := captureRun(t, "ledger", "purge-deltas"); code != 2 || !strings.Contains(out, "usage") {
+		t.Fatalf("no flag: code=%d out=%s", code, out)
+	}
+	parent := t.TempDir()
+	missing := filepath.Join(parent, "nope")
+	code, out := captureRun(t, "ledger", "purge-deltas", "--tenant-dir", missing)
+	if code != 1 {
+		t.Fatalf("missing dir exit %d:\n%s", code, out)
+	}
+	if _, err := os.Stat(missing); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("purge-deltas created the missing tenant dir: %v", err)
+	}
+}
+
+func TestLedgerPurgeDeltasLocked(t *testing.T) {
+	dir := buildLegacyLedger(t)
+	hold, err := store.OpenExclusive(dir, store.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer hold.Close()
+	before := countFacts(t, hold)
+	code, out := captureRun(t, "ledger", "purge-deltas", "--tenant-dir", dir)
+	if code != 1 {
+		t.Fatalf("exit %d:\n%s", code, out)
+	}
+	if !strings.Contains(out, "locked") {
+		t.Fatalf("no lock message:\n%s", out)
+	}
+	if got := countFacts(t, hold); got != before {
+		t.Fatalf("database changed: %d -> %d", before, got)
 	}
 }
 

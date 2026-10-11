@@ -3,6 +3,7 @@ package archive
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -304,6 +305,130 @@ func TestRepairLeavesHealthyFileUntouched(t *testing.T) {
 	got, err := Read(dir, "c")
 	if err != nil || len(got) != 3 || got[2].RowHash != "h3" {
 		t.Fatalf("got %v err %v", got, err)
+	}
+}
+
+func evEnt(conv string, ts float64, hash, event string) Entry {
+	cj, _ := json.Marshal(conv)
+	ej, _ := json.Marshal(event)
+	return Entry{ConversationID: conv, TS: ts, Line: Line{
+		RowHash: hash, ReceivedAt: int64(ts * 1e9),
+		Fact: json.RawMessage(fmt.Sprintf(`{"conversation_id":%s,"event":%s,"ts":%v}`, cj, ej, ts)),
+	}}
+}
+
+// dropDelta is the predicate a caller (compact) supplies: drop lines whose fact event is a delta.
+func dropDelta(l Line) bool {
+	return !bytes.Contains(l.Fact, []byte(`"event":"message.part.delta"`))
+}
+
+func monthTS(month, day int) float64 {
+	return float64(time.Date(2026, time.Month(month), day, 12, 0, 0, 0, time.UTC).Unix())
+}
+
+func TestFilterDropsDeltas(t *testing.T) {
+	dir := t.TempDir()
+	// One conversation-month per case, in distinct months so an emptied month dir can be removed.
+	if err := Append(dir, []Entry{
+		evEnt("only", monthTS(1, 5), "d1", "message.part.delta"),
+		evEnt("only", monthTS(1, 6), "d2", "message.part.delta"),
+		evEnt("mixed", monthTS(2, 5), "k1", "transcript.assistant_message"),
+		evEnt("mixed", monthTS(2, 6), "x1", "message.part.delta"),
+		evEnt("mixed", monthTS(2, 7), "k1", "transcript.assistant_message"), // duplicate hash kept
+		evEnt("mixed", monthTS(2, 8), "x2", "message.part.delta"),
+		evEnt("none", monthTS(3, 5), "n1", "PreToolUse"),
+		evEnt("none", monthTS(3, 6), "n2", "PostToolUse"),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	nonePath := filepath.Join(dir, "archive", "2026-03", "none.jsonl.zst")
+	noneBefore, err := os.ReadFile(nonePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	noneFi0, _ := os.Stat(nonePath)
+
+	st, err := Filter(dir, dropDelta)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st.Dropped != 4 || st.Deleted != 1 || st.Rewritten != 1 {
+		t.Fatalf("stats = %+v, want dropped=4 deleted=1 rewritten=1", st)
+	}
+	// only: every line dropped, file and its month dir gone.
+	if _, err := os.Stat(filepath.Join(dir, "archive", "2026-01")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("emptied month dir 2026-01 was not removed: %v", err)
+	}
+	// mixed: survivors in order, duplicates kept.
+	var mixed []Line
+	if err := readFile(filepath.Join(dir, "archive", "2026-02", "mixed.jsonl.zst"), func(l Line) {
+		mixed = append(mixed, l)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	var hs []string
+	for _, l := range mixed {
+		hs = append(hs, l.RowHash)
+	}
+	if strings.Join(hs, ",") != "k1,k1" {
+		t.Fatalf("mixed survivors = %v, want k1,k1", hs)
+	}
+	// none: byte- and mtime-identical.
+	noneAfter, err := os.ReadFile(nonePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(noneBefore, noneAfter) {
+		t.Fatal("Filter changed the untouched file")
+	}
+	noneFi1, _ := os.Stat(nonePath)
+	if !noneFi0.ModTime().Equal(noneFi1.ModTime()) {
+		t.Fatal("Filter touched the untouched file's mtime")
+	}
+	// A second call changes nothing.
+	st2, err := Filter(dir, dropDelta)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st2 != (FilterStats{}) {
+		t.Fatalf("second Filter changed something: %+v", st2)
+	}
+}
+
+func TestFilterAfterRepairHandlesTornTail(t *testing.T) {
+	dir := t.TempDir()
+	// One frame per Append: the delta and the kept line survive, the third frame is torn.
+	for _, e := range []Entry{
+		evEnt("c", monthTS(4, 5), "x1", "message.part.delta"),
+		evEnt("c", monthTS(4, 6), "k1", "PreToolUse"),
+		evEnt("c", monthTS(4, 7), "x2", "message.part.delta"),
+	} {
+		if err := Append(dir, []Entry{e}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	p := filepath.Join(dir, "archive", "2026-04", "c.jsonl.zst")
+	truncate(t, p, 4)
+	rep, err := Repair(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rep.Files != 1 {
+		t.Fatalf("Repair = %+v, want 1 file", rep)
+	}
+	st, err := Filter(dir, dropDelta)
+	if err != nil {
+		t.Fatalf("Filter after Repair: %v", err)
+	}
+	if st.Dropped != 1 || st.Rewritten != 1 {
+		t.Fatalf("stats = %+v, want dropped=1 rewritten=1", st)
+	}
+	var lines []Line
+	if err := readFile(p, func(l Line) { lines = append(lines, l) }); err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 1 || lines[0].RowHash != "k1" {
+		t.Fatalf("after Filter: %v", lines)
 	}
 }
 

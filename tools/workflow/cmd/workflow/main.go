@@ -26,7 +26,7 @@ var (
 	commit  = "unknown"
 )
 
-const usage = "usage: workflow serve | drain | ledger compact --tenant-dir <dir> | mcp | status | version\n"
+const usage = "usage: workflow serve | drain | ledger compact --tenant-dir <dir> | ledger purge-deltas --tenant-dir <dir> | mcp | status | version\n"
 
 func main() { os.Exit(run(os.Args[1:])) }
 

@@ -26,13 +26,15 @@ var newCompactSession = func() (context.Context, context.CancelFunc, compact.Opt
 	return ctx, cancel, compact.Options{Progress: os.Stdout}
 }
 
-// runLedger dispatches `workflow ledger ...`. Only `compact` exists.
+// runLedger dispatches `workflow ledger ...`: the offline `compact` reclaim and the offline
+// `purge-deltas` removal of message.part.delta facts and archive lines.
 func runLedger(args []string) int {
-	if len(args) == 0 || args[0] != "compact" {
+	if len(args) == 0 || (args[0] != "compact" && args[0] != "purge-deltas") {
 		fmt.Fprint(os.Stderr, usage)
 		return 2
 	}
-	fs := flag.NewFlagSet("ledger compact", flag.ContinueOnError)
+	cmd := args[0]
+	fs := flag.NewFlagSet("ledger "+cmd, flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	fs.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	var dir string
@@ -43,7 +45,10 @@ func runLedger(args []string) int {
 		}
 		return 2
 	}
-	return compactTenant(dir)
+	if cmd == "compact" {
+		return compactTenant(dir)
+	}
+	return purgeDeltasTenant(dir)
 }
 
 // compactTenant runs the offline compaction of the tenant at dir and reports rows and bytes before
@@ -105,6 +110,73 @@ func compactTenant(dir string) int {
 	after, err := ledgerCounts(tn)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+		return 1
+	}
+	fmt.Printf("after: %s elapsed=%s\n", after, time.Since(start).Round(time.Millisecond))
+	return 0
+}
+
+// purgeDeltasTenant runs the offline purge of the tenant at dir: it deletes every
+// message.part.delta fact and archive line, rebuilds the rollups and vacuums. It never creates a
+// missing tenant: a dir without ledger.db fails (exit 1). Like compactTenant it refuses safely
+// (exit 1) when locked, short of space, or interrupted, and prints rows and counts before and after.
+func purgeDeltasTenant(dir string) int {
+	if _, err := os.Stat(filepath.Join(dir, "ledger.db")); err != nil {
+		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		return 1
+	}
+	tn, err := store.OpenExclusive(dir, store.Options{})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		return 1
+	}
+	defer tn.Close()
+
+	start := time.Now()
+	before, err := ledgerCounts(tn)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		return 1
+	}
+	fmt.Printf("before: %s\n", before)
+
+	// VACUUM writes a copy before it swaps, so the filesystem must hold a second ledger.db.
+	need := uint64(fileSize(filepath.Join(dir, "ledger.db")))
+	free, err := compact.FreeBytes(dir)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		return 1
+	}
+	fmt.Printf("space: need %d MiB, have %d MiB\n", need>>20, free>>20)
+	if free < need {
+		fmt.Fprintf(os.Stderr, "workflow ledger purge-deltas: need %d MiB, have %d MiB\n", need>>20, free>>20)
+		return 1
+	}
+
+	ctx, cancel, opts := newCompactSession()
+	st, runErr := compact.PurgeDeltas(ctx, tn, opts)
+	interrupted := ctx.Err() != nil &&
+		(runErr == nil || errors.Is(runErr, context.Canceled) || errors.Is(runErr, context.DeadlineExceeded))
+	cancel()
+	if runErr != nil {
+		if interrupted {
+			fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas: interrupted; rerun the same command to resume")
+		} else {
+			fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", runErr)
+		}
+		return 1
+	}
+	fmt.Printf("purge: facts=%d archive-lines=%d files-rewritten=%d files-deleted=%d\n",
+		st.FactsDeleted, st.ArchiveDropped, st.FilesRewritten, st.FilesDeleted)
+
+	if err := vacuum(tn); err != nil {
+		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		return 1
+	}
+
+	after, err := ledgerCounts(tn)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
 		return 1
 	}
 	fmt.Printf("after: %s elapsed=%s\n", after, time.Since(start).Round(time.Millisecond))
