@@ -253,4 +253,14 @@ on a compacted copy of the real ledger.
 12. `partial` is emitted only by `/query`; conversation totals cover only the returned events when a timeline is truncated; `time/tzdata` is not imported in serve, `tz=Local` is accepted, filter value counts and `top` are unbounded, and the locked-tenant 503 echoes the tenant path.
 13. Builder: zero dimensions with bucket `none` renders a chart with no valid type; `data-ready` is true while the previous chart is still shown. Dashboards: import bypasses the 12-tile cap, a fragment in a saved URL drops `embed=1`, the saved-view store does not validate stored entries on read, and `/dashboards` has no settle signal.
 14. The Executions sankey filters client-side over the loaded first page, so counts trail the totals until the user pages on.
-15. Pricing rates for Claude and Codex are missing from `tools/transcript/pricing.json` and `internal/store/pricing_table.json`, so most calls are unpriced. A `serve` built without the site build first reports "analytics bundle not embedded".
+15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
+
+## Live cutover record (2026-10-11)
+
+The local `workflow-serve.service` (systemd user unit) moved from build ace7370 to master b9034da with the site embedded.
+
+- Backup: a zstd tar of the whole tenant dir under `/var/tmp/wf-cutover-<stamp>/`, checked against the live ledger by sha256 and `integrity_check` (ok). The old tenant dir is kept at `~/.local/share/workflow/cutover-hold/local.pre-cutover` for rollback.
+- Compaction ran on a restored copy because `/home` lacked the roughly 8 GiB the in-place check needs. Rows went from 9,276,949 to 438,910 and the ledger from 12.99 GB to 338 MB (13m42s). `purge-deltas` then removed 0 rows (23.6 s). The result was copied back into `serve/local`.
+- Downtime was about 26.5 minutes. Hooks buffered events to the queue, and the new serve's hosted drain ingested them.
+- Checked: health `compaction: complete`, `/v1/analytics/schema`, a 7-day query (unpriced calls 1, down from 84.7% of calls before pricing), `/` and `/usage` returning 200, new events ingested, a `message.part.delta` POST accepted with no fact stored, `integrity_check` ok, and the hook_events rollup equal to the facts count.
+- Gotchas: the unit's old ExecStart path no longer existed, so it now points at `~/.local/lib/workflow/<commit>/workflow-linux-amd64` (the previous binary is kept beside it as `.bak`). Do not leave a stray tenant dir inside `serve/`, because health then reports compaction "required". A hook-kicked standalone `drain` can hold the drain lock and block the hosted drain.
