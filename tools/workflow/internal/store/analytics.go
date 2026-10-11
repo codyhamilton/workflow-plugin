@@ -44,6 +44,10 @@ func planOf(p string) string {
 type AnalyticsFilter struct {
 	From, To                       time.Time // inclusive
 	Repos, Harnesses, Kinds, Plans []string
+	NormEvents, Events             []string
+	Tools, Models, Sources         []string
+	ConversationIDs                []string
+	TZ                             *time.Location // nil means UTC
 }
 
 type ToolCount struct {
@@ -82,12 +86,6 @@ type ExploreRow struct {
 	Harness, RepoID, Plan, Kind, Event, Tool, Path, ConversationID, Source, SHA, ScreenVerdict, RejectionStage string
 }
 
-const (
-	toolExpr   = `COALESCE(CAST(json_extract(raw,'$.payload.tool_name') AS TEXT),'')`
-	sourceExpr = `COALESCE(CAST(json_extract(raw,'$.source') AS TEXT),'')`
-	shaExpr    = `COALESCE(CAST(json_extract(raw,'$.sha') AS TEXT),'')`
-)
-
 func inList(expr string, vals []string, args *[]any) string {
 	if len(vals) == 0 {
 		return ""
@@ -106,8 +104,14 @@ func (f AnalyticsFilter) factWhere() (string, []any) {
 	w := "ts >= ? AND ts <= ?"
 	w += inList("repo_id", f.Repos, &args)
 	w += inList("harness", f.Harnesses, &args)
-	w += inList("wf_kind(path)", f.Kinds, &args)
-	w += inList("wf_plan(path)", f.Plans, &args)
+	w += inList("kind", f.Kinds, &args)
+	w += inList("plan", f.Plans, &args)
+	w += inList("norm_event", f.NormEvents, &args)
+	w += inList("event", f.Events, &args)
+	w += inList("tool", f.Tools, &args)
+	w += inList("model", f.Models, &args)
+	w += inList("source", f.Sources, &args)
+	w += inList("conversation_id", f.ConversationIDs, &args)
 	return w, args
 }
 
@@ -147,12 +151,12 @@ func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) 
 	for _, d := range []struct {
 		dst  *[]string
 		expr string
-	}{{&out.Repos, "repo_id"}, {&out.Harnesses, "harness"}, {&out.Plans, "wf_plan(path)"}, {&out.Events, "event"}} {
+	}{{&out.Repos, "repo_id"}, {&out.Harnesses, "harness"}, {&out.Plans, "plan"}, {&out.Events, "event"}} {
 		if *d.dst, err = t.strings(ctx, `SELECT DISTINCT `+d.expr+` AS v FROM facts WHERE `+w+` ORDER BY v`, args...); err != nil {
 			return out, err
 		}
 	}
-	ks, err := t.strings(ctx, `SELECT DISTINCT wf_kind(path) FROM facts WHERE `+w, args...)
+	ks, err := t.strings(ctx, `SELECT DISTINCT kind FROM facts WHERE `+w, args...)
 	if err != nil {
 		return out, err
 	}
@@ -165,7 +169,7 @@ func (t *Tenant) Facets(ctx context.Context, f AnalyticsFilter) (Facets, error) 
 			out.Kinds = append(out.Kinds, k)
 		}
 	}
-	rows, err := t.rdb.QueryContext(ctx, `SELECT `+toolExpr+` AS tname, count(*) AS n FROM facts
+	rows, err := t.rdb.QueryContext(ctx, `SELECT tool AS tname, count(*) AS n FROM facts
 		WHERE type='hook_event' AND `+w+` GROUP BY tname HAVING tname != '' ORDER BY n DESC, tname ASC LIMIT 100`, args...)
 	if err != nil {
 		return out, err
@@ -194,7 +198,7 @@ func (t *Tenant) Summary(ctx context.Context, f AnalyticsFilter) (Summary, error
 	if err != nil {
 		return s, err
 	}
-	rows, err := t.rdb.QueryContext(ctx, `SELECT COALESCE(NULLIF(wf_kind(path),''),'other'), `+sourceExpr+`, count(*)
+	rows, err := t.rdb.QueryContext(ctx, `SELECT COALESCE(NULLIF(kind,''),'other'), source, count(*)
 		FROM facts WHERE type='artifact_version' AND `+w+` GROUP BY 1, 2`, args...)
 	if err != nil {
 		return s, err
@@ -281,7 +285,8 @@ func (t *Tenant) Series(ctx context.Context, f AnalyticsFilter, metric, bucket, 
 		q = `SELECT ` + key + ` AS k, ` + rb + ` AS t, count(*) FROM rejections WHERE ` + w + ` GROUP BY k, t ORDER BY k, t`
 	} else {
 		groups := map[string]string{"none": "'all'", "harness": "harness", "repo_id": "repo_id", "event": "event",
-			"tool": toolExpr, "kind": "wf_kind(path)", "plan": "wf_plan(path)", "source": sourceExpr}
+			"tool": "tool", "kind": "kind", "plan": "plan", "source": "source",
+			"norm_event": "norm_event", "model": "model", "conversation_id": "conversation_id"}
 		key, ok := groups[group]
 		if !ok {
 			return nil, fmt.Errorf("store: unknown group %q", group)
@@ -329,7 +334,7 @@ func (t *Tenant) WindowScores(ctx context.Context, f AnalyticsFilter, kind strin
 	args = append([]any{kind}, args...)
 	rows, err := t.rdb.QueryContext(ctx, `
 	WITH h AS (SELECT DISTINCT content_hash FROM facts
-		WHERE type='artifact_version' AND content_hash != '' AND wf_kind(path)=? AND `+w+`),
+		WHERE type='artifact_version' AND content_hash != '' AND kind=? AND `+w+`),
 	s AS (SELECT content_hash, check_name, result,
 		ROW_NUMBER() OVER (PARTITION BY content_hash, check_name ORDER BY id DESC) AS rn FROM scores)
 	SELECT s.check_name, s.result FROM s JOIN h ON h.content_hash = s.content_hash
@@ -356,13 +361,13 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 	w, args := f.factWhere()
 	rows, err := t.rdb.QueryContext(ctx, `
 	WITH b AS (
-		SELECT repo_id, conversation_id, path, harness, ts,
+		SELECT repo_id, conversation_id, path, harness, ts, plan,
 			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
-		FROM facts WHERE type='artifact_version' AND wf_kind(path)='brief' AND `+w+`)
-	SELECT repo_id, wf_plan(path), conversation_id, path, harness, ts,
+		FROM facts WHERE type='artifact_version' AND kind='brief' AND `+w+`)
+	SELECT repo_id, plan, conversation_id, path, harness, ts,
 		CASE WHEN EXISTS (SELECT 1 FROM facts c WHERE c.type='commit' AND c.conversation_id=b.conversation_id AND c.repo_id=b.repo_id)
 			THEN CASE WHEN EXISTS (SELECT 1 FROM facts r WHERE r.type='artifact_version' AND r.conversation_id=b.conversation_id
-				AND r.repo_id=b.repo_id AND r.path = 'docs/plans/' || wf_plan(b.path) || '/reports/' || substr(b.path, length('docs/plans/' || wf_plan(b.path) || '/briefs/') + 1))
+				AND r.repo_id=b.repo_id AND r.path = 'docs/plans/' || b.plan || '/reports/' || substr(b.path, length('docs/plans/' || b.plan || '/briefs/') + 1))
 				THEN 'complete' ELSE 'unreported' END
 			ELSE 'started' END
 	FROM b WHERE rn = 1 ORDER BY ts DESC, conversation_id, path, repo_id`, args...)
@@ -384,7 +389,7 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 // Conversations aggregates the filtered in-window facts per conversation.
 func (t *Tenant) Conversations(ctx context.Context, f AnalyticsFilter) ([]ConvRow, error) {
 	w, args := f.factWhere()
-	rows, err := t.rdb.QueryContext(ctx, `SELECT conversation_id, harness, repo_id, type, ts, wf_kind(path) FROM facts WHERE `+w, args...)
+	rows, err := t.rdb.QueryContext(ctx, `SELECT conversation_id, harness, repo_id, type, ts, kind FROM facts WHERE `+w, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -462,9 +467,9 @@ func (t *Tenant) Explore(ctx context.Context, f AnalyticsFilter, limit int) ([]E
 	args := append(append(fargs, rargs...), limit+1)
 	rows, err := t.rdb.QueryContext(ctx, `
 	SELECT type, ts, harness, repo_id, plan, kind, event, tool, path, conversation_id, source, sha, verdict, stage FROM (
-		SELECT type, ts, harness, repo_id, wf_plan(path) AS plan, wf_kind(path) AS kind, event,
-			CASE WHEN type='hook_event' THEN `+toolExpr+` ELSE '' END AS tool, path, conversation_id,
-			`+sourceExpr+` AS source, `+shaExpr+` AS sha,
+		SELECT type, ts, harness, repo_id, plan, kind, event,
+			CASE WHEN type='hook_event' THEN tool ELSE '' END AS tool, path, conversation_id,
+			source, sha,
 			COALESCE((SELECT verdict FROM screens s WHERE s.content_hash=facts.content_hash AND facts.content_hash != '' ORDER BY s.id DESC LIMIT 1),'') AS verdict,
 			'' AS stage, row_hash AS k
 		FROM facts WHERE `+fw+`

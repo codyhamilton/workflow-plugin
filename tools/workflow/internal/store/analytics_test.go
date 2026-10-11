@@ -52,7 +52,7 @@ func addFacts(t *testing.T, tn *Tenant, fs ...afx) {
 		raw, _ := json.Marshal(m)
 		rows = append(rows, FactRow{RowHash: keys.ContentHash(raw), Type: f.typ, ConversationID: f.conv,
 			Harness: f.harness, Event: f.event, TS: float64(f.ts.Unix()), RepoID: f.repo, Path: f.path,
-			ContentHash: f.hash, Raw: raw})
+			ContentHash: f.hash, Raw: raw, Tool: f.tool, Source: f.source, SHA: f.sha})
 	}
 	if _, err := tn.Append(context.Background(), rows); err != nil {
 		t.Fatal(err)
@@ -318,6 +318,79 @@ func TestAnalyticsFacets(t *testing.T) {
 	if err != nil || len(got.Tools) != 100 || got.Tools[0] != (ToolCount{"t104", 2}) ||
 		got.Tools[1] != (ToolCount{"t000", 1}) || got.Tools[99] != (ToolCount{"t098", 1}) {
 		t.Fatalf("tools cap: %d %v", len(got.Tools), err)
+	}
+}
+
+func TestAnalyticsColumnReads(t *testing.T) {
+	tn := openT(t, Options{})
+	ctx := context.Background()
+	mk := func(conv, repo, event, tool, norm, model, source string, ts time.Time) FactRow {
+		raw, _ := json.Marshal(map[string]any{"type": "hook_event", "conversation_id": conv}) // no payload
+		return FactRow{RowHash: keys.ContentHash([]byte(conv)), Type: "hook_event", ConversationID: conv,
+			Harness: "h", Event: event, TS: float64(ts.Unix()), RepoID: repo, Raw: raw,
+			Tool: tool, NormEvent: norm, Model: model, Source: source}
+	}
+	tsA, tsB := ad(9, 29, 10, 0), ad(9, 29, 11, 0)
+	if _, err := tn.Append(ctx, []FactRow{
+		mk("cA", "rA", "PreToolUse", "Read", "tool_use", "m1", "commit", tsA),
+		mk("cB", "rB", "PostToolUse", "Bash", "tool_result", "m2", "worktree", tsB),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	f := AnalyticsFilter{From: aFrom, To: aTo}
+	// Facets reads the tool column even though raw carries no payload.
+	fac, err := tn.Facets(ctx, f)
+	if err != nil || !reflect.DeepEqual(fac.Tools, []ToolCount{{"Bash", 1}, {"Read", 1}}) {
+		t.Fatalf("facets tools: %+v %v", fac.Tools, err)
+	}
+	// Series groups on tool and on each new group name.
+	for _, c := range []struct{ group, a, b string }{
+		{"tool", "Bash", "Read"},
+		{"norm_event", "tool_result", "tool_use"},
+		{"model", "m1", "m2"},
+		{"conversation_id", "cA", "cB"},
+	} {
+		got, err := tn.Series(ctx, f, "hook_events", "day", c.group)
+		want := pts(c.a, "2026-09-29", "1", c.b, "2026-09-29", "1")
+		if err != nil || !reflect.DeepEqual(got, want) {
+			t.Fatalf("series %s: %v %v", c.group, got, err)
+		}
+	}
+	// One assertion per new filter key, then an AND of two.
+	base := func() AnalyticsFilter { return AnalyticsFilter{From: aFrom, To: aTo} }
+	one := func(name string, f AnalyticsFilter) {
+		t.Helper()
+		s, err := tn.Summary(ctx, f)
+		if err != nil || s.HookEvents != 1 || s.Conversations != 1 {
+			t.Fatalf("%s: %+v %v", name, s, err)
+		}
+	}
+	fa := base()
+	fa.NormEvents = []string{"tool_use"}
+	one("norm_event", fa)
+	fa = base()
+	fa.Events = []string{"PreToolUse"}
+	one("event", fa)
+	fa = base()
+	fa.Tools = []string{"Read"}
+	one("tool", fa)
+	fa = base()
+	fa.Models = []string{"m1"}
+	one("model", fa)
+	fa = base()
+	fa.Sources = []string{"commit"}
+	one("source", fa)
+	fa = base()
+	fa.ConversationIDs = []string{"cA"}
+	one("conversation_id", fa)
+	fa = base()
+	fa.NormEvents = []string{"tool_use"}
+	fa.Tools = []string{"Read"}
+	one("norm_event AND tool", fa)
+	fa = base()
+	fa.Tools = []string{"Nope"}
+	if s, err := tn.Summary(ctx, fa); err != nil || s.HookEvents != 0 {
+		t.Fatalf("miss: %+v %v", s, err)
 	}
 }
 
