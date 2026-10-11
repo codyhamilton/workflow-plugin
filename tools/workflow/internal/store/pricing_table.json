@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "source": "https://cursor.com/docs/models-and-pricing",
+    "fetched": "2026-06-26",
+    "unit": "USD per million tokens",
+    "columns": {
+      "input": "fresh input — CSV 'Input (w/o Cache Write)'",
+      "cache_write": "cache creation — CSV 'Input (w/ Cache Write)'",
+      "cache_read": "cache hit — CSV 'Cache Read'",
+      "output": "generation — CSV 'Output Tokens'"
+    },
+    "notes": [
+      "Models with no native cache_write (composer, glm, kimi, gemini) use input rate as the cache_write fallback; their cache_write token volume is ~0 so it does not matter.",
+      "composer-2.5-fast cache_read is approximated as a 90% discount on its $3 input ($0.3); Cursor docs do not list the fast variant explicitly.",
+      "glm-5.2-high / -thinking and claude high-thinking variants inherit the base model's rates (Cursor prices by base model, not reasoning tier)."
+    ]
+  },
+  "composer-2.5":                    {"input": 0.5, "cache_write": 0.5,  "cache_read": 0.2,  "output": 2.5},
+  "composer-2.5-fast":               {"input": 3.0, "cache_write": 3.0,  "cache_read": 0.3,  "output": 15.0},
+  "glm-5.2-high":                    {"input": 1.4, "cache_write": 1.4,  "cache_read": 0.26, "output": 4.4},
+  "glm-5.2-high-thinking":           {"input": 1.4, "cache_write": 1.4,  "cache_read": 0.26, "output": 4.4},
+  "kimi-k2.5":                       {"input": 0.6, "cache_write": 0.6,  "cache_read": 0.1,  "output": 3.0},
+  "claude-4.6-sonnet-high-thinking": {"input": 3.0, "cache_write": 3.75, "cache_read": 0.3,  "output": 15.0},
+  "gemini-3.5-flash":                {"input": 1.5, "cache_write": 1.5,  "cache_read": 0.15, "output": 9.0}
+}
