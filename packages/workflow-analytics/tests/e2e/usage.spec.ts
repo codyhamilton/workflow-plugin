@@ -157,3 +157,69 @@ test('cost-by-model table formats cost by unit and keeps exact values', async ({
 	await expect(unpriced).toHaveText('unpriced');
 	await expect(unpriced).toHaveAttribute('data-value', '0');
 });
+
+test('every table row reports USAGE_BY_MODEL calls, and no zero-call row shows tokens', async ({ page }) => {
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
+	for (const [model, v] of Object.entries(USAGE_BY_MODEL)) {
+		await expect(page.getByTestId(`usage-${model}-calls`)).toHaveText(String(v.calls));
+	}
+	const rows = page.getByTestId('usage-table').locator('tbody tr');
+	const parse = (t: string) => (t === '—' ? 0 : Number(t.replace(/[^0-9.-]/g, '')) || 0);
+	for (let i = 0; i < (await rows.count()); i++) {
+		const cells = rows.nth(i).locator('td');
+		const calls = parse(await cells.nth(0).innerText());
+		const tin = parse(await cells.nth(2).innerText());
+		const tout = parse(await cells.nth(3).innerText());
+		expect(calls === 0 && (tin > 0 || tout > 0), `row ${i} calls 0 beside tokens`).toBe(false);
+	}
+});
+
+test('a model with no cost data shows unpriced, never $0.00', async ({ page }) => {
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-${QWEN}-cost`)).toHaveText('unpriced');
+	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText('unpriced');
+	await expect(page.getByTestId('usage-table')).not.toContainText('$0.00');
+});
+
+test('the five by-model table requests ask for top=100', async ({ page }) => {
+	const seen: { measure: string; top: string | null }[] = [];
+	await page.route('**/v1/analytics/query*', async (route) => {
+		const u = new URL(route.request().url());
+		if (u.searchParams.getAll('dim').includes('model') && u.searchParams.get('bucket') === 'none') {
+			seen.push({ measure: u.searchParams.get('measure') ?? '', top: u.searchParams.get('top') });
+		}
+		await route.continue();
+	});
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
+	await expectSettled(page);
+	expect(seen.map((s) => s.measure).sort()).toEqual(
+		['cost_usd', 'model_calls', 'tokens_in', 'tokens_out', 'unpriced_calls'].sort()
+	);
+	for (const s of seen) expect(s.top, s.measure).toBe('100');
+});
+
+test('empty model key shows (none) and is inert; __other__ shows other models with a truncation note', async ({ page }) => {
+	await page.route('**/v1/analytics/query*', (route) => {
+		const u = new URL(route.request().url());
+		const dims = u.searchParams.getAll('dim');
+		const rows = dims.includes('model')
+			? [
+					{ k: [''], v: 1 },
+					{ k: ['__other__'], v: 0.5 }
+				]
+			: [];
+		return route.fulfill({
+			json: { measure: u.searchParams.get('measure') ?? 'cost_usd', bucket: 'none', dims, rows },
+			headers: { 'access-control-allow-origin': '*' }
+		});
+	});
+	await page.goto('/usage');
+	await expect(page.getByTestId('usage-row-')).toContainText('(none)');
+	await expect(page.getByTestId('usage-row-__other__')).toContainText('other models');
+	await expect(page.getByTestId('usage-truncated-note')).toBeVisible();
+	await page.getByTestId('usage-row-').click();
+	await page.getByTestId('usage-row-__other__').click();
+	await expect(page.locator('[data-testid^="chip-"]')).toHaveCount(0);
+});

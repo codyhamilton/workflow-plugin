@@ -4,7 +4,7 @@
 	import BarChart from '$lib/charts/BarChart.svelte';
 	import TimeChart from '$lib/charts/TimeChart.svelte';
 	import type { TimeSeries } from '$lib/charts/options';
-	import { costLabel, num } from '$lib/format';
+	import { costLabel, label, num } from '$lib/format';
 	import { resolveWindow } from '$lib/params';
 	import { getJSON, Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
@@ -80,7 +80,7 @@
 				}
 			);
 		};
-		const byModel = { dim: 'model', top: '20', bucket: 'none' };
+		const byModel = { dim: 'model', top: '100', bucket: 'none' };
 		run('usage-by-model-cost', { measure: 'cost_usd', ...byModel }, (r) => (costResp = r));
 		run('usage-by-model-calls', { measure: 'model_calls', ...byModel }, (r) => (callsResp = r));
 		run('usage-by-model-unpriced', { measure: 'unpriced_calls', ...byModel }, (r) => (unpricedResp = r));
@@ -116,6 +116,20 @@
 			return { key: m, label: cost === 0 && unpriced > 0 ? `${m} (unpriced)` : m, value: cost };
 		})
 	);
+	const OTHER = '__other__';
+
+	/** A per-measure cell: an absent key means zero/not-applicable for that measure, shown as `—`. */
+	function cell(map: Record<string, number>, key: string): string {
+		return key in map ? num(map[key]) : '—';
+	}
+
+	/** `__other__` (the folded tail) and the empty key are display-only, never drill targets. */
+	function rowLabel(key: string): string {
+		return key === OTHER ? 'other models' : label(key);
+	}
+	function rowInert(key: string): boolean {
+		return key === OTHER || key === '';
+	}
 	const costSeries = $derived(points(costTimeResp));
 	const tokenSeries = $derived(points(tokensTimeResp, 'tokens_out'));
 
@@ -127,7 +141,13 @@
 	}
 
 	function cost(m: string): string {
-		return costLabel({ cost: costBy[m] ?? 0, unpriced: unpricedBy[m] ?? 0, calls: callsBy[m] ?? 0 });
+		const c = costBy[m] ?? 0;
+		const u = unpricedBy[m] ?? 0;
+		// costLabel only says "unpriced" when unpriced >= calls; a folded `__other__` row can have
+		// fewer unpriced than calls and would otherwise read `$0.00`. Guard that here (format.ts is
+		// owned by 5-14).
+		if (c === 0 && u > 0) return 'unpriced';
+		return costLabel({ cost: c, unpriced: u, calls: callsBy[m] ?? 0 });
 	}
 </script>
 
@@ -147,17 +167,28 @@
 	</thead>
 	<tbody>
 		{#each models as m (m)}
-			<tr data-testid="usage-row-{m}" onclick={(e) => view.drill('model', m, { shift: e.shiftKey })}>
-				<th scope="row">{m}</th>
-				<td data-testid="usage-{m}-calls">{num(callsBy[m] ?? 0)}</td>
-				<td data-testid="usage-{m}-unpriced">{num(unpricedBy[m] ?? 0)}</td>
-				<td data-testid="usage-{m}-tokens_in">{num(tinBy[m] ?? 0)}</td>
-				<td data-testid="usage-{m}-tokens_out">{num(toutBy[m] ?? 0)}</td>
+			<tr
+				data-testid="usage-row-{m}"
+				class:inert={rowInert(m)}
+				onclick={(e) => {
+					if (!rowInert(m)) view.drill('model', m, { shift: e.shiftKey });
+				}}
+			>
+				<th scope="row">{rowLabel(m)}</th>
+				<td data-testid="usage-{m}-calls">{cell(callsBy, m)}</td>
+				<td data-testid="usage-{m}-unpriced">{cell(unpricedBy, m)}</td>
+				<td data-testid="usage-{m}-tokens_in">{cell(tinBy, m)}</td>
+				<td data-testid="usage-{m}-tokens_out">{cell(toutBy, m)}</td>
 				<td data-testid="usage-{m}-cost">{cost(m)}</td>
 			</tr>
 		{/each}
 	</tbody>
 </table>
+{#if models.includes(OTHER)}
+	<p class="footnote" data-testid="usage-truncated-note">
+		Table truncated to 100 models; "other models" folds the rest.
+	</p>
+{/if}
 <p class="footnote" data-testid="usage-footnote">Claude calls captured live may be counted more than once</p>
 
 <h2>Cost by model</h2>
@@ -193,5 +224,9 @@
 	}
 	th[scope='row'] {
 		text-align: left;
+	}
+	tr.inert {
+		color: var(--muted);
+		cursor: default;
 	}
 </style>
