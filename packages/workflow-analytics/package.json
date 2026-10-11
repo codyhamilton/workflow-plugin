@@ -34,6 +34,7 @@
     "@perspective-dev/server": "^5.5.1",
     "@perspective-dev/viewer": "^5.5.1",
     "@perspective-dev/viewer-datagrid": "^5.5.1",
+    "echarts": "6.1.0",
     "layerchart": "^2.5.1"
   }
 }
