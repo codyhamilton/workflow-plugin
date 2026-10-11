@@ -402,3 +402,7 @@ Built (b22233b, df88f60, flash worker): Executions sankey with links `exec-link-
 ### 5-18-stacked-area-and-multiples-ready
 
 Added by the orchestrator after 5-05 and 5-07 reported the area type and the small-multiples settle defects (`briefs/5-18-stacked-area-and-multiples-ready.md`); 5-17 now also depends on it.
+
+### 5-11-client-latency-and-inflight
+
+Built (e7d25c9, flash worker): `query.ts` debounce 100 ms (was 250) with `idleMs` 250 leading edge for a slot that has been idle; a released fetch no longer poisons the cache or duplicates a request (`dead` flag). 13 tests pass, e2e overview and usage 20 pass, fixture preset-click p50 46 to 34 ms. Contradictions: the brief's "never made" leading edge clashes with "a burst issues only the last request", so cold slots still debounce; the brief's joiner symptom did not reproduce, the real defect was a released fetch poisoning the cache. Large-ledger timing is re-measured at verification.
