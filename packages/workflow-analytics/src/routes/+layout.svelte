@@ -28,19 +28,24 @@
 		['/conversations', 'Conversations'],
 		['/explore', 'Explore'],
 		['/dashboards', 'Dashboards'],
+		['/profile', 'Profile'],
 		['/settings', 'Settings']
 	];
 
-	// Filters, chips, notices and the save control show everywhere except settings and login.
+	// Filters, chips, notices and the save control show everywhere except settings, login, and profile.
 	// embed=1 does not hide the shell.
-	const chrome = $derived(page.url.pathname !== '/settings' && page.url.pathname !== '/login');
+	const chrome = $derived(
+		page.url.pathname !== '/settings' &&
+			page.url.pathname !== '/login' &&
+			page.url.pathname !== '/profile'
+	);
 
 	const collector = $derived(isCollectorMode());
 	const noTenant = $derived(collector && fetchError.status === 403 && fetchError.message === 'no such tenant');
 
 	// Every link but Settings keeps the current filters in the query string.
 	function navHref(path: string): string {
-		return path === '/settings' ? path : path + page.url.search;
+		return path === '/settings' || path === '/profile' ? path : path + page.url.search;
 	}
 
 	// Register the view before any child effect runs (`$effect.pre` flushes first), so a notice a
@@ -127,7 +132,7 @@
 			<div class="error" role="alert" data-testid="error-panel">
 				<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
 				{#if noTenant}
-					<p>You do not have a tenant yet. Create one after registration lands in a later phase; an empty tenant list is normal until then.</p>
+					<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
 				{:else if collector && fetchError.status === 401}
 					<p><a href="/login">Sign in</a> to load data from this collector.</p>
 				{:else if fetchError.status === 401 || fetchError.network}

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, apiGet, fetchMe } from './api';
+import { ApiError, apiGet, apiPost, createToken, fetchMe, revokeToken } from './api';
 
 let store: Record<string, string>;
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -70,6 +70,30 @@ describe('apiGet', () => {
 		const [url, init] = fetchMock.mock.calls[0];
 		expect(url).toBe('/v1/me');
 		expect(init?.credentials).toBe('include');
+	});
+
+	it('apiPost in collector mode sends credentials and JSON without Authorization', async () => {
+		await apiPost('tokens', { tenant: 't', scope: 'read', expires_at: '2099-01-01T00:00:00Z' });
+		const [url, init] = fetchMock.mock.calls[0];
+		expect(url).toBe('/v1/tokens');
+		expect(init?.method).toBe('POST');
+		expect(new Headers(init?.headers).has('authorization')).toBe(false);
+		expect(init?.credentials).toBe('include');
+		expect(init?.body).toBe(JSON.stringify({ tenant: 't', scope: 'read', expires_at: '2099-01-01T00:00:00Z' }));
+	});
+
+	it('revokeToken posts to the revoke subpath', async () => {
+		fetchMock.mockImplementation(() => Promise.resolve(new Response(null, { status: 204 })));
+		await revokeToken('abc');
+		const [url, init] = fetchMock.mock.calls[0];
+		expect(url).toBe('/v1/tokens/abc/revoke');
+		expect(init?.method).toBe('POST');
+	});
+
+	it('createToken uses apiPost', async () => {
+		fetchMock.mockImplementation(() => ok({ id: '1', token: 'wk_x', tenant: 't', scope: 'read', expires_at: 'x' }));
+		await createToken({ tenant: 't', scope: 'read', expires_at: '2099-01-01T00:00:00Z' });
+		expect(fetchMock.mock.calls[0][0]).toBe('/v1/tokens');
 	});
 
 	it('names a non-JSON 200 (a static host without the API) as a connection problem', async () => {
