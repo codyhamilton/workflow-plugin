@@ -95,6 +95,14 @@ artifact_feedback on the five phase 3 briefs: quality service unreachable at `ht
 - Deviations: none.
 - Agent: Composer, harness did not report turns or final context.
 
+### 3-02-device-auth-server
+
+- Built: remote `POST /v1/device/authorize` (session, JSON, Origin) issues a token and 303s to the loopback redirect with `code` and `state` only. `POST /v1/device/exchange` takes no session and no Origin, returns `endpoint` and the one-time `token`, and a second exchange is 401. Device codes persist in `registry.json`.
+- Surfaces: `tools/workflow/internal/serve/device.go`, `tools/workflow/internal/serve/registry.go`, `tools/workflow/internal/serve/serve.go`, `tools/workflow/internal/serve/serve_test.go`.
+- Commit: `e04e500`. `go test ./internal/serve/` passed, including `-run Device`.
+- Deviations: none. The registry keeps the token plaintext until exchange so a restart can still redeem the code.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
