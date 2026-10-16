@@ -180,7 +180,7 @@
 	.tile {
 		min-width: 6rem;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--border, #ddd);
+		border: 1px solid var(--border);
 		border-radius: 4px;
 		display: flex;
 		flex-direction: column;
@@ -191,7 +191,7 @@
 	}
 	.name {
 		font-size: 0.8rem;
-		color: #555;
+		color: var(--muted);
 	}
 	.spacer {
 		position: relative;
@@ -200,7 +200,7 @@
 		height: 600px;
 		margin-top: 1rem;
 		overflow-y: auto;
-		border: 1px solid var(--border, #eee);
+		border: 1px solid var(--border);
 	}
 	.row {
 		position: absolute;
@@ -212,18 +212,18 @@
 		padding: 0 0.5rem;
 		box-sizing: border-box;
 		white-space: nowrap;
-		border-bottom: 1px solid #f2f2f2;
+		border-bottom: 1px solid var(--border);
 	}
 	.t {
 		flex: 0 0 11rem;
 		font-variant-numeric: tabular-nums;
-		color: #555;
+		color: var(--muted);
 	}
 	.ev {
 		flex: 0 0 14rem;
 	}
 	.dim {
-		color: #555;
+		color: var(--muted);
 	}
 	.path {
 		max-width: 20rem;

@@ -68,14 +68,14 @@
 	td {
 		text-align: left;
 		padding: 0.35rem 0.6rem;
-		border-bottom: 1px solid var(--border, #d1d5db);
-		color: var(--text, #1a1a1a);
+		border-bottom: 1px solid var(--border);
+		color: var(--text);
 	}
 	th {
-		color: var(--muted, #6b7280);
+		color: var(--muted);
 		font-weight: 600;
 	}
 	tr.inert {
-		color: var(--muted, #6b7280);
+		color: var(--muted);
 	}
 </style>

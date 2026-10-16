@@ -114,7 +114,7 @@
 	}
 	.presets button[aria-pressed='true'] {
 		background: var(--accent);
-		color: #fff;
+		color: var(--bg);
 		border-color: var(--accent);
 	}
 	label {

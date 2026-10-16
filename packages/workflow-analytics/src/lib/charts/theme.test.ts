@@ -3,6 +3,30 @@ import { DEFAULT_TOKENS, readTokens, scheme, watchScheme } from './theme';
 
 afterEach(() => vi.unstubAllGlobals());
 
+describe('DEFAULT_TOKENS', () => {
+	it('matches the light theme contract', () => {
+		expect(DEFAULT_TOKENS).toEqual({
+			bg: '#fdf6e3',
+			surface: '#eee8d5',
+			text: '#657b83',
+			muted: '#586e75',
+			border: '#93a1a1',
+			accent: '#268bd2',
+			danger: '#dc322f',
+			series: [
+				'#268bd2',
+				'#859900',
+				'#b58900',
+				'#cb4b16',
+				'#dc322f',
+				'#d33682',
+				'#6c71c4',
+				'#2aa198'
+			]
+		});
+	});
+});
+
 describe('readTokens', () => {
 	it('falls back to defaults when a variable is empty', () => {
 		vi.stubGlobal('getComputedStyle', () => ({

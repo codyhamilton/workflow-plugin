@@ -106,7 +106,7 @@
 	td {
 		padding: 0.2rem 0.75rem;
 		text-align: right;
-		border-bottom: 1px solid var(--border, #eee);
+		border-bottom: 1px solid var(--border);
 		font-variant-numeric: tabular-nums;
 	}
 	th:first-child {

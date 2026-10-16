@@ -99,7 +99,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0 0.75rem;
-		border-bottom: 1px solid #eee;
+		border-bottom: 1px solid var(--border);
 		box-sizing: border-box;
 	}
 	.head {

@@ -106,10 +106,10 @@
 		z-index: 1;
 		font-size: 0.75rem;
 		padding: 0.15rem 0.5rem;
-		border: 1px solid var(--border, #d1d5db);
+		border: 1px solid var(--border);
 		border-radius: 4px;
-		background: var(--surface, #f5f5f5);
-		color: var(--text, #1a1a1a);
+		background: var(--surface);
+		color: var(--text);
 		cursor: pointer;
 	}
 	.grid {
@@ -121,9 +121,9 @@
 		margin: 0 0 0.25rem;
 		font-size: 0.8rem;
 		font-weight: 600;
-		color: var(--text, #1a1a1a);
+		color: var(--text);
 	}
 	.empty {
-		color: var(--muted, #6b7280);
+		color: var(--muted);
 	}
 </style>

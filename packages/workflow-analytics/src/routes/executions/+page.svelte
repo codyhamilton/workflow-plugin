@@ -187,7 +187,7 @@
 	.tile {
 		min-width: 7rem;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #ddd;
+		border: 1px solid var(--border);
 		border-radius: 4px;
 		display: flex;
 		flex-direction: column;
@@ -198,7 +198,7 @@
 	}
 	.name {
 		font-size: 0.8rem;
-		color: #555;
+		color: var(--muted);
 	}
 	.links {
 		display: flex;
@@ -214,7 +214,7 @@
 	td {
 		padding: 0.2rem 0.75rem;
 		text-align: left;
-		border-bottom: 1px solid #eee;
+		border-bottom: 1px solid var(--border);
 	}
 	td button {
 		border: none;

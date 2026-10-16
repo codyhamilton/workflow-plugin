@@ -55,6 +55,29 @@ test('the layout fits 1024x768 without a horizontal scrollbar', async ({ page })
 	expect(scroll).toBeLessThanOrEqual(inner);
 });
 
+const SERIES = [
+	'#268bd2',
+	'#859900',
+	'#b58900',
+	'#cb4b16',
+	'#dc322f',
+	'#d33682',
+	'#6c71c4',
+	'#2aa198'
+];
+
+async function readThemeVars(page: import('@playwright/test').Page) {
+	return page.evaluate((series) => {
+		const cs = getComputedStyle(document.documentElement);
+		const token = (name: string) => cs.getPropertyValue(name).trim();
+		return {
+			bg: token('--bg'),
+			text: token('--text'),
+			series: series.map((_, i) => token(`--series-${i + 1}`))
+		};
+	}, SERIES);
+}
+
 test('the dark scheme swaps the background token', async ({ page }) => {
 	await page.goto('/');
 	const light = await page.evaluate(() =>
@@ -64,6 +87,40 @@ test('the dark scheme swaps the background token', async ({ page }) => {
 	await expect
 		.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()))
 		.not.toBe(light);
+});
+
+test('system dark mode uses solarized tokens on overview and settings', async ({ page }) => {
+	await page.addInitScript(() => localStorage.removeItem('workflow-analytics-theme'));
+	await page.emulateMedia({ colorScheme: 'dark' });
+	for (const path of ['/', '/settings']) {
+		await page.goto(path);
+		await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
+		const vars = await readThemeVars(page);
+		expect(vars.text).toBe('#839496');
+		expect(vars.series).toEqual(SERIES);
+	}
+});
+
+test('choosing Light updates tokens without reload and survives reload', async ({ page }) => {
+	await page.goto('/');
+	await page.getByTestId('theme-light').click();
+	await expect
+		.poll(async () => (await readThemeVars(page)).bg)
+		.toBe('#fdf6e3');
+	expect((await readThemeVars(page)).text).toBe('#657b83');
+	await page.reload();
+	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
+	expect((await readThemeVars(page)).text).toBe('#657b83');
+});
+
+test('system mode follows a later OS colour-scheme change', async ({ page }) => {
+	await page.addInitScript(() => localStorage.removeItem('workflow-analytics-theme'));
+	await page.emulateMedia({ colorScheme: 'light' });
+	await page.goto('/');
+	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
+	await page.getByTestId('theme-system').click();
+	await page.emulateMedia({ colorScheme: 'dark' });
+	await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
 });
 
 test('a burst of preset clicks reaches the facets endpoint at most twice', async ({ page }) => {

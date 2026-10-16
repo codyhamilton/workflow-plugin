@@ -203,7 +203,7 @@
 	.tile {
 		min-width: 0;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #ddd;
+		border: 1px solid var(--border);
 		border-radius: 4px;
 		display: flex;
 		flex-direction: column;
@@ -215,11 +215,11 @@
 	}
 	.name {
 		font-size: 0.8rem;
-		color: #555;
+		color: var(--muted);
 	}
 	.sub {
 		font-size: 0.75rem;
-		color: #777;
+		color: var(--muted);
 	}
 	.group {
 		margin-top: 1.25rem;

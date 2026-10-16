@@ -112,7 +112,8 @@
 	}
 	.cap {
 		padding: 0.5rem 0.75rem;
-		background: #fff4d6;
-		border: 1px solid #e0b84a;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		color: var(--text);
 	}
 </style>

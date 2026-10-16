@@ -63,10 +63,10 @@
 		z-index: 1;
 		font-size: 0.75rem;
 		padding: 0.15rem 0.5rem;
-		border: 1px solid var(--border, #d1d5db);
+		border: 1px solid var(--border);
 		border-radius: 4px;
-		background: var(--surface, #f5f5f5);
-		color: var(--text, #1a1a1a);
+		background: var(--surface);
+		color: var(--text);
 		cursor: pointer;
 	}
 </style>
