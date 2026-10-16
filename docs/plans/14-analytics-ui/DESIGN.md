@@ -131,6 +131,13 @@ One unit. Execute briefs it inline. The change is the same token replacement in 
 
 ### Phase 2 — Distribution, score series, and run aggregates
 
+- Units:
+  - **2-01-distribution-read** — `briefs/2-01-distribution-read.md`. Depends on: nothing. Runs alongside: 2-05-conversation-window.
+  - **2-02-score-series-read** — `briefs/2-02-score-series-read.md`. Depends on: 2-01-distribution-read. Runs alongside: nothing.
+  - **2-03-executions-shape-series** — `briefs/2-03-executions-shape-series.md`. Depends on: 2-02-score-series-read. Runs alongside: nothing.
+  - **2-04-conversations-usage-fields** — `briefs/2-04-conversations-usage-fields.md`. Depends on: 2-03-executions-shape-series. Runs alongside: nothing.
+  - **2-05-conversation-window** — `briefs/2-05-conversation-window.md`. Depends on: nothing. Runs alongside: 2-01-distribution-read (coordinate `analytics_bench_test.go` if both touch it in one wave).
+  - **2-06-analytics-site-reads-doc** — `briefs/2-06-analytics-site-reads-doc.md`. Depends on: 2-01 through 2-05. Runs alongside: nothing.
 - Outcome:
   - `TestAnalyticsBenchSmoke` returns 200 for `GET /v1/analytics/distribution`, `GET /v1/analytics/score-series`, `GET /v1/analytics/executions` with `shape` and `bucket`, `GET /v1/analytics/conversations`, and `GET /v1/analytics/conversation` with `from` and `to`, on the synthetic fixture.
   - A distribution fixture shows a cost row whose `n` excludes an unpriced call, whose `unpriced` counts it, and whose bins and percentiles ignore it; a token row whose `unpriced` is 0; two models sharing the fixed cost edges; a dropped key setting `truncated` with no `__other__` row.
