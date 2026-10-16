@@ -50,12 +50,19 @@ harness waits for an MCP server, so every harness's `SessionStart` hook also run
 There is no install command. Local setup varies too much by system (systemd, launchd, a terminal)
 for the plugin to presume one, and local mode needs no generated state:
 
-- `workflow serve` with no `WORKFLOW_SERVE_KEYS` runs keyless on `127.0.0.1:8770` and stores under
-  tenant `local`. How it is kept running is the user's choice.
+- On loopback, `workflow serve` runs keyless on `127.0.0.1:8770` and stores under tenant `local`,
+  whether or not the GitHub OAuth env vars are set (they are ignored). Setting `WORKFLOW_SERVE_KEYS`
+  to anything but empty makes the process exit before it listens. How loopback serve is kept running
+  is the user's choice.
 - With no `~/.config/workflow/client.toml`, the drain and the shim use `http://127.0.0.1:8770`
   with no key.
-- Remote mode is opted into with `workflow login` (not built yet), which ensures a tenant and key
-  exist and writes `client.toml`.
+- A non-loopback bind with `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, and
+  `WORKFLOW_PUBLIC_URL` set is a remote collector. `WORKFLOW_SERVE_KEYS` is not a credential there:
+  any non-empty value makes the process exit before it listens, on loopback or not. The collector
+  serves the embedded analytics site with GitHub login (`/login`, `GET /oauth/login`) and a
+  `workflow_session` cookie for same-origin dashboard reads. Clients and agents use issued bearer
+  tokens (not the session cookie). `workflow login`, which opens the collector and writes
+  `client.toml`, is a later phase; until then configure `endpoint` and `key` by hand or env.
 
 With no `serve` running and no remote configured, the drain finds the endpoint unreachable and the
 queue grows; `workflow status` reports it as a failure, not as idle.

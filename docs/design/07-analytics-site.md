@@ -10,8 +10,12 @@ serve`, and a static Svelte site that renders them. Part of
 
 `packages/workflow-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
 CSS, JS; no SSR). Locally, `workflow serve` embeds that build and serves it on the same origin as
-`/v1`. Remotely, the same build is a Cloudflare Pages site that calls a keyed `workflow serve` with a
-browser-supplied bearer token. Aggregation stays in SQLite; the browser receives JSON aggregates and
+`/v1`. On a remote collector (non-loopback bind with the GitHub OAuth env set), the same embedded
+build is same-origin with `/v1`: the person signs in at `/login` (`GET /oauth/login` → GitHub →
+`/oauth/callback`), the collector sets a `workflow_session` cookie, and dashboard `GET`s use
+`credentials: 'include'` with no `Authorization` header. `GET /v1/me` supplies the GitHub identity and
+owned tenant list; data routes carry `?tenant=` from that response. Cross-origin Cloudflare Pages
+still calls a keyed `workflow serve` with a browser-supplied bearer token from `/settings`. Aggregation stays in SQLite; the browser receives JSON aggregates and
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
 
@@ -30,13 +34,15 @@ change what the agent does in a run (principle 2).
 | `/builder` | Chart builder | any measure, up to two dimensions and a bucket |
 | `/dashboards` | Dashboards | ordered grids of saved views |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
+| `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
-Every report except `/settings` shares one filter set held in the page URL: window, `repo_id`,
-`harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`, `conversation_id`. The
-URL is the view: filters, window, active view and every chart configuration (measure, dimensions,
-bucket, chart type, top) serialise into the query string, so pasting it reproduces the view, and
-filters survive navigation between views. There is no server-side saved-view store (the ledger has no
-user identity to own one).
+Every report except `/settings` and `/login` shares one filter set held in the page URL: window,
+`repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`,
+`conversation_id`. The URL is the view: filters, window, active view and every chart configuration
+(measure, dimensions, bucket, chart type, top) serialise into the query string, so pasting it
+reproduces the view, and filters survive navigation between views. Saved views and dashboards stay in
+`localStorage`; the collector knows the signed-in GitHub user via the session, not via a server-side
+view store.
 
 What the request's words mean on the ledger: an **agent** is a `conversation_id`; a **hook** is a
 `hook_event` split by `event` and `payload.tool_name` (no cross-harness tool taxonomy); **build /
@@ -47,8 +53,10 @@ type** is the artifact kind plus its check distributions.
 ## Analytics reads
 
 Additive `/v1` routes. Every analytics `GET` resolves the tenant exactly as `GET /v1/artifacts`
-does: local mode maps to tenant `local` and ignores any token; keyed mode requires `Authorization:
-Bearer <key>`. `GET /v1/health` stays unauthenticated and is not an analytics route. Unknown routes
+does: local mode maps to tenant `local` and ignores any token and any session; remote collector mode
+accepts either `Authorization: Bearer` (issued token) or a `workflow_session` cookie with `?tenant=`
+for a tenant the session owns; a cross-origin Pages client sends only the pasted bearer from
+`/settings`. `GET /v1/health` stays unauthenticated and is not an analytics route. Unknown routes
 under `/v1/` are JSON 404; errors are `{"error":"<text>"}`. The routes read only the ledger's columns: no payload bodies (the ledger holds none, design 1), no
 artifact text and no search snippets. Model, token and cost fields are served as aggregates and as
 per-call rows in the conversation timeline.
@@ -220,15 +228,21 @@ on a compacted copy of the real ledger.
   `localGuard` (loopback `Host`, JSON-only POST) runs first.
 - Keyed mode: the same headers only for an origin listed exactly in `WORKFLOW_SERVE_CORS_ORIGINS`
   ([design 3](03-remote-service.md#configuration-first-round)). No wildcard, no reflected origin.
-- No cookies and no `Access-Control-Allow-Credentials`. The site sends `Authorization` only when a
-  token is configured.
+- Collector mode: the session cookie is same-origin only; CORS stays without credentials. The embedded
+  site sends no `Authorization` header and does not read `workflow-analytics-key` from
+  `localStorage`. Pages sends `Authorization` only when a token is configured in `/settings`.
 
 ## The site
 
+- On the collector, an unauthenticated analytics `GET` is 401 and the layout sends the browser to
+  `/login`. After GitHub admission, the cookie backs same-origin reads; a 403 `no such tenant` means
+  the session owns no matching `?tenant=` yet (not a logged-out 401). `POST /logout` clears the
+  session.
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
-  `workflow-analytics-base` and `workflow-analytics-key`. An empty base means same-origin `/v1`. The
-  token is sent only as `Authorization: Bearer` and never written into the build or the repo; the
-  build's bundle check fails if a key appears in it.
+  `workflow-analytics-base` and `workflow-analytics-key`. An empty base means same-origin `/v1`
+  (collector session path). A non-empty base is the cross-origin Pages path: the token is sent only
+  as `Authorization: Bearer` and never written into the build or the repo; the build's bundle check
+  fails if a key appears in it.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
