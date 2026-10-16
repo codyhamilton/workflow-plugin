@@ -51,3 +51,11 @@ Refined in `1773214` into six units. Refine agent `d742ac97-355e-4334-8c57-c8076
 - Deviations: none.
 - Agent: Composer, agent `fb7bdfd1-c41d-466a-aa61-912a7a547d43`. The harness did not report turn count or final context size. Status `done`.
 - Check: `go test ./internal/store/ -run TestConversation -count=1` and `go test ./internal/serve/ -run TestConversation -count=1` from `tools/workflow`, both ok.
+
+### 2-02-score-series-read
+
+- Built: `GET /v1/analytics/score-series`. A bucket uses the latest score of a content hash inside that bucket. A bucket with no scores is omitted.
+- Surfaces: `tools/workflow/internal/store/score_series.go`, `score_series_test.go`; `tools/workflow/internal/serve/analytics_score_series.go`, `analytics_score_series_test.go`, `serve.go`, `analytics_bench_test.go`. Commit `5d340d9`.
+- Deviations: none.
+- Agent: Composer, agent `181d15dd-ad7a-4dd1-88ff-50483e632968`. The harness did not report turn count or final context size. Status `done`.
+- Check: `go test ./internal/store/ -run TestScoreSeries -count=1` and `go test ./internal/serve/ -run 'TestScoreSeries|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
