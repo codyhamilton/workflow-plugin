@@ -62,6 +62,24 @@ That supersedes the automatic token. `workflow login` still opens the website an
 - Keep the loopback one-time code: the browser comes back with a code, the command exchanges it, writes `client.toml`, and does not print or log the token.
 - The device page is where tenant, grant, and lifetime are chosen. Phase 3's outcome includes `workflow login`. Phase 1 stays the GitHub session.
 
+### Turn 5
+
+**User responded:** Apply the adversarial findings. Keep the device page (tenant, grant, lifetime; no silent defaults). Do not add a fifth phase.
+
+**Agent decisions:**
+
+- These came from the adversarial pass and were applied. The pass had read the store copy from before the device page; findings that only said to add `workflow login` were already in the contract and stayed.
+- The HTTP 401 points at the login page, not at the command. `workflow init` stays out.
+- A dashboard login lands on `/`. A device login returns to the device page. Zero tenants means the user types a name. There is no server-side lifetime default. Abandoning the page writes nothing.
+- The handoff is a loopback one-time code plus `state`. The exchange is not under the collector `Origin` rule. Plaintext goes only to the CLI. The redirect is only that loopback URI. The code is not a data credential. Login does not revoke the previous token. A `read` token in `client.toml` makes ingest 403, and `workflow mcp` still reads.
+- Collector-origin data calls are cookie-only, with `?tenant=` from `GET /v1/me`. The site does not send a stored bearer. Pages still pastes a bearer.
+- Phase 1: unauthenticated and session-only `POST /v1/ingest` store nothing. The admin can log in when the allow list omits `ctzns.net`. A session the policy would now deny is cleared.
+- `GET /v1/tokens` is the owner's list. `GET /v1/admin/tokens` is every token. Phase 2 shows admin revoke without a restart, and a policy change leaves an existing token valid. A `wk_` token is scrubbed before it is stored.
+- Remote mode still honors `WORKFLOW_SERVE_CORS_ORIGINS`. Credentialed CORS stays off.
+- Exactly one of `WORKFLOW_ENDPOINT` or `WORKFLOW_KEY` fails before any request.
+- The session stores the GitHub login, so `GET /v1/me` may return `github_login`.
+- Loopback is always local mode and ignores the OAuth env.
+
 ## Agent Decisions
 
 - **Admin lockout**: the verified admin email can log in even when the allow list does not include `ctzns.net`. Rationale: otherwise the only person who can edit the policy can remove themselves.
