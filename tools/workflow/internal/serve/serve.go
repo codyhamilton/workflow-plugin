@@ -32,6 +32,9 @@ var tenantRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
 type Config struct {
 	Addr, Data string
 	Keys       []KeyPair
+	PublicURL  string
+	GitHubOAuthClientID     string
+	GitHubOAuthClientSecret string
 	// CORSOrigins are the exact origins allowed to read a keyed server from a browser. Local mode
 	// ignores it and allows loopback origins.
 	CORSOrigins []string
@@ -43,12 +46,33 @@ type KeyPair struct{ Tenant, Key string }
 // LocalTenant is the one tenant of local mode.
 const LocalTenant = "local"
 
-// Local reports local mode: no keys, every request is LocalTenant, and the bind is loopback.
-func (c Config) Local() bool { return len(c.Keys) == 0 }
+// Local reports local mode: loopback bind (OAuth env ignored) or keyless non-remote config. Every
+// local request is LocalTenant and bearer tokens are ignored.
+func (c Config) Local() bool {
+	if c.Addr != "" && loopbackBind(c.Addr) {
+		return true
+	}
+	if len(c.Keys) > 0 {
+		return false
+	}
+	return !c.Remote()
+}
 
-// ConfigFromEnv reads WORKFLOW_SERVE_ADDR, WORKFLOW_SERVE_DATA and WORKFLOW_SERVE_KEYS. With no
-// keys the service runs in local mode and refuses any bind that is not loopback.
+// Remote reports collector mode: non-loopback bind with GitHub OAuth env configured.
+func (c Config) Remote() bool {
+	if c.Addr == "" || loopbackBind(c.Addr) {
+		return false
+	}
+	return c.GitHubOAuthClientID != "" && c.GitHubOAuthClientSecret != "" && c.PublicURL != ""
+}
+
+// ConfigFromEnv reads serve configuration from the environment. Loopback binds are always local
+// mode. A non-loopback bind requires GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_CLIENT_SECRET, and
+// WORKFLOW_PUBLIC_URL. WORKFLOW_SERVE_KEYS must be empty.
 func ConfigFromEnv(getenv func(string) string) (Config, error) {
+	if strings.TrimSpace(getenv("WORKFLOW_SERVE_KEYS")) != "" {
+		return Config{}, fmt.Errorf("WORKFLOW_SERVE_KEYS is set; keyed startup via environment is no longer supported")
+	}
 	c := Config{Addr: getenv("WORKFLOW_SERVE_ADDR"), Data: getenv("WORKFLOW_SERVE_DATA")}
 	if c.Addr == "" {
 		c.Addr = "127.0.0.1:8770"
@@ -65,12 +89,39 @@ func ConfigFromEnv(getenv func(string) string) (Config, error) {
 			c.CORSOrigins = append(c.CORSOrigins, o)
 		}
 	}
-	ks, err := ParseKeys(getenv("WORKFLOW_SERVE_KEYS"))
-	c.Keys = ks
-	if err == nil && c.Local() && !loopbackBind(c.Addr) {
-		err = fmt.Errorf("WORKFLOW_SERVE_KEYS is empty, so WORKFLOW_SERVE_ADDR must be loopback (it is %q)", c.Addr)
+	if loopbackBind(c.Addr) {
+		return c, nil
 	}
-	return c, err
+	id := strings.TrimSpace(getenv("GITHUB_OAUTH_CLIENT_ID"))
+	secret := strings.TrimSpace(getenv("GITHUB_OAUTH_CLIENT_SECRET"))
+	pub := strings.TrimSpace(getenv("WORKFLOW_PUBLIC_URL"))
+	if id == "" || secret == "" || pub == "" {
+		return c, fmt.Errorf("non-loopback WORKFLOW_SERVE_ADDR requires GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_CLIENT_SECRET, and WORKFLOW_PUBLIC_URL")
+	}
+	if err := validatePublicURL(pub); err != nil {
+		return c, err
+	}
+	c.GitHubOAuthClientID = id
+	c.GitHubOAuthClientSecret = secret
+	c.PublicURL = pub
+	return c, nil
+}
+
+func validatePublicURL(raw string) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL: %w", err)
+	}
+	if u.Scheme != "https" || u.Host == "" {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL must be an https origin with no path (got %q)", raw)
+	}
+	if u.Path != "" && u.Path != "/" {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL must be an https origin with no path (got %q)", raw)
+	}
+	if u.RawQuery != "" || u.Fragment != "" {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL must be an https origin with no path (got %q)", raw)
+	}
+	return nil
 }
 
 // loopbackBind reports whether addr binds only a loopback interface.
@@ -181,9 +232,10 @@ type hashFailure struct {
 
 // Server is the HTTP service.
 type Server struct {
-	cfg    Config
-	opts   Options
-	screen ScreenFunc
+	cfg      Config
+	opts     Options
+	screen   ScreenFunc
+	registry *Registry
 
 	mu      sync.Mutex
 	tenants map[string]*tenantState
@@ -205,10 +257,19 @@ func New(cfg Config, opts Options) *Server {
 	if opts.Version == "" {
 		opts.Version = "dev"
 	}
-	s := &Server{cfg: cfg, opts: opts, tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
+	reg, err := OpenRegistry(cfg.Data)
+	if err != nil {
+		panic("serve: registry: " + err.Error())
+	}
+	s := &Server{cfg: cfg, opts: opts, registry: reg, tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	if s.screen == nil {
 		s.screen = unscreened
+	}
+	if cfg.Remote() {
+		if err := reg.Persist(); err != nil {
+			panic("serve: registry: " + err.Error())
+		}
 	}
 	return s
 }
@@ -406,6 +467,11 @@ func (s *Server) Close() error {
 	var first error
 	for _, ts := range s.tenants {
 		if err := ts.t.Close(); err != nil && first == nil {
+			first = err
+		}
+	}
+	if s.registry != nil {
+		if err := s.registry.Close(); err != nil && first == nil {
 			first = err
 		}
 	}

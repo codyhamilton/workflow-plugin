@@ -150,19 +150,82 @@ func TestParseKeys(t *testing.T) {
 
 func TestLocalModeConfig(t *testing.T) {
 	env := func(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
+	oauth := map[string]string{
+		"GITHUB_OAUTH_CLIENT_ID": "id", "GITHUB_OAUTH_CLIENT_SECRET": "sec", "WORKFLOW_PUBLIC_URL": "https://collector.example",
+	}
 	for _, addr := range []string{"", "127.0.0.1:0", "localhost:8770", "[::1]:8770", "127.0.0.2:1"} {
-		c, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"}))
-		if err != nil || !c.Local() {
-			t.Errorf("%q: %v", addr, err)
+		m := map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"}
+		for k, v := range oauth {
+			m[k] = v
+		}
+		c, err := ConfigFromEnv(env(m))
+		if err != nil || !c.Local() || c.Remote() {
+			t.Errorf("%q: local=%v remote=%v err=%v", addr, c.Local(), c.Remote(), err)
 		}
 	}
 	for _, addr := range []string{"0.0.0.0:8770", ":8770", "[::]:8770", "192.168.1.5:8770", "example.com:80"} {
 		if _, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"})); err == nil {
-			t.Errorf("%q: keyless non-loopback bind accepted", addr)
+			t.Errorf("%q: non-loopback bind without OAuth accepted", addr)
 		}
 	}
-	if c, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": "0.0.0.0:8770", "WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka"})); err != nil || c.Local() {
-		t.Fatal("keyed wildcard bind refused", err)
+	if _, err := ConfigFromEnv(env(map[string]string{
+		"WORKFLOW_SERVE_ADDR": "0.0.0.0:8770", "WORKFLOW_SERVE_DATA": "/d",
+		"GITHUB_OAUTH_CLIENT_ID": "id", "GITHUB_OAUTH_CLIENT_SECRET": "sec", "WORKFLOW_PUBLIC_URL": "https://collector.example",
+	})); err != nil {
+		t.Fatal("remote bind with OAuth:", err)
+	}
+	if _, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": "127.0.0.1:0", "WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka"})); err == nil || !strings.Contains(err.Error(), "WORKFLOW_SERVE_KEYS") {
+		t.Fatal("WORKFLOW_SERVE_KEYS must refuse:", err)
+	}
+}
+
+func TestRemoteConfig(t *testing.T) {
+	env := func(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
+	c, err := ConfigFromEnv(env(map[string]string{
+		"WORKFLOW_SERVE_ADDR": "0.0.0.0:8770", "WORKFLOW_SERVE_DATA": "/d",
+		"GITHUB_OAUTH_CLIENT_ID": "cid", "GITHUB_OAUTH_CLIENT_SECRET": "csec", "WORKFLOW_PUBLIC_URL": "https://wf.example",
+	}))
+	if err != nil || !c.Remote() || c.Local() {
+		t.Fatalf("remote: local=%v remote=%v err=%v", c.Local(), c.Remote(), err)
+	}
+	if c.PublicURL != "https://wf.example" || c.GitHubOAuthClientID != "cid" {
+		t.Fatal(c)
+	}
+}
+
+func TestRegistry(t *testing.T) {
+	dir := t.TempDir()
+	cfg := Config{
+		Addr:                    "0.0.0.0:8770",
+		Data:                    dir,
+		PublicURL:               "https://collector.example",
+		GitHubOAuthClientID:     "id",
+		GitHubOAuthClientSecret: "sec",
+	}
+	if !cfg.Remote() {
+		t.Fatal("expected remote config")
+	}
+	s := New(cfg, Options{DisableWorker: true})
+	t.Cleanup(func() { s.Close() })
+	path := filepath.Join(dir, registryFileName)
+	if _, err := os.Stat(path); err != nil {
+		t.Fatal("registry file:", err)
+	}
+	if p := s.registry.Policy(); p.Mode != PolicyEveryone {
+		t.Fatal(p)
+	}
+	exp := time.Now().Add(24 * time.Hour).UTC()
+	s.registry.PutSession("sess1", SessionRecord{GitHubID: 1, GitHubLogin: "u", VerifiedEmails: []string{"u@example.com"}, ExpiresAt: exp})
+	if rec, ok := s.registry.GetSession("sess1", time.Now()); !ok || rec.GitHubLogin != "u" {
+		t.Fatal(rec, ok)
+	}
+	if err := s.registry.SetPolicy(DomainPolicy{Mode: PolicyAllowList, Domains: []string{"example.com"}}); err != nil {
+		t.Fatal(err)
+	}
+	s.Close()
+	b, _ := os.ReadFile(path)
+	if !strings.Contains(string(b), "allow_list") {
+		t.Fatal(string(b))
 	}
 }
 
@@ -366,7 +429,7 @@ func TestCORSKeyedMode(t *testing.T) {
 }
 
 func TestCORSConfig(t *testing.T) {
-	env := map[string]string{"WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka", "WORKFLOW_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
+	env := map[string]string{"WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_ADDR": "127.0.0.1:8770", "WORKFLOW_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
 	c, err := ConfigFromEnv(func(k string) string { return env[k] })
 	if err != nil || len(c.CORSOrigins) != 2 || c.CORSOrigins[0] != "https://a.example" || c.CORSOrigins[1] != "https://b.example" {
 		t.Fatal(c.CORSOrigins, err)
