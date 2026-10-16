@@ -81,10 +81,13 @@ type ExecRow struct {
 	TS                                                      float64
 }
 type ConvRow struct {
-	ConversationID, Harness               string
+	ConversationID, Harness, Model        string
 	Repos, Kinds                          []string
 	FirstTS, LastTS                       float64
 	HookEvents, ArtifactVersions, Commits int
+	ModelCalls, UnpricedCalls             int
+	TokensIn, TokensOut                   int
+	CostUSD                               float64
 }
 
 // ExecCursor is the keyset position in the executions order (ts desc, conversation_id, path, repo_id).
@@ -758,6 +761,9 @@ func (t *Tenant) Conversations(ctx context.Context, f AnalyticsFilter) ([]ConvRo
 		}
 		return out[i].ConversationID < out[j].ConversationID
 	})
+	if err := t.fillConvUsage(ctx, f, out); err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
@@ -806,6 +812,9 @@ func (t *Tenant) ConversationsPage(ctx context.Context, f AnalyticsFilter, cur *
 		out = out[:limit]
 	}
 	if err := t.fillHarness(ctx, w, args, out); err != nil {
+		return nil, false, err
+	}
+	if err := t.fillConvUsage(ctx, f, out); err != nil {
 		return nil, false, err
 	}
 	return out, more, nil
@@ -863,6 +872,61 @@ func (t *Tenant) fillHarness(ctx context.Context, w string, wargs []any, out []C
 			}
 		}
 		out[i].Harness = best
+	}
+	return nil
+}
+
+// fillConvUsage sets each row's in-window kept-call usage totals and dominant model, using one
+// usageKeptRows fetch scoped to the page's conversation ids.
+func (t *Tenant) fillConvUsage(ctx context.Context, f AnalyticsFilter, out []ConvRow) error {
+	if len(out) == 0 {
+		return nil
+	}
+	ff := f
+	ff.ConversationIDs = make([]string, len(out))
+	for i := range out {
+		ff.ConversationIDs[i] = out[i].ConversationID
+	}
+	kept, err := t.usageKeptRows(ctx, ff)
+	if err != nil {
+		return err
+	}
+	type acc struct {
+		modelCalls, unpriced              int
+		tokensIn, tokensOut               int64
+		cost                              float64
+		models                            map[string]int
+	}
+	m := map[string]*acc{}
+	for _, r := range kept {
+		a := m[r.convID]
+		if a == nil {
+			a = &acc{models: map[string]int{}}
+			m[r.convID] = a
+		}
+		a.modelCalls++
+		a.tokensIn += r.tokIn
+		a.tokensOut += r.tokOut
+		usd, priced := Cost(r.harness, r.model, r.tokens(), r.costReported)
+		a.cost += usd
+		if !priced {
+			a.unpriced++
+		}
+		if r.model != "" {
+			a.models[r.model]++
+		}
+	}
+	for i := range out {
+		a := m[out[i].ConversationID]
+		if a == nil {
+			continue
+		}
+		out[i].Model = dominantModel(a.models)
+		out[i].ModelCalls = a.modelCalls
+		out[i].UnpricedCalls = a.unpriced
+		out[i].CostUSD = roundCost(a.cost)
+		out[i].TokensIn = int(a.tokensIn)
+		out[i].TokensOut = int(a.tokensOut)
 	}
 	return nil
 }

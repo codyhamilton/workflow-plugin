@@ -504,6 +504,33 @@ func TestAnalyticsConversations(t *testing.T) {
 			t.Errorf("row %d\n got %+v\nwant %+v", i, got[i], want[i])
 		}
 	}
+	// Usage on c1: two alpha calls, one beta; dominant model alpha (ties to smaller name).
+	ts := ad(10, 1, 9, 0)
+	usageRows := []FactRow{
+		ufact(101, "codex", "alpha", "c1", `{"n":101}`, ts, 100, 10, 0, 0, 0, nil),
+		ufact(102, "codex", "alpha", "c1", `{"n":102}`, ts, 50, 5, 0, 0, 0, nil),
+		ufact(103, "codex", "beta", "c1", `{"n":103}`, ts, 0, 20, 0, 0, 0, nil),
+	}
+	if _, err := tn.Append(context.Background(), usageRows); err != nil {
+		t.Fatal(err)
+	}
+	got2, _, err := tn.ConversationsPage(context.Background(), f, nil, 20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var c1 *ConvRow
+	for i := range got2 {
+		if got2[i].ConversationID == "c1" {
+			c1 = &got2[i]
+			break
+		}
+	}
+	if c1 == nil {
+		t.Fatal("c1 missing")
+	}
+	if c1.Model != "alpha" || c1.ModelCalls != 3 || c1.TokensIn != 150 || c1.TokensOut != 35 {
+		t.Fatalf("c1 usage: %+v", *c1)
+	}
 }
 
 func TestAnalyticsFacets(t *testing.T) {

@@ -472,6 +472,7 @@ func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, 
 	type row struct {
 		ConversationID   string   `json:"conversation_id"`
 		Harness          string   `json:"harness"`
+		Model            string   `json:"model"`
 		Repos            []string `json:"repos"`
 		FirstTS          string   `json:"first_ts"`
 		LastTS           string   `json:"last_ts"`
@@ -479,11 +480,17 @@ func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, 
 		ArtifactVersions int      `json:"artifact_versions"`
 		Commits          int      `json:"commits"`
 		Kinds            []string `json:"kinds"`
+		ModelCalls       int      `json:"model_calls"`
+		UnpricedCalls    int      `json:"unpriced_calls"`
+		CostUSD          float64  `json:"cost_usd"`
+		TokensIn         int      `json:"tokens_in"`
+		TokensOut        int      `json:"tokens_out"`
 	}
 	out := []row{}
 	for _, x := range rows {
-		out = append(out, row{x.ConversationID, x.Harness, nz(x.Repos), rfc(x.FirstTS), rfc(x.LastTS),
-			x.HookEvents, x.ArtifactVersions, x.Commits, nz(x.Kinds)})
+		out = append(out, row{x.ConversationID, x.Harness, x.Model, nz(x.Repos), rfc(x.FirstTS), rfc(x.LastTS),
+			x.HookEvents, x.ArtifactVersions, x.Commits, nz(x.Kinds),
+			x.ModelCalls, x.UnpricedCalls, x.CostUSD, x.TokensIn, x.TokensOut})
 	}
 	resp := map[string]any{"rows": out}
 	if more {

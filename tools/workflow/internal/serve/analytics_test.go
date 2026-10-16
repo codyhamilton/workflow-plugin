@@ -440,10 +440,16 @@ func TestAnalyticsOutcome(t *testing.T) {
 		if !reflect.DeepEqual(ids, []string{"c4", "c3", "c2", "c1"}) {
 			t.Fatalf("order %v", ids)
 		}
-		want := fx{"conversation_id": "c1", "harness": "claude", "repos": []any{"r1"}, "first_ts": rfc(at(1, 10, 0)), "last_ts": rfc(at(3, 12, 0)),
-			"hook_events": 3.0, "artifact_versions": 3.0, "commits": 1.0, "kinds": []any{"brief", "design"}}
+		want := fx{"conversation_id": "c1", "harness": "claude", "model": "", "repos": []any{"r1"}, "first_ts": rfc(at(1, 10, 0)), "last_ts": rfc(at(3, 12, 0)),
+			"hook_events": 3.0, "artifact_versions": 3.0, "commits": 1.0, "kinds": []any{"brief", "design"},
+			"model_calls": 0.0, "unpriced_calls": 0.0, "cost_usd": 0.0, "tokens_in": 0.0, "tokens_out": 0.0}
 		if !reflect.DeepEqual(rows[3], want) {
 			t.Errorf("c1 %v want %v", rows[3], want)
+		}
+		for _, k := range []string{"model", "model_calls", "unpriced_calls", "cost_usd", "tokens_in", "tokens_out"} {
+			if _, ok := rows[0][k]; !ok {
+				t.Errorf("row missing %q", k)
+			}
 		}
 		if !reflect.DeepEqual(rows[0]["kinds"], []any{}) {
 			t.Errorf("c4 kinds %v", rows[0]["kinds"])
