@@ -45,6 +45,14 @@ artifact_feedback on the four phase 2 briefs: quality service unreachable at `ht
 - Deviations: the e2e bearer is written into `registry.json` before serve starts, not issued through OAuth and `POST /v1/tokens`. Other analytics routes still omit `tenant`.
 - Agent: Composer, harness did not report turns or final context.
 
+### 2-04-design-docs-remote-tokens
+
+- Built: `docs/design/03-remote-service.md` describes issued `wk_` tokens, GitHub session login, and a non-empty `WORKFLOW_SERVE_KEYS` refusing startup. It no longer says registration, key issue, or rotation are out of scope.
+- Surfaces: `docs/design/03-remote-service.md`.
+- Commit: `bf25bde`. A search of that file finds no `out of scope` and no `tenant=key` credential line. It names `wk_` and GitHub.
+- Deviations: none.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
