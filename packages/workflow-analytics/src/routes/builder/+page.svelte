@@ -91,6 +91,9 @@
 	);
 	const buckets = $derived(schema ? allowedBuckets(schema) : []);
 	const charts = $derived(config ? allowedCharts(config.dims.length, config.bucket) : []);
+	const measureUnit = $derived(
+		schema && config ? schema.measures.find((m) => m.name === config.measure)?.unit : undefined
+	);
 
 	$effect(() => {
 		if (!schema || !config) return;
@@ -284,6 +287,7 @@
 		testid="builder-chart"
 		{config}
 		resp={data}
+		unit={measureUnit}
 		onpick={onpick}
 		onbrush={({ from, to }) => view.setWindow(from, to)}
 	/>

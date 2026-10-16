@@ -22,8 +22,8 @@ const schema: Schema = {
 };
 
 describe('allowedCharts', () => {
-	it('dims 0: a single number without a bucket, line/area/bar with one', () => {
-		expect(allowedCharts(0, 'none')).toEqual([]);
+	it('dims 0: scalar without a bucket, line/area/bar with one', () => {
+		expect(allowedCharts(0, 'none')).toEqual(['scalar']);
 		expect(allowedCharts(0, 'day')).toEqual(['line', 'area', 'bar']);
 	});
 
@@ -77,7 +77,7 @@ describe('parseConfig', () => {
 			['c', 'line']
 		]);
 		expect(parseConfig(q, schema).chart).toBe('heatmap');
-		expect(parseConfig(new URLSearchParams(), schema).chart).toBe('line');
+		expect(parseConfig(new URLSearchParams(), schema).chart).toBe('scalar');
 	});
 
 	it('clamps top to [1,100], defaulting to 20 when absent or NaN', () => {

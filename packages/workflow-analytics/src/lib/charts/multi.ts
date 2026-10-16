@@ -221,6 +221,8 @@ export function heatmapProps(resp: QueryResponse): {
 	cells: { x: number; y: number; v: number }[];
 	xLabels: string[];
 	yLabels: string[];
+	xKeys: string[];
+	yKeys: string[];
 } {
 	const dims = resp.dims ?? [];
 	const rows = resp.rows ?? [];
@@ -240,7 +242,9 @@ export function heatmapProps(resp: QueryResponse): {
 	return {
 		cells,
 		xLabels: xKeys.map((k) => labelFor(xDim ?? '', k)),
-		yLabels: yKeys.map((k) => labelFor(yDim ?? '', k))
+		yLabels: yKeys.map((k) => labelFor(yDim ?? '', k)),
+		xKeys,
+		yKeys
 	};
 }
 

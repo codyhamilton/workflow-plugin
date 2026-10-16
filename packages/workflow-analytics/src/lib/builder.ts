@@ -4,7 +4,7 @@ import { pickBucket } from './buckets';
 import type { Window } from './params';
 import type { Schema } from './types';
 
-export type ChartKind = 'line' | 'area' | 'bar' | 'stackedbar' | 'heatmap' | 'treemap' | 'multiples';
+export type ChartKind = 'line' | 'area' | 'bar' | 'stackedbar' | 'heatmap' | 'treemap' | 'multiples' | 'scalar';
 export type Bucket = 'none' | 'hour' | 'day' | 'week' | 'month';
 
 export interface BuilderConfig {
@@ -16,7 +16,7 @@ export interface BuilderConfig {
 }
 
 const BUCKETS: Bucket[] = ['none', 'hour', 'day', 'week', 'month'];
-const CHART_KINDS: ChartKind[] = ['line', 'area', 'bar', 'stackedbar', 'heatmap', 'treemap', 'multiples'];
+const CHART_KINDS: ChartKind[] = ['line', 'area', 'bar', 'stackedbar', 'heatmap', 'treemap', 'multiples', 'scalar'];
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function isBucket(v: string): v is Bucket {
@@ -29,7 +29,7 @@ function isChartKind(v: string): v is ChartKind {
 
 /** The chart kinds that fit a dimension count and bucket. */
 export function allowedCharts(dims: number, bucket: Bucket): ChartKind[] {
-	if (dims === 0) return bucket === 'none' ? [] : ['line', 'area', 'bar'];
+	if (dims === 0) return bucket === 'none' ? ['scalar'] : ['line', 'area', 'bar'];
 	if (dims === 1) return bucket === 'none' ? ['bar', 'treemap'] : ['line', 'area', 'bar', 'stackedbar', 'heatmap'];
 	if (dims === 2)
 		return bucket === 'none' ? ['heatmap', 'treemap', 'bar', 'stackedbar'] : ['multiples', 'line', 'area'];

@@ -3,17 +3,28 @@
 	import EChart from './EChart.svelte';
 	import { heatmapOption, type HeatCell } from './options';
 	import type { Tokens } from './theme';
+	import { DIM_KEYS } from '$lib/urlstate';
 
 	let {
 		testid,
 		cells,
 		xLabels,
-		yLabels
+		yLabels,
+		xKeys = [],
+		yKeys = [],
+		dims = [],
+		unit,
+		onpick
 	}: {
 		testid: string;
 		cells: HeatCell[];
 		xLabels: string[];
 		yLabels: string[];
+		xKeys?: string[];
+		yKeys?: string[];
+		dims?: string[];
+		unit?: string;
+		onpick?: (dim: string, key: string, shift: boolean) => void;
 	} = $props();
 
 	let showTable = $state(false);
@@ -22,11 +33,39 @@
 
 	const build = (t: Tokens) => heatmapOption({ cells, xLabels, yLabels }, t);
 
+	function drillX(xIndex: number, shift: boolean) {
+		const dim = dims[0] ?? '';
+		if (dim === 'weekday' || dim === 'hour_of_day') return;
+		if (!(DIM_KEYS as readonly string[]).includes(dim)) return;
+		const key = xKeys[xIndex] ?? '';
+		if (key === '' || key === '__other__') return;
+		onpick?.(dim, key, shift);
+	}
+
+	function pick(params: any, native: any) {
+		const data = params?.data;
+		if (!Array.isArray(data) || data.length < 2) return;
+		drillX(Number(data[0]), !!native?.shiftKey);
+	}
+
+	function pickRow(i: number, shift: boolean) {
+		const c = cells[i];
+		if (c) drillX(c.x, shift);
+	}
+
+	function rowSelectable(c: HeatCell): boolean {
+		const dim = dims[0] ?? '';
+		if (dim === 'weekday' || dim === 'hour_of_day') return false;
+		if (!(DIM_KEYS as readonly string[]).includes(dim)) return false;
+		const key = xKeys[c.x] ?? '';
+		return key !== '' && key !== '__other__';
+	}
+
 	const columns = $derived(['X', 'Y', 'Value']);
 	const tableRows = $derived(
 		cells.map((c) => ({
 			cells: [xLabels[c.x] ?? c.x, yLabels[c.y] ?? c.y, c.v],
-			selectable: false
+			selectable: rowSelectable(c)
 		}))
 	);
 </script>
@@ -41,9 +80,9 @@
 		{showTable ? 'Chart' : 'Table'}
 	</button>
 	{#if showTable}
-		<DataTable testid="{testid}-table" {columns} rows={tableRows} />
+		<DataTable testid="{testid}-table" {columns} rows={tableRows} {unit} onrow={pickRow} />
 	{:else}
-		<EChart {build} bind:ready bind:theme />
+		<EChart {build} bind:ready bind:theme onclick={pick} />
 	{/if}
 </div>
 
