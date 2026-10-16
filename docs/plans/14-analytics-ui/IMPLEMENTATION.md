@@ -205,3 +205,40 @@ The design 7 open-issue-12 carried item stays for Phase 5. The priced-opus e2e m
 - Surfaces: `tests/e2e/fixture.ts`, `overview.spec.ts`, `usage.spec.ts`, `interactions.spec.ts`. Commit `1b94b7a`.
 - Deviations: unpriced-only cases filter qwen with `model=` because Opus under `harness=claude` is priced. Interactions repos fan-out expects five queries. The `$0` guard is limited to the usage table so histogram bin labels do not fail it.
 - Agent: Composer, agent `f01d08db-d85f-4d48-a2f4-090615e94a2f`. The harness did not report turn count or final context size. Status `done`.
+
+### 4-02-executions-shape-series
+
+- Built: clicking a sankey edge sets `shape` in the URL. The executions request sends that shape. Counts stay the window totals. A stacked series of the three shapes is on the page. Brushing it sets the window.
+- Surfaces: `packages/workflow-analytics/src/routes/executions/+page.svelte`, `types.ts` (executions `bucket` and `series`), `tests/e2e/executions.spec.ts`. Commit `484e0c1`.
+- Deviations: e2e uses `timezoneId: 'UTC'`. The brush test drags the inner chart because the shared brush helper missed this plot. `shape=complete` with `limit=1` is a single page in the fixture.
+- Agent: Composer, agent `33d5a8e6-4a53-4111-b4b4-06555eaf2215`. The harness did not report turn count or final context size. Status `done`.
+
+### 4-03-conversations-cost-distribution
+
+- Built: each loaded conversation row shows model and cost. A model click filters. The page shows the distribution of per-conversation cost for the window.
+- Surfaces: `packages/workflow-analytics/src/routes/conversations/+page.svelte`, `types.ts` (list row usage fields), `tests/e2e/conversations.spec.ts`. Commit `a222364`.
+- Deviations: none.
+- Agent: Composer, agent `44d21e69-9bd1-4c28-873f-3bf7415a0a2c`. The harness did not report turn count or final context size. Status `done`.
+
+### 4-04-conversation-window-timeline
+
+- Built: `/conversation` shows the window control. Events inside `from`/`to` are marked, events outside stay listed, and `window_totals` render beside `totals`.
+- Surfaces: `packages/workflow-analytics/src/routes/conversation/+page.svelte`, `+layout.svelte`, `types.ts` (`window_totals`), `params.ts` (`conversationParams`), `tests/e2e/conversation.spec.ts`. Commit `44affde`.
+- Deviations: `conversationParams` omits `from` and `to` when the range is all time, so the API omits `window_totals`. Other rest routes clamp all time to 399 days.
+- Agent: Composer, agent `88d5aa18-74f4-46e1-a0df-544d9abf0c0c`. The harness did not report turn count or final context size. Status `done`.
+
+### Verification
+
+Checked against the phase outcome, not the reports. From `packages/workflow-analytics`.
+
+- `npm test -- src/lib/charts/score-series.test.ts`: 5 passed.
+- `E2E_PORT=4417 npx playwright test` on `quality.spec.ts`, `executions.spec.ts`, `conversations.spec.ts`, `conversation.spec.ts`, `explore.spec.ts`, `overview.spec.ts`, `usage.spec.ts`, and `interactions.spec.ts`: 98 passed.
+- Those runs cover the outcome: a score band leaves an omitted bucket blank and brush sets `from`/`to`; a kind tab refetches score series; a sankey click sends `shape` while counts stay the window totals; the stacked shape series brushes; a conversation row shows model and cost and a model click filters; per-conversation cost distribution loads; the conversation window control marks out-of-window events and shows window totals; Explore exposes `model`, `cost_usd`, and `norm_event`. The previously failing overview and usage unpriced-opus cases pass.
+
+### Feedback
+
+`artifact_feedback` was not called on the six briefs or six reports. The workflow feedback namespace is not loaded in this session. Nothing is queued.
+
+### Carried
+
+- `docs/design/07-analytics-site.md` open issue 12 still says conversation totals cover only the returned events when a timeline is truncated. The contract on that page says `totals` is the whole run and `truncated` applies to `events` only. Phase 5 edits that file and should replace the stale clause.
