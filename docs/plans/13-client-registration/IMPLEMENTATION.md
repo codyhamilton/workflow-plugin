@@ -53,6 +53,27 @@ artifact_feedback on the four phase 2 briefs: quality service unreachable at `ht
 - Deviations: none.
 - Agent: Composer, harness did not report turns or final context.
 
+### Phase 2 verification
+
+Outcome holds.
+
+- A logged-in session `POST`ed tenant `acme` and a `read_write` token. The create response carried the `wk_` plaintext. `GET /v1/tokens` and `registry.json` did not. `POST /v1/ingest` with that bearer stored the fact under `acme`, and `GET /v1/analytics/summary?tenant=acme` returned 200. The same tenant's `read` token got 403 `read-only token` and stored nothing, and 200 on the summary.
+- A fact whose text contained the `wk_` token was rejected by precheck and the plaintext was absent from the data directory. The same text after `Redact` was accepted and stored without the token.
+- After the owner revoked, the next ingest was 401 and stored nothing. An in-process reload kept the token valid, and the revocation after that reload stuck. A separate OS restart of `workflow serve` on the same data directory still accepted the live token (`duplicate` for the fact stored before the restart) and still returned 401 for the revoked token. The plaintext was not on disk.
+- A session summary for the owned tenant was 200; another tenant was 403 `no such tenant`. Tightening the domain policy left the bearer able to ingest.
+- `go test` covering `TestToken`, `TestRegistryTenant`, `TestRegistryRestart`, and `TestBearerTenant` passed, including admin list without `token` and admin revoke of another user's token. `go test ./internal/secrets/` passed. `npm test` passed (166).
+- Chromium on the collector origin, with a stored `wk_` key: `/` requested `GET /v1/analytics/summary?...&tenant=acme` with an empty `Authorization` and showed that summary (`4242` conversations). `/profile` created a token, showed the plaintext once, and the list table did not contain it. The create `POST /v1/tokens` sent no bearer.
+- Starting with `WORKFLOW_SERVE_KEYS` set exited before listen, and the error names that variable. `docs/design/03-remote-service.md` has no `out of scope` and no `tenant=key` credential line.
+
+artifact_feedback on the four phase 2 briefs and four reports: service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
+### Carried
+
+1. Collector-mode `tenant` is still only on `/`. Other analytics routes omit it.
+2. `Server.New` panics if the registry cannot be opened or persisted.
+3. E2e global-setup seeds `registry.json` instead of logging in and calling `POST /v1/tokens`.
+4. The profile expiry field is prefilled to three months in the browser. The device page must not copy that. The server still has no default.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
