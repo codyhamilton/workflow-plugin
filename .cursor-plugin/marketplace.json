@@ -1,0 +1,41 @@
+{
+  "name": "workflow-plugin",
+  "owner": {
+    "name": "William Hamilton",
+    "email": "codyh@ctzns.net"
+  },
+  "metadata": {
+    "description": "Private workflow plugin marketplace"
+  },
+  "plugins": [
+    {
+      "name": "workflow",
+      "description": "Cloud-safe core workflow skills for Cursor: design, refine, execute, comprehensive-review, close-out, post-build",
+      "author": {
+        "name": "William Hamilton",
+        "email": "codyh@ctzns.net"
+      },
+      "category": "development",
+      "source": {
+        "source": "github",
+        "repo": "codyhamilton/workflow-plugin",
+        "ref": "master"
+      }
+    },
+    {
+      "name": "workflow-lab",
+      "description": "Local/interactive workflow skills for Cursor: setup, iterate, transcript-parser, workflow-tuning, lab-proposal",
+      "author": {
+        "name": "William Hamilton",
+        "email": "codyh@ctzns.net"
+      },
+      "category": "development",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/codyhamilton/workflow-plugin.git",
+        "path": "plugins/workflow-lab",
+        "ref": "master"
+      }
+    }
+  ]
+}
