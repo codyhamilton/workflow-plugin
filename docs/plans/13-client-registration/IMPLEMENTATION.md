@@ -7,3 +7,9 @@ Branch: `cursor/client-registration-3d44`
 Starting HEAD: `33f90be`
 
 Phase 1 only. Later phases are not started.
+
+## Phase 1 — GitHub login and admission
+
+Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
+
+artifact_feedback on the four phase 1 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
