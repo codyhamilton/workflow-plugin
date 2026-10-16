@@ -37,3 +37,11 @@ artifact_feedback on the four phase 1 briefs: quality service unreachable at `ht
 - Commit: `fd91d15`. `npm test` passed (163 tests). Playwright `--grep 'session|login'` did not run: e2e global-setup starts a keyed `workflow serve` with `WORKFLOW_SERVE_KEYS`, and that process now exits before listen.
 - Deviations: none from the brief. Other analytics routes still omit `tenant` in collector mode.
 - Agent: Composer, harness did not report turns or final context.
+
+### 1-04-design-docs-login
+
+- Built: `docs/design/05-distribution.md` and `docs/design/07-analytics-site.md` describe the collector GitHub session, `/login`, and `workflow_session`. They no longer say the dashboard has no user identity, and they no longer say `workflow login` is the way remote mode is opted into.
+- Surfaces: `docs/design/05-distribution.md`, `docs/design/07-analytics-site.md`.
+- Commit: `aa6dd93`. A search of those two files finds no `no user identity`, no `WORKFLOW_SERVE_KEYS=tenant`, and no `workflow login (not built yet)`.
+- Deviations: none. The docs name bearer tokens as the client credential before phase 2 issues them.
+- Agent: Composer, harness did not report turns or final context.
