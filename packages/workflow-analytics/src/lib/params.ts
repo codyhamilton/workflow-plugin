@@ -107,3 +107,14 @@ export function scoreSeriesParams(
 	out.set('bucket', bucket);
 	return out;
 }
+
+/** Conversation GET params: id and optional from/to only — no shared dimension filters. */
+export function conversationParams(id: string, state: UrlState, tz: string, now = new Date()): URLSearchParams {
+	const params = new URLSearchParams({ id });
+	if (state.range !== 'all') {
+		const win = resolveWindow(state, now, tz, 'rest');
+		if (win.from !== undefined) params.set('from', win.from.toISOString());
+		if (win.to !== undefined) params.set('to', win.to.toISOString());
+	}
+	return params;
+}

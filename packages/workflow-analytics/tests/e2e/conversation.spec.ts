@@ -201,6 +201,188 @@ test('a zero-token zero-cost row shows no cost text, an unpriced tokenized row r
 	await expect(rows.nth(1)).toContainText('unpriced');
 });
 
+test('the date preset control is visible on the conversation page', async ({ page }) => {
+	await page.goto('/conversation?id=c5');
+	await expect(page.getByTestId('preset-30d')).toBeVisible();
+});
+
+test('a narrower preset adds from and to on the conversation request', async ({ page }) => {
+	const urls: string[] = [];
+	await page.route('**/v1/analytics/conversation*', (route) => {
+		urls.push(route.request().url());
+		return route.continue();
+	});
+	await page.goto('/conversation?id=c5&range=30d');
+	await expect(page.getByTestId('conv-total-model_calls')).toHaveText('3');
+	const before = urls.length;
+	await page.getByTestId('preset-7d').click();
+	await expect.poll(() => urls.length).toBeGreaterThan(before);
+	const last = new URL(urls[urls.length - 1]!);
+	expect(last.searchParams.get('id')).toBe('c5');
+	expect(last.searchParams.get('from')).toBeTruthy();
+	expect(last.searchParams.get('to')).toBeTruthy();
+	expect(last.searchParams.get('harness')).toBeNull();
+});
+
+test('events outside the window stay listed and read out of window', async ({ page }) => {
+	const events = [
+		{
+			ts: '2020-01-01T00:00:00Z',
+			type: 'hook_event',
+			norm_event: 'old',
+			event: 'old',
+			tool: '',
+			model: '',
+			path: '',
+			kind: '',
+			source: '',
+			sha: ''
+		},
+		{
+			ts: new Date(Date.now() - 86400000).toISOString(),
+			type: 'hook_event',
+			norm_event: 'inwin',
+			event: 'inwin',
+			tool: '',
+			model: '',
+			path: '',
+			kind: '',
+			source: '',
+			sha: ''
+		}
+	];
+	await page.route('**/v1/analytics/conversation*', (route) =>
+		route.fulfill({
+			contentType: 'application/json',
+			headers: { 'access-control-allow-origin': '*' },
+			body: JSON.stringify({
+				conversation_id: 'w',
+				harness: 'claude',
+				repos: [],
+				models: [],
+				first_ts: events[0].ts,
+				last_ts: events[1].ts,
+				totals: {
+					model_calls: 0,
+					tokens_in: 0,
+					tokens_out: 0,
+					tokens_cache_read: 0,
+					tokens_cache_write: 0,
+					tokens_reasoning: 0,
+					cost_usd: 0,
+					unpriced_calls: 0
+				},
+				window_totals: {
+					model_calls: 0,
+					tokens_in: 0,
+					tokens_out: 0,
+					tokens_cache_read: 0,
+					tokens_cache_write: 0,
+					tokens_reasoning: 0,
+					cost_usd: 0,
+					unpriced_calls: 0
+				},
+				events
+			})
+		})
+	);
+	await page.goto('/conversation?id=w&range=7d');
+	await expect(page.getByTestId('timeline-row')).toHaveCount(2);
+	await expect(page.getByTestId('timeline-out')).toHaveCount(1);
+	await expect(page.getByTestId('timeline-row').filter({ hasText: 'old' }).getByTestId('timeline-out')).toBeVisible();
+});
+
+test('window totals render beside whole-run totals when the API sends them', async ({ page }) => {
+	await page.route('**/v1/analytics/conversation*', (route) =>
+		route.fulfill({
+			contentType: 'application/json',
+			headers: { 'access-control-allow-origin': '*' },
+			body: JSON.stringify({
+				conversation_id: 'w2',
+				harness: 'claude',
+				repos: [],
+				models: [],
+				first_ts: '2026-01-01T00:00:00Z',
+				last_ts: '2026-01-02T00:00:00Z',
+				totals: {
+					model_calls: 9,
+					tokens_in: 0,
+					tokens_out: 0,
+					tokens_cache_read: 0,
+					tokens_cache_write: 0,
+					tokens_reasoning: 0,
+					cost_usd: 0,
+					unpriced_calls: 0
+				},
+				window_totals: {
+					model_calls: 2,
+					tokens_in: 0,
+					tokens_out: 0,
+					tokens_cache_read: 0,
+					tokens_cache_write: 0,
+					tokens_reasoning: 0,
+					cost_usd: 0,
+					unpriced_calls: 0
+				},
+				events: []
+			})
+		})
+	);
+	await page.goto('/conversation?id=w2&range=7d');
+	await expect(page.getByTestId('conv-total-model_calls')).toHaveText('9');
+	await expect(page.getByTestId('conv-window-totals')).toBeVisible();
+	await expect(page.getByTestId('conv-window-model_calls')).toHaveText('2');
+});
+
+test('all-time range omits window bounds and hides window totals', async ({ page }) => {
+	const urls: string[] = [];
+	await page.route('**/v1/analytics/conversation*', (route) => {
+		urls.push(route.request().url());
+		const u = new URL(route.request().url());
+		const body: Record<string, unknown> = {
+			conversation_id: 'w3',
+			harness: 'claude',
+			repos: [],
+			models: [],
+			first_ts: '2026-01-01T00:00:00Z',
+			last_ts: '2026-01-02T00:00:00Z',
+			totals: {
+				model_calls: 1,
+				tokens_in: 0,
+				tokens_out: 0,
+				tokens_cache_read: 0,
+				tokens_cache_write: 0,
+				tokens_reasoning: 0,
+				cost_usd: 0,
+				unpriced_calls: 0
+			},
+			events: []
+		};
+		if (u.searchParams.get('from') || u.searchParams.get('to')) {
+			body.window_totals = {
+				model_calls: 0,
+				tokens_in: 0,
+				tokens_out: 0,
+				tokens_cache_read: 0,
+				tokens_cache_write: 0,
+				tokens_reasoning: 0,
+				cost_usd: 0,
+				unpriced_calls: 0
+			};
+		}
+		return route.fulfill({
+			contentType: 'application/json',
+			headers: { 'access-control-allow-origin': '*' },
+			body: JSON.stringify(body)
+		});
+	});
+	await page.goto('/conversation?id=w3&range=7d');
+	await expect(page.getByTestId('conv-window-totals')).toBeVisible();
+	await page.getByTestId('preset-all').click();
+	await expect.poll(() => urls.some((u) => !new URL(u).searchParams.get('from'))).toBe(true);
+	await expect(page.getByTestId('conv-window-totals')).toHaveCount(0);
+});
+
 test('a truncated timeline says so', async ({ page }) => {
 	await page.goto('/conversation?id=c5');
 	await expect(page.getByTestId('timeline-truncated')).toHaveCount(0);

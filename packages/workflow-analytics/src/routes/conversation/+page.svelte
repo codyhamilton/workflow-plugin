@@ -3,9 +3,11 @@
 	import { page } from '$app/state';
 	import { ApiError } from '$lib/api';
 	import { costLabel, label, num } from '$lib/format';
+	import { conversationParams, resolveWindow } from '$lib/params';
 	import { getJSON } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
-	import type { ConversationDetail, TimelineEvent } from '$lib/types';
+	import type { ConversationDetail, TimelineEvent, Totals } from '$lib/types';
+	import { view } from '$lib/view.svelte';
 
 	const ROW_H = 28; // fixed px per timeline row, so the window can be computed without measuring
 	const MARGIN = 10; // rows kept above and below the viewport
@@ -18,9 +20,18 @@
 
 	const id = $derived(page.url.searchParams.get('id') ?? '');
 
+	const requestParams = $derived(conversationParams(id, view.state, view.tz));
+
+	/** Inclusive API window used for row marking; absent when the URL range is all time. */
+	const eventWindow = $derived.by(() => {
+		if (view.state.range === 'all') return null;
+		const w = resolveWindow(view.state, new Date(), view.tz, 'rest');
+		if (w.from === undefined || w.to === undefined) return null;
+		return { from: w.from.getTime(), to: w.to.getTime() };
+	});
+
 	// The list the user came from: kept in memory for the session and in sessionStorage so a reload
-	// keeps it. Only known site routes count; /conversation and /settings are excluded (the layout
-	// hides the chrome on /conversation, and /settings is not a list).
+	// keeps it. Only known site routes count; /settings is not a list.
 	const ROUTE_NAMES: Record<string, string> = {
 		'/': 'Overview',
 		'/trends': 'Trends',
@@ -62,9 +73,9 @@
 		}
 	});
 
-	// One request for this conversation; the window and filters do not apply here.
 	$effect(() => {
-		const q = new URLSearchParams({ id });
+		const q = requestParams;
+		page.url.search;
 		let live = true;
 		data = null;
 		message = '';
@@ -95,6 +106,13 @@
 	const end = $derived(Math.min(events.length, Math.ceil((scrollTop + viewportH) / ROW_H) + MARGIN));
 	const windowed = $derived(events.slice(start, end).map((e, i) => ({ e, i: start + i })));
 
+	const inWindow = (ts: string) => {
+		const w = eventWindow;
+		if (!w) return true;
+		const t = new Date(ts).getTime();
+		return t >= w.from && t <= w.to;
+	};
+
 	const stamp = (v: string) => new Date(v).toLocaleString();
 	const list = (a: string[]) => (a.length ? a.join(', ') : label(''));
 	const tokens = (e: TimelineEvent) =>
@@ -110,6 +128,22 @@
 		if (used > 0 && !(e.cost_usd != null && e.cost_usd > 0)) return 'unpriced';
 		if (e.cost_usd != null && e.cost_usd > 0) return costLabel({ cost: e.cost_usd, unpriced: 0, calls: 1 });
 		return '';
+	};
+
+	const WINDOW_TOTAL_KEYS = [
+		'model_calls',
+		'tokens_in',
+		'tokens_out',
+		'tokens_cache_read',
+		'tokens_cache_write',
+		'tokens_reasoning',
+		'unpriced_calls'
+	] as const satisfies readonly (keyof Totals)[];
+
+	const windowTotal = (t: Totals, k: keyof Totals) => {
+		if (k === 'cost_usd')
+			return costLabel({ cost: t.cost_usd, unpriced: t.unpriced_calls, calls: t.model_calls });
+		return num(t[k]);
 	};
 </script>
 
@@ -140,6 +174,22 @@
 		<div class="tile"><span class="n" data-testid="conv-total-cost">{costLabel({ cost: data.totals.cost_usd, unpriced: data.totals.unpriced_calls, calls: data.totals.model_calls })}</span><span class="name">cost</span></div>
 	</div>
 
+	{#if data.window_totals}
+		<p class="totals-label">Window</p>
+		<div class="totals" data-testid="conv-window-totals">
+			{#each WINDOW_TOTAL_KEYS as k (k)}
+				<div class="tile">
+					<span class="n" data-testid="conv-window-{k}">{windowTotal(data.window_totals, k)}</span>
+					<span class="name">{k.replace(/_/g, ' ')}</span>
+				</div>
+			{/each}
+			<div class="tile">
+				<span class="n" data-testid="conv-window-cost">{windowTotal(data.window_totals, 'cost_usd')}</span>
+				<span class="name">cost</span>
+			</div>
+		</div>
+	{/if}
+
 	{#if data.truncated}
 		<p data-testid="timeline-truncated">showing the first 5,000 events</p>
 	{/if}
@@ -151,8 +201,16 @@
 	>
 		<div class="spacer" style="height:{events.length * ROW_H}px">
 			{#each windowed as { e, i } (i)}
-				<div class="row" data-testid="timeline-row" style="top:{i * ROW_H}px; height:{ROW_H}px">
+				<div
+					class="row"
+					class:out={eventWindow && !inWindow(e.ts)}
+					data-testid="timeline-row"
+					style="top:{i * ROW_H}px; height:{ROW_H}px"
+				>
 					<time class="t" datetime={e.ts}>{stamp(e.ts)}</time>
+					{#if eventWindow && !inWindow(e.ts)}
+						<span class="badge" data-testid="timeline-out">out of window</span>
+					{/if}
 					<span class="ev">{e.norm_event || e.event || label('')}</span>
 					<span class="dim">{label(e.tool)}</span>
 					<span class="dim">{label(e.model)}</span>
@@ -171,6 +229,11 @@
 		flex-wrap: wrap;
 		gap: 0.25rem 1.25rem;
 		margin: 0.5rem 0 1rem;
+	}
+	.totals-label {
+		margin: 0.75rem 0 0.25rem;
+		font-size: 0.85rem;
+		color: var(--muted);
 	}
 	.totals {
 		display: flex;
@@ -213,6 +276,17 @@
 		box-sizing: border-box;
 		white-space: nowrap;
 		border-bottom: 1px solid var(--border);
+	}
+	.row.out {
+		opacity: 0.55;
+	}
+	.badge {
+		flex: 0 0 auto;
+		font-size: 0.7rem;
+		color: var(--muted);
+		border: 1px solid var(--border);
+		border-radius: 3px;
+		padding: 0 0.25rem;
 	}
 	.t {
 		flex: 0 0 11rem;

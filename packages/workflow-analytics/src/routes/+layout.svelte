@@ -32,13 +32,10 @@
 
 	// The dashboards route frames saved views with `embed=1`; embed mode renders the page alone.
 	const embed = $derived(page.url.searchParams.get('embed') === '1');
-	// Filters, chips, notices and the save control show everywhere except the settings, conversation
-	// and dashboards pages (the dashboards route frames views that carry their own chrome off).
+	// Filters, chips, notices and the save control show everywhere except settings and dashboards
+	// (the dashboards route frames views that carry their own chrome off).
 	const chrome = $derived(
-		!embed &&
-			page.url.pathname !== '/settings' &&
-			page.url.pathname !== '/conversation' &&
-			page.url.pathname !== '/dashboards'
+		!embed && page.url.pathname !== '/settings' && page.url.pathname !== '/dashboards'
 	);
 
 	// Every link but Settings keeps the current filters in the query string.

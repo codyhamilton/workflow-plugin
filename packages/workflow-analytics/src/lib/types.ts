@@ -171,6 +171,7 @@ export interface ConversationDetail {
 	first_ts: string;
 	last_ts: string;
 	totals: Totals;
+	window_totals?: Totals;
 	events: TimelineEvent[];
 	truncated?: boolean;
 }
