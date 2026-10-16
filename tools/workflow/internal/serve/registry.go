@@ -1,6 +1,11 @@
 package serve
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -37,8 +42,28 @@ type SessionRecord struct {
 	ExpiresAt       time.Time `json:"expires_at"`
 }
 
-// TokenHashRecord is reserved for phase-2 issued API tokens (stored hashed, never plaintext).
-type TokenHashRecord struct{}
+const (
+	TokenScopeRead      = "read"
+	TokenScopeReadWrite = "read_write"
+)
+
+// TokenHashRecord is one issued API token (SHA-256 of plaintext stored; plaintext never persisted).
+type TokenHashRecord struct {
+	ID        string    `json:"id"`
+	Tenant    string    `json:"tenant"`
+	Scope     string    `json:"scope"`
+	Hash      string    `json:"hash"`
+	GitHubID  int64     `json:"github_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Revoked   bool      `json:"revoked"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// CreatedToken is returned once when a token is issued (includes plaintext).
+type CreatedToken struct {
+	Record    TokenHashRecord
+	Plaintext string
+}
 
 // registryDoc is the on-disk shape of registry.json.
 type registryDoc struct {
@@ -198,3 +223,154 @@ func (r *Registry) DeleteSession(id string) {
 
 // RegistryPath reports the on-disk file path (tests).
 func (r *Registry) RegistryPath() string { return r.path }
+
+func hashTokenPlaintext(plaintext string) string {
+	h := sha256.Sum256([]byte(plaintext))
+	return hex.EncodeToString(h[:])
+}
+
+func generateTokenPlaintext() (string, error) {
+	var b [32]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return "wk_" + base64.RawURLEncoding.EncodeToString(b[:]), nil
+}
+
+func newTokenID() (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b[:]), nil
+}
+
+// CreateTenant registers name for githubID. Returns false when the name is taken.
+func (r *Registry) CreateTenant(name string, githubID int64) bool {
+	owner := fmt.Sprintf("%d", githubID)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.owners[name] != "" {
+		return false
+	}
+	r.owners[name] = owner
+	r.dirty = true
+	return true
+}
+
+// CreateToken issues a token for tenant owned by githubID. Returns nil on validation or ownership failure.
+func (r *Registry) CreateToken(tenant, scope string, expiresAt time.Time, githubID int64, now time.Time) (*CreatedToken, error) {
+	if scope != TokenScopeRead && scope != TokenScopeReadWrite {
+		return nil, fmt.Errorf("invalid scope")
+	}
+	if !expiresAt.After(now) {
+		return nil, fmt.Errorf("expires_at must be in the future")
+	}
+	owner := fmt.Sprintf("%d", githubID)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.owners[tenant] != owner {
+		return nil, fmt.Errorf("forbidden tenant")
+	}
+	id, err := newTokenID()
+	if err != nil {
+		return nil, err
+	}
+	plain, err := generateTokenPlaintext()
+	if err != nil {
+		return nil, err
+	}
+	rec := TokenHashRecord{
+		ID:        id,
+		Tenant:    tenant,
+		Scope:     scope,
+		Hash:      hashTokenPlaintext(plain),
+		GitHubID:  githubID,
+		ExpiresAt: expiresAt.UTC(),
+		CreatedAt: now.UTC(),
+	}
+	r.tokenHashes = append(r.tokenHashes, rec)
+	r.dirty = true
+	return &CreatedToken{Record: rec, Plaintext: plain}, nil
+}
+
+// ListTokensForOwner returns tokens whose tenant is owned by githubID.
+func (r *Registry) ListTokensForOwner(githubID int64) []TokenHashRecord {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	owner := fmt.Sprintf("%d", githubID)
+	var out []TokenHashRecord
+	for _, rec := range r.tokenHashes {
+		if r.owners[rec.Tenant] == owner {
+			out = append(out, rec)
+		}
+	}
+	return out
+}
+
+// ListAllTokens returns every token record.
+func (r *Registry) ListAllTokens() []TokenHashRecord {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	out := make([]TokenHashRecord, len(r.tokenHashes))
+	copy(out, r.tokenHashes)
+	return out
+}
+
+// RevokeToken marks a token revoked. Returns (found, alreadyRevoked).
+func (r *Registry) RevokeToken(id string) (bool, bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for i := range r.tokenHashes {
+		if r.tokenHashes[i].ID != id {
+			continue
+		}
+		if r.tokenHashes[i].Revoked {
+			return true, true
+		}
+		r.tokenHashes[i].Revoked = true
+		r.dirty = true
+		return true, false
+	}
+	return false, false
+}
+
+// TokenByID returns one token by id.
+func (r *Registry) TokenByID(id string) (TokenHashRecord, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, rec := range r.tokenHashes {
+		if rec.ID == id {
+			return rec, true
+		}
+	}
+	return TokenHashRecord{}, false
+}
+
+// resolveBearer maps a plaintext bearer to tenant and scope. Expired and revoked tokens do not match.
+func (r *Registry) resolveBearer(plaintext string, now time.Time) (tenant, scope string, ok bool) {
+	kh := sha256.Sum256([]byte(plaintext))
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var found *TokenHashRecord
+	match := 0
+	for i := range r.tokenHashes {
+		rec := &r.tokenHashes[i]
+		ph, err := hex.DecodeString(rec.Hash)
+		if err != nil || len(ph) != sha256.Size {
+			continue
+		}
+		eq := subtle.ConstantTimeCompare(kh[:], ph)
+		if eq == 1 {
+			found = rec
+		}
+		match |= eq
+	}
+	if match != 1 || found == nil {
+		return "", "", false
+	}
+	if found.Revoked || !now.Before(found.ExpiresAt) {
+		return "", "", false
+	}
+	return found.Tenant, found.Scope, true
+}

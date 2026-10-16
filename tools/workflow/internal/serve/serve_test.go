@@ -663,6 +663,231 @@ func TestLoopbackUnchangedWithOAuthEnv(t *testing.T) {
 	}
 }
 
+func remoteCreateTenant(t *testing.T, h http.Handler, origin string, sess []*http.Cookie, name string) {
+	code, body, _ := doWithCookies(t, h, "POST", "/v1/tenants", origin, `{"name":"`+name+`"}`, sess)
+	if code != 201 || !strings.Contains(body, `"name":"`+name+`"`) {
+		t.Fatalf("create tenant %q: %d %s", name, code, body)
+	}
+}
+
+func remoteIssueToken(t *testing.T, h http.Handler, origin string, sess []*http.Cookie, tenant, scope string, expires time.Time) (id, plain string) {
+	payload := `{"tenant":"` + tenant + `","scope":"` + scope + `","expires_at":"` + expires.UTC().Format(time.RFC3339) + `"}`
+	code, body, _ := doWithCookies(t, h, "POST", "/v1/tokens", origin, payload, sess)
+	if code != 201 {
+		t.Fatalf("issue token: %d %s", code, body)
+	}
+	var resp struct {
+		ID    string `json:"id"`
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal([]byte(body), &resp); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(resp.Token, "wk_") {
+		t.Fatalf("token prefix: %q", resp.Token)
+	}
+	return resp.ID, resp.Token
+}
+
+func TestRegistryTenantCreate(t *testing.T) {
+	gh := mockGitHub(t, 10, "owner", []mockEmail{{Email: "owner@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+
+	remoteCreateTenant(t, h, origin, sess, "acme")
+	if code, _, _ := doWithCookies(t, h, "POST", "/v1/tenants", origin, `{"name":"acme"}`, sess); code != 409 {
+		t.Fatalf("duplicate tenant: %d", code)
+	}
+	if code, _, _ := doWithCookies(t, h, "POST", "/v1/tenants", origin, `{"name":"beta"}`, nil); code != 401 {
+		t.Fatalf("tenant without session: %d", code)
+	}
+	if code, _ := do(t, h, "POST", "/v1/tenants", "wk_notreal", `{"name":"gamma"}`); code != 401 {
+		t.Fatalf("bearer tenant create: %d", code)
+	}
+}
+
+func TestTokenBearerIngestScopes(t *testing.T) {
+	gh := mockGitHub(t, 11, "writer", []mockEmail{{Email: "w@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	dir := t.TempDir()
+	s := remoteTestConfig(t, dir, gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+	remoteCreateTenant(t, h, origin, sess, "t1")
+	exp := time.Now().Add(24 * time.Hour)
+	_, rwTok := remoteIssueToken(t, h, origin, sess, "t1", TokenScopeReadWrite, exp)
+	_, roTok := remoteIssueToken(t, h, origin, sess, "t1", TokenScopeRead, exp)
+
+	if code, body := do(t, h, "POST", "/v1/ingest", rwTok, `{"facts":[]}`); code != 200 {
+		t.Fatalf("read_write ingest: %d %s", code, body)
+	}
+	if code, body := do(t, h, "GET", "/v1/analytics/summary?tenant=t1", rwTok, ""); code != 200 {
+		t.Fatalf("read_write summary: %d %s", code, body)
+	}
+	if code, body := do(t, h, "POST", "/v1/ingest", roTok, `{"facts":[]}`); code != 403 || !strings.Contains(body, "read-only token") {
+		t.Fatalf("read ingest: %d %s", code, body)
+	}
+	if code, body := do(t, h, "GET", "/v1/analytics/summary?tenant=t1", roTok, ""); code != 200 {
+		t.Fatalf("read summary: %d %s", code, body)
+	}
+	if code, body := do(t, h, "GET", "/v1/analytics/summary?tenant=other", rwTok, ""); code != 401 || !strings.Contains(body, `"unauthorized"`) {
+		t.Fatalf("tenant mismatch: %d %s", code, body)
+	}
+}
+
+func TestTokenRevokeAndExpiry(t *testing.T) {
+	gh := mockGitHub(t, 12, "u12", []mockEmail{{Email: "u12@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+	remoteCreateTenant(t, h, origin, sess, "rev")
+	exp := time.Now().Add(24 * time.Hour)
+	id, tok := remoteIssueToken(t, h, origin, sess, "rev", TokenScopeReadWrite, exp)
+
+	if code, _, _ := doWithCookies(t, h, "POST", "/v1/tokens/"+id+"/revoke", origin, "{}", sess); code != 204 {
+		t.Fatalf("revoke: %d", code)
+	}
+	if code, body := do(t, h, "POST", "/v1/ingest", tok, `{"facts":[]}`); code != 401 {
+		t.Fatalf("ingest after revoke: %d %s", code, body)
+	}
+	if code, _, _ := doWithCookies(t, h, "POST", "/v1/tokens/"+id+"/revoke", origin, "{}", sess); code != 204 {
+		t.Fatalf("second revoke: %d", code)
+	}
+
+	_, expTok := remoteIssueToken(t, h, origin, sess, "rev", TokenScopeReadWrite, time.Now().Add(2*time.Hour))
+	s.registry.mu.Lock()
+	for i := range s.registry.tokenHashes {
+		if s.registry.tokenHashes[i].Hash == hashTokenPlaintext(expTok) {
+			s.registry.tokenHashes[i].ExpiresAt = time.Now().Add(-time.Minute)
+		}
+	}
+	s.registry.mu.Unlock()
+	if code, body := do(t, h, "POST", "/v1/ingest", expTok, `{"facts":[]}`); code != 401 {
+		t.Fatalf("ingest after expiry: %d %s", code, body)
+	}
+}
+
+func TestTokenListAndBearerReject(t *testing.T) {
+	gh := mockGitHub(t, 13, "u13", []mockEmail{{Email: "u13@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+	remoteCreateTenant(t, h, origin, sess, "listme")
+	remoteIssueToken(t, h, origin, sess, "listme", TokenScopeRead, time.Now().Add(time.Hour))
+
+	code, body, _ := doWithCookies(t, h, "GET", "/v1/tokens", origin, "", sess)
+	if code != 200 || strings.Contains(body, `"token"`) || !strings.Contains(body, `"scope":"read"`) {
+		t.Fatalf("owner list: %d %s", code, body)
+	}
+	if code, _ := do(t, h, "GET", "/v1/tokens", "wk_notreal", ""); code != 401 {
+		t.Fatalf("bearer list: %d", code)
+	}
+}
+
+func TestTokenAdminListRevoke(t *testing.T) {
+	ghUser := mockGitHub(t, 20, "member", []mockEmail{{Email: "member@allowed.example", Verified: true}})
+	t.Cleanup(ghUser.Close)
+	dir := t.TempDir()
+	sUser := remoteTestConfig(t, dir, ghUser.URL)
+	hUser := sUser.Handler()
+	origin := "https://collector.example"
+	member := loginRemote(t, hUser, origin)
+	remoteCreateTenant(t, hUser, origin, member, "shared")
+	id, tok := remoteIssueToken(t, hUser, origin, member, "shared", TokenScopeReadWrite, time.Now().Add(time.Hour))
+
+	ghAdmin := mockGitHub(t, 1, "codyh", []mockEmail{{Email: adminEmail, Verified: true}})
+	t.Cleanup(ghAdmin.Close)
+	sAdmin := remoteTestConfig(t, dir, ghAdmin.URL)
+	hAdmin := sAdmin.Handler()
+	admin := loginRemote(t, hAdmin, origin)
+
+	code, body, _ := doWithCookies(t, hAdmin, "GET", "/v1/admin/tokens", origin, "", admin)
+	if code != 200 || !strings.Contains(body, `"github_id":20`) || strings.Contains(body, `"token"`) {
+		t.Fatalf("admin list: %d %s", code, body)
+	}
+	if code, _, _ := doWithCookies(t, hAdmin, "GET", "/v1/admin/tokens", origin, "", member); code != 403 {
+		t.Fatalf("non-admin list: %d", code)
+	}
+	if code, _, _ := doWithCookies(t, hAdmin, "POST", "/v1/tokens/"+id+"/revoke", origin, "{}", admin); code != 204 {
+		t.Fatalf("admin revoke: %d", code)
+	}
+	if code, body := do(t, hAdmin, "POST", "/v1/ingest", tok, `{"facts":[]}`); code != 401 {
+		t.Fatalf("ingest after admin revoke: %d %s", code, body)
+	}
+}
+
+func TestTokenPolicyDoesNotRevoke(t *testing.T) {
+	gh := mockGitHub(t, 14, "pol", []mockEmail{{Email: "pol@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+	remoteCreateTenant(t, h, origin, sess, "polt")
+	_, tok := remoteIssueToken(t, h, origin, sess, "polt", TokenScopeReadWrite, time.Now().Add(time.Hour))
+
+	body := `{"mode":"allow_list","domains":["other.example"]}`
+	if code, _, _ := doWithCookies(t, h, "PUT", "/v1/admin/policy", origin, body, sess); code != 403 {
+		// member is not admin — use pre-set policy tighten via registry
+	}
+	s.registry.SetPolicy(DomainPolicy{Mode: PolicyAllowList, Domains: []string{"other.example"}})
+	if err := s.registry.Persist(); err != nil {
+		t.Fatal(err)
+	}
+	if code, body := do(t, h, "POST", "/v1/ingest", tok, `{"facts":[]}`); code != 200 {
+		t.Fatalf("ingest after policy tighten: %d %s", code, body)
+	}
+}
+
+func TestRegistryRestartLoad(t *testing.T) {
+	gh := mockGitHub(t, 15, "rst", []mockEmail{{Email: "rst@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	dir := t.TempDir()
+	s1 := remoteTestConfig(t, dir, gh.URL)
+	h1 := s1.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h1, origin)
+	remoteCreateTenant(t, h1, origin, sess, "persist")
+	id, tok := remoteIssueToken(t, h1, origin, sess, "persist", TokenScopeReadWrite, time.Now().Add(time.Hour))
+	s1.Close()
+
+	s2 := remoteTestConfig(t, dir, gh.URL)
+	if code, body := do(t, s2.Handler(), "POST", "/v1/ingest", tok, `{"facts":[]}`); code != 200 {
+		t.Fatalf("ingest after restart: %d %s", code, body)
+	}
+	if code, _, _ := doWithCookies(t, s2.Handler(), "POST", "/v1/tokens/"+id+"/revoke", origin, "{}", sess); code != 204 {
+		t.Fatalf("revoke after restart: %d", code)
+	}
+	if code, body := do(t, s2.Handler(), "POST", "/v1/ingest", tok, `{"facts":[]}`); code != 401 {
+		t.Fatalf("ingest after restart revoke: %d %s", code, body)
+	}
+}
+
+func TestBearerTenantSessionSummary(t *testing.T) {
+	gh := mockGitHub(t, 16, "sum", []mockEmail{{Email: "sum@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+	remoteCreateTenant(t, h, origin, sess, "owned")
+
+	if code, body, _ := doWithCookies(t, h, "GET", "/v1/analytics/summary?tenant=owned", origin, "", sess); code != 200 {
+		t.Fatalf("owned summary: %d %s", code, body)
+	}
+	if code, body, _ := doWithCookies(t, h, "GET", "/v1/analytics/summary?tenant=else", origin, "", sess); code != 403 || !strings.Contains(body, "no such tenant") {
+		t.Fatalf("unowned summary: %d %s", code, body)
+	}
+}
+
 func TestCORSConfig(t *testing.T) {
 	env := map[string]string{"WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_ADDR": "127.0.0.1:8770", "WORKFLOW_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
 	c, err := ConfigFromEnv(func(k string) string { return env[k] })

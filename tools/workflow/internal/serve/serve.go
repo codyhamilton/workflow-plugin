@@ -501,6 +501,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/analytics/distribution", s.method(http.MethodGet, s.auth(s.analyticsDistribution)))
 	mux.HandleFunc("/v1/analytics/score-series", s.method(http.MethodGet, s.auth(s.analyticsScoreSeries)))
 	mux.HandleFunc("/v1/me", s.method(http.MethodGet, s.sessionOnly(s.handleMe)))
+	mux.HandleFunc("/v1/tenants", s.handleTenantsRoute)
+	mux.HandleFunc("/v1/tokens", s.handleTokensRoute)
+	mux.HandleFunc("/v1/tokens/", s.handleTokensSubpath)
+	mux.HandleFunc("/v1/admin/tokens", s.method(http.MethodGet, s.sessionOnly(s.handleAdminListTokens)))
 	mux.HandleFunc("/v1/admin/policy", s.method(http.MethodPut, s.originGuard(s.sessionOnly(s.handleAdminPolicy))))
 	mux.HandleFunc("/oauth/login", s.method(http.MethodGet, s.oauthLogin))
 	mux.HandleFunc("/oauth/callback", s.method(http.MethodGet, s.oauthCallback))
@@ -599,7 +603,15 @@ func (s *Server) auth(h tenantHandler) http.HandlerFunc {
 			return
 		}
 		if res.status != authOK {
-			writeJSON(w, 401, map[string]string{"error": res.msg})
+			msg := res.msg
+			if msg == "" {
+				msg = "unauthorized"
+			}
+			writeJSON(w, 401, map[string]string{"error": msg})
+			return
+		}
+		if r.Method == http.MethodPost && r.URL.Path == "/v1/ingest" && res.scope == TokenScopeRead {
+			writeJSON(w, 403, map[string]string{"error": "read-only token"})
 			return
 		}
 		name := res.tenant

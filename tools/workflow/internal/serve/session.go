@@ -32,6 +32,7 @@ type Session struct {
 
 type authResult struct {
 	tenant string
+	scope  string
 	status authStatus
 	msg    string
 }
@@ -238,10 +239,24 @@ func (s *Server) authorizeRequest(r *http.Request) authResult {
 		return authResult{tenant: LocalTenant, status: authOK}
 	}
 	if tok, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer "); ok {
-		if tenant, ok := s.tenantForKey(tok); ok {
-			return authResult{tenant: tenant, status: authOK}
+		now := time.Now()
+		var tenant, scope string
+		var okTenant bool
+		if s.cfg.Remote() {
+			tenant, scope, okTenant = s.registry.resolveBearer(tok, now)
+		} else {
+			tenant, okTenant = s.tenantForKey(tok)
+			if okTenant {
+				scope = TokenScopeReadWrite
+			}
 		}
-		return authResult{status: authUnauthorized, msg: "unauthorized"}
+		if !okTenant {
+			return authResult{status: authUnauthorized, msg: "unauthorized"}
+		}
+		if q := r.URL.Query().Get("tenant"); q != "" && q != tenant {
+			return authResult{status: authUnauthorized, msg: "unauthorized"}
+		}
+		return authResult{tenant: tenant, scope: scope, status: authOK}
 	}
 	if !s.cfg.Remote() {
 		return authResult{status: authUnauthorized, msg: "unauthorized: this service requires a key; run workflow login"}
