@@ -37,6 +37,14 @@ artifact_feedback on the four phase 2 briefs: quality service unreachable at `ht
 - Deviations: none.
 - Agent: Composer, harness did not report turns or final context.
 
+### 2-03-analytics-profile-e2e
+
+- Built: `/profile` creates a tenant and a token, shows the plaintext once, lists tokens without it, and revokes. Admin sessions also load `GET /v1/admin/tokens`. Collector posts send the session cookie and no bearer. E2e global-setup no longer sets `WORKFLOW_SERVE_KEYS`; it starts a remote serve with a registry-seeded `wk_` bearer.
+- Surfaces: `packages/workflow-analytics/src/lib/api.ts`, `packages/workflow-analytics/src/lib/api.test.ts`, `packages/workflow-analytics/src/routes/+layout.svelte`, `packages/workflow-analytics/src/routes/profile/+page.svelte`, `packages/workflow-analytics/tests/e2e/global-setup.ts`.
+- Commit: `d0cc49a`. `npm test` passed (166). Playwright `session.spec.ts` and `settings.spec.ts` (excluding `@slow`) passed, 4 tests, after previously exiting because of `WORKFLOW_SERVE_KEYS`.
+- Deviations: the e2e bearer is written into `registry.json` before serve starts, not issued through OAuth and `POST /v1/tokens`. Other analytics routes still omit `tenant`.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
