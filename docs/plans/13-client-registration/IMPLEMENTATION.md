@@ -29,3 +29,11 @@ artifact_feedback on the four phase 1 briefs: quality service unreachable at `ht
 - Commit: `40b81f7`. `go test ./internal/serve/` passed, including `TestOAuthSessionRemoteAuth`, `TestRemoteSessionIngestAndTenant`, `TestRemotePolicyAdmin`, and `TestLoopbackUnchangedWithOAuthEnv`.
 - Deviations: none.
 - Agent: Composer, harness did not report turns or final context.
+
+### 1-03-analytics-session-site
+
+- Built: collector-origin fetches send the session cookie and no bearer; the overview appends `tenant` from `GET /v1/me`; `/login` exists, including the denied-admission message; a 403 `no such tenant` is not treated as a logged-out 401.
+- Surfaces: `packages/workflow-analytics/src/lib/api.ts`, `packages/workflow-analytics/src/lib/api.test.ts`, `packages/workflow-analytics/src/routes/+layout.svelte`, `packages/workflow-analytics/src/routes/+page.svelte`, `packages/workflow-analytics/src/routes/login/+page.svelte`, `packages/workflow-analytics/tests/e2e/session.spec.ts`.
+- Commit: `fd91d15`. `npm test` passed (163 tests). Playwright `--grep 'session|login'` did not run: e2e global-setup starts a keyed `workflow serve` with `WORKFLOW_SERVE_KEYS`, and that process now exits before listen.
+- Deviations: none from the brief. Other analytics routes still omit `tenant` in collector mode.
+- Agent: Composer, harness did not report turns or final context.
