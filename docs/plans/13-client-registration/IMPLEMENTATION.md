@@ -21,3 +21,11 @@ artifact_feedback on the four phase 1 briefs: quality service unreachable at `ht
 - Commit: `3191ce2`. `go test` on `internal/serve` and `cmd/workflow` passed (`TestServeOutcome` now covers OAuth refusal, keys refusal on loopback, and loopback local ingest).
 - Deviations: the keys refusal lives in `ConfigFromEnv` only, not a second check in `runServe`. `New` panics if the registry cannot be opened or persisted. Tests for the registry landed in `serve_test.go` rather than a new `registry_test.go`. `main.go` was not edited.
 - Agent: Composer, harness did not report turns or final context.
+
+### 1-02-oauth-session-remote-auth
+
+- Built: GitHub OAuth login, callback, and logout; `workflow_session` with a policy re-check; admin `PUT /v1/admin/policy`; `GET /v1/me`; remote `/v1` auth that treats ingest as bearer-only and leaves loopback on `localGuard`. Unknown bearers are `unauthorized` until phase 2 issues tokens.
+- Surfaces: `tools/workflow/internal/serve/oauth.go`, `tools/workflow/internal/serve/session.go`, `tools/workflow/internal/serve/serve.go`, `tools/workflow/internal/serve/serve_test.go`.
+- Commit: `40b81f7`. `go test ./internal/serve/` passed, including `TestOAuthSessionRemoteAuth`, `TestRemoteSessionIngestAndTenant`, `TestRemotePolicyAdmin`, and `TestLoopbackUnchangedWithOAuthEnv`.
+- Deviations: none.
+- Agent: Composer, harness did not report turns or final context.
