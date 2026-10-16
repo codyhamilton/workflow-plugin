@@ -314,9 +314,10 @@ func buildBenchCases(t *testing.T, h *benchHarness, to time.Time) []benchCase {
 		add("explore/"+p.name, "/v1/analytics/explore?"+win)
 		add("distribution/cost/"+p.name, "/v1/analytics/distribution?measure=cost_usd&grain=call&"+win)
 		add("distribution/tokens/"+p.name, "/v1/analytics/distribution?measure=tokens_in&grain=call&"+win)
+		convWin := "from=" + p.from.UTC().Format(time.RFC3339) + "&to=" + p.to.UTC().Format(time.RFC3339)
 		for i, id := range benchTopConversations(t, h.db, p.from, p.to, 3) {
 			q := url.Values{"id": []string{id}}
-			add(fmt.Sprintf("conversation/conv#%d/%s", i+1, p.name), "/v1/analytics/conversation?"+q.Encode()+"&"+win)
+			add(fmt.Sprintf("conversation/conv#%d/%s", i+1, p.name), "/v1/analytics/conversation?"+q.Encode()+"&"+convWin)
 		}
 	}
 	add("schema", "/v1/analytics/schema")

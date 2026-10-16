@@ -206,3 +206,34 @@ func TestConversationRouteTruncate(t *testing.T) {
 		t.Errorf("last event ts = %v", ev[4999]["ts"])
 	}
 }
+
+func TestConversationRouteWindowTotals(t *testing.T) {
+	s, _, base := convFixture(t)
+	from := rfc(base + 3)
+	to := rfc(base + 4)
+	m := aok(t, s, "/v1/analytics/conversation?id=c1&from="+from+"&to="+to)
+	wt, ok := m["window_totals"].(map[string]any)
+	if !ok {
+		t.Fatal("window_totals missing")
+	}
+	if wt["model_calls"] != 0.0 {
+		t.Errorf("window model_calls = %v", wt["model_calls"])
+	}
+	tot, _ := m["totals"].(map[string]any)
+	if tot["model_calls"] != 1.0 {
+		t.Errorf("totals = %v", tot)
+	}
+	ev := convEvents(m)
+	if len(ev) != 5 || ev[2]["cost_usd"] == nil {
+		t.Errorf("full events = %d, usage=%v", len(ev), ev[2]["cost_usd"])
+	}
+	m2 := aok(t, s, "/v1/analytics/conversation?id=c1")
+	if _, ok := m2["window_totals"]; ok {
+		t.Errorf("window_totals present without bounds: %v", m2["window_totals"])
+	}
+}
+
+func TestConversationRouteFromAfterTo(t *testing.T) {
+	s, _, base := convFixture(t)
+	aerr(t, s, "/v1/analytics/conversation?id=c1&from="+rfc(base+4)+"&to="+rfc(base), 400, "from after to")
+}
