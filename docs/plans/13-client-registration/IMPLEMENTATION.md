@@ -45,3 +45,23 @@ artifact_feedback on the four phase 1 briefs: quality service unreachable at `ht
 - Commit: `aa6dd93`. A search of those two files finds no `no user identity`, no `WORKFLOW_SERVE_KEYS=tenant`, and no `workflow login (not built yet)`.
 - Deviations: none. The docs name bearer tokens as the client credential before phase 2 issues them.
 - Agent: Composer, harness did not report turns or final context.
+
+### Phase 1 verification
+
+Outcome holds.
+
+- A non-loopback `workflow serve` with the OAuth env set and `WORKFLOW_SERVE_KEYS` unset listened, wrote `registry.json`, and answered `GET /v1/analytics/summary` with 401 `sign in at https://collector.example/login`. The same bind with `WORKFLOW_SERVE_KEYS` set, a loopback bind with that variable set, and a non-loopback bind missing the OAuth env each exited 1 before the port accepted a connection. The keys error names `WORKFLOW_SERVE_KEYS`.
+- Against the handler and a mock GitHub: a verified `codyh@ctzns.net` login set `workflow_session` (HttpOnly, SameSite=Lax, Secure) and redirected to `/`. The same admin still got a session when the allow list was `allowed.example`. A verified `x@denied.example` login redirected to `/login?error=denied` with no session cookie. `PUT /v1/admin/policy` to `allow_list` and back to `everyone` was 200 for the admin and 403 for a non-admin; `everyone` stored an empty domain list. After the list was tightened, the member's next summary was 401 and the cookie was cleared. The stranger's next login then landed on `/` with a session. A session with no owned tenant got 403 `{"error":"no such tenant"}`. `POST /v1/ingest` with no bearer, and with a session and no bearer, was 401 and left no `ledger.db`.
+- The live binary's `/oauth/login` redirected to `https://github.com/login/oauth/authorize`. The binary has no mock GitHub base, so the cookie was checked on the handler, not against github.com.
+- Loopback with the OAuth env set served `/` (200, built site) and `GET /v1/analytics/summary` (200) with no cookie. A bearer on that summary was ignored (200).
+- Chromium on the collector origin, with `workflow-analytics-key` set to a `wk_` value: `/login` showed Sign in with GitHub; `/login?error=denied` showed the denial. With `/v1/me` returning no tenants and summary returning 403 `no such tenant`, the page said "You do not have a tenant yet" and did not offer the logged-out sign-in link. Every `/v1` request had an empty `Authorization` header.
+- `npm test` in `packages/workflow-analytics`: 163 passed. `go test ./internal/serve/` passed. The first `go test ./cmd/workflow` failed because those servers still set `WORKFLOW_SERVE_KEYS` and exited before listen. `52dfcf0` starts them without that variable and expects tenant `local`. `main_test.go` still expects the refusal. After that commit, `go test ./cmd/workflow/` passed.
+- `docs/design/05-distribution.md` and `docs/design/07-analytics-site.md` have no `no user identity`, no `WORKFLOW_SERVE_KEYS=tenant`, and no `workflow login (not built yet)`.
+
+artifact_feedback on the four phase 1 briefs and four reports: service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
+### Carried
+
+1. `packages/workflow-analytics` e2e global-setup still sets `WORKFLOW_SERVE_KEYS`, so the keyed server exits before listen and `tests/e2e/session.spec.ts` did not run.
+2. Collector-mode `tenant` is appended on the overview only. Other analytics routes still omit it.
+3. `Server.New` panics if the registry cannot be opened or persisted.
