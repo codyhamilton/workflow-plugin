@@ -85,7 +85,7 @@ func (e *env) startServe(addr string) {
 		}
 	}
 	cmd := exec.Command(e.bin, "serve")
-	cmd.Env = append(env, "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr, "WORKFLOW_SERVE_KEYS=t="+apiKey)
+	cmd.Env = append(env, "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Start(); err != nil {
@@ -144,7 +144,7 @@ func (e *env) rejected() []string {
 }
 
 func (e *env) ledger(query string, args ...any) int {
-	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "t", "ledger.db")+"?mode=ro")
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "local", "ledger.db")+"?mode=ro")
 	if err != nil {
 		return -1
 	}

@@ -33,7 +33,7 @@ func (e *env) startHosted(addr string, extra ...string) string {
 	}
 	cmd := exec.Command(e.bin, "serve")
 	cmd.Env = append(append([]string{}, e.base...), "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr,
-		"WORKFLOW_SERVE_KEYS=t="+apiKey, "WORKFLOW_SERVE_POLL=500ms")
+		"WORKFLOW_SERVE_POLL=500ms")
 	cmd.Env = append(cmd.Env, extra...)
 	cmd.Stderr = lf
 	if err := cmd.Start(); err != nil {
@@ -214,7 +214,7 @@ func TestCaptureOutcome(t *testing.T) {
 			return e.ledger(`SELECT count(*) FROM facts WHERE type='artifact_version'
 				AND instr(raw, '"source":"commit"') > 0`) >= 1
 		})
-		db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "t", "ledger.db")+"?mode=ro")
+		db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "local", "ledger.db")+"?mode=ro")
 		if err != nil {
 			t.Fatal(err)
 		}

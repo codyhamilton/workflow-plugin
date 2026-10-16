@@ -21,7 +21,7 @@ func TestServeScorerWiring(t *testing.T) {
 		cmd := exec.Command(bin, "serve")
 		cmd.Env = append(os.Environ(), "HOME="+tmp, "WORKFLOW_SERVE_DATA="+filepath.Join(tmp, "data"), "WORKFLOW_SERVE_ADDR=127.0.0.1:0",
 			"WORKFLOW_QUEUE="+filepath.Join(tmp, "queue"), "WORKFLOW_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"),
-			"WORKFLOW_SERVE_KEYS=a=ka", "TYPESAFE_API_KEY=", "WORKFLOW_CHECKS_DIR=")
+			"TYPESAFE_API_KEY=", "WORKFLOW_CHECKS_DIR=")
 		cmd.Env = append(cmd.Env, extra...)
 		var out bytes.Buffer
 		cmd.Stderr = &out

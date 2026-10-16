@@ -199,7 +199,7 @@ func TestAdvisoryOutcome(t *testing.T) {
 	checkA := cl[0].(map[string]any)["name"].(string)
 	checkB := cl[1].(map[string]any)["name"].(string)
 	// Test setup, not a product path: scores rows for the delivered designs.
-	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "t", "ledger.db")+"?_pragma=busy_timeout(5000)")
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "local", "ledger.db")+"?_pragma=busy_timeout(5000)")
 	if err != nil {
 		t.Fatal(err)
 	}
