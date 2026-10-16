@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"net"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/login"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/mcp"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
 	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
@@ -26,7 +28,7 @@ var (
 	commit  = "unknown"
 )
 
-const usage = "usage: workflow serve | drain | ledger compact --tenant-dir <dir> | ledger purge-deltas --tenant-dir <dir> | mcp | status | version\n"
+const usage = "usage: workflow serve | drain | login [--endpoint URL] | ledger compact --tenant-dir <dir> | ledger purge-deltas --tenant-dir <dir> | mcp | status | version\n"
 
 func main() { os.Exit(run(os.Args[1:])) }
 
@@ -44,6 +46,8 @@ func run(args []string) int {
 		return drain.RunStandalone(ctx, os.Stderr)
 	case "status":
 		return drain.RunStatus(os.Stdout)
+	case "login":
+		return runLogin(args[1:])
 	case "ledger":
 		return runLedger(args[1:])
 	case "mcp":
@@ -54,6 +58,23 @@ func run(args []string) int {
 	}
 	fmt.Fprint(os.Stderr, usage)
 	return 2
+}
+
+func runLogin(args []string) int {
+	fs := flag.NewFlagSet("login", flag.ContinueOnError)
+	fs.SetOutput(os.Stderr)
+	fs.Usage = func() { fmt.Fprint(os.Stderr, usage) }
+	var endpoint string
+	fs.StringVar(&endpoint, "endpoint", "", "collector origin (https URL, no path)")
+	if err := fs.Parse(args); err != nil || fs.NArg() != 0 {
+		if err == nil {
+			fmt.Fprint(os.Stderr, usage)
+		}
+		return 2
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	return login.Run(ctx, login.Options{Endpoint: endpoint, Stderr: os.Stderr})
 }
 
 // runMCP serves the advisory shim on stdin and stdout until EOF or a signal. Only JSON-RPC goes to
