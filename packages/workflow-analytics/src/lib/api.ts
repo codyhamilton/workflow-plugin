@@ -10,6 +10,13 @@ export class ApiError extends Error {
 	}
 }
 
+export type MeResponse = {
+	github_id: number;
+	github_login: string;
+	admin: boolean;
+	tenants: { name: string }[];
+};
+
 // localStorage is read on every call: no caching, so /settings takes effect without a reload.
 function read(key: string): string {
 	try {
@@ -19,6 +26,11 @@ function read(key: string): string {
 	}
 }
 
+/** Empty `workflow-analytics-base`: same-origin collector embed; session cookie, no bearer. */
+export function isCollectorMode(): boolean {
+	return read(BASE_KEY) === '';
+}
+
 /** GET <base>/v1/<path>?<params>. `path` is relative to /v1, e.g. "analytics/summary". */
 export async function apiGet<T = unknown>(
 	path: string,
@@ -26,12 +38,15 @@ export async function apiGet<T = unknown>(
 	signal?: AbortSignal
 ): Promise<T> {
 	const base = read(BASE_KEY).replace(/\/+$/, '');
-	const key = read(TOKEN_KEY);
+	const collector = base === '';
+	const key = collector ? '' : read(TOKEN_KEY);
 	const qs = params ? params.toString() : '';
 	const url = `${base}/v1/${path.replace(/^\/+/, '')}${qs ? `?${qs}` : ''}`;
 	const headers: Record<string, string> = { accept: 'application/json' };
 	if (key) headers.authorization = `Bearer ${key}`;
-	const res = await fetch(url, { headers, signal });
+	const init: RequestInit = { headers, signal };
+	if (collector) init.credentials = 'include';
+	const res = await fetch(url, init);
 	if (!res.ok) {
 		let msg = res.statusText || `HTTP ${res.status}`;
 		try {
@@ -49,4 +64,9 @@ export async function apiGet<T = unknown>(
 	} catch {
 		throw new Error(`${url} did not return JSON: this origin does not serve the workflow API. Set the API base URL.`);
 	}
+}
+
+/** Session identity and owned tenants (`GET /v1/me`). Collector mode only; same transport as `apiGet`. */
+export async function fetchMe(signal?: AbortSignal): Promise<MeResponse> {
+	return apiGet<MeResponse>('me', undefined, signal);
 }

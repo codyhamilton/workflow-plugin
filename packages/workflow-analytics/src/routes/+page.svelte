@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
+	import { fetchMe, isCollectorMode } from '$lib/api';
 	import Heatmap from '$lib/charts/Heatmap.svelte';
 	import Sparkline from '$lib/charts/Sparkline.svelte';
 	import type { HeatCell, TimePoint } from '$lib/charts/options';
@@ -53,6 +54,40 @@
 	let sparks = $state<Record<string, TimePoint[]>>({});
 	let heat = $state<HeatCell[]>([]);
 
+	let sessionTenant = $state<string | null>(null);
+	let sessionReady = $state(!isCollectorMode());
+
+	$effect(() => {
+		page.url.pathname;
+		page.url.search;
+		if (!isCollectorMode()) {
+			sessionTenant = null;
+			sessionReady = true;
+			return;
+		}
+		sessionReady = false;
+		let live = true;
+		fetchMe()
+			.then((me) => {
+				if (!live) return;
+				sessionTenant = me.tenants[0]?.name ?? null;
+				sessionReady = true;
+			})
+			.catch((e) => {
+				if (!live || e instanceof Superseded) return;
+				sessionReady = true;
+				setError(e);
+			});
+		return () => {
+			live = false;
+		};
+	});
+
+	function withTenant(p: URLSearchParams | null): URLSearchParams | null {
+		if (p && sessionTenant) p.set('tenant', sessionTenant);
+		return p;
+	}
+
 	// Secondary grouped rows, rendered from the same summary response. Nested keys are joined with
 	// "-" for the test id (summary-by_kind-brief), matching the ids the old page exposed.
 	const groups = $derived.by(() => {
@@ -75,6 +110,7 @@
 		const needsFacets = Object.keys(state.exclude).length > 0;
 		// Wait for facets of the *current* window when an exclude needs their complement. `facetsReady`
 		// only flips on a genuine window change, so a late facet response does not re-run this effect.
+		if (!sessionReady) return;
 		if (needsFacets && !view.facetsReady) return;
 
 		let live = true;
@@ -83,7 +119,7 @@
 			setError(e);
 		};
 
-		const rest = untrack(() => view.paramsFor('rest'));
+		const rest = untrack(() => withTenant(view.paramsFor('rest')));
 		if (rest) {
 			getJSON<Summary>('overview-summary', 'analytics/summary', rest).then((s) => {
 				if (!live) return;
@@ -117,7 +153,7 @@
 		};
 
 		for (const [id, measure] of SPARKS) {
-			const p = query({ measure, bucket });
+			const p = withTenant(query({ measure, bucket }));
 			if (!p) continue;
 			getJSON<QueryResponse>(`overview-spark-${id}`, 'analytics/query', p).then((r) => {
 				if (!live) return;
@@ -129,7 +165,7 @@
 			}, fail);
 		}
 
-		const hp = query({ measure: 'hook_events', dim: ['weekday', 'hour_of_day'], bucket: 'none' });
+		const hp = withTenant(query({ measure: 'hook_events', dim: ['weekday', 'hour_of_day'], bucket: 'none' }));
 		if (hp) {
 			getJSON<QueryResponse>('overview-heatmap', 'analytics/query', hp).then((r) => {
 				if (!live) return;

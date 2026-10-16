@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, apiGet } from './api';
+import { ApiError, apiGet, fetchMe } from './api';
 
 let store: Record<string, string>;
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -25,6 +25,15 @@ describe('apiGet', () => {
 		const [url, init] = fetchMock.mock.calls[0];
 		expect(url).toBe('/v1/analytics/summary?repo_id=a&repo_id=b');
 		expect(new Headers(init?.headers).has('authorization')).toBe(false);
+		expect(init?.credentials).toBe('include');
+	});
+
+	it('collector mode ignores a stored key and still omits Authorization', async () => {
+		store['workflow-analytics-key'] = 'sekret';
+		await apiGet('analytics/summary');
+		const [, init] = fetchMock.mock.calls[0];
+		expect(new Headers(init?.headers).has('authorization')).toBe(false);
+		expect(init?.credentials).toBe('include');
 	});
 
 	it('uses the stored base without a trailing slash and sends the bearer token', async () => {
@@ -37,6 +46,7 @@ describe('apiGet', () => {
 	});
 
 	it('reads storage on every call', async () => {
+		store['workflow-analytics-base'] = 'https://api.example.com';
 		await apiGet('baselines');
 		store['workflow-analytics-key'] = 'k2';
 		await apiGet('baselines');
@@ -52,6 +62,14 @@ describe('apiGet', () => {
 			message: 'unauthorized'
 		});
 		await expect(apiGet('analytics/summary')).rejects.toBeInstanceOf(ApiError);
+	});
+
+	it('fetchMe hits /v1/me with session transport', async () => {
+		fetchMock.mockImplementation(() => ok({ github_id: 1, github_login: 'u', admin: false, tenants: [] }));
+		await fetchMe();
+		const [url, init] = fetchMock.mock.calls[0];
+		expect(url).toBe('/v1/me');
+		expect(init?.credentials).toBe('include');
 	});
 
 	it('names a non-JSON 200 (a static host without the API) as a connection problem', async () => {
