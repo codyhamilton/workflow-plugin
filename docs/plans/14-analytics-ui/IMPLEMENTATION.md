@@ -59,3 +59,11 @@ Refined in `1773214` into six units. Refine agent `d742ac97-355e-4334-8c57-c8076
 - Deviations: none.
 - Agent: Composer, agent `181d15dd-ad7a-4dd1-88ff-50483e632968`. The harness did not report turn count or final context size. Status `done`.
 - Check: `go test ./internal/store/ -run TestScoreSeries -count=1` and `go test ./internal/serve/ -run 'TestScoreSeries|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
+
+### 2-03-executions-shape-series
+
+- Built: repeatable `shape` filters executions rows and the cursor only. `counts` stay the window totals. Optional `bucket` adds `series` with keys `complete`, `unreported`, `started` in that order.
+- Surfaces: `tools/workflow/internal/store/analytics.go`, `analytics_test.go`; `tools/workflow/internal/serve/analytics.go`, `analytics_test.go`, `analytics_bench_test.go`. Commit `8fd0807`.
+- Deviations: none.
+- Agent: Composer, agent `0c5692ac-6817-4c4f-9e17-0c7e5f7a69e1`. The harness did not report turn count or final context size. Status `done`.
+- Check: `go test ./internal/store/ -run 'TestAnalyticsExecutions|TestExecutionsPage|TestExecutions.*Series' -count=1` and `go test ./internal/serve/ -run 'TestExecutions|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
