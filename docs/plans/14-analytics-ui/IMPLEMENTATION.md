@@ -184,3 +184,24 @@ Checked against the phase outcome, not the reports. From `packages/workflow-anal
 Refined in `c809570` into six units. Refine agent `82a4ce38-8c57-4f4d-9b55-97613c94d3ea` returned Proceed. `artifact_feedback` was not called: the workflow feedback namespace is not loaded in this session. Nothing is queued for the six briefs.
 
 The design 7 open-issue-12 carried item stays for Phase 5. The priced-opus e2e mismatch is unit 4-06.
+
+### 4-01-quality-score-series
+
+- Built: `/quality` fetches score series per kind, draws a median line and a p25–p75 band per check with points, draws the all-time baseline median, leaves a gap where a bucket has no point, keeps the box plot, reloads both when kind changes, and brush sets the custom window.
+- Surfaces: `packages/workflow-analytics/src/routes/quality/+page.svelte`, `types.ts`, `params.ts`, `ScoreBandChart.svelte`, `score-series.ts`, `score-series.test.ts`, `tests/e2e/quality.spec.ts`. Commit `7404a65`.
+- Deviations: quality e2e sets `timezoneId: 'UTC'`. The kind-refetch test waits for the score-series request.
+- Agent: Composer, agent `2ebfdc9a-73d0-4fe8-a8b6-b1d581b7d610`. The harness did not report turn count or final context size. Status `done`.
+
+### 4-05-explore-usage-columns
+
+- Built: the Explore table columns include `model`, `cost_usd`, and `norm_event`.
+- Surfaces: `packages/workflow-analytics/src/routes/explore/+page.svelte`, `tests/e2e/explore.spec.ts`. Commit `de59898`.
+- Deviations: none.
+- Agent: Composer, agent `7f8d8580-a5be-4fd0-8fca-34586d038e4e`. The harness did not report turn count or final context size. Status `done`.
+
+### 4-06-e2e-pricing-fixture
+
+- Built: e2e expectations match priced `claude-opus-5-5` (`$0.13` per call, one unpriced qwen call).
+- Surfaces: `tests/e2e/fixture.ts`, `overview.spec.ts`, `usage.spec.ts`, `interactions.spec.ts`. Commit `1b94b7a`.
+- Deviations: unpriced-only cases filter qwen with `model=` because Opus under `harness=claude` is priced. Interactions repos fan-out expects five queries. The `$0` guard is limited to the usage table so histogram bin labels do not fail it.
+- Agent: Composer, agent `f01d08db-d85f-4d48-a2f4-090615e94a2f`. The harness did not report turn count or final context size. Status `done`.
