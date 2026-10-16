@@ -34,7 +34,7 @@ None.
 
 ## Phase 2 — Distribution, score series, and run aggregates
 
-Refined in `1773214` into six units. [Refine](d742ac97-355e-4334-8c57-c8076a6ee14b) returned Proceed. `artifact_feedback` on the six briefs was not delivered; nothing was queued.
+Refined in `1773214` into six units. Refine agent `d742ac97-355e-4334-8c57-c8076a6ee14b` returned Proceed. `artifact_feedback` on the six briefs was not delivered; nothing was queued.
 
 ### 2-01-distribution-read
 
