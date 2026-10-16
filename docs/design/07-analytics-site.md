@@ -299,6 +299,19 @@ on a compacted copy of the real ledger.
 
 ## Hosting
 
+- **Fly.io remote collector:** Plan 13 deploys the public `workflow serve` host on fly.io (`fly.toml`:
+  app `workflow-collector`, `WORKFLOW_PUBLIC_URL` `https://workflow-collector.fly.dev` until the
+  operator renames the app). One machine runs the image built from the repo `Dockerfile` (analytics
+  `build/` copied into `tools/workflow/internal/serve/site/`, then `workflow serve` on internal port
+  8080). A fly volume `workflow_serve_data` mounts at `/data`; `WORKFLOW_SERVE_DATA=/data` holds the
+  registry and tenant ledgers across restarts. `WORKFLOW_SERVE_KEYS` is unset. GitHub OAuth uses that
+  collector origin (`GET /oauth/login`, callback `/oauth/callback`); `GITHUB_OAUTH_CLIENT_SECRET` is a
+  fly secret, not in the repo. The embedded site is same-origin with `/v1` on that host: session
+  cookie after `/login`, no pasted key in the build. On the collector dashboard, `?tenant=` from
+  `GET /v1/me` is wired on the overview and on `/profile` where tenant context applies; other
+  report routes do not append it yet. The fly app lists the Cloudflare Pages origin exactly in
+  `WORKFLOW_SERVE_CORS_ORIGINS` so a browser on Pages can `GET /v1/analytics/*` with a pasted bearer
+  while credentialed CORS stays off.
 - The site's build output is copied into `tools/workflow/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
   `index.html` is missing or is the placeholder, then restores the committed placeholder on exit.
@@ -310,9 +323,12 @@ on a compacted copy of the real ledger.
   `Cache-Control: no-cache`; files under `_app/immutable/` are `public, max-age=31536000,
   immutable`. `/v1` and `/v1/*` are never HTML. In keyed mode the static files need no key; they
   carry no tenant data.
-- `packages/workflow-analytics/wrangler.toml` declares `pages_build_output_dir = "./build"`, the same
-  build. With no `404.html`, Pages serves it as a single-page app. Creating the Pages project,
-  attaching a hostname and setting `WORKFLOW_SERVE_CORS_ORIGINS` to that origin are operator
+- **Cloudflare Pages (static pasted-token client):** `packages/workflow-analytics/wrangler.toml`
+  declares `pages_build_output_dir = "./build"`, the same artifact as the embedded collector build.
+  Pages is a static host only: `/settings` stores the collector API base and a pasted bearer in
+  `localStorage`; the site never receives the collector `workflow_session` cookie. With no
+  `404.html`, Pages serves it as a single-page app. Creating the Pages project, attaching a hostname,
+  and setting the fly collector's `WORKFLOW_SERVE_CORS_ORIGINS` to that exact origin are operator
   actions.
 
 ## Open issues
