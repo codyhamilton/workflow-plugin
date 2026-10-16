@@ -81,7 +81,7 @@ Run identity: https://cursor.com/agents/bc-b44d5a65-1dda-58d1-8753-0a1631f41a82
 Started: 2026-10-16T12:29:57Z
 Resuming HEAD: `1b7c79b`
 
-Phase 3 only. Phase 4 is not started.
+Phase 4 is not started.
 
 Refined into five units, committed in `e0d9c1d`. 3-01 and 3-02 first (disjoint). After 3-02, 3-03 and 3-04. 3-05 after 3-01 and 3-04. Phase 2 carried items: other routes omitting `tenant` stay out of this phase; the registry-open panic stays; e2e seeding stays; the device page must not prefill expiry.
 
@@ -105,10 +105,10 @@ artifact_feedback on the five phase 3 briefs: quality service unreachable at `ht
 
 ### 3-03-device-page
 
-- Built: `/device` requires `state` and a loopback `redirect_uri`, and tenant, grant, and expiry with no defaults (expiry starts empty). Zero tenants shows a create form. Signed-out users go to `/oauth/login?return=…`. Submit posts `POST /v1/device/authorize` and navigates to the redirect without showing the plaintext.
-- Surfaces: `packages/workflow-analytics/src/routes/device/+page.svelte`, `packages/workflow-analytics/src/lib/api.ts`, `packages/workflow-analytics/src/lib/api.test.ts`, `packages/workflow-analytics/tests/e2e/device.spec.ts`.
-- Commit: `48309e2`. `npm test` passed (169). Playwright `device.spec.ts` passed (2).
-- Deviations: `authorizeDevice` follows an opaque 303 by retrying `redirect: 'follow'` and then assigning `response.url`. The Playwright test mocks a same-origin 303 so `Location` is visible. `global-setup.ts` was left alone.
+- Built: `/device` requires `state` and a loopback `redirect_uri`, and tenant, grant, and expiry with no defaults (expiry starts empty). Zero tenants shows a create form. Signed-out users go to `/oauth/login?return=…`. Submit is one form POST to `/v1/device/authorize`, and the browser follows the 303 to the loopback callback. The page does not show the plaintext.
+- Surfaces: `packages/workflow-analytics/src/routes/device/+page.svelte`, `packages/workflow-analytics/src/lib/api.ts`, `packages/workflow-analytics/src/lib/api.test.ts`, `packages/workflow-analytics/tests/e2e/device.spec.ts`. The fixer also touched `tools/workflow/internal/serve/device.go`, `tools/workflow/internal/serve/session.go`, and `tools/workflow/internal/serve/serve_test.go`.
+- Commit: `48309e2`. `npm test` passed (169). Playwright `device.spec.ts` passed (2). Fixer `2141d86` replaced the fetch workaround with the form POST.
+- Deviations: the first page used `fetch` and, in Chromium, that opaque 303 issued a second token and never navigated. `2141d86` accepts `application/x-www-form-urlencoded` on this route (session and Origin still required) and the page submits once. `global-setup.ts` was left alone.
 - Agent: Composer, harness did not report turns or final context.
 
 ### 3-04-workflow-login-cli
@@ -126,6 +126,28 @@ artifact_feedback on the five phase 3 briefs: quality service unreachable at `ht
 - Commit: `8456ea3`. Those files name `WORKFLOW_ENDPOINT` and `workflow login`, and the only `workflow init` lines say there is none.
 - Deviations: none.
 - Agent: Composer, harness did not report turns or final context.
+
+### Phase 3 verification
+
+Outcome holds.
+
+- With `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` set to a live `read_write` token and no `client.toml`, `workflow drain` stored the spooled fact and `workflow mcp` `list_checks` reached the collector with that bearer (`no checks loaded on the service`, HTTP 200). A `client.toml` from `workflow login`, with those env vars unset, did the same. A hand-written `client.toml` with the same key did too.
+- Neither file nor env is local mode: `workflow status` said `config: none (local mode)` and `GET /v1/health` on `127.0.0.1:8770` carried an empty `Authorization`.
+- Exactly one of `WORKFLOW_ENDPOINT` or `WORKFLOW_KEY`, with a working `client.toml` present, made `workflow status` and `workflow drain` exit 1 before any connection. `workflow mcp` returned the unusable-config text and did not contact the file's collector, the half-set endpoint, or loopback.
+- `workflow login --endpoint` opened `https://<collector>/device?state=&redirect_uri=` with the loopback callback. The live `/oauth/login?return=` redirected to `https://github.com/login/oauth/authorize` and set `workflow_oauth_return`. The signed-out device page links to that login with the device path as `return`. The binary has no mock GitHub base, so the session cookie was seeded and the page was driven in Chromium; the return trip from github.com was not run.
+- With no tenant, the page asked for a name and created it. Grant and expiry were empty, and Authorize stayed disabled until both were chosen. The submitted `expires_at` was the chosen time (`2027-06-15T15:30:00Z`), not a generated lifetime. One form POST, then the browser document landed on that login's `http://127.0.0.1:<port>/callback?code=&state=`. The page, the callback URL, and the login stderr contained no `wk_` plaintext. After exchange, `registry.json` had no `wk_` plaintext. A second exchange of that code was 401 and returned no token.
+- Drain with the `read_write` key from that file delivered. A `read` token from a second login left ingest 403 `read-only token` and stored nothing, and `workflow mcp` still read. The earlier `read_write` token still authorized (`200`, `duplicate` for a fact already stored). Quitting before submit wrote no file. Login with no endpoint exited 1 and wrote nothing.
+- Loopback `workflow serve` with no keys answered `GET /v1/health`. `workflow init` is not a command (exit 2, usage has no `init`). `docs/design/02-edge-capture.md` and `docs/design/05-distribution.md` name `WORKFLOW_ENDPOINT` and `workflow login`, and they do not say the command is not built yet.
+- `go test` on `internal/clientconfig`, `internal/login`, `internal/serve` (including `TestDeviceAuthorizationFlow`), `internal/mcp`, and `cmd/workflow` (`Login|ClientEnv|HalfSet`) passed. `npm test` passed (169).
+
+artifact_feedback on the five phase 3 briefs and five reports: service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
+### Carried
+
+1. Collector-mode `tenant` is still only on `/`. Other analytics routes omit it.
+2. `Server.New` panics if the registry cannot be opened or persisted.
+3. E2e global-setup seeds `registry.json` instead of logging in and calling `POST /v1/tokens`.
+4. The profile expiry field is prefilled to three months in the browser. The device page does not copy that. The server still has no default.
 
 ## Phase 1 — GitHub login and admission
 
