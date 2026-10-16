@@ -1,0 +1,6 @@
+{
+  "execution_eligible": false,
+  "note": "The requested queue-after-#133 gate was not met when this seat ran.",
+  "prerequisite_pr": 133,
+  "status_at_execution_check": "OPEN"
+}

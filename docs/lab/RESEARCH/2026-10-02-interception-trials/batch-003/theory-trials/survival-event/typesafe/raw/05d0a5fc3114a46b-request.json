@@ -1,0 +1,238 @@
+{
+  "model": "jev-1.13.0",
+  "state": {
+    "scenario_id": "PR-SURVIVAL-EVENT|07357f196666|seat-3",
+    "framing": "EX-MARKER-1A",
+    "snapshot": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "worker_id": "07357f196666",
+      "stratum": "weak",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "worker_id": "07357f196666",
+          "checkpoint_turn": 75,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "prior_checkpoint_turn": null,
+          "brief_anchor": "Use medium reasoning effort. If you spawn any read-only helper, use model opus at medium effort.\n\nYou are the worker for unit 3-09 of plan docs/plans/03-map-layer-parity-remediation. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3-09-shape-to-every-overlapped-cell.md`. Read it and follow it exactly.\n\nRepo: <REPO>, branch master. Commit only explicit paths (never `git add -A`) and never stage binaries or scratch output. End commit messages with:\n",
+          "cumulative": {
+            "api_turns": 75,
+            "peak_ctx_tokens": 138945,
+            "prefix_bytes": 1509388,
+            "tool_histogram": {
+              "Bash": 75,
+              "Write": 2
+            },
+            "reread_paths": [],
+            "distinct_read_paths": 0,
+            "compaction_event_count": 2,
+            "assistant_text_chars": 62
+          },
+          "delta_since_prior": {},
+          "tail": [
+            {
+              "turn": 68,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 69,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 70,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 71,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 72,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 73,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 74,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            },
+            {
+              "turn": 75,
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ]
+            }
+          ],
+          "thrash_top_rereads": []
+        }
+      ],
+      "stimulus_sha256": "489faeb5d65c4842323293f703db978fb9e79eb2c43f526744e5e08ccd66388d"
+    }
+  },
+  "questions": {
+    "event_time": {
+      "type": "choice",
+      "instructions": "At what api_turn, if any, did this trajectory become unproductive? Use only the shown early-window card. Return the earliest supported api_turn as an integer label, or null when the card does not support an event. Do not use trajectory length or hindsight.",
+      "criteria": {
+        "null": "No supported transition to unproductive is visible in this prefix; return null rather than guessing.",
+        "1": "The earliest supported transition occurred at api_turn 1.",
+        "2": "The earliest supported transition occurred at api_turn 2.",
+        "3": "The earliest supported transition occurred at api_turn 3.",
+        "4": "The earliest supported transition occurred at api_turn 4.",
+        "5": "The earliest supported transition occurred at api_turn 5.",
+        "6": "The earliest supported transition occurred at api_turn 6.",
+        "7": "The earliest supported transition occurred at api_turn 7.",
+        "8": "The earliest supported transition occurred at api_turn 8.",
+        "9": "The earliest supported transition occurred at api_turn 9.",
+        "10": "The earliest supported transition occurred at api_turn 10.",
+        "11": "The earliest supported transition occurred at api_turn 11.",
+        "12": "The earliest supported transition occurred at api_turn 12.",
+        "13": "The earliest supported transition occurred at api_turn 13.",
+        "14": "The earliest supported transition occurred at api_turn 14.",
+        "15": "The earliest supported transition occurred at api_turn 15.",
+        "16": "The earliest supported transition occurred at api_turn 16.",
+        "17": "The earliest supported transition occurred at api_turn 17.",
+        "18": "The earliest supported transition occurred at api_turn 18.",
+        "19": "The earliest supported transition occurred at api_turn 19.",
+        "20": "The earliest supported transition occurred at api_turn 20.",
+        "21": "The earliest supported transition occurred at api_turn 21.",
+        "22": "The earliest supported transition occurred at api_turn 22.",
+        "23": "The earliest supported transition occurred at api_turn 23.",
+        "24": "The earliest supported transition occurred at api_turn 24.",
+        "25": "The earliest supported transition occurred at api_turn 25.",
+        "26": "The earliest supported transition occurred at api_turn 26.",
+        "27": "The earliest supported transition occurred at api_turn 27.",
+        "28": "The earliest supported transition occurred at api_turn 28.",
+        "29": "The earliest supported transition occurred at api_turn 29.",
+        "30": "The earliest supported transition occurred at api_turn 30.",
+        "31": "The earliest supported transition occurred at api_turn 31.",
+        "32": "The earliest supported transition occurred at api_turn 32.",
+        "33": "The earliest supported transition occurred at api_turn 33.",
+        "34": "The earliest supported transition occurred at api_turn 34.",
+        "35": "The earliest supported transition occurred at api_turn 35.",
+        "36": "The earliest supported transition occurred at api_turn 36.",
+        "37": "The earliest supported transition occurred at api_turn 37.",
+        "38": "The earliest supported transition occurred at api_turn 38.",
+        "39": "The earliest supported transition occurred at api_turn 39.",
+        "40": "The earliest supported transition occurred at api_turn 40.",
+        "41": "The earliest supported transition occurred at api_turn 41.",
+        "42": "The earliest supported transition occurred at api_turn 42.",
+        "43": "The earliest supported transition occurred at api_turn 43.",
+        "44": "The earliest supported transition occurred at api_turn 44.",
+        "45": "The earliest supported transition occurred at api_turn 45.",
+        "46": "The earliest supported transition occurred at api_turn 46.",
+        "47": "The earliest supported transition occurred at api_turn 47.",
+        "48": "The earliest supported transition occurred at api_turn 48.",
+        "49": "The earliest supported transition occurred at api_turn 49.",
+        "50": "The earliest supported transition occurred at api_turn 50.",
+        "51": "The earliest supported transition occurred at api_turn 51.",
+        "52": "The earliest supported transition occurred at api_turn 52.",
+        "53": "The earliest supported transition occurred at api_turn 53.",
+        "54": "The earliest supported transition occurred at api_turn 54.",
+        "55": "The earliest supported transition occurred at api_turn 55.",
+        "56": "The earliest supported transition occurred at api_turn 56.",
+        "57": "The earliest supported transition occurred at api_turn 57.",
+        "58": "The earliest supported transition occurred at api_turn 58.",
+        "59": "The earliest supported transition occurred at api_turn 59.",
+        "60": "The earliest supported transition occurred at api_turn 60.",
+        "61": "The earliest supported transition occurred at api_turn 61.",
+        "62": "The earliest supported transition occurred at api_turn 62.",
+        "63": "The earliest supported transition occurred at api_turn 63.",
+        "64": "The earliest supported transition occurred at api_turn 64.",
+        "65": "The earliest supported transition occurred at api_turn 65.",
+        "66": "The earliest supported transition occurred at api_turn 66.",
+        "67": "The earliest supported transition occurred at api_turn 67.",
+        "68": "The earliest supported transition occurred at api_turn 68.",
+        "69": "The earliest supported transition occurred at api_turn 69.",
+        "70": "The earliest supported transition occurred at api_turn 70.",
+        "71": "The earliest supported transition occurred at api_turn 71.",
+        "72": "The earliest supported transition occurred at api_turn 72.",
+        "73": "The earliest supported transition occurred at api_turn 73.",
+        "74": "The earliest supported transition occurred at api_turn 74.",
+        "75": "The earliest supported transition occurred at api_turn 75.",
+        "76": "The earliest supported transition occurred at api_turn 76.",
+        "77": "The earliest supported transition occurred at api_turn 77.",
+        "78": "The earliest supported transition occurred at api_turn 78.",
+        "79": "The earliest supported transition occurred at api_turn 79.",
+        "80": "The earliest supported transition occurred at api_turn 80.",
+        "81": "The earliest supported transition occurred at api_turn 81.",
+        "82": "The earliest supported transition occurred at api_turn 82.",
+        "83": "The earliest supported transition occurred at api_turn 83.",
+        "84": "The earliest supported transition occurred at api_turn 84.",
+        "85": "The earliest supported transition occurred at api_turn 85.",
+        "86": "The earliest supported transition occurred at api_turn 86.",
+        "87": "The earliest supported transition occurred at api_turn 87.",
+        "88": "The earliest supported transition occurred at api_turn 88.",
+        "89": "The earliest supported transition occurred at api_turn 89.",
+        "90": "The earliest supported transition occurred at api_turn 90.",
+        "91": "The earliest supported transition occurred at api_turn 91.",
+        "92": "The earliest supported transition occurred at api_turn 92.",
+        "93": "The earliest supported transition occurred at api_turn 93.",
+        "94": "The earliest supported transition occurred at api_turn 94.",
+        "95": "The earliest supported transition occurred at api_turn 95.",
+        "96": "The earliest supported transition occurred at api_turn 96.",
+        "97": "The earliest supported transition occurred at api_turn 97.",
+        "98": "The earliest supported transition occurred at api_turn 98.",
+        "99": "The earliest supported transition occurred at api_turn 99.",
+        "100": "The earliest supported transition occurred at api_turn 100.",
+        "101": "The earliest supported transition occurred at api_turn 101.",
+        "102": "The earliest supported transition occurred at api_turn 102.",
+        "103": "The earliest supported transition occurred at api_turn 103.",
+        "104": "The earliest supported transition occurred at api_turn 104.",
+        "105": "The earliest supported transition occurred at api_turn 105.",
+        "106": "The earliest supported transition occurred at api_turn 106.",
+        "107": "The earliest supported transition occurred at api_turn 107.",
+        "108": "The earliest supported transition occurred at api_turn 108.",
+        "109": "The earliest supported transition occurred at api_turn 109.",
+        "110": "The earliest supported transition occurred at api_turn 110.",
+        "111": "The earliest supported transition occurred at api_turn 111.",
+        "112": "The earliest supported transition occurred at api_turn 112.",
+        "113": "The earliest supported transition occurred at api_turn 113.",
+        "114": "The earliest supported transition occurred at api_turn 114.",
+        "115": "The earliest supported transition occurred at api_turn 115.",
+        "116": "The earliest supported transition occurred at api_turn 116.",
+        "117": "The earliest supported transition occurred at api_turn 117.",
+        "118": "The earliest supported transition occurred at api_turn 118.",
+        "119": "The earliest supported transition occurred at api_turn 119.",
+        "120": "The earliest supported transition occurred at api_turn 120."
+      }
+    },
+    "rationale": {
+      "type": "noul",
+      "instructions": "Optional one-line rationale. Cite only visible checkpoint turns and observable activity in the card; do not invent an event."
+    }
+  }
+}

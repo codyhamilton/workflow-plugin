@@ -1,0 +1,4404 @@
+[
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14… at -j 12",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 36,
+            "compaction_event_count": 8,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 129961,
+            "prefix_bytes": 2911105,
+            "reread_paths": [
+              {
+                "count": 6,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 5,
+                "path": "<REPO>/parser/kiwiw/divide.py"
+              },
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/_e2.c"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 37,
+              "Read": 19
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 6,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 5,
+              "path": "<REPO>/parser/kiwiw/divide.py"
+            },
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/_e2.c"
+            }
+          ],
+          "worker_id": "92a48e004519"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14… at -j 12",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 36,
+            "compaction_event_count": 10,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 129961,
+            "prefix_bytes": 3412009,
+            "reread_paths": [
+              {
+                "count": 6,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 5,
+                "path": "<REPO>/parser/kiwiw/_e2.c"
+              },
+              {
+                "count": 5,
+                "path": "<REPO>/parser/kiwiw/divide.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 46,
+              "Read": 21
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 9,
+              "Read": 2
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Bash"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 6,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 5,
+              "path": "<REPO>/parser/kiwiw/_e2.c"
+            },
+            {
+              "count": 5,
+              "path": "<REPO>/parser/kiwiw/divide.py"
+            }
+          ],
+          "worker_id": "92a48e004519"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14… at -j 12",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 36,
+            "compaction_event_count": 12,
+            "distinct_read_paths": 7,
+            "peak_ctx_tokens": 129961,
+            "prefix_bytes": 4202317,
+            "reread_paths": [
+              {
+                "count": 10,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 7,
+                "path": "<REPO>/parser/kiwiw/divide.py"
+              },
+              {
+                "count": 6,
+                "path": "<REPO>/parser/kiwiw/_e2.c"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 55,
+              "Read": 31
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<REPO>/parser/kiwiw/cenc.py"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 9,
+              "Read": 10
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read",
+                "Read"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 10,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 7,
+              "path": "<REPO>/parser/kiwiw/divide.py"
+            },
+            {
+              "count": 6,
+              "path": "<REPO>/parser/kiwiw/_e2.c"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+            }
+          ],
+          "worker_id": "92a48e004519"
+        }
+      ],
+      "stimulus_sha256": "0e71a48d81c100aae2cd146bb8ebabd6a966b76f516b4914d9545f8cf64f2d5c",
+      "stratum": "thrash",
+      "worker_id": "92a48e004519"
+    },
+    "metadata": {
+      "T": 296,
+      "early_window_end": 120,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 36,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 4,
+        "compaction_last_le120": 12,
+        "edit_write_absent": true,
+        "last_checkpoint_le120": 75,
+        "no_mutation": true,
+        "peak_ctx_first": 129961,
+        "reread_cluster": true,
+        "reread_max": 10,
+        "tool_histogram_last": {
+          "Bash": 55,
+          "Read": 31
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/92a48e004519-dry-run-metrics-20261001-194107.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/92a48e004519-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "7ef052461bca7e8488939e1b9ad4ed9416dc53b5a7a6740dc47d50677e406ced",
+      "stimulus_chars": 5956,
+      "worker_id": "92a48e004519"
+    },
+    "worker_id": "92a48e004519"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14… at -j 12",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 111,
+            "compaction_event_count": 8,
+            "distinct_read_paths": 13,
+            "peak_ctx_tokens": 123714,
+            "prefix_bytes": 2457119,
+            "reread_paths": [
+              {
+                "count": 8,
+                "path": "<REPO>/parser/kiwiw/divide.py"
+              },
+              {
+                "count": 6,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 4,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/_e2.c"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/cenc.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 24,
+              "Read": 35
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 8,
+              "path": "<REPO>/parser/kiwiw/divide.py"
+            },
+            {
+              "count": 6,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 4,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/_e2.c"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/cenc.py"
+            }
+          ],
+          "worker_id": "ca977b9ca0dd"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14… at -j 12",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 111,
+            "compaction_event_count": 8,
+            "distinct_read_paths": 14,
+            "peak_ctx_tokens": 123714,
+            "prefix_bytes": 2976768,
+            "reread_paths": [
+              {
+                "count": 8,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 8,
+                "path": "<REPO>/parser/kiwiw/divide.py"
+              },
+              {
+                "count": 5,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/_e2.c"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/cenc.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 30,
+              "Read": 40
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<HOME>/.claude/projects/-home-<USER>-workspace-open-pajero-maps/d006f5a0-267f-402e-bed7-b13d1a65a961/tool-results/b2f5a3jt5.txt"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 6,
+              "Read": 5
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 8,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 8,
+              "path": "<REPO>/parser/kiwiw/divide.py"
+            },
+            {
+              "count": 5,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/_e2.c"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/cenc.py"
+            }
+          ],
+          "worker_id": "ca977b9ca0dd"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-09-division-into-e2.md` in repo <REPO>, branch master. Its dependency 3C-08 is committed (965dcfc). Read the outcome records for 3C-06, 3C-07 and 3C-08 in `docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md`, and the amendments at the end of the 3C-06, 3C-07 and 3C-08 briefs. Follow the brief exactly, including its step gates and committed stop point (full-disc sha 87a01b14… at -j 12",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 167,
+            "compaction_event_count": 10,
+            "distinct_read_paths": 14,
+            "peak_ctx_tokens": 126470,
+            "prefix_bytes": 3522749,
+            "reread_paths": [
+              {
+                "count": 10,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 9,
+                "path": "<REPO>/parser/kiwiw/divide.py"
+              },
+              {
+                "count": 6,
+                "path": "<REPO>/parser/kiwiw/_e2.c"
+              },
+              {
+                "count": 5,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/cenc.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 42,
+              "Read": 45
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 12,
+              "Read": 5
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 10,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 9,
+              "path": "<REPO>/parser/kiwiw/divide.py"
+            },
+            {
+              "count": 6,
+              "path": "<REPO>/parser/kiwiw/_e2.c"
+            },
+            {
+              "count": 5,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/cenc.py"
+            }
+          ],
+          "worker_id": "ca977b9ca0dd"
+        }
+      ],
+      "stimulus_sha256": "f6d48085f6e51530dee28e77f87882f5729fc3ede316eb0815af91ce04e7ee08",
+      "stratum": "thrash",
+      "worker_id": "ca977b9ca0dd"
+    },
+    "metadata": {
+      "T": 109,
+      "early_window_end": 109,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 167,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 2,
+        "compaction_last_le120": 10,
+        "edit_write_absent": true,
+        "last_checkpoint_le120": 75,
+        "no_mutation": true,
+        "peak_ctx_first": 123714,
+        "reread_cluster": true,
+        "reread_max": 10,
+        "tool_histogram_last": {
+          "Bash": 42,
+          "Read": 45
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/ca977b9ca0dd-dry-run-metrics-20261001-204508.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/ca977b9ca0dd-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "4e2e8eb6b060c2407668a8a5ffff9b9f5b854f1be0eab665d7599afca971d337",
+      "stimulus_chars": 6457,
+      "worker_id": "ca977b9ca0dd"
+    },
+    "worker_id": "ca977b9ca0dd"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Repo: <REPO>, branch `master` (work directly on it, no new branch). You are a build worker for one unit of a larger plan-driven project (open-pajero-maps, reverse-engineering a proprietary map disc format).\n\nYour brief is the complete, self-sufficient spec for this unit: read it in full before doing anything else.\n\n  docs/plans/03-map-layer-parity-remediation/briefs/3-12-overlap-duplication-remeasure.md\n\nFollow it exactly — owned paths, contract, done evidence, ev",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 1444,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 4,
+            "peak_ctx_tokens": 92950,
+            "prefix_bytes": 649191,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/overlap.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 36,
+              "Monitor": 3,
+              "Read": 9,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "Waiting for the background full-Australia build and Perth fixture builds to complete before continuing with compare_disc, roundtrip, and mirror-probe checks.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "Good, both still running/in-progress. I'll wait for the monitor notifications.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "Still waiting on the background builds (full-Australia -j12 and Perth j1/j4); will report once the monitor notifications land.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "Waiting for the background build tasks to complete.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "I'll wait here for the Monitor notifications for both background builds (full-Australia -j12 and Perth j1/j4) rather than polling further.",
+              "tool_names": [],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/overlap.py"
+            }
+          ],
+          "worker_id": "87a380bc64ff"
+        },
+        {
+          "brief_anchor": "Repo: <REPO>, branch `master` (work directly on it, no new branch). You are a build worker for one unit of a larger plan-driven project (open-pajero-maps, reverse-engineering a proprietary map disc format).\n\nYour brief is the complete, self-sufficient spec for this unit: read it in full before doing anything else.\n\n  docs/plans/03-map-layer-parity-remediation/briefs/3-12-overlap-duplication-remeasure.md\n\nFollow it exactly — owned paths, contract, done evidence, ev",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 1761,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 4,
+            "peak_ctx_tokens": 99541,
+            "prefix_bytes": 718453,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/overlap.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 45,
+              "Monitor": 4,
+              "Read": 9,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 9,
+              "Monitor": 1
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "While waiting, let's set up the mirror-probe script copy and run compare_disc/roundtrip against the already-completed full disc.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "I'll wait for compare_disc, roundtrip, and probe to complete.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "I'll wait for these three background tasks (compare_disc, roundtrip, mirror probe) to finish via their completion notifications.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/overlap.py"
+            }
+          ],
+          "worker_id": "87a380bc64ff"
+        },
+        {
+          "brief_anchor": "Repo: <REPO>, branch `master` (work directly on it, no new branch). You are a build worker for one unit of a larger plan-driven project (open-pajero-maps, reverse-engineering a proprietary map disc format).\n\nYour brief is the complete, self-sufficient spec for this unit: read it in full before doing anything else.\n\n  docs/plans/03-map-layer-parity-remediation/briefs/3-12-overlap-duplication-remeasure.md\n\nFollow it exactly — owned paths, contract, done evidence, ev",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 2284,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 4,
+            "peak_ctx_tokens": 105811,
+            "prefix_bytes": 801534,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/kiwiw/overlap.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 56,
+              "Monitor": 6,
+              "Read": 9,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 11,
+              "Monitor": 2
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "Waiting for compare_disc and quantisation_roundtrip to finish.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "Waiting for the compare_disc and quantisation_roundtrip background jobs to complete.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "Now waiting for both monitors to report back.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "Waiting on the compare_disc and roundtrip monitors.",
+              "tool_names": [],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/kiwiw/overlap.py"
+            }
+          ],
+          "worker_id": "87a380bc64ff"
+        }
+      ],
+      "stimulus_sha256": "183c77b22308ee5b4a42aac309a2be867f30da85c70695323ed65bca6bfacb27",
+      "stratum": "poll_monitor",
+      "worker_id": "87a380bc64ff"
+    },
+    "metadata": {
+      "T": 89,
+      "early_window_end": 89,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 2284,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 0,
+        "edit_write_absent": true,
+        "last_checkpoint_le120": 75,
+        "no_mutation": true,
+        "peak_ctx_first": 92950,
+        "reread_cluster": true,
+        "reread_max": 4,
+        "tool_histogram_last": {
+          "Bash": 56,
+          "Monitor": 6,
+          "Read": 9,
+          "ToolSearch": 1
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/87a380bc64ff-dry-run-metrics-20261001-214046.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/87a380bc64ff-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "7168467e2d497b3de6c7412181094bb8cc0c7c374f996013a8e9256817f0cd4b",
+      "stimulus_chars": 6586,
+      "worker_id": "87a380bc64ff"
+    },
+    "worker_id": "87a380bc64ff"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/… Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 1413,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 121906,
+            "prefix_bytes": 2792981,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/spec/format_english/pdf/0702122e.pdf"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 42,
+              "Monitor": 1,
+              "Read": 8,
+              "ToolSearch": 1,
+              "Write": 1
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "Moving along well. Let me continue checking periodically at longer intervals while doing other prep.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Write"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf"
+            }
+          ],
+          "worker_id": "bb6165018de0"
+        },
+        {
+          "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/… Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 1726,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 124894,
+            "prefix_bytes": 2844635,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/spec/format_english/pdf/0702122e.pdf"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 51,
+              "Monitor": 2,
+              "Read": 8,
+              "ToolSearch": 1,
+              "Write": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 9,
+              "Monitor": 1
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "I'll wait for this monitor's notifications instead of polling manually now.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "I'll wait for the monitor to report progress or completion.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "Census census is running in the background over the full R disc (level 0 is the large one, ~3.7M leaves / 9.9M links). I'll continue once it completes or reports further progress.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf"
+            }
+          ],
+          "worker_id": "bb6165018de0"
+        },
+        {
+          "brief_anchor": "READ-ONLY RESEARCH. Repo <REPO> (branch master). You must NOT edit, create or commit any file in the repo. Throwaway census scripts go in your scratchpad only; run with `<REPO>/.venv-rp/bin/python`. Reference disc R mounted read-only at <MOUNT>/… Spec PDFs at spec/format_english/pdf/ (index spec/INDEX.md; ch.7.2 = 0702122e.pdf is the Road Data Frame, ch.7.1 = 0701122e.pdf). Read PDFs with the Read tool's `pages` ",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 2174,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 127123,
+            "prefix_bytes": 2912944,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/spec/format_english/pdf/0702122e.pdf"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 66,
+              "Monitor": 2,
+              "Read": 8,
+              "ToolSearch": 1,
+              "Write": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 15
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "Standing by.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "Waiting for the census job — will resume analysis once it finishes.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "I'll wait for the next monitor event.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/spec/format_english/pdf/0702122e.pdf"
+            }
+          ],
+          "worker_id": "bb6165018de0"
+        }
+      ],
+      "stimulus_sha256": "816cfc66a0f71c611e74a54cac831ae30a10ab23462478a7bc0eae68503eda35",
+      "stratum": "poll_monitor",
+      "worker_id": "bb6165018de0"
+    },
+    "metadata": {
+      "T": 154,
+      "early_window_end": 120,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 2174,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 0,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 75,
+        "no_mutation": false,
+        "peak_ctx_first": 121906,
+        "reread_cluster": true,
+        "reread_max": 3,
+        "tool_histogram_last": {
+          "Bash": 66,
+          "Monitor": 2,
+          "Read": 8,
+          "ToolSearch": 1,
+          "Write": 1
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/bb6165018de0-dry-run-metrics-20261001-194107.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/bb6165018de0-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "617b8baffc4ac23c25960d4f9fcc4366f1a7c3b7cfbb1c6981a6de07f5a03fe4",
+      "stimulus_chars": 5608,
+      "worker_id": "bb6165018de0"
+    },
+    "worker_id": "bb6165018de0"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Invoke the Skill `workflow:execute` and run exactly ONE phase — Phase 2 of docs/plans/03-map-layer-parity-remediation/DESIGN.md (repo <REPO>, branch master). This is a RESTART: a first attempt did not close (see IMPLEMENTATION.md Phase 2 sections, EVIDENCE-2-03.json, WORD7-ANALYSIS.md). Follow the skill's rules; append to IMPLEMENTATION.md, commit and push (project CLAUDE.md; no large binaries; update docs/provenance.md for new untracked material). Close with a co",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 737,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 8,
+            "peak_ctx_tokens": 93883,
+            "prefix_bytes": 585117,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Agent": 1,
+              "Bash": 11,
+              "Edit": 2,
+              "Monitor": 26,
+              "Read": 8,
+              "Skill": 1,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "`refine` is still running (no briefs committed yet). Continuing to wait.",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "15f24c7ba18c"
+        },
+        {
+          "brief_anchor": "Invoke the Skill `workflow:execute` and run exactly ONE phase — Phase 2 of docs/plans/03-map-layer-parity-remediation/DESIGN.md (repo <REPO>, branch master). This is a RESTART: a first attempt did not close (see IMPLEMENTATION.md Phase 2 sections, EVIDENCE-2-03.json, WORD7-ANALYSIS.md). Follow the skill's rules; append to IMPLEMENTATION.md, commit and push (project CLAUDE.md; no large binaries; update docs/provenance.md for new untracked material). Close with a co",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 977,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 8,
+            "peak_ctx_tokens": 103981,
+            "prefix_bytes": 688120,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Agent": 3,
+              "Bash": 17,
+              "Edit": 2,
+              "Monitor": 28,
+              "Read": 8,
+              "Skill": 1,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Agent": 2,
+              "Bash": 6,
+              "Monitor": 2
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "My monitors were returning immediately rather than blocking. Switching to a foreground wait that actually blocks.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "`refine` committed. Reading its output.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "Briefs are in. Dispatching the two independent units (2-05, 2-07) in parallel on Sonnet.",
+              "tool_names": [
+                "Agent"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Agent"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "15f24c7ba18c"
+        },
+        {
+          "brief_anchor": "Invoke the Skill `workflow:execute` and run exactly ONE phase — Phase 2 of docs/plans/03-map-layer-parity-remediation/DESIGN.md (repo <REPO>, branch master). This is a RESTART: a first attempt did not close (see IMPLEMENTATION.md Phase 2 sections, EVIDENCE-2-03.json, WORD7-ANALYSIS.md). Follow the skill's rules; append to IMPLEMENTATION.md, commit and push (project CLAUDE.md; no large binaries; update docs/provenance.md for new untracked material). Close with a co",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 1289,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 8,
+            "peak_ctx_tokens": 138468,
+            "prefix_bytes": 985261,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Agent": 6,
+              "Bash": 25,
+              "Edit": 6,
+              "Monitor": 28,
+              "Read": 8,
+              "Skill": 1,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Agent": 3,
+              "Bash": 8,
+              "Edit": 4
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "2-05 and 2-07 recorded. Waiting on 2-06.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "Dispatching 2-08 (overlay re-run) and a small fixer for the bug 2-05 deferred.",
+              "tool_names": [
+                "Agent"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Agent"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "15f24c7ba18c"
+        }
+      ],
+      "stimulus_sha256": "ae2dcac6d8cadd29415c9d57b43ad2a0a22d4b667f7042da88f32f19d6d8cb78",
+      "stratum": "poll_monitor",
+      "worker_id": "15f24c7ba18c"
+    },
+    "metadata": {
+      "T": 93,
+      "early_window_end": 93,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 1289,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 0,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 75,
+        "no_mutation": false,
+        "peak_ctx_first": 93883,
+        "reread_cluster": false,
+        "reread_max": 0,
+        "tool_histogram_last": {
+          "Agent": 6,
+          "Bash": 25,
+          "Edit": 6,
+          "Monitor": 28,
+          "Read": 8,
+          "Skill": 1,
+          "ToolSearch": 1
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/15f24c7ba18c-dry-run-metrics-20261001-214046.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/15f24c7ba18c-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "fd1282d3ac2230b5591dea77dd04f8979098c4f74df084ba4cceacc8236f57b0",
+      "stimulus_chars": 5384,
+      "worker_id": "15f24c7ba18c"
+    },
+    "worker_id": "15f24c7ba18c"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Invoke the `workflow:execute` skill (Skill tool) for Phase 2 of docs/plans/03-map-layer-parity-remediation/DESIGN.md in this repo (<REPO>). Follow that skill's instructions exactly — it is the authority on process, not this prompt.\n\nRead DESIGN.md and IMPLEMENTATION.md cold first; don't trust the summary below beyond it as pointers.\n\nContext: Phase 2 has failed twice before (see IMPLEMENTATION.md's Phase 2 restart entry, EVIDENCE-2-03.json, EVIDENCE-2-08.json — bo",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 3355,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 3,
+            "peak_ctx_tokens": 146033,
+            "prefix_bytes": 1216140,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Agent": 2,
+              "Bash": 51,
+              "Edit": 1,
+              "Monitor": 3,
+              "Read": 5,
+              "SendMessage": 2,
+              "Skill": 1,
+              "ToolSearch": 3
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "Now recording 2-14's outcome in IMPLEMENTATION.md before dispatching 2-15.",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "Now dispatching unit 2-15 (grounded gate verdict).",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "Dispatching unit 2-15 now on Sonnet at medium effort.",
+              "tool_names": [
+                "Agent"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "ToolSearch"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "Unit 2-15 (grounded gate verdict) has been dispatched to a fresh agent in the background. I'll wait for its completion notification, then verify the result, record it in IMPLEMENTATION.md, close the phase with the trailer commit if it passes, and produce the final workflow-report block.",
+              "tool_names": [],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "8e36f8e80baa"
+        },
+        {
+          "brief_anchor": "Invoke the `workflow:execute` skill (Skill tool) for Phase 2 of docs/plans/03-map-layer-parity-remediation/DESIGN.md in this repo (<REPO>). Follow that skill's instructions exactly — it is the authority on process, not this prompt.\n\nRead DESIGN.md and IMPLEMENTATION.md cold first; don't trust the summary below beyond it as pointers.\n\nContext: Phase 2 has failed twice before (see IMPLEMENTATION.md's Phase 2 restart entry, EVIDENCE-2-03.json, EVIDENCE-2-08.json — bo",
+          "checkpoint_turn": 90,
+          "cumulative": {
+            "api_turns": 90,
+            "assistant_text_chars": 3905,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 4,
+            "peak_ctx_tokens": 146033,
+            "prefix_bytes": 1377176,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md"
+              }
+            ],
+            "tool_histogram": {
+              "Agent": 2,
+              "Bash": 61,
+              "Edit": 1,
+              "Monitor": 5,
+              "Read": 7,
+              "SendMessage": 2,
+              "Skill": 1,
+              "ToolSearch": 4
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<REPO>/docs/plans/03-map-layer-parity-remediation/GATE-2.md"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 10,
+              "Monitor": 2,
+              "Read": 2,
+              "ToolSearch": 1
+            }
+          },
+          "prior_checkpoint_turn": 75,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "Good, only the single ledger entry was touched. Now waiting on the pytest/lint background rerun for independent verification.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 83
+            },
+            {
+              "excerpt": "Still running; I'll poll with Monitor rather than waiting blind.",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 84
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 85
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 86
+            },
+            {
+              "excerpt": "Good context. Now check on the background verification.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 87
+            },
+            {
+              "excerpt": "Still running. I'll wait for the monitor event.",
+              "tool_names": [],
+              "turn": 88
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 89
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 90
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/docs/plans/03-map-layer-parity-remediation/IMPLEMENTATION.md"
+            }
+          ],
+          "worker_id": "8e36f8e80baa"
+        }
+      ],
+      "stimulus_sha256": "33249eb9e215f78f6ca6ad403999df0f565a04fc426d72e900b446ac4c6ed6bf",
+      "stratum": "poll_monitor",
+      "worker_id": "8e36f8e80baa"
+    },
+    "metadata": {
+      "T": 97,
+      "early_window_end": 97,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 3905,
+        "checkpoints_seen_le120": 2,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 2,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 90,
+        "no_mutation": false,
+        "peak_ctx_first": 146033,
+        "reread_cluster": true,
+        "reread_max": 3,
+        "tool_histogram_last": {
+          "Agent": 2,
+          "Bash": 61,
+          "Edit": 1,
+          "Monitor": 5,
+          "Read": 7,
+          "SendMessage": 2,
+          "Skill": 1,
+          "ToolSearch": 4
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/8e36f8e80baa-dry-run-metrics-20261001-214046.json",
+      "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/8e36f8e80baa-judge-packs-20261001-214046.jsonl",
+      "source_pack_sha256": "36446e414f83e03a6b6acfe42035daaac8c521e413504a91c9f874690cffdb2b",
+      "stimulus_chars": 4256,
+      "worker_id": "8e36f8e80baa"
+    },
+    "worker_id": "8e36f8e80baa"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 196,
+            "compaction_event_count": 6,
+            "distinct_read_paths": 5,
+            "peak_ctx_tokens": 125620,
+            "prefix_bytes": 2497331,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 67,
+              "Edit": 1,
+              "Read": 9,
+              "ToolSearch": 1,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read",
+                "Read"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+            }
+          ],
+          "worker_id": "daf933273c8f"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+          "checkpoint_turn": 90,
+          "cumulative": {
+            "api_turns": 90,
+            "assistant_text_chars": 251,
+            "compaction_event_count": 6,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 125620,
+            "prefix_bytes": 2690259,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 80,
+              "Edit": 1,
+              "Read": 12,
+              "ToolSearch": 1,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<REPO>/parser/kiwiw/spool.py"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 13,
+              "Read": 3
+            }
+          },
+          "prior_checkpoint_turn": 75,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 83
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 84
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 85
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 86
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 87
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 88
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 89
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 90
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+            }
+          ],
+          "worker_id": "daf933273c8f"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+          "checkpoint_turn": 105,
+          "cumulative": {
+            "api_turns": 105,
+            "assistant_text_chars": 251,
+            "compaction_event_count": 6,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 125620,
+            "prefix_bytes": 2832973,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 96,
+              "Edit": 1,
+              "Read": 12,
+              "ToolSearch": 1,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 16
+            }
+          },
+          "prior_checkpoint_turn": 90,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 98
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 99
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 100
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 101
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash",
+                "Bash"
+              ],
+              "turn": 102
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 103
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 104
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 105
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+            }
+          ],
+          "worker_id": "daf933273c8f"
+        },
+        {
+          "brief_anchor": "Execute the brief `docs/plans/03-map-layer-parity-remediation/briefs/3C-04-roundtrip-redesign.md` in repo <REPO>, branch master. Follow it exactly, including Contract W waiting rules in DESIGN.md (one background script with STEP status lines, a single monitor, no foreground long jobs, never end your turn to wait) and the heavy-job lock (`flock output/.heavy.lock`) for every full run.\n\nThis is a retry. A previous Sonnet worker's uncommitted attempt is saved at `out",
+          "checkpoint_turn": 120,
+          "cumulative": {
+            "api_turns": 120,
+            "assistant_text_chars": 251,
+            "compaction_event_count": 8,
+            "distinct_read_paths": 6,
+            "peak_ctx_tokens": 125620,
+            "prefix_bytes": 3165370,
+            "reread_paths": [
+              {
+                "count": 3,
+                "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 109,
+              "Edit": 1,
+              "Monitor": 1,
+              "Read": 12,
+              "ToolSearch": 2,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 13,
+              "Monitor": 1,
+              "ToolSearch": 1
+            }
+          },
+          "prior_checkpoint_turn": 105,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "ToolSearch"
+              ],
+              "turn": 113
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 114
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Monitor"
+              ],
+              "turn": 115
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 116
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 117
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 118
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 119
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 120
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 3,
+              "path": "<REPO>/parser/tools/quantisation_roundtrip.py"
+            }
+          ],
+          "worker_id": "daf933273c8f"
+        }
+      ],
+      "stimulus_sha256": "ebe71534a299afc7b9beaa2723454b6c11759d89a667bca85d94b12a267902fe",
+      "stratum": "weak",
+      "worker_id": "daf933273c8f"
+    },
+    "metadata": {
+      "T": 122,
+      "early_window_end": 120,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 251,
+        "checkpoints_seen_le120": 4,
+        "compaction_delta_le120": 2,
+        "compaction_last_le120": 8,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 120,
+        "no_mutation": false,
+        "peak_ctx_first": 125620,
+        "reread_cluster": true,
+        "reread_max": 3,
+        "tool_histogram_last": {
+          "Bash": 109,
+          "Edit": 1,
+          "Monitor": 1,
+          "Read": 12,
+          "ToolSearch": 2,
+          "Write": 2
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/daf933273c8f-dry-run-metrics-20261001-204508.json",
+      "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/daf933273c8f-judge-packs-20261001-204508.jsonl",
+      "source_pack_sha256": "bb1afbd4874d586c14645da602b4364c3581edfed58c62ffac346803975cec47",
+      "stimulus_chars": 6820,
+      "worker_id": "daf933273c8f"
+    },
+    "worker_id": "daf933273c8f"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Use medium reasoning effort. If you spawn any read-only helper, use model opus at medium effort.\n\nYou are the worker for unit 3-09 of plan docs/plans/03-map-layer-parity-remediation. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3-09-shape-to-every-overlapped-cell.md`. Read it and follow it exactly.\n\nRepo: <REPO>, branch master. Commit only explicit paths (never `git add -A`) and never stage binaries or scratch output. End commit messages with:\n",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 62,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 0,
+            "peak_ctx_tokens": 138945,
+            "prefix_bytes": 1509388,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Bash": 75,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "07357f196666"
+        }
+      ],
+      "stimulus_sha256": "489faeb5d65c4842323293f703db978fb9e79eb2c43f526744e5e08ccd66388d",
+      "stratum": "weak",
+      "worker_id": "07357f196666"
+    },
+    "metadata": {
+      "T": 83,
+      "early_window_end": 83,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 62,
+        "checkpoints_seen_le120": 1,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 2,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 75,
+        "no_mutation": false,
+        "peak_ctx_first": 138945,
+        "reread_cluster": false,
+        "reread_max": 0,
+        "tool_histogram_last": {
+          "Bash": 75,
+          "Write": 2
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/07357f196666-dry-run-metrics-20261001-214046.json",
+      "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/07357f196666-judge-packs-20261001-214046.jsonl",
+      "source_pack_sha256": "4f180da369413e56fd5f5fae75d7a918ead80bf7fb7bb2e1dbe596a5174ed56c",
+      "stimulus_chars": 1570,
+      "worker_id": "07357f196666"
+    },
+    "worker_id": "07357f196666"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "You are the worker for unit 3C-02 of plan `docs/plans/03-map-layer-parity-remediation/`. Repo: <REPO>, branch master. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3C-02-c-test-scaffolding.md`. Read it first and follow it exactly: owned paths, done evidence, boundary rule, waiting rules, machine facts, report format.\n\nOther units run alongside you right now (3C-03 golden capture, 3C-04 round-trip redesign), and they have their own uncommitted ed",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 1006,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 8,
+            "peak_ctx_tokens": 126023,
+            "prefix_bytes": 1092962,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 32,
+              "Edit": 3,
+              "Read": 15,
+              "Write": 5
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "`iter_level` exists at line 516, returning `Iterator[tuple[int, int, dict]]` — exactly matching the test's usage. Let me confirm its actual body matches expectations (content dict shape).",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "Now let me check `cbuild.py` current content before running anything.",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "\"Before\" confirmed: these are untracked/new files (no prior version existed to run). Now run the actual test suite for the first time.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "All 7 tests pass on the first run, including the hand-computed C unit tests and the real-Perth-frame invariant test. Now demonstrate the touch-rebuild behavior.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            }
+          ],
+          "worker_id": "0677f597286e"
+        },
+        {
+          "brief_anchor": "You are the worker for unit 3C-02 of plan `docs/plans/03-map-layer-parity-remediation/`. Repo: <REPO>, branch master. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3C-02-c-test-scaffolding.md`. Read it first and follow it exactly: owned paths, done evidence, boundary rule, waiting rules, machine facts, report format.\n\nOther units run alongside you right now (3C-03 golden capture, 3C-04 round-trip redesign), and they have their own uncommitted ed",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 1992,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 8,
+            "peak_ctx_tokens": 126023,
+            "prefix_bytes": 1173096,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 41,
+              "Edit": 4,
+              "Read": 15,
+              "Write": 5
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 9,
+              "Edit": 1
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "Found a real bug: `build_test_bin`'s staleness hash only covers `ctest/*.c` files, not the extension sources they `#include` transitively — so editing `_cenc.c` alone does NOT trigger a test-binary rebuild. Fixing this now (within the owned `cbuild.py` file).",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "Now re-verify the fix triggers a rebuild, and that a subsequent run with no changes does not rebuild.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "Rebuilt (mtime changed 1790312458 → 1790312503), and tests still pass. Now revert the demo comment in `_cenc.c` (not my owned content, must stay untouched) and confirm no-rebuild on rerun.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "`_cenc.c` reverted cleanly, and the second unchanged rerun shows no rebuild (mtime stable at 1790312511). Now the full test suite run, via a Contract W background script.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "Clean. Now run the full test suite in background per Contract W.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            }
+          ],
+          "worker_id": "0677f597286e"
+        },
+        {
+          "brief_anchor": "You are the worker for unit 3C-02 of plan `docs/plans/03-map-layer-parity-remediation/`. Repo: <REPO>, branch master. Your brief is `docs/plans/03-map-layer-parity-remediation/briefs/3C-02-c-test-scaffolding.md`. Read it first and follow it exactly: owned paths, done evidence, boundary rule, waiting rules, machine facts, report format.\n\nOther units run alongside you right now (3C-03 golden capture, 3C-04 round-trip redesign), and they have their own uncommitted ed",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 3263,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 9,
+            "peak_ctx_tokens": 126023,
+            "prefix_bytes": 1306824,
+            "reread_paths": [
+              {
+                "count": 5,
+                "path": "<REPO>/docs/provenance.md"
+              },
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 46,
+              "Edit": 7,
+              "Read": 20,
+              "ToolSearch": 1,
+              "Write": 5
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<REPO>/.gitignore"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 5,
+              "Edit": 3,
+              "Read": 5,
+              "ToolSearch": 1
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "I'll correct the now-inaccurate \"rebuilt when the source is newer\" line (it describes the exact mechanism I changed) and append my own new entry for the Contract T build products.",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "Now append my own new entry at the end of the file (after 3C-01's or others' latest entries, appending only — not touching 3C-03's concurrent additions).",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "That's the end of the file (231 lines original + my 3 added lines = 234). I'll append my new entry there.",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "Now let's check on the full pytest run.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "I'll wait for this notification. Meanwhile, let's prepare the commit message and double-check nothing else needs attention while it's still running — no further action possible until it completes, so I'll pause here.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "The full pytest suite is running in the background under a bounded wait (`timeout 3300`, polling every 10s for `ALLDONE`/`ABORT`/`FAIL`/`Traceback`). I'll continue once that notification arrives.",
+              "tool_names": [],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 5,
+              "path": "<REPO>/docs/provenance.md"
+            },
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            }
+          ],
+          "worker_id": "0677f597286e"
+        }
+      ],
+      "stimulus_sha256": "abf4c5da886b2119fd8ba0c089494a66d772ede4d3458e8966be5da2db458ea6",
+      "stratum": "residual",
+      "worker_id": "0677f597286e"
+    },
+    "metadata": {
+      "T": 93,
+      "early_window_end": 93,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 3263,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 2,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 75,
+        "no_mutation": false,
+        "peak_ctx_first": 126023,
+        "reread_cluster": true,
+        "reread_max": 5,
+        "tool_histogram_last": {
+          "Bash": 46,
+          "Edit": 7,
+          "Read": 20,
+          "ToolSearch": 1,
+          "Write": 5
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/0677f597286e-dry-run-metrics-20261001-214046.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/0677f597286e-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "51860649397c96a36ced93965d97dd8eafe836719a516adcefe6a300f8018311",
+      "stimulus_chars": 7470,
+      "worker_id": "0677f597286e"
+    },
+    "worker_id": "0677f597286e"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "You are an implementation worker on the open-pajero-maps repo. Read and implement, in order:\n\n1. docs/plans/01-eval-harness-and-map-layer/briefs/24-dune-drop-and-selection-vocab-consistency.md (primary fix)\n2. docs/plans/01-eval-harness-and-map-layer/briefs/19-container-pdmdh-blob-tail.md (documents the downstream symptom this same fix resolves — confirm it actually does resolve, don't assume)\n\nFollow each brief's own \"Required reading\", \"Goal\", \"Contract\", \"Changes\", and \"Done evidence\" section",
+          "checkpoint_turn": 50,
+          "cumulative": {
+            "api_turns": 50,
+            "assistant_text_chars": 1501,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 8,
+            "peak_ctx_tokens": 122645,
+            "prefix_bytes": 849009,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Bash": 36,
+              "Edit": 4,
+              "Read": 9,
+              "ToolSearch": 1,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 43
+            },
+            {
+              "excerpt": "Now let's add a regression test in test_selection.py that cross-checks selection.json's background predicates against bg_type.json's mappability, guarding against this exact class of bug reappearing.",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 44
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 45
+            },
+            {
+              "excerpt": "Now run the full test suite.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 46
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 47
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 48
+            },
+            {
+              "excerpt": "All 229 tests pass. Now let's run the dry-run calibration counting mode as a done-evidence artifact.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 49
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 50
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "074c8cf22927"
+        },
+        {
+          "brief_anchor": "You are an implementation worker on the open-pajero-maps repo. Read and implement, in order:\n\n1. docs/plans/01-eval-harness-and-map-layer/briefs/24-dune-drop-and-selection-vocab-consistency.md (primary fix)\n2. docs/plans/01-eval-harness-and-map-layer/briefs/19-container-pdmdh-blob-tail.md (documents the downstream symptom this same fix resolves — confirm it actually does resolve, don't assume)\n\nFollow each brief's own \"Required reading\", \"Goal\", \"Contract\", \"Changes\", and \"Done evidence\" section",
+          "checkpoint_turn": 60,
+          "cumulative": {
+            "api_turns": 60,
+            "assistant_text_chars": 1876,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 10,
+            "peak_ctx_tokens": 130063,
+            "prefix_bytes": 927976,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Bash": 44,
+              "Edit": 4,
+              "Read": 11,
+              "ToolSearch": 1,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<TMP_REPO>/f06c7365-e8be-4dbf-b6c3-730a03ecdc0d/tasks/b85wrl5z5.output",
+              "<TMP_REPO>/f06c7365-e8be-4dbf-b6c3-730a03ecdc0d/tasks/bsdmpdzcv.output"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 8,
+              "Read": 2
+            }
+          },
+          "prior_checkpoint_turn": 50,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 53
+            },
+            {
+              "excerpt": "Levels 10/12 background counts land in range (26 vs 25, ratio 1.04x). Now let's attempt a Perth-fixture build to test the container/PDMDH mechanism for brief 19.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 54
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 55
+            },
+            {
+              "excerpt": "Good — supports `--levels`. Let's run a Perth-fixture extraction restricted to levels 10 and 12 to verify content is now spooled (fast, small scope).",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 56
+            },
+            {
+              "excerpt": "I'll wait for this task to finish.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 57
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 58
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 59
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 60
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "074c8cf22927"
+        },
+        {
+          "brief_anchor": "You are an implementation worker on the open-pajero-maps repo. Read and implement, in order:\n\n1. docs/plans/01-eval-harness-and-map-layer/briefs/24-dune-drop-and-selection-vocab-consistency.md (primary fix)\n2. docs/plans/01-eval-harness-and-map-layer/briefs/19-container-pdmdh-blob-tail.md (documents the downstream symptom this same fix resolves — confirm it actually does resolve, don't assume)\n\nFollow each brief's own \"Required reading\", \"Goal\", \"Contract\", \"Changes\", and \"Done evidence\" section",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 2586,
+            "compaction_event_count": 0,
+            "distinct_read_paths": 11,
+            "peak_ctx_tokens": 152501,
+            "prefix_bytes": 1097434,
+            "reread_paths": [],
+            "tool_histogram": {
+              "Bash": 58,
+              "Edit": 4,
+              "Read": 12,
+              "ToolSearch": 1,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<TMP_REPO>/f06c7365-e8be-4dbf-b6c3-730a03ecdc0d/tasks/bte46fhjd.output"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 14,
+              "Read": 1
+            }
+          },
+          "prior_checkpoint_turn": 60,
+          "schedule": {
+            "checkpoints": [
+              50,
+              60,
+              75
+            ],
+            "first_at": 50,
+            "interval": 10,
+            "mode": "early_prefix_exact"
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "That note was just confirming my own append landed as expected. Now amend brief 19 similarly.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "Good, the amendment landed. Now let's clean up scratch build artifacts and run the full test suite once more to confirm everything is green after all edits.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "I'll wait for tests to finish.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "All 229 tests pass. Now let's commit. Scratch build artifacts were all written outside the worktree (in the scratchpad tmp dir), so nothing extra to clean up in the repo itself.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [],
+          "worker_id": "074c8cf22927"
+        }
+      ],
+      "stimulus_sha256": "8e17c348cd593765f873a36b622c74ff0092f6b4d9888a2270910e5f2e848314",
+      "stratum": "residual",
+      "worker_id": "074c8cf22927"
+    },
+    "metadata": {
+      "T": 76,
+      "early_window_end": 76,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 2586,
+        "checkpoints_seen_le120": 3,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 0,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 75,
+        "no_mutation": false,
+        "peak_ctx_first": 122645,
+        "reread_cluster": false,
+        "reread_max": 0,
+        "tool_histogram_last": {
+          "Bash": 58,
+          "Edit": 4,
+          "Read": 12,
+          "ToolSearch": 1,
+          "Write": 2
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/074c8cf22927-dry-run-metrics-20261001-214046.json",
+      "source_pack": "/home/codyh/workspace/corpus-ops/corpus-ops/registry/validation-phase/packs/074c8cf22927-judge-packs-20261002-earlycps.jsonl",
+      "source_pack_sha256": "ed8d8c1a6f4f7d555c7ed20412252457b631df3429101ff756722fedb487f2f9",
+      "stimulus_chars": 6312,
+      "worker_id": "074c8cf22927"
+    },
+    "worker_id": "074c8cf22927"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file — read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 1993,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 12,
+            "peak_ctx_tokens": 166945,
+            "prefix_bytes": 1308076,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 52,
+              "Edit": 2,
+              "Read": 20,
+              "Write": 1
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "Now let's make the edits to `alldata_writer.py`. First the signature and docstring:",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "Now the body: build `lmr_by_level`, group divided input, seed `block_slots`, and update the placement loop.",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+            }
+          ],
+          "worker_id": "0853bc21d3aa"
+        },
+        {
+          "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file — read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+          "checkpoint_turn": 90,
+          "cumulative": {
+            "api_turns": 90,
+            "assistant_text_chars": 2310,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 12,
+            "peak_ctx_tokens": 166945,
+            "prefix_bytes": 1463282,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 57,
+              "Edit": 10,
+              "Read": 22,
+              "Write": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [],
+            "tool_histogram_delta": {
+              "Bash": 5,
+              "Edit": 8,
+              "Read": 2
+            }
+          },
+          "prior_checkpoint_turn": 75,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "Now rewrite `_encode_level` to route through `plan_divisions`:",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 83
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 84
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 85
+            },
+            {
+              "excerpt": "Now update `run()` to compute thresholds and pass `divided` to the writer, and update the manifest.",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 86
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 87
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 88
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 89
+            },
+            {
+              "excerpt": "Now let's verify the file compiles and check for stray issues (unused `_level_dims` function now that llcode logic moved).",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 90
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+            }
+          ],
+          "worker_id": "0853bc21d3aa"
+        },
+        {
+          "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file — read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+          "checkpoint_turn": 105,
+          "cumulative": {
+            "api_turns": 105,
+            "assistant_text_chars": 2493,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 13,
+            "peak_ctx_tokens": 166945,
+            "prefix_bytes": 1574348,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 71,
+              "Edit": 10,
+              "Read": 23,
+              "Write": 1
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<REPO>/parser/tests/test_alldata_writer.py"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 14,
+              "Read": 1
+            }
+          },
+          "prior_checkpoint_turn": 90,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 98
+            },
+            {
+              "excerpt": "Good, existing test suite passes. Let's check that output and continue examining the check functions.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 99
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 100
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 101
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 102
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 103
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 104
+            },
+            {
+              "excerpt": "Good, this is exactly the pattern I need. Now write `parser/tests/test_divide.py`.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 105
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+            }
+          ],
+          "worker_id": "0853bc21d3aa"
+        },
+        {
+          "brief_anchor": "Repo: <REPO> (branch: master, currently clean at commit 74e7393).\n\nYour task is fully specified in this brief file — read it first, in full, before doing anything else:\ndocs/plans/01-eval-harness-and-map-layer/briefs/13-divided-parcels.md\n\nFollow it exactly: read its \"Required reading, in order\" list (including the Amendment section) before writing any code, implement only within its stated owned paths, run its stated done evidence, and commit + push to master whe",
+          "checkpoint_turn": 120,
+          "cumulative": {
+            "api_turns": 120,
+            "assistant_text_chars": 2912,
+            "compaction_event_count": 4,
+            "distinct_read_paths": 14,
+            "peak_ctx_tokens": 166945,
+            "prefix_bytes": 1850627,
+            "reread_paths": [
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/build_alldata.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 81,
+              "Edit": 12,
+              "Read": 25,
+              "Write": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<REPO>/parser/tests/test_divide.py"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 10,
+              "Edit": 2,
+              "Read": 2,
+              "Write": 1
+            }
+          },
+          "prior_checkpoint_turn": 105,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 113
+            },
+            {
+              "excerpt": "Now let's run this test file.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 114
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 115
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 116
+            },
+            {
+              "excerpt": "Now update the remaining `0, 0` literal usages to `_IX, _IY` for clarity/consistency (not required, but harmless if left). Let's just rerun tests first.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 117
+            },
+            {
+              "excerpt": "All 5 pass. Now run the full test suite again.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 118
+            },
+            {
+              "excerpt": "All pass except the two pre-existing, unrelated extractor-scale failures. Now let's rebuild the Perth fixture and run the compare_disc harness.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 119
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 120
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/alldata_writer.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/build_alldata.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/osm_to_parcel_geometry.py"
+            }
+          ],
+          "worker_id": "0853bc21d3aa"
+        }
+      ],
+      "stimulus_sha256": "a1c367fd4c7748599f074cc8340ee1234e33a0f921b8182ac7d88f35d5d702c4",
+      "stratum": "residual",
+      "worker_id": "0853bc21d3aa"
+    },
+    "metadata": {
+      "T": 155,
+      "early_window_end": 120,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 2912,
+        "checkpoints_seen_le120": 4,
+        "compaction_delta_le120": 2,
+        "compaction_last_le120": 4,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 120,
+        "no_mutation": false,
+        "peak_ctx_first": 166945,
+        "reread_cluster": true,
+        "reread_max": 4,
+        "tool_histogram_last": {
+          "Bash": 81,
+          "Edit": 12,
+          "Read": 25,
+          "Write": 2
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/INVENTORY-shape-qual-full-maps-v1-20261001-214046.json",
+      "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/0853bc21d3aa-judge-packs-20261001-202909.jsonl",
+      "source_pack_sha256": "bf6fe6da772757aa63cc5366be0dbb61e82b768664e70a9cecbe44f0058fb10e",
+      "stimulus_chars": 8640,
+      "worker_id": "0853bc21d3aa"
+    },
+    "worker_id": "0853bc21d3aa"
+  },
+  {
+    "card": {
+      "card_kind": "hybrid_v0_early_window",
+      "case_id": "PR-SURVIVAL-EVENT",
+      "early_window_max": 120,
+      "rows": [
+        {
+          "brief_anchor": "Repo: <REPO>, branch `master` (work directly on it, no new branch). You are a build worker for one unit of a larger plan-driven project (open-pajero-maps, reverse-engineering a proprietary map disc format).\n\nYour brief is the complete, self-sufficient spec for this unit: read it in full before doing anything else.\n\n  docs/plans/03-map-layer-parity-remediation/briefs/3-11-mult-const-selection.md\n\nFollow it exactly — owned paths, contract, done evidence, everything.",
+          "checkpoint_turn": 75,
+          "cumulative": {
+            "api_turns": 75,
+            "assistant_text_chars": 2231,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 12,
+            "peak_ctx_tokens": 145806,
+            "prefix_bytes": 1241552,
+            "reread_paths": [
+              {
+                "count": 5,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/clip.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/tests/test_cenc.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 36,
+              "Edit": 13,
+              "Monitor": 1,
+              "Read": 24,
+              "ToolSearch": 1
+            }
+          },
+          "delta_since_prior": {},
+          "prior_checkpoint_turn": null,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "Now let's run the full test suite (both new and existing).",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 68
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 69
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 70
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 71
+            },
+            {
+              "excerpt": "Fix confirmed correct. Now mirror in the C file's `emit_rect_piece`.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 72
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 73
+            },
+            {
+              "excerpt": "Now replace the step computation to match the Python fix (even distribution, remainder steps last, each of size `(q+1)*mult`).",
+              "tool_names": [
+                "Edit"
+              ],
+              "turn": 74
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 75
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 5,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/clip.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/tests/test_cenc.py"
+            }
+          ],
+          "worker_id": "16a958631580"
+        },
+        {
+          "brief_anchor": "Repo: <REPO>, branch `master` (work directly on it, no new branch). You are a build worker for one unit of a larger plan-driven project (open-pajero-maps, reverse-engineering a proprietary map disc format).\n\nYour brief is the complete, self-sufficient spec for this unit: read it in full before doing anything else.\n\n  docs/plans/03-map-layer-parity-remediation/briefs/3-11-mult-const-selection.md\n\nFollow it exactly — owned paths, contract, done evidence, everything.",
+          "checkpoint_turn": 90,
+          "cumulative": {
+            "api_turns": 90,
+            "assistant_text_chars": 2740,
+            "compaction_event_count": 2,
+            "distinct_read_paths": 13,
+            "peak_ctx_tokens": 145806,
+            "prefix_bytes": 1394243,
+            "reread_paths": [
+              {
+                "count": 5,
+                "path": "<REPO>/parser/kiwiw/_cenc.c"
+              },
+              {
+                "count": 4,
+                "path": "<REPO>/parser/kiwiw/clip.py"
+              },
+              {
+                "count": 3,
+                "path": "<REPO>/parser/tests/test_cenc.py"
+              }
+            ],
+            "tool_histogram": {
+              "Bash": 47,
+              "Edit": 13,
+              "Monitor": 1,
+              "Read": 26,
+              "ToolSearch": 2
+            }
+          },
+          "delta_since_prior": {
+            "new_read_paths": [
+              "<TMP_REPO>/af9b5cb1-edc5-4155-b521-a56bad1c7f13/tasks/bm8cg4if9.output"
+            ],
+            "tool_histogram_delta": {
+              "Bash": 11,
+              "Read": 2,
+              "ToolSearch": 1
+            }
+          },
+          "prior_checkpoint_turn": 75,
+          "schedule": {
+            "first_at": 75,
+            "interval": 15
+          },
+          "snapshot_mode": "hybrid_v0",
+          "snapshot_params": {
+            "N": 8,
+            "excerpt": 400
+          },
+          "tail": [
+            {
+              "excerpt": "I already have a background watcher running for this. I'll wait for its completion notification.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 83
+            },
+            {
+              "excerpt": "Still running. I'll wait for the background watcher's notification.",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 84
+            },
+            {
+              "excerpt": "I'll pause here and wait for the pytest run to finish (background watcher is armed and will notify me).",
+              "tool_names": [],
+              "turn": 85
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 86
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Read"
+              ],
+              "turn": 87
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 88
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 89
+            },
+            {
+              "excerpt": "",
+              "tool_names": [
+                "Bash"
+              ],
+              "turn": 90
+            }
+          ],
+          "thrash_top_rereads": [
+            {
+              "count": 5,
+              "path": "<REPO>/parser/kiwiw/_cenc.c"
+            },
+            {
+              "count": 4,
+              "path": "<REPO>/parser/kiwiw/clip.py"
+            },
+            {
+              "count": 3,
+              "path": "<REPO>/parser/tests/test_cenc.py"
+            }
+          ],
+          "worker_id": "16a958631580"
+        }
+      ],
+      "stimulus_sha256": "e1feb6ff8f27def4c9b562d29f615163c43375693e519e1c67e297e2c9518f49",
+      "stratum": "residual",
+      "worker_id": "16a958631580"
+    },
+    "metadata": {
+      "T": 94,
+      "early_window_end": 94,
+      "feature_set": "EX-MARKER-1A",
+      "markers": {
+        "assistant_text_chars_last": 2740,
+        "checkpoints_seen_le120": 2,
+        "compaction_delta_le120": 0,
+        "compaction_last_le120": 2,
+        "edit_write_absent": false,
+        "last_checkpoint_le120": 90,
+        "no_mutation": false,
+        "peak_ctx_first": 145806,
+        "reread_cluster": true,
+        "reread_max": 5,
+        "tool_histogram_last": {
+          "Bash": 47,
+          "Edit": 13,
+          "Monitor": 1,
+          "Read": 26,
+          "ToolSearch": 2
+        }
+      },
+      "source_metrics": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/ubuntu-raw/16a958631580-dry-run-metrics-20261001-214046.json",
+      "source_pack": "origin/cursor/adversarial-brittle-v2-c262:docs/lab/RESEARCH/2026-10-01-progressive-jev-session-gates/proofs/validated/gold/packs/16a958631580-judge-packs-20261001-214046.jsonl",
+      "source_pack_sha256": "4e95b743b1a17a49a91e8ccd032d10f4008374d3da3226189ec73ae2bf6141c2",
+      "stimulus_chars": 4400,
+      "worker_id": "16a958631580"
+    },
+    "worker_id": "16a958631580"
+  }
+]

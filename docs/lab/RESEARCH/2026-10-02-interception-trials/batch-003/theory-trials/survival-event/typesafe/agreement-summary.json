@@ -1,0 +1,182 @@
+{
+  "agreement_kill_fired": null,
+  "agreement_kill_status": "not_evaluable: protocol does not specify prefix-causal alpha",
+  "all_three_exact_workers": 12,
+  "case_id": "PR-SURVIVAL-EVENT",
+  "n_seats": 3,
+  "n_worker_seat_rows": 36,
+  "n_workers": 12,
+  "pairwise_exact_agreement_rate": 1.0,
+  "per_worker": [
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "thrash",
+      "worker_id": "92a48e004519"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "thrash",
+      "worker_id": "ca977b9ca0dd"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "poll_monitor",
+      "worker_id": "87a380bc64ff"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "poll_monitor",
+      "worker_id": "bb6165018de0"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "poll_monitor",
+      "worker_id": "15f24c7ba18c"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "poll_monitor",
+      "worker_id": "8e36f8e80baa"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "weak",
+      "worker_id": "daf933273c8f"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "weak",
+      "worker_id": "07357f196666"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "residual",
+      "worker_id": "0677f597286e"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "residual",
+      "worker_id": "074c8cf22927"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "residual",
+      "worker_id": "0853bc21d3aa"
+    },
+    {
+      "all_three_exact": true,
+      "event_times_by_seat": [
+        null,
+        null,
+        null
+      ],
+      "majority_count": 3,
+      "majority_event_time": null,
+      "pairwise_exact_agreement": 1.0,
+      "range": null,
+      "stratum": "residual",
+      "worker_id": "16a958631580"
+    }
+  ],
+  "prefix_causal_alpha": null,
+  "worker_exact_agreement_rate": 1.0
+}

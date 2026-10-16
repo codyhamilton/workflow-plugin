@@ -1,0 +1,121 @@
+{
+  "case_id": "PR-SURVIVAL-EVENT",
+  "covariates": [
+    "compaction_last_le120",
+    "edit_write_absent",
+    "reread_max"
+  ],
+  "feature_set": "EX-MARKER-1A",
+  "kill_fired": false,
+  "kill_note": "Any valid 2-covariate LOO concordance below 0.60 fires this gate.",
+  "kill_rule_evaluated": false,
+  "kill_threshold": 0.6,
+  "loo_definition": "Each model leaves one of the three preregistered features out.",
+  "models": {
+    "majority_consensus": {
+      "compaction_last_le120|edit_write_absent": {
+        "covariates": [
+          "compaction_last_le120",
+          "edit_write_absent"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "compaction_last_le120|reread_max": {
+        "covariates": [
+          "compaction_last_le120",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "edit_write_absent|reread_max": {
+        "covariates": [
+          "edit_write_absent",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      }
+    },
+    "seat_1": {
+      "compaction_last_le120|edit_write_absent": {
+        "covariates": [
+          "compaction_last_le120",
+          "edit_write_absent"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "compaction_last_le120|reread_max": {
+        "covariates": [
+          "compaction_last_le120",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "edit_write_absent|reread_max": {
+        "covariates": [
+          "edit_write_absent",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      }
+    },
+    "seat_2": {
+      "compaction_last_le120|edit_write_absent": {
+        "covariates": [
+          "compaction_last_le120",
+          "edit_write_absent"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "compaction_last_le120|reread_max": {
+        "covariates": [
+          "compaction_last_le120",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "edit_write_absent|reread_max": {
+        "covariates": [
+          "edit_write_absent",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      }
+    },
+    "seat_3": {
+      "compaction_last_le120|edit_write_absent": {
+        "covariates": [
+          "compaction_last_le120",
+          "edit_write_absent"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "compaction_last_le120|reread_max": {
+        "covariates": [
+          "compaction_last_le120",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      },
+      "edit_write_absent|reread_max": {
+        "covariates": [
+          "edit_write_absent",
+          "reread_max"
+        ],
+        "reason": "fewer than two events",
+        "status": "refused"
+      }
+    }
+  },
+  "valid_model_count": 0
+}
