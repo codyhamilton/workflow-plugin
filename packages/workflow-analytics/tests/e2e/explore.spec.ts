@@ -14,8 +14,25 @@ async function tableSize(page: Page): Promise<number> {
 	});
 }
 
+async function tableColumnNames(page: Page): Promise<string[]> {
+	return page.evaluate(async () => {
+		const v = document.querySelector('perspective-viewer') as unknown as {
+			getTable(): Promise<{ schema(): Promise<Record<string, string>> }>;
+		};
+		return Object.keys(await (await v.getTable()).schema());
+	});
+}
+
 test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
+});
+
+test('the table exposes model, cost_usd, and norm_event columns', async ({ page }) => {
+	await page.goto('/explore');
+	await expect(page.locator('perspective-viewer')).toBeVisible();
+	await expect.poll(() => tableColumnNames(page).catch(() => [])).toEqual(
+		expect.arrayContaining(['model', 'cost_usd', 'norm_event'])
+	);
 });
 
 test('the viewer holds every fact and rejection, and the slice is not capped', async ({ page }) => {

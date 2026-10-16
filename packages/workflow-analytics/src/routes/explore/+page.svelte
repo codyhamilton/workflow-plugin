@@ -14,6 +14,9 @@
 		'kind',
 		'event',
 		'tool',
+		'norm_event',
+		'model',
+		'cost_usd',
 		'path',
 		'conversation_id',
 		'source',
@@ -21,7 +24,9 @@
 		'screen_verdict',
 		'rejection_stage'
 	] as const;
-	const SCHEMA = Object.fromEntries(COLUMNS.map((c) => [c, c === 'ts' ? 'datetime' : 'string']));
+	const SCHEMA = Object.fromEntries(
+		COLUMNS.map((c) => [c, c === 'ts' ? 'datetime' : c === 'cost_usd' ? 'float' : 'string'])
+	);
 
 	type PTable = { replace(data: unknown[]): Promise<void> };
 	let viewer = $state<HTMLElement | null>(null);
@@ -37,6 +42,13 @@
 				if (c === 'ts') {
 					const t = Date.parse(String(r.ts ?? ''));
 					o.ts = Number.isNaN(t) ? null : t;
+				} else if (c === 'cost_usd') {
+					const raw = r[c];
+					if (raw == null || raw === '') o.cost_usd = null;
+					else {
+						const n = typeof raw === 'number' ? raw : Number.parseFloat(String(raw));
+						o.cost_usd = Number.isFinite(n) ? n : null;
+					}
 				} else o[c] = r[c] == null ? '' : String(r[c]);
 			}
 			return o;
