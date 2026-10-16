@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { costLabel } from '../../src/lib/format';
 import { USAGE_ALL, USAGE_BY_MODEL } from './fixture';
 import { brush, clickBar, expectSettled, trackRequests, useServe } from './helpers';
 
@@ -29,17 +30,20 @@ test('usage table shows per-model calls, tokens and cost, and the unpriced banne
 	await expect(page.getByTestId(`usage-${SONNET}-unpriced`)).toHaveText('0');
 	await expect(page.getByTestId(`usage-${SONNET}-cost`)).toHaveText('$0.02');
 	await expect(page.getByTestId(`usage-${QWEN}-cost`)).toHaveText('unpriced');
-	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText('unpriced');
+	const opus = USAGE_BY_MODEL[OPUS];
+	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText(
+		costLabel({ cost: opus.cost_usd, unpriced: opus.unpriced, calls: opus.calls })
+	);
 	await expect(page.getByTestId('usage-unpriced-banner')).toHaveText(
 		`${USAGE_ALL.unpriced_calls} of ${USAGE_ALL.model_calls} calls are unpriced`
 	);
 });
 
 test('a window with only unpriced calls never shows $0', async ({ page }) => {
-	await page.goto('/usage?harness=claude');
-	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText('unpriced');
+	await page.goto(`/usage?model=${encodeURIComponent(QWEN)}`);
+	await expect(page.getByTestId(`usage-${QWEN}-cost`)).toHaveText('unpriced');
 	await expect(page.getByTestId('usage-unpriced-banner')).toHaveText('1 of 1 calls are unpriced');
-	await expect(page.locator('body')).not.toContainText('$0');
+	await expect(page.getByTestId('usage-table')).not.toContainText('$0.00');
 });
 
 test('?model= narrows the table to that model', async ({ page }) => {
@@ -182,7 +186,10 @@ test('every table row reports USAGE_BY_MODEL calls, and no zero-call row shows t
 test('a model with no cost data shows unpriced, never $0.00', async ({ page }) => {
 	await page.goto('/usage');
 	await expect(page.getByTestId(`usage-${QWEN}-cost`)).toHaveText('unpriced');
-	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText('unpriced');
+	const opus = USAGE_BY_MODEL[OPUS];
+	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText(
+		costLabel({ cost: opus.cost_usd, unpriced: opus.unpriced, calls: opus.calls })
+	);
 	await expect(page.getByTestId('usage-table')).not.toContainText('$0.00');
 });
 

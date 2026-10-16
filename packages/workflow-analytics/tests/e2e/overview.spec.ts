@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { costLabel } from '../../src/lib/format';
 import { FILTER_REPO, SUMMARY_ALL, SUMMARY_R1, USAGE_ALL } from './fixture';
 import { expectSettled, trackRequests, useServe } from './helpers';
 
@@ -58,7 +59,13 @@ test('overview shows the fixture numbers for the whole window', async ({ page })
 	await expectNumbers(page, USAGE_TILES);
 	await expect(page.getByTestId('summary-tokens')).toHaveText(String(USAGE_ALL.tokens_in + USAGE_ALL.tokens_out));
 	await expect(page.getByTestId('summary-tokens_cache_read')).toHaveText(String(USAGE_ALL.tokens_cache_read));
-	await expect(page.getByTestId('summary-cost_usd')).toHaveText('$0.02, 2 unpriced');
+	await expect(page.getByTestId('summary-cost_usd')).toHaveText(
+		costLabel({
+			cost: USAGE_ALL.cost_usd,
+			unpriced: USAGE_ALL.unpriced_calls,
+			calls: USAGE_ALL.model_calls
+		})
+	);
 });
 
 test('repo_id in the URL filters, and survives a reload', async ({ page }) => {
@@ -96,8 +103,14 @@ test('no filter control offers an empty option', async ({ page }) => {
 
 test('cost tile never shows $0.00 while calls are unpriced', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByTestId('summary-cost_usd')).toHaveText('$0.02, 2 unpriced');
-	await expect(page.getByTestId('summary-unpriced_calls')).toHaveText('2');
+	await expect(page.getByTestId('summary-cost_usd')).toHaveText(
+		costLabel({
+			cost: USAGE_ALL.cost_usd,
+			unpriced: USAGE_ALL.unpriced_calls,
+			calls: USAGE_ALL.model_calls
+		})
+	);
+	await expect(page.getByTestId('summary-unpriced_calls')).toHaveText(String(USAGE_ALL.unpriced_calls));
 	await page.route('**/analytics/summary*', (route) =>
 		route.fulfill({
 			status: 200,

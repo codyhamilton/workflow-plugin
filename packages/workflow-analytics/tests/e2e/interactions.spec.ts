@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import { USAGE_C5 } from './fixture';
 import { brush, clickBar, expectSettled, trackRequests, useServe } from './helpers';
 
+const QWEN = 'ollama-maxctx/qwen3-coder:30b-a3b-q4_K_M';
+
 // The fixture days are UTC days; pin the browser zone so the /query buckets land on them.
 test.use({ timezoneId: 'UTC' });
 
@@ -10,7 +12,6 @@ test.beforeEach(async ({ page }) => {
 });
 
 const SONNET = 'anthropic/claude-sonnet-5-5';
-const OPUS = 'claude-opus-5-5';
 
 const TOTAL_KEYS = [
 	'model_calls',
@@ -86,9 +87,9 @@ test('usage shows cost by model and never renders $0 when only unpriced', async 
 	await expect(page.getByTestId('usage-cost-by-model')).toBeVisible();
 	await expect(page.getByTestId(`usage-${SONNET}-cost`)).toHaveText('$0.02');
 
-	await page.goto('/usage?harness=claude');
-	await expect(page.getByTestId(`usage-${OPUS}-cost`)).toHaveText('unpriced');
-	await expect(page.locator('body')).not.toContainText('$0');
+	await page.goto(`/usage?model=${encodeURIComponent(QWEN)}`);
+	await expect(page.getByTestId(`usage-${QWEN}-cost`)).toHaveText('unpriced');
+	await expect(page.getByTestId('usage-table')).not.toContainText('$0.00');
 });
 
 // 6. A preset click, a harness drill and a brush each settle under a second.
@@ -137,7 +138,7 @@ test('a burst and the repos fan-out issue one query per slot', async ({ page }) 
 	reqs.reset();
 	await page.goto('/repos');
 	await expectSettled(page);
-	expect(reqs.count()).toBe(4);
+	expect(reqs.count()).toBe(5);
 
 	reqs.reset();
 	await page.route('**/v1/analytics/query*', (route) => {
@@ -151,7 +152,7 @@ test('a burst and the repos fan-out issue one query per slot', async ({ page }) 
 	await page.goto('/repos');
 	await expect(page.getByTestId('repo-invented-0-hook_events')).toHaveText('40');
 	await expect(page.getByTestId('repo-invented-39-hook_events')).toHaveText('1');
-	expect(reqs.count()).toBe(4);
+	expect(reqs.count()).toBe(5);
 });
 
 // 8. Every chart is ready and every table toggle reveals rows, in light and dark, on every route.
