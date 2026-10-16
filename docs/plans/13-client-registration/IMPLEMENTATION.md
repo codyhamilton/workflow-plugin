@@ -111,6 +111,14 @@ artifact_feedback on the five phase 3 briefs: quality service unreachable at `ht
 - Deviations: `authorizeDevice` follows an opaque 303 by retrying `redirect: 'follow'` and then assigning `response.url`. The Playwright test mocks a same-origin 303 so `Location` is visible. `global-setup.ts` was left alone.
 - Agent: Composer, harness did not report turns or final context.
 
+### 3-04-workflow-login-cli
+
+- Built: `workflow login [--endpoint URL]` listens on loopback `/callback`, opens `{endpoint}/device?state=&redirect_uri=`, exchanges the code, and writes `endpoint` and `key` into `client.toml` at mode 0600. Missing endpoint exits 1 and writes nothing. Success output does not include the token.
+- Surfaces: `tools/workflow/internal/login/login.go`, `tools/workflow/internal/login/login_test.go`, `tools/workflow/cmd/workflow/main.go`, `tools/workflow/cmd/workflow/login_test.go`.
+- Commit: `102e791`. `go test ./internal/login/ ./cmd/workflow/ -run Login` passed.
+- Deviations: none.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
