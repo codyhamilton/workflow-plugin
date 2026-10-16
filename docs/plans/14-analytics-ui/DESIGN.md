@@ -175,6 +175,13 @@ One unit. Execute briefs it inline. The change is the same token replacement in 
 
 ### Phase 4 — Quality and runs
 
+- Units:
+  - **4-01-quality-score-series** — `briefs/4-01-quality-score-series.md`. Depends on: nothing. Runs alongside: 4-05-explore-usage-columns, 4-06-e2e-pricing-fixture.
+  - **4-02-executions-shape-series** — `briefs/4-02-executions-shape-series.md`. Depends on: 4-01-quality-score-series. Runs alongside: 4-03-conversations-cost-distribution, 4-04-conversation-window-timeline.
+  - **4-03-conversations-cost-distribution** — `briefs/4-03-conversations-cost-distribution.md`. Depends on: 4-01-quality-score-series. Runs alongside: 4-02-executions-shape-series, 4-04-conversation-window-timeline.
+  - **4-04-conversation-window-timeline** — `briefs/4-04-conversation-window-timeline.md`. Depends on: 4-01-quality-score-series. Runs alongside: 4-02-executions-shape-series, 4-03-conversations-cost-distribution.
+  - **4-05-explore-usage-columns** — `briefs/4-05-explore-usage-columns.md`. Depends on: nothing. Runs alongside: 4-01-quality-score-series, 4-06-e2e-pricing-fixture.
+  - **4-06-e2e-pricing-fixture** — `briefs/4-06-e2e-pricing-fixture.md`. Depends on: nothing. Runs alongside: 4-01-quality-score-series, 4-05-explore-usage-columns.
 - Outcome:
   - On `/quality`, for one kind, each check with points shows a median line and a p25–p75 band over the window, and the all-time baseline median is drawn on that panel. A bucket with no point is a gap, not a zero. The box plot against the baseline remains. Switching kind reloads both. Brushing the band sets the custom window in the URL and the panel follows.
   - On `/executions`, clicking a sankey edge sets `shape` in the URL. The next page of rows matches that shape. The funnel counts stay the window totals. A stacked series of the three shapes over the window is on the page. Brushing that series sets the window and the series follows.
