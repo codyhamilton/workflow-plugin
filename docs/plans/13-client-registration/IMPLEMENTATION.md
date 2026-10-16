@@ -21,6 +21,14 @@ Refined into four units, committed in `fad2d04`. 4-01 first. Then 4-02. After 4-
 
 artifact_feedback on the four phase 4 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
 
+### 4-01-fly-collector-manifest
+
+- Built: `fly.toml` for one machine, app `workflow-collector`, HTTP on port 8080, volume `workflow_serve_data` at `/data`. `WORKFLOW_SERVE_KEYS` is not set. `Dockerfile` embeds the analytics build and runs `workflow serve`. The GitHub client secret is not in the repo.
+- Surfaces: `fly.toml`, `Dockerfile`, `.dockerignore`.
+- Commit: `f23689e`. `docker build` succeeded. `fly config validate` passed. A search of those files finds no `WORKFLOW_SERVE_KEYS`.
+- Deviations: none. `GITHUB_OAUTH_CLIENT_ID` and `WORKFLOW_SERVE_CORS_ORIGINS` in `fly.toml` are placeholders for the operator.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 2 — Issued tokens are the remote credential
 
 Tool: Cursor (Grok 4.7 orchestrator).
