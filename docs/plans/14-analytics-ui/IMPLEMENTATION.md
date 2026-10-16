@@ -98,3 +98,9 @@ Checked against the phase outcome, not the reports.
 ### Carried
 
 - `docs/design/07-analytics-site.md` open issue 12 still says conversation totals cover only the returned events when a timeline is truncated. The new contract on that same page says `totals` is the whole run and `truncated` applies to `events` only. The next edit of that file should replace the stale clause.
+
+## Phase 3 — Model and volume reports
+
+Refined in `1a39fdf` into eight units. Refine agent `7b649bbb-44a8-4ff8-b39c-d8fa60faca15` returned Proceed. `artifact_feedback` was not called: the workflow feedback namespace was not available in that session. Nothing is queued for the eight briefs.
+
+The Phase 2 carried item is not a Phase 3 surface. It stays for the Phase 5 edit of `docs/design/07-analytics-site.md`.
