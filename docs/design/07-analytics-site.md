@@ -101,16 +101,56 @@ per-call rows in the conversation timeline.
   kind, latest score per `(content_hash, check)`. Percentiles use the baseline method (sorted values,
   position `(n-1)*q` with linear interpolation, rounded to 3 places); empty is all zeros. This never
   writes or replaces `GET /v1/baselines`, which stays all-time; `/quality` shows the two side by side.
+- `GET /v1/analytics/distribution` — `measure` is required: one of `cost_usd`, `tokens_in`,
+  `tokens_out`, `tokens_cache_read`, `tokens_cache_write`, `tokens_reasoning`; else 400
+  `{"error":"unknown measure <m>"}`. `grain` is `call` (default) or `conversation`; else 400
+  `{"error":"unknown grain <g>"}`. `dim` is omitted or `model`; any other dimension is 400
+  `{"error":"unsupported dimension <d> for <measure>"}`. Call grain: one value per model call in the
+  window (the same call identity `model_calls` uses). Conversation grain: one value per conversation,
+  the sum of that measure over its calls; the conversation's `model` is the most frequent model on
+  those calls, ties to the smaller name, `""` when it has none (same rule as the conversation list).
+  For `cost_usd`, `n` is priced calls, `unpriced` is the rest, and percentiles and bins use priced
+  calls only; for a token measure, `unpriced` is 0 and every call is in `n` and in the bins.
+  `repo_id`, `harness`, `model`, and `conversation_id` apply; `kind`, `plan`, `norm_event`, `event`,
+  `tool`, and `source` are ignored and listed in `ignored_filters`. Response
+  `{"measure","grain","dim","rows":[{"k","n","unpriced","min","p25","median","p75","p95","max","bins":[{"lo","hi","n"}]}],"truncated"?,"ignored_filters"?}`.
+  `k` is the model, or `"all"` when `dim` is omitted. `top` defaults to 20, max 100, orders rows by
+  `n` descending; there is no `__other__` row; `truncated` is true when keys were dropped. Percentiles
+  use the `/scores` method; cost is rounded to 6 decimal places, token measures to 1. Bin edges are
+  fixed so models share an axis: tokens — a zero bin, then `[2^i, 2^(i+1))` for `i` from 0 through
+  19, then overflow at `2^20`; cost — a zero bin, `(0, 10^-4)`, then `[10^i, 10^(i+1))` for `i` from
+  -4 through 1, then overflow at `100`; `lo` inclusive, `hi` exclusive, except the overflow bin has
+  no `hi`. Scans existing columns; no hourly rollup and no `partial`. Wider than 400 days is 400
+  `{"error":"range too wide"}`.
+- `GET /v1/analytics/score-series` — `kind` is required, exactly one of `design`, `brief`, `report`.
+  `bucket` is required: `day`, `week`, or `month`. Wider than 400 days, or more than 400 buckets, is
+  400 `{"error":"range too wide"}`. `t` is the bucket start, RFC3339 in `tz`; `week` starts Monday
+  and `month` starts on the first, both in `tz` (same `t` rule as the executions `series`). A
+  point's population is distinct content hashes with a version timestamp in that bucket; several
+  versions of one hash in the bucket contribute the latest; a hash can appear in more than one
+  bucket (not the same population as `GET /v1/analytics/scores`, which is latest per hash over the
+  whole window). Response
+  `{"kind","bucket","checks":[{"name","points":[{"t","n","p25","median","p75"}]}]}`. Points are
+  sparse; checks with no points are omitted. Percentiles use the `/scores` method, rounded to 3
+  decimal places; no `partial`.
 - `GET /v1/analytics/executions` — grain is one brief `(repo_id, conversation_id,
-  docs/plans/<plan>/briefs/<stem>.md)` with an in-window version. `shape` is `complete` (the
+  docs/plans/<plan>/briefs/<stem>.md)` with an in-window version. Row `shape` is `complete` (the
   conversation has a commit in that repo and a version of `reports/<stem>.md` exists in that repo),
   `unreported` (commit, no report) or `started` (no commit); commit and report facts count even
-  outside the window. Response `{"counts":{complete,unreported,started},"rows":[{repo_id,plan,conversation_id,brief_path,harness,shape,ts}],"next"}`.
-  This is [design 1](01-event-model-and-ingest.md)'s derived execution view applied per brief and
-  computed at read time; it is not an ingest-side table.
+  outside the window. Repeatable query `shape` (`complete`, `unreported`, `started`; else 400
+  `{"error":"unknown shape <s>"}`) OR's values; omitted means all rows. `shape` filters `rows` and
+  the cursor only; `counts` stays the three window totals with `shape` ignored. Other filters apply to
+  both. Optional `bucket` `day`, `week`, or `month` adds `series` of exactly three objects, `key`
+  `complete`, `unreported`, `started`, in that order, each with sparse `points` of `{"t","n"}`; `t`
+  is bucket start in `tz` as for score-series; `shape` does not change `series`. Response
+  `{"counts":{complete,unreported,started},"rows":[{repo_id,plan,conversation_id,brief_path,harness,shape,ts}],"series"?,"next"}`. The cursor binds `shape` and `bucket` with the other filters. This is
+  [design 1](01-event-model-and-ingest.md)'s derived execution view applied per brief and computed at
+  read time; it is not an ingest-side table.
 - `GET /v1/analytics/conversations` — conversations with any in-window fact; counts and
   `first_ts`/`last_ts` from in-window facts only; `harness` is the most frequent (ties to the smaller
-  name); `repos` and `kinds` distinct. Ordered `last_ts` desc, `conversation_id` asc.
+  name); `repos` and `kinds` distinct. Each row adds `model` (most frequent model on in-window calls,
+  same tie rule), `model_calls`, `unpriced_calls`, `cost_usd`, `tokens_in`, `tokens_out` (counts
+  in-window). Ordered `last_ts` desc, `conversation_id` asc.
 - Paging (executions, conversations) is keyset in SQL: `limit` default 100, max 500 (**judgement**), `cursor` from a
   previous `next`; `next` absent on the last page. Executions order `ts` desc, `conversation_id`,
   `brief_path` asc. The cursor is opaque, bound to the route, the filters and the first page's
@@ -141,8 +181,18 @@ per-call rows in the conversation timeline.
   | `model_calls`, `tokens_in`, `tokens_out`, `tokens_cache_read`, `tokens_cache_write`, `tokens_reasoning`, `cost_usd`, `unpriced_calls` | `harness`, `repo_id`, `model`, `conversation_id` |
 
   Every measure also takes `hour_of_day` and `weekday`.
-- `GET /v1/analytics/conversation` (`id` required; unknown id is 404) — `{"conversation_id","harness","repos","models","first_ts","last_ts","totals":{tokens…,cost_usd},"events":[{"ts","type","norm_event","event","tool","model","path","kind","source","sha","tokens"?,"cost_usd"?}]}`
-  in time order, capped at 5,000 events (**judgement**) with `truncated`. It returns no bodies.
+- `GET /v1/analytics/conversation` (`id` required; unknown id is 404) — optional `from` and `to`,
+  RFC3339, inclusive; `from` after `to` is 400 `{"error":"from after to"}`. Dimension filters from
+  the shared set are not sent to this route. `events` is the whole run in time order, capped at 5,000
+  (**judgement**); `from` and `to` do not drop events. `truncated` applies to `events` only.
+  `totals` is the whole conversation, including events past the cap. When `from` or `to` is present,
+  `window_totals` is that range's full totals (not the capped slice); when both are omitted,
+  `window_totals` is absent. Response
+  `{"conversation_id","harness","repos","models","first_ts","last_ts","totals":{tokens…,cost_usd},"window_totals"?,"events":[…],"truncated"?}`.
+  It returns no bodies.
+
+Phase 2 leaves existing `/query` fields unchanged; `/schema`, `/summary`, `/series`, `/scores`, and
+`/baselines` are likewise unchanged.
 
 **Count semantics.** `hook_events` counts stored hook events. Events on the ingest policy's `remove`
 list are never stored, so they are not counted; a streamed message part counts once, through its
