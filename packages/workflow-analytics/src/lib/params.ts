@@ -94,3 +94,16 @@ export function scoresParams(params: URLSearchParams, kind: string): URLSearchPa
 	out.set('kind', kind);
 	return out;
 }
+
+/** The same query narrowed to one kind and time bucket, for score-series. */
+export function scoreSeriesParams(
+	params: URLSearchParams,
+	kind: string,
+	bucket: string
+): URLSearchParams {
+	const out = new URLSearchParams(params);
+	out.delete('kind');
+	out.set('kind', kind);
+	out.set('bucket', bucket);
+	return out;
+}

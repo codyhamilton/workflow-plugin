@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
-import { serveState, trackRequests, useServe } from './helpers';
+import { brush, serveState, trackRequests, useServe } from './helpers';
+
+test.use({ timezoneId: 'UTC' });
 
 type ScoreRow = { name: string; n: number; min: number; p25: number; median: number; p75: number; max: number };
 type BaseRow = { n: number; p25: number; median: number; p75: number };
@@ -7,13 +9,23 @@ type BaseRow = { n: number; p25: number; median: number; p75: number };
 // The e2e serve has no scorer, so every quality window is empty (n = 0). The distribution-chart
 // checks hand the page scored rows so the chart has something to draw; a test then asserts the
 // chart's table against these handed-in numbers, never against the chart code.
-async function stubQuality(page: Page, checks: ScoreRow[], bases: Record<string, BaseRow>): Promise<void> {
+type SeriesPoint = { t: string; n: number; p25: number; median: number; p75: number };
+
+async function stubQuality(
+	page: Page,
+	checks: ScoreRow[],
+	bases: Record<string, BaseRow>,
+	series: { name: string; points: SeriesPoint[] }[] = []
+): Promise<void> {
 	const cors = { 'access-control-allow-origin': '*' };
 	await page.route('**/v1/analytics/scores*', (r) =>
 		r.fulfill({ json: { kind: 'design', checks }, headers: cors })
 	);
 	await page.route('**/v1/baselines*', (r) =>
 		r.fulfill({ json: { kind: 'design', checks: bases }, headers: cors })
+	);
+	await page.route('**/v1/analytics/score-series*', (r) =>
+		r.fulfill({ json: { kind: 'design', bucket: 'day', checks: series }, headers: cors })
 	);
 }
 
@@ -89,6 +101,9 @@ test('stubbed responses: every cell shows its own field; only GETs are made', as
 	const base = { kind: 'design', checks: { 'd.alpha': { n: 21, p25: 0.15, median: 0.35, p75: 0.55 } } };
 	await page.route('**/v1/analytics/scores*', (r) => r.fulfill({ json: scores, headers: { 'access-control-allow-origin': '*' } }));
 	await page.route('**/v1/baselines*', (r) => r.fulfill({ json: base, headers: { 'access-control-allow-origin': '*' } }));
+	await page.route('**/v1/analytics/score-series*', (r) =>
+		r.fulfill({ json: { kind: 'design', bucket: 'day', checks: [] }, headers: { 'access-control-allow-origin': '*' } })
+	);
 	await page.goto('/quality?kind=design');
 	for (const c of scores.checks)
 		for (const f of F) await expect(page.getByTestId(`q-${c.name}-w-${f}`)).toHaveText(String(c[f]));
@@ -136,6 +151,10 @@ test('quality-dist re-renders when the kind switches', async ({ page }) => {
 	await page.route('**/v1/baselines*', (r) =>
 		r.fulfill({ json: { kind: 'design', checks: {} }, headers: cors })
 	);
+	await page.route('**/v1/analytics/score-series*', (r) => {
+		const kind = new URL(r.request().url()).searchParams.get('kind') ?? 'design';
+		return r.fulfill({ json: { kind, bucket: 'day', checks: [] }, headers: cors });
+	});
 	await page.goto('/quality');
 	await page.getByTestId('quality-dist-table-toggle').click();
 	const rows = page.getByTestId('quality-dist-table').locator('tbody tr');
@@ -144,6 +163,103 @@ test('quality-dist re-renders when the kind switches', async ({ page }) => {
 	await page.getByTestId('quality-kind-brief').click();
 	await expect(page).toHaveURL(/kind=brief/);
 	await expect(rows.nth(0).locator('td').nth(0)).toHaveText('b.only');
+});
+
+test('score-series gap: omitted middle bucket is blank in the band table, not zero', async ({ page }) => {
+	const cors = { 'access-control-allow-origin': '*' };
+	const scores = {
+		kind: 'design',
+		checks: [{ name: 'd.alpha', n: 5, min: 0.1, p25: 0.2, median: 0.3, p75: 0.4, max: 0.5 }]
+	};
+	const series = {
+		kind: 'design',
+		bucket: 'day',
+		checks: [
+			{
+				name: 'd.alpha',
+				points: [
+					{ t: '2024-01-01T00:00:00Z', n: 2, p25: 0.2, median: 0.3, p75: 0.4 },
+					{ t: '2024-01-03T00:00:00Z', n: 2, p25: 0.5, median: 0.6, p75: 0.7 }
+				]
+			}
+		]
+	};
+	await page.route('**/v1/analytics/scores*', (r) => r.fulfill({ json: scores, headers: cors }));
+	await page.route('**/v1/baselines*', (r) => r.fulfill({ json: { kind: 'design', checks: {} }, headers: cors }));
+	await page.route('**/v1/analytics/score-series*', (r) => r.fulfill({ json: series, headers: cors }));
+	await page.goto('/quality?from=2024-01-01T00:00:00.000Z&to=2024-01-03T23:59:59.000Z&bucket=day');
+	const chart = page.getByTestId('quality-band-d.alpha');
+	await expect(chart).toHaveAttribute('data-ready', 'true');
+	await page.getByTestId('quality-band-d.alpha-table-toggle').click();
+	const gap = page.getByTestId('quality-band-d.alpha-table').locator('tbody tr').filter({ hasText: '2024-01-02T00:00:00Z' });
+	await expect(gap.locator('td').nth(2)).toHaveText('');
+	await expect(gap.locator('td').nth(2)).not.toHaveAttribute('data-value', /.+/);
+});
+
+test('brushing a score band chart sets from and to in the URL', async ({ page }) => {
+	await stubQuality(
+		page,
+		[{ name: 'd.alpha', n: 4, min: 0.1, p25: 0.2, median: 0.3, p75: 0.4, max: 0.5 }],
+		{},
+		[
+			{
+				name: 'd.alpha',
+				points: [
+					{ t: '2024-01-01T00:00:00Z', n: 2, p25: 0.2, median: 0.3, p75: 0.4 },
+					{ t: '2024-01-02T00:00:00Z', n: 2, p25: 0.25, median: 0.35, p75: 0.45 }
+				]
+			}
+		]
+	);
+	await page.goto('/quality?from=2024-01-01T00:00:00.000Z&to=2024-01-02T23:59:59.000Z&bucket=day');
+	await expect(page.getByTestId('quality-band-d.alpha')).toHaveAttribute('data-ready', 'true');
+	await brush(page, 'quality-band-d.alpha', 0.25, 0.75);
+	await expect(page).toHaveURL(/from=/);
+	await expect(page).toHaveURL(/to=/);
+});
+
+test('kind tab refetches score-series with the new kind', async ({ page }) => {
+	const design = await catalog('design');
+	const brief = await catalog('brief');
+	const cors = { 'access-control-allow-origin': '*' };
+	const row = (name: string) => ({
+		name,
+		n: 0,
+		min: 0,
+		p25: 0,
+		median: 0,
+		p75: 0,
+		max: 0
+	});
+	await page.route('**/v1/analytics/scores*', (r) => {
+		const kind = new URL(r.request().url()).searchParams.get('kind') ?? 'design';
+		const name = kind === 'brief' ? brief[0] : design[0];
+		return r.fulfill({ json: { kind, checks: [row(name)] }, headers: cors });
+	});
+	await page.route('**/v1/baselines*', (r) => {
+		const kind = new URL(r.request().url()).searchParams.get('kind') ?? 'design';
+		return r.fulfill({ json: { kind, checks: {} }, headers: cors });
+	});
+	await page.route('**/v1/analytics/score-series*', (r) => {
+		const kind = new URL(r.request().url()).searchParams.get('kind') ?? 'design';
+		return r.fulfill({ json: { kind, bucket: 'day', checks: [] }, headers: cors });
+	});
+	const seen = trackRequests(page, '/v1/analytics/score-series');
+	await page.goto('/quality');
+	await expect(page.getByTestId('q-row').first()).toBeVisible();
+	expect(seen.count()).toBeGreaterThan(0);
+	for (const u of seen.urls()) expect(new URL(u).searchParams.getAll('kind')).toEqual(['design']);
+	seen.reset();
+	const briefSeries = page.waitForRequest(
+		(r) =>
+			r.url().includes('/v1/analytics/score-series') &&
+			new URL(r.url()).searchParams.get('kind') === 'brief'
+	);
+	await page.getByTestId('quality-kind-brief').click();
+	await briefSeries;
+	await expect(page).toHaveURL(/kind=brief/);
+	expect(seen.count()).toBe(1);
+	expect(new URL(seen.urls()[0]).searchParams.getAll('kind')).toEqual(['brief']);
 });
 
 test('quality-dist renders in the dark theme', async ({ page }) => {

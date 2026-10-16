@@ -61,6 +61,25 @@ export interface Baselines {
 	checks: Record<string, { n: number; p25: number; median: number; p75: number }>;
 }
 
+export interface ScoreSeriesPoint {
+	t: string;
+	n: number;
+	p25: number;
+	median: number;
+	p75: number;
+}
+
+export interface ScoreSeriesCheck {
+	name: string;
+	points: ScoreSeriesPoint[];
+}
+
+export interface ScoreSeries {
+	kind: Kind;
+	bucket: 'day' | 'week' | 'month';
+	checks: ScoreSeriesCheck[];
+}
+
 export type Shape = 'complete' | 'unreported' | 'started';
 export interface Executions {
 	counts: Record<Shape, number>;
