@@ -17,19 +17,6 @@ Resuming HEAD: `aa3c971`
 
 Phase 2 is closed (`1b7c79b`, `Workflow-Phase: client-registration:2`).
 
-## Phase 3 — Devices and remote agents present a token
-
-Tool: Cursor (Grok 4.7 orchestrator).
-Run identity: https://cursor.com/agents/bc-b44d5a65-1dda-58d1-8753-0a1631f41a82
-Started: 2026-10-16T12:29:57Z
-Resuming HEAD: `1b7c79b`
-
-Phase 3 only. Phase 4 is not started.
-
-Refined into five units, committed in `e0d9c1d`. 3-01 and 3-02 first (disjoint). After 3-02, 3-03 and 3-04. 3-05 after 3-01 and 3-04. Phase 2 carried items: other routes omitting `tenant` stay out of this phase; the registry-open panic stays; e2e seeding stays; the device page must not prefill expiry.
-
-artifact_feedback on the five phase 3 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
-
 Refined into four units, committed in `3423391`. 2-01 first. After it, 2-02, 2-03, and 2-04 have disjoint paths. Phase 1 carried items: the e2e keyed setup and the overview `tenant` query go to 2-03; the registry-open panic stays as 2-01 left it.
 
 artifact_feedback on the four phase 2 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
@@ -86,6 +73,27 @@ artifact_feedback on the four phase 2 briefs and four reports: service unreachab
 2. `Server.New` panics if the registry cannot be opened or persisted.
 3. E2e global-setup seeds `registry.json` instead of logging in and calling `POST /v1/tokens`.
 4. The profile expiry field is prefilled to three months in the browser. The device page must not copy that. The server still has no default.
+
+## Phase 3 — Devices and remote agents present a token
+
+Tool: Cursor (Grok 4.7 orchestrator).
+Run identity: https://cursor.com/agents/bc-b44d5a65-1dda-58d1-8753-0a1631f41a82
+Started: 2026-10-16T12:29:57Z
+Resuming HEAD: `1b7c79b`
+
+Phase 3 only. Phase 4 is not started.
+
+Refined into five units, committed in `e0d9c1d`. 3-01 and 3-02 first (disjoint). After 3-02, 3-03 and 3-04. 3-05 after 3-01 and 3-04. Phase 2 carried items: other routes omitting `tenant` stay out of this phase; the registry-open panic stays; e2e seeding stays; the device page must not prefill expiry.
+
+artifact_feedback on the five phase 3 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
+### 3-01-clientconfig-env-resolution
+
+- Built: `clientconfig.Load` uses both `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` over the file, and returns `ErrPartialEnv` when exactly one is set. Drain and status exit 1 on that error before any request. Env-only remote ingest and an MCP bearer GET are covered.
+- Surfaces: `tools/workflow/internal/clientconfig/clientconfig.go`, `tools/workflow/internal/clientconfig/clientconfig_test.go`, `tools/workflow/internal/drain/cli.go`, `tools/workflow/cmd/workflow/drain_test.go`, `tools/workflow/internal/mcp/mcp_test.go`.
+- Commit: `5fa53ad`. `go test` on `internal/clientconfig`, `cmd/workflow` (`Drain|Env|Client|Status`), and `internal/mcp` passed.
+- Deviations: none.
+- Agent: Composer, harness did not report turns or final context.
 
 ## Phase 1 — GitHub login and admission
 
