@@ -139,3 +139,42 @@ The Phase 2 carried item is not a Phase 3 surface. It stays for the Phase 5 edit
 - Surfaces: builder route, `builder.ts`, `BuilderChart.svelte`, `Heatmap.svelte`, `packages/workflow-analytics/tests/e2e/builder.spec.ts`. Commit `279d0bd`.
 - Deviations: none.
 - Agent: Composer, agent `2233c0bc-b93b-48a3-bd4b-2bb3da7d0c8f`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-04-trends-stacked-drill
+
+- Built: `/trends` drills a grouped series through `TimeChart`, and a control switches the multi-key split to a stacked area. The chart choice is in the URL.
+- Surfaces: `packages/workflow-analytics/src/routes/trends/+page.svelte`, `packages/workflow-analytics/tests/e2e/trends.spec.ts`. Commit `b3d0898`.
+- Deviations: the e2e drill clicks ECharts SVG paths because the brush layer blocks legend hits. The fixture series that drills is qwen.
+- Agent: Composer, agent `91b452c4-e44a-47d2-8e97-bdfc2d69da5b`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-05-usage-distribution
+
+- Built: `/usage` shows cost and token totals by model, a cost time series and a token time series split by model, and a per-call histogram for `cost_usd` and each token measure in the distribution contract. Model click and shift-click filter. Brush sets the window.
+- Surfaces: `packages/workflow-analytics/src/routes/usage/+page.svelte`, `packages/workflow-analytics/src/lib/types.ts`, `packages/workflow-analytics/src/lib/charts/DistributionChart.svelte`, `distribution.ts`, `distribution.test.ts`, `packages/workflow-analytics/tests/e2e/usage.spec.ts`. Commit `84c4ae0`.
+- Deviations: the histogram control lists the six contract measures. The brief said seven. Usage e2e sets `timezoneId: 'UTC'`. Three existing usage tests still fail because `claude-opus-5-5` is priced in the store while the e2e fixture still expects it unpriced. `tests/e2e/fixture.ts` was outside this unit's paths.
+- Agent: Composer, agent `50c36eaf-4724-476c-a667-701590b6a8f0`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-07-hooks-timeseries
+
+- Built: `/hooks` draws `GET /v1/analytics/query` with `measure=hook_events`, a time bucket, and a dimension of `norm_event` or `tool`. Brush sets the window. A treemap leaf still drills.
+- Surfaces: `packages/workflow-analytics/src/routes/hooks/+page.svelte`, `packages/workflow-analytics/tests/e2e/hooks.spec.ts`. Commit `f973e59`.
+- Deviations: the brief's Playwright `-g "fixture counts"` matches no test title. The static bar fixture test still runs in the full spec.
+- Agent: Composer, agent `6732f0c0-1a98-4e2a-bf2d-d1563932e1a6`. The harness did not report turn count or final context size. Status `done`.
+
+### Verification
+
+Checked against the phase outcome, not the reports. From `packages/workflow-analytics`.
+
+- `npm test -- src/lib/charts/distribution.test.ts src/lib/charts/options.test.ts src/lib/builder.test.ts`: 41 passed.
+- `E2E_PORT=4401 npx playwright test` on `filter-bar.spec.ts`, `overview.spec.ts`, `trends.spec.ts`, `usage.spec.ts`, `repos.spec.ts`, `hooks.spec.ts`, and `builder.spec.ts`: 66 passed, 5 failed.
+- Passing cases cover the outcome: the filter bar exposes all ten dimensions; overview KPI tiles keep `repo_id` and the trends tile sets `metric`; `/trends` series click filters and shift-click excludes, and stacked area lists series columns; `/repos` cost ranking orders the bars and a repo click filters; `/hooks` requests `measure=hook_events` with a time bucket and split dim, brush narrows the window, and a treemap leaf drills; `/usage` switches the distribution measure, requests tokens over time with `dim=model`, brush sets `from`/`to`, and a model bar click filters; the builder shows a scalar for zero dimensions with bucket `none`, and a model heatmap cell adds a chip while weekday and hour cells do not.
+- The five failures are the existing unpriced-opus expectations: overview `unpriced_calls` is 1 not 2 and cost is `$0.16, 1 unpriced` not `$0.02, 2 unpriced`; usage expects `claude-opus-5-5` to read `unpriced` and receives `$0.13`. Those assertions are not the phase outcome.
+
+### Feedback
+
+`artifact_feedback` was not called on the eight briefs or eight reports. The workflow feedback namespace is not available in this session. Nothing is queued.
+
+### Carried
+
+- `docs/design/07-analytics-site.md` open issue 12 still says conversation totals cover only the returned events when a timeline is truncated. The contract on that page says `totals` is the whole run and `truncated` applies to `events` only. Phase 5 edits that file and should replace the stale clause.
+- Overview and usage e2e still expect `claude-opus-5-5` to be unpriced (`unpriced_calls` 2, cost `$0.02, 2 unpriced`, opus cost `unpriced`). The API prices that model, so the page shows 1 unpriced call and `$0.13` for opus. The next edit of `tests/e2e/fixture.ts` or those specs should match the priced fixture.
