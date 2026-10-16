@@ -206,6 +206,7 @@ type Options struct {
 	ScreenStep    ScreenFunc     // default: promote as unscreened
 	Checks        *scorer.Checks // loaded checks for /v1/checks; nil = none loaded
 	ScreenBackoff time.Duration  // first wait after an unreachable scorer; default 5s, doubles to 5 min
+	GitHubHTTPBase string        // tests: mock GitHub authorize/token/api base URL
 }
 
 // ScreenFunc is the screen step applied to one pending hash. Phase 3 replaces it.
@@ -499,8 +500,13 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/analytics/query", s.method(http.MethodGet, s.auth(s.analyticsQuery)))
 	mux.HandleFunc("/v1/analytics/distribution", s.method(http.MethodGet, s.auth(s.analyticsDistribution)))
 	mux.HandleFunc("/v1/analytics/score-series", s.method(http.MethodGet, s.auth(s.analyticsScoreSeries)))
+	mux.HandleFunc("/v1/me", s.method(http.MethodGet, s.sessionOnly(s.handleMe)))
+	mux.HandleFunc("/v1/admin/policy", s.method(http.MethodPut, s.originGuard(s.sessionOnly(s.handleAdminPolicy))))
+	mux.HandleFunc("/oauth/login", s.method(http.MethodGet, s.oauthLogin))
+	mux.HandleFunc("/oauth/callback", s.method(http.MethodGet, s.oauthCallback))
+	mux.HandleFunc("/logout", s.method(http.MethodPost, s.originGuard(s.logout)))
 	mux.HandleFunc("/", siteHandler(siteFS))
-	h := s.cors(mux)
+	h := s.withSession(s.cors(mux))
 	if s.cfg.Local() {
 		return localGuard(h)
 	}
@@ -583,32 +589,20 @@ func (s *Server) method(m string, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// tenantFor maps the bearer token to its tenant (see tenantForKey). In local mode every request
-// is LocalTenant and any token is ignored.
-func (s *Server) tenantFor(r *http.Request) (string, bool) {
-	if s.cfg.Local() {
-		return LocalTenant, true
-	}
-	tok, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
-	if !ok {
-		return "", false
-	}
-	return s.tenantForKey(tok)
-}
-
 type tenantHandler func(w http.ResponseWriter, r *http.Request, name string, ts *tenantState)
 
 func (s *Server) auth(h tenantHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name, ok := s.tenantFor(r)
-		if !ok {
-			msg := "unauthorized"
-			if !strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ") {
-				msg = "unauthorized: this service requires a key; run workflow login"
-			}
-			writeJSON(w, 401, map[string]string{"error": msg})
+		res := s.authorizeRequest(r)
+		if res.status == authForbidden {
+			writeJSON(w, 403, map[string]string{"error": "no such tenant"})
 			return
 		}
+		if res.status != authOK {
+			writeJSON(w, 401, map[string]string{"error": res.msg})
+			return
+		}
+		name := res.tenant
 		ts, err := s.tenant(name)
 		if err != nil {
 			if errors.Is(err, store.ErrLocked) {

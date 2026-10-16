@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -426,6 +428,239 @@ func TestCORSKeyedMode(t *testing.T) {
 	s2 := New(Config{Data: t.TempDir(), Keys: []KeyPair{{"a", "ka"}}}, Options{DisableWorker: true})
 	t.Cleanup(func() { s2.Close() })
 	assertNoCORS(t, corsReq(s2.Handler(), "GET", "/v1/checks", "https://wf.pages.dev", "ka"), "no CORSOrigins")
+}
+
+func remoteTestConfig(t *testing.T, dir string, ghBase string) *Server {
+	cfg := Config{
+		Addr:                    "0.0.0.0:8770",
+		Data:                    dir,
+		PublicURL:               "https://collector.example",
+		GitHubOAuthClientID:     "cid",
+		GitHubOAuthClientSecret: "csec",
+	}
+	if !cfg.Remote() {
+		t.Fatal("expected remote config")
+	}
+	s := New(cfg, Options{DisableWorker: true, GitHubHTTPBase: ghBase})
+	t.Cleanup(func() { s.Close() })
+	return s
+}
+
+type mockEmail struct {
+	Email    string `json:"email"`
+	Verified bool   `json:"verified"`
+}
+
+func mockGitHub(t *testing.T, userID int64, login string, emails []mockEmail) *httptest.Server {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/login/oauth/authorize", func(w http.ResponseWriter, r *http.Request) {
+		state := r.URL.Query().Get("state")
+		redir := r.URL.Query().Get("redirect_uri")
+		http.Redirect(w, r, redir+"?code=mockcode&state="+url.QueryEscape(state), http.StatusFound)
+	})
+	mux.HandleFunc("/login/oauth/access_token", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, 200, map[string]string{"access_token": "mock-access", "token_type": "bearer"})
+	})
+	mux.HandleFunc("/api/user", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, 200, map[string]any{"id": userID, "login": login})
+	})
+	mux.HandleFunc("/api/user/emails", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, 200, emails)
+	})
+	return httptest.NewServer(mux)
+}
+
+func doWithCookies(t *testing.T, h http.Handler, method, path, origin, body string, cookies []*http.Cookie) (int, string, []*http.Cookie) {
+	var rdr io.Reader
+	if body != "" {
+		rdr = strings.NewReader(body)
+	}
+	req := httptest.NewRequest(method, path, rdr)
+	if origin != "" {
+		req.Header.Set("Origin", origin)
+	}
+	if body != "" {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code, rec.Body.String(), rec.Result().Cookies()
+}
+
+func loginRemote(t *testing.T, h http.Handler, origin string) []*http.Cookie {
+	code, _, cookies := doWithCookies(t, h, "GET", "/oauth/login", "", "", nil)
+	if code != http.StatusFound {
+		t.Fatalf("oauth login: %d", code)
+	}
+	var state string
+	for _, c := range cookies {
+		if c.Name == oauthStateCookie {
+			state = c.Value
+		}
+	}
+	if state == "" {
+		t.Fatal("no oauth state cookie")
+	}
+	code, _, cookies = doWithCookies(t, h, "GET", "/oauth/callback?code=mockcode&state="+url.QueryEscape(state), "", "", cookies)
+	if code != http.StatusFound {
+		t.Fatalf("oauth callback: %d", code)
+	}
+	for _, c := range cookies {
+		if c.Name == sessionCookieName && c.Value != "" {
+			return []*http.Cookie{c}
+		}
+	}
+	t.Fatalf("no session cookie after login: %v", cookies)
+	return nil
+}
+
+func TestOAuthSessionRemoteAuth(t *testing.T) {
+	gh := mockGitHub(t, 42, "codyh", []mockEmail{{Email: adminEmail, Verified: true}})
+	t.Cleanup(gh.Close)
+	dir := t.TempDir()
+	s := remoteTestConfig(t, dir, gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+
+	if code, body := do(t, h, "GET", "/v1/analytics/summary", "", ""); code != 401 || !strings.Contains(body, "sign in at https://collector.example/login") {
+		t.Fatalf("remote summary without session: %d %s", code, body)
+	}
+	if code, body := do(t, h, "POST", "/v1/ingest", "", `{"facts":[]}`); code != 401 {
+		t.Fatalf("ingest without bearer: %d %s", code, body)
+	}
+
+	s.registry.SetPolicy(DomainPolicy{Mode: PolicyAllowList, Domains: []string{"other.example"}})
+	sess := loginRemote(t, h, origin)
+	code, body, _ := doWithCookies(t, h, "GET", "/v1/me", origin, "", sess)
+	if code != 200 || !strings.Contains(body, `"admin":true`) {
+		t.Fatalf("/v1/me admin: %d %s", code, body)
+	}
+
+	gh2 := mockGitHub(t, 99, "stranger", []mockEmail{{Email: "x@denied.example", Verified: true}})
+	t.Cleanup(gh2.Close)
+	s2 := remoteTestConfig(t, t.TempDir(), gh2.URL)
+	s2.registry.SetPolicy(DomainPolicy{Mode: PolicyAllowList, Domains: []string{"other.example"}})
+	h2 := s2.Handler()
+	code, _, cookies := doWithCookies(t, h2, "GET", "/oauth/login", "", "", nil)
+	if code != http.StatusFound {
+		t.Fatal(code)
+	}
+	var state string
+	for _, c := range cookies {
+		if c.Name == oauthStateCookie {
+			state = c.Value
+		}
+	}
+	req := httptest.NewRequest("GET", "/oauth/callback?code=mockcode&state="+url.QueryEscape(state), nil)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	h2.ServeHTTP(rec, req)
+	if rec.Code != http.StatusFound {
+		t.Fatalf("denied callback: %d", rec.Code)
+	}
+	loc := rec.Header().Get("Location")
+	if !strings.Contains(loc, "error=denied") {
+		t.Fatalf("denied login location: %q", loc)
+	}
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == sessionCookieName && c.Value != "" {
+			t.Fatal("denied login set session cookie")
+		}
+	}
+}
+
+func TestRemoteSessionIngestAndTenant(t *testing.T) {
+	gh := mockGitHub(t, 7, "u", []mockEmail{{Email: "u@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+
+	if code, _, _ := doWithCookies(t, h, "POST", "/v1/ingest", origin, `{"facts":[]}`, sess); code != 401 {
+		t.Fatalf("session ingest: %d", code)
+	}
+	if code, body, _ := doWithCookies(t, h, "GET", "/v1/analytics/summary", origin, "", sess); code != 403 || !strings.Contains(body, "no such tenant") {
+		t.Fatalf("summary without tenant: %d %s", code, body)
+	}
+	s.registry.mu.Lock()
+	s.registry.owners["mine"] = "7"
+	s.registry.mu.Unlock()
+	if code, _, _ := doWithCookies(t, h, "GET", "/v1/analytics/summary?tenant=mine", origin, "", sess); code != 200 {
+		t.Fatalf("summary with owned tenant: %d", code)
+	}
+}
+
+func TestRemotePolicyAdmin(t *testing.T) {
+	gh := mockGitHub(t, 1, "codyh", []mockEmail{{Email: adminEmail, Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	admin := loginRemote(t, h, origin)
+
+	body := `{"mode":"allow_list","domains":["allowed.example"]}`
+	if code, _, _ := doWithCookies(t, h, "PUT", "/v1/admin/policy", origin, body, admin); code != 200 {
+		t.Fatalf("admin policy put: %d", code)
+	}
+	if code, _, _ := doWithCookies(t, h, "PUT", "/v1/admin/policy", origin, body, nil); code != 401 {
+		t.Fatalf("policy without session: %d", code)
+	}
+
+	ghUser := mockGitHub(t, 2, "member", []mockEmail{{Email: "member@allowed.example", Verified: true}})
+	t.Cleanup(ghUser.Close)
+	s2 := remoteTestConfig(t, t.TempDir(), ghUser.URL)
+	h2 := s2.Handler()
+	member := loginRemote(t, h2, origin)
+	if code, _, _ := doWithCookies(t, h2, "PUT", "/v1/admin/policy", origin, body, member); code != 403 {
+		t.Fatalf("non-admin policy: %d", code)
+	}
+
+	ghMember2 := mockGitHub(t, 3, "member2", []mockEmail{{Email: "member@allowed.example", Verified: true}})
+	t.Cleanup(ghMember2.Close)
+	s3 := remoteTestConfig(t, t.TempDir(), ghMember2.URL)
+	h3 := s3.Handler()
+	s3.registry.SetPolicy(DomainPolicy{Mode: PolicyAllowList, Domains: []string{"allowed.example"}})
+	deniedSess := loginRemote(t, h3, origin)
+	s3.registry.SetPolicy(DomainPolicy{Mode: PolicyAllowList, Domains: []string{"other.example"}})
+	code, _, _ := doWithCookies(t, h3, "GET", "/v1/me", origin, "", deniedSess)
+	if code != 401 {
+		t.Fatalf("policy change should clear session: %d", code)
+	}
+}
+
+func TestLoopbackUnchangedWithOAuthEnv(t *testing.T) {
+	dir := t.TempDir()
+	cfg := Config{
+		Addr:                    "127.0.0.1:8770",
+		Data:                    dir,
+		PublicURL:               "https://collector.example",
+		GitHubOAuthClientID:     "id",
+		GitHubOAuthClientSecret: "sec",
+	}
+	if !cfg.Local() {
+		t.Fatal("loopback with oauth env must be local")
+	}
+	s := New(cfg, Options{DisableWorker: true})
+	t.Cleanup(func() { s.Close() })
+	h := s.Handler()
+	req := httptest.NewRequest("GET", "http://127.0.0.1:8770/v1/analytics/summary", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != 200 {
+		t.Fatalf("loopback summary: %d %s", rec.Code, rec.Body.String())
+	}
+	req2 := httptest.NewRequest("GET", "http://127.0.0.1:8770/", nil)
+	rec2 := httptest.NewRecorder()
+	h.ServeHTTP(rec2, req2)
+	if rec2.Code != 200 && rec2.Code != 404 {
+		t.Fatalf("/ on loopback: %d", rec2.Code)
+	}
 }
 
 func TestCORSConfig(t *testing.T) {
