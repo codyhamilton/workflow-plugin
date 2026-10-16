@@ -14,7 +14,11 @@
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": "./"
+      "source": {
+        "source": "github",
+        "repo": "codyhamilton/workflow-plugin",
+        "ref": "master"
+      }
     },
     {
       "name": "workflow-lab",
@@ -24,7 +28,12 @@
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": "./plugins/workflow-lab"
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/codyhamilton/workflow-plugin.git",
+        "path": "plugins/workflow-lab",
+        "ref": "master"
+      }
     }
   ]
 }
