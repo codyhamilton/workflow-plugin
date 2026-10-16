@@ -128,3 +128,65 @@ export async function revokeToken(id: string, signal?: AbortSignal): Promise<voi
 export async function fetchMe(signal?: AbortSignal): Promise<MeResponse> {
 	return apiGet<MeResponse>('me', undefined, signal);
 }
+
+export type DeviceAuthorizeBody = {
+	redirect_uri: string;
+	state: string;
+	tenant: string;
+	scope: 'read' | 'read_write';
+	expires_at: string;
+};
+
+/** Loopback http(s) redirect URIs allowed for device authorization (matches serve `validLoopbackRedirectURI`). */
+export function isValidLoopbackRedirectUri(raw: string): boolean {
+	if (!raw) return false;
+	try {
+		const u = new URL(raw);
+		if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+		const host = u.hostname;
+		if (host === 'localhost') return true;
+		if (host === '127.0.0.1' || host === '::1' || host === '[::1]') return true;
+		// IPv4 loopback 127.0.0.0/8
+		const m = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(host);
+		if (m) {
+			const a = Number(m[1]);
+			return a === 127;
+		}
+		return false;
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * Device authorization (`POST /v1/device/authorize`). Collector session + JSON + Origin.
+ * Returns the loopback redirect URL (303 Location); response body must not contain the token plaintext.
+ */
+export async function authorizeDevice(body: DeviceAuthorizeBody, signal?: AbortSignal): Promise<string> {
+	const collector = isCollectorMode();
+	const key = collector ? '' : read(TOKEN_KEY);
+	const url = apiUrl('device/authorize');
+	const init = apiInit('POST', collector, key, body, signal);
+	let res = await fetch(url, { ...init, redirect: 'manual' });
+	if (res.status >= 300 && res.status < 400) {
+		const loc = res.headers.get('Location');
+		if (!loc) throw new ApiError(res.status, 'missing redirect location');
+		return loc;
+	}
+	// Cross-origin 303 from fetch can surface as an opaque redirect (status 0); follow to learn the final URL.
+	if (res.status === 0 || res.type === 'opaqueredirect') {
+		res = await fetch(url, { ...init, redirect: 'follow' });
+		if (res.redirected && res.url) return res.url;
+	}
+	if (!res.ok) {
+		let msg = res.statusText || `HTTP ${res.status}`;
+		try {
+			const errBody = await res.json();
+			if (errBody && typeof errBody.error === 'string') msg = errBody.error;
+		} catch {
+			/* non-JSON error body */
+		}
+		throw new ApiError(res.status, msg);
+	}
+	throw new ApiError(res.status, 'unexpected device authorize response');
+}

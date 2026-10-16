@@ -1,5 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, apiGet, apiPost, createToken, fetchMe, revokeToken } from './api';
+import {
+	ApiError,
+	apiGet,
+	apiPost,
+	authorizeDevice,
+	createToken,
+	fetchMe,
+	isValidLoopbackRedirectUri,
+	revokeToken
+} from './api';
 
 let store: Record<string, string>;
 let fetchMock: ReturnType<typeof vi.fn>;
@@ -94,6 +103,57 @@ describe('apiGet', () => {
 		fetchMock.mockImplementation(() => ok({ id: '1', token: 'wk_x', tenant: 't', scope: 'read', expires_at: 'x' }));
 		await createToken({ tenant: 't', scope: 'read', expires_at: '2099-01-01T00:00:00Z' });
 		expect(fetchMock.mock.calls[0][0]).toBe('/v1/tokens');
+	});
+
+	it('isValidLoopbackRedirectUri accepts loopback http(s) only', () => {
+		expect(isValidLoopbackRedirectUri('http://127.0.0.1:8765/callback')).toBe(true);
+		expect(isValidLoopbackRedirectUri('https://localhost:9/')).toBe(true);
+		expect(isValidLoopbackRedirectUri('https://example.com/cb')).toBe(false);
+		expect(isValidLoopbackRedirectUri('')).toBe(false);
+	});
+
+	it('authorizeDevice posts to device/authorize and returns redirect Location', async () => {
+		fetchMock.mockImplementation(() =>
+			Promise.resolve(
+				new Response(null, {
+					status: 303,
+					headers: { Location: 'http://127.0.0.1:1/cb?code=c&state=s' }
+				})
+			)
+		);
+		const loc = await authorizeDevice({
+			redirect_uri: 'http://127.0.0.1:1/cb',
+			state: 's',
+			tenant: 't',
+			scope: 'read',
+			expires_at: '2099-01-01T00:00:00Z'
+		});
+		expect(loc).toBe('http://127.0.0.1:1/cb?code=c&state=s');
+		const [url, init] = fetchMock.mock.calls[0];
+		expect(url).toBe('/v1/device/authorize');
+		expect(init?.method).toBe('POST');
+		expect(init?.redirect).toBe('manual');
+		expect(init?.credentials).toBe('include');
+		expect(JSON.parse(String(init?.body))).toEqual({
+			redirect_uri: 'http://127.0.0.1:1/cb',
+			state: 's',
+			tenant: 't',
+			scope: 'read',
+			expires_at: '2099-01-01T00:00:00Z'
+		});
+	});
+
+	it('authorizeDevice surfaces API errors without parsing redirect', async () => {
+		fetchMock.mockImplementation(() => ok({ error: 'forbidden' }, 403));
+		await expect(
+			authorizeDevice({
+				redirect_uri: 'http://127.0.0.1:1/cb',
+				state: 's',
+				tenant: 't',
+				scope: 'read',
+				expires_at: '2099-01-01T00:00:00Z'
+			})
+		).rejects.toMatchObject({ status: 403, message: 'forbidden' });
 	});
 
 	it('names a non-JSON 200 (a static host without the API) as a connection problem', async () => {
