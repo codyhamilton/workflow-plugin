@@ -28,9 +28,10 @@ The OpenCode plugin writes the same files itself.
 
 After spooling, `spool.sh` starts one detached `bin/workflow drain` (a lock keeps it to one;
 `WORKFLOW_HOOKLOG_KICK=0` disables, `WORKFLOW_BIN` names the binary). The drain posts the queued files
-to the endpoint and deletes them; files the service refuses move to `rejected/`. The endpoint is
-the one in `~/.config/workflow/client.toml` (remote mode), or `http://127.0.0.1:8770` with no key
-when that file is absent (local mode). While the endpoint is unreachable the files wait. A running
+to the endpoint and deletes them; files the service refuses move to `rejected/`. Endpoint and bearer
+follow the same resolution as design 2: both `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` override
+`client.toml`; exactly one of them set is a hard error; otherwise the file, else local
+`http://127.0.0.1:8770` with no key. While the endpoint is unreachable the files wait. A running
 `workflow serve` on the same machine hosts the drain itself. `workflow status` reports the queue
 and the mode.
 
@@ -42,14 +43,15 @@ first real call finds a warm cache.
 ## Setup
 
 There is no install step. For local mode, run `bin/workflow serve` however suits the machine (a
-terminal, a systemd user unit, launchd). With no `WORKFLOW_SERVE_KEYS` it runs keyless, binds
-`127.0.0.1:8770` (`WORKFLOW_SERVE_ADDR` may name another loopback address, never a public one),
-and stores data under `WORKFLOW_SERVE_DATA` (default `~/.local/share/workflow/serve`), tenant
-`local`. To turn on screening, set `TYPESAFE_API_KEY` in serve's environment; it never goes in a
-hook config or `client.toml`.
+terminal, a systemd user unit, launchd). Loopback serve is keyless, binds `127.0.0.1:8770`
+(`WORKFLOW_SERVE_ADDR` may name another loopback address, never a public one), and stores data under
+`WORKFLOW_SERVE_DATA` (default `~/.local/share/workflow/serve`), tenant `local`. To turn on
+screening, set `TYPESAFE_API_KEY` in serve's environment; it never goes in a hook config or
+`client.toml`.
 
-Remote mode is `client.toml` (mode 0600, `endpoint` and `key`), written by `workflow login` (not
-built yet).
+Remote mode is `client.toml` (mode 0600, `endpoint` and `key`), written by **`workflow login`**, or
+the same pair via **`WORKFLOW_ENDPOINT`** and **`WORKFLOW_KEY`** when the agent has no file (for
+example a cloud worker). `WORKFLOW_CLIENT_CONFIG` overrides only the file path.
 
 ## MCP
 

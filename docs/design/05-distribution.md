@@ -60,9 +60,12 @@ for the plugin to presume one, and local mode needs no generated state:
   `WORKFLOW_PUBLIC_URL` set is a remote collector. `WORKFLOW_SERVE_KEYS` is not a credential there:
   any non-empty value makes the process exit before it listens, on loopback or not. The collector
   serves the embedded analytics site with GitHub login (`/login`, `GET /oauth/login`) and a
-  `workflow_session` cookie for same-origin dashboard reads. Clients and agents use issued bearer
-  tokens (not the session cookie). `workflow login`, which opens the collector and writes
-  `client.toml`, is a later phase; until then configure `endpoint` and `key` by hand or env.
+  `workflow_session` cookie for same-origin dashboard reads. The overview dashboard uses `?tenant=`
+  from `GET /v1/me`; other analytics routes are unchanged. Clients and agents use issued bearer
+  tokens (not the session cookie). **`workflow login`** (`--endpoint` optional) opens the collector
+  device page in the browser and writes `endpoint` and `key` into `client.toml`. Hand-edit the file,
+  or set **`WORKFLOW_ENDPOINT`** and **`WORKFLOW_KEY`** in the agent environment, when there is no
+  browser. There is no `workflow init`.
 
 With no `serve` running and no remote configured, the drain finds the endpoint unreachable and the
 queue grows; `workflow status` reports it as a failure, not as idle.
