@@ -40,6 +40,28 @@ Boundaries given with those answers: a token belongs to one tenant; scope is rea
 - `WORKFLOW_SERVE_KEYS` is not kept as a hidden admin path. If it is set, the process refuses to start.
 - All four phases are known.
 
+### Turn 3
+
+**User responded:** could `workflow login` automatically open the website, then when the user authenticates it creates a token which is then stored in config (effectively an automatic api token created and saved).
+
+The contract sent with that sentence: the command opens the system browser, listens on loopback, and after GitHub auth writes one token into `client.toml`. The automatic token was `read_write`, lifetime 90 days, revocable from the profile. No tenant yet meant create one named from the GitHub login; exactly one meant that tenant; more than one meant the page asks. Flags `--tenant`, `--scope`, and `--expires` would override those defaults.
+
+**Agent decisions:**
+
+- Not written into the design. The next turn superseded it before it landed.
+
+### Turn 4
+
+**User responded:** "The device code creation page can ask for which tenancy and grant for the device."
+
+That supersedes the automatic token. `workflow login` still opens the website and, after GitHub auth, writes the issued token into `client.toml`. The page that creates that device credential asks which tenant and which grant (`read` or `read_write`). Lifetime is set on that same page. If the user has no tenant yet, that page can create one. It does not silently choose among several tenants, and it does not silently choose the grant. Profile token creation is unchanged. Remote agents with no browser still use `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY`. Local loopback still needs no keys.
+
+**Agent decisions:**
+
+- Drop automatic `read_write`, the 90-day default, a silently picked tenant, and a tenant named from the GitHub login. Do not keep the override flags that existed only to change those defaults.
+- Keep the loopback one-time code: the browser comes back with a code, the command exchanges it, writes `client.toml`, and does not print or log the token.
+- The device page is where tenant, grant, and lifetime are chosen. Phase 3's outcome includes `workflow login`. Phase 1 stays the GitHub session.
+
 ## Agent Decisions
 
 - **Admin lockout**: the verified admin email can log in even when the allow list does not include `ctzns.net`. Rationale: otherwise the only person who can edit the policy can remove themselves.
@@ -50,6 +72,6 @@ Boundaries given with those answers: a token belongs to one tenant; scope is rea
 - **Read token on ingest**: 403 `read-only token`. Unknown, expired, or revoked: 401 `unauthorized`. Rationale: he reserved "unauthorized" for expired or revoked; a read token is a valid credential that must not write.
 - **Scope and expiry**: not editable. A different access is a new token. Rationale: he described setting them when the token is created, and revoke covers taking one back.
 - **Env versus file**: `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` together win over `client.toml`. Exactly one of them is bad config. Rationale: he asked for remote-agent env, and design 2's objection was hook environments that are not a deliberate client config. A hook that sets neither is unchanged.
-- **No CLI login**: the login he asked for is the page. `workflow login` and `workflow init` are not added. Rationale: both are absent on master; the 401 string that names the CLI is replaced with the page.
+- **`workflow login`**: the command opens the collector and writes the token the device page issued into `client.toml`. The page asks for the tenant, the grant, and the lifetime. Rationale: he asked for the command, then replaced a silent automatic token with that page. `workflow init` is still not added.
 - **Pages**: the pasted token on `/settings` stays for a cross-origin static site. The collector dashboard uses the session. Rationale: CORS has no credentials, and he did not ask to retire Pages.
 - **Plan number**: `docs/plans/13-client-registration/`. Rationale: 12 is the highest prefix; 11 is an unused gap.

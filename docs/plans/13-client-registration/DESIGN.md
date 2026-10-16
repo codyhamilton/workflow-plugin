@@ -12,7 +12,7 @@ User request, verbatim:
 
 ## Solution Shape
 
-A remote `workflow serve` is a collector. A person logs in with GitHub; the session opens the analytics dashboard and the profile. The profile creates tenants and issues tokens. A token belongs to one tenant, is `read` or `read_write`, and has an expiry the issuer set. Agents and devices send it as `Authorization: Bearer`. The session is not a bearer token, and a bearer token is not a session. Local loopback serve stays keyless. On the collector, `WORKFLOW_SERVE_KEYS` is not a credential. The collector runs as one fly.io machine with a persistent data directory.
+A remote `workflow serve` is a collector. A person logs in with GitHub; the session opens the analytics dashboard and the profile. The profile creates tenants and issues tokens. A token belongs to one tenant, is `read` or `read_write`, and has an expiry the issuer set. `workflow login` is a second way onto that same login: it opens the collector in the browser, the device page asks which tenant and which grant and sets the lifetime, and the command writes the issued token into `client.toml`. Agents and devices send it as `Authorization: Bearer`. The session is not a bearer token, and a bearer token is not a session. Local loopback serve stays keyless. On the collector, `WORKFLOW_SERVE_KEYS` is not a credential. The collector runs as one fly.io machine with a persistent data directory.
 
 ### Domain: Identity and admission
 
@@ -27,8 +27,8 @@ A remote `workflow serve` is a collector. A person logs in with GitHub; the sess
   - Session cookie: name `workflow_session`, HttpOnly, SameSite=Lax, Secure when `WORKFLOW_PUBLIC_URL` is https. It expires 14 days after login and is not slid forward by activity. Each authenticated request re-reads policy against the emails stored for that session; a session that would now be denied is cleared and treated as logged out. Logout (`POST /logout`) clears the cookie and does not revoke tokens.
   - `PUT /v1/admin/policy` with a session that is not the admin is 403. Body: `{"mode":"everyone"|"allow_list","domains":["example.com"]}`. `domains` is the list when mode is `allow_list`, and is stored empty when mode is `everyone`.
   - Mutating session routes require `Content-Type: application/json` and an `Origin` equal to `WORKFLOW_PUBLIC_URL` (local mode: a loopback origin). Anything else is 403 and changes nothing.
-  - Successful login redirects to `/`, the analytics dashboard. Static files stay unauthenticated. Ledger data does not.
-- Non-goals: a `workflow login` CLI or device-code flow; more than one OAuth app; org or team SSO; letting a non-admin edit the policy.
+  - Successful login redirects to `/`, the analytics dashboard, unless the browser was sent to the device page by `workflow login` (client presentation). The OAuth callback itself does not create a tenant. Static files stay unauthenticated. Ledger data does not.
+- Non-goals: more than one OAuth app; org or team SSO; letting a non-admin edit the policy; a GitHub device-code grant that never opens the collector.
 
 ### Domain: Tenancy and tokens
 
@@ -54,7 +54,7 @@ A remote `workflow serve` is a collector. A person logs in with GitHub; the sess
   - If the request has `Authorization: Bearer <token>`, the registry decides. Unknown, expired (`now >= expires_at`), or revoked is 401 `{"error":"unauthorized"}`. A `tenant` query that is present and differs from the token's tenant is 401. The session cookie is not consulted on a request that presented a bearer, so a session cannot widen a `read` token.
   - A valid `read` token may call the existing GET reads (`/v1/artifacts`, `/v1/checks`, `/v1/baselines`, `/v1/search`, `/v1/analytics/*`). `POST /v1/ingest` with a valid `read` token is 403 `{"error":"read-only token"}` and stores nothing. A valid `read_write` token may ingest and may call those GETs.
   - With no bearer, a session may call those GETs for a `tenant` query it owns, and may not call `POST /v1/ingest` (ingest is bearer-only). A missing `tenant`, or one the session does not own, is 403 `{"error":"no such tenant"}`.
-  - No bearer and no session on a remote data route is 401 `{"error":"unauthorized: this service requires a token; sign in at <WORKFLOW_PUBLIC_URL>/login to issue one"}`. The `run workflow login` string is gone.
+  - No bearer and no session on a remote data route is 401 `{"error":"unauthorized: this service requires a token; run workflow login"}`. That command is the device path in client presentation. It is not a session.
   - `GET /v1/health` stays unauthenticated. Profile and admin routes reject a bearer with 401; they accept only a session, as the identity contract says.
   - `GET /v1/me` with a session returns `{"github_id","github_login","admin","tenants":[{"name"}]}`. Without a session it is 401.
 - Non-goals: credentialed CORS (no `Access-Control-Allow-Credentials`); a bearer that names an arbitrary tenant; keyed local mode.
@@ -70,8 +70,14 @@ A remote `workflow serve` is a collector. A person logs in with GitHub; the sess
     4. Neither set, and no file: local mode, `http://127.0.0.1:8770`, no bearer.
   - `WORKFLOW_CLIENT_CONFIG` still overrides only the file path.
   - The drain's ingest request stays `POST <endpoint>/v1/ingest` with `Authorization: Bearer <key>` when the resolved key is non-empty. The MCP shim's GETs use the same resolution.
-  - A person configures a device by writing `client.toml` (`endpoint`, `key`) from a token the profile showed once. A Claude or Codex remote agent is configured by setting `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` in that agent's environment.
-- Non-goals: the service writing `client.toml` onto the user's machine; a `workflow login` or `workflow init` command.
+  - A hand-written `client.toml` (`endpoint`, `key`) still works. A Claude or Codex remote agent that has no browser is configured by setting `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` in that agent's environment.
+  - `workflow login` is how a person at a device points a client at the collector. It does not change local loopback serve, which still requires no keys.
+  - `workflow login` takes an optional `--endpoint` (the collector origin, no path). When the flag is omitted, the `endpoint` already in `client.toml` is used. When the flag is omitted and there is no endpoint, the command exits without writing a key.
+  - The command listens on loopback and opens the system browser to the collector's device page, carrying the loopback redirect. If the browser has no session, the collector sends it through the GitHub login and back to that page. The device page asks which tenant, which grant (`read` or `read_write`), and the lifetime (`expires_at`, RFC3339 UTC, strictly in the future). The collector does not fill those in. A submit that omits any of them creates no token.
+  - The page does not silently choose among several tenants, and it does not silently choose the grant. It does not name a tenant from the GitHub login. There is no 90-day default and no automatic `read_write`. If the user has no tenant yet, the page can create one, and the user supplies the name under the existing tenant name rule. If they do not complete the page, `client.toml` is unchanged.
+  - On submit the collector creates the token and redirects the browser to the loopback URL with a one-time code, not the plaintext. The redirect target must be the loopback address this command opened; any other redirect is refused and creates no token. The command exchanges the code once for the plaintext, writes `endpoint` and `key` into `client.toml`, and does not print the token. A second exchange of the same code is 401 and returns no token. The code is not a bearer and cannot call `/v1`. The code and the token are not logged.
+  - That token is an ordinary issued token: one tenant, the grant the user chose, the expiry the user set, revocable from the profile. Profile creation is unchanged: the profile still asks for tenant, scope, and expiry, and its create response is still the only profile response that contains the plaintext.
+- Non-goals: the collector pushing `client.toml` onto a machine that did not run `workflow login`; `workflow init`; flags that skip the device page's questions; a silent default tenant, grant, or lifetime.
 
 ### Domain: Collector hosting
 
@@ -84,9 +90,9 @@ A remote `workflow serve` is a collector. A person logs in with GitHub; the sess
 
 ## Architectural Implications
 
-- Design 3's "registration, key issue and rotation are out of scope", the env-only key list, and the 1:1 key/tenant rule are replaced by this contract. Design 2's "not env vars" is narrowed: a remote agent's `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` are a supported client configuration, and hook environments that set neither are unchanged. Design 5's "`workflow login` (not built yet)" becomes the login page; the CLI stays unbuilt. Design 7's "no user identity" and the unrotated pasted tenant key stop being the collector's dashboard auth. The pasted key remains the Pages path.
+- Design 3's "registration, key issue and rotation are out of scope", the env-only key list, and the 1:1 key/tenant rule are replaced by this contract. Design 2's "not env vars" is narrowed: a remote agent's `WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` are a supported client configuration, and hook environments that set neither are unchanged. Design 2 and design 5's "`workflow login` (not built yet)" becomes this command: it opens the collector's login, and the device page issues the token the command writes into `client.toml`. Design 7's "no user identity" and the unrotated pasted tenant key stop being the collector's dashboard auth. The pasted key remains the Pages path.
 - `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` still describe plan 08 and the workflow-quality service. Design 1 already marks plan 08 superseded. This design does not take those two pages as the service contract, and it does not rewrite them.
-- Plan 09's record says `workflow init` was built and writes `client.toml`. The command is absent on master, and design 5 says there is no install command. Clients are configured by hand or by agent env, not by `init`.
+- Plan 09's record says `workflow init` was built and writes `client.toml`. The command is absent on master, and this design does not add it. `workflow login` is the command that writes `client.toml`. A hand-written file and the remote-agent env pair remain valid.
 - The 2026-10-11 cutover in design 7 is a local keyless systemd unit. It stays on the local-mode contract. A deployment that today depends on `WORKFLOW_SERVE_KEYS` has to have its clients re-issued tokens; there is no import.
 - CORS stays credential-less. The session is same-origin on the collector. Pages cannot send the cookie.
 - Phase count is four. `refine` is not skipped.
@@ -101,7 +107,8 @@ Interactive. The turn record is in `PROVENANCE.md`.
 - A token belongs to one tenant. Scope is read, or read and write. It has a lifetime. The profile can revoke it before the lifetime ends.
 - The GitHub session authorizes the dashboard and the profile. Agents keep using `Authorization: Bearer`. A read token cannot ingest. A read+write token can ingest and read. Expired or revoked is unauthorized.
 - On the remote collector there is no `WORKFLOW_SERVE_KEYS`. Local loopback stays keyless and still refuses a non-loopback bind.
-- Held for the checkpoint, not re-asked: admin revoke of any token; policy change does not itself revoke tokens; admin can still log in when the allow list omits `ctzns.net`; default policy `everyone`; session length 14 days with no sliding renewal; exact domain match; `read` on ingest is 403 and expiry or revocation is 401; scope and expiry are not editable in place; env wins over `client.toml` when both pairs are present; all four phases are known.
+- `workflow login` opens the collector. After GitHub auth, the device page asks which tenant and which grant (`read` or `read_write`), and the lifetime is set on that page. The command writes that token into `client.toml`. An automatic `read_write` grant, a 90-day default, a silently picked tenant, and a tenant named from the GitHub login are not part of this design.
+- Held for the checkpoint, not re-asked: admin revoke of any token; policy change does not itself revoke tokens; admin can still log in when the allow list omits `ctzns.net`; default policy `everyone`; session length 14 days with no sliding renewal; exact domain match; `read` on ingest is 403 and expiry or revocation is 401; scope and expiry are not editable in place; env wins over `client.toml` when both pairs are present; the device page asks for tenant, grant, and lifetime with no silent default; all four phases are known.
 
 ## Assumption Ledger
 
@@ -131,8 +138,8 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 
 ### Phase 3 — Devices and remote agents present a token
 
-- Outcome: With `WORKFLOW_ENDPOINT` set to the collector and `WORKFLOW_KEY` set to a live `read_write` token, and with no `client.toml`, `workflow drain` delivers a spooled fact (`POST /v1/ingest` succeeds) and `workflow mcp` reads with that bearer. A `client.toml` of `endpoint` and `key`, with those two env vars unset, does the same. Neither file nor env is local mode and sends no bearer. Setting exactly one of `WORKFLOW_ENDPOINT` or `WORKFLOW_KEY` is bad config and does not send a different key. `docs/design/02-edge-capture.md` states this resolution and no longer says a client key is never taken from the environment.
-- Surfaces: `tools/workflow/internal/clientconfig/clientconfig.go`, `tools/workflow/internal/drain/cli.go`, `tools/workflow/internal/drain/http.go`, `tools/workflow/internal/mcp/feedback.go`, `tools/hooklog/README.md`, `docs/design/02-edge-capture.md`.
+- Outcome: With `WORKFLOW_ENDPOINT` set to the collector and `WORKFLOW_KEY` set to a live `read_write` token, and with no `client.toml`, `workflow drain` delivers a spooled fact (`POST /v1/ingest` succeeds) and `workflow mcp` reads with that bearer. A `client.toml` of `endpoint` and `key`, with those two env vars unset, does the same. Neither file nor env is local mode and sends no bearer. Setting exactly one of `WORKFLOW_ENDPOINT` or `WORKFLOW_KEY` is bad config and does not send a different key. `workflow login --endpoint <collector>` opens the browser; after GitHub auth the device page will not issue a token until the user has chosen a tenant, a grant (`read` or `read_write`), and an expiry. If that user has no tenant, they can create one there by naming it. The command then writes `endpoint` and `key` into `client.toml`, prints no token, and a drain using that file delivers when the grant is `read_write` and is refused on ingest when the grant is `read`. Quitting the page leaves `client.toml` unchanged. A hand-written `client.toml` still works. Loopback serve still answers with no keys. `docs/design/02-edge-capture.md` and `docs/design/05-distribution.md` describe this command and this resolution.
+- Surfaces: `tools/workflow/cmd/workflow/main.go`, `tools/workflow/internal/clientconfig/clientconfig.go`, `tools/workflow/internal/drain/cli.go`, `tools/workflow/internal/drain/http.go`, `tools/workflow/internal/mcp/feedback.go`, the device page on the collector (`tools/workflow/internal/serve/serve.go`, `packages/workflow-analytics`), `tools/hooklog/README.md`, `docs/design/02-edge-capture.md`, `docs/design/05-distribution.md`.
 - Approach: known
 - Depends on: Phase 2
 
@@ -149,7 +156,7 @@ The current `ParseKeys` rule (one key, one tenant, loaded once from the environm
 
 The dashboard uses the session because that is what was asked. Design 7's "later, a short-lived browser token" is not this design. Agents stay on bearer tokens because a GitHub session cannot be configured into a Claude or Codex remote agent.
 
-`workflow login` stays absent on purpose. The 401 text points at the login page.
+`workflow login` opens the collector and writes the token the device page issued. It is not a silent issuer: the page asks for the tenant, the grant, and the lifetime. The earlier automatic `read_write`, 90-day, and GitHub-login tenant defaults are not in the contract. The HTTP 401 names that command. The login page from phase 1 is still how the session starts.
 
 Pages keeps the pasted token because the cookie is same-origin and CORS stays without credentials. Teaching Pages to send the session would be a different design.
 
