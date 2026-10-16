@@ -2,6 +2,8 @@ import { expect, test, type Page } from '@playwright/test';
 import { DAYS, HOOK_EVENTS_BY_DAY } from './fixture';
 import { brush, expectSettled, trackRequests, useServe } from './helpers';
 
+const SONNET = 'anthropic/claude-sonnet-5-5';
+
 // The fixture days are UTC days; pin the browser zone so the /query buckets land on them.
 test.use({ timezoneId: 'UTC' });
 
@@ -19,6 +21,26 @@ async function showTable(page: Page) {
 		await page.getByTestId('trends-chart-table-toggle').click();
 	}
 	await expect(page.getByTestId('trends-chart-table')).toBeVisible();
+}
+
+/** ECharts line drill under an armed brush: click paths 0..`DRILL_SERIES_PATH` on the SVG (legend clicks do not fire). */
+const DRILL_SERIES_PATH = 6;
+
+async function drillTrendsSeries(page: Page, testid: string): Promise<string> {
+	await expect(page.getByTestId(testid).locator('.echart svg')).toBeVisible();
+	for (let i = 0; i <= DRILL_SERIES_PATH; i++) {
+		await page.getByTestId(testid).locator('.echart svg path').nth(i).click({ force: true });
+		await page.waitForTimeout(40);
+	}
+	const model = new URL(page.url()).searchParams.getAll('model')[0];
+	if (!model) throw new Error('drillTrendsSeries: series click did not add a model filter');
+	return model;
+}
+
+async function shiftDrillTrendsSeries(page: Page, testid: string): Promise<void> {
+	await page.keyboard.down('Shift');
+	await page.getByTestId(testid).locator('.echart svg path').nth(DRILL_SERIES_PATH).click({ force: true });
+	await page.keyboard.up('Shift');
 }
 
 /** The cell text for `series` on UTC day `day`, read from the chart's data table. */
@@ -48,9 +70,39 @@ test('the default render matches the per-day hook_events counts', async ({ page 
 test('cost_usd grouped by model shows the two priced days', async ({ page }) => {
 	await page.goto('/trends?metric=cost_usd&group=model');
 	await showTable(page);
-	const sonnet = 'anthropic/claude-sonnet-5-5';
-	expect(await cellOf(page, sonnet, DAYS.d4), 'sonnet d4').toBe('0.0123');
-	expect(await cellOf(page, sonnet, DAYS.d1), 'sonnet d1').toBe('0.01');
+	expect(await cellOf(page, SONNET, DAYS.d4), 'sonnet d4').toBe('0.0123');
+	expect(await cellOf(page, SONNET, DAYS.d1), 'sonnet d1').toBe('0.01');
+});
+
+test('grouped series click filters by model; shift-click excludes', async ({ page }) => {
+	await page.goto('/trends?metric=cost_usd&group=model');
+	await expectSettled(page);
+	const model = await drillTrendsSeries(page, 'trends-chart');
+	const chip = page.getByTestId(`chip-model-${model}`);
+	await expect(chip).toBeVisible();
+	await expect(chip).toHaveAttribute('data-mode', 'include');
+	await shiftDrillTrendsSeries(page, 'trends-chart');
+	await expect(chip).toHaveAttribute('data-mode', 'exclude');
+});
+
+test('stacked area lists multiple series columns that sum per bucket', async ({ page }) => {
+	await page.goto('/trends?metric=cost_usd&group=model');
+	await expectSettled(page);
+	await page.getByTestId('trends-chart-style').selectOption('area');
+	await expect(page).toHaveURL(/chart=area/);
+	await showTable(page);
+	const table = page.getByTestId('trends-chart-table');
+	const headers = await table.locator('thead th').allTextContents();
+	expect(headers.length).toBeGreaterThan(2);
+	const rows = await table.locator('tbody tr').evaluateAll((trs) =>
+		trs.map((tr) => Array.from(tr.querySelectorAll('td'), (td) => td.textContent ?? ''))
+	);
+	const row = rows.find((r) => (r[0] ?? '').slice(0, 10) === DAYS.d4);
+	expect(row, `row for ${DAYS.d4}`).toBeTruthy();
+	const nums = row!.slice(1).map((c) => Number(c));
+	expect(nums.some((n) => n > 0)).toBe(true);
+	const sum = nums.reduce((a, b) => a + b, 0);
+	expect(sum).toBeCloseTo(0.0123, 5);
 });
 
 test('the group list only offers the chosen measure dims', async ({ page }) => {

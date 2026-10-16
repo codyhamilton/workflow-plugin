@@ -8,6 +8,7 @@
 	import { getJSON, Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { QueryResponse, Schema } from '$lib/types';
+	import type { DimKey } from '$lib/urlstate';
 	import { view } from '$lib/view.svelte';
 
 	const ORDER: Bucket[] = ['hour', 'day', 'week', 'month'];
@@ -45,6 +46,10 @@
 	const group = $derived.by(() => {
 		const g = page.url.searchParams.get('group') ?? 'none';
 		return groups.includes(g) ? g : 'none';
+	});
+	const chartStyle = $derived.by(() => {
+		const c = page.url.searchParams.get('chart');
+		return c === 'area' ? 'area' : 'line';
 	});
 
 	// The chart window. /query takes `all=1`, but over the whole ledger every time bucket exceeds
@@ -108,8 +113,11 @@
 		};
 	});
 
-	const series = $derived(data ? buildSeries(data) : []);
+	const built = $derived(data ? buildSeries(data) : { series: [], drillByName: new Map<string, string>() });
+	const series = $derived(built.series);
+	const drillByName = $derived(built.drillByName);
 	const chartBucket = $derived((data?.bucket ?? 'day') as Bucket);
+	const stackedArea = $derived(chartStyle === 'area' && group !== 'none' && series.length > 1);
 
 	function setMetric(v: string) {
 		view.setParam('metric', v);
@@ -119,6 +127,16 @@
 	}
 	function setBucket(v: string) {
 		view.setParam('bucket', v);
+	}
+	function setChartStyle(v: string) {
+		view.setParam('chart', v === 'line' ? null : v);
+	}
+
+	function onSeries({ key, shift }: { key: string; shift: boolean }) {
+		if (group === 'none') return;
+		const raw = drillByName.get(key) ?? key;
+		if (raw === '__other__' || raw === '') return;
+		view.drill(group as DimKey, raw, { shift });
 	}
 
 	function pad(n: number): string {
@@ -198,8 +216,9 @@
 	 * in the window. A bucket the API omits (no rows) becomes 0, so a gap reads as zero and not as
 	 * a join. Keys come back top-N ordered; the empty key list is the whole-window series `all`.
 	 */
-	function buildSeries(resp: QueryResponse): TimeSeries[] {
+	function buildSeries(resp: QueryResponse): { series: TimeSeries[]; drillByName: Map<string, string> } {
 		const by = new Map<string, Map<number, { t: string; v: number }>>();
+		const drillByName = new Map<string, string>();
 		let lo = Infinity;
 		let hi = -Infinity;
 		for (const r of resp.rows) {
@@ -209,11 +228,13 @@
 			lo = Math.min(lo, e);
 			hi = Math.max(hi, e);
 			const name = r.k.length ? r.k.map(label).join(' / ') : 'all';
+			if (r.k.length === 1) drillByName.set(name, r.k[0] ?? '');
+			else if (r.k.length > 1) drillByName.set(name, r.k.join(' / '));
 			let m = by.get(name);
 			if (!m) by.set(name, (m = new Map()));
 			m.set(e, { t: r.t, v: r.v });
 		}
-		if (!Number.isFinite(lo)) return [];
+		if (!Number.isFinite(lo)) return { series: [], drillByName };
 		const starts = bucketStarts(view.tz, (resp.bucket as Bucket) ?? 'day', new Date(lo), new Date(hi));
 		const out: TimeSeries[] = [];
 		for (const [name, m] of by) {
@@ -222,7 +243,7 @@
 				points: starts.map((e) => m.get(e) ?? { t: instantKey(view.tz, new Date(e)), v: 0 })
 			});
 		}
-		return out;
+		return { series: out, drillByName };
 	}
 </script>
 
@@ -243,6 +264,18 @@
 			{#each groups as g (g)}<option value={g}>{g}</option>{/each}
 		</select>
 	</label>
+	{#if group !== 'none' && series.length > 1}
+		<label>chart
+			<select
+				data-testid="trends-chart-style"
+				value={chartStyle}
+				onchange={(e) => setChartStyle(e.currentTarget.value)}
+			>
+				<option value="line">line</option>
+				<option value="area">stacked area</option>
+			</select>
+		</label>
+	{/if}
 </div>
 
 {#if data}
@@ -250,6 +283,10 @@
 		testid="trends-chart"
 		{series}
 		bucket={chartBucket}
+		stacked={stackedArea}
+		area={stackedArea}
+		filterDim={group !== 'none' ? (group as DimKey) : undefined}
+		onseries={group !== 'none' ? onSeries : undefined}
 		onbrush={({ from, to }) => view.setWindow(from, to)}
 	/>
 {/if}
