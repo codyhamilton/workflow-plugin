@@ -163,6 +163,16 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 - Approach: known
 - Depends on: Phase 2
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| Client config and env resolution | [briefs/3-01-clientconfig-env-resolution.md](briefs/3-01-clientconfig-env-resolution.md) | Phase 2 | 3-02 |
+| Device authorization server | [briefs/3-02-device-auth-server.md](briefs/3-02-device-auth-server.md) | Phase 2 | 3-01 |
+| Device page | [briefs/3-03-device-page.md](briefs/3-03-device-page.md) | 3-02 | 3-04, 3-05 |
+| workflow login CLI | [briefs/3-04-workflow-login-cli.md](briefs/3-04-workflow-login-cli.md) | 3-02 | 3-03, 3-05 |
+| Design docs for client login | [briefs/3-05-design-docs-client-login.md](briefs/3-05-design-docs-client-login.md) | 3-01, 3-02, 3-04 | 3-03 |
+
 ### Phase 4 — The collector runs on fly.io
 
 - Outcome: The fly app's public https origin answers `GET /v1/health` with no bearer and `GET /oauth/login` with a redirect to GitHub. The OAuth app callback is that origin's `/oauth/callback`. `WORKFLOW_SERVE_KEYS` is unset on the app. A `read_write` token that ingested before a machine restart ingests into the same tenant after it, and a token revoked before the restart does not. With `WORKFLOW_SERVE_CORS_ORIGINS` set to the Pages origin, a browser on that origin can `GET /v1/analytics/summary` with a bearer, a browser on any other origin cannot, and the response has no `Access-Control-Allow-Credentials`. `docs/design/07-analytics-site.md` names this fly collector as the remote host and leaves the Pages pasted-token path as a static client.
