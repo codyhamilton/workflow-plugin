@@ -6,7 +6,16 @@ Started: 2026-10-16T11:35:03Z
 Branch: `cursor/client-registration-3d44`
 Starting HEAD: `33f90be`
 
-Phase 1 only. Later phases are not started.
+Phase 1 is closed (`aa3c971`, `Workflow-Phase: client-registration:1`).
+
+## Phase 2 — Issued tokens are the remote credential
+
+Tool: Cursor (Grok 4.7 orchestrator).
+Run identity: https://cursor.com/agents/bc-6714af74-e997-5724-81fe-38570d576092
+Started: 2026-10-16T12:08:00Z
+Resuming HEAD: `aa3c971`
+
+Phase 2 only. Later phases are not started.
 
 ## Phase 1 — GitHub login and admission
 
