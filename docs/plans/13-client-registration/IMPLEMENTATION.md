@@ -29,6 +29,14 @@ artifact_feedback on the four phase 2 briefs: quality service unreachable at `ht
 - Deviations: token lists are a JSON array, not an object with a `tokens` field. `session.go` was edited; the brief's owned paths did not name it.
 - Agent: Composer, harness did not report turns or final context.
 
+### 2-02-wk-secret-scrub
+
+- Built: the shared secret scanner treats `wk_` plus a 32-character body as `workflow_api_token` and redacts it.
+- Surfaces: `tools/workflow/internal/secrets/secrets.go`, `tools/workflow/internal/secrets/secrets_test.go`.
+- Commit: `11509e0`. `go test ./internal/secrets/` passed. `TestScanPatterns` failed before the pattern existed and passed after.
+- Deviations: none.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
