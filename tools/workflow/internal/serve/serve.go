@@ -432,6 +432,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/analytics/schema", s.method(http.MethodGet, s.auth(s.analyticsSchema)))
 	mux.HandleFunc("/v1/analytics/query", s.method(http.MethodGet, s.auth(s.analyticsQuery)))
 	mux.HandleFunc("/v1/analytics/distribution", s.method(http.MethodGet, s.auth(s.analyticsDistribution)))
+	mux.HandleFunc("/v1/analytics/score-series", s.method(http.MethodGet, s.auth(s.analyticsScoreSeries)))
 	mux.HandleFunc("/", siteHandler(siteFS))
 	h := s.cors(mux)
 	if s.cfg.Local() {
