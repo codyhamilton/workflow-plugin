@@ -8,6 +8,15 @@ Starting HEAD: `33f90be`
 
 Phase 1 is closed (`aa3c971`, `Workflow-Phase: client-registration:1`).
 
+## Phase 4 — The collector runs on fly.io
+
+Tool: Cursor (Grok 4.7 orchestrator).
+Run identity: https://cursor.com/agents/bc-c4d46ed6-4237-55d0-950e-4ae0ead9c9c5
+Started: 2026-10-16T13:24:36Z
+Resuming HEAD: `6e280e3`
+
+Phase 4 only. Terminal review and close-out are not part of this run.
+
 ## Phase 2 — Issued tokens are the remote credential
 
 Tool: Cursor (Grok 4.7 orchestrator).
@@ -81,7 +90,7 @@ Run identity: https://cursor.com/agents/bc-b44d5a65-1dda-58d1-8753-0a1631f41a82
 Started: 2026-10-16T12:29:57Z
 Resuming HEAD: `1b7c79b`
 
-Phase 4 is not started.
+Phase 3 is closed (`6e280e3`, `Workflow-Phase: client-registration:3`).
 
 Refined into five units, committed in `e0d9c1d`. 3-01 and 3-02 first (disjoint). After 3-02, 3-03 and 3-04. 3-05 after 3-01 and 3-04. Phase 2 carried items: other routes omitting `tenant` stay out of this phase; the registry-open panic stays; e2e seeding stays; the device page must not prefill expiry.
 
