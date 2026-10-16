@@ -178,3 +178,9 @@ Checked against the phase outcome, not the reports. From `packages/workflow-anal
 
 - `docs/design/07-analytics-site.md` open issue 12 still says conversation totals cover only the returned events when a timeline is truncated. The contract on that page says `totals` is the whole run and `truncated` applies to `events` only. Phase 5 edits that file and should replace the stale clause.
 - Overview and usage e2e still expect `claude-opus-5-5` to be unpriced (`unpriced_calls` 2, cost `$0.02, 2 unpriced`, opus cost `unpriced`). The API prices that model, so the page shows 1 unpriced call and `$0.13` for opus. The next edit of `tests/e2e/fixture.ts` or those specs should match the priced fixture.
+
+## Phase 4 — Quality and runs
+
+Refined in `c809570` into six units. Refine agent `82a4ce38-8c57-4f4d-9b55-97613c94d3ea` returned Proceed. `artifact_feedback` was not called: the workflow feedback namespace is not loaded in this session. Nothing is queued for the six briefs.
+
+The design 7 open-issue-12 carried item stays for Phase 5. The priced-opus e2e mismatch is unit 4-06.
