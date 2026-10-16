@@ -915,6 +915,33 @@ func deviceAuthorize(t *testing.T, h http.Handler, origin string, body string, s
 	return deviceCode, loc
 }
 
+func deviceAuthorizeForm(t *testing.T, h http.Handler, origin string, form url.Values, sess []*http.Cookie) (deviceCode string, loc string) {
+	req := httptest.NewRequest("POST", "/v1/device/authorize", strings.NewReader(form.Encode()))
+	req.Header.Set("Origin", origin)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	for _, c := range sess {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("authorize form: %d %s", rec.Code, rec.Body.String())
+	}
+	loc = rec.Header().Get("Location")
+	if loc == "" || strings.Contains(loc, "wk_") {
+		t.Fatalf("bad redirect: %q", loc)
+	}
+	u, err := url.Parse(loc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deviceCode = u.Query().Get("code")
+	if deviceCode == "" {
+		t.Fatalf("no code in redirect: %s", loc)
+	}
+	return deviceCode, loc
+}
+
 func deviceExchange(t *testing.T, h http.Handler, payload string, origin string) (int, string) {
 	req := httptest.NewRequest("POST", "/v1/device/exchange", strings.NewReader(payload))
 	req.Header.Set("Content-Type", "application/json")
@@ -942,6 +969,30 @@ func TestDeviceAuthorizationFlow(t *testing.T) {
 	deviceCode, loc := deviceAuthorize(t, h, origin, authBody, sess)
 	if !strings.Contains(loc, "state="+url.QueryEscape(oauthState)) && !strings.Contains(loc, "state="+oauthState) {
 		t.Fatalf("redirect missing state: %s", loc)
+	}
+
+	form := url.Values{
+		"redirect_uri": {redirectURI},
+		"state":        {oauthState},
+		"tenant":       {"devt"},
+		"scope":        {"read"},
+		"expires_at":   {exp},
+	}
+	formCode, formLoc := deviceAuthorizeForm(t, h, origin, form, sess)
+	if formCode == "" || !strings.Contains(formLoc, "code=") {
+		t.Fatalf("form authorize redirect: %s", formLoc)
+	}
+
+	badCT := httptest.NewRequest("POST", "/v1/device/authorize", strings.NewReader(form.Encode()))
+	badCT.Header.Set("Origin", origin)
+	badCT.Header.Set("Content-Type", "text/plain")
+	for _, c := range sess {
+		badCT.AddCookie(c)
+	}
+	badRec := httptest.NewRecorder()
+	h.ServeHTTP(badRec, badCT)
+	if badRec.Code != 403 {
+		t.Fatalf("authorize with disallowed content-type: %d %s", badRec.Code, badRec.Body.String())
 	}
 
 	badRedirect := `{"redirect_uri":"https://evil.example/cb","state":"s","tenant":"devt","scope":"read","expires_at":"` + exp + `"}`

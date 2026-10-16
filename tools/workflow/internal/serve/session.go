@@ -171,9 +171,26 @@ func (s *Server) allowedOrigin(origin string) bool {
 }
 
 func (s *Server) originGuard(h http.HandlerFunc) http.HandlerFunc {
+	return s.originGuardContentTypes(h, "application/json")
+}
+
+// originGuardJSONOrForm allows JSON (API clients) or form POST (device page navigation) with the same Origin check.
+func (s *Server) originGuardJSONOrForm(h http.HandlerFunc) http.HandlerFunc {
+	return s.originGuardContentTypes(h, "application/json", "application/x-www-form-urlencoded")
+}
+
+func (s *Server) originGuardContentTypes(h http.HandlerFunc, allowed ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		mt, _, _ := strings.Cut(r.Header.Get("Content-Type"), ";")
-		if !strings.EqualFold(strings.TrimSpace(mt), "application/json") {
+		mt = strings.TrimSpace(mt)
+		ok := false
+		for _, a := range allowed {
+			if strings.EqualFold(mt, a) {
+				ok = true
+				break
+			}
+		}
+		if !ok {
 			writeJSON(w, 403, map[string]string{"error": "forbidden"})
 			return
 		}

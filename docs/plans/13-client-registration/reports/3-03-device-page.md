@@ -47,3 +47,8 @@ npx playwright test tests/e2e/device.spec.ts
 ## Known problems
 
 - None blocking this unit. Full loopback navigation is not exercised in Playwright against a cross-origin 303 mock (see deviation); manual verification against a running collector + `workflow login` (3-04) remains the integration check.
+
+## Fixer note (device authorize navigation)
+
+- **Bug:** `authorizeDevice` used `fetch` with `redirect: 'manual'`; cross-origin 303 to loopback is opaque in Chromium, so the page retried with `redirect: 'follow'`, issued a second token, and never navigated to the callback.
+- **Fix:** `/device` submits one same-origin `POST` form to `/v1/device/authorize`; the route accepts `application/x-www-form-urlencoded` under the existing session + Origin guard and still 303s to the loopback URI. Removed `authorizeDevice` and the opaque-redirect fallback.

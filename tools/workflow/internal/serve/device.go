@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -31,7 +32,29 @@ func redirectWithDeviceCode(w http.ResponseWriter, r *http.Request, redirectURI,
 	http.Redirect(w, r, u.String(), http.StatusSeeOther)
 }
 
-func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, sess *Session) {
+type deviceAuthorizeFields struct {
+	RedirectURI string
+	State       string
+	Tenant      string
+	Scope       string
+	ExpiresAt   string
+}
+
+func readDeviceAuthorizeFields(r *http.Request) (deviceAuthorizeFields, error) {
+	mt, _, _ := strings.Cut(r.Header.Get("Content-Type"), ";")
+	mt = strings.TrimSpace(mt)
+	if strings.EqualFold(mt, "application/x-www-form-urlencoded") {
+		if err := r.ParseForm(); err != nil {
+			return deviceAuthorizeFields{}, err
+		}
+		return deviceAuthorizeFields{
+			RedirectURI: r.FormValue("redirect_uri"),
+			State:       r.FormValue("state"),
+			Tenant:      r.FormValue("tenant"),
+			Scope:       r.FormValue("scope"),
+			ExpiresAt:   r.FormValue("expires_at"),
+		}, nil
+	}
 	var body struct {
 		RedirectURI string `json:"redirect_uri"`
 		State       string `json:"state"`
@@ -40,6 +63,20 @@ func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, s
 		ExpiresAt   string `json:"expires_at"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return deviceAuthorizeFields{}, err
+	}
+	return deviceAuthorizeFields{
+		RedirectURI: body.RedirectURI,
+		State:       body.State,
+		Tenant:      body.Tenant,
+		Scope:       body.Scope,
+		ExpiresAt:   body.ExpiresAt,
+	}, nil
+}
+
+func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, sess *Session) {
+	body, err := readDeviceAuthorizeFields(r)
+	if err != nil {
 		writeJSON(w, 400, map[string]string{"error": "invalid body"})
 		return
 	}
@@ -111,7 +148,7 @@ func (s *Server) handleDeviceAuthorizeRoute(w http.ResponseWriter, r *http.Reque
 	if rejectBearer(w, r) {
 		return
 	}
-	s.originGuard(s.sessionOnly(s.handleDeviceAuthorize))(w, r)
+	s.originGuardJSONOrForm(s.sessionOnly(s.handleDeviceAuthorize))(w, r)
 }
 
 func (s *Server) handleDeviceExchangeRoute(w http.ResponseWriter, r *http.Request) {

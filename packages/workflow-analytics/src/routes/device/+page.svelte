@@ -2,7 +2,6 @@
 	import { page } from '$app/state';
 	import {
 		ApiError,
-		authorizeDevice,
 		createTenant,
 		fetchMe,
 		isCollectorMode,
@@ -28,8 +27,6 @@
 	let expiresLocal = $state('');
 
 	let tenantStatus = $state('');
-	let submitStatus = $state('');
-	let submitting = $state(false);
 
 	function parseFutureExpiry(local: string): string | null {
 		if (!local.trim()) return null;
@@ -45,7 +42,6 @@
 	const canSubmit = $derived(
 		paramsOk &&
 			me !== null &&
-			!submitting &&
 			selectedTenant !== '' &&
 			grantScope !== '' &&
 			expiresAt !== null
@@ -87,26 +83,6 @@
 			tenantStatus = err instanceof ApiError ? err.message : 'Could not create tenant.';
 		}
 	}
-
-	async function submitDevice(e: Event) {
-		e.preventDefault();
-		submitStatus = '';
-		if (!canSubmit || !expiresAt) return;
-		submitting = true;
-		try {
-			const loc = await authorizeDevice({
-				redirect_uri: redirectUri,
-				state: deviceState,
-				tenant: selectedTenant,
-				scope: grantScope as 'read' | 'read_write',
-				expires_at: expiresAt
-			});
-			window.location.assign(loc);
-		} catch (err) {
-			submitting = false;
-			submitStatus = err instanceof ApiError ? err.message : 'Could not authorize device.';
-		}
-	}
 </script>
 
 <h1>Authorize workflow CLI</h1>
@@ -145,10 +121,21 @@
 				<span role="status">{tenantStatus}</span>
 			</form>
 		{:else}
-			<form id="device-form" onsubmit={submitDevice}>
+			<form
+				id="device-form"
+				method="POST"
+				action="/v1/device/authorize"
+				data-testid="device-authorize-form"
+			>
+				<input type="hidden" name="redirect_uri" value={redirectUri} />
+				<input type="hidden" name="state" value={deviceState} />
+				{#if expiresAt}
+					<input type="hidden" name="expires_at" value={expiresAt} />
+				{/if}
+
 				<label>
 					Tenant
-					<select data-testid="device-tenant" bind:value={selectedTenant} required>
+					<select data-testid="device-tenant" name="tenant" bind:value={selectedTenant} required>
 						<option value="" disabled selected>Select tenant</option>
 						{#each me.tenants as t (t.name)}
 							<option value={t.name}>{t.name}</option>
@@ -158,7 +145,7 @@
 
 				<label>
 					Grant
-					<select data-testid="device-grant" bind:value={grantScope} required>
+					<select data-testid="device-grant" name="scope" bind:value={grantScope} required>
 						<option value="" disabled selected>Select grant</option>
 						<option value="read">read</option>
 						<option value="read_write">read_write</option>
@@ -178,7 +165,6 @@
 				<button type="submit" data-testid="device-submit" disabled={!canSubmit}>
 					Authorize
 				</button>
-				<span role="status">{submitStatus}</span>
 			</form>
 		{/if}
 	</section>
