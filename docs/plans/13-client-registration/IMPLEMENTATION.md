@@ -15,7 +15,16 @@ Run identity: https://cursor.com/agents/bc-6714af74-e997-5724-81fe-38570d576092
 Started: 2026-10-16T12:08:00Z
 Resuming HEAD: `aa3c971`
 
-Phase 2 only. Later phases are not started.
+Phase 2 is closed (`1b7c79b`, `Workflow-Phase: client-registration:2`).
+
+## Phase 3 — Devices and remote agents present a token
+
+Tool: Cursor (Grok 4.7 orchestrator).
+Run identity: https://cursor.com/agents/bc-b44d5a65-1dda-58d1-8753-0a1631f41a82
+Started: 2026-10-16T12:29:57Z
+Resuming HEAD: `1b7c79b`
+
+Phase 3 only. Phase 4 is not started.
 
 Refined into four units, committed in `3423391`. 2-01 first. After it, 2-02, 2-03, and 2-04 have disjoint paths. Phase 1 carried items: the e2e keyed setup and the overview `tenant` query go to 2-03; the registry-open panic stays as 2-01 left it.
 
