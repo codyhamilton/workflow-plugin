@@ -85,6 +85,8 @@ export interface Executions {
 	counts: Record<Shape, number>;
 	rows: { repo_id: string; plan: string; conversation_id: string; brief_path: string; harness: string; shape: Shape; ts: string }[];
 	next?: string;
+	bucket?: 'day' | 'week' | 'month';
+	series?: { key: Shape; points: { t: string; n: number }[] }[];
 }
 
 export interface Conversations {

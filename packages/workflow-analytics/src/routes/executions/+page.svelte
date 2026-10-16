@@ -1,16 +1,23 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
+	import { bucketStarts, instantKey } from '$lib/charts/score-series';
 	import SankeyChart from '$lib/charts/SankeyChart.svelte';
 	import type { SankeyLink, SankeyNode } from '$lib/charts/sankey';
+	import TimeChart from '$lib/charts/TimeChart.svelte';
+	import type { TimeSeries } from '$lib/charts/options';
 	import Pager from '$lib/components/Pager.svelte';
+	import { bucketCount, pickBucket, type Bucket } from '$lib/buckets';
 	import { label } from '$lib/format';
+	import { resolveWindow } from '$lib/params';
 	import { getJSON } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { Executions, Shape } from '$lib/types';
 	import { view } from '$lib/view.svelte';
 
 	const SHAPES: Shape[] = ['complete', 'unreported', 'started'];
+	const ORDER: Bucket[] = ['day', 'week', 'month'];
+	const CAP = 400;
 
 	const NODES: SankeyNode[] = [
 		{ name: 'design', label: 'design' },
@@ -38,6 +45,8 @@
 	let counts = $state<Executions['counts'] | null>(null);
 	let rows = $state<Executions['rows']>([]);
 	let next = $state<string | undefined>(undefined);
+	let execSeries = $state<Executions['series']>(undefined);
+	let respBucket = $state<Executions['bucket']>(undefined);
 
 	const selected = $derived((page.url.searchParams.get('shape') ?? '').split(',').filter(Boolean) as Shape[]);
 	const empty = $derived(counts !== null && counts.complete + counts.unreported + counts.started === 0);
@@ -45,7 +54,44 @@
 		const c = counts;
 		return c ? LINKS.map((l) => ({ source: l.source, target: l.target, value: l.value(c) })) : [];
 	});
-	const filteredRows = $derived(selected.length > 0 ? rows.filter((r) => selected.includes(r.shape)) : rows);
+
+	const window = $derived.by(() => {
+		const w = resolveWindow(view.state, new Date(), view.tz, 'rest');
+		return w.from && w.to ? { from: w.from, to: w.to } : null;
+	});
+
+	const offered = $derived.by(() =>
+		window ? ORDER.filter((b) => bucketCount(b, window.from, window.to, view.tz) <= CAP) : ORDER
+	);
+
+	const bucket = $derived.by(() => {
+		if (!window) return 'day' as Bucket;
+		const want = page.url.searchParams.get('bucket') as Bucket | null;
+		if (want && offered.includes(want)) return want;
+		return pickBucket(window.from, window.to, view.tz, ORDER) ?? offered[0] ?? 'month';
+	});
+
+	const chartSeries = $derived.by((): TimeSeries[] => {
+		if (!execSeries?.length || !window) return [];
+		const b = (respBucket ?? bucket) as Bucket;
+		const starts = bucketStarts(view.tz, b, window.from, window.to);
+		return execSeries.map((s) => {
+			const byT = new Map(s.points.map((p) => [p.t, p.n]));
+			const byStart = new Map<number, number>();
+			for (const p of s.points) {
+				const e = Date.parse(p.t);
+				if (!Number.isNaN(e)) byStart.set(e, p.n);
+			}
+			return {
+				name: s.key,
+				points: starts.map((e) => {
+					const t = instantKey(view.tz, new Date(e));
+					const v = byStart.get(e) ?? byT.get(t) ?? 0;
+					return { t, v };
+				})
+			};
+		});
+	});
 
 	function sameSet(a: readonly string[], b: readonly string[]) {
 		return a.length === b.length && a.every((x) => b.includes(x));
@@ -58,17 +104,18 @@
 		const def = LINKS.find((d) => d.source === l.source && d.target === l.target);
 		if (def) applyShapes(def.shapes);
 	}
+	function setBucket(v: string) {
+		view.setParam('bucket', v);
+	}
 
-	// First-page query: the shared view params plus an optional `limit` passed through to the API.
-	// `paramsFor` returns null while facets are pending or when an exclude matches nothing.
 	const params = $derived.by(() => {
 		const limit = page.url.searchParams.get('limit');
-		return view.paramsFor('rest', limit ? { limit } : undefined);
+		const extra: Record<string, string | string[]> = { bucket };
+		if (selected.length) extra.shape = [...selected];
+		if (limit) extra.limit = limit;
+		return view.paramsFor('rest', extra);
 	});
 
-	// The fetch is keyed on the API query string only: a `shape` selection (or a late facet response
-	// that recomputes `params` to the same query) does not change the key, so the effect does not
-	// re-run and its in-flight request is not cancelled. `params` is read untracked inside the effect.
 	const queryKey = $derived(params ? params.toString() : null);
 
 	$effect(() => {
@@ -79,6 +126,8 @@
 		let live = true;
 		rows = [];
 		next = undefined;
+		execSeries = undefined;
+		respBucket = undefined;
 		getJSON<Executions>('executions', 'analytics/executions', q).then(
 			(r) => {
 				if (!live) return;
@@ -86,10 +135,14 @@
 				counts = r.counts;
 				rows = r.rows;
 				next = r.next;
+				execSeries = r.series;
+				respBucket = r.bucket;
 			},
 			(e) => {
 				if (!live) return;
 				counts = null;
+				execSeries = undefined;
+				respBucket = undefined;
 				setError(e);
 			}
 		);
@@ -107,6 +160,23 @@
 			</div>
 		{/each}
 	</div>
+	<div class="controls">
+		<label>bucket
+			<select data-testid="exec-bucket" value={bucket} onchange={(e) => setBucket(e.currentTarget.value)}>
+				{#each offered as b (b)}<option value={b}>{b}</option>{/each}
+			</select>
+		</label>
+	</div>
+	{#if chartSeries.length}
+		<TimeChart
+			testid="exec-shape-series"
+			series={chartSeries}
+			bucket={(respBucket ?? bucket) as 'day' | 'week' | 'month'}
+			stacked={true}
+			area={true}
+			onbrush={({ from, to }) => view.setWindow(from, to)}
+		/>
+	{/if}
 	{#if empty}
 		<p data-testid="exec-empty">No executions in this window</p>
 	{:else}
@@ -127,7 +197,7 @@
 			<tr><th>repo</th><th>plan</th><th>conversation</th><th>brief</th><th>harness</th><th>shape</th><th>ts</th></tr>
 		</thead>
 		<tbody>
-			{#each filteredRows as r, i (i)}
+			{#each rows as r, i (i)}
 				<tr data-testid="exec-row">
 					<td>
 						<button
@@ -199,6 +269,11 @@
 	.name {
 		font-size: 0.8rem;
 		color: var(--muted);
+	}
+	.controls {
+		display: flex;
+		gap: 1rem;
+		margin: 0.75rem 0;
 	}
 	.links {
 		display: flex;
