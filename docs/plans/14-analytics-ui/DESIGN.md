@@ -152,6 +152,15 @@ One unit. Execute briefs it inline. The change is the same token replacement in 
 
 ### Phase 3 — Model and volume reports
 
+- Units:
+  - **3-01-filter-bar-ten-dims** — `briefs/3-01-filter-bar-ten-dims.md`. Depends on: nothing. Runs alongside: 3-02, 3-03, 3-06, 3-08.
+  - **3-02-overview-kpi-links** — `briefs/3-02-overview-kpi-links.md`. Depends on: nothing. Runs alongside: 3-01, 3-03, 3-06, 3-08.
+  - **3-03-time-chart-interactions** — `briefs/3-03-time-chart-interactions.md`. Depends on: nothing. Runs alongside: 3-01, 3-02, 3-06, 3-08.
+  - **3-04-trends-stacked-drill** — `briefs/3-04-trends-stacked-drill.md`. Depends on: 3-03-time-chart-interactions. Runs alongside: 3-05, 3-07.
+  - **3-05-usage-distribution** — `briefs/3-05-usage-distribution.md`. Depends on: 3-03-time-chart-interactions. Runs alongside: 3-04, 3-07.
+  - **3-06-repos-cost-rank** — `briefs/3-06-repos-cost-rank.md`. Depends on: nothing. Runs alongside: 3-01, 3-02, 3-03, 3-08.
+  - **3-07-hooks-timeseries** — `briefs/3-07-hooks-timeseries.md`. Depends on: 3-03-time-chart-interactions. Runs alongside: 3-04, 3-05.
+  - **3-08-builder-scalar-heatmap** — `briefs/3-08-builder-scalar-heatmap.md`. Depends on: nothing. Runs alongside: 3-01, 3-02, 3-03, 3-06.
 - Outcome:
   - On `/usage`, with the seeded e2e window, the page shows cost and token totals by model, a time series of cost split by model, and a time series of tokens split by model. A control draws the per-call histogram for `cost_usd` and for each token measure in the distribution contract, on that measure's bin edges. Clicking a model filters every panel to it. Shift-click excludes it. Brushing either time series sets the window in the URL and every panel follows.
   - On `/trends`, clicking a series key sets that dimension as a filter. A control draws a multi-key split as a stacked area.
@@ -199,3 +208,5 @@ The usage distribution scans extracted columns, not hook JSON. It does not take 
 Phase 1's first surface list could not make its color outcome true: stylesheet hexes also lived on conversation, conversations, executions, explore, repos, builder, the filter bar, and the chart components' `var()` fallbacks. The outcome stays whole-site. The surfaces are those files. Narrowing the outcome to Overview and Settings was rejected, because the request is the analytics UI, not two routes.
 
 A page-per-phase split was considered and rejected. Five phases, each bullet of the outcome required, is the cut that can sign off.
+
+Phase 3 refine (2026-10-16) coarse-checked phases 3–5: surfaces locatable in `packages/workflow-analytics` and `docs/design/07-analytics-site.md` where listed; contracts and outcomes stated in this design; dependency order Phase 3 on 1–2, Phase 4 on 1–2, Phase 5 on 1–3–4. No bounce.
