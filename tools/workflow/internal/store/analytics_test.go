@@ -296,7 +296,7 @@ func pageFixture(t *testing.T) (*Tenant, AnalyticsFilter, time.Time) {
 func TestExecutionsPage(t *testing.T) {
 	tn, f, _ := pageFixture(t)
 	ctx := context.Background()
-	all, cntAll, moreAll, err := tn.ExecutionsPage(ctx, f, nil, 500)
+	all, cntAll, moreAll, err := tn.ExecutionsPage(ctx, f, nil, nil, 500)
 	if err != nil || moreAll || len(all) != 9 {
 		t.Fatalf("all: n=%d more=%v err=%v", len(all), moreAll, err)
 	}
@@ -306,7 +306,7 @@ func TestExecutionsPage(t *testing.T) {
 	var walk []ExecRow
 	var cur *ExecCursor
 	for pages := 1; ; pages++ {
-		page, cnt, more, err := tn.ExecutionsPage(ctx, f, cur, 3)
+		page, cnt, more, err := tn.ExecutionsPage(ctx, f, nil, cur, 3)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -332,6 +332,87 @@ func TestExecutionsPage(t *testing.T) {
 	// The tie at the max ts is ordered c08 then c09 by conversation_id.
 	if walk[0].ConversationID != "c08" || walk[1].ConversationID != "c09" {
 		t.Errorf("tie order %+v", walk[:2])
+	}
+}
+
+func TestExecutionsPageShapeFilter(t *testing.T) {
+	tn, f := fixture(t)
+	ctx := context.Background()
+	all, cntAll, _, err := tn.ExecutionsPage(ctx, f, nil, nil, 500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	complete, cnt, _, err := tn.ExecutionsPage(ctx, f, []string{"complete"}, nil, 500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(cnt, cntAll) {
+		t.Fatalf("counts with shape: %v want %v", cnt, cntAll)
+	}
+	var nComplete int
+	for _, r := range all {
+		if r.Shape == "complete" {
+			nComplete++
+		}
+	}
+	if len(complete) != nComplete || nComplete == 0 {
+		t.Fatalf("complete rows %d, want %d", len(complete), nComplete)
+	}
+	for _, r := range complete {
+		if r.Shape != "complete" {
+			t.Fatalf("shape %q", r.Shape)
+		}
+	}
+	var walk []ExecRow
+	var cur *ExecCursor
+	for {
+		page, c, more, err := tn.ExecutionsPage(ctx, f, []string{"complete"}, cur, 1)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(c, cntAll) {
+			t.Fatalf("paged counts %v", c)
+		}
+		walk = append(walk, page...)
+		if !more {
+			break
+		}
+		last := page[len(page)-1]
+		cur = &ExecCursor{TS: last.TS, Key: []string{last.ConversationID, last.BriefPath, last.RepoID}}
+	}
+	if !reflect.DeepEqual(walk, complete) {
+		t.Errorf("shape walk\n got %+v\nwant %+v", walk, complete)
+	}
+}
+
+func TestExecutionsShapeSeries(t *testing.T) {
+	tn, f := fixture(t)
+	ctx := context.Background()
+	series, err := tn.ExecutionsShapeSeries(ctx, f, "day")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(series) != 3 {
+		t.Fatalf("len %d", len(series))
+	}
+	wantKeys := []string{"complete", "unreported", "started"}
+	for i, key := range wantKeys {
+		if series[i].Key != key {
+			t.Fatalf("[%d] key %q want %q", i, series[i].Key, key)
+		}
+	}
+	var total int
+	for _, e := range series {
+		for _, p := range e.Points {
+			total += p.N
+			if p.T == "" || p.N <= 0 {
+				t.Fatalf("bad point %+v", p)
+			}
+		}
+	}
+	all, _, _, _ := tn.ExecutionsPage(ctx, f, nil, nil, 500)
+	if total != len(all) {
+		t.Fatalf("series total %d != rows %d", total, len(all))
 	}
 }
 
@@ -384,7 +465,7 @@ func TestExecutionsPageTiming(t *testing.T) {
 	addFacts(t, tn, fs...)
 	f := AnalyticsFilter{From: base, To: base.Add(48 * time.Hour)}
 	start := time.Now()
-	rows, _, more, err := tn.ExecutionsPage(ctx, f, nil, 5)
+	rows, _, more, err := tn.ExecutionsPage(ctx, f, nil, nil, 5)
 	elapsed := time.Since(start)
 	if err != nil {
 		t.Fatal(err)

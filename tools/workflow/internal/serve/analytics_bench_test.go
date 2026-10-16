@@ -310,6 +310,8 @@ func buildBenchCases(t *testing.T, h *benchHarness, to time.Time) []benchCase {
 		add("series/"+p.name, "/v1/analytics/series?metric=hook_events&bucket=day&group=none&"+win)
 		add("scores/"+p.name, "/v1/analytics/scores?kind=design&"+win)
 		add("executions/"+p.name, "/v1/analytics/executions?"+win)
+		add("executions/shape/"+p.name, "/v1/analytics/executions?shape=complete&"+win)
+		add("executions/shape-bucket/"+p.name, "/v1/analytics/executions?shape=complete&bucket=day&"+win)
 		add("conversations/"+p.name, "/v1/analytics/conversations?"+win)
 		add("explore/"+p.name, "/v1/analytics/explore?"+win)
 		add("distribution/cost/"+p.name, "/v1/analytics/distribution?measure=cost_usd&grain=call&"+win)

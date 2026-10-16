@@ -547,10 +547,87 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 	return out, rows.Err()
 }
 
+func execShapeWhere(shapes []string) (clause string, args []any) {
+	if len(shapes) == 0 {
+		return "", nil
+	}
+	ph := make([]string, len(shapes))
+	args = make([]any, len(shapes))
+	for i, s := range shapes {
+		ph[i] = "?"
+		args[i] = s
+	}
+	return ` AND (` + execShapeSQL + `) IN (` + strings.Join(ph, ",") + `)`, args
+}
+
+// ExecSeriesPoint is one bucket count for an executions shape series.
+type ExecSeriesPoint struct {
+	T string
+	N int
+}
+
+// ExecSeriesEntry is sparse points for one execution shape (complete, unreported, started).
+type ExecSeriesEntry struct {
+	Key    string
+	Points []ExecSeriesPoint
+}
+
+// ExecutionsShapeSeries returns per-shape counts over time buckets for in-window briefs. f.Kinds and
+// other shared filters apply; shape query params do not affect series.
+func (t *Tenant) ExecutionsShapeSeries(ctx context.Context, f AnalyticsFilter, bucket string) ([]ExecSeriesEntry, error) {
+	w, args := f.factWhere()
+	cte := `
+	WITH b AS (
+		SELECT repo_id, conversation_id, path, harness, ts, plan,
+			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
+		FROM facts WHERE type='artifact_version' AND kind='brief' AND ` + w + `)`
+	rows, err := t.rdb.QueryContext(ctx, cte+`
+	SELECT ts, `+execShapeSQL+` AS shape FROM b WHERE rn = 1`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	byShape := map[string]map[string]int{}
+	for rows.Next() {
+		var ts float64
+		var shape string
+		if err := rows.Scan(&ts, &shape); err != nil {
+			return nil, err
+		}
+		bt := scoreSeriesBucketStart(ts, bucket, f.TZ)
+		m := byShape[shape]
+		if m == nil {
+			m = map[string]int{}
+			byShape[shape] = m
+		}
+		m[bt]++
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	order := []string{"complete", "unreported", "started"}
+	out := make([]ExecSeriesEntry, 0, len(order))
+	for _, key := range order {
+		var pts []ExecSeriesPoint
+		if m := byShape[key]; m != nil {
+			tsKeys := make([]string, 0, len(m))
+			for t := range m {
+				tsKeys = append(tsKeys, t)
+			}
+			sort.Strings(tsKeys)
+			for _, t := range tsKeys {
+				pts = append(pts, ExecSeriesPoint{T: t, N: m[t]})
+			}
+		}
+		out = append(out, ExecSeriesEntry{Key: key, Points: pts})
+	}
+	return out, nil
+}
+
 // ExecutionsPage returns one keyset page of Executions (ts desc, conversation_id, path, repo_id),
-// the shape counts over the whole filtered window, and whether more rows follow. It reads at most
-// limit+1 rows and never loads the whole window into Go.
-func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, cur *ExecCursor, limit int) ([]ExecRow, map[string]int, bool, error) {
+// the shape counts over the whole filtered window, and whether more rows follow. shapes filters rows
+// only, not counts. It reads at most limit+1 rows and never loads the whole window into Go.
+func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, shapes []string, cur *ExecCursor, limit int) ([]ExecRow, map[string]int, bool, error) {
 	w, args := f.factWhere()
 	cte := `
 	WITH b AS (
@@ -578,10 +655,12 @@ func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, cur *Exe
 	}
 	crows.Close()
 
+	shapeClause, shapeArgs := execShapeWhere(shapes)
 	q := cte + `
 	SELECT repo_id, plan, conversation_id, path, harness, ts, ` + execShapeSQL + `
-	FROM b WHERE rn = 1`
+	FROM b WHERE rn = 1` + shapeClause
 	pargs := append([]any{}, args...)
+	pargs = append(pargs, shapeArgs...)
 	if cur != nil && len(cur.Key) >= 3 {
 		q += ` AND (ts < ? OR (ts = ? AND (conversation_id, path, repo_id) > (?, ?, ?)))`
 		pargs = append(pargs, cur.TS, cur.TS, cur.Key[0], cur.Key[1], cur.Key[2])
