@@ -1,17 +1,21 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { page } from '$app/state';
+	import DistributionChart from '$lib/charts/DistributionChart.svelte';
 	import Pager from '$lib/components/Pager.svelte';
 	import VirtualRows from '$lib/components/VirtualRows.svelte';
+	import { costLabel } from '$lib/format';
 	import { getJSON, Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
+	import type { Conversations, DistributionResponse } from '$lib/types';
 	import { view } from '$lib/view.svelte';
-	import type { Conversations } from '$lib/types';
 
 	const ROW_HEIGHT = 36;
 
 	let rows = $state<Conversations['rows']>([]);
 	let next = $state<string | undefined>(undefined);
 	let loaded = $state(false);
+	let distResp = $state<DistributionResponse | null>(null);
 
 	const limit = $derived(page.url.searchParams.get('limit'));
 	const params = $derived(view.paramsFor('rest', limit ? { limit } : {}));
@@ -42,13 +46,52 @@
 		return () => (live = false);
 	});
 
+	$effect(() => {
+		void view.state;
+		const needsFacets = Object.keys(view.state.exclude).length > 0;
+		if (needsFacets && !view.facetsReady) return;
+		let live = true;
+		const p = untrack(() => view.paramsFor('rest', { measure: 'cost_usd', grain: 'conversation' }));
+		if (!p) return;
+		getJSON<DistributionResponse>('conversations-distribution', 'analytics/distribution', p).then(
+			(r) => {
+				if (!live) return;
+				clearError();
+				distResp = r;
+			},
+			(e) => {
+				if (live && !(e instanceof Superseded)) setError(e);
+			}
+		);
+		return () => {
+			live = false;
+		};
+	});
+
+	const distBins = $derived(distResp?.rows.find((r) => r.k === 'all')?.bins ?? []);
+
+	function rowCost(r: Conversations['rows'][number]): string {
+		return costLabel({
+			cost: r.cost_usd,
+			unpriced: r.unpriced_calls,
+			calls: r.model_calls
+		});
+	}
+
 	const list = (a: string[]) => a.join(', ');
 </script>
 
 <h1>Conversations</h1>
+
+<h2>Cost per conversation</h2>
+{#if distBins.length > 0}
+	<DistributionChart testid="conversations-distribution" measure="cost_usd" bins={distBins} />
+{/if}
+
 {#if loaded}
 	<div class="head">
 		<span>conversation</span><span>harness</span><span>repos</span><span>first</span><span>last</span>
+		<span>model</span><span>cost</span>
 		<span>hook events</span><span>artifact versions</span><span>commits</span><span>kinds</span>
 	</div>
 	<VirtualRows {rows} rowHeight={ROW_HEIGHT}>
@@ -73,6 +116,17 @@
 				</span>
 				<time class="cell">{r.first_ts}</time>
 				<time class="cell">{r.last_ts}</time>
+				{#if r.model}
+					<button
+						type="button"
+						class="cell link"
+						data-testid="conv-{r.conversation_id}-model"
+						onclick={(e) => view.drill('model', r.model, e)}>{r.model}</button
+					>
+				{:else}
+					<span class="cell" data-testid="conv-{r.conversation_id}-model">—</span>
+				{/if}
+				<span class="cell num" data-testid="conv-{r.conversation_id}-cost">{rowCost(r)}</span>
 				<span class="cell num" data-testid="conv-{r.conversation_id}-hook_events">{r.hook_events}</span>
 				<span class="cell num" data-testid="conv-{r.conversation_id}-artifact_versions">{r.artifact_versions}</span>
 				<span class="cell num" data-testid="conv-{r.conversation_id}-commits">{r.commits}</span>
@@ -95,7 +149,7 @@
 	.head,
 	.row {
 		display: grid;
-		grid-template-columns: 1.4fr 0.8fr 0.8fr 1.2fr 1.2fr 0.8fr 0.9fr 0.6fr 1fr;
+		grid-template-columns: 1.2fr 0.7fr 0.7fr 1fr 1fr 1.1fr 0.9fr 0.7fr 0.8fr 0.5fr 0.8fr;
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0 0.75rem;

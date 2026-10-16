@@ -100,6 +100,12 @@ export interface Conversations {
 		artifact_versions: number;
 		commits: number;
 		kinds: Kind[];
+		model: string;
+		model_calls: number;
+		unpriced_calls: number;
+		cost_usd: number;
+		tokens_in: number;
+		tokens_out: number;
 	}[];
 	next?: string;
 }
