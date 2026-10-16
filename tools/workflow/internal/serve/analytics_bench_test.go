@@ -312,6 +312,8 @@ func buildBenchCases(t *testing.T, h *benchHarness, to time.Time) []benchCase {
 		add("executions/"+p.name, "/v1/analytics/executions?"+win)
 		add("conversations/"+p.name, "/v1/analytics/conversations?"+win)
 		add("explore/"+p.name, "/v1/analytics/explore?"+win)
+		add("distribution/cost/"+p.name, "/v1/analytics/distribution?measure=cost_usd&grain=call&"+win)
+		add("distribution/tokens/"+p.name, "/v1/analytics/distribution?measure=tokens_in&grain=call&"+win)
 		for i, id := range benchTopConversations(t, h.db, p.from, p.to, 3) {
 			q := url.Values{"id": []string{id}}
 			add(fmt.Sprintf("conversation/conv#%d/%s", i+1, p.name), "/v1/analytics/conversation?"+q.Encode()+"&"+win)
@@ -513,7 +515,7 @@ func TestAnalyticsBenchSmoke(t *testing.T) {
 	for _, c := range cases {
 		names[c.name] = true
 	}
-	for _, route := range []string{"facets", "summary", "series", "scores", "executions", "conversations", "explore"} {
+	for _, route := range []string{"facets", "summary", "series", "scores", "executions", "conversations", "explore", "distribution"} {
 		found := false
 		for _, c := range cases {
 			if strings.HasPrefix(c.name, route+"/") {
