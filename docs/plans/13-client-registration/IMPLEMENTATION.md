@@ -26,6 +26,10 @@ Resuming HEAD: `1b7c79b`
 
 Phase 3 only. Phase 4 is not started.
 
+Refined into five units, committed in `e0d9c1d`. 3-01 and 3-02 first (disjoint). After 3-02, 3-03 and 3-04. 3-05 after 3-01 and 3-04. Phase 2 carried items: other routes omitting `tenant` stay out of this phase; the registry-open panic stays; e2e seeding stays; the device page must not prefill expiry.
+
+artifact_feedback on the five phase 3 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
 Refined into four units, committed in `3423391`. 2-01 first. After it, 2-02, 2-03, and 2-04 have disjoint paths. Phase 1 carried items: the e2e keyed setup and the overview `tenant` query go to 2-03; the registry-open panic stays as 2-01 left it.
 
 artifact_feedback on the four phase 2 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
