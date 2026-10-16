@@ -180,6 +180,15 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 - Approach: known
 - Depends on: Phase 2
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| Fly collector manifest | [briefs/4-01-fly-collector-manifest.md](briefs/4-01-fly-collector-manifest.md) | Phase 2 | nothing |
+| Fly collector deploy | [briefs/4-02-fly-collector-deploy.md](briefs/4-02-fly-collector-deploy.md) | 4-01 | nothing |
+| Fly collector outcome verify | [briefs/4-03-fly-collector-outcome-verify.md](briefs/4-03-fly-collector-outcome-verify.md) | 4-02 | 4-04 |
+| Design docs for fly hosting | [briefs/4-04-design-docs-fly-hosting.md](briefs/4-04-design-docs-fly-hosting.md) | 4-01 | 4-03 |
+
 ## Provenance Notes
 
 The current `ParseKeys` rule (one key, one tenant, loaded once from the environment) is what makes issuing, scopes, lifetimes, and revoke unexpressible. The replacement is a registry the request path reads, not a longer env string.
