@@ -21,6 +21,14 @@ Refined into four units, committed in `3423391`. 2-01 first. After it, 2-02, 2-0
 
 artifact_feedback on the four phase 2 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
 
+### 2-01-registry-tenancy-bearer
+
+- Built: tenant create, issued `wk_` tokens stored as SHA-256, profile and admin token routes, bearer scope checks (read ingest is 403, revoked or expired is 401), and remote `tenantForKey` from the registry. A restart reloads the registry. A policy change does not revoke tokens.
+- Surfaces: `tools/workflow/internal/serve/registry.go`, `tools/workflow/internal/serve/tokens.go`, `tools/workflow/internal/serve/serve.go`, `tools/workflow/internal/serve/host.go`, `tools/workflow/internal/serve/session.go`, `tools/workflow/internal/serve/serve_test.go`.
+- Commit: `a8cc689`. `go test ./internal/serve/` passed, including the token, tenant, and bearer tests.
+- Deviations: token lists are a JSON array, not an object with a `tokens` field. `session.go` was edited; the brief's owned paths did not name it.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
