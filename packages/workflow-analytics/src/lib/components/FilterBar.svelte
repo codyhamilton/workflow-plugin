@@ -1,16 +1,20 @@
 <script lang="ts">
 	import { dateToFrom, dateToTo } from '$lib/filters';
 	import { PRESETS, presetWindow } from '$lib/presets';
-	import type { DimKey } from '$lib/urlstate';
+	import { DIM_KEYS, type DimKey } from '$lib/urlstate';
 	import { view } from '$lib/view.svelte';
 
-	const MULTIS: DimKey[] = ['repo_id', 'harness', 'kind', 'plan', 'model'];
-	const LABELS: Record<string, string> = {
+	const LABELS: Record<DimKey, string> = {
 		repo_id: 'Repo',
 		harness: 'Harness',
 		kind: 'Kind',
 		plan: 'Plan',
-		model: 'Model'
+		norm_event: 'Norm event',
+		event: 'Event',
+		tool: 'Tool',
+		model: 'Model',
+		source: 'Source',
+		conversation_id: 'Conversation'
 	};
 
 	// The window the date inputs display: the custom range, or the preset expanded at `now`.
@@ -86,9 +90,14 @@
 		To
 		<input type="date" data-testid="filter-to" value={win.to} onchange={onTo} />
 	</label>
-	{#each MULTIS as key (key)}
-		<label>
-			{LABELS[key]}
+	{#each DIM_KEYS as key (key)}
+		<label class:wide={key === 'conversation_id'}>
+			<span class="caption">
+				{LABELS[key]}
+				{#if key === 'conversation_id'}
+					<span class="hint" data-testid="filter-conversation_id-exclude-hint">Exclude not applied</span>
+				{/if}
+			</span>
 			<select multiple size="3" data-testid="filter-{key}" onchange={(e) => onSelect(key, e)}>
 				{#each options(key) as v (v)}
 					<option value={v} selected={(view.state.include[key] ?? []).includes(v)}>{v}</option>
@@ -122,6 +131,19 @@
 		flex-direction: column;
 		font-size: 0.8rem;
 		gap: 0.25rem;
+	}
+	.caption {
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+	}
+	.hint {
+		font-size: 0.7rem;
+		color: var(--muted);
+		font-weight: normal;
+	}
+	label.wide select {
+		min-width: 11rem;
 	}
 	select {
 		min-width: 9rem;
