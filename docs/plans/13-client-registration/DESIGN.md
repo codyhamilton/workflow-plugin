@@ -131,6 +131,15 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 - Approach: known
 - Depends on: nothing
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| Registry and remote mode config | [briefs/1-01-registry-remote-config.md](briefs/1-01-registry-remote-config.md) | nothing | nothing |
+| OAuth, session, and remote request auth | [briefs/1-02-oauth-session-remote-auth.md](briefs/1-02-oauth-session-remote-auth.md) | 1-01 | nothing |
+| Analytics site session mode | [briefs/1-03-analytics-session-site.md](briefs/1-03-analytics-session-site.md) | 1-02 | nothing |
+| Design docs for login and admission | [briefs/1-04-design-docs-login.md](briefs/1-04-design-docs-login.md) | 1-02, 1-03 | nothing |
+
 ### Phase 2 — Issued tokens are the remote credential
 
 - Outcome: A logged-in user `POST`s a tenant and a `read_write` token with a future `expires_at`, and the profile create response is the only profile response that contains the plaintext. `POST /v1/ingest` with `Authorization: Bearer` of that token stores a fact in that tenant; `GET /v1/analytics/summary` with it returns that tenant. The same tenant's `read` token gets 403 `read-only token` on ingest and stores nothing, and 200 on the summary. After the owner revokes, or after `expires_at`, the same POST is 401 and stores nothing. `GET /v1/tokens` lists the owner's tokens without `token`. `GET /v1/admin/tokens` lists every token without `token`. The admin revokes another user's token from that list, and the next ingest with it is 401 without a restart. Changing the domain policy does not revoke that token: it still ingests. A session `GET /v1/analytics/summary?tenant=<owned>` returns that tenant; a tenant the session does not own is 403. After login, with one owned tenant, `/` shows that tenant's summary from a cookie-only request whose `tenant` comes from `GET /v1/me`, and the site does not send a stored bearer. A submitted fact whose text contains a `wk_` token is stored without that secret. Restarting the process does not forget the token or the revocation. Starting with `WORKFLOW_SERVE_KEYS` set exits before listen. `docs/design/03-remote-service.md` states this and no longer says registration, key issue, or rotation are out of scope.
