@@ -119,6 +119,14 @@ artifact_feedback on the five phase 3 briefs: quality service unreachable at `ht
 - Deviations: none.
 - Agent: Composer, harness did not report turns or final context.
 
+### 3-05-design-docs-client-login
+
+- Built: design 2 and design 5, and `tools/hooklog/README.md`, describe env-pair resolution, half-set failure, `client.toml`, local default, and the built `workflow login`. They no longer say the command is not built yet. Design 5 notes that `tenant` is still only on the overview. They do not claim an OAuth e2e login.
+- Surfaces: `docs/design/02-edge-capture.md`, `docs/design/05-distribution.md`, `tools/hooklog/README.md`.
+- Commit: `8456ea3`. Those files name `WORKFLOW_ENDPOINT` and `workflow login`, and the only `workflow init` lines say there is none.
+- Deviations: none.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
