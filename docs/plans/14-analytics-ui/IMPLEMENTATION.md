@@ -31,3 +31,15 @@ Checked against the phase outcome, not the report.
 ### Carried
 
 None.
+
+## Phase 2 — Distribution, score series, and run aggregates
+
+Refined in `1773214` into six units. [Refine](d742ac97-355e-4334-8c57-c8076a6ee14b) returned Proceed. `artifact_feedback` on the six briefs was not delivered; nothing was queued.
+
+### 2-01-distribution-read
+
+- Built: `GET /v1/analytics/distribution` — call and conversation grain, optional `model` dimension, fixed bins, top-N without `__other__`, unpriced cost excluded from percentiles and bins.
+- Surfaces: `tools/workflow/internal/store/distribution.go`, `distribution_test.go`, `percentile.go`; `tools/workflow/internal/serve/analytics_distribution.go`, `analytics_distribution_test.go`, `serve.go`, `analytics_bench_test.go`. Commit `f66b9db`.
+- Deviations: the serve shape test sees `rows: []` on `queryFixture` because that fixture has no usage facts. Store tests cover the populated cases.
+- Agent: Composer, agent `9b0236d1-8c6a-41bb-bd43-323df3157d3d`. The harness did not report turn count or final context size. Status `done`.
+- Check: `go test ./internal/store/ -run TestDistribution -count=1` and `go test ./internal/serve/ -run 'TestDistribution|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
