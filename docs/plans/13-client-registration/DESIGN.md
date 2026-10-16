@@ -147,6 +147,15 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 - Approach: known
 - Depends on: Phase 1
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| Registry, tenancy, and bearer authorization | [briefs/2-01-registry-tenancy-bearer.md](briefs/2-01-registry-tenancy-bearer.md) | Phase 1 | nothing |
+| `wk_` workflow token secret scrub | [briefs/2-02-wk-secret-scrub.md](briefs/2-02-wk-secret-scrub.md) | 2-01 | 2-03, 2-04 |
+| Profile UI, collector overview, and e2e setup | [briefs/2-03-analytics-profile-e2e.md](briefs/2-03-analytics-profile-e2e.md) | 2-01 | 2-02, 2-04 |
+| Design doc for issued remote credentials | [briefs/2-04-design-docs-remote-tokens.md](briefs/2-04-design-docs-remote-tokens.md) | 2-01 | 2-02, 2-03 |
+
 ### Phase 3 — Devices and remote agents present a token
 
 - Outcome: With `WORKFLOW_ENDPOINT` set to the collector and `WORKFLOW_KEY` set to a live `read_write` token, and with no `client.toml`, `workflow drain` delivers a spooled fact (`POST /v1/ingest` succeeds) and `workflow mcp` reads with that bearer. A `client.toml` of `endpoint` and `key`, with those two env vars unset, does the same. Neither file nor env is local mode and sends no bearer. Setting exactly one of `WORKFLOW_ENDPOINT` or `WORKFLOW_KEY` makes `workflow drain`, `workflow mcp`, and `workflow status` fail before any request; they do not use the file and they do not contact loopback. `workflow login --endpoint <collector>` opens the browser and, after GitHub auth, returns to the device page. That page issues no token until the user has chosen a tenant, a grant (`read` or `read_write`), and an expiry, and it does not invent a lifetime. If the user has no tenant, they type a name and the page creates it. The browser is sent only to that login's loopback URI, with a one-time code and `state`, and the page response contains no plaintext. The CLI exchange, which is not under the collector `Origin` rule, writes `endpoint` and `key` into `client.toml` and prints no token. A drain using a `read_write` token from that file delivers. A `read` token from that file leaves ingest 403 and storing nothing, and `workflow mcp` reads succeed. The previous token still authorizes until it expires or is revoked. Quitting the page writes nothing. A hand-written `client.toml` still works. Loopback serve still answers with no keys. `docs/design/02-edge-capture.md` and `docs/design/05-distribution.md` describe this command and this resolution. `workflow init` is not added.
