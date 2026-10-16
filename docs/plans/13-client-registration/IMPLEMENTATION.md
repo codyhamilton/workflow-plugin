@@ -103,6 +103,14 @@ artifact_feedback on the five phase 3 briefs: quality service unreachable at `ht
 - Deviations: none. The registry keeps the token plaintext until exchange so a restart can still redeem the code.
 - Agent: Composer, harness did not report turns or final context.
 
+### 3-03-device-page
+
+- Built: `/device` requires `state` and a loopback `redirect_uri`, and tenant, grant, and expiry with no defaults (expiry starts empty). Zero tenants shows a create form. Signed-out users go to `/oauth/login?return=…`. Submit posts `POST /v1/device/authorize` and navigates to the redirect without showing the plaintext.
+- Surfaces: `packages/workflow-analytics/src/routes/device/+page.svelte`, `packages/workflow-analytics/src/lib/api.ts`, `packages/workflow-analytics/src/lib/api.test.ts`, `packages/workflow-analytics/tests/e2e/device.spec.ts`.
+- Commit: `48309e2`. `npm test` passed (169). Playwright `device.spec.ts` passed (2).
+- Deviations: `authorizeDevice` follows an opaque 303 by retrying `redirect: 'follow'` and then assigning `response.url`. The Playwright test mocks a same-origin 303 so `Location` is visible. `global-setup.ts` was left alone.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
