@@ -104,3 +104,38 @@ Checked against the phase outcome, not the reports.
 Refined in `1a39fdf` into eight units. Refine agent `7b649bbb-44a8-4ff8-b39c-d8fa60faca15` returned Proceed. `artifact_feedback` was not called: the workflow feedback namespace was not available in that session. Nothing is queued for the eight briefs.
 
 The Phase 2 carried item is not a Phase 3 surface. It stays for the Phase 5 edit of `docs/design/07-analytics-site.md`.
+
+### 3-01-filter-bar-ten-dims
+
+- Built: the filter bar lists all ten shared dimensions. Conversation exclude is called out as unsupported.
+- Surfaces: `packages/workflow-analytics/src/lib/components/FilterBar.svelte`, `packages/workflow-analytics/tests/e2e/filter-bar.spec.ts`. Commit `6a19e68`.
+- Deviations: `mapFacets` was already mapping the missing dimensions, so `view.svelte.ts` was not edited.
+- Agent: Composer, agent `2577f7a0-db11-4436-be7a-f352a4f14777`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-02-overview-kpi-links
+
+- Built: overview KPI tiles link to the owning reports and keep the query string. Trends links set `metric`.
+- Surfaces: `packages/workflow-analytics/src/routes/+page.svelte`, `packages/workflow-analytics/tests/e2e/overview.spec.ts`. Commit `0edf140`.
+- Deviations: the existing `overview shows the fixture numbers` check fails with `unpriced_calls` 1 against fixture 2, with this unit's diff stashed as well. Sparkline `pointer-events` were set to `none` so the tile link receives the click.
+- Agent: Composer, agent `10650bf9-beff-468d-9c36-199661c50379`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-03-time-chart-interactions
+
+- Built: `TimeChart` takes optional `filterDim` and `onseries`. Series and legend clicks drill, including shift to exclude. Brush is unchanged.
+- Surfaces: `packages/workflow-analytics/src/lib/charts/TimeChart.svelte`, `docs/plans/14-analytics-ui/reports/3-03-time-chart-interactions.md`. Commit `7863bbe`.
+- Deviations: none.
+- Agent: Composer, agent `7de7ac2e-d375-4b0f-a70b-190e613f450f`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-06-repos-cost-rank
+
+- Built: `/repos` can rank by `cost_usd`. The default rank stays `hook_events`. A repo click filters.
+- Surfaces: `packages/workflow-analytics/src/routes/repos/+page.svelte`, `packages/workflow-analytics/tests/e2e/repos.spec.ts`. Commit `23e98ba`.
+- Deviations: the cost e2e compares live API values rather than the hand-counted `USAGE_ALL.cost_usd` constant, because per-repo totals use read-time pricing.
+- Agent: Composer, agent `7137a2a7-1e34-4735-8ab5-8190d62c979a`. The harness did not report turn count or final context size. Status `done`.
+
+### 3-08-builder-scalar-heatmap
+
+- Built: zero dimensions with bucket `none` shows the scalar. Heatmap cells drill a filter dimension. Weekday and hour cells do not.
+- Surfaces: builder route, `builder.ts`, `BuilderChart.svelte`, `Heatmap.svelte`, `packages/workflow-analytics/tests/e2e/builder.spec.ts`. Commit `279d0bd`.
+- Deviations: none.
+- Agent: Composer, agent `2233c0bc-b93b-48a3-bd4b-2bb3da7d0c8f`. The harness did not report turn count or final context size. Status `done`.
