@@ -37,6 +37,34 @@ artifact_feedback on the four phase 4 briefs: quality service unreachable at `ht
 - Deviations: none. The public URL in the doc is the one in `fly.toml` (`https://workflow-collector.fly.dev`). There is no deploy report yet.
 - Agent: Composer, harness did not report turns or final context.
 
+### 4-02-fly-collector-deploy
+
+- Built: nothing on fly.io. No app, volume, secret, or release.
+- Surfaces: the report only.
+- Commit: `bdeb88d`. `fly config validate` passed. `workflow-collector` does not exist. `https://workflow-collector.fly.dev` does not resolve.
+- Deviations: deploy was not attempted. `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are not in this environment. Placeholder values were not invented, and the `l-fante` org was not given a new app.
+- Agent: Composer, harness did not report turns or final context.
+
+### 4-03-fly-collector-outcome-verify
+
+Not started. It depends on a live public origin from 4-02.
+
+### Phase 4 verification
+
+The public origin is not proven. The phase is not closed.
+
+- Fly auth is present. The GitHub OAuth client id and secret are not. `workflow-collector` was not created, and `https://workflow-collector.fly.dev/v1/health` and `/oauth/login` do not resolve.
+- On a local non-loopback `workflow serve` with the OAuth env set, `WORKFLOW_SERVE_KEYS` unset, and `WORKFLOW_SERVE_CORS_ORIGINS=https://pages.example`: `GET /v1/health` with no bearer was 200. `GET /oauth/login` was 302 to `https://github.com/login/oauth/authorize` with `redirect_uri` `https://collector.example/oauth/callback`. A summary from `https://pages.example` with a bearer was 200 and echoed that origin, with no `Access-Control-Allow-Credentials`. `https://evil.example` got no CORS headers. A `read_write` token that ingested before a process restart still ingested after it (`duplicate`). After that token was revoked in `registry.json` and the process started again, ingest was 401. The plaintext was not in the registry. This is the binary, not the fly app.
+- `docs/design/07-analytics-site.md` names the fly collector and leaves Pages as the pasted-token client.
+
+artifact_feedback on the four phase 4 briefs and the three reports: service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
+### Remaining
+
+1. Create `workflow-collector` only once a real GitHub OAuth client id and secret are available, set the secret with `fly secrets set`, point the app callback at `https://<origin>/oauth/callback`, replace the placeholder client id and Pages origin, and deploy.
+2. Then run 4-03 against that public origin: health, GitHub redirect, `WORKFLOW_SERVE_KEYS` unset, token survives a machine restart, revoked token does not, and CORS for the Pages origin has no credentials header.
+3. Collector-mode `tenant` is still only on `/` and `/profile`. `Server.New` still panics if the registry cannot be opened or persisted. E2e still seeds `registry.json`. The profile expiry field is still prefilled in the browser.
+
 ## Phase 2 — Issued tokens are the remote credential
 
 Tool: Cursor (Grok 4.7 orchestrator).
