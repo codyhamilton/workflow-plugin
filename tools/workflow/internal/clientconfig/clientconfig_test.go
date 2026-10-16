@@ -1,6 +1,7 @@
 package clientconfig
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,6 +41,44 @@ func TestDefaultPath(t *testing.T) {
 	t.Setenv("HOME", "/h")
 	if Path() != "/h/.config/workflow/client.toml" {
 		t.Fatal(Path())
+	}
+}
+
+func TestEnvOverridesFile(t *testing.T) {
+	write(t, "endpoint = \"http://file.example\"\nkey = \"file-key\"\n")
+	t.Setenv("WORKFLOW_ENDPOINT", "http://env.example")
+	t.Setenv("WORKFLOW_KEY", "env-key")
+	c, err := Load()
+	if err != nil || c.Local || c.Endpoint != "http://env.example" || c.Key != "env-key" {
+		t.Fatalf("got %+v %v", c, err)
+	}
+}
+
+func TestEnvRemoteNoFile(t *testing.T) {
+	t.Setenv("WORKFLOW_CLIENT_CONFIG", filepath.Join(t.TempDir(), "missing.toml"))
+	t.Setenv("WORKFLOW_ENDPOINT", "http://collector.example")
+	t.Setenv("WORKFLOW_KEY", "wk_test")
+	c, err := Load()
+	if err != nil || c.Local || c.Endpoint != "http://collector.example" || c.Key != "wk_test" {
+		t.Fatalf("got %+v %v", c, err)
+	}
+}
+
+func TestPartialEnv(t *testing.T) {
+	secret := "super-secret-key-value"
+	t.Setenv("WORKFLOW_KEY", secret)
+	_, err := Load()
+	if err == nil || !errors.Is(err, ErrPartialEnv) {
+		t.Fatalf("got %v", err)
+	}
+	if strings.Contains(err.Error(), secret) {
+		t.Fatalf("error leaks key: %v", err)
+	}
+	t.Setenv("WORKFLOW_KEY", "")
+	t.Setenv("WORKFLOW_ENDPOINT", "http://only-endpoint.example")
+	_, err = Load()
+	if err == nil || !errors.Is(err, ErrPartialEnv) {
+		t.Fatalf("got %v", err)
 	}
 }
 
