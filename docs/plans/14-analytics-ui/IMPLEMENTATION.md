@@ -67,3 +67,11 @@ Refined in `1773214` into six units. Refine agent `d742ac97-355e-4334-8c57-c8076
 - Deviations: none.
 - Agent: Composer, agent `0c5692ac-6817-4c4f-9e17-0c7e5f7a69e1`. The harness did not report turn count or final context size. Status `done`.
 - Check: `go test ./internal/store/ -run 'TestAnalyticsExecutions|TestExecutionsPage|TestExecutions.*Series' -count=1` and `go test ./internal/serve/ -run 'TestExecutions|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
+
+### 2-04-conversations-usage-fields
+
+- Built: conversation list rows include `model`, `model_calls`, `unpriced_calls`, `cost_usd`, `tokens_in`, and `tokens_out`. `model` is the most frequent in-window call model, ties to the smaller name.
+- Surfaces: `tools/workflow/internal/store/analytics.go`, `analytics_test.go`; `tools/workflow/internal/serve/analytics.go`, `analytics_test.go`. Commit `dfe6722`.
+- Deviations: none.
+- Agent: Composer, agent `758fa3ca-e1d6-400f-b777-25715ccf47e6`. The harness did not report turn count or final context size. Status `done`.
+- Check: `go test ./internal/store/ -run 'TestAnalyticsConversations|TestConversationsPage' -count=1` and `go test ./internal/serve/ -run 'TestAnalytics.*Conversation|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
