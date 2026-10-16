@@ -75,3 +75,26 @@ Refined in `1773214` into six units. Refine agent `d742ac97-355e-4334-8c57-c8076
 - Deviations: none.
 - Agent: Composer, agent `758fa3ca-e1d6-400f-b777-25715ccf47e6`. The harness did not report turn count or final context size. Status `done`.
 - Check: `go test ./internal/store/ -run 'TestAnalyticsConversations|TestConversationsPage' -count=1` and `go test ./internal/serve/ -run 'TestAnalytics.*Conversation|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
+
+### 2-06-analytics-site-reads-doc
+
+- Built: `docs/design/07-analytics-site.md` states `GET /v1/analytics/distribution`, `GET /v1/analytics/score-series`, executions `shape` and `series`, conversation-list usage fields, and conversation `window_totals`. It states that existing `/query` fields are unchanged, and the same for `/schema`, `/summary`, `/series`, `/scores`, and `/baselines`.
+- Surfaces: `docs/design/07-analytics-site.md`. Commit `c0e120f`.
+- Deviations: none.
+- Agent: Composer, agent `203856de-1428-4702-9425-9e69f07075cd`. The harness did not report turn count or final context size. Status `done`.
+
+### Verification
+
+Checked against the phase outcome, not the reports.
+
+- `go test ./internal/serve/ -run TestAnalyticsBenchSmoke -count=1` from `tools/workflow` passed. The smoke cases include `distribution/cost`, `distribution/tokens`, `score-series/`, `executions/shape`, `executions/shape-bucket`, `conversations/`, and `conversation/` with `from` and `to`. The smoke route list requires a `distribution` case and a `score-series` case.
+- Store and serve tests named in each unit's done evidence were re-run and passed, as recorded on the units above.
+- `docs/design/07-analytics-site.md` contains the distribution and score-series routes, `window_totals`, and the sentence that existing `/query` fields are unchanged.
+
+### Feedback
+
+`artifact_feedback` on the six phase-2 briefs and the six phase-2 reports returned not delivered. Nothing is queued for any of them.
+
+### Carried
+
+- `docs/design/07-analytics-site.md` open issue 12 still says conversation totals cover only the returned events when a timeline is truncated. The new contract on that same page says `totals` is the whole run and `truncated` applies to `events` only. The next edit of that file should replace the stale clause.
