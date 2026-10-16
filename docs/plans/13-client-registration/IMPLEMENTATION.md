@@ -13,3 +13,11 @@ Phase 1 only. Later phases are not started.
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
 
 artifact_feedback on the four phase 1 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
+### 1-01-registry-remote-config
+
+- Built: `registry.json` under `WORKFLOW_SERVE_DATA` (policy, sessions, reserved owners and token hashes), `Local()` / `Remote()`, and `ConfigFromEnv` that refuses a non-empty `WORKFLOW_SERVE_KEYS`, ignores OAuth on loopback, and requires the OAuth trio plus a valid `WORKFLOW_PUBLIC_URL` on a non-loopback bind. `New` opens the registry when remote.
+- Surfaces: `tools/workflow/internal/serve/registry.go`, `tools/workflow/internal/serve/serve.go`, `tools/workflow/internal/serve/serve_test.go`, `tools/workflow/cmd/workflow/main_test.go`.
+- Commit: `3191ce2`. `go test` on `internal/serve` and `cmd/workflow` passed (`TestServeOutcome` now covers OAuth refusal, keys refusal on loopback, and loopback local ingest).
+- Deviations: the keys refusal lives in `ConfigFromEnv` only, not a second check in `runServe`. `New` panics if the registry cannot be opened or persisted. Tests for the registry landed in `serve_test.go` rather than a new `registry_test.go`. `main.go` was not edited.
+- Agent: Composer, harness did not report turns or final context.
