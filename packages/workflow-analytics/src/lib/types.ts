@@ -147,3 +147,31 @@ export interface ConversationDetail {
 	events: TimelineEvent[];
 	truncated?: boolean;
 }
+
+export interface DistributionBin {
+	lo: number;
+	hi?: number;
+	n: number;
+}
+
+export interface DistributionRow {
+	k: string;
+	n: number;
+	unpriced: number;
+	min: number;
+	p25: number;
+	median: number;
+	p75: number;
+	p95: number;
+	max: number;
+	bins: DistributionBin[];
+}
+
+export interface DistributionResponse {
+	measure: string;
+	grain: string;
+	dim?: string;
+	rows: DistributionRow[];
+	truncated?: boolean;
+	ignored_filters?: string[];
+}

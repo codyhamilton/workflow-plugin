@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { USAGE_ALL, USAGE_BY_MODEL } from './fixture';
-import { clickBar, expectSettled, trackRequests, useServe } from './helpers';
+import { brush, clickBar, expectSettled, trackRequests, useServe } from './helpers';
+
+test.use({ timezoneId: 'UTC' });
 
 const SONNET = 'anthropic/claude-sonnet-5-5';
 const QWEN = 'ollama-maxctx/qwen3-coder:30b-a3b-q4_K_M';
@@ -79,12 +81,14 @@ test('__other__ is inert', async ({ page }) => {
 	await expect(page.locator('[data-testid^="chip-"]')).toHaveCount(0);
 });
 
-test('one load issues seven /analytics/query requests, none per model', async ({ page }) => {
-	const reqs = trackRequests(page, /analytics\/query/);
+test('one load issues seven /analytics/query requests and one distribution', async ({ page }) => {
+	const queries = trackRequests(page, /analytics\/query/);
+	const dist = trackRequests(page, /analytics\/distribution/);
 	await page.goto('/usage');
 	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
 	await expectSettled(page);
-	expect(reqs.count()).toBe(7);
+	expect(queries.count()).toBe(7);
+	expect(dist.count()).toBe(1);
 });
 
 test('switching 30d to 90d issues each distinct query once', async ({ page }) => {
@@ -198,6 +202,67 @@ test('the five by-model table requests ask for top=100', async ({ page }) => {
 		['cost_usd', 'model_calls', 'tokens_in', 'tokens_out', 'unpriced_calls'].sort()
 	);
 	for (const s of seen) expect(s.top, s.measure).toBe('100');
+});
+
+test('tokens-over-time query includes dim=model', async ({ page }) => {
+	const seen: string[][] = [];
+	page.on('request', (r) => {
+		if (!/analytics\/query/.test(r.url())) return;
+		const u = new URL(r.url());
+		if (u.searchParams.get('measure') === 'tokens_out' && u.searchParams.get('bucket') !== 'none') {
+			seen.push(u.searchParams.getAll('dim'));
+		}
+	});
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
+	await expectSettled(page);
+	expect(seen.length).toBeGreaterThan(0);
+	for (const dims of seen) expect(dims).toContain('model');
+});
+
+test('distribution measure control switches measure and requests cost_usd', async ({ page }) => {
+	const seen: string[] = [];
+	page.on('response', (r) => {
+		if (/analytics\/distribution/.test(r.url())) seen.push(r.url());
+	});
+	await page.goto('/usage');
+	await expect(page.getByTestId('usage-distribution')).toBeVisible();
+	await expectSettled(page);
+	expect(seen.some((u) => new URL(u).searchParams.get('measure') === 'cost_usd')).toBe(true);
+	const switched = page.waitForResponse(
+		(r) => /analytics\/distribution/.test(r.url()) && new URL(r.url()).searchParams.get('measure') === 'tokens_in'
+	);
+	await page.getByTestId('usage-distribution-measure').selectOption('tokens_in');
+	await switched;
+	await expectSettled(page);
+});
+
+test('brushing usage-over-time sets from/to and reloads distribution', async ({ page }) => {
+	await page.goto('/usage');
+	await expectSettled(page);
+	await page.getByTestId('usage-over-time-table-toggle').click();
+	await expect(page.getByTestId('usage-over-time-table')).toBeVisible();
+	await page.getByTestId('usage-over-time-table-toggle').click();
+	await expect(page.getByTestId('usage-over-time').locator('.echart svg')).toBeVisible();
+	const distAfter = page.waitForResponse((r) => /analytics\/distribution/.test(r.url()));
+	await brush(page, 'usage-over-time', 0.25, 0.75);
+	await expect(page).toHaveURL(/[?&]from=/);
+	const u = new URL(page.url());
+	expect(u.searchParams.get('from')).toBeTruthy();
+	expect(u.searchParams.get('to')).toBeTruthy();
+	await expectSettled(page);
+	await distAfter;
+});
+
+test('model bar click filters time series and distribution via chip', async ({ page }) => {
+	await page.goto('/usage');
+	await expect(page.getByTestId(`usage-row-${SONNET}`)).toBeVisible();
+	await expect(page.getByTestId(`usage-row-${QWEN}`)).toBeVisible();
+	await openTable(page, 'usage-cost-by-model');
+	await clickBar(page, 'usage-cost-by-model', SONNET_BAR);
+	await expect(page.getByTestId(`chip-model-${SONNET}`)).toBeVisible();
+	await expect(page.getByTestId(`usage-row-${QWEN}`)).toHaveCount(0);
+	await expectSettled(page);
 });
 
 test('empty model key shows (none) and is inert; __other__ shows other models with a truncation note', async ({ page }) => {
