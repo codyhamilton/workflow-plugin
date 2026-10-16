@@ -80,6 +80,14 @@ That supersedes the automatic token. `workflow login` still opens the website an
 - The session stores the GitHub login, so `GET /v1/me` may return `github_login`.
 - Loopback is always local mode and ignores the OAuth env.
 
+### Turn 6
+
+**User responded:** "Sounds good. have an agent execute"
+
+**Agent decisions:**
+
+- Sign-off recorded. Execute phase 1 only.
+
 ## Agent Decisions
 
 - **Admin lockout**: the verified admin email can log in even when the allow list does not include `ctzns.net`. Rationale: otherwise the only person who can edit the policy can remove themselves.
