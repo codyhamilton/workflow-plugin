@@ -17,6 +17,10 @@ Resuming HEAD: `aa3c971`
 
 Phase 2 only. Later phases are not started.
 
+Refined into four units, committed in `3423391`. 2-01 first. After it, 2-02, 2-03, and 2-04 have disjoint paths. Phase 1 carried items: the e2e keyed setup and the overview `tenant` query go to 2-03; the registry-open panic stays as 2-01 left it.
+
+artifact_feedback on the four phase 2 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
 ## Phase 1 — GitHub login and admission
 
 Refined into four sequential units, committed in `7dd001f`. Nothing runs in parallel: 1-01, then 1-02, then 1-03, then 1-04.
