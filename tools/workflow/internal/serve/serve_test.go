@@ -888,6 +888,102 @@ func TestBearerTenantSessionSummary(t *testing.T) {
 	}
 }
 
+func deviceAuthorize(t *testing.T, h http.Handler, origin string, body string, sess []*http.Cookie) (deviceCode string, loc string) {
+	req := httptest.NewRequest("POST", "/v1/device/authorize", strings.NewReader(body))
+	req.Header.Set("Origin", origin)
+	req.Header.Set("Content-Type", "application/json")
+	for _, c := range sess {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("authorize: %d %s", rec.Code, rec.Body.String())
+	}
+	loc = rec.Header().Get("Location")
+	if loc == "" || strings.Contains(loc, "wk_") {
+		t.Fatalf("bad redirect: %q", loc)
+	}
+	u, err := url.Parse(loc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deviceCode = u.Query().Get("code")
+	if deviceCode == "" {
+		t.Fatalf("no code in redirect: %s", loc)
+	}
+	return deviceCode, loc
+}
+
+func deviceExchange(t *testing.T, h http.Handler, payload string, origin string) (int, string) {
+	req := httptest.NewRequest("POST", "/v1/device/exchange", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	if origin != "" {
+		req.Header.Set("Origin", origin)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec.Code, rec.Body.String()
+}
+
+func TestDeviceAuthorizationFlow(t *testing.T) {
+	gh := mockGitHub(t, 30, "devuser", []mockEmail{{Email: "dev@example.com", Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+	origin := "https://collector.example"
+	sess := loginRemote(t, h, origin)
+	remoteCreateTenant(t, h, origin, sess, "devt")
+
+	redirectURI := "http://127.0.0.1:54321/callback"
+	oauthState := "cli-state-xyz"
+	exp := time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339)
+	authBody := `{"redirect_uri":"` + redirectURI + `","state":"` + oauthState + `","tenant":"devt","scope":"read_write","expires_at":"` + exp + `"}`
+	deviceCode, loc := deviceAuthorize(t, h, origin, authBody, sess)
+	if !strings.Contains(loc, "state="+url.QueryEscape(oauthState)) && !strings.Contains(loc, "state="+oauthState) {
+		t.Fatalf("redirect missing state: %s", loc)
+	}
+
+	badRedirect := `{"redirect_uri":"https://evil.example/cb","state":"s","tenant":"devt","scope":"read","expires_at":"` + exp + `"}`
+	if c, b, _ := doWithCookies(t, h, "POST", "/v1/device/authorize", origin, badRedirect, sess); c != 400 {
+		t.Fatalf("non-loopback redirect: %d %s", c, b)
+	}
+
+	wrongStatePayload := `{"code":"` + deviceCode + `","state":"wrong","redirect_uri":"` + redirectURI + `"}`
+	if code, _ := deviceExchange(t, h, wrongStatePayload, ""); code != 401 {
+		t.Fatalf("wrong state exchange: %d", code)
+	}
+
+	exchangePayload := `{"code":"` + deviceCode + `","state":"` + oauthState + `","redirect_uri":"` + redirectURI + `"}`
+	code, body := deviceExchange(t, h, exchangePayload, "")
+	if code != 200 {
+		t.Fatalf("exchange: %d %s", code, body)
+	}
+	var exResp struct {
+		Endpoint string `json:"endpoint"`
+		Token    string `json:"token"`
+	}
+	if err := json.Unmarshal([]byte(body), &exResp); err != nil {
+		t.Fatal(err)
+	}
+	if exResp.Endpoint != origin || !strings.HasPrefix(exResp.Token, "wk_") {
+		t.Fatalf("exchange body: %+v", exResp)
+	}
+	if code, body := deviceExchange(t, h, exchangePayload, ""); code != 401 {
+		t.Fatalf("second exchange: %d %s", code, body)
+	}
+	if code, body := deviceExchange(t, h, exchangePayload, origin); code != 401 {
+		t.Fatalf("third exchange with origin: %d %s", code, body)
+	}
+
+	if code, body := do(t, h, "GET", "/v1/analytics/summary?tenant=devt", deviceCode, ""); code != 401 {
+		t.Fatalf("code as bearer: %d %s", code, body)
+	}
+	if code, body := do(t, h, "GET", "/v1/analytics/summary?tenant=devt", exResp.Token, ""); code != 200 {
+		t.Fatalf("exchanged token summary: %d %s", code, body)
+	}
+}
+
 func TestCORSConfig(t *testing.T) {
 	env := map[string]string{"WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_ADDR": "127.0.0.1:8770", "WORKFLOW_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
 	c, err := ConfigFromEnv(func(k string) string { return env[k] })

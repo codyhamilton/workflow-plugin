@@ -506,6 +506,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/tokens/", s.handleTokensSubpath)
 	mux.HandleFunc("/v1/admin/tokens", s.method(http.MethodGet, s.sessionOnly(s.handleAdminListTokens)))
 	mux.HandleFunc("/v1/admin/policy", s.method(http.MethodPut, s.originGuard(s.sessionOnly(s.handleAdminPolicy))))
+	if s.cfg.Remote() {
+		mux.HandleFunc("/v1/device/authorize", s.handleDeviceAuthorizeRoute)
+		mux.HandleFunc("/v1/device/exchange", s.handleDeviceExchangeRoute)
+	}
 	mux.HandleFunc("/oauth/login", s.method(http.MethodGet, s.oauthLogin))
 	mux.HandleFunc("/oauth/callback", s.method(http.MethodGet, s.oauthCallback))
 	mux.HandleFunc("/logout", s.method(http.MethodPost, s.originGuard(s.logout)))

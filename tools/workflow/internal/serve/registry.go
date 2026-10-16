@@ -65,6 +65,16 @@ type CreatedToken struct {
 	Plaintext string
 }
 
+// DeviceCodeRecord binds a one-time device code to an issued token until exchange.
+type DeviceCodeRecord struct {
+	CodeHash       string    `json:"code_hash"`
+	TokenID        string    `json:"token_id"`
+	TokenPlaintext string    `json:"token_plaintext"`
+	RedirectURI    string    `json:"redirect_uri"`
+	State          string    `json:"state"`
+	ExpiresAt      time.Time `json:"expires_at"`
+}
+
 // registryDoc is the on-disk shape of registry.json.
 type registryDoc struct {
 	Version     int               `json:"version"`
@@ -72,6 +82,7 @@ type registryDoc struct {
 	Sessions    map[string]SessionRecord `json:"sessions"`
 	Owners      map[string]string `json:"owners"`
 	TokenHashes []TokenHashRecord `json:"token_hashes"`
+	DeviceCodes []DeviceCodeRecord `json:"device_codes,omitempty"`
 }
 
 // Registry holds collector-wide state outside tenant directories.
@@ -83,6 +94,7 @@ type Registry struct {
 	sessions    map[string]SessionRecord
 	owners      map[string]string
 	tokenHashes []TokenHashRecord
+	deviceCodes []DeviceCodeRecord
 	dirty       bool
 }
 
@@ -126,6 +138,7 @@ func (r *Registry) load() error {
 		r.owners = doc.Owners
 	}
 	r.tokenHashes = doc.TokenHashes
+	r.deviceCodes = doc.DeviceCodes
 	return nil
 }
 
@@ -143,6 +156,7 @@ func (r *Registry) saveLocked() error {
 		Sessions:    r.sessions,
 		Owners:      r.owners,
 		TokenHashes: r.tokenHashes,
+		DeviceCodes: r.deviceCodes,
 	}
 	b, err := json.MarshalIndent(doc, "", "  ")
 	if err != nil {
@@ -292,6 +306,81 @@ func (r *Registry) CreateToken(tenant, scope string, expiresAt time.Time, github
 	r.tokenHashes = append(r.tokenHashes, rec)
 	r.dirty = true
 	return &CreatedToken{Record: rec, Plaintext: plain}, nil
+}
+
+func generateDeviceCode() (string, error) {
+	var b [32]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b[:]), nil
+}
+
+func hashDeviceCode(code string) string {
+	return hashTokenPlaintext(code)
+}
+
+// CreateDeviceAuthorization issues a token and stores a one-time device code for loopback exchange.
+func (r *Registry) CreateDeviceAuthorization(tenant, scope string, expiresAt time.Time, githubID int64, redirectURI, state string, now time.Time) (code string, created *CreatedToken, err error) {
+	created, err = r.CreateToken(tenant, scope, expiresAt, githubID, now)
+	if err != nil {
+		return "", nil, err
+	}
+	code, err = generateDeviceCode()
+	if err != nil {
+		return "", nil, err
+	}
+	rec := DeviceCodeRecord{
+		CodeHash:       hashDeviceCode(code),
+		TokenID:        created.Record.ID,
+		TokenPlaintext: created.Plaintext,
+		RedirectURI:    redirectURI,
+		State:          state,
+		ExpiresAt:      created.Record.ExpiresAt,
+	}
+	r.mu.Lock()
+	r.deviceCodes = append(r.deviceCodes, rec)
+	r.dirty = true
+	r.mu.Unlock()
+	return code, created, nil
+}
+
+// ExchangeDeviceCode consumes a device code once and returns the issued token plaintext.
+func (r *Registry) ExchangeDeviceCode(code, state, redirectURI string, now time.Time) (plaintext string, ok bool) {
+	kh := sha256.Sum256([]byte(code))
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var idx = -1
+	var found *DeviceCodeRecord
+	match := 0
+	for i := range r.deviceCodes {
+		rec := &r.deviceCodes[i]
+		ph, err := hex.DecodeString(rec.CodeHash)
+		if err != nil || len(ph) != sha256.Size {
+			continue
+		}
+		eq := subtle.ConstantTimeCompare(kh[:], ph)
+		if eq == 1 {
+			found = rec
+			idx = i
+		}
+		match |= eq
+	}
+	if match != 1 || found == nil {
+		return "", false
+	}
+	if found.State != state || found.RedirectURI != redirectURI {
+		return "", false
+	}
+	if !now.Before(found.ExpiresAt) {
+		r.deviceCodes = append(r.deviceCodes[:idx], r.deviceCodes[idx+1:]...)
+		r.dirty = true
+		return "", false
+	}
+	plaintext = found.TokenPlaintext
+	r.deviceCodes = append(r.deviceCodes[:idx], r.deviceCodes[idx+1:]...)
+	r.dirty = true
+	return plaintext, true
 }
 
 // ListTokensForOwner returns tokens whose tenant is owned by githubID.
