@@ -1,0 +1,31 @@
+# Fly.io collector: one machine, persistent WORKFLOW_SERVE_DATA, GitHub OAuth remote serve.
+# Set GITHUB_OAUTH_CLIENT_SECRET via `fly secrets set` (never in this file).
+
+app = "workflow-collector"
+primary_region = "iad"
+
+[build]
+
+[env]
+  WORKFLOW_SERVE_ADDR = "0.0.0.0:8080"
+  WORKFLOW_SERVE_DATA = "/data"
+  WORKFLOW_PUBLIC_URL = "https://workflow-collector.fly.dev"
+  GITHUB_OAUTH_CLIENT_ID = "replace-with-github-oauth-client-id"
+  WORKFLOW_SERVE_CORS_ORIGINS = "https://replace-with-pages-project.pages.dev"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[mounts]]
+  source = "workflow_serve_data"
+  destination = "/data"
