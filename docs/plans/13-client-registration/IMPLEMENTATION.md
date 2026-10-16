@@ -17,6 +17,10 @@ Resuming HEAD: `6e280e3`
 
 Phase 4 only. Terminal review and close-out are not part of this run.
 
+Refined into four units, committed in `fad2d04`. 4-01 first. Then 4-02. After 4-02, 4-03 and 4-04 (4-04 also only needs 4-01). Phase 3 carried items stay out of this phase: other routes omitting `tenant`, the registry-open panic, e2e seeding, and the profile expiry prefill. 4-04 may note the tenant gap and must not claim full-site wiring.
+
+artifact_feedback on the four phase 4 briefs: quality service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores).
+
 ## Phase 2 — Issued tokens are the remote credential
 
 Tool: Cursor (Grok 4.7 orchestrator).
