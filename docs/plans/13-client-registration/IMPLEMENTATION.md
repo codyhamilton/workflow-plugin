@@ -29,6 +29,14 @@ artifact_feedback on the four phase 4 briefs: quality service unreachable at `ht
 - Deviations: none. `GITHUB_OAUTH_CLIENT_ID` and `WORKFLOW_SERVE_CORS_ORIGINS` in `fly.toml` are placeholders for the operator.
 - Agent: Composer, harness did not report turns or final context.
 
+### 4-04-design-docs-fly-hosting
+
+- Built: design 7 Hosting names the fly.io collector (`fly.toml`, volume, OAuth callback on the collector origin, no `WORKFLOW_SERVE_KEYS`, CORS for the Pages origin) and keeps Pages as the static pasted-token client. It notes `?tenant=` is still only on the overview and `/profile`.
+- Surfaces: `docs/design/07-analytics-site.md`.
+- Commit: `6f3e261`. That file names `fly.toml` and `WORKFLOW_SERVE_DATA`, and it does not say the dashboard has no user identity.
+- Deviations: none. The public URL in the doc is the one in `fly.toml` (`https://workflow-collector.fly.dev`). There is no deploy report yet.
+- Agent: Composer, harness did not report turns or final context.
+
 ## Phase 2 — Issued tokens are the remote credential
 
 Tool: Cursor (Grok 4.7 orchestrator).
