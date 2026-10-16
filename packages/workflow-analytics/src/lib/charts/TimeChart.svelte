@@ -1,8 +1,11 @@
 <script lang="ts">
+	import type { DimKey } from '$lib/urlstate';
 	import DataTable from './DataTable.svelte';
 	import EChart from './EChart.svelte';
 	import { timeOption, type TimeSeries } from './options';
 	import type { Tokens } from './theme';
+
+	const INERT_SERIES = new Set(['all', '__other__', '']);
 
 	let {
 		testid,
@@ -10,6 +13,8 @@
 		bucket,
 		stacked = false,
 		area = false,
+		filterDim,
+		onseries,
 		onbrush
 	}: {
 		testid: string;
@@ -17,6 +22,8 @@
 		bucket: 'hour' | 'day' | 'week' | 'month';
 		stacked?: boolean;
 		area?: boolean;
+		filterDim?: DimKey;
+		onseries?: (d: { key: string; shift: boolean }) => void;
 		onbrush?: (d: { from: Date; to: Date }) => void;
 	} = $props();
 
@@ -25,7 +32,32 @@
 	let theme = $state('light');
 	let chart: any = null;
 
-	const build = (t: Tokens) => timeOption({ series, bucket, stacked, area }, t);
+	const drillable = $derived(!!filterDim && !!onseries);
+
+	const build = (t: Tokens) => {
+		const option = timeOption({ series, bucket, stacked, area }, t);
+		if (drillable && option.legend && typeof option.legend === 'object') {
+			option.legend = { ...option.legend, selectedMode: false };
+		}
+		return option;
+	};
+
+	function pickSeries(params: any, native: any) {
+		if (!drillable) return;
+		const kind = params?.componentType;
+		if (kind !== 'series' && kind !== 'legend') return;
+		const key = params?.seriesName ?? '';
+		if (INERT_SERIES.has(key)) return;
+		onseries?.({ key, shift: !!native?.shiftKey });
+	}
+
+	function cursorFor(params: any) {
+		if (!drillable) return 'default';
+		const kind = params?.componentType;
+		if (kind !== 'series' && kind !== 'legend') return 'default';
+		const key = params?.seriesName ?? '';
+		return INERT_SERIES.has(key) ? 'default' : 'pointer';
+	}
 
 	// Brush must be armed on mount so a horizontal drag fires brushEnd.
 	function oninit(c: any) {
@@ -67,7 +99,7 @@
 	{#if showTable}
 		<DataTable testid="{testid}-table" {columns} rows={tableRows} />
 	{:else}
-		<EChart {build} bind:ready bind:theme {oninit} {onbrushend} />
+		<EChart {build} bind:ready bind:theme {oninit} {onbrushend} onclick={pickSeries} {cursorFor} />
 	{/if}
 </div>
 
