@@ -43,3 +43,11 @@ Refined in `1773214` into six units. Refine agent `d742ac97-355e-4334-8c57-c8076
 - Deviations: the serve shape test sees `rows: []` on `queryFixture` because that fixture has no usage facts. Store tests cover the populated cases.
 - Agent: Composer, agent `9b0236d1-8c6a-41bb-bd43-323df3157d3d`. The harness did not report turn count or final context size. Status `done`.
 - Check: `go test ./internal/store/ -run TestDistribution -count=1` and `go test ./internal/serve/ -run 'TestDistribution|TestAnalyticsBenchSmoke' -count=1` from `tools/workflow`, both ok.
+
+### 2-05-conversation-window
+
+- Built: `GET /v1/analytics/conversation` keeps the full event list, `totals` covers the whole run past the event cap, and `window_totals` is present only when `from` or `to` is set. `from` after `to` is 400 `{"error":"from after to"}`.
+- Surfaces: `tools/workflow/internal/store/conversation.go`, `conversation_test.go`; `tools/workflow/internal/serve/analytics_conversation.go`, `analytics_conversation_test.go`, `analytics_bench_test.go`. Commit `0d836e5`.
+- Deviations: none.
+- Agent: Composer, agent `fb7bdfd1-c41d-466a-aa61-912a7a547d43`. The harness did not report turn count or final context size. Status `done`.
+- Check: `go test ./internal/store/ -run TestConversation -count=1` and `go test ./internal/serve/ -run TestConversation -count=1` from `tools/workflow`, both ok.
