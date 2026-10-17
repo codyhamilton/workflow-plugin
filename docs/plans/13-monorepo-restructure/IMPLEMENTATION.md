@@ -58,3 +58,9 @@ Phase 1 outcome holds, with the print-mode departure recorded above.
 ### Carried
 
 None.
+
+## Phase 2: Runtime units become packages
+
+Refine: Proceed. Commit `f51e6f0`. Six units. 2-01 first. Then 2-02, 2-03, 2-04, and 2-05 alongside. Then 2-06. Phase 1 Carried was none. Coarse check of phases 1–7 found no bounce. `artifact_feedback` unreachable: Workflow MCP tool discovery failed.
+
+Decision 1 gate passed: `origin/master` contains `docs/plans/12-analytics-dashboard-overhaul.md`.
