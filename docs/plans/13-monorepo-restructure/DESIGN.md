@@ -494,6 +494,15 @@ Units:
 - Approach: known. The moves follow Decision 1's two-commit shape.
 - Depends on: Phase 1. Plan 12 is already on master.
 
+Units:
+
+- 2-01 Package renames (git mv only). Brief: `docs/plans/13-monorepo-restructure/briefs/2-01-package-renames.md`. Depends on: Phase 1. Runs alongside: nothing.
+- 2-02 Go workflow package and bin resolver. Brief: `docs/plans/13-monorepo-restructure/briefs/2-02-go-workflow-package.md`. Depends on: 2-01. Runs alongside: 2-03, 2-04, 2-05.
+- 2-03 Hook configs and hooklog package. Brief: `docs/plans/13-monorepo-restructure/briefs/2-03-hooks-and-hooklog.md`. Depends on: 2-01. Runs alongside: 2-02, 2-04, 2-05.
+- 2-04 Python maintainer tooling paths. Brief: `docs/plans/13-monorepo-restructure/briefs/2-04-python-tooling-paths.md`. Depends on: 2-01. Runs alongside: 2-02, 2-03, 2-05.
+- 2-05 JavaScript and Node test consumers. Brief: `docs/plans/13-monorepo-restructure/briefs/2-05-js-and-node-consumers.md`. Depends on: 2-01. Runs alongside: 2-02, 2-03, 2-04.
+- 2-06 Prose, stable docs, and changelog. Brief: `docs/plans/13-monorepo-restructure/briefs/2-06-prose-docs-and-closeout-prep.md`. Depends on: 2-02, 2-03, 2-04, 2-05. Runs alongside: nothing.
+
 ### Phase 3: Cursor loads `plugins/yakka` and its hooks fire
 
 - Why: Cursor is not loading this plugin, and the hooks file's commands never run. The plugin is a marketplace entry at `plugins/yakka`, and those commands are `./script/...` because Cursor runs them from that directory.
