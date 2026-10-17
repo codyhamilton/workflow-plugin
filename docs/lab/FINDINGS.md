@@ -9,7 +9,6 @@ Append-only, dated notes. Prefer facts and pointers over speculation. Confidence
 ### Plugin map (high)
 
 - **Core `workflow`:** version **2.5.0** (`/.claude-plugin/plugin.json`) — skills `design`, `refine`, `execute`, `comprehensive-review`, `close-out`, `post-build`.
-- **Lab `workflow-lab`:** version **1.1.0** — `setup`, `iterate`, `transcript-parser`, `workflow-tuning`.
 - **Evals:** harness documented in `evals/README.md`; **fixture corpus empty** (no `scenarios/` populated in repo yet).
 - **Phase driver:** described in `docs/OVERVIEW.md` as `tools/driver/` — **not present in tree**; design lives in `docs/plans/06-phase-driver/DESIGN.md` (medium).
 - **Transcript toolkit:** `tools/transcript/` — extract, stats, cost, search, `iterate_analysis.py` (regex phase skim); **classify spike landed on master** (`classify.py`, `lib/snapshot.py`, `lib/jev_client.py`, pin `jev-1.13.0`).
@@ -214,7 +213,7 @@ Fixture stand-in, not a live multi-phase dogfood. No `ANTHROPIC_API_KEY` or `CUR
 ### Observation (high)
 
 - Proposal [`PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](PROPOSALS/2026-09-30-opencode-hooks-plugin.md) is `status: resolved`. Recommendations accepted pending product wiring. No npm package, no `opencode.json` registration, no driver or `assert_phase` change.
-- **Packaging:** separate npm OpenCode plugin. In-tree files stay lab proofs. Core `workflow` / `workflow-lab` manifests stay unchanged.
+- **Packaging:** separate npm OpenCode plugin. In-tree files stay lab proofs. Core `workflow` manifest stays unchanged.
 - **Batch:** buffer `tool.execute.after`, flush on `message.updated` or `session.idle`, call shared `gate_thresholds` (`band_exit` at 76). OpenCode has no `PostToolBatch` event.
 - **Advisory:** soft signals log only. Kill line remains `assert_phase --deterministic`.
 - **Analytics:** optional `WORKFLOW_ANALYTICS_URL` via sink `dual_write_sink.py`. `WORKFLOW_INSTALL_MODE=opencode` sets `host_kind: opencode`. Unset URL skips the POST.

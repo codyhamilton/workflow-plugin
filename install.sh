@@ -4,7 +4,6 @@ set -euo pipefail
 DEFAULT_REPO_HTTPS_URL="https://github.com/codyhamilton/workflow-plugin.git"
 INSTALL_BRANCH="${WORKFLOW_INSTALL_BRANCH:-master}"
 CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
-CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
 INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
 WORKFLOW_WORKSPACE_SKILLS_NAME="${WORKFLOW_WORKSPACE_SKILLS_NAME:-workflow}"
 OPENCODE_SKILLS_ROOT="${WORKFLOW_OPENCODE_SKILLS:-$HOME/.config/opencode/skills}"
@@ -327,24 +326,6 @@ ensure_cursor_core_plugin() {
   verify_cursor_core_plugin "$CURSOR_CORE_PLUGIN"
 }
 
-# The lab plugin is a subtree of the same repo (plugins/workflow-lab/), not a
-# separate remote — copy it out of the already-current core checkout rather
-# than cloning again. Requires the core plugin to have been installed first.
-ensure_cursor_lab_plugin() {
-  local src="$CURSOR_CORE_PLUGIN/plugins/workflow-lab"
-  if [[ ! -d "$src" ]]; then
-    echo "  workflow-lab not found in core checkout at $src — skipping."
-    return
-  fi
-  if [[ -e "$CURSOR_LAB_PLUGIN" ]]; then
-    echo "  Replacing existing install at $CURSOR_LAB_PLUGIN"
-    rm -rf "$CURSOR_LAB_PLUGIN"
-  fi
-  mkdir -p "$(dirname "$CURSOR_LAB_PLUGIN")"
-  echo "  Copying lab plugin to $CURSOR_LAB_PLUGIN"
-  cp -a "$src"/. "$CURSOR_LAB_PLUGIN"/
-}
-
 verify_cursor_core_plugin() {
   local plugin="$1"
   local errors=0
@@ -539,7 +520,6 @@ verify_symlinked_skills() {
 }
 
 ensure_opencode_skills() {
-  local include_lab="${WORKFLOW_OPENCODE_INCLUDE_LAB:-0}"
   local src=""
 
   if is_valid_plugin_source "$SCRIPT_DIR"; then
@@ -555,20 +535,6 @@ ensure_opencode_skills() {
   echo "  OpenCode skills dir: $OPENCODE_SKILLS_ROOT"
   symlink_skills "$src" "$OPENCODE_SKILLS_ROOT"
   verify_symlinked_skills "$OPENCODE_SKILLS_ROOT" "OpenCode core skills"
-
-  if [[ "$include_lab" == "1" ]]; then
-    local lab_src="$SCRIPT_DIR/plugins/workflow-lab/skills"
-    if [[ ! -d "$lab_src" && -d "$INSTALL_SRC_CACHE/plugins/workflow-lab/skills" ]]; then
-      lab_src="$INSTALL_SRC_CACHE/plugins/workflow-lab/skills"
-    fi
-    if [[ -d "$lab_src" ]]; then
-      echo "  Including workflow-lab skills"
-      symlink_skills "$lab_src" "$OPENCODE_SKILLS_ROOT"
-      verify_symlinked_skills "$OPENCODE_SKILLS_ROOT" "OpenCode skills (core + lab)"
-    else
-      echo "  workflow-lab skills not found — skipping lab symlink pass."
-    fi
-  fi
 }
 
 echo "workflow-plugin installer"
@@ -584,11 +550,6 @@ case "$route" in
     ensure_opencode_skills
     echo "  Done. Core skills linked under: $OPENCODE_SKILLS_ROOT"
     echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-    if [[ "${WORKFLOW_OPENCODE_INCLUDE_LAB:-0}" == "1" ]]; then
-      echo "  Lab skills were included (WORKFLOW_OPENCODE_INCLUDE_LAB=1)."
-    else
-      echo "  (workflow-lab not linked; set WORKFLOW_OPENCODE_INCLUDE_LAB=1 or re-run interactively.)"
-    fi
     echo ""
     echo "Installation complete."
     exit 0
@@ -600,7 +561,6 @@ case "$route" in
     ensure_claude_user_skills
     echo "  Done. Core skills available at: $HOME/.claude/skills/"
     echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-    echo "  (workflow-lab is not installed automatically; install it interactively if needed.)"
     echo ""
     echo "Installation complete."
     exit 0
@@ -617,7 +577,6 @@ case "$route" in
     echo "  Done. Core skills available at: $dest"
     echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
     echo "  Add .cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
-    echo "  (workflow-lab is not installed in cloud agent environments.)"
     echo ""
     echo "Installation complete."
     exit 0
@@ -630,11 +589,6 @@ if [[ -d "$HOME/.claude" ]]; then
     install_skills "$SCRIPT_DIR/skills" "$HOME/.claude/skills"
     echo "  Done. Core skills available immediately in Claude Code."
   fi
-  echo ""
-  if ask "Also install workflow-lab skills (setup, iterate, transcript-parser, workflow-tuning)? Local/interactive only — skip this in cloud build environments."; then
-    install_skills "$SCRIPT_DIR/plugins/workflow-lab/skills" "$HOME/.claude/skills"
-    echo "  Done. Lab skills available immediately in Claude Code."
-  fi
 else
   echo "Claude Code (~/.claude) not found — skipping."
 fi
@@ -644,15 +598,8 @@ echo ""
 # OpenCode — symlink skills into ~/.config/opencode/skills/ (preferred over ~/.claude/skills).
 if [[ -d "$HOME/.config/opencode" || -d "$OPENCODE_SKILLS_ROOT" ]]; then
   if ask "Install workflow core skills into OpenCode ($OPENCODE_SKILLS_ROOT/) as symlinks to this checkout?"; then
-    WORKFLOW_OPENCODE_INCLUDE_LAB=0
     ensure_opencode_skills
     echo "  Done. Core skills symlinked for OpenCode."
-    echo ""
-    if ask "Also symlink workflow-lab skills into OpenCode? Local/interactive only."; then
-      WORKFLOW_OPENCODE_INCLUDE_LAB=1
-      ensure_opencode_skills
-      echo "  Done. Lab skills symlinked for OpenCode."
-    fi
   fi
 else
   echo "OpenCode (~/.config/opencode) not found — skipping."
@@ -662,19 +609,12 @@ fi
 
 echo ""
 
-# Cursor — materialize repo into ~/.cursor/plugins/local/workflow (core), then
-# optionally copy the lab subtree into ~/.cursor/plugins/local/workflow-lab
+# Cursor — materialize repo into ~/.cursor/plugins/local/workflow (core).
 if [[ -d "$HOME/.cursor" ]]; then
   if ask "Install workflow core plugin into Cursor (~/.cursor/plugins/local/)?"; then
     ensure_cursor_core_plugin
     echo "  Done. Restart Cursor to pick up the plugin."
     echo "  Plugin path: $CURSOR_CORE_PLUGIN (re-run install.sh to update)"
-    echo ""
-    if ask "Also install workflow-lab plugin into Cursor?"; then
-      ensure_cursor_lab_plugin
-      echo "  Done. Restart Cursor to pick up the lab plugin."
-      echo "  Plugin path: $CURSOR_LAB_PLUGIN (re-run install.sh to update; tracks the core checkout)"
-    fi
   fi
 else
   echo "Cursor (~/.cursor) not found — skipping."

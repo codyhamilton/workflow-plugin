@@ -2,7 +2,7 @@
 
 ## What It Is
 
-A workflow plugin for Claude Code, Cursor, and (with documented limits) OpenCode — ten skills split across two plugins — for a design → phased refine/execute → review → close-out workflow. The loop is the same in intent; harness integration is not: unattended multi-phase driver, Claude `SessionStart`, and live `PostToolBatch` signals are Claude/Cursor today. OpenCode installs skills via symlinks under `~/.config/opencode/skills/` (see `README.md` § OpenCode); there is no OpenCode driver provider yet. **Codex** is a separate CLI harness (not an OpenCode provider): pin Sol/Luna; soft effort×fit routing (ask CHM when unsure) — [`docs/lab/GUIDANCE-codex-harness.md`](lab/GUIDANCE-codex-harness.md).
+A workflow plugin for Claude Code, Cursor, and (with documented limits) OpenCode — six core skills shipped with the plugin, plus maintainer project skills at `.claude/skills/` — for a design → phased refine/execute → review → close-out workflow. The loop is the same in intent; harness integration is not: unattended multi-phase driver, Claude `SessionStart`, and live `PostToolBatch` signals are Claude/Cursor today. OpenCode installs skills via symlinks under `~/.config/opencode/skills/` (see `README.md` § OpenCode); there is no OpenCode driver provider yet. **Codex** is a separate CLI harness (not an OpenCode provider): pin Sol/Luna; soft effort×fit routing (ask CHM when unsure) — [`docs/lab/GUIDANCE-codex-harness.md`](lab/GUIDANCE-codex-harness.md).
 
 ## Who Uses It
 
@@ -25,16 +25,18 @@ Teams and individual developers who want:
 5. **close-out** — Collapses the plan folder into one record file, `docs/plans/<NN>-<slug>.md` (what was built per phase, deviations, review, QA, risks, follow-ups), promotes contracts that outlive the change to `docs/design/`, deletes the folder in one commit.
 6. **post-build** — The pipeline stage against a PR: classify and right-size, `comprehensive-review`, bounded remediation and fresh verification for briefed findings, conditional `QA.md` and exact-SHA deploy proof and browser QA, one end-of-work required-checks gate, an uncommitted merge-readiness report. Workers run from standing briefs in the skill's `briefs/`; repo mechanics come from a per-repo adapter skill.
 
-**Lab plugin (`workflow-lab`)** — local and/or interactive; never required by the pipeline:
+**Maintainer project skills** (`.claude/skills/`, not installed by `install.sh`) — for repo maintainers working in this checkout:
 
 7. **setup** — Bootstraps `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for repos that lack them.
 8. **iterate** — Long-horizon exploration for goals whose criteria are not knowable up front: sequential divergent candidates, a divergence gate, synthesis, consolidation, a hardening relay. Also the method for a design phase flagged approach-open, with that phase's outcome as the fixed yardstick.
-9. **transcript-parser** — Extracts cost metrics from a session transcript into eval cost-comparison format.
-10. **workflow-tuning** — Holds the design principles and the lessons corpus; runs evals; harvests retros and merged PRs' pipeline outcomes.
+9. **jev-variants** — Jev Stage A variant registry and matrix expansion (`tools/jev-variants/`).
+10. **transcript-parser** — Extracts cost metrics from a session transcript into eval cost-comparison format.
+11. **white-paper** — Evidence-backed research loop for hypotheses that deserve a consolidated paper.
+12. **workflow-tuning** — Holds the design principles and the lessons corpus; runs evals; harvests retros and merged PRs' pipeline outcomes.
 
-**Workflow Optimiser docs** (`docs/lab/`) — durable research and ops notebook (goals, dated findings, proposals, analysis index, external research library). The Workflow Optimiser agent maintains this tree; interactive lab skills remain under `plugins/workflow-lab/`.
+**Workflow Optimiser docs** (`docs/lab/`) — durable research and ops notebook (goals, dated findings, proposals, analysis index, external research library). The Workflow Optimiser agent maintains this tree; maintainer skills live under `.claude/skills/`.
 
-**Driver tool** (`tools/driver/`) — a third, optional way to run the refine/execute loop across phases, beside the two plugins above. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`). OpenCode is out of scope for the driver until a provider exists; use human/`execute` coordination or Claude/Cursor for unattended loops.
+**Driver tool** (`tools/driver/`) — an optional way to run the refine/execute loop across phases, beside human-orchestrated `execute`. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`). OpenCode is out of scope for the driver until a provider exists; use human/`execute` coordination or Claude/Cursor for unattended loops.
 
 **Codex (separate harness)** — OpenAI `codex` CLI alongside Claude; Sol/Luna pins and soft routing guidance — [`docs/lab/GUIDANCE-codex-harness.md`](lab/GUIDANCE-codex-harness.md). Not a driver provider; no BDK wiring in-tree yet.
 

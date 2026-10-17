@@ -19,7 +19,7 @@ its own design. Skill behaviour stays in each `SKILL.md`; the skill-level seams 
  Remote service         ingest API · ledger · derived views · scorer client      (replaceable backends)
         │ reads
  Agent advisory tools   read-only MCP: "what should I decide?"
- Maintainer lab         jev-variants · held-out set · white paper                (not part of the pipeline)
+ Maintainer skills      .claude/skills/ — jev-variants · held-out set · white paper (not part of the pipeline)
 ```
 
 The scorer is **Jev via TypeSafe System One**, behind a client interface. The model behind it is

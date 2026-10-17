@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.10.0 — 2026-10-17
+
+- Remove the separate lab marketplace plugin. Six maintainer-only skills (`iterate`, `jev-variants`,
+  `setup`, `transcript-parser`, `white-paper`, `workflow-tuning`) live as Claude Code project skills
+  under `.claude/skills/` at the repo root. `install.sh` and cloud bootstrap install core skills only;
+  `WORKFLOW_INSTALL_LAB=1` is ignored.
+
 ## 2.9.2 — 2026-10-05
 
 - Codex gets its own MCP config, `.codex-mcp.json` (`./bin/workflow mcp`, `cwd` the plugin root). Codex does not expand

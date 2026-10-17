@@ -9,8 +9,8 @@
 # A daily environment rebuild re-runs setup, which refreshes master and
 # re-syncs skills.
 #
-# Core only — workflow-lab is not installed unless WORKFLOW_INSTALL_LAB=1
-# (opt-in; not required for the driver loop).
+# Core only — maintainer skills under .claude/skills/ are not installed here.
+# WORKFLOW_INSTALL_LAB=1 is accepted for backward compatibility and ignored.
 #
 # Environment:
 #   WORKFLOW_WORKSPACE     Consuming git repo root (default: git root or /workspace)
@@ -18,7 +18,6 @@
 #   WORKFLOW_REPO_URL      Override clone URL (default: workflow-plugin on GitHub)
 #   WORKFLOW_INSTALL_BRANCH  Branch to track (default: master)
 #   WORKFLOW_INSTALL_SH    Skip fetch; run this installer instead (tests, vendored)
-#   WORKFLOW_INSTALL_LAB=1 Also copy lab skills into .cursor/skills/workflow-lab/
 #
 # Non-interactive. Safe to re-run. Exits non-zero only on hard failure.
 set -euo pipefail
@@ -74,29 +73,6 @@ refresh_plugin_checkout() {
   git clone --depth 1 --branch "$branch" "$url" "$cache"
 }
 
-install_lab_skills_optional() {
-  [[ "${WORKFLOW_INSTALL_LAB:-}" == "1" ]] || return 0
-
-  local workspace="$1"
-  local plugin_root="$2"
-  local lab_src="$plugin_root/plugins/workflow-lab/skills"
-  local dest="$workspace/.cursor/skills/workflow-lab"
-
-  if [[ ! -d "$lab_src" ]]; then
-    echo "WORKFLOW_INSTALL_LAB=1 but lab skills missing at $lab_src" >&2
-    return 1
-  fi
-
-  echo "Installing optional workflow-lab skills to $dest" >&2
-  mkdir -p "$dest"
-  local skill_dir skill_name
-  for skill_dir in "$lab_src"/*/; do
-    skill_name="$(basename "$skill_dir")"
-    rm -rf "$dest/$skill_name"
-    cp -a "$skill_dir" "$dest/$skill_name"
-  done
-}
-
 main() {
   local workspace
   workspace="$(resolve_workspace)"
@@ -104,14 +80,11 @@ main() {
   export WORKFLOW_INSTALL_MODE=cloud
 
   local installer=""
-  local plugin_root=""
 
   if [[ -n "${WORKFLOW_INSTALL_SH:-}" ]]; then
     installer="$WORKFLOW_INSTALL_SH"
-    plugin_root="$(dirname "$installer")"
   else
     refresh_plugin_checkout "$CACHE" "$BRANCH" "$REPO_URL"
-    plugin_root="$CACHE"
     installer="$CACHE/install.sh"
     if [[ ! -f "$installer" ]]; then
       echo "Missing installer at $installer after checkout." >&2
@@ -122,8 +95,6 @@ main() {
 
   echo "Running workflow core skill install (cloud route) for workspace $workspace" >&2
   bash "$installer"
-
-  install_lab_skills_optional "$workspace" "$plugin_root"
 }
 
 main "$@"

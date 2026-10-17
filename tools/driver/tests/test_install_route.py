@@ -21,7 +21,7 @@ BOOTSTRAP = WORKSPACE / "docs" / "lab" / "bootstrap"
 CLOUD_BOOTSTRAP = WORKSPACE / "tools" / "cloud-env" / "bootstrap-workflow-skills.sh"
 sys.path.insert(0, str(DRIVER))
 
-from check_skills import CORE_SKILLS, LAB_SKILLS, report_for_env  # noqa: E402
+from check_skills import CORE_SKILLS, MAINTAINER_SKILLS, report_for_env  # noqa: E402
 
 
 def _base_env(home: Path, **extra: str) -> dict[str, str]:
@@ -30,6 +30,7 @@ def _base_env(home: Path, **extra: str) -> dict[str, str]:
         "HOME": str(home),
         "HOSTNAME": "devbox",
         "WORKFLOW_INSTALL_SKIP_REFRESH": "1",
+        "WORKFLOW_INSTALL_LAB": "1",
     }
     for key in (
         "CURSOR_AGENT",
@@ -250,6 +251,42 @@ class TestPrintRoute(unittest.TestCase):
 
 
 class TestCoreOnlyInstall(unittest.TestCase):
+    def test_interactive_cursor_core_install_ignores_install_lab(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "home"
+            cursor_dir = home / ".cursor"
+            home.mkdir()
+            cursor_dir.mkdir()
+            core_plugin = home / ".cursor" / "plugins" / "local" / "workflow"
+            env = _base_env(
+                home,
+                WORKFLOW_INSTALL_MODE="interactive",
+                CURSOR_CORE_PLUGIN=str(core_plugin),
+            )
+            master, slave = pty.openpty()
+            try:
+                proc = subprocess.Popen(
+                    ["bash", str(INSTALL)],
+                    cwd=WORKSPACE,
+                    env=env,
+                    stdin=slave,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                os.close(slave)
+                slave = -1
+                os.write(master, b"y\n")
+                out, err = proc.communicate(timeout=120)
+            finally:
+                if slave != -1:
+                    os.close(slave)
+                os.close(master)
+            self.assertEqual(proc.returncode, 0, err + out)
+            self.assertTrue(core_plugin.is_dir())
+            lab_plugin = home / ".cursor" / "plugins" / "local" / "workflow-lab"
+            self.assertFalse(lab_plugin.exists())
+
     def test_cloud_install_copies_core_not_lab(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp) / "home"
@@ -276,7 +313,7 @@ class TestCoreOnlyInstall(unittest.TestCase):
             root = ws / ".cursor" / "skills" / "workflow"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 self.assertFalse((root / name).exists(), name)
             self.assertFalse((home / ".claude" / "skills").exists())
             report = report_for_env(env, can_prompt=False)
@@ -308,7 +345,7 @@ class TestCoreOnlyInstall(unittest.TestCase):
             root = home / ".claude" / "skills"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 self.assertFalse((root / name).exists(), name)
             self.assertFalse((ws / ".cursor").exists())
 
@@ -341,7 +378,7 @@ class TestOpenCodeSymlinkInstall(unittest.TestCase):
                     str(link.resolve()).startswith(str(WORKSPACE.resolve())),
                     f"{name} should point into checkout",
                 )
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 lab_link = opencode_skills / name
                 self.assertFalse(lab_link.exists(), name)
 
@@ -493,7 +530,7 @@ class TestBootstrapArtifacts(unittest.TestCase):
             root = ws / ".cursor" / "skills" / "workflow"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 self.assertFalse((root / name).exists(), name)
 
     def test_cloud_bootstrap_uses_local_installer_core_only(self) -> None:
@@ -532,7 +569,7 @@ class TestBootstrapArtifacts(unittest.TestCase):
             root = ws / ".cursor" / "skills" / "workflow"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 self.assertFalse((root / name).exists(), name)
 
     def test_cursor_setup_delegates_to_cloud_bootstrap(self) -> None:

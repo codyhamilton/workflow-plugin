@@ -1,5 +1,7 @@
 # Provenance: Rename to yakka
 
+The design this conversation produced was folded into `docs/plans/13-monorepo-restructure/`. This file is the record of the conversation, not a second plan.
+
 Interactive posture only. Headless runs carry intent, the assumption ledger, and decisions in `DESIGN.md` alone.
 
 ## Session

@@ -11,7 +11,7 @@ Plugin **skills** (`design`, `execute`, …) are installed separately. They are 
 | Cursor cloud | `docs/lab/bootstrap/cursor-cloud-setup.sh` in the **image** install, then snapshot | Agents boot from a prebaked image. Skills are read at process start. There is no session hook. |
 | Claude Code on the web | Copy `docs/lab/bootstrap/session-start.sh` + settings fragment | Fresh container per session. `reloadSkills` makes the install visible on that session. |
 
-Both paths install **core only** (never `workflow-lab`). `WORKFLOW_INSTALL_MODE=cloud` or `claude-code` forces the route.
+Both paths install **core only** (never maintainer skills under `.claude/skills/`). `WORKFLOW_INSTALL_MODE=cloud` or `claude-code` forces the route.
 
 The **driver** is a small Python toolkit the bot calls in a fixed loop:
 

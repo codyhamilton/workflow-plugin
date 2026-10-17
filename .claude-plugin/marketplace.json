@@ -19,21 +19,6 @@
         "repo": "codyhamilton/workflow-plugin",
         "ref": "master"
       }
-    },
-    {
-      "name": "workflow-lab",
-      "description": "Local lab: setup, iterate, transcript-parser, workflow-tuning. Interactive and/or local-filesystem-bound; never required by the pipeline.",
-      "author": {
-        "name": "William Hamilton",
-        "email": "codyh@ctzns.net"
-      },
-      "category": "development",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/codyhamilton/workflow-plugin.git",
-        "path": "plugins/workflow-lab",
-        "ref": "master"
-      }
     }
   ]
 }

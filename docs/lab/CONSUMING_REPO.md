@@ -24,7 +24,7 @@ bash /path/to/workflow-plugin/tools/cloud-env/bootstrap-workflow-skills.sh
 
 Same behavior via legacy path: `docs/lab/bootstrap/cursor-cloud-setup.sh` (execs the bootstrap script).
 
-That tracks `master` in `~/.cache/workflow-plugin`, runs `install.sh` **core only** into `<repo>/.cursor/skills/workflow/`. Optional lab skills: `WORKFLOW_INSTALL_LAB=1` (see [`tools/cloud-env/README.md`](../../tools/cloud-env/README.md)). Add the core path to `.gitignore`.
+That tracks `master` in `~/.cache/workflow-plugin`, runs `install.sh` **core only** into `<repo>/.cursor/skills/workflow/`. Maintainer skills stay in the workflow-plugin checkout at `.claude/skills/` (not installed into the consuming repo). Add the core path to `.gitignore`.
 
 **Claude Code on the web** starts a fresh container per session and does support a hook. Copy:
 
