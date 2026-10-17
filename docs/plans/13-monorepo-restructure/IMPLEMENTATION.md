@@ -9,6 +9,11 @@ Tool: Cursor cloud agent
 Run: https://cursor.com/agents/bc-687260bb-d69c-599d-b5b2-00a309f320b0
 Start: 2026-10-17T17:33:48Z
 
+Phase 2:
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-31ad8066-77e3-5acc-8b24-bcdf36e79742
+Start: 2026-10-17T17:46:00Z
+
 ## Phase 1: Lab collapses into maintainer skills
 
 Refine skipped. DESIGN.md says Phase 1 is one worker. Assumption 9's check, which that skipped refine would have made, is settled in the brief: Cursor's skills doc loads `.claude/skills/` for compatibility, so this phase adds no `.cursor/skills/` symlinks.
