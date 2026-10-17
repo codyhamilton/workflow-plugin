@@ -145,3 +145,16 @@ Built: analytics e2e and hosted setups use `packages/workflow` and `packages/wor
 Surfaces: `packages/workflow-analytics/tests/**`, `packages/opencode-workflow-hooks/{src/index.ts,tests/test_hooks.mjs,README.md}`.
 
 Deviations: analytics e2e not run (no `node_modules`). Orchestrator runs it at phase verification.
+
+### 2-06-prose-docs-and-closeout-prep
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-06-prose-docs-and-closeout-prep.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/2-06-prose-docs-and-closeout-prep.md`.
+Worker: Composer (`composer-2.5`), agent `bc-80045534-33ee-55a7-93f1-589d29d47c78`. The harness did not report turns or final context.
+Commit: `ac82ca8`.
+
+Built: skill catalogue citations, design docs, README hooklog links, `CHANGELOG.md` `2.11.0` (including the silent-failure note for a pasted `tools/hooklog/spool.sh` path), plugin manifests `2.11.0`.
+
+Surfaces: the brief's owned paths. `.claude/skills/workflow-tuning/reference.md` had no old-path literals and was left unchanged.
+
+Deviations: status `blocked` on the phase search. Two comments outside the owned paths still say `tools/hooklog` and `tools/workflow`. Fixer 2-07 owns them. Earlier changelog entries stay, as the outcome excludes them.

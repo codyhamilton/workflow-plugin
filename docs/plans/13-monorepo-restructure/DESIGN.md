@@ -502,6 +502,7 @@ Units:
 - 2-04 Python maintainer tooling paths. Brief: `docs/plans/13-monorepo-restructure/briefs/2-04-python-tooling-paths.md`. Depends on: 2-01. Runs alongside: 2-02, 2-03, 2-05.
 - 2-05 JavaScript and Node test consumers. Brief: `docs/plans/13-monorepo-restructure/briefs/2-05-js-and-node-consumers.md`. Depends on: 2-01. Runs alongside: 2-02, 2-03, 2-04.
 - 2-06 Prose, stable docs, and changelog. Brief: `docs/plans/13-monorepo-restructure/briefs/2-06-prose-docs-and-closeout-prep.md`. Depends on: 2-02, 2-03, 2-04, 2-05. Runs alongside: nothing.
+- 2-07 Residual path comments. Brief: `docs/plans/13-monorepo-restructure/briefs/2-07-residual-path-comments.md`. Depends on: 2-06. Runs alongside: nothing.
 
 ### Phase 3: Cursor loads `plugins/yakka` and its hooks fire
 
