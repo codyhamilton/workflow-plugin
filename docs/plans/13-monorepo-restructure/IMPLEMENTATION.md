@@ -309,3 +309,39 @@ Refine skipped. DESIGN.md says Phase 4 is one worker. Brief authored inline: `do
 Phase 3 Carried item 1 is a logged-in Cursor session check. It does not touch a Phase 4 contract, boundary, or outcome, so it is not absorbed and it does not bounce the phase. It stays carried for the next refinement. This phase does not run it.
 
 `artifact_feedback` on the brief: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 4-01-layout-contract
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/4-01-layout-contract.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/4-01-layout-contract.md`.
+Worker: Composer (`composer-2.5`), agent `bc-359b70bd-039b-57c8-94fd-cc763c29dee9`. The harness did not report turns or final context.
+Commit: `eccbb91`.
+
+Built: `tools/release/test_layout.py` scans the repo and fails six fixtures, each naming the file and the offending path. Package READMEs carry **Consumers**, **Build**, **Test**, **Release**. `tools/README.md` and `packages/README.md` index every child directory. The OpenCode flush default and `tools/driver/jev_signal_log.py` both resolve `${XDG_STATE_HOME:-~/.local/state}/workflow/jev-signal-log.jsonl`, overridable by `WORKFLOW_JEV_SIGNAL_LOG`. The component map and the distribution Layout section state `plugins/yakka`, `packages/`, and `tools/`.
+
+Surfaces: the brief's owned paths.
+
+Deviations: the worker exempted `packages/*/internal/serve/site/` because the placeholder HTML named `tools/release/build.sh` and that file was outside the brief. That exemption is not in the package contract. Commit `9b988ab` removes it and rewords the placeholder so the `workflow-analytics-placeholder` marker stays and the sentence no longer contains a `tools/` path. The worker also duplicated the path resolver instead of importing the OpenCode module, which the brief required.
+
+`artifact_feedback` on the brief and the report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### Verification
+
+Closed on this branch at `/workspace` (not merged to master).
+
+- `python3 -m unittest tools/release/test_layout.py` → 7 tests, OK. The repo scan is clean. The six fixtures fail on a hook command into `tools/`, a package file containing `tools/driver/x`, a skill file containing `.claude/skills/`, a package with no README, a marketplace with two plugins, and a Cursor command using `${CURSOR_PLUGIN_ROOT}`. Each assertion checks the file and the offending path.
+- `python3 -m unittest discover -s tools/release -p 'test_*.py' -v` loads those seven cases in the same run as `test_release`. The layout cases pass there.
+- `python3 -m unittest packages/opencode-workflow-hooks/tests/test_batch.py tools/driver/tests/test_jev_signal_log.py` → 9 tests, OK. With the override unset, both resolvers return `~/.local/state/workflow/jev-signal-log.jsonl`. `XDG_STATE_HOME` and `WORKFLOW_JEV_SIGNAL_LOG` move both to the same path. The default does not contain `tools/driver`.
+- `tools/README.md` names `cloud-env`, `driver`, `interception`, `jev-variants`, `quality`, `release`, and `transcript`. `packages/README.md` names `hooklog`, `opencode-workflow-hooks`, `workflow`, and `workflow-analytics`. Those are the directories on disk.
+- Judgement: `docs/ARCHITECTURE.md`'s component map shows `plugins/yakka` as the plugin install root, `packages/`, `tools/`, and maintainer skills at `.claude/skills/`. `docs/design/05-distribution.md`'s Layout section states those three trees. The remaining "Not in this round" bullets are pinned copies and registration; the monorepo deferral is already gone.
+- With Go 1.27.1 at `~/.local/go/bin/go`, `test_6_no_go_no_asset`, `test_8_bash32_lint`, and `test_10_workflow_bin` pass. `test_10` expects `WORKFLOW_ROOT` to be `plugins/yakka`. `test_1_clean_cache_build` fails before a compile: the wrapper looks for `plugins/yakka/../packages/workflow/go.mod`, and the module is at `plugins/yakka/../../packages/workflow`. That failure is carried. The four-binary `build.sh` test was not re-run.
+
+## Closed
+
+Phase 4 outcome holds. The layout check passes, its six fixtures fail with the file and the path named, and the signal-log default matches Assumption 11. The logged-in Cursor session check is not a Phase 4 outcome; it stays carried.
+
+### Carried
+
+1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `workflow drain` to a local `workflow serve` ships it and `workflow status` reports no failure.
+2. Root `README.md` still documents the signal log as `tools/driver/.jev-signal-log.jsonl`. The package and `tools/driver` no longer default there.
+3. `plugins/yakka/bin/workflow` step 4 joins `$ROOT/../packages/workflow`. `ROOT` is the plugin directory, so the source build does not see the module. `tools/release/test_release.py` `test_1_clean_cache_build` fails with "no release asset and no Go toolchain (or module source)". The module is at `$ROOT/../../packages/workflow`. Phase 5 owns that wrapper.
