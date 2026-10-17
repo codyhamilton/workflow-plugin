@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { SUMMARY_ALL } from '../e2e/fixture';
 
-const MARKER = 'workflow-analytics-placeholder';
+const MARKER = 'yakka-analytics-placeholder';
 // Set by global-setup before workers start.
 test.use({ baseURL: process.env.HOSTED_BASE });
 

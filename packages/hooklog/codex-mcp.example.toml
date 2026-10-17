@@ -1,4 +1,4 @@
-# Merge into ~/.codex/config.toml; replace /ABS/PATH/workflow-plugin with the checkout path.
-[mcp_servers.workflow]
-command = "/ABS/PATH/workflow-plugin/bin/workflow"
+# Merge into ~/.codex/config.toml; replace /ABS/PATH/yakka with the checkout path.
+[mcp_servers.yakka]
+command = "/ABS/PATH/yakka/plugins/yakka/bin/yakka"
 args = ["mcp"]

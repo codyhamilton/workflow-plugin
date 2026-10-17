@@ -1,7 +1,7 @@
 {
   "mcpServers": {
-    "workflow": {
-      "command": "/ABS/PATH/workflow-plugin/bin/workflow",
+    "yakka": {
+      "command": "/ABS/PATH/yakka/plugins/yakka/bin/yakka",
       "args": ["mcp"]
     }
   }

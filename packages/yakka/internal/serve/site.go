@@ -16,7 +16,7 @@ import (
 //go:embed all:site
 var siteEmbed embed.FS
 
-const siteMarker = "workflow-analytics-placeholder"
+const siteMarker = "yakka-analytics-placeholder"
 
 // siteFS is the site root. Tests replace it with an fstest.MapFS.
 var siteFS fs.FS = func() fs.FS {

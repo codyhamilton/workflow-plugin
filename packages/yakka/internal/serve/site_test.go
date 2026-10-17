@@ -12,7 +12,7 @@ import (
 const builtIndex = "<html>built app</html>"
 
 func placeholderFS() fstest.MapFS {
-	return fstest.MapFS{"index.html": {Data: []byte("<p>workflow-analytics-placeholder</p>")}}
+	return fstest.MapFS{"index.html": {Data: []byte("<p>yakka-analytics-placeholder</p>")}}
 }
 
 func builtFS() fstest.MapFS {

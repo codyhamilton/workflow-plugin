@@ -1,6 +1,6 @@
 """Replay the write fixtures through every shipped hook registration into a temp hosted serve.
 
-Builds the workflow binary once, starts `serve` on a free 127.0.0.1 port with temp data, queue and
+Builds the yakka binary once, starts `serve` on a free 127.0.0.1 port with temp data, queue and
 client config, runs each shipped command with the fixture payload, and waits for an
 `artifact_version` fact for the file the fixture wrote. OpenCode fixtures go through
 `spool.sh --harness opencode` (5-04 proved the plugin writes the same queue file).
@@ -107,7 +107,7 @@ class WriteSurfaceTests(unittest.TestCase):
         config = json.loads((ROOT / file).read_text())
         groups = config["hooks"][event]
         hooks = groups if harness == "cursor" else [h for g in groups for h in g["hooks"]]
-        return [h["command"].replace("/ABS/PATH/workflow-plugin", str(ROOT)) for h in hooks]
+        return [h["command"].replace("/ABS/PATH/yakka", str(ROOT)) for h in hooks]
 
     def versions(self, path):
         db = self.data / "t" / "ledger.db"

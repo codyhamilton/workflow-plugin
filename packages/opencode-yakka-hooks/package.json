@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codyhamilton/workflow-plugin.git",
+    "url": "https://github.com/codyhamilton/yakka.git",
     "directory": "packages/opencode-yakka-hooks"
   },
   "exports": {

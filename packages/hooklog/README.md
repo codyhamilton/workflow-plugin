@@ -11,14 +11,14 @@
 Local, advisory capture of hook payloads as a session happens. All command hooks exit 0;
 OpenCode observers leave inputs and outputs unchanged. Captured events go to a queue directory,
 `${YAKKA_QUEUE:-~/.local/share/yakka/queue}`; `plugins/yakka/bin/yakka drain` ships them to the
-workflow service. Capture failures never deny or rewrite an action. Cursor receives the
+yakka service. Capture failures never deny or rewrite an action. Cursor receives the
 permissive response required by its pre-action schema.
 
 | Harness | Catalog requirement | Registration |
 |---------|---------------------|--------------|
 | Claude Code | 33 catalog keys; 31 active + 2 integration-only | [`plugins/yakka/hooks/hooks.json`](../../plugins/yakka/hooks/hooks.json), command handlers |
 | Cursor | 22 claimed; 21 enumerated | [`plugins/yakka/hooks/cursor.json`](../../plugins/yakka/hooks/cursor.json), selected by `plugins/yakka/.cursor-plugin/plugin.json` |
-| OpenCode | 18 Hooks + 28 bus types | [`packages/opencode-workflow-hooks`](../../packages/opencode-workflow-hooks), JS callbacks |
+| OpenCode | 18 Hooks + 28 bus types | [`packages/opencode-yakka-hooks`](../../packages/opencode-yakka-hooks), JS callbacks |
 | Codex | 12 events | [`plugins/yakka/hooks/codex.json`](../../plugins/yakka/hooks/codex.json), selected by `plugins/yakka/.codex-plugin/plugin.json` |
 
 The supplied 2026-10-03 catalog's Cursor subtotal says 19 agent hooks but lists 18.
@@ -37,9 +37,9 @@ The OpenCode plugin writes the same files itself.
 After spooling, `spool.sh` starts one detached `plugins/yakka/bin/yakka drain` (a lock keeps it to one;
 `YAKKA_HOOKLOG_KICK=0` disables, `YAKKA_BIN` names the binary). The drain posts the queued files
 to the endpoint and deletes them; files the service refuses move to `rejected/`. The endpoint is
-the one in `~/.config/workflow/client.toml` (remote mode), or `http://127.0.0.1:8770` with no key
+the one in `~/.config/yakka/client.toml` (remote mode), or `http://127.0.0.1:8770` with no key
 when that file is absent (local mode). While the endpoint is unreachable the files wait. A running
-`workflow serve` on the same machine hosts the drain itself. `workflow status` reports the queue
+`yakka serve` on the same machine hosts the drain itself. `yakka status` reports the queue
 and the mode.
 
 `plugins/yakka/bin/yakka` is a wrapper: it uses `YAKKA_BIN`, then the cached binary under
@@ -56,20 +56,20 @@ and stores data under `YAKKA_SERVE_DATA` (default `~/.local/share/yakka/serve`),
 `local`. To turn on screening, set `TYPESAFE_API_KEY` in serve's environment; it never goes in a
 hook config or `client.toml`.
 
-Remote mode is `client.toml` (mode 0600, `endpoint` and `key`), written by `workflow login` (not
+Remote mode is `client.toml` (mode 0600, `endpoint` and `key`), written by `yakka login` (not
 built yet).
 
 ## MCP
 
-The advisory shim is the stdio command `plugins/yakka/bin/workflow mcp`. Claude Code picks it up from the
+The advisory shim is the stdio command `plugins/yakka/bin/yakka mcp`. Claude Code picks it up from the
 repo's [`plugins/yakka/.mcp.json`](../../plugins/yakka/.mcp.json). For Cursor, merge
 [`cursor-mcp.example.json`](cursor-mcp.example.json) into `~/.cursor/mcp.json`; for Codex, merge
 [`codex-mcp.example.toml`](codex-mcp.example.toml) into `~/.codex/config.toml`. Replace
-`/ABS/PATH/workflow-plugin` with the checkout path.
+`/ABS/PATH/yakka` with the checkout path.
 
 ## Claude Code
 
-Load the checkout as a plugin (`claude --plugin-dir /absolute/path/workflow-plugin`), or use
+Load the checkout as a plugin (`claude --plugin-dir /absolute/path/yakka`), or use
 the marketplace plugin. `hooks/hooks.json` records with `--harness claude` and resolves its
 script from `${CLAUDE_PLUGIN_ROOT}` (with `$PLUGIN_ROOT` fallback).
 
@@ -98,7 +98,7 @@ discovery for Cursor. Commands resolve `${CURSOR_PLUGIN_ROOT}` and pass the regi
 `--event`, ensuring an allow response even if input is malformed or logging is disabled.
 
 For a standalone user/project install, merge [`cursor-hooks.example.json`](cursor-hooks.example.json)
-into `~/.cursor/hooks.json` or `<project>/.cursor/hooks.json`, replacing `/ABS/PATH/workflow-plugin`
+into `~/.cursor/hooks.json` or `<project>/.cursor/hooks.json`, replacing `/ABS/PATH/yakka`
 with the checkout path. Preserve unrelated existing hooks. Use one registration path to avoid
 capturing each event twice.
 
@@ -118,7 +118,7 @@ other Cursor capture hooks print `{}`.
 ## OpenCode
 
 Register the package's `src/index.ts` in project/global `opencode.json`; see the
-[package README](../../packages/opencode-workflow-hooks/README.md). All 18 capture callbacks are
+[package README](../../packages/opencode-yakka-hooks/README.md). All 18 capture callbacks are
 present, including config, dispose, permission.ask, chat parameters/headers, tool definitions,
 shell environment and experimental transforms/compaction/model selection. `event` captures
 all 28 catalog bus names, plus future types. Older runtimes may not invoke newer callbacks.
@@ -173,8 +173,8 @@ are excluded from agent turns. Subagent rows are excluded from main-session anal
 ```sh
 python3 -m unittest discover -s packages/hooklog/tests -v
 python3 -m unittest discover -s tools/jev-variants/tests -v
-python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
-node --experimental-strip-types --test packages/opencode-workflow-hooks/tests/test_hooks.mjs
+python3 -m unittest discover -s packages/opencode-yakka-hooks/tests -v
+node --experimental-strip-types --test packages/opencode-yakka-hooks/tests/test_hooks.mjs
 ```
 
 The command smoke executes every active shipped registration against a temporary queue, plus

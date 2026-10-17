@@ -45,7 +45,7 @@ class SurfaceTests(unittest.TestCase):
                     else:
                         hooks = groups if harness == 'cursor' else [h for g in groups for h in g['hooks']]
                         replace_base = ROOT if file.startswith('packages/') else PLUGIN
-                        commands = [h['command'].replace('/ABS/PATH/workflow-plugin', str(replace_base)) for h in hooks]
+                        commands = [h['command'].replace('/ABS/PATH/yakka', str(replace_base)) for h in hooks]
                     payload = {'hook_event_name': event, 'session_id': 'surface-test', 'conversation_id': 'surface-test',
                                'prompt': 'smoke'}
                     if harness == 'claude':

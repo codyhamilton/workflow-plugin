@@ -47,8 +47,6 @@ class BatchAggregatorTests(unittest.TestCase):
     def test_seventy_six_steps_band_exit_and_log(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "signal.jsonl"
-            os.environ["WORKFLOW_SIGNAL_STATE_DIR"] = str(Path(tmp) / "state")
-            os.environ.pop("WORKFLOW_ANALYTICS_URL", None)
             agg = OpenCodeBatchAggregator(log_path=log)
             entry = simulate_model_steps(agg, session_id="oc-test", steps=76)
             self.assertIsNotNone(entry)
@@ -60,7 +58,6 @@ class BatchAggregatorTests(unittest.TestCase):
     def test_parallel_tools_one_step(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "signal.jsonl"
-            os.environ["WORKFLOW_SIGNAL_STATE_DIR"] = str(Path(tmp) / "state")
             agg = OpenCodeBatchAggregator(log_path=log)
             sid = "parallel"
             agg.on_tool_execute_after(session_id=sid, tool="read", call_id="a", output="a")
@@ -74,7 +71,6 @@ class BatchAggregatorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "signal.jsonl"
             os.environ["YAKKA_JEV_SIGNAL_LOG"] = str(log)
-            os.environ["WORKFLOW_SIGNAL_STATE_DIR"] = str(Path(tmp) / "state")
             os.environ["YAKKA_REPO_ROOT"] = str(_REPO)
             payload = {
                 "session_id": "cli-test",

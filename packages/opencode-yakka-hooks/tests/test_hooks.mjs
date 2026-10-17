@@ -101,7 +101,7 @@ test('tool.execute.after writes one queue file named like spool.sh with the open
     const q2 = path.join(sb.tmp, 'queue2')
     execFileSync('bash', [spoolSh, '--harness', 'opencode', '--event', 'tool.execute.after'], {
       input: JSON.stringify({ session_id: 'ses/odd id' }),
-      env: { ...process.env, WORKFLOW_QUEUE: q2, WORKFLOW_HOOKLOG_KICK: '0' },
+      env: { ...process.env, YAKKA_QUEUE: q2, YAKKA_HOOKLOG_KICK: '0' },
     })
     const ref = await evts(q2)
     assert.equal(ref.length, 1)
