@@ -284,6 +284,20 @@ class TestCoreOnlyInstall(unittest.TestCase):
                 os.close(master)
             self.assertEqual(proc.returncode, 0, err + out)
             self.assertTrue(core_plugin.is_dir())
+            manifest = json.loads(
+                (core_plugin / ".cursor-plugin" / "plugin.json").read_text(encoding="utf-8")
+            )
+            hooks_rel = manifest["hooks"].lstrip("./")
+            self.assertTrue((core_plugin / "script" / "spool.sh").is_file())
+            self.assertTrue((core_plugin / hooks_rel).is_file())
+            claude_hooks = json.loads((core_plugin / "hooks" / "hooks.json").read_text(encoding="utf-8"))
+            codex_hooks = json.loads((core_plugin / "hooks" / "codex.json").read_text(encoding="utf-8"))
+            claude_text = json.dumps(claude_hooks)
+            codex_text = json.dumps(codex_hooks)
+            self.assertIn("script/spool.sh", claude_text)
+            self.assertNotIn("packages/", claude_text)
+            self.assertIn("script/spool.sh", codex_text)
+            self.assertNotIn("packages/", codex_text)
             lab_plugin = home / ".cursor" / "plugins" / "local" / "workflow-lab"
             self.assertFalse(lab_plugin.exists())
 

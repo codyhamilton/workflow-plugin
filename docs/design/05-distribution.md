@@ -15,17 +15,18 @@ need bash, and a Windows-native harness opening a WSL repo is out of scope.
 | `packages/workflow/` | Go module: `cmd/workflow`, `internal/`, and embedded analytics site |
 | `packages/workflow/catalogue/` | Jev criteria and check JSON shipped with the binary |
 | `packages/hooklog/` | Hook capture edge: `spool.sh`, drain helpers, harness examples |
-| `bin/workflow` | bash wrapper, committed |
-| `bin/VERSION` | the release version the wrapper fetches |
-| `bin/SHA256SUMS` | checksums for that version's four binaries, committed |
-| `bin/RELEASE_URL` | release download base, `https://github.com/codyhamilton/workflow-plugin/releases/download` |
+| `plugins/yakka/` | Workflow plugin install root: skills, harness manifests, `hooks/`, `script/`, `bin/` |
+| `plugins/yakka/bin/workflow` | bash wrapper, committed |
+| `plugins/yakka/bin/VERSION` | the release version the wrapper fetches |
+| `plugins/yakka/bin/SHA256SUMS` | checksums for that version's four binaries, committed |
+| `plugins/yakka/bin/RELEASE_URL` | release download base, `https://github.com/codyhamilton/workflow-plugin/releases/download` |
 | `tools/release/build.sh` | builds the four binaries and writes `SHA256SUMS` |
 
 Binaries are never committed.
 
 ## Wrapper
 
-`bin/workflow` resolves a binary, then `exec`s it with all arguments. In order:
+`plugins/yakka/bin/workflow` resolves a binary, then `exec`s it with all arguments. In order:
 
 1. `WORKFLOW_BIN`, if set (development).
 2. `~/.cache/workflow/<version>/workflow-<os>-<arch>`, if present.
@@ -64,7 +65,7 @@ queue grows; `workflow status` reports it as a failure, not as idle.
 
 ## Release
 
-`tools/release/build.sh` cross-compiles with `CGO_ENABLED=0` and writes `bin/SHA256SUMS`. Publishing
+`tools/release/build.sh` cross-compiles with `CGO_ENABLED=0` and writes `plugins/yakka/bin/SHA256SUMS`. Publishing
 the release (GitHub release assets for `bin/VERSION`) is a publish action and happens only with the
 maintainer's agreement. Until a release exists, the wrapper's step 4 is the working path.
 
@@ -72,10 +73,10 @@ maintainer's agreement. Until a release exists, the wrapper's step 4 is the work
 
 | Harness | File | Registers |
 |---|---|---|
-| Claude Code | `hooks/hooks.json`, `.mcp.json` | `spool.sh --harness claude`; shim as stdio |
-| Cursor | `hooks/cursor.json`, `packages/hooklog/cursor-hooks.example.json` | `spool.sh --harness cursor` |
-| Codex | `hooks/codex.json` | `spool.sh --harness codex` |
-| OpenCode | `packages/opencode-workflow-hooks` | writes spool files with the design 2 name; kicks `bin/workflow drain` |
+| Claude Code | `plugins/yakka/hooks/hooks.json`, `plugins/yakka/.mcp.json` | `plugins/yakka/script/spool.sh --harness claude`; shim as stdio |
+| Cursor | `plugins/yakka/hooks/cursor.json`, `packages/hooklog/cursor-hooks.example.json` | `./script/spool.sh --harness cursor` |
+| Codex | `plugins/yakka/hooks/codex.json` | `plugins/yakka/script/spool.sh --harness codex` |
+| OpenCode | `packages/opencode-workflow-hooks` | writes spool files with the design 2 name; kicks `plugins/yakka/bin/workflow drain` |
 
 All four drop the `artifact_submit.py` registration.
 

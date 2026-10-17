@@ -73,7 +73,7 @@ else
     if [ -x "$c" ]; then GO="$c"; break; fi
   done
 fi
-if [ -z "$GO" ] || [ ! -f "$ROOT/packages/workflow/go.mod" ]; then
+if [ -z "$GO" ] || [ ! -f "$ROOT/../packages/workflow/go.mod" ]; then
   echo "workflow: no release asset and no Go toolchain (or module source); cannot resolve a binary" >&2
   exit 1
 fi
@@ -106,7 +106,7 @@ trap 'rm -f "$TMP"; rm -rf "$LOCK"' EXIT
 if [ ! -x "$FINAL" ]; then
   COMMIT=$(git -C "$ROOT" rev-parse --short=12 HEAD 2>/dev/null) || COMMIT=""
   [ -n "$COMMIT" ] || COMMIT=unknown
-  if ! (cd "$ROOT/packages/workflow" && CGO_ENABLED=0 GOTOOLCHAIN=local "$GO" build -trimpath \
+  if ! (cd "$ROOT/../packages/workflow" && CGO_ENABLED=0 GOTOOLCHAIN=local "$GO" build -trimpath \
         -ldflags "-X main.version=$VERSION -X main.commit=$COMMIT" -o "$TMP" ./cmd/workflow) >&2; then
     echo "workflow: build failed" >&2
     exit 1

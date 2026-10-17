@@ -16,7 +16,7 @@
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": "./"
+      "source": "plugins/yakka"
     }
   ]
 }

@@ -3,9 +3,9 @@
 set -eu
 ROOT=$(cd "$(dirname "$0")/../.." && pwd -P)
 cd "$ROOT"
-VERSION=$(tr -d ' \n\r' < bin/VERSION)
+VERSION=$(tr -d ' \n\r' < plugins/yakka/bin/VERSION)
 OUT_DIR=${OUT_DIR:-tools/release/dist}
-SUMS_FILE=${SUMS_FILE:-bin/SHA256SUMS}
+SUMS_FILE=${SUMS_FILE:-plugins/yakka/bin/SHA256SUMS}
 if command -v go >/dev/null 2>&1; then
   GO=$(command -v go)
 else

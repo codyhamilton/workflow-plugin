@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.12.0 — 2026-10-17
+
+- The workflow plugin install root is `plugins/yakka`. Marketplace entries list `source`:
+  `plugins/yakka`. Cursor hook commands are plugin-root-relative `./script/...` (`spool.sh` and
+  `prefetch-version.sh` under `plugins/yakka/script/`).
+
 ## 2.11.0 — 2026-10-17
 
 - Move the Go binary module to `packages/workflow/`, hook capture to `packages/hooklog/`, and the

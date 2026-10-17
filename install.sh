@@ -217,6 +217,34 @@ https_repo_url() {
   esac
 }
 
+is_valid_plugin_source() {
+  local src="$1"
+  [[ -d "$src/skills" && -f "$src/.cursor-plugin/plugin.json" ]]
+}
+
+plugin_source_for_checkout() {
+  local base="$1"
+  local src="$base/plugins/yakka"
+  if is_valid_plugin_source "$src"; then
+    echo "$src"
+    return 0
+  fi
+  return 1
+}
+
+resolve_plugin_source() {
+  local src=""
+  if src="$(plugin_source_for_checkout "$SCRIPT_DIR")"; then
+    echo "$src"
+    return 0
+  fi
+  if src="$(plugin_source_for_checkout "$INSTALL_SRC_CACHE")"; then
+    echo "$src"
+    return 0
+  fi
+  return 1
+}
+
 # When run as `curl … | bash`, the script is not on disk next to skills/. Clone
 # (or refresh) a shallow checkout so the rest of the installer can copy files.
 ensure_script_dir() {
@@ -224,7 +252,7 @@ ensure_script_dir() {
   local src="${_INSTALLER_SOURCE:-}"
   if [[ -n "$src" && "$src" != "-" && -f "$src" ]]; then
     candidate="$(cd "$(dirname "$src")" && pwd)"
-    if [[ -d "$candidate/skills" ]]; then
+    if plugin_source_for_checkout "$candidate" >/dev/null; then
       refresh_git_checkout "$candidate"
       echo "$candidate"
       return
@@ -266,11 +294,6 @@ fi
 
 SCRIPT_DIR="$(ensure_script_dir)"
 
-is_valid_plugin_source() {
-  local src="$1"
-  [[ -d "$src/skills" && -f "$src/.cursor-plugin/plugin.json" ]]
-}
-
 # Cursor rejects symlinks that point outside ~/.cursor/plugins/local/. Always
 # materialize a real directory tree under the local plugins folder.
 copy_plugin_tree() {
@@ -293,15 +316,10 @@ ensure_cursor_core_plugin() {
   mkdir -p "$(dirname "$CURSOR_CORE_PLUGIN")"
 
   local src=""
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR"
-  elif is_valid_plugin_source "$INSTALL_SRC_CACHE"; then
-    src="$INSTALL_SRC_CACHE"
-  fi
-
-  if [[ -n "$src" ]]; then
-    refresh_git_checkout "$src"
-    local src_real dest_real
+  if src="$(resolve_plugin_source)"; then
+    local checkout src_real dest_real
+    checkout="$(cd "$src/../.." && pwd -P)"
+    refresh_git_checkout "$checkout"
     src_real="$(readlink -f "$src")"
     dest_real="$(readlink -f "$CURSOR_CORE_PLUGIN" 2>/dev/null || echo "$CURSOR_CORE_PLUGIN")"
     if [[ "$src_real" != "$dest_real" ]]; then
@@ -311,18 +329,25 @@ ensure_cursor_core_plugin() {
     fi
   fi
 
-  local url
+  local url checkout
   url="$(https_repo_url)"
-  if [[ -d "$CURSOR_CORE_PLUGIN/.git" ]]; then
-    refresh_git_checkout "$CURSOR_CORE_PLUGIN"
+  checkout="$INSTALL_SRC_CACHE"
+  mkdir -p "$(dirname "$checkout")"
+  if [[ -d "$checkout/.git" ]]; then
+    refresh_git_checkout "$checkout"
   else
-    if [[ -e "$CURSOR_CORE_PLUGIN" ]]; then
-      echo "  Replacing existing install at $CURSOR_CORE_PLUGIN"
-      rm -rf "$CURSOR_CORE_PLUGIN"
+    if [[ -e "$checkout" ]]; then
+      echo "  Replacing existing installer checkout at $checkout"
+      rm -rf "$checkout"
     fi
-    echo "  Cloning plugin to $CURSOR_CORE_PLUGIN"
-    git clone --depth 1 --branch "$INSTALL_BRANCH" "$url" "$CURSOR_CORE_PLUGIN"
+    echo "  Cloning installer checkout to $checkout"
+    git clone --depth 1 --branch "$INSTALL_BRANCH" "$url" "$checkout"
   fi
+  if ! src="$(plugin_source_for_checkout "$checkout")"; then
+    echo "  ERROR: checkout at $checkout is missing plugins/yakka" >&2
+    return 1
+  fi
+  copy_plugin_tree "$src" "$CURSOR_CORE_PLUGIN"
   verify_cursor_core_plugin "$CURSOR_CORE_PLUGIN"
 }
 
@@ -340,6 +365,18 @@ verify_cursor_core_plugin() {
   fi
   if [[ ! -d "$plugin/skills" ]]; then
     echo "  ERROR: missing $plugin/skills/" >&2
+    errors=$((errors + 1))
+  fi
+  if [[ ! -x "$plugin/script/spool.sh" ]]; then
+    echo "  ERROR: missing or non-executable $plugin/script/spool.sh" >&2
+    errors=$((errors + 1))
+  fi
+  local hooks_rel="hooks/cursor.json"
+  if [[ -f "$plugin/.cursor-plugin/plugin.json" ]]; then
+    hooks_rel=$(python3 -c "import json; print(json.load(open('$plugin/.cursor-plugin/plugin.json'))['hooks'].lstrip('./'))")
+  fi
+  if [[ ! -f "$plugin/$hooks_rel" ]]; then
+    echo "  ERROR: missing hooks file $plugin/$hooks_rel" >&2
     errors=$((errors + 1))
   fi
 
@@ -374,10 +411,8 @@ ensure_cursor_workspace_skills() {
   fi
 
   dest="$(workspace_skills_dest "$workspace")"
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR/skills"
-  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
-    src="$INSTALL_SRC_CACHE/skills"
+  if src="$(resolve_plugin_source)"; then
+    src="$src/skills"
   else
     echo "  ERROR: no workflow skills source found." >&2
     return 1
@@ -395,10 +430,8 @@ ensure_claude_user_skills() {
   local dest="$HOME/.claude/skills"
   local src=""
 
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR/skills"
-  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
-    src="$INSTALL_SRC_CACHE/skills"
+  if src="$(resolve_plugin_source)"; then
+    src="$src/skills"
   else
     echo "  ERROR: no workflow skills source found." >&2
     return 1
@@ -522,10 +555,8 @@ verify_symlinked_skills() {
 ensure_opencode_skills() {
   local src=""
 
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR/skills"
-  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
-    src="$INSTALL_SRC_CACHE/skills"
+  if src="$(resolve_plugin_source)"; then
+    src="$src/skills"
   else
     echo "  ERROR: no workflow skills source found." >&2
     return 1
@@ -586,7 +617,12 @@ esac
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then
   if ask "Install workflow core skills (design, refine, execute, comprehensive-review, close-out, post-build) into Claude Code (~/.claude/skills/)?"; then
-    install_skills "$SCRIPT_DIR/skills" "$HOME/.claude/skills"
+    if src="$(resolve_plugin_source)"; then
+      install_skills "$src/skills" "$HOME/.claude/skills"
+    else
+      echo "  ERROR: no workflow skills source found." >&2
+      exit 1
+    fi
     echo "  Done. Core skills available immediately in Claude Code."
   fi
 else

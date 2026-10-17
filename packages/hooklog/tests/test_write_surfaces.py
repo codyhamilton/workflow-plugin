@@ -20,10 +20,11 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+PLUGIN = ROOT / "plugins" / "yakka"
 GOBIN = os.path.join(pwd.getpwuid(os.getuid()).pw_dir, ".local/go/bin")  # HOME may be a temp dir
-CONFIGS = {"claude": ["hooks/hooks.json"],
-           "cursor": ["hooks/cursor.json", "packages/hooklog/cursor-hooks.example.json"],
-           "codex": ["hooks/codex.json"]}
+CONFIGS = {"claude": ["plugins/yakka/hooks/hooks.json"],
+           "cursor": ["plugins/yakka/hooks/cursor.json", "packages/hooklog/cursor-hooks.example.json"],
+           "codex": ["plugins/yakka/hooks/codex.json"]}
 GIT_ENV = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
 
 
@@ -70,8 +71,8 @@ class WriteSurfaceTests(unittest.TestCase):
         cls.env = {"PATH": "/usr/bin:/bin", "HOME": str(cls.home), "XDG_CACHE_HOME": str(cls.cache),
                    "WORKFLOW_QUEUE": str(cls.queue), "WORKFLOW_CLIENT_CONFIG": str(cls.cfg),
                    "WORKFLOW_SERVE_DATA": str(cls.data), "WORKFLOW_BIN": cls.bin, "TYPESAFE_API_KEY": "",
-                   "WORKFLOW_HOOKLOG_KICK": "0", "CLAUDE_PLUGIN_ROOT": str(ROOT), "CURSOR_PLUGIN_ROOT": str(ROOT),
-                   "PLUGIN_ROOT": str(ROOT)}
+                   "WORKFLOW_HOOKLOG_KICK": "0", "CLAUDE_PLUGIN_ROOT": str(PLUGIN), "CURSOR_PLUGIN_ROOT": str(PLUGIN),
+                   "PLUGIN_ROOT": str(PLUGIN)}
         cls.log = open(t / "serve.log", "wb")
         senv = dict(cls.env, WORKFLOW_SERVE_ADDR="127.0.0.1:%d" % port, WORKFLOW_SERVE_KEYS="t=" + key,
                     WORKFLOW_SERVE_POLL="500ms")
@@ -137,9 +138,10 @@ class WriteSurfaceTests(unittest.TestCase):
                     payload["cwd"] = str(self.repo)
                     before = self.versions(rel)
                     event = payload["hook_event_name"]
+                    run_cwd = PLUGIN if harness == "cursor" and file and file.startswith("plugins/yakka") else self.repo
                     for command in self.commands(harness, event, file):
                         r = subprocess.run(command, shell=True, input=json.dumps(payload), text=True,
-                                           capture_output=True, env=self.env, cwd=self.repo, timeout=10)
+                                           capture_output=True, env=self.env, cwd=run_cwd, timeout=10)
                         self.assertEqual(r.returncode, 0, r.stderr)
                     deadline = time.time() + 30
                     while self.versions(rel) <= before and time.time() < deadline:

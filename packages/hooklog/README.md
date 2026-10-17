@@ -2,16 +2,16 @@
 
 Local, advisory capture of hook payloads as a session happens. All command hooks exit 0;
 OpenCode observers leave inputs and outputs unchanged. Captured events go to a queue directory,
-`${WORKFLOW_QUEUE:-~/.local/share/workflow/queue}`; `bin/workflow drain` ships them to the
+`${WORKFLOW_QUEUE:-~/.local/share/workflow/queue}`; `plugins/yakka/bin/workflow drain` ships them to the
 workflow service. Capture failures never deny or rewrite an action. Cursor receives the
 permissive response required by its pre-action schema.
 
 | Harness | Catalog requirement | Registration |
 |---------|---------------------|--------------|
-| Claude Code | 33 catalog keys; 31 active + 2 integration-only | [`hooks/hooks.json`](../../hooks/hooks.json), command handlers |
-| Cursor | 22 claimed; 21 enumerated | [`hooks/cursor.json`](../../hooks/cursor.json), selected by `.cursor-plugin/plugin.json` |
+| Claude Code | 33 catalog keys; 31 active + 2 integration-only | [`plugins/yakka/hooks/hooks.json`](../../plugins/yakka/hooks/hooks.json), command handlers |
+| Cursor | 22 claimed; 21 enumerated | [`plugins/yakka/hooks/cursor.json`](../../plugins/yakka/hooks/cursor.json), selected by `plugins/yakka/.cursor-plugin/plugin.json` |
 | OpenCode | 18 Hooks + 28 bus types | [`packages/opencode-workflow-hooks`](../../packages/opencode-workflow-hooks), JS callbacks |
-| Codex | 12 events | [`hooks/codex.json`](../../hooks/codex.json), selected by `.codex-plugin/plugin.json` |
+| Codex | 12 events | [`plugins/yakka/hooks/codex.json`](../../plugins/yakka/hooks/codex.json), selected by `plugins/yakka/.codex-plugin/plugin.json` |
 
 The supplied 2026-10-03 catalog's Cursor subtotal says 19 agent hooks but lists 18.
 The [official plugin reference](https://cursor.com/docs/reference/plugins#available-hook-events)
@@ -26,7 +26,7 @@ exits. No python, no network, no waiting. Payloads with no conversation id are d
 get their permissive reply (`{"permission":"allow"}` etc.); capture can never block or fail the agent.
 The OpenCode plugin writes the same files itself.
 
-After spooling, `spool.sh` starts one detached `bin/workflow drain` (a lock keeps it to one;
+After spooling, `spool.sh` starts one detached `plugins/yakka/bin/workflow drain` (a lock keeps it to one;
 `WORKFLOW_HOOKLOG_KICK=0` disables, `WORKFLOW_BIN` names the binary). The drain posts the queued files
 to the endpoint and deletes them; files the service refuses move to `rejected/`. The endpoint is
 the one in `~/.config/workflow/client.toml` (remote mode), or `http://127.0.0.1:8770` with no key
@@ -34,14 +34,14 @@ when that file is absent (local mode). While the endpoint is unreachable the fil
 `workflow serve` on the same machine hosts the drain itself. `workflow status` reports the queue
 and the mode.
 
-`bin/workflow` is a wrapper: it uses `WORKFLOW_BIN`, then the cached binary under
+`plugins/yakka/bin/workflow` is a wrapper: it uses `WORKFLOW_BIN`, then the cached binary under
 `${XDG_CACHE_HOME:-~/.cache}/workflow/<version>/`, then a checksummed download, then a source build.
 A `SessionStart` hook in each shipped config runs `bin/workflow --version` in the background so the
-first real call finds a warm cache.
+first real call finds a warm cache. Shipped hooks run copies under `plugins/yakka/script/`.
 
 ## Setup
 
-There is no install step. For local mode, run `bin/workflow serve` however suits the machine (a
+There is no install step. For local mode, run `plugins/yakka/bin/workflow serve` however suits the machine (a
 terminal, a systemd user unit, launchd). With no `WORKFLOW_SERVE_KEYS` it runs keyless, binds
 `127.0.0.1:8770` (`WORKFLOW_SERVE_ADDR` may name another loopback address, never a public one),
 and stores data under `WORKFLOW_SERVE_DATA` (default `~/.local/share/workflow/serve`), tenant
@@ -53,8 +53,8 @@ built yet).
 
 ## MCP
 
-The advisory shim is the stdio command `bin/workflow mcp`. Claude Code picks it up from the
-repo's [`.mcp.json`](../../.mcp.json). For Cursor, merge
+The advisory shim is the stdio command `plugins/yakka/bin/workflow mcp`. Claude Code picks it up from the
+repo's [`plugins/yakka/.mcp.json`](../../plugins/yakka/.mcp.json). For Cursor, merge
 [`cursor-mcp.example.json`](cursor-mcp.example.json) into `~/.cursor/mcp.json`; for Codex, merge
 [`codex-mcp.example.toml`](codex-mcp.example.toml) into `~/.codex/config.toml`. Replace
 `/ABS/PATH/workflow-plugin` with the checkout path.
@@ -126,8 +126,8 @@ arguments, prompts, headers, config, environment, tool definitions or experiment
 
 ## Codex
 
-The plugin registers Codex hooks itself: `.codex-plugin/plugin.json` points Codex at
-[`hooks/codex.json`](../../hooks/codex.json), whose commands use `$PLUGIN_ROOT`. Without that
+The plugin registers Codex hooks itself: `plugins/yakka/.codex-plugin/plugin.json` points Codex at
+[`plugins/yakka/hooks/codex.json`](../../plugins/yakka/hooks/codex.json), whose commands use `$PLUGIN_ROOT`. Without that
 manifest Codex falls back to `hooks/hooks.json` and records every Codex event as `claude`. Do not
 also register these hooks in `~/.codex/hooks.json` or `<project>/.codex/hooks.json`: Codex runs
 every source, so each event would be captured twice. Plugin hooks need the host's trust review in

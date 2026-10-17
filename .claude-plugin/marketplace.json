@@ -14,11 +14,7 @@
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": {
-        "source": "github",
-        "repo": "codyhamilton/workflow-plugin",
-        "ref": "master"
-      }
+      "source": "plugins/yakka"
     }
   ]
 }
