@@ -28,8 +28,12 @@ export const CHART_PARAM_KEYS = new Set<string>([
 	'kind',
 	'metric',
 	'group',
-	'grain'
+	'grain',
+	'shape',
+	'limit'
 ]);
+
+const HOOKS_SPLIT_DIM = new Set(['norm_event', 'tool']);
 
 const BUILDER_QUERY_TO_PARAM: Record<string, string> = {
 	m: 'measure',
@@ -159,7 +163,7 @@ function canonicalChartKey(urlKey: string): string | null {
 
 /** Chart-only params from a page query; window and shared filter keys are omitted. */
 export function chartParamsFromQuery(
-	_report: ReportId,
+	report: ReportId,
 	searchParams: URLSearchParams
 ): Record<string, string | string[]> {
 	const params: Record<string, string | string[]> = {};
@@ -168,6 +172,11 @@ export function chartParamsFromQuery(
 		if (seen.has(urlKey)) continue;
 		seen.add(urlKey);
 		if (WINDOW_AND_FILTER_KEYS.has(urlKey)) continue;
+		if (report === 'hooks' && urlKey === 'split') {
+			const v = searchParams.get(urlKey);
+			if (v !== null) params.dim = v;
+			continue;
+		}
 		const canonical = canonicalChartKey(urlKey);
 		if (!canonical) continue;
 		if (canonical === 'dim') {
@@ -185,7 +194,16 @@ function paramsToSearchParams(report: ReportId, params: Record<string, string | 
 	const out = new URLSearchParams();
 	for (const [key, value] of Object.entries(params)) {
 		if (!CHART_PARAM_KEYS.has(key)) continue;
-		const urlKey = report === 'builder' && BUILDER_PARAM_TO_QUERY[key] ? BUILDER_PARAM_TO_QUERY[key] : key;
+		let urlKey =
+			report === 'builder' && BUILDER_PARAM_TO_QUERY[key] ? BUILDER_PARAM_TO_QUERY[key] : key;
+		if (
+			report === 'hooks' &&
+			key === 'dim' &&
+			typeof value === 'string' &&
+			HOOKS_SPLIT_DIM.has(value)
+		) {
+			urlKey = 'split';
+		}
 		if (Array.isArray(value)) {
 			for (const v of value) out.append(urlKey, v);
 		} else {

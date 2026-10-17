@@ -32,6 +32,18 @@ describe('reportFromPathname / chartParamsFromQuery', () => {
 		const q = new URLSearchParams('range=7d&measure=cost_usd&repo_id=r1&from=2020-01-01');
 		expect(chartParamsFromQuery('usage', q)).toEqual({ measure: 'cost_usd' });
 	});
+
+	it('stores hooks split under dim and round-trips split in viewHref', () => {
+		const q = new URLSearchParams('split=tool&bucket=day');
+		expect(chartParamsFromQuery('hooks', q)).toEqual({ dim: 'tool', bucket: 'day' });
+		const href = viewHref({
+			id: 'v1',
+			name: 'H',
+			report: 'hooks',
+			params: { dim: 'tool', bucket: 'day' }
+		});
+		expect(href).toBe('/hooks?split=tool&bucket=day');
+	});
 });
 
 describe('saveView', () => {

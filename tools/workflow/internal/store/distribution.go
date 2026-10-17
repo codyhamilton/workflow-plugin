@@ -191,7 +191,6 @@ func distConversationSamples(rows []usageRow, p DistributionParams) []distSample
 		if r.model != "" {
 			a.models[r.model]++
 		}
-		_ = val
 	}
 	out := make([]distSample, 0, len(m))
 	for _, a := range m {

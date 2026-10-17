@@ -39,6 +39,8 @@
 	let { view: saved, testid: testidSuffix = '' }: { view: SavedView; testid?: string } = $props();
 
 	const rootTestId = $derived(testidSuffix ? `dash-tile-chart-${testidSuffix}` : 'dash-tile-chart');
+	/** Unique fetch slot per dashboard tile so duplicate views do not supersede each other. */
+	const tileSlot = (name: string) => (testidSuffix ? `${name}@${testidSuffix}` : name);
 	const tileParams = $derived(saved.params);
 	const report = $derived(saved.report);
 
@@ -144,7 +146,7 @@
 		return p;
 	}
 	type HookStep = { dim: DimKey; value: string; shift: boolean };
-	let hooksPending = $state<HookStep[]>([]);
+	let hooksPending: HookStep[] = [];
 	function hooksDrillPath(dims: DimKey[], path: string[], shift: boolean) {
 		if (path.length === 0 || path.some((v) => v === '__other__')) return;
 		view.drill(dims[0], path[0], { shift });
@@ -170,7 +172,7 @@
 			});
 			if (!params) continue;
 			jobs.push(
-				getJSON<QueryResponse>(`tile-${testid}`, 'analytics/query', params).then(
+				getJSON<QueryResponse>(tileSlot(`tile-${testid}`), 'analytics/query', params).then(
 					(resp) => {
 						hooksBars[testid] = hooksBarRows(resp);
 					},
@@ -186,7 +188,7 @@
 			});
 			if (!params) continue;
 			jobs.push(
-				getJSON<QueryResponse>(`tile-${testid}`, 'analytics/query', params).then(
+				getJSON<QueryResponse>(tileSlot(`tile-${testid}`), 'analytics/query', params).then(
 					(resp) => {
 						hooksTrees[testid] = hooksTreeNodes(resp);
 					},
@@ -197,7 +199,7 @@
 		const tsp = hooksTsParams();
 		if (tsp) {
 			jobs.push(
-				getJSON<QueryResponse>('tile-hooks-over-time', 'analytics/query', tsp).then(
+				getJSON<QueryResponse>(tileSlot('tile-hooks-over-time'), 'analytics/query', tsp).then(
 					(resp) => {
 						hooksTs = resp;
 					},
@@ -244,7 +246,7 @@
 	$effect(() => {
 		if (report !== 'builder') return;
 		let live = true;
-		getJSON<Schema>('tile-builder-schema', 'analytics/schema', new URLSearchParams()).then(
+		getJSON<Schema>(tileSlot('tile-builder-schema'), 'analytics/schema', new URLSearchParams()).then(
 			(s) => {
 				if (live) builderSchema = s;
 			},
@@ -279,7 +281,7 @@
 			params.set('from', win.from.toISOString());
 			params.set('to', win.to.toISOString());
 		}
-		getJSON<QueryResponse>('tile-builder-query', 'analytics/query', params).then(
+		getJSON<QueryResponse>(tileSlot('tile-builder-query'), 'analytics/query', params).then(
 			(r) => {
 				if (!live) return;
 				clearError();
@@ -329,7 +331,7 @@
 				params.set('from', win.from.toISOString());
 				params.set('to', win.to.toISOString());
 			}
-			getJSON<QueryResponse>('tile-usage-query', 'analytics/query', params).then(
+			getJSON<QueryResponse>(tileSlot('tile-usage-query'), 'analytics/query', params).then(
 				(r) => {
 					if (live) set(r);
 				},
@@ -345,7 +347,11 @@
 			})
 		);
 		if (distParams) {
-			getJSON<DistributionResponse>('tile-usage-dist', 'analytics/distribution', distParams).then(
+			getJSON<DistributionResponse>(
+				tileSlot('tile-usage-dist'),
+				'analytics/distribution',
+				distParams
+			).then(
 				(r) => {
 					if (live) usageDist = r;
 				},
@@ -370,6 +376,8 @@
 	}
 
 	// --- Trends ---
+	const TRENDS_ORDER: Bucket[] = ['hour', 'day', 'week', 'month'];
+	const TRENDS_CAP = 400;
 	let trendsSchema = $state<Schema | null>(null);
 	let trendsData = $state<QueryResponse | null>(null);
 	const trendsMetric = $derived(
@@ -379,10 +387,30 @@
 		typeof tileParams.group === 'string' ? tileParams.group : 'none'
 	);
 	const trendsChartStyle = $derived(tileParams.chart === 'area' ? 'area' : 'line');
+	const trendsWindow = $derived.by(() => {
+		const now = new Date();
+		const q = resolveWindow(view.state, now, view.tz, 'query');
+		if (q.all) {
+			const r = resolveWindow(view.state, now, view.tz, 'rest');
+			return r.from && r.to ? { from: r.from, to: r.to } : null;
+		}
+		return q.from && q.to ? { from: q.from, to: q.to } : null;
+	});
+	const trendsOffered = $derived.by(() =>
+		trendsWindow
+			? TRENDS_ORDER.filter((b) => bucketCount(b, trendsWindow.from, trendsWindow.to, view.tz) <= TRENDS_CAP)
+			: []
+	);
+	const trendsBucket = $derived.by(() => {
+		if (!trendsWindow) return 'day' as Bucket;
+		const want = typeof tileParams.bucket === 'string' ? tileParams.bucket : null;
+		if (want && trendsOffered.includes(want as Bucket)) return want as Bucket;
+		return pickBucket(trendsWindow.from, trendsWindow.to, view.tz) ?? trendsOffered[0] ?? 'month';
+	});
 	$effect(() => {
 		if (report !== 'trends') return;
 		let live = true;
-		getJSON<Schema>('tile-trends-schema', 'analytics/schema', new URLSearchParams()).then(
+		getJSON<Schema>(tileSlot('tile-trends-schema'), 'analytics/schema', new URLSearchParams()).then(
 			(s) => {
 				if (live) trendsSchema = s;
 			},
@@ -394,10 +422,15 @@
 	});
 	$effect(() => {
 		if (report !== 'trends' || !trendsSchema) return;
-		const p = view.paramsForTile('query', 'trends', tileParams);
+		const p = view.paramsForTile('query', 'trends', { ...tileParams, bucket: trendsBucket });
 		if (!p) return;
+		if (view.state.range === 'all' && trendsWindow) {
+			p.delete('all');
+			p.set('from', trendsWindow.from.toISOString());
+			p.set('to', trendsWindow.to.toISOString());
+		}
 		let live = true;
-		getJSON<QueryResponse>('tile-trends-main', 'analytics/query', p).then(
+		getJSON<QueryResponse>(tileSlot('tile-trends-main'), 'analytics/query', p).then(
 			(r) => {
 				if (live) trendsData = r;
 			},
@@ -437,7 +470,7 @@
 		let live = true;
 		const rest = untrack(() => view.paramsForTile('rest', 'overview', tileParams));
 		if (rest) {
-			getJSON<Summary>('tile-overview-summary', 'analytics/summary', rest).then(
+			getJSON<Summary>(tileSlot('tile-overview-summary'), 'analytics/summary', rest).then(
 				(s) => {
 					if (live) overviewSummary = s;
 				},
@@ -446,7 +479,16 @@
 		}
 		const q = untrack(() => view.paramsForTile('query', 'overview', tileParams));
 		if (q) {
-			getJSON<QueryResponse>('tile-overview-spark', 'analytics/query', q).then(
+			if (view.state.range === 'all') {
+				const now = new Date();
+				const clamped = resolveWindow(view.state, now, view.tz, 'rest');
+				if (clamped.from && clamped.to) {
+					q.delete('all');
+					q.set('from', clamped.from.toISOString());
+					q.set('to', clamped.to.toISOString());
+				}
+			}
+			getJSON<QueryResponse>(tileSlot('tile-overview-spark'), 'analytics/query', q).then(
 				(r) => {
 					if (live)
 						overviewSpark = r.rows.filter((x) => x.t).map((x) => ({ t: x.t as string, v: x.v }));
@@ -466,7 +508,7 @@
 		const p = view.paramsForTile('query', 'repos', tileParams);
 		if (!p) return;
 		let live = true;
-		getJSON<QueryResponse>('tile-repos-chart', 'analytics/query', p).then(
+		getJSON<QueryResponse>(tileSlot('tile-repos-chart'), 'analytics/query', p).then(
 			(r) => {
 				if (live) reposResp = r;
 			},
@@ -503,9 +545,13 @@
 		if (!base) return;
 		let live = true;
 		Promise.all([
-			getJSON<Scores>('tile-quality-scores', 'analytics/scores', scoresParams(base, qualityKind)),
+			getJSON<Scores>(
+				tileSlot('tile-quality-scores'),
+				'analytics/scores',
+				scoresParams(base, qualityKind)
+			),
 			getJSON<ScoreSeries>(
-				'tile-quality-series',
+				tileSlot('tile-quality-series'),
 				'analytics/score-series',
 				scoreSeriesParams(base, qualityKind, qualityBucket)
 			)
@@ -543,7 +589,7 @@
 		const p = view.paramsForTile('rest', 'executions', tileParams);
 		if (!p) return;
 		let live = true;
-		getJSON<Executions>('tile-executions', 'analytics/executions', p).then(
+		getJSON<Executions>(tileSlot('tile-executions'), 'analytics/executions', p).then(
 			(r) => {
 				if (live) execData = r;
 			},
@@ -592,7 +638,7 @@
 		const p = view.paramsForTile('rest', 'conversations', tileParams);
 		if (!p) return;
 		let live = true;
-		getJSON<DistributionResponse>('tile-conversations-dist', 'analytics/distribution', p).then(
+		getJSON<DistributionResponse>(tileSlot('tile-conversations-dist'), 'analytics/distribution', p).then(
 			(r) => {
 				if (live) convDist = r;
 			},
@@ -611,7 +657,7 @@
 		const p = view.paramsForTile('rest', 'explore', tileParams);
 		if (!p) return;
 		let live = true;
-		getJSON<Explore>('tile-explore', 'analytics/explore', p).then(
+		getJSON<Explore>(tileSlot('tile-explore'), 'analytics/explore', p).then(
 			(r) => {
 				if (live) exploreCount = r.rows?.length ?? 0;
 			},
@@ -730,7 +776,11 @@
 			/>
 		{/if}
 	{:else if report === 'conversations' && convDistBins.length > 0}
-		<DistributionChart testid="conversations-distribution" measure="cost_usd" bins={convDistBins} />
+		<DistributionChart
+			testid="conversations-distribution"
+			measure={(typeof tileParams.measure === 'string' ? tileParams.measure : 'cost_usd') as DistributionMeasure}
+			bins={convDistBins}
+		/>
 	{:else if report === 'explore'}
 		<p data-testid="explore-count">Rows loaded: {exploreCount ?? '…'}</p>
 	{:else}

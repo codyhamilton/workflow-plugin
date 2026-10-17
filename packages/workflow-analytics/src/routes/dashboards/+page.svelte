@@ -225,7 +225,7 @@
 					</div>
 					<div class="tile-body">
 						{#if t.view}
-							<DashboardTile view={t.view} />
+							<DashboardTile view={t.view} testid={`${t.viewId}-${t.index}`} />
 						{:else}
 							<p class="muted tile-missing">This saved view is missing.</p>
 						{/if}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -90,7 +91,7 @@ func (t *Tenant) ScoreSeries(ctx context.Context, f AnalyticsFilter, kind, bucke
 		hashes = append(hashes, h)
 	}
 	sort.Strings(hashes)
-	placeholders := "?" + repeat(",?", len(hashes)-1)
+	placeholders := "?" + strings.Repeat(",?", len(hashes)-1)
 	scRows, err := t.rdb.QueryContext(ctx, `
 		WITH s AS (
 			SELECT content_hash, check_name, result,
@@ -157,17 +158,6 @@ func (t *Tenant) ScoreSeries(ctx context.Context, f AnalyticsFilter, kind, bucke
 		out = append(out, ScoreSeriesCheck{Name: check, Points: pts})
 	}
 	return out, nil
-}
-
-func repeat(s string, n int) string {
-	if n <= 0 {
-		return ""
-	}
-	out := s
-	for i := 1; i < n; i++ {
-		out += s
-	}
-	return out
 }
 
 func anyStrings(ss []string) []any {
