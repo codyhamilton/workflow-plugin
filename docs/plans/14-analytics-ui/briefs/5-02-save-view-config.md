@@ -46,7 +46,7 @@ Filter bar, dashboard routes, and chart components.
 
 Identify or write the failing check before changing code. Report its output before and after.
 
-- Extend `shell.spec.ts` (or add assertions to the existing save-view test): on `/hooks?range=7d&repo_id=r1&split=tool&bucket=day`, save `hooks-view`; read `localStorage` key `workflow-analytics-views:views` → parsed entry has `report: 'hooks'`, `params` includes `split` and `bucket`, and has no `range`, `repo_id`, or `url`.
+- Extend `shell.spec.ts` (or add assertions to the existing save-view test): on `/trends?range=7d&repo_id=r1&metric=commits&group=harness&bucket=day`, save `trends-view`; read `localStorage` key `workflow-analytics-views:views` → parsed entry has `report: 'trends'`, `params` includes `metric`, `group`, and `bucket`, and has no `range`, `repo_id`, or `url`.
 - `npx playwright test tests/e2e/shell.spec.ts -g save` from `packages/workflow-analytics` → passes (including prior save-view visibility test).
 
 ## Report back
