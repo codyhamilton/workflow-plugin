@@ -2,7 +2,7 @@
 
 **Status:** research design, 2026-10-02. No Jev decision policy is empirically established or authorised for runtime use. **Parent:** [hypotheses](JEV-HYPOTHESES.md). **Human wording:** [provenance](PROVENANCE-jev-hypotheses-2026-10-02.md).
 
-This is the **Jev-specific study design**. Start with the [lab result register](JEV-RESULTS.md), then the parent hypotheses and this document. The reusable research loop, including early failed tests and evidence-backed white papers, lives in the [`white-paper` skill](../../plugins/workflow-lab/skills/white-paper/SKILL.md). Older Jev packs retain their data, failed trials, and protocols as evidence history. Where their proposed next step conflicts with this file, use this study design and record the discrepancy.
+This is the **Jev-specific study design**. Start with the [lab result register](JEV-RESULTS.md), then the parent hypotheses and this document. The reusable research loop, including early failed tests and evidence-backed white papers, lives in the [`white-paper` skill](../../.claude/skills/white-paper/SKILL.md). Older Jev packs retain their data, failed trials, and protocols as evidence history. Where their proposed next step conflicts with this file, use this study design and record the discrepancy.
 
 ## Jev-specific evidence requirements
 

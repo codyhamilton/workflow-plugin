@@ -50,9 +50,7 @@ After setup (no network required):
 python3 /path/to/workflow-plugin/tools/driver/check_skills.py
 ```
 
-## Optional lab skills
-
-Unattended cloud bootstrap installs **core only**. To also copy workflow-lab skills into `.cursor/skills/workflow-lab/`, set `WORKFLOW_INSTALL_LAB=1`. Lab skills are not required for `check_skills.py` or the phase driver loop.
+Unattended cloud bootstrap installs **core only**. Maintainer skills under `.claude/skills/` are not copied into the consuming repo. `WORKFLOW_INSTALL_LAB=1` is ignored (backward compatibility).
 
 ## Environment variables
 
@@ -63,6 +61,6 @@ Unattended cloud bootstrap installs **core only**. To also copy workflow-lab ski
 | `WORKFLOW_REPO_URL` | workflow-plugin GitHub URL | Fork or mirror |
 | `WORKFLOW_INSTALL_BRANCH` | `master` | Tracked branch |
 | `WORKFLOW_INSTALL_SH` | — | Skip fetch; run alternate installer (tests) |
-| `WORKFLOW_INSTALL_LAB` | unset | Set to `1` to copy lab skills |
+| `WORKFLOW_INSTALL_LAB` | unset | Ignored (legacy; no longer installs skills) |
 
 More context: [`docs/lab/CONSUMING_REPO.md`](../../docs/lab/CONSUMING_REPO.md).

@@ -57,9 +57,10 @@ Beyond validating the hypotheses head-to-head, candidate variations to try when 
 
 ## Skills
 
-Two plugins. **Core** (`workflow`) is cloud-safe — no interactive gates that dead-end headless, no
-local-filesystem dependencies — and is what a build/pipeline environment installs. **Lab**
-(`workflow-lab`) is local and/or interactive; the pipeline never requires it.
+One shipped plugin. **Core** (`workflow`) is cloud-safe — no interactive gates that dead-end headless,
+no local-filesystem dependencies — and is what a build/pipeline environment installs. **Maintainer
+skills** under `.claude/skills/` are Claude Code project skills for this repo checkout; the pipeline
+never installs or requires them.
 
 The loop: **design → (refine → execute → verify → close) per phase → review → close-out.** A design
 fixes phases each closed by a provable outcome; each phase is refined against the code the previous
@@ -74,12 +75,16 @@ skipped for a one-unit phase.
 | `workflow` (core) | `comprehensive-review` | Independent review keyed to the design's phase outcomes; fixes mechanical findings in place, briefs structural ones |
 | `workflow` (core) | `close-out` | End a plan: collapse the folder into one record file at `docs/plans/<NN>-<slug>.md`, promote durable contracts to `docs/design/`, delete the folder in one commit |
 | `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
-| `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
-| `workflow-lab` | `iterate` | Divergent candidates, judge, reconcile, extrapolate — for goals with no fixed spec, or for a design phase flagged approach-open |
-| `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
-| `workflow-lab` | `workflow-tuning` | Improve the workflow itself — design principles, lessons from retros and merged-PR outcomes, evals |
+| (maintainer) | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
+| (maintainer) | `iterate` | Divergent candidates, judge, reconcile, extrapolate — for goals with no fixed spec, or for a design phase flagged approach-open |
+| (maintainer) | `jev-variants` | Jev Stage A variant search protocol (`tools/jev-variants/`) |
+| (maintainer) | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
+| (maintainer) | `white-paper` | Evidence-backed research loop for consolidated lab papers |
+| (maintainer) | `workflow-tuning` | Improve the workflow itself — design principles, lessons from retros and merged-PR outcomes, evals |
 
-**Workflow Optimiser workspace:** research, goals, findings, and proposals for tuning this plugin live in [`docs/lab/`](docs/lab/) (maintained in-repo; separate from the interactive `workflow-lab` skills under `plugins/workflow-lab/`).
+Maintainer skills live under [`.claude/skills/`](.claude/skills/) and are not copied by `install.sh`.
+
+**Workflow Optimiser workspace:** research, goals, findings, and proposals for tuning this plugin live in [`docs/lab/`](docs/lab/) (maintained in-repo alongside maintainer skills).
 
 ### Grok Bot / unattended driver
 
@@ -90,7 +95,7 @@ Skills from this plugin are **not** auto-visible to Grok Bot or other cloud driv
 2. `python3 tools/driver/run.py <plan-folder> --once` — one phase; provider by API key
 3. `python3 tools/driver/assert_phase.py --state <compact-state.json>` — phase-boundary assert (Jev logged; deterministic pass/fail)
 
-Repeat 1–3 until `done` or `unsuccessful`. Lab skills are not required. Details: [`tools/driver/README.md`](tools/driver/README.md) and paste template [`docs/lab/CONSUMING_REPO.md`](docs/lab/CONSUMING_REPO.md).
+Repeat 1–3 until `done` or `unsuccessful`. Maintainer skills are not required. Details: [`tools/driver/README.md`](tools/driver/README.md) and paste template [`docs/lab/CONSUMING_REPO.md`](docs/lab/CONSUMING_REPO.md).
 
 **Bot discovery pattern:** status → trigger → asserts. Listing skills in chat is not enough for Grok Bot — bake or hook skills first, then call the driver CLIs. Harness routing (when to use Codex vs Claude vs Composer vs OpenCode Flash): [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md).
 
@@ -118,13 +123,13 @@ cd workflow-plugin
 
 The installer detects **Claude Code** and **Cursor** (and asks before installing into each). It does
 **not** auto-detect OpenCode — use the OpenCode path below (`WORKFLOW_INSTALL_MODE=opencode` or
-`./install.sh --opencode-skills`). Core and lab are separate prompts on the interactive path, so a
-cloud build image can accept core only. No other config required for Claude/Cursor routes.
+`./install.sh --opencode-skills`). Interactive prompts cover each harness separately; unattended
+routes install **core only**. No other config required for Claude/Cursor routes.
 
 When run non-interactively (piped via `curl | bash`, or invoked by an agent's Bash tool, which
-never has a TTY), the installer skips the prompts and auto-installs **core only** (never
-`workflow-lab`). `WORKFLOW_INSTALL_MODE=cloud`, `claude-code`, or `interactive` forces that route
-and wins over ambient variables.
+never has a TTY), the installer skips the prompts and auto-installs **core only**. Maintainer
+skills are never copied. `WORKFLOW_INSTALL_MODE=cloud`, `claude-code`, or `interactive` forces that
+route and wins over ambient variables. `WORKFLOW_INSTALL_LAB=1` is ignored.
 
 - **Claude Code** (`CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, or `CLAUDE_CODE_REMOTE` detected — true
   for local Claude Code sessions and Claude Code on the web alike) → `~/.claude/skills/`. Personal
@@ -139,8 +144,8 @@ and wins over ambient variables.
   `<checkout>/skills/<skill>`. See [OpenCode (partial compatibility)](#opencode-partial-compatibility).
 
 `WORKFLOW_INSTALL_MODE=opencode` or `./install.sh --opencode-skills` runs only the OpenCode symlink
-path (idempotent). Optional: `WORKFLOW_OPENCODE_INCLUDE_LAB=1` to link lab skills too;
-`WORKFLOW_OPENCODE_SKILLS` overrides the destination root (default `~/.config/opencode/skills`).
+path (idempotent). `WORKFLOW_OPENCODE_SKILLS` overrides the destination root (default
+`~/.config/opencode/skills`).
 
 `./install.sh --print-route` prints the chosen route, destination, and `core_only` as JSON and does
 not copy files. After install, `python3 tools/driver/check_skills.py` exits 0 when the six core
@@ -206,7 +211,7 @@ actually loaded.
 Neither path notices that the other exists, and neither notices that this repo moved on.
 
 **To tell which is live**, look at how the skills are named in the harness's skill list: a
-`workflow:`/`workflow-lab:` prefix means Path B, bare names mean Path A. Then read the file that
+`workflow:` prefix means Path B, bare names mean Path A. Then read the file that
 name resolves to — not this repo:
 
 ```sh
@@ -218,7 +223,7 @@ grep -rn "\[NEW\]" ~/.claude/plugins/cache/workflow-plugin/     # should return 
 ls ~/.claude/skills/
 ```
 
-**To update Path B**, `/plugin update workflow@workflow-plugin` (and `workflow-lab@workflow-plugin`).
+**To update Path B**, `/plugin update workflow@workflow-plugin`.
 That refetches the marketplace clone, re-pins `gitCommitSha`, and repopulates the version-numbered
 cache directory. Editing the cache by hand does not re-pin it and will be overwritten.
 
@@ -290,9 +295,6 @@ to review the phase and sign off (`Workflow-Phase:`). Pattern: Flash draft → S
 `install.sh` and the OpenCode signals plugin do not encode that chain. The hooks proposal records the same invariant:
 [`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
 
-Lab skills: interactive install can symlink `workflow-lab` too, or
-`WORKFLOW_OPENCODE_INCLUDE_LAB=1 WORKFLOW_INSTALL_MODE=opencode ./install.sh`.
-
 ## Codex (separate harness)
 
 **Codex** (OpenAI `codex` / `codex exec` CLI) is a **separate harness**, not an OpenCode provider and not Cursor Composer. Use it to **balance Plus/Codex + Claude subscriptions**: Codex often fits **high-thinking** and mechanically rich unit work **alongside** Claude Code (soft effort×fit routing — ask CHM when unsure); keep OpenCode **DeepSeek Flash** for cheap brief/unit drafts under the Flash review gate.
@@ -321,11 +323,8 @@ Copy core skills directly:
 cp -r skills/* ~/.claude/skills/
 ```
 
-Add the lab skills too, for local/interactive use:
-
-```sh
-cp -r plugins/workflow-lab/skills/* ~/.claude/skills/
-```
+Maintainer skills are already available in this checkout under `.claude/skills/` for Claude Code
+project-skill discovery at the repo root.
 
 ### OpenCode
 
@@ -361,14 +360,14 @@ Skills are available immediately. For marketplace-style install (so colleagues c
 }
 ```
 
-Then install either or both plugins:
+Then install the core plugin:
 
 ```
 /plugin install workflow@workflow-plugin
-/plugin install workflow-lab@workflow-plugin
 ```
 
-Skills become available as `workflow:design`, `workflow:execute`, `workflow-lab:iterate`, etc.
+Skills become available as `workflow:design`, `workflow:execute`, etc. Maintainer skills require
+working in the workflow-plugin checkout (`.claude/skills/`).
 
 ### Cursor
 
@@ -378,13 +377,7 @@ Clone the repo into Cursor's local plugins directory for the core plugin, then r
 git clone git@github.com:codyhamilton/workflow-plugin.git ~/.cursor/plugins/local/workflow
 ```
 
-For the lab plugin too, copy its subtree into a second local plugin directory:
-
-```sh
-cp -rL ~/.cursor/plugins/local/workflow/plugins/workflow-lab ~/.cursor/plugins/local/workflow-lab
-```
-
-Or run `./install.sh` and accept the Cursor prompts (core, then optionally lab).
+Or run `./install.sh` and accept the Cursor prompt for the core plugin.
 
 ## Structure
 
@@ -392,7 +385,7 @@ Or run `./install.sh` and accept the Cursor prompts (core, then optionally lab).
 workflow-plugin/                    (repo root — the `workflow` core plugin)
 ├── .claude-plugin/
 │   ├── plugin.json
-│   └── marketplace.json            (lists both plugins)
+│   └── marketplace.json            (lists the workflow plugin)
 ├── .cursor-plugin/plugin.json
 ├── skills/                         (core plugin's skills)
 │   ├── design/
@@ -401,15 +394,14 @@ workflow-plugin/                    (repo root — the `workflow` core plugin)
 │   ├── comprehensive-review/
 │   ├── close-out/
 │   └── post-build/                 (briefs/ for its workers)
+├── .claude/skills/                 (maintainer project skills; not installed by install.sh)
+│   ├── setup/
+│   ├── iterate/
+│   ├── jev-variants/
+│   ├── transcript-parser/
+│   ├── white-paper/
+│   └── workflow-tuning/
 ├── docs/
 │   ├── lab/                        (Optimiser research/ops: goals, findings, proposals)
 │   └── automation/                 (operator guides for external automation triggers)
-└── plugins/workflow-lab/           (lab plugin, its own manifests + skills/)
-    ├── .claude-plugin/plugin.json
-    ├── .cursor-plugin/plugin.json
-    └── skills/
-        ├── setup/
-        ├── iterate/
-        ├── transcript-parser/
-        └── workflow-tuning/
 ```

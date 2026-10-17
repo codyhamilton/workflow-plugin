@@ -16,7 +16,7 @@ sys.path.insert(0, str(DRIVER))
 
 from check_skills import (  # noqa: E402
     CORE_SKILLS,
-    LAB_SKILLS,
+    MAINTAINER_SKILLS,
     HARNESS_CLAUDE,
     HARNESS_CURSOR,
     HARNESS_INTERACTIVE,
@@ -134,10 +134,10 @@ class TestScan(unittest.TestCase):
             self.assertNotIn("execute", found)
             self.assertEqual(missing, ["execute"])
 
-    def test_lab_dirs_do_not_count(self) -> None:
+    def test_maintainer_dirs_do_not_count(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 _write_skill(root, name)
             found, missing = scan_core_skills(root)
             self.assertEqual(found, [])

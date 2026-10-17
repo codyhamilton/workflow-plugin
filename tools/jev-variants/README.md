@@ -1,6 +1,6 @@
 # jev-variants
 
-Registry, validator and matrix expander for the Jev Stage A variant search (see `plugins/workflow-lab/skills/jev-variants/SKILL.md` for the agent protocol).
+Registry, validator and matrix expander for the Jev Stage A variant search (see `.claude/skills/jev-variants/SKILL.md` for the agent protocol).
 
 - Axes: `signals/`, `states/`, `markers/` JSON files under a registry root; filename and `id` are a content hash of `spec`, so results stay tied to what ran.
 - `brief <role>` prints a self-contained prompt for a variant-authoring agent (the primary way to drive opencode/Flash runs); `template <kind>` prints an example spec.

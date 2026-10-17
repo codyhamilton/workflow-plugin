@@ -15,8 +15,8 @@ workflow-plugin/ (repo root — the `workflow` core plugin)
 │   ├── comprehensive-review/
 │   ├── close-out/
 │   └── post-build/            → briefs/{fixer,verifier,qa-planner,qa-driver}.md
-├── plugins/workflow-lab/      → lab: local and/or interactive; never required by the pipeline
-│   └── skills/{setup,iterate,transcript-parser,workflow-tuning}/
+├── .claude/skills/            → maintainer project skills (not installed by install.sh)
+│   └── {setup,iterate,jev-variants,transcript-parser,white-paper,workflow-tuning}/
 ├── docs/{OVERVIEW,ARCHITECTURE}.md, docs/automation/, docs/plans/, docs/analysis/
 └── evals/{scenarios,results}/
 ```
@@ -43,10 +43,10 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 | `comprehensive-review` | Independent assessment against phase outcomes; in-place fixes; remediation briefs | `REVIEW.md`, `briefs/remediation-<NN>.md`, `RECOVERED-INTENT.md` |
 | `post-build` | The pipeline stage against a PR | Nothing itself; workers write `QA.md` and `REVIEW.md` updates; the report is external |
 | `close-out` | Ending a plan | `docs/plans/<NN>-<slug>.md`; deletes the folder |
-| `setup` (lab) | Bootstrapping stable docs | `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md` |
-| `iterate` (lab) | Divergent exploration; approach-open phases | `OUTCOMES.md`, per-cycle artifacts |
-| `transcript-parser` (lab) | Transcript → cost metrics | a `cost-comparison.md` section |
-| `workflow-tuning` (lab) | The workflow itself | `principles.md`, `reference.md` |
+| `setup` (maintainer) | Bootstrapping stable docs | `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md` |
+| `iterate` (maintainer) | Divergent exploration; approach-open phases | `OUTCOMES.md`, per-cycle artifacts |
+| `transcript-parser` (maintainer) | Transcript → cost metrics | a `cost-comparison.md` section |
+| `workflow-tuning` (maintainer) | The workflow itself | `principles.md`, `reference.md` |
 
 ## Cross-Skill Contracts
 
@@ -118,7 +118,7 @@ Declared by the invoker, never inferred. Every posture has a safe default.
 4. Review is never silent: terminal runs independent review; pipeline substitutes pre-flight because a downstream stage is declared.
 5. A phase closes on a provable outcome, verified against real behaviour. Outcomes define phases; surfaces define units.
 6. Refinement is per phase, against the code as it stands; the design's phase count bounds the loop.
-7. Core never depends on lab; lab may compose core.
+7. Core never depends on maintainer skills; maintainer skills may compose core.
 8. `workflow-tuning` never auto-runs.
 9. No commit follows the tested commit. Nothing in this plugin merges.
 10. Every plan ends in one record file.
@@ -128,6 +128,6 @@ Declared by the invoker, never inferred. Every posture has a safe default.
 - [OVERVIEW.md](OVERVIEW.md)
 - [../README.md](../README.md)
 - [automation/post-build.md](automation/post-build.md)
-- [../plugins/workflow-lab/skills/workflow-tuning/principles.md](../plugins/workflow-lab/skills/workflow-tuning/principles.md)
-- [../plugins/workflow-lab/skills/workflow-tuning/reference.md](../plugins/workflow-lab/skills/workflow-tuning/reference.md)
+- [../.claude/skills/workflow-tuning/principles.md](../.claude/skills/workflow-tuning/principles.md)
+- [../.claude/skills/workflow-tuning/reference.md](../.claude/skills/workflow-tuning/reference.md)
 - [analysis/2026-09-08-workflow-vs-field.md](analysis/2026-09-08-workflow-vs-field.md) — the review this shape came from

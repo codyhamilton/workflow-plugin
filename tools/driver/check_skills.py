@@ -26,11 +26,13 @@ CORE_SKILLS: tuple[str, ...] = (
     "post-build",
 )
 
-# plugins/workflow-lab. Unattended install must not require these.
-LAB_SKILLS: tuple[str, ...] = (
-    "setup",
+# Maintainer project skills at .claude/skills/. Unattended install must not copy these.
+MAINTAINER_SKILLS: tuple[str, ...] = (
     "iterate",
+    "jev-variants",
+    "setup",
     "transcript-parser",
+    "white-paper",
     "workflow-tuning",
 )
 
