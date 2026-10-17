@@ -271,3 +271,19 @@ The Phase 4 carried item is unit 5-07.
 - Surfaces: `docs/design/07-analytics-site.md`. Commit `5d1c230`.
 - Deviations: none. Open issue 13 still says a builder with zero dimensions and bucket `none` has no valid type. The dashboard contract says that case is a scalar and a valid saved view. The brief left the builder sentence.
 - Agent: Composer, agent `1ea27e3c-1403-4ccd-9216-1ff54f5dff25`. The harness did not report turn count or final context size. Status `done`.
+
+### 5-02-save-view-config
+
+- Built: saving a view stores chart params only. Menu links use the chart config. Non-report routes do not call the store.
+- Surfaces: `packages/workflow-analytics/src/lib/components/SaveView.svelte`, `tests/e2e/shell.spec.ts`. Commit `14e747e`.
+- Deviations: the new e2e title is `save view stores chart params only` so `-g save` matches it. Non-report routes disable the controls and show a hint.
+- Agent: Composer, agent `b989a980-979b-4cbb-b54c-b8240aaadaaa`. The harness did not report turn count or final context size. Status `done`.
+- Check: `E2E_PORT=4422 npx playwright test tests/e2e/shell.spec.ts -g save`: 2 passed.
+
+### 5-04-dashboard-tile-render
+
+- Built: `DashboardTile` renders each saved report in the document. Tile params merge onto the dashboard window and filters.
+- Surfaces: `DashboardTile.svelte`, `dashboard-tile.ts`, `view.svelte.ts`, `dashboard-tile.test.ts`. Commit `9b5b298`.
+- Deviations: hooks bars use fixed dimensions because stored `dim` is the time-series split. Reports other than hooks, builder, and usage render one primary chart.
+- Agent: Composer, agent `918088a1-6355-4b53-93a6-ba393c67fec9`. The harness did not report turn count or final context size. Status `done`.
+- Check: `npm test -- src/lib/dashboard-tile.test.ts`: 3 passed. The report's SaveView mismatch is the pre-5-02 tree; `14e747e` is the save path on this branch.
