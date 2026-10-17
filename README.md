@@ -1,7 +1,7 @@
 # workflow-plugin
 
-Private plugin marketplace containing workflow skills for plan, execute, and review, split across
-a cloud-safe core plugin and a local lab plugin.
+Private plugin marketplace containing workflow skills for plan, execute, and review:
+one cloud-safe core plugin, plus maintainer project skills at `.claude/skills/`.
 
 ## Breaking change: the folder-status taxonomy is removed
 
