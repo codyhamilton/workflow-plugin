@@ -388,3 +388,18 @@ find packages/yakka -type f -name '*.go' -exec sed -i \
 ```
 
 Literal follow-ons in the same unit (not covered by the `sed` lines above): `opencode-workflow-hooks` → `opencode-yakka-hooks` in `packages/yakka/internal/ingest/policy.go` and `policy_test.go`; user-facing `workflow` CLI strings → `yakka` in `packages/yakka/cmd/yakka` and stderr prefixes in `internal/{serve,mcp,drain}`; MCP `serverInfo.name` → `yakka`; `cmd/yakka` integration tests use a Go spool helper instead of `packages/hooklog/spool.sh` until hooklog env names land in `5-04`.
+
+### 5-02-go-yakka-runtime
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-02-go-yakka-runtime.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-02-go-yakka-runtime.md`.
+Worker: Composer (`composer-2.5`), agent `bc-b0a44433-3d91-547d-8a02-ddfdd124f1a8`. The harness did not report turns or final context.
+Commit: `b4f6239`.
+
+Built: module `github.com/codyhamilton/yakka/packages/yakka`, command `cmd/yakka`, `YAKKA_*` env vars and `~/.config/yakka` / `~/.local/share/yakka` defaults, `yakka --version` and MCP `serverInfo.name` `yakka`. `go test ./...` in `packages/yakka` passed (auto Go 1.27.1). The rewrite command is the block above.
+
+Surfaces: `packages/yakka/**`, plus the rewrite block in this file.
+
+Deviations: `cmd/yakka` tests write the queue in Go instead of calling `packages/hooklog/spool.sh`, because hooklog still reads `WORKFLOW_*`. Hooklog belongs to `5-03`, not `5-04`. Also renamed `drain`, `ledger`, and `login` CLI strings, and a test path in `packages/yakka/README.md`.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
