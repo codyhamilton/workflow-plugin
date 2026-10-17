@@ -452,6 +452,10 @@ Each outcome clause is tagged with how it is proven. All tagged clauses are requ
 - Approach: known.
 - Depends on: nothing.
 
+Units:
+
+- 1-01 Lab collapse. Brief: `briefs/1-01-lab-collapse.md`. Depends on: nothing. Runs alongside: nothing.
+
 ### Phase 2: Runtime units become packages
 
 - Why: the binary and the hook edge are what every user runs. While they sit in `tools/`, the directory name lies about them, and the binary's catalogue makes a shipped unit depend on a maintainer tool. Each outcome below proves the move broke none of the user-visible paths: source build, hook capture, release build.
