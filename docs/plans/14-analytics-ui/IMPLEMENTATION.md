@@ -248,3 +248,26 @@ Checked against the phase outcome, not the reports. From `packages/workflow-anal
 Refined in `4366fed` into seven units (`c242b39` aligns two briefs with the contract param keys). Refine agent `49f58caa-5023-4dfa-b21d-1e0adef9cdb8` returned Proceed. `artifact_feedback` was not called: the workflow feedback namespace is in error in this session. Nothing is queued for the seven briefs.
 
 The Phase 4 carried item is unit 5-07.
+
+### 5-01-view-store-config
+
+- Built: saved views are `{id, name, report, params}` and dashboards are ordered tiles with column span. Export is v2. Import of a 13-tile document keeps 12 and returns how many tiles were dropped. A stored `/usage` URL keeps the measure and drops window and filter keys. A non-report path is dropped and counted.
+- Surfaces: `packages/workflow-analytics/src/lib/views.ts`, `views.test.ts`. Commit `0bfa5d5`.
+- Deviations: none. Callers of `importDashboard` still expect a bare dashboard until 5-05.
+- Agent: Composer, agent `bca8f6db-4efd-4686-9a19-0c3d08a6ded6`. The harness did not report turn count or final context size. Status `done`.
+- Check: `npm test -- src/lib/views.test.ts` from `packages/workflow-analytics`: 28 passed.
+
+### 5-03-remove-embed-chrome
+
+- Built: the layout no longer has an embed branch. `/dashboards` shows the filter chrome. `embed=1` on a report no longer hides the shell.
+- Surfaces: `packages/workflow-analytics/src/routes/+layout.svelte`, `tests/e2e/shell.spec.ts`. Commit `41a7e9e`.
+- Deviations: none.
+- Agent: Composer, agent `bfb6b55c-415b-457a-a129-acdb2badbf54`. The harness did not report turn count or final context size. Status `done`.
+- Check: `E2E_PORT=4423 npx playwright test tests/e2e/shell.spec.ts -g "embed|dashboards"`: 2 passed.
+
+### 5-07-analytics-site-doc
+
+- Built: `docs/design/07-analytics-site.md` describes the theme override, the in-document dashboard, the overview links, the non-clickable marks, and zero-fill for count series only. Open issue 12 no longer says conversation totals cover only the returned events.
+- Surfaces: `docs/design/07-analytics-site.md`. Commit `5d1c230`.
+- Deviations: none. Open issue 13 still says a builder with zero dimensions and bucket `none` has no valid type. The dashboard contract says that case is a scalar and a valid saved view. The brief left the builder sentence.
+- Agent: Composer, agent `1ea27e3c-1403-4ccd-9216-1ff54f5dff25`. The harness did not report turn count or final context size. Status `done`.
