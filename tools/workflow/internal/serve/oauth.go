@@ -55,10 +55,7 @@ func (s *Server) oauthLogin(w http.ResponseWriter, r *http.Request) {
 		Secure:   s.sessionCookieSecure(),
 		Expires:  time.Now().Add(oauthStateLifetime).UTC(),
 	})
-	redirectAfter := "/"
-	if ret := r.URL.Query().Get("return"); ret != "" && strings.HasPrefix(ret, "/") && !strings.HasPrefix(ret, "//") {
-		redirectAfter = ret
-	}
+	redirectAfter := oauthReturnPath(r.URL.Query().Get("return"))
 	http.SetCookie(w, &http.Cookie{
 		Name:     "workflow_oauth_return",
 		Value:    redirectAfter,
@@ -123,14 +120,46 @@ func (s *Server) oauthCallback(w http.ResponseWriter, r *http.Request) {
 	_ = s.registry.Persist()
 	s.setSessionCookie(w, sid, rec.ExpiresAt)
 	dest := "/"
-	if ret, err := r.Cookie("workflow_oauth_return"); err == nil && ret.Value != "" {
-		dest = ret.Value
+	if ret, err := r.Cookie("workflow_oauth_return"); err == nil {
+		dest = oauthReturnPath(ret.Value)
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name: "workflow_oauth_return", Value: "", Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode,
 		Secure: s.sessionCookieSecure(), MaxAge: -1,
 	})
 	http.Redirect(w, r, dest, http.StatusFound)
+}
+
+// oauthReturnPath is a same-origin path safe to store in the return cookie and
+// to pass to http.Redirect. A value that is not a path, or that contains a
+// byte net/http would drop from a cookie (backslash, controls), is "/".
+// Dropping those bytes would otherwise turn a leading slash into a
+// protocol-relative URL.
+func oauthReturnPath(ret string) string {
+	const fallback = "/"
+	if ret == "" || cookieOctets(ret) != ret {
+		return fallback
+	}
+	u, err := url.Parse(ret)
+	if err != nil || u.IsAbs() || u.Host != "" {
+		return fallback
+	}
+	if !strings.HasPrefix(u.Path, "/") || strings.HasPrefix(u.Path, "//") || strings.Contains(u.Path, "\\") {
+		return fallback
+	}
+	return ret
+}
+
+// cookieOctets is the subset net/http will keep in a cookie value.
+func cookieOctets(v string) string {
+	buf := make([]byte, 0, len(v))
+	for i := 0; i < len(v); i++ {
+		b := v[i]
+		if b >= 0x20 && b < 0x7f && b != '"' && b != ';' && b != '\\' {
+			buf = append(buf, b)
+		}
+	}
+	return string(buf)
 }
 
 func (s *Server) logout(w http.ResponseWriter, r *http.Request) {

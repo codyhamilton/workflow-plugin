@@ -574,6 +574,77 @@ func TestOAuthSessionRemoteAuth(t *testing.T) {
 	}
 }
 
+func oauthFinish(t *testing.T, h http.Handler, loginPath string, mutate func([]*http.Cookie)) string {
+	t.Helper()
+	code, _, cookies := doWithCookies(t, h, "GET", loginPath, "", "", nil)
+	if code != http.StatusFound {
+		t.Fatalf("oauth login %s: %d", loginPath, code)
+	}
+	var state string
+	for _, c := range cookies {
+		if c.Name == oauthStateCookie {
+			state = c.Value
+		}
+	}
+	if state == "" {
+		t.Fatal("no oauth state cookie")
+	}
+	if mutate != nil {
+		mutate(cookies)
+	}
+	req := httptest.NewRequest("GET", "/oauth/callback?code=mockcode&state="+url.QueryEscape(state), nil)
+	for _, c := range cookies {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusFound {
+		t.Fatalf("oauth callback: %d %s", rec.Code, rec.Body.String())
+	}
+	return rec.Header().Get("Location")
+}
+
+func TestOAuthReturnStaysOnOrigin(t *testing.T) {
+	gh := mockGitHub(t, 42, "codyh", []mockEmail{{Email: adminEmail, Verified: true}})
+	t.Cleanup(gh.Close)
+	s := remoteTestConfig(t, t.TempDir(), gh.URL)
+	h := s.Handler()
+
+	deviceReturn := "/device?state=abc&redirect_uri=http://127.0.0.1:9/callback"
+	cases := []struct {
+		raw  string
+		want string
+	}{
+		{raw: "", want: "/"},
+		{raw: "/profile", want: "/profile"},
+		{raw: deviceReturn, want: deviceReturn},
+		{raw: "//evil.example", want: "/"},
+		{raw: "https://evil.example/phish", want: "/"},
+		{raw: "/\\/evil.example", want: "/"},
+		{raw: "/\t/evil.example", want: "/"},
+		{raw: "/\\evil.example", want: "/"},
+	}
+	for _, tc := range cases {
+		path := "/oauth/login"
+		if tc.raw != "" {
+			path += "?return=" + url.QueryEscape(tc.raw)
+		}
+		if loc := oauthFinish(t, h, path, nil); loc != tc.want {
+			t.Errorf("return %q: location %q, want %q", tc.raw, loc, tc.want)
+		}
+	}
+	loc := oauthFinish(t, h, "/oauth/login", func(cookies []*http.Cookie) {
+		for _, c := range cookies {
+			if c.Name == "workflow_oauth_return" {
+				c.Value = "//evil.example/phish"
+			}
+		}
+	})
+	if loc != "/" {
+		t.Fatalf("forged return cookie: location %q", loc)
+	}
+}
+
 func TestRemoteSessionIngestAndTenant(t *testing.T) {
 	gh := mockGitHub(t, 7, "u", []mockEmail{{Email: "u@example.com", Verified: true}})
 	t.Cleanup(gh.Close)

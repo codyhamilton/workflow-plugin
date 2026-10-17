@@ -364,7 +364,7 @@ on a compacted copy of the real ledger.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
 16. The layout header and main use the 4/8/16/24/32 space scale. The filter bar, filter chips, and save-view control still use rem gaps. Pick scale steps and restyle those controls.
 17. Overview links to `/trends` set `metric` (`artifact_versions`, `distinct_content`, `commits`), which is the key that page reads. The drill-down sentence says those links set `measure`. Pick one query key and make the sentence and the page agree.
-18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser; a device code keeps the token plaintext in `registry.json` until exchange; `/oauth/login?return=` accepts a single leading slash and does not reject a backslash, and the callback does not re-check the return path.
+18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser; a device code keeps the token plaintext in `registry.json` until exchange.
 
 ## Live cutover record (2026-10-11)
 

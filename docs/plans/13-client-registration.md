@@ -55,7 +55,7 @@ Phases 1–3 were checked with `go test` on serve, login, client config, and sec
 
 ## Follow-ups
 
-Recorded as open issue 18 in [design 7](../design/07-analytics-site.md): overview-only `?tenant=`, the registry-open panic, e2e seeding, the prefilled profile expiry, device-code plaintext until exchange, and the OAuth return path not rejecting a backslash.
+Recorded as open issue 18 in [design 7](../design/07-analytics-site.md): overview-only `?tenant=`, the registry-open panic, e2e seeding, the prefilled profile expiry, and device-code plaintext until exchange. The OAuth return path now rejects values that are not a same-origin path, including those whose cookie serialization would become protocol-relative.
 
 ## Decisions Worth Keeping
 
