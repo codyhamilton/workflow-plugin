@@ -15,8 +15,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/compact"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/compact"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // newCompactSession returns the context and Options for one compaction run. It is a package

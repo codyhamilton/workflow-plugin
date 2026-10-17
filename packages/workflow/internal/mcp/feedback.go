@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/facts"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/facts"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 )
 
 const fixLine = "Fix: rewrite the file; the new write is the repair."

@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 
 	_ "modernc.org/sqlite"
 )
@@ -115,7 +115,7 @@ func advFirstLines(s string, n int) string {
 
 func TestAdvisoryOutcome(t *testing.T) {
 	e := newEnv(t)
-	checksDir, err := filepath.Abs("../../../quality")
+	checksDir, err := filepath.Abs("../../catalogue")
 	if err != nil {
 		t.Fatal(err)
 	}

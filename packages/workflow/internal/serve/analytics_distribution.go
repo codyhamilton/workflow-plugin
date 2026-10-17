@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 var distributionMeasures = map[string]bool{

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // minFinalDB and walHeadroom bound the estimate NeedBytes makes for the compacted database and the

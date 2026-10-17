@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 func secretText() string { return "AKIA" + "IOSFODNN7" + "EXAMPLE" }

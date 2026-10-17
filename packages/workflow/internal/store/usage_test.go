@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 )
 
 func ufact(n int, harness, model, conv, raw string, ts time.Time, in, out, cr, cw, reas int64, cost *float64) FactRow {

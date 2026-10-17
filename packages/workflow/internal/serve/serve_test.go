@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 func do(t *testing.T, h http.Handler, method, url, key, body string) (int, string) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // The measure × dimension matrix and the bucket units, served verbatim (DESIGN.md plan 12).

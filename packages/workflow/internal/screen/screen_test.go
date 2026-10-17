@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 func TestStepNoFactYet(t *testing.T) {

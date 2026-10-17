@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-const realQuality = "../../../quality"
+const realQuality = "../../catalogue"
 const design1 = "../../../../docs/design/01-event-model-and-ingest.md"
 
 func TestReportChecksVerbatim(t *testing.T) {

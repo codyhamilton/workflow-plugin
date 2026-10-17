@@ -79,3 +79,11 @@ Surfaces: the brief's owned paths.
 Deviations: none in the report. The report lives in a following commit so the rename commit stays empty of content edits.
 
 `artifact_feedback` on this report: not yet called.
+
+### Phase 2
+
+Module-path rewrite (Decision 1 rebase protocol), from repo root:
+
+```bash
+find packages/workflow -type f \( -name '*.go' -o -name go.mod \) -exec sed -i 's|github.com/codyhamilton/workflow-plugin/tools/workflow|github.com/codyhamilton/workflow-plugin/packages/workflow|g' {} +
+```

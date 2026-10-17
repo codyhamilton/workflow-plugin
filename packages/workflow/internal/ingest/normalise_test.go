@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/secrets"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/secrets"
 )
 
 type policyFixture struct {

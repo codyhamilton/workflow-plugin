@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // legacyLedger writes a tenant dir whose ledger.db is a pre-migration-5 database holding one fact.

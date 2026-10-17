@@ -13,11 +13,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/mcp"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/serve"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/mcp"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/screen"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/serve"
 )
 
 // Set with -ldflags -X main.version=… -X main.commit=…

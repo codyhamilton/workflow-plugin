@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // convFact builds a fact whose raw JSON carries the extra payload (so json_extract can read a

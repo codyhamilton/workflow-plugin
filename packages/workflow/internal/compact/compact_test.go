@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 var errStop = errors.New("compact_test: stop")

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
 )
 
 // RunStandalone is `workflow drain`: exit 0 when idle-exited, lock held by another or stopped.

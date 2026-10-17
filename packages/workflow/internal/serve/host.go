@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
 )
 
 // HostOptions configure Host.

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/serve"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/serve"
 
 	_ "modernc.org/sqlite"
 )

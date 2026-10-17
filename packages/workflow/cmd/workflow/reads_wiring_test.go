@@ -20,7 +20,7 @@ func TestReadsWiring(t *testing.T) {
 	if out, err := exec.Command("go", "build", "-o", bin, ".").CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
-	checks, err := filepath.Abs("../../../quality")
+	checks, err := filepath.Abs("../../catalogue")
 	if err != nil {
 		t.Fatal(err)
 	}

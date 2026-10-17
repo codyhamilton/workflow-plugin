@@ -58,7 +58,7 @@ func TestServeScorerWiring(t *testing.T) {
 	if err != nil || !strings.Contains(out, "WORKFLOW_CHECKS_DIR is unset") || strings.Contains(out, dummy) {
 		t.Fatalf("no checks dir: %v\n%s", err, out)
 	}
-	out, err, _ = run("TYPESAFE_API_KEY="+dummy, "WORKFLOW_CHECKS_DIR="+filepath.Join("..", "..", "..", "quality"))
+	out, err, _ = run("TYPESAFE_API_KEY="+dummy, "WORKFLOW_CHECKS_DIR="+filepath.Join("..", "..", "catalogue"))
 	if err != nil || !strings.Contains(out, "report=5") || strings.Contains(out, dummy) {
 		t.Fatalf("real checks: %v\n%s", err, out)
 	}

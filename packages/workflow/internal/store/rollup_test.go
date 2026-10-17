@@ -10,7 +10,7 @@ import (
 	"time"
 	_ "time/tzdata"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 )
 
 // hook rolls up one hook_event fact at second ts.

@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 )
 
 // The hourly hook_events rollup (migration 6): one row per distinct (hour, dimension tuple) with

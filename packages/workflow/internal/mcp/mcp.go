@@ -19,7 +19,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/drain"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
 )
 
 // Options configures Serve. Zero values take defaults.

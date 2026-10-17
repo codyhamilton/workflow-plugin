@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // The analytics reads (DESIGN.md plan 10, "Domain: Analytics reads"). Each handler resolves the

@@ -10,7 +10,7 @@ import (
 func near(a, b float64) bool { return math.Abs(a-b) < 1e-12 }
 
 func TestPricingTableMatchesTranscript(t *testing.T) {
-	want, err := os.ReadFile("../../../transcript/pricing.json")
+	want, err := os.ReadFile("../../../../tools/transcript/pricing.json")
 	if err != nil {
 		t.Fatal(err)
 	}

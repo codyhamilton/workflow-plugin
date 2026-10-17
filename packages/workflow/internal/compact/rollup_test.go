@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // rollupLedger appends a small hook_event ledger holding removable (opencode Remove-policy) rows

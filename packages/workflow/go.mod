@@ -1,4 +1,4 @@
-module github.com/codyhamilton/workflow-plugin/tools/workflow
+module github.com/codyhamilton/workflow-plugin/packages/workflow
 
 go 1.27.1
 

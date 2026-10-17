@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/screen"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 const briefPath = "docs/plans/01-x/briefs/1-01-a.md"
@@ -102,7 +102,7 @@ func hits(t *testing.T, s *Server, key, q string) []map[string]any {
 }
 
 func TestAdvisoryReads(t *testing.T) {
-	checks, err := scorer.LoadChecks("../../../quality")
+	checks, err := scorer.LoadChecks("../../catalogue")
 	if err != nil {
 		t.Fatal(err)
 	}

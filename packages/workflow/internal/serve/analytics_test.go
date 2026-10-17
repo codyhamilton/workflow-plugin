@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/store"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/screen"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
 )
 
 // qaScorer is contentScorer with its score filed under a catalog check, so the scores route has a
@@ -81,7 +81,7 @@ func strs(v any) []string {
 func mustJSON(v any) []byte { b, _ := json.Marshal(v); return b }
 
 func TestAnalyticsOutcome(t *testing.T) {
-	checks, err := scorer.LoadChecks("../../../quality")
+	checks, err := scorer.LoadChecks("../../catalogue")
 	if err != nil {
 		t.Fatal(err)
 	}

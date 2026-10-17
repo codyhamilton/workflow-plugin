@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 	"github.com/klauspost/compress/zstd"
 )
 

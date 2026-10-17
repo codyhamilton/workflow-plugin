@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
 )
 
 type policyFact struct {

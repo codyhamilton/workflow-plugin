@@ -15,9 +15,9 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/screen"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/screen"
 )
 
 const (
@@ -271,7 +271,7 @@ func TestScreeningOutcome(t *testing.T) {
 		}
 	})
 	t.Run("report checks", func(t *testing.T) {
-		c, err := scorer.LoadChecks("../../../quality")
+		c, err := scorer.LoadChecks("../../catalogue")
 		if err != nil {
 			t.Fatal(err)
 		}

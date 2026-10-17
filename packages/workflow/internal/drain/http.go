@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/clientconfig"
-	"github.com/codyhamilton/workflow-plugin/tools/workflow/internal/ingest"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
+	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
 )
 
 // HTTPSink POSTs to <Endpoint>/v1/ingest with the bearer key (none in local mode), 30 s timeout.
