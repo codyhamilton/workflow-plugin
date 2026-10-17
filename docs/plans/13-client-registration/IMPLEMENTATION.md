@@ -21,7 +21,13 @@ Resumed: 2026-10-17T15:23:19Z.
 Run identity: https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5
 Resuming HEAD: `140c63a`
 
-The ctzns token can create apps. Cody corrected the Fly app name to `yakka`. The empty app `workflow-collector` was destroyed. App `yakka` now exists with a volume, dedicated addresses, and an unverified `yakka.build` certificate. The GitHub OAuth client id and secret are still absent, and `yakka.build` has no DNS, so there is no release. The phase is not closed. The product, CLI, and packages were not renamed.
+The ctzns token can create apps. Cody corrected the Fly app name to `yakka`. The empty app `workflow-collector` was destroyed. App `yakka` now exists with a volume, dedicated addresses, and an unverified `yakka.build` certificate. The GitHub OAuth client id and secret were absent from that environment, and `yakka.build` had no DNS, so that resume made no release. The product, CLI, and packages were not renamed.
+
+Resumed: 2026-10-17T15:46:11Z.
+Run identity: https://cursor.com/agents/bc-1ec6b82c-d11a-5065-b210-5ffbb1fbf758
+Resuming HEAD: `2372142`
+
+`GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent from this environment (injected names are `GH_TOKEN` and `FLY_API_TOKEN`; `FLY_APP` is `yakka`). Both OAuth names were already staged on app `yakka`. This run did not call `fly secrets set` and did not print the values. `fly deploy --ha=false` released one machine and moved those secrets to Deployed. Public DNS for `yakka.build` is Cloudflare, which is expected. The certificate stays Not verified until `TXT _fly-ownership.yakka.build` = `app-5ydex1q` is published. `https://yakka.build` is Cloudflare 525. The phase is not closed.
 
 Refined into four units, committed in `fad2d04`. 4-01 first. Then 4-02. After 4-02, 4-03 and 4-04 (4-04 also only needs 4-01). Phase 3 carried items stay out of this phase: other routes omitting `tenant`, the registry-open panic, e2e seeding, and the profile expiry prefill. 4-04 may note the tenant gap and must not claim full-site wiring.
 
@@ -45,18 +51,18 @@ artifact_feedback on the four phase 4 briefs: quality service unreachable at `ht
 
 ### 4-02-fly-collector-deploy
 
-- Built: Fly app `yakka` in org `ctzns`. Volume `workflow_serve_data` `vol_v3gppxdm66k9gmw4` in `iad` (1 GB, unattached). Dedicated IPv4 `137.66.6.45`. Dedicated IPv6 `2a09:8280:1::1bb:db4d:0`. Certificate `yakka.build` created, status Not verified. No machines, no secrets, no release. The empty app `workflow-collector` was destroyed. `fly.toml` `app` is `yakka`. `fly config validate` passed.
-- Surfaces: `fly.toml`, the collector-hosting sentences in `DESIGN.md` and `docs/design/07-analytics-site.md`, briefs `4-01`, `4-02`, and `4-03` (app name only), and the report.
-- `fly secrets list -a yakka` is empty, so `WORKFLOW_SERVE_KEYS` is unset. `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent from the environment (injected names are only `GH_TOKEN` and `FLY_API_TOKEN`). `fly deploy` was not run. `https://yakka.build/v1/health` does not resolve.
-- Deviations: the earlier `l-fante` attempt created nothing (`bdeb88d`). A first create in this resume used the name `workflow-collector` and was destroyed after Cody corrected the name. No other Fly app was touched.
-- Agent: this run, https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5. Harness did not report turns or final context.
+- Built: Fly app `yakka` in org `ctzns`. Volume `workflow_serve_data` `vol_v3gppxdm66k9gmw4` in `iad` (1 GB), now attached to machine `8047ddb6475de8` (`withered-waterfall-175`, started, shared-cpu-1x 1024MB, image `yakka:deployment-01M558Z6K3Q8GGZ2PXRZVERQ4E`). Dedicated IPv4 `137.66.6.45`. Dedicated IPv6 `2a09:8280:1::1bb:db4d:0`. Certificate `yakka.build` is Not verified. The empty app `workflow-collector` was destroyed and was not recreated. `fly.toml` `app` is `yakka`.
+- Surfaces: the report. No manifest change in this resume.
+- `fly secrets list -a yakka` is `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`, both Deployed. `WORKFLOW_SERVE_KEYS` is unset. This environment still does not have those OAuth variables, so this run did not set them; they were already staged and the deploy released them. `https://yakka.build/v1/health` and `/oauth/login` are Cloudflare 525. `http://yakka.build/v1/health` is 301 to the HTTPS URL and the response includes `via: 1.1 fly.io`. `https://yakka.fly.dev/v1/health` is 200 and `/oauth/login` is 302 to GitHub with `redirect_uri=https://yakka.build/oauth/callback`. That hostname is not the close condition.
+- Deviations: the earlier `l-fante` attempt created nothing (`bdeb88d`). A first create used the name `workflow-collector` and was destroyed after Cody corrected the name. This resume deployed without calling `fly secrets set`, because the env vars were absent and the staged secrets were already the OAuth pair.
+- Agent: https://cursor.com/agents/bc-1ec6b82c-d11a-5065-b210-5ffbb1fbf758. Harness did not report turns or final context. Earlier handoff: https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5.
 
 ### 4-03-fly-collector-outcome-verify
 
-- Built: nothing. No health, OAuth, restart, revocation, or CORS check on `https://yakka.build`. The host does not resolve, and app `yakka` has no machines.
+- Built: nothing on the close origin. No ingest, revoke, restart, or CORS transcript. `https://yakka.build` is 525. The fly.dev answers were recorded only as the fallback and were not treated as proof.
 - Surfaces: the report only.
 - Deviations: none. A local `workflow serve` was not used as a stand-in.
-- Agent: this run, https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5. Harness did not report turns or final context.
+- Agent: https://cursor.com/agents/bc-1ec6b82c-d11a-5065-b210-5ffbb1fbf758. Harness did not report turns or final context. Earlier handoff: https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5.
 
 ### Public origin `https://yakka.build`
 
@@ -65,25 +71,27 @@ Cody set the phase 4 close condition to `https://yakka.build`. The GitHub OAuth 
 - Built: `WORKFLOW_PUBLIC_URL` in `fly.toml` is `https://yakka.build`. The placeholder client id and the placeholder Pages CORS origin are gone from the committed env. Design 7 Hosting and the phase 4 outcome name that origin and that callback. Briefs 4-01, 4-02, and 4-03 name the same origin.
 - Surfaces: `fly.toml`, `docs/design/07-analytics-site.md`, `docs/plans/13-client-registration/DESIGN.md`, briefs `4-01`, `4-02`, and `4-03`.
 - `fly config validate` on `fly.toml` passed, including `--strict`.
-- `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are unset in the environment. Injected secret names on this resume are `GH_TOKEN` and `FLY_API_TOKEN`. `FLY_APP` is `yakka`, which matches the Fly app. No values were invented or written down.
-- The earlier `l-fante` token could not create the app. This resume destroyed empty `workflow-collector` and created `yakka` in org `ctzns`. DNS to set, from `fly certs add yakka.build -a yakka`: `A yakka.build → 137.66.6.45` and `AAAA yakka.build → 2a09:8280:1::1bb:db4d:0`. The certificate is Not verified. `https://yakka.build` does not resolve. Do not use the destroyed app's addresses.
-- The phase is not closed. `https://yakka.build` was requested and did not resolve, so it is not proof.
+- `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are unset in this environment. Injected secret names are `GH_TOKEN` and `FLY_API_TOKEN`. `FLY_APP` is `yakka`. Both OAuth names are Deployed on the app. No values were invented, printed, or written down.
+- Public DNS is Cloudflare (`104.21.87.219`, `172.67.147.5`, and Cloudflare AAAA). That proxy is intentional. `fly certs setup yakka.build -a yakka` requires `TXT _fly-ownership.yakka.build` = `app-5ydex1q` before Fly can issue the certificate through it. `dig` shows that TXT is absent. The certificate is Not verified. `https://yakka.build/v1/health` and `/oauth/login` are Cloudflare 525. Direct TLS to `137.66.6.45` with SNI `yakka.build` fails the handshake. Do not replace the Cloudflare addresses with the Fly IPs. Do not use the destroyed app's addresses.
+- Cloudflare SSL must stay Full (strict). `http://yakka.build/v1/health` is 301 to HTTPS with `via: 1.1 fly.io`, so Flexible will loop. The 525 is the missing origin certificate, not that loop.
+- `https://yakka.fly.dev/v1/health` is 200 and `/oauth/login` redirects to GitHub with the `yakka.build` callback. That is not proof.
+- The phase is not closed.
 
 ### Phase 4 verification
 
 The public origin is not proven. The phase is not closed. No `Workflow-Phase: client-registration:4` trailer.
 
-- App `yakka` exists in org `ctzns` with volume `vol_v3gppxdm66k9gmw4`, dedicated IPv4 `137.66.6.45`, dedicated IPv6 `2a09:8280:1::1bb:db4d:0`, and an unverified certificate for `yakka.build`. `workflow-collector` does not exist. There are no machines and no secrets. `WORKFLOW_SERVE_KEYS` is unset. `fly deploy` was not run because the GitHub OAuth client id and secret are absent.
-- `curl` of `https://yakka.build/v1/health` and `https://yakka.build/oauth/login` failed with `Could not resolve host`. `dig` returned no A or AAAA for `yakka.build`.
-- An earlier local non-loopback `workflow serve` (OAuth env set, `WORKFLOW_SERVE_KEYS` unset, `WORKFLOW_SERVE_CORS_ORIGINS=https://pages.example`) returned health 200, a GitHub redirect, CORS without credentials, and restart persistence for a token. That was the binary, not this fly app, and it is not proof of `https://yakka.build`.
+- App `yakka` is released in org `ctzns`: machine `8047ddb6475de8` started, volume `vol_v3gppxdm66k9gmw4` attached, secrets `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` Deployed, `WORKFLOW_SERVE_KEYS` unset. `workflow-collector` does not exist. The process logs `workflow serve: listening on [::]:8080`.
+- `curl` of `https://yakka.build/v1/health` and `https://yakka.build/oauth/login` returned 525 from Cloudflare. `fly certs check yakka.build -a yakka` is Not verified. The ownership TXT is not published.
+- An earlier local non-loopback `workflow serve` returned health 200, a GitHub redirect, CORS without credentials, and restart persistence. That was the binary, not this fly app, and it is not proof of `https://yakka.build`. Restart, revocation, and CORS were not run against the fly app.
 - `docs/design/07-analytics-site.md` names the fly collector at `https://yakka.build` and leaves Pages as the pasted-token client.
 
 artifact_feedback on the four phase 4 briefs and reports `4-01`, `4-02`, `4-03`, and `4-04`: service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores). No `workflow` binary is on this machine.
 
 ### Remaining
 
-1. Cody sets DNS: `A yakka.build → 137.66.6.45` and `AAAA yakka.build → 2a09:8280:1::1bb:db4d:0`. Then `fly certs check yakka.build -a yakka` can verify. Do not treat `https://yakka.fly.dev` as the close condition. Do not recreate `workflow-collector`.
-2. Cody provides `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` in the environment (the GitHub OAuth app callback is already `https://yakka.build/oauth/callback`). Set both with `fly secrets set -a yakka`. Do not commit them. Do not deploy until both are set. Then `fly deploy` from this branch.
+1. Publish `TXT _fly-ownership.yakka.build` = `app-5ydex1q`. Leave Cloudflare proxying `yakka.build`. Do not set the apex A/AAAA to `137.66.6.45` / `2a09:8280:1::1bb:db4d:0`. Keep SSL Full (strict). Then `fly certs check yakka.build -a yakka` can become verified. Do not treat `https://yakka.fly.dev` as the close condition. Do not recreate `workflow-collector`.
+2. OAuth secret names are already Deployed. Do not rotate them unless the GitHub app changed. The callback is `https://yakka.build/oauth/callback`.
 3. Then re-run 4-03 against `https://yakka.build`: health `200`, `/oauth/login` redirect to GitHub with that callback, `WORKFLOW_SERVE_KEYS` unset, a `read_write` token still ingests after a machine restart, a token revoked before the restart does not. The Pages origin is still unknown, so `WORKFLOW_SERVE_CORS_ORIGINS` stays unset until Cody names it; the CORS sentence of the outcome waits on that origin.
 4. Collector-mode `tenant` is still only on `/` and `/profile`. `Server.New` still panics if the registry cannot be opened or persisted. E2e still seeds `registry.json`. The profile expiry field is still prefilled in the browser.
 
