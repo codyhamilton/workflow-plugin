@@ -46,29 +46,41 @@ The same binary and code path in both. Differences are configuration only.
 
 Port 8770 avoids the legacy Python service's 8765 while both exist.
 
-### Configuration (first round)
+### Configuration
 
 Server configuration is environment only:
 
 | Variable | Meaning |
 |---|---|
 | `WORKFLOW_SERVE_ADDR` | listen address, default `127.0.0.1:8770` |
-| `WORKFLOW_SERVE_DATA` | data directory |
-| `WORKFLOW_SERVE_KEYS` | `tenant=key[,tenant=key…]`; unset or empty means keyless local mode |
-| `WORKFLOW_SERVE_CORS_ORIGINS` | comma-separated exact origins allowed to read a keyed server from a browser; unset or empty means no CORS headers; ignored in local mode, which allows loopback origins ([design 7](07-analytics-site.md#browser-access)) |
+| `WORKFLOW_SERVE_DATA` | data directory; tenant facts at `<data>/<tenant>/`; the token registry, sessions, and admission policy live alongside, not inside a tenant directory |
+| `WORKFLOW_SERVE_KEYS` | must be unset or empty; any non-empty value makes the process exit before it listens on loopback or remote. Legacy env-key credentials are not supported. |
+| `WORKFLOW_SERVE_CORS_ORIGINS` | comma-separated exact origins allowed to call bearer-authenticated reads from a browser; unset or empty means no CORS headers; ignored in local mode, which allows loopback origins ([design 7](07-analytics-site.md#browser-access)) |
+| `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `WORKFLOW_PUBLIC_URL` | set together for remote collector mode (non-loopback bind); ignored on loopback ([design 5](05-distribution.md#local-bootstrap)) |
 | `TYPESAFE_API_KEY` | scorer credential; server side only, never in any client config |
 
-Registration, key issue and rotation are out of scope. A key maps to exactly one tenant; the client
-never names its tenant. Keys are compared in constant time and never logged.
+**Local mode** is loopback with no credential requirement, for one user on one machine:
 
-**Local mode** is the keyless case, for one user on one machine:
-
-- Every request maps to tenant `local`, and any key sent is ignored.
-- The bind must be loopback; the service refuses to start keyless on any other address.
+- Every request maps to tenant `local`; any `Authorization: Bearer` token and any session cookie are
+  ignored.
+- The bind must be loopback; a non-loopback bind without the GitHub OAuth env is refused at startup.
 - Browser guards: the `Host` header must be a loopback name (stops DNS rebinding), and a POST must
   be `Content-Type: application/json` (a cross-origin form cannot send it without a preflight).
 
-A keyed service sent no key answers 401 saying a key is required (`workflow login`).
+**Remote collector mode** is a non-loopback bind with the GitHub OAuth env set. A person signs in
+with GitHub; the session opens the embedded analytics dashboard and profile ([design
+7](07-analytics-site.md#shape)). On the profile they create tenants and issue API tokens.
+Each issued token is plaintext `wk_` plus an unguessable body, belongs to one tenant, has scope
+`read` or `read_write` chosen at creation, and expires at an `expires_at` the issuer set with no
+server default. Clients and agents configure that plaintext as `Authorization: Bearer`. The
+registry stores SHA-256 only; comparison is constant time and neither plaintext nor hash is logged.
+The session cookie is not a bearer token and is not used for ingest.
+
+`POST /v1/tenants`, `POST /v1/tokens`, `GET /v1/tokens`, and `POST /v1/tokens/<id>/revoke` are
+session-only (a bearer on those routes is 401). Revocation and expiry take effect on the next
+request without restart. A domain-policy change does not revoke tokens.
+
+A remote ledger route with no bearer and no session is 401 and names sign-in at `/login`.
 
 ## API
 
@@ -78,9 +90,12 @@ endpoints. Unknown fields in a fact are kept in its raw payload, never rejected.
 | Method and path | Auth | Purpose |
 |---|---|---|
 | `GET /v1/health` | none | liveness, version, pending count, screen gaps, `compaction` (`complete` or `required`) |
-| `POST /v1/ingest` | key | a batch of facts from a drain |
-| advisory reads (`/v1/artifacts`, `/v1/checks`, `/v1/baselines`, `/v1/search`) | key | defined by [design 4](04-advisory-surface.md#api) |
-| analytics reads (`/v1/analytics/*`) | key | defined by [design 7](07-analytics-site.md#analytics-reads) |
+| `POST /v1/ingest` | local: none; remote: bearer `read_write` | a batch of facts from a drain |
+| advisory reads (`/v1/artifacts`, `/v1/checks`, `/v1/baselines`, `/v1/search`) | local: none; remote: bearer `read` or `read_write`, or session with `?tenant=` for an owned tenant | defined by [design 4](04-advisory-surface.md#api) |
+| analytics reads (`/v1/analytics/*`) | same as advisory reads | defined by [design 7](07-analytics-site.md#analytics-reads) |
+| `GET /v1/me` | session | signed-in GitHub identity and owned tenants (collector dashboard) |
+| `POST /v1/tenants`, `POST /v1/tokens`, `GET /v1/tokens`, `POST /v1/tokens/<id>/revoke` | session (tenant owner) | create tenant; issue, list, or revoke tokens; plaintext `token` only in the `POST /v1/tokens` response |
+| `GET /v1/admin/tokens` | session (admin) | list every token without plaintext |
 
 Outside `/v1`, the binary serves the embedded analytics site at `/` and answers browsers with the
 CORS rules in [design 7](07-analytics-site.md#browser-access). `/v1` paths are never HTML.
@@ -100,7 +115,9 @@ Response: `200` with one result per fact, in order:
 - `accepted` and `duplicate` mean delivered: the drain deletes the file.
 - `rejected` is per fact: the drain moves that file only to `rejected/` with the reason. One bad
   fact never rejects its batch.
-- Whole-request errors: `400` for a body that is not a facts batch, `401` for a bad key, `413` above
+- Whole-request errors: `400` for a body that is not a facts batch, `401` for missing, unknown,
+  expired, or revoked bearer (and for bearer on session-only routes), `403` for `read` scope on
+  ingest (`read-only token`), `413` above
   the size limit (16 MB), `429` with `Retry-After`, `5xx` for retry. The drain splits on `400` and
   `413` (design 2), so a whole batch is never rejected for one file.
 
@@ -245,8 +262,7 @@ In local mode `workflow serve` also drains the user's queue, as a long-lived dra
   sink calls the same ingest function as the handler, so the precheck and screening apply. In
   process never means unchecked.
 - It drains only when the client config's endpoint is this server (same host and port). Otherwise
-  the queue is addressed elsewhere and it leaves it alone. Its tenant is the one the client config's
-  key maps to.
+  the queue is addressed elsewhere and it leaves it alone. Its tenant is always `local`.
 - If it stops, the lock is released, the next hook starts a standalone drain, and that drain posts
   to the endpoint with backoff until `serve` returns.
 
@@ -264,7 +280,8 @@ Cheap, in temp directories, never the live queue or data.
 
 1. Ingest: a batch with one secret-bearing fact returns per-fact results; only that fact is
    rejected, with a reason that does not contain the secret; a resend is all `duplicate`.
-2. Auth: no key, wrong key, and a key for tenant B never see tenant A's artifacts.
+2. Auth: on remote, no bearer, wrong bearer, `read` on ingest, and a bearer for tenant B never see
+   tenant A's artifacts; session `?tenant=` is limited to owned tenants.
 3. Writer: replay N tenants each sending bursts of about 20 facts; record p99 commit latency and
    database size with content stored by hash.
 4. Screening: scorer pass, flag and unreachable each leave the stated state; no key gives

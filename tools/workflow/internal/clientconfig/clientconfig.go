@@ -1,7 +1,8 @@
-// Package clientconfig loads the one client config file the drain and the MCP shim share
-// (design 2, Config): ~/.config/workflow/client.toml with `endpoint` and `key`. The file means
-// remote mode and is written by `workflow login`; with no file the client is in local mode and
-// talks to the keyless local service at LocalEndpoint.
+// Package clientconfig loads client endpoint and key for the drain, MCP shim, and status.
+// Resolution (plan 13): when both WORKFLOW_ENDPOINT and WORKFLOW_KEY are set they win over the
+// file; exactly one of those variables set is an error; otherwise ~/.config/workflow/client.toml
+// means remote mode (written by `workflow login`); with no file the client is local mode at
+// LocalEndpoint with no bearer.
 //
 // The path is $WORKFLOW_CLIENT_CONFIG when set (tests only), else $HOME/.config/workflow/client.toml.
 // Only the subset design 2 shows is parsed: `name = "string"` lines, `#` comments and blank lines;
@@ -21,6 +22,14 @@ import (
 
 // LocalEndpoint is where local mode sends, matching serve's default address.
 const LocalEndpoint = "http://127.0.0.1:8770"
+
+const (
+	envEndpoint = "WORKFLOW_ENDPOINT"
+	envKey      = "WORKFLOW_KEY"
+)
+
+// ErrPartialEnv means exactly one of WORKFLOW_ENDPOINT and WORKFLOW_KEY is set.
+var ErrPartialEnv = errors.New("clientconfig: WORKFLOW_ENDPOINT and WORKFLOW_KEY must both be set or both unset")
 
 // Config is the parsed file, or the local default when there is none.
 type Config struct {
@@ -52,8 +61,18 @@ func Path() string {
 }
 
 // Load reads and parses the config on every call, so edits need no restart. A missing file is
-// local mode, not an error.
+// local mode, not an error, unless env overrides apply.
 func Load() (Config, error) {
+	ep := strings.TrimSpace(os.Getenv(envEndpoint))
+	key := strings.TrimSpace(os.Getenv(envKey))
+	epSet := ep != ""
+	keySet := key != ""
+	switch {
+	case epSet && keySet:
+		return Config{Endpoint: ep, Key: key}, nil
+	case epSet || keySet:
+		return Config{}, ErrPartialEnv
+	}
 	path := Path()
 	data, err := os.ReadFile(path)
 	if err != nil {

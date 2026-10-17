@@ -11,6 +11,7 @@
 	import FilterChips from '$lib/components/FilterChips.svelte';
 	import Notices from '$lib/components/Notices.svelte';
 	import SaveView from '$lib/components/SaveView.svelte';
+	import { isCollectorMode } from '$lib/api';
 	import { clearError, fetchError, pruneNotices, setNoticeView } from '$lib/state.svelte';
 
 	let { children } = $props();
@@ -27,15 +28,24 @@
 		['/conversations', 'Conversations'],
 		['/explore', 'Explore'],
 		['/dashboards', 'Dashboards'],
+		['/profile', 'Profile'],
 		['/settings', 'Settings']
 	];
 
-	// Filters, chips, notices and the save control show everywhere except settings.
-	const chrome = $derived(page.url.pathname !== '/settings');
+	// Filters, chips, notices and the save control show everywhere except settings, login, and profile.
+	// embed=1 does not hide the shell.
+	const chrome = $derived(
+		page.url.pathname !== '/settings' &&
+			page.url.pathname !== '/login' &&
+			page.url.pathname !== '/profile'
+	);
+
+	const collector = $derived(isCollectorMode());
+	const noTenant = $derived(collector && fetchError.status === 403 && fetchError.message === 'no such tenant');
 
 	// Every link but Settings keeps the current filters in the query string.
 	function navHref(path: string): string {
-		return path === '/settings' ? path : path + page.url.search;
+		return path === '/settings' || path === '/profile' ? path : path + page.url.search;
 	}
 
 	// Register the view before any child effect runs (`$effect.pre` flushes first), so a notice a
@@ -121,7 +131,11 @@
 		{#if fetchError.message}
 			<div class="error" role="alert" data-testid="error-panel">
 				<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
-				{#if fetchError.status === 401 || fetchError.network}
+				{#if noTenant}
+					<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
+				{:else if collector && fetchError.status === 401}
+					<p><a href="/login">Sign in</a> to load data from this collector.</p>
+				{:else if fetchError.status === 401 || fetchError.network}
 					<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
 				{/if}
 			</div>

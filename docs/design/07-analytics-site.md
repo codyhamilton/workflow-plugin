@@ -10,8 +10,12 @@ serve`, and a static Svelte site that renders them. Part of
 
 `packages/workflow-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
 CSS, JS; no SSR). Locally, `workflow serve` embeds that build and serves it on the same origin as
-`/v1`. Remotely, the same build is a Cloudflare Pages site that calls a keyed `workflow serve` with a
-browser-supplied bearer token. Aggregation stays in SQLite; the browser receives JSON aggregates and
+`/v1`. On a remote collector (non-loopback bind with the GitHub OAuth env set), the same embedded
+build is same-origin with `/v1`: the person signs in at `/login` (`GET /oauth/login` → GitHub →
+`/oauth/callback`), the collector sets a `workflow_session` cookie, and dashboard `GET`s use
+`credentials: 'include'` with no `Authorization` header. `GET /v1/me` supplies the GitHub identity and
+owned tenant list; data routes carry `?tenant=` from that response. Cross-origin Cloudflare Pages
+still calls a keyed `workflow serve` with a browser-supplied bearer token from `/settings`. Aggregation stays in SQLite; the browser receives JSON aggregates and
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
 
@@ -30,13 +34,15 @@ change what the agent does in a run (principle 2).
 | `/builder` | Chart builder | any measure, up to two dimensions and a bucket |
 | `/dashboards` | Dashboards | ordered grids of saved views |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
+| `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
-Every report except `/settings` shares one filter set held in the page URL: window, `repo_id`,
-`harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`, `conversation_id`. The
-URL is the view: filters, window, active view and every chart configuration (measure, dimensions,
-bucket, chart type, top) serialise into the query string, so pasting it reproduces the view, and
-filters survive navigation between views. There is no server-side saved-view store (the ledger has no
-user identity to own one).
+Every report except `/settings` and `/login` shares one filter set held in the page URL: window,
+`repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`,
+`conversation_id`. The URL is the view: filters, window, active view and every chart configuration
+(measure, dimensions, bucket, chart type, top) serialise into the query string, so pasting it
+reproduces the view, and filters survive navigation between views. Saved views and dashboards stay in
+`localStorage`; the collector knows the signed-in GitHub user via the session, not via a server-side
+view store.
 
 What the request's words mean on the ledger: an **agent** is a `conversation_id`; a **hook** is a
 `hook_event` split by `event` and `payload.tool_name` (no cross-harness tool taxonomy); **build /
@@ -47,8 +53,10 @@ type** is the artifact kind plus its check distributions.
 ## Analytics reads
 
 Additive `/v1` routes. Every analytics `GET` resolves the tenant exactly as `GET /v1/artifacts`
-does: local mode maps to tenant `local` and ignores any token; keyed mode requires `Authorization:
-Bearer <key>`. `GET /v1/health` stays unauthenticated and is not an analytics route. Unknown routes
+does: local mode maps to tenant `local` and ignores any token and any session; remote collector mode
+accepts either `Authorization: Bearer` (issued token) or a `workflow_session` cookie with `?tenant=`
+for a tenant the session owns; a cross-origin Pages client sends only the pasted bearer from
+`/settings`. `GET /v1/health` stays unauthenticated and is not an analytics route. Unknown routes
 under `/v1/` are JSON 404; errors are `{"error":"<text>"}`. The routes read only the ledger's columns: no payload bodies (the ledger holds none, design 1), no
 artifact text and no search snippets. Model, token and cost fields are served as aggregates and as
 per-call rows in the conversation timeline.
@@ -220,15 +228,21 @@ on a compacted copy of the real ledger.
   `localGuard` (loopback `Host`, JSON-only POST) runs first.
 - Keyed mode: the same headers only for an origin listed exactly in `WORKFLOW_SERVE_CORS_ORIGINS`
   ([design 3](03-remote-service.md#configuration-first-round)). No wildcard, no reflected origin.
-- No cookies and no `Access-Control-Allow-Credentials`. The site sends `Authorization` only when a
-  token is configured.
+- Collector mode: the session cookie is same-origin only; CORS stays without credentials. The embedded
+  site sends no `Authorization` header and does not read `workflow-analytics-key` from
+  `localStorage`. Pages sends `Authorization` only when a token is configured in `/settings`.
 
 ## The site
 
+- On the collector, an unauthenticated analytics `GET` is 401 and the layout sends the browser to
+  `/login`. After GitHub admission, the cookie backs same-origin reads; a 403 `no such tenant` means
+  the session owns no matching `?tenant=` yet (not a logged-out 401). `POST /logout` clears the
+  session.
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
-  `workflow-analytics-base` and `workflow-analytics-key`. An empty base means same-origin `/v1`. The
-  token is sent only as `Authorization: Bearer` and never written into the build or the repo; the
-  build's bundle check fails if a key appears in it.
+  `workflow-analytics-base` and `workflow-analytics-key`. An empty base means same-origin `/v1`
+  (collector session path). A non-empty base is the cross-origin Pages path: the token is sent only
+  as `Authorization: Bearer` and never written into the build or the repo; the build's bundle check
+  fails if a key appears in it.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
@@ -285,6 +299,21 @@ on a compacted copy of the real ledger.
 
 ## Hosting
 
+- **Fly.io remote collector:** Plan 13 deploys the public `workflow serve` host on fly.io (`fly.toml`:
+  app `yakka`, `WORKFLOW_PUBLIC_URL` `https://yakka.build`). The GitHub OAuth callback
+  is `https://yakka.build/oauth/callback`. The product name stays `workflow`. The Fly app name is `yakka`.
+  One machine runs the image built from the repo `Dockerfile` (analytics
+  `build/` copied into `tools/workflow/internal/serve/site/`, then `workflow serve` on internal port
+  8080). A fly volume `workflow_serve_data` mounts at `/data`; `WORKFLOW_SERVE_DATA=/data` holds the
+  registry and tenant ledgers across restarts. `WORKFLOW_SERVE_KEYS` is unset. GitHub OAuth uses that
+  collector origin (`GET /oauth/login`, callback `https://yakka.build/oauth/callback`); `GITHUB_OAUTH_CLIENT_ID`
+  and `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. The embedded site is same-origin with `/v1` on that host: session
+  cookie after `/login`, no pasted key in the build. On the collector dashboard, `?tenant=` from
+  `GET /v1/me` is wired on the overview and on `/profile` where tenant context applies; other
+  report routes do not append it yet. There is no Cloudflare Pages site for this collector, so
+  `WORKFLOW_SERVE_CORS_ORIGINS` is unset. If a Pages origin is added later, set that variable to the
+  exact origin so a browser there can `GET /v1/analytics/*` with a pasted bearer. Credentialed CORS
+  stays off.
 - The site's build output is copied into `tools/workflow/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
   `index.html` is missing or is the placeholder, then restores the committed placeholder on exit.
@@ -296,9 +325,12 @@ on a compacted copy of the real ledger.
   `Cache-Control: no-cache`; files under `_app/immutable/` are `public, max-age=31536000,
   immutable`. `/v1` and `/v1/*` are never HTML. In keyed mode the static files need no key; they
   carry no tenant data.
-- `packages/workflow-analytics/wrangler.toml` declares `pages_build_output_dir = "./build"`, the same
-  build. With no `404.html`, Pages serves it as a single-page app. Creating the Pages project,
-  attaching a hostname and setting `WORKFLOW_SERVE_CORS_ORIGINS` to that origin are operator
+- **Cloudflare Pages (static pasted-token client):** `packages/workflow-analytics/wrangler.toml`
+  declares `pages_build_output_dir = "./build"`, the same artifact as the embedded collector build.
+  Pages is a static host only: `/settings` stores the collector API base and a pasted bearer in
+  `localStorage`; the site never receives the collector `workflow_session` cookie. With no
+  `404.html`, Pages serves it as a single-page app. Creating the Pages project, attaching a hostname,
+  and setting the fly collector's `WORKFLOW_SERVE_CORS_ORIGINS` to that exact origin are operator
   actions.
 
 ## Open issues
@@ -332,6 +364,7 @@ on a compacted copy of the real ledger.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
 16. The layout header and main use the 4/8/16/24/32 space scale. The filter bar, filter chips, and save-view control still use rem gaps. Pick scale steps and restyle those controls.
 17. Overview links to `/trends` set `metric` (`artifact_versions`, `distinct_content`, `commits`), which is the key that page reads. The drill-down sentence says those links set `measure`. Pick one query key and make the sentence and the page agree.
+18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser; a device code keeps the token plaintext in `registry.json` until exchange.
 
 ## Live cutover record (2026-10-11)
 

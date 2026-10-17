@@ -32,6 +32,9 @@ var tenantRE = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`)
 type Config struct {
 	Addr, Data string
 	Keys       []KeyPair
+	PublicURL  string
+	GitHubOAuthClientID     string
+	GitHubOAuthClientSecret string
 	// CORSOrigins are the exact origins allowed to read a keyed server from a browser. Local mode
 	// ignores it and allows loopback origins.
 	CORSOrigins []string
@@ -43,12 +46,33 @@ type KeyPair struct{ Tenant, Key string }
 // LocalTenant is the one tenant of local mode.
 const LocalTenant = "local"
 
-// Local reports local mode: no keys, every request is LocalTenant, and the bind is loopback.
-func (c Config) Local() bool { return len(c.Keys) == 0 }
+// Local reports local mode: loopback bind (OAuth env ignored) or keyless non-remote config. Every
+// local request is LocalTenant and bearer tokens are ignored.
+func (c Config) Local() bool {
+	if c.Addr != "" && loopbackBind(c.Addr) {
+		return true
+	}
+	if len(c.Keys) > 0 {
+		return false
+	}
+	return !c.Remote()
+}
 
-// ConfigFromEnv reads WORKFLOW_SERVE_ADDR, WORKFLOW_SERVE_DATA and WORKFLOW_SERVE_KEYS. With no
-// keys the service runs in local mode and refuses any bind that is not loopback.
+// Remote reports collector mode: non-loopback bind with GitHub OAuth env configured.
+func (c Config) Remote() bool {
+	if c.Addr == "" || loopbackBind(c.Addr) {
+		return false
+	}
+	return c.GitHubOAuthClientID != "" && c.GitHubOAuthClientSecret != "" && c.PublicURL != ""
+}
+
+// ConfigFromEnv reads serve configuration from the environment. Loopback binds are always local
+// mode. A non-loopback bind requires GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_CLIENT_SECRET, and
+// WORKFLOW_PUBLIC_URL. WORKFLOW_SERVE_KEYS must be empty.
 func ConfigFromEnv(getenv func(string) string) (Config, error) {
+	if strings.TrimSpace(getenv("WORKFLOW_SERVE_KEYS")) != "" {
+		return Config{}, fmt.Errorf("WORKFLOW_SERVE_KEYS is set; keyed startup via environment is no longer supported")
+	}
 	c := Config{Addr: getenv("WORKFLOW_SERVE_ADDR"), Data: getenv("WORKFLOW_SERVE_DATA")}
 	if c.Addr == "" {
 		c.Addr = "127.0.0.1:8770"
@@ -65,12 +89,39 @@ func ConfigFromEnv(getenv func(string) string) (Config, error) {
 			c.CORSOrigins = append(c.CORSOrigins, o)
 		}
 	}
-	ks, err := ParseKeys(getenv("WORKFLOW_SERVE_KEYS"))
-	c.Keys = ks
-	if err == nil && c.Local() && !loopbackBind(c.Addr) {
-		err = fmt.Errorf("WORKFLOW_SERVE_KEYS is empty, so WORKFLOW_SERVE_ADDR must be loopback (it is %q)", c.Addr)
+	if loopbackBind(c.Addr) {
+		return c, nil
 	}
-	return c, err
+	id := strings.TrimSpace(getenv("GITHUB_OAUTH_CLIENT_ID"))
+	secret := strings.TrimSpace(getenv("GITHUB_OAUTH_CLIENT_SECRET"))
+	pub := strings.TrimSpace(getenv("WORKFLOW_PUBLIC_URL"))
+	if id == "" || secret == "" || pub == "" {
+		return c, fmt.Errorf("non-loopback WORKFLOW_SERVE_ADDR requires GITHUB_OAUTH_CLIENT_ID, GITHUB_OAUTH_CLIENT_SECRET, and WORKFLOW_PUBLIC_URL")
+	}
+	if err := validatePublicURL(pub); err != nil {
+		return c, err
+	}
+	c.GitHubOAuthClientID = id
+	c.GitHubOAuthClientSecret = secret
+	c.PublicURL = pub
+	return c, nil
+}
+
+func validatePublicURL(raw string) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL: %w", err)
+	}
+	if u.Scheme != "https" || u.Host == "" {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL must be an https origin with no path (got %q)", raw)
+	}
+	if u.Path != "" && u.Path != "/" {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL must be an https origin with no path (got %q)", raw)
+	}
+	if u.RawQuery != "" || u.Fragment != "" {
+		return fmt.Errorf("WORKFLOW_PUBLIC_URL must be an https origin with no path (got %q)", raw)
+	}
+	return nil
 }
 
 // loopbackBind reports whether addr binds only a loopback interface.
@@ -155,6 +206,7 @@ type Options struct {
 	ScreenStep    ScreenFunc     // default: promote as unscreened
 	Checks        *scorer.Checks // loaded checks for /v1/checks; nil = none loaded
 	ScreenBackoff time.Duration  // first wait after an unreachable scorer; default 5s, doubles to 5 min
+	GitHubHTTPBase string        // tests: mock GitHub authorize/token/api base URL
 }
 
 // ScreenFunc is the screen step applied to one pending hash. Phase 3 replaces it.
@@ -181,9 +233,10 @@ type hashFailure struct {
 
 // Server is the HTTP service.
 type Server struct {
-	cfg    Config
-	opts   Options
-	screen ScreenFunc
+	cfg      Config
+	opts     Options
+	screen   ScreenFunc
+	registry *Registry
 
 	mu      sync.Mutex
 	tenants map[string]*tenantState
@@ -205,10 +258,19 @@ func New(cfg Config, opts Options) *Server {
 	if opts.Version == "" {
 		opts.Version = "dev"
 	}
-	s := &Server{cfg: cfg, opts: opts, tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
+	reg, err := OpenRegistry(cfg.Data)
+	if err != nil {
+		panic("serve: registry: " + err.Error())
+	}
+	s := &Server{cfg: cfg, opts: opts, registry: reg, tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	if s.screen == nil {
 		s.screen = unscreened
+	}
+	if cfg.Remote() {
+		if err := reg.Persist(); err != nil {
+			panic("serve: registry: " + err.Error())
+		}
 	}
 	return s
 }
@@ -409,6 +471,11 @@ func (s *Server) Close() error {
 			first = err
 		}
 	}
+	if s.registry != nil {
+		if err := s.registry.Close(); err != nil && first == nil {
+			first = err
+		}
+	}
 	return first
 }
 
@@ -433,8 +500,21 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/analytics/query", s.method(http.MethodGet, s.auth(s.analyticsQuery)))
 	mux.HandleFunc("/v1/analytics/distribution", s.method(http.MethodGet, s.auth(s.analyticsDistribution)))
 	mux.HandleFunc("/v1/analytics/score-series", s.method(http.MethodGet, s.auth(s.analyticsScoreSeries)))
+	mux.HandleFunc("/v1/me", s.method(http.MethodGet, s.sessionOnly(s.handleMe)))
+	mux.HandleFunc("/v1/tenants", s.handleTenantsRoute)
+	mux.HandleFunc("/v1/tokens", s.handleTokensRoute)
+	mux.HandleFunc("/v1/tokens/", s.handleTokensSubpath)
+	mux.HandleFunc("/v1/admin/tokens", s.method(http.MethodGet, s.sessionOnly(s.handleAdminListTokens)))
+	mux.HandleFunc("/v1/admin/policy", s.method(http.MethodPut, s.originGuard(s.sessionOnly(s.handleAdminPolicy))))
+	if s.cfg.Remote() {
+		mux.HandleFunc("/v1/device/authorize", s.handleDeviceAuthorizeRoute)
+		mux.HandleFunc("/v1/device/exchange", s.handleDeviceExchangeRoute)
+	}
+	mux.HandleFunc("/oauth/login", s.method(http.MethodGet, s.oauthLogin))
+	mux.HandleFunc("/oauth/callback", s.method(http.MethodGet, s.oauthCallback))
+	mux.HandleFunc("/logout", s.method(http.MethodPost, s.originGuard(s.logout)))
 	mux.HandleFunc("/", siteHandler(siteFS))
-	h := s.cors(mux)
+	h := s.withSession(s.cors(mux))
 	if s.cfg.Local() {
 		return localGuard(h)
 	}
@@ -517,32 +597,28 @@ func (s *Server) method(m string, h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// tenantFor maps the bearer token to its tenant (see tenantForKey). In local mode every request
-// is LocalTenant and any token is ignored.
-func (s *Server) tenantFor(r *http.Request) (string, bool) {
-	if s.cfg.Local() {
-		return LocalTenant, true
-	}
-	tok, ok := strings.CutPrefix(r.Header.Get("Authorization"), "Bearer ")
-	if !ok {
-		return "", false
-	}
-	return s.tenantForKey(tok)
-}
-
 type tenantHandler func(w http.ResponseWriter, r *http.Request, name string, ts *tenantState)
 
 func (s *Server) auth(h tenantHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name, ok := s.tenantFor(r)
-		if !ok {
-			msg := "unauthorized"
-			if !strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ") {
-				msg = "unauthorized: this service requires a key; run workflow login"
+		res := s.authorizeRequest(r)
+		if res.status == authForbidden {
+			writeJSON(w, 403, map[string]string{"error": "no such tenant"})
+			return
+		}
+		if res.status != authOK {
+			msg := res.msg
+			if msg == "" {
+				msg = "unauthorized"
 			}
 			writeJSON(w, 401, map[string]string{"error": msg})
 			return
 		}
+		if r.Method == http.MethodPost && r.URL.Path == "/v1/ingest" && res.scope == TokenScopeRead {
+			writeJSON(w, 403, map[string]string{"error": "read-only token"})
+			return
+		}
+		name := res.tenant
 		ts, err := s.tenant(name)
 		if err != nil {
 			if errors.Is(err, store.ErrLocked) {

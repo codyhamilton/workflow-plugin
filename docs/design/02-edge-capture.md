@@ -120,21 +120,31 @@ drain uses `flock(2)` as on Linux.
 
 ## Config
 
-One file, read by both the drain and the shim: `~/.config/workflow/client.toml`, mode 0600. Its
-presence means remote mode; it is written by `workflow login` (not built yet).
+The drain and the shim resolve endpoint and bearer key the same way on every batch (no restart
+needed to pick up a change):
+
+1. **`WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` both set** — remote mode with those values. They win over
+   `client.toml`.
+2. **Exactly one of them set** — bad config. `workflow drain`, `workflow mcp`, and `workflow status`
+   exit before any request; they do not read the file and do not contact loopback.
+3. **Neither set, and `client.toml` present** — remote mode from the file (`endpoint`, `key`), mode
+   0600, default path `~/.config/workflow/client.toml`.
+4. **Neither set, and no file** — local mode: `http://127.0.0.1:8770` with no bearer.
+
+`WORKFLOW_CLIENT_CONFIG` overrides only the file path (tests and explicit installs).
 
 ```toml
-endpoint = "https://quality.example"
-key = "…"                              # write-and-read client key for the quality service
+endpoint = "https://collector.example"
+key = "wk_…"                           # issued bearer for the collector (read or read_write)
 ```
 
-- Not env vars. The drain inherits the environment of whichever hook started it, and that differs
-  per harness. An env override exists for tests only.
-- Re-read on every batch, so changing endpoint or key needs no restart.
-- The key is the quality service's client key, never `TYPESAFE_API_KEY`, which stays on the server.
-- Registration (how a key is issued) is out of scope.
-- No config is local mode: `http://127.0.0.1:8770` with no key. If nothing listens there the
-  queue grows and nothing is lost; `status` shows the mode and the failure.
+- **`workflow login`** writes `client.toml` after the collector's device page issues a token (optional
+  `--endpoint` for the collector origin). There is no `workflow init`.
+- A hand-written `client.toml` still works. A remote agent with no browser (for example Claude or
+  Codex in the cloud) uses the env pair instead of a file.
+- The key is an issued service bearer, never `TYPESAFE_API_KEY`, which stays on the server only.
+- If nothing listens at the resolved endpoint the queue grows and nothing is lost; `status` shows the
+  mode and the failure.
 - An invalid config is never guessed past: the drain retries, then gives up, and the shim reports
   `bad config`.
 
@@ -146,8 +156,8 @@ The advisory MCP is registered with every harness as a local stdio command, not 
 reads the shared config and forwards to the remote's advisory API. Design 4 owns what it exposes;
 design 2 fixes two things it relies on:
 
-- **Endpoint by config.** Local or remote is one setting in one file. No harness config holds an
-  endpoint or a key.
+- **Endpoint by resolution.** Local or remote comes from the env pair, `client.toml`, or the local
+  default above. No harness config holds an endpoint or a key.
 - **Queue awareness.** Before answering about a file, the shim checks `queue/` and `rejected/` for
   envelopes that refer to it. If files are pending, it kicks the drain and waits up to about 1.5 s.
   If they are still pending, the answer says so ("3 events for this file still queued, oldest 40 s,

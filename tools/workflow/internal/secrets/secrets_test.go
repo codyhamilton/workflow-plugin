@@ -27,6 +27,7 @@ func samples() map[string]string {
 		"bearer_token":      "Authorization: Bear" + "er " + rep("Ab1", 8),
 		"connection_string": "db postgres" + "://admin:" + "s3cr3tpass" + "@db.example:5432/x",
 		"env_assignment":    "MY_API_" + "KEY=" + "abcd1234efgh",
+		"workflow_api_token": "tok wk" + "_" + rep("a1", 16),
 	}
 }
 

@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -14,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"testing"
 	"time"
@@ -22,6 +26,7 @@ import (
 )
 
 const apiKey = "k-test-key-9f3a"
+const envWKToken = "wk_drainenvtesttoken0123456789abcdef"
 
 type env struct {
 	t                      *testing.T
@@ -76,6 +81,69 @@ func (e *env) writeConfig(addr string) {
 
 // startServe runs `workflow serve` on addr with no WORKFLOW_CLIENT_CONFIG and no WORKFLOW_QUEUE of
 // its own, so it can never host a drain.
+func hashWKToken(plain string) string {
+	h := sha256.Sum256([]byte(plain))
+	return hex.EncodeToString(h[:])
+}
+
+func seedRegistry(dataDir, tenant, plain string) {
+	doc := map[string]any{
+		"version": 1,
+		"policy":  map[string]any{"mode": "everyone"},
+		"owners":  map[string]string{tenant: "1"},
+		"token_hashes": []map[string]any{{
+			"id": "tok1", "tenant": tenant, "scope": "read_write",
+			"hash": hashWKToken(plain), "github_id": 1,
+			"expires_at": time.Now().Add(24 * time.Hour).UTC().Format(time.RFC3339),
+			"revoked": false, "created_at": time.Now().UTC().Format(time.RFC3339),
+		}},
+	}
+	b, _ := json.MarshalIndent(doc, "", "  ")
+	if err := os.MkdirAll(dataDir, 0o700); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(filepath.Join(dataDir, "registry.json"), b, 0o600); err != nil {
+		panic(err)
+	}
+}
+
+func (e *env) startRemoteServe(hostPort string) {
+	e.t.Helper()
+	var env []string
+	for _, kv := range e.base {
+		if !strings.HasPrefix(kv, "WORKFLOW_CLIENT_CONFIG=") && !strings.HasPrefix(kv, "WORKFLOW_QUEUE=") {
+			env = append(env, kv)
+		}
+	}
+	cmd := exec.Command(e.bin, "serve")
+	cmd.Env = append(env,
+		"WORKFLOW_SERVE_DATA="+e.data,
+		"WORKFLOW_SERVE_ADDR="+hostPort,
+		"GITHUB_OAUTH_CLIENT_ID=test",
+		"GITHUB_OAUTH_CLIENT_SECRET=test",
+		"WORKFLOW_PUBLIC_URL=https://collector.example",
+	)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Start(); err != nil {
+		e.t.Fatal(err)
+	}
+	e.serveCmd = cmd
+	e.t.Cleanup(func() { cmd.Process.Kill(); cmd.Wait() })
+	_, port, err := net.SplitHostPort(hostPort)
+	if err != nil {
+		e.t.Fatal(err)
+	}
+	healthURL := "http://127.0.0.1:" + port
+	waitFor(e.t, 15*time.Second, "remote serve start", func() bool {
+		r, err := http.Get(healthURL + "/v1/health")
+		if err == nil {
+			r.Body.Close()
+		}
+		return err == nil
+	})
+}
+
 func (e *env) startServe(addr string) {
 	e.t.Helper()
 	var env []string
@@ -85,7 +153,7 @@ func (e *env) startServe(addr string) {
 		}
 	}
 	cmd := exec.Command(e.bin, "serve")
-	cmd.Env = append(env, "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr, "WORKFLOW_SERVE_KEYS=t="+apiKey)
+	cmd.Env = append(env, "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Start(); err != nil {
@@ -144,7 +212,7 @@ func (e *env) rejected() []string {
 }
 
 func (e *env) ledger(query string, args ...any) int {
-	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "t", "ledger.db")+"?mode=ro")
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "local", "ledger.db")+"?mode=ro")
 	if err != nil {
 		return -1
 	}
@@ -370,6 +438,100 @@ func (e *env) status() (string, int) {
 		e.t.Fatal(err)
 	}
 	return string(out), code
+}
+
+func TestClientEnvDrainIngest(t *testing.T) {
+	e := newEnv(t)
+	os.Remove(e.cfg)
+	_, port, err := net.SplitHostPort(freePort(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bind := "0.0.0.0:" + port
+	seedRegistry(e.data, "envtenant", envWKToken)
+	e.startRemoteServe(bind)
+	endpoint := "http://127.0.0.1:" + port
+	env := append(e.base, "WORKFLOW_ENDPOINT="+endpoint, "WORKFLOW_KEY="+envWKToken)
+	absent := filepath.Join(e.tmp, "absent.toml")
+	for i, kv := range env {
+		if strings.HasPrefix(kv, "WORKFLOW_CLIENT_CONFIG=") {
+			env[i] = "WORKFLOW_CLIENT_CONFIG=" + absent
+		}
+	}
+	if err := e.spool("claude", map[string]any{"hook_event_name": "Stop", "session_id": "conv-env", "n": 1}); err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(e.bin, "drain")
+	cmd.Env = env
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("drain: %v\n%s", err, out)
+	}
+	waitFor(t, 30*time.Second, "queue empty", func() bool { return e.queued() == 0 })
+	db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "envtenant", "ledger.db")+"?mode=ro")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	var n int
+	if err := db.QueryRow("SELECT count(*) FROM facts WHERE type='hook_event'").Scan(&n); err != nil || n != 1 {
+		t.Fatalf("remote tenant rows: %v %d", err, n)
+	}
+}
+
+func TestHalfSetEnvRefusal(t *testing.T) {
+	e := newEnv(t)
+	os.Remove(e.cfg)
+	var hits atomic.Int32
+	ln, err := net.Listen("tcp", "127.0.0.1:8770")
+	if err != nil {
+		t.Fatalf("listen 8770: %v", err)
+	}
+	defer ln.Close()
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			hits.Add(1)
+			c.Close()
+		}
+	}()
+	env := append([]string{}, e.base...)
+	for i, kv := range env {
+		if strings.HasPrefix(kv, "WORKFLOW_CLIENT_CONFIG=") {
+			env[i] = "WORKFLOW_CLIENT_CONFIG=" + filepath.Join(e.tmp, "absent.toml")
+		}
+	}
+	env = append(env, "WORKFLOW_ENDPOINT=http://collector.example")
+	cmdStatus := exec.Command(e.bin, "status")
+	cmdStatus.Env = env
+	outb, err := cmdStatus.CombinedOutput()
+	code := 0
+	if ee, ok := err.(*exec.ExitError); ok {
+		code = ee.ExitCode()
+	} else if err != nil {
+		t.Fatal(err)
+	}
+	out := string(outb)
+	if code != 1 || strings.Contains(out, "127.0.0.1:8770") {
+		t.Fatalf("status exit %d:\n%s", code, out)
+	}
+	if !strings.Contains(out, "WORKFLOW_ENDPOINT") {
+		t.Fatalf("expected config error:\n%s", out)
+	}
+	cmd := exec.Command(e.bin, "drain")
+	cmd.Env = env
+	drainOut, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("drain should fail:\n%s", drainOut)
+	}
+	if !strings.Contains(string(drainOut), "WORKFLOW_ENDPOINT") {
+		t.Fatalf("expected config error in drain output:\n%s", drainOut)
+	}
+	if hits.Load() != 0 {
+		t.Fatalf("drain contacted loopback (%d hits)", hits.Load())
+	}
 }
 
 func TestStatus(t *testing.T) {

@@ -77,6 +77,10 @@ func pointsHere(endpoint, bound string) bool {
 // tenantForKey maps a key to its tenant. It compares SHA-256 digests in constant time against
 // every key with no early exit, so neither the key's content nor its length shows in the timing.
 func (s *Server) tenantForKey(key string) (string, bool) {
+	if s.cfg.Remote() {
+		tenant, _, ok := s.registry.resolveBearer(key, time.Now())
+		return tenant, ok
+	}
 	kh := sha256.Sum256([]byte(key))
 	found, match := "", 0
 	for _, kp := range s.cfg.Keys {
