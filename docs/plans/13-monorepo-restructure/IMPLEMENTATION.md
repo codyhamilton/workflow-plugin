@@ -345,3 +345,11 @@ Phase 4 outcome holds. The layout check passes, its six fixtures fail with the f
 1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `workflow drain` to a local `workflow serve` ships it and `workflow status` reports no failure.
 2. Root `README.md` still documents the signal log as `tools/driver/.jev-signal-log.jsonl`. The package and `tools/driver` no longer default there.
 3. `plugins/yakka/bin/workflow` step 4 joins `$ROOT/../packages/workflow`. `ROOT` is the plugin directory, so the source build does not see the module. `tools/release/test_release.py` `test_1_clean_cache_build` fails with "no release asset and no Go toolchain (or module source)". The module is at `$ROOT/../../packages/workflow`. Phase 5 owns that wrapper.
+
+## Phase 5: Runtime runs as yakka
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-9da6c3fb-f694-5216-b8c5-7912ba41224a
+Start: 2026-10-17T23:15:00Z
+
+`artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
