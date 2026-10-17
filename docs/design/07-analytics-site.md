@@ -300,13 +300,14 @@ on a compacted copy of the real ledger.
 ## Hosting
 
 - **Fly.io remote collector:** Plan 13 deploys the public `workflow serve` host on fly.io (`fly.toml`:
-  app `workflow-collector`, `WORKFLOW_PUBLIC_URL` `https://workflow-collector.fly.dev` until the
-  operator renames the app). One machine runs the image built from the repo `Dockerfile` (analytics
+  app `workflow-collector`, `WORKFLOW_PUBLIC_URL` `https://yakka.build`). The GitHub OAuth callback
+  is `https://yakka.build/oauth/callback`. The product name and the Fly app name stay `workflow`.
+  One machine runs the image built from the repo `Dockerfile` (analytics
   `build/` copied into `tools/workflow/internal/serve/site/`, then `workflow serve` on internal port
   8080). A fly volume `workflow_serve_data` mounts at `/data`; `WORKFLOW_SERVE_DATA=/data` holds the
   registry and tenant ledgers across restarts. `WORKFLOW_SERVE_KEYS` is unset. GitHub OAuth uses that
-  collector origin (`GET /oauth/login`, callback `/oauth/callback`); `GITHUB_OAUTH_CLIENT_SECRET` is a
-  fly secret, not in the repo. The embedded site is same-origin with `/v1` on that host: session
+  collector origin (`GET /oauth/login`, callback `https://yakka.build/oauth/callback`); `GITHUB_OAUTH_CLIENT_ID`
+  and `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. The embedded site is same-origin with `/v1` on that host: session
   cookie after `/login`, no pasted key in the build. On the collector dashboard, `?tenant=` from
   `GET /v1/me` is wired on the overview and on `/profile` where tenant context applies; other
   report routes do not append it yet. The fly app lists the Cloudflare Pages origin exactly in

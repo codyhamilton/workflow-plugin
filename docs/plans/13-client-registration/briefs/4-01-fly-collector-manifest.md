@@ -28,7 +28,7 @@ Cited from `docs/plans/13-client-registration/DESIGN.md`, settled:
 
 **Domain: Collector hosting**
 
-- "One fly.io machine runs the `workflow serve` binary. A volume holds `WORKFLOW_SERVE_DATA`. The GitHub OAuth app's callback is `https://<collector>/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin. `WORKFLOW_SERVE_KEYS` is unset. The GitHub client secret is a fly secret, not a file in the repo."
+- "One fly.io machine runs the `workflow serve` binary as app `workflow-collector`. A volume holds `WORKFLOW_SERVE_DATA`. The public origin is `https://yakka.build`. The GitHub OAuth app's callback is `https://yakka.build/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin. `WORKFLOW_SERVE_KEYS` is unset. The GitHub client id and secret are fly secrets, not files in the repo. The product, CLI, packages, and Fly app name stay `workflow`."
 - "Cloudflare Pages, if still used, remains a static site that sends a pasted bearer from `/settings`. It does not receive the session cookie. The fly app sets `WORKFLOW_SERVE_CORS_ORIGINS` to that Pages origin. Credentialed CORS stays off."
 - Non-goals: "more than one machine; putting the fact ledger on anything other than the volume's tenant directories."
 
@@ -39,7 +39,7 @@ Cited from `docs/plans/13-client-registration/DESIGN.md`, settled:
 ## Changes
 
 - Add **`fly.toml`** at the repo root for a **single** machine app: HTTP service on the port the process binds, **one** mounted volume at the path used as `WORKFLOW_SERVE_DATA`, `primary_region` chosen explicitly. Do **not** set `WORKFLOW_SERVE_KEYS`. Document in the report which env vars are set in the manifest vs fly secrets vs operator `fly secrets set`.
-- Set non-secret env in the manifest where appropriate: `WORKFLOW_SERVE_ADDR` listening on `0.0.0.0:<internal_port>` matching fly's `internal_port`; `WORKFLOW_PUBLIC_URL` as the app's `https://` origin (no path); `GITHUB_OAUTH_CLIENT_ID`; `WORKFLOW_SERVE_CORS_ORIGINS` as a placeholder or documented operator value for the Pages origin (exact origin, no wildcard).
+- Set non-secret env in the manifest where appropriate: `WORKFLOW_SERVE_ADDR` listening on `0.0.0.0:<internal_port>` matching fly's `internal_port`; `WORKFLOW_PUBLIC_URL` is `https://yakka.build` (no path). `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, never committed values or placeholders. `WORKFLOW_SERVE_CORS_ORIGINS` stays unset until the real Pages origin is known (exact origin, no wildcard, no placeholder).
 - Add **`Dockerfile`** (multi-stage): build `packages/workflow-analytics` into `tools/workflow/internal/serve/site/` the same way `build.sh` does, then `CGO_ENABLED=0` build `tools/workflow/cmd/workflow`; runtime image runs `workflow serve` (or the binary with equivalent entrypoint). Use `GOTOOLCHAIN=auto` when the host Go is older than `go.mod`.
 - Add **`.dockerignore`** to keep the image build bounded (exclude unrelated large trees).
 - The report must list: volume name and mount path, internal port, app name, and a **secrets checklist** (`GITHUB_OAUTH_CLIENT_SECRET` at minimum; never commit secrets).

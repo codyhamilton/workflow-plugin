@@ -85,7 +85,7 @@ A remote `workflow serve` is a collector. A person logs in with GitHub; the sess
 
 - Owns: the fly.io process that is the remote collector. Does not own a second replica.
 - Contract:
-  - One fly.io machine runs the `workflow serve` binary. A volume holds `WORKFLOW_SERVE_DATA`. The GitHub OAuth app's callback is `https://<collector>/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin. `WORKFLOW_SERVE_KEYS` is unset. The GitHub client secret is a fly secret, not a file in the repo.
+  - One fly.io machine runs the `workflow serve` binary as app `workflow-collector`. A volume holds `WORKFLOW_SERVE_DATA`. The public origin is `https://yakka.build`. The GitHub OAuth app's callback is `https://yakka.build/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin. `WORKFLOW_SERVE_KEYS` is unset. The GitHub client id and secret are fly secrets, not files in the repo. The product, CLI, packages, and Fly app name stay `workflow`.
   - After a restart, a token that was valid before the restart still authorizes, and a token revoked before the restart still does not.
   - Cloudflare Pages, if still used, remains a static site that sends a pasted bearer from `/settings`. It does not receive the session cookie. The fly app sets `WORKFLOW_SERVE_CORS_ORIGINS` to that Pages origin. Credentialed CORS stays off.
 - Non-goals: more than one machine; putting the fact ledger on anything other than the volume's tenant directories.
@@ -175,7 +175,7 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 
 ### Phase 4 — The collector runs on fly.io
 
-- Outcome: The fly app's public https origin answers `GET /v1/health` with no bearer and `GET /oauth/login` with a redirect to GitHub. The OAuth app callback is that origin's `/oauth/callback`. `WORKFLOW_SERVE_KEYS` is unset on the app. A `read_write` token that ingested before a machine restart ingests into the same tenant after it, and a token revoked before the restart does not. With `WORKFLOW_SERVE_CORS_ORIGINS` set to the Pages origin, a browser on that origin can `GET /v1/analytics/summary` with a bearer, a browser on any other origin cannot, and the response has no `Access-Control-Allow-Credentials`. `docs/design/07-analytics-site.md` names this fly collector as the remote host and leaves the Pages pasted-token path as a static client.
+- Outcome: The fly app `workflow-collector` serves `https://yakka.build`. That origin answers `GET /v1/health` with no bearer and `GET /oauth/login` with a redirect to GitHub. The OAuth app callback is `https://yakka.build/oauth/callback`. `WORKFLOW_SERVE_KEYS` is unset on the app. A `read_write` token that ingested before a machine restart ingests into the same tenant after it, and a token revoked before the restart does not. With `WORKFLOW_SERVE_CORS_ORIGINS` set to the Pages origin, a browser on that origin can `GET /v1/analytics/summary` with a bearer, a browser on any other origin cannot, and the response has no `Access-Control-Allow-Credentials`. `docs/design/07-analytics-site.md` names this fly collector as the remote host and leaves the Pages pasted-token path as a static client. `https://workflow-collector.fly.dev` is not the close condition. The product, CLI, packages, and Fly app name stay `workflow`.
 - Surfaces: new `fly.toml`, `docs/design/07-analytics-site.md` hosting section. The binary and registry are the Phase 2 surfaces, unchanged in role.
 - Approach: known
 - Depends on: Phase 2
