@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event SessionStart",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event SessionStart",
             "timeout": 5
           },
           {
@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event Setup",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event Setup",
             "timeout": 5
           }
         ]
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event InstructionsLoaded",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event InstructionsLoaded",
             "timeout": 5
           }
         ]
@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event UserPromptSubmit",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event UserPromptSubmit",
             "timeout": 5
           }
         ]
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event UserPromptExpansion",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event UserPromptExpansion",
             "timeout": 5
           }
         ]
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event MessageDisplay",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event MessageDisplay",
             "timeout": 5
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PreToolUse",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PreToolUse",
             "timeout": 5
           }
         ]
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PermissionRequest",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PermissionRequest",
             "timeout": 5
           }
         ]
@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PermissionDenied",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PermissionDenied",
             "timeout": 5
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PostToolUse",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PostToolUse",
             "timeout": 5
           }
         ]
@@ -120,7 +120,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PostToolUseFailure",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PostToolUseFailure",
             "timeout": 5
           }
         ]
@@ -131,7 +131,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PostToolBatch",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PostToolBatch",
             "timeout": 5
           }
         ]
@@ -142,7 +142,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event Notification",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event Notification",
             "timeout": 5
           }
         ]
@@ -153,7 +153,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event SubagentStart",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event SubagentStart",
             "timeout": 5
           }
         ]
@@ -164,7 +164,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event SubagentStop",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event SubagentStop",
             "timeout": 5
           }
         ]
@@ -175,7 +175,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event TaskCreated",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event TaskCreated",
             "timeout": 5
           }
         ]
@@ -186,7 +186,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event TaskCompleted",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event TaskCompleted",
             "timeout": 5
           }
         ]
@@ -197,7 +197,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event Stop",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event Stop",
             "timeout": 5
           }
         ]
@@ -208,7 +208,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event StopFailure",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event StopFailure",
             "timeout": 5
           }
         ]
@@ -219,7 +219,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event TeammateIdle",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event TeammateIdle",
             "timeout": 5
           }
         ]
@@ -230,7 +230,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event ConfigChange",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event ConfigChange",
             "timeout": 5
           }
         ]
@@ -241,7 +241,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event CwdChanged",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event CwdChanged",
             "timeout": 5
           }
         ]
@@ -252,7 +252,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event DirectoryAdded",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event DirectoryAdded",
             "timeout": 5
           }
         ]
@@ -263,7 +263,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event FileChanged",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event FileChanged",
             "timeout": 5
           }
         ]
@@ -276,7 +276,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PreCompact",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PreCompact",
             "timeout": 5
           }
         ]
@@ -287,7 +287,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PostCompact",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PostCompact",
             "timeout": 5
           }
         ]
@@ -298,7 +298,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PreModelSwitch",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PreModelSwitch",
             "timeout": 5
           }
         ]
@@ -309,7 +309,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event PostModelSwitch",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event PostModelSwitch",
             "timeout": 5
           }
         ]
@@ -320,7 +320,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event Elicitation",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event Elicitation",
             "timeout": 5
           }
         ]
@@ -331,7 +331,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event ElicitationResult",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event ElicitationResult",
             "timeout": 5
           }
         ]
@@ -342,7 +342,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/tools/hooklog/spool.sh\" --harness claude --event SessionEnd",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh\" --harness claude --event SessionEnd",
             "timeout": 5
           }
         ]

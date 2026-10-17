@@ -75,7 +75,7 @@ path contract. Do not add a standalone logger as a replacement worktree handler.
 from a handler that already has the payload in `$payload`:
 
 ```sh
-printf '%s\n' "$payload" | bash "$CLAUDE_PLUGIN_ROOT/tools/hooklog/spool.sh" --harness claude --event WorktreeCreate
+printf '%s\n' "$payload" | bash "$CLAUDE_PLUGIN_ROOT/packages/hooklog/spool.sh" --harness claude --event WorktreeCreate
 # The existing handler then performs its original operation and returns its original output.
 ```
 
@@ -142,7 +142,7 @@ Codex capture hooks emit no stdout or control decision.
 
 ## Rows and turns
 
-Inspect with `python3 tools/hooklog/hooklog.py ls` and `show <file>`.
+Inspect with `python3 packages/hooklog/hooklog.py ls` and `show <file>`.
 The v1 schema keeps `{v, ts, harness, session_id, hook_event, kind, cwd}` and adds bounded,
 redacted native payload details in `data`. Existing prompt/tool/step fields remain compatible.
 New pre-tool rows use `tool_pre`; lifecycle and unknown named events use `event`. Events with
@@ -163,7 +163,7 @@ are excluded from agent turns. Subagent rows are excluded from main-session anal
 ## Tests and smoke notes (2.7.0)
 
 ```sh
-python3 -m unittest discover -s tools/hooklog/tests -v
+python3 -m unittest discover -s packages/hooklog/tests -v
 python3 -m unittest discover -s tools/jev-variants/tests -v
 python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
 node --experimental-strip-types --test packages/opencode-workflow-hooks/tests/test_hooks.mjs
