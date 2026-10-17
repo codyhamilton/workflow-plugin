@@ -2,7 +2,7 @@
 """Harness-neutral session event rows: normalisation, redaction and the per-session JSONL archive.
 
 Capture is not here: hooks run `spool.sh` (bash), which drops the raw payload in the queue, and `workflow drain`
-(tools/workflow) normalises, scrubs and posts it. This module keeps `normalize()` and the archive readers.
+(packages/workflow) normalises, scrubs and posts it. This module keeps `normalize()` and the archive readers.
 `record` remains as a compatibility shim for older registrations: it execs spool.sh.
 Store: $WORKFLOW_HOOKLOG_DIR or ~/.local/share/workflow-plugin/hooklog. Secrets are pattern-redacted and large fields
 truncated in normalize(), before anything is archived or posted.

@@ -10,7 +10,7 @@ type Derived struct {
 }
 
 // normTable maps lower-cased native event names to norm_event. It is seeded from the kinds in
-// tools/hooklog/hooklog.py normalize() and extended with the names the local ledger holds.
+// packages/hooklog/hooklog.py normalize() and extended with the names the local ledger holds.
 // Names are shared across harnesses (each harness uses a subset), so one table serves all; an
 // unknown harness or event is "other". transcript.* events are handled in Derive because their
 // mapping depends on the payload.
