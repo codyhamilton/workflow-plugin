@@ -197,3 +197,13 @@ Phase 2 outcome holds, with the hook-session departure recorded above.
 ### Carried
 
 None.
+
+## Phase 3: Cursor loads `plugins/yakka` and its hooks fire
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-19d85e57-4a4c-542f-ab1e-1098ffc96187
+Start: 2026-10-17T18:38:41Z
+
+Refine skipped. DESIGN.md says Phase 3 is one unit. Brief authored inline: `docs/plans/13-monorepo-restructure/briefs/3-01-cursor-plugin.md`. Phase 2 Carried was none.
+
+`artifact_feedback` on the brief: unreachable. Workflow MCP tool discovery failed.

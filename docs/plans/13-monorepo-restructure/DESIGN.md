@@ -522,6 +522,10 @@ Units:
 - Approach: known. The path, the command shape and the move are decided. The hooks filename is whatever Cursor must read for the session outcome to hold.
 - Depends on: Phase 2, so `script/` wraps the moved hook edge. It can be briefed against `plugins/yakka`.
 
+Units:
+
+- 3-01 Cursor plugin and hook scripts. Brief: `docs/plans/13-monorepo-restructure/briefs/3-01-cursor-plugin.md`. Depends on: Phase 2. Runs alongside: nothing.
+
 ### Phase 4: The layout contract is stated and enforced
 
 - Why: without a check, the next unit guesses its directory again and adds another cross-tree path. The check makes the packages, tools and `plugins/yakka` rule fail loudly instead of drifting, and the README fields make each package independently buildable by anyone reading it.
