@@ -158,3 +158,16 @@ Built: skill catalogue citations, design docs, README hooklog links, `CHANGELOG.
 Surfaces: the brief's owned paths. `.claude/skills/workflow-tuning/reference.md` had no old-path literals and was left unchanged.
 
 Deviations: status `blocked` on the phase search. Two comments outside the owned paths still say `tools/hooklog` and `tools/workflow`. Fixer 2-07 owns them. Earlier changelog entries stay, as the outcome excludes them.
+
+### 2-07-residual-path-comments
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-07-residual-path-comments.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/2-07-residual-path-comments.md`.
+Worker: Composer (`composer-2.5`), agent `bc-794afd78-1b91-5d4c-beec-b8170cea5c06`. The harness did not report turns or final context.
+Commit: `6e24d67`.
+
+Built: comments in `packages/workflow/internal/ingest/normalise.go` and `packages/hooklog/hooklog.py` now name `packages/hooklog` and `packages/workflow`. `go test ./internal/ingest/` passed. Hooklog tests: 36 OK.
+
+Surfaces: those two files.
+
+Deviations: none.
