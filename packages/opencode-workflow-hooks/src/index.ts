@@ -28,7 +28,7 @@ function flushHelperPath(): string {
   return path.join(packageRoot(), "python", "batch_flush_cli.py")
 }
 
-// Queue capture: one file per event in the shared queue, same name and envelope as tools/hooklog/spool.sh's queue branch
+// Queue capture: one file per event in the shared queue, same name and envelope as packages/hooklog/spool.sh's queue branch
 // (<conversation>-<ts>-<pid>-<rand>.evt, written under tmp/ then renamed); `bin/workflow drain` ingests it.
 function queueDir(): string {
   return process.env.WORKFLOW_QUEUE || path.join(os.homedir(), ".local", "share", "workflow", "queue")

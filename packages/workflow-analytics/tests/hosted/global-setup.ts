@@ -32,7 +32,7 @@ export default async function globalSetup() {
 			...process.env,
 			WORKFLOW_SERVE_ADDR: `127.0.0.1:${port}`,
 			WORKFLOW_SERVE_DATA: path.join(tmp, 'data'),
-			WORKFLOW_CHECKS_DIR: path.join(repoRoot, 'tools/quality'),
+			WORKFLOW_CHECKS_DIR: path.join(repoRoot, 'packages/workflow/catalogue'),
 			TYPESAFE_API_KEY: ''
 		},
 		stdio: 'ignore'

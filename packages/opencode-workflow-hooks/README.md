@@ -12,7 +12,7 @@ OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus ty
 **Advisory only** — never blocks tools or changes exit codes. Does not call `assert_phase --deterministic` or enforce Flash review guidance.
 
 Every hook and bus event except five is written as one file in the queue (`WORKFLOW_QUEUE`), named and wrapped
-as `tools/hooklog/spool.sh --harness opencode` does; an event with no session ID is dropped. After a
+as `packages/hooklog/spool.sh --harness opencode` does; an event with no session ID is dropped. After a
 write the plugin kicks `bin/workflow drain` (detached, at most once per 10 s) and warms the binary
 with `bin/workflow --version` once at load. Capture never waits on the binary or the network, and
 failures never reach OpenCode.
@@ -73,7 +73,7 @@ git pull origin master
 | Variable | Default | Role |
 |----------|---------|------|
 | `WORKFLOW_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
-| `WORKFLOW_QUEUE` | `~/.local/share/workflow/queue` | Queue directory; one `<session>-<ts>-<pid>-<rand>.evt` file per event, as `tools/hooklog/spool.sh` writes it |
+| `WORKFLOW_QUEUE` | `~/.local/share/workflow/queue` | Queue directory; one `<session>-<ts>-<pid>-<rand>.evt` file per event, as `packages/hooklog/spool.sh` writes it |
 | `WORKFLOW_BIN` | `bash <repo>/bin/workflow` | Binary the plugin kicks as `drain` after a write, and runs as `--version` once at load to warm its cache |
 | `WORKFLOW_HOOKLOG_KICK` | on | Set `0` to disable the drain kick (at most one per 10 s) and the load prefetch |
 | `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
