@@ -207,3 +207,32 @@ Start: 2026-10-17T18:38:41Z
 Refine skipped. DESIGN.md says Phase 3 is one unit. Brief authored inline: `docs/plans/13-monorepo-restructure/briefs/3-01-cursor-plugin.md`. Phase 2 Carried was none.
 
 `artifact_feedback` on the brief: unreachable. Workflow MCP tool discovery failed.
+
+### 3-01-cursor-plugin
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/3-01-cursor-plugin.md` (amended: bootstrap script stays; it only runs `install.sh`).
+Report: `docs/plans/13-monorepo-restructure/reports/3-01-cursor-plugin.md`.
+Worker: Composer (`composer-2.5`), agent `bc-3db3eed2-f85f-5998-9108-d0f284279cf2`. The harness did not report turns or final context.
+Commits: `4d41202` (rename only), `d010965` (rewrite, scripts, report).
+
+Built: plugin tree at `plugins/yakka`. Both marketplace `source` values are `plugins/yakka`. Cursor commands are `./script/spool.sh` and `./script/prefetch-version.sh`. Claude and Codex commands name `script/spool.sh` and `bin/workflow` under the plugin root. Manifests are `2.12.0`. `bin/VERSION` stays `0.1.0`. Cursor install copies that directory and the install-route test asserts `script/spool.sh` and the manifest hooks file.
+
+Surfaces: the brief's owned paths.
+
+Deviations: `test_surfaces.py` skips the `--version` stub assertion for `packages/hooklog/cursor-hooks.example.json` only. `install.sh` moved plugin-source helpers above `ensure_script_dir`. The bootstrap script was not edited; the brief is amended so a re-dispatch does not edit it.
+
+`artifact_feedback` on the brief and the report: unreachable. Workflow MCP tool discovery failed.
+
+### Verification
+
+Not closed. Checked on this branch at `/workspace`.
+
+- Both marketplace files: plugin name `workflow`, `source` string `plugins/yakka`. `plugins/yakka/.cursor-plugin/plugin.json` exists, `hooks` is `./hooks/cursor.json`, `skills/` and `hooks/cursor.json` exist, `packages/yakka` does not. Manifests are `2.12.0`. `plugins/yakka/bin/VERSION` is `0.1.0`.
+- Every command in `plugins/yakka/hooks/cursor.json` starts with `./script/`. None contains `${CURSOR_PLUGIN_ROOT}`, `tools/hooklog`, or an absolute path. `script/spool.sh` and `script/prefetch-version.sh` exist.
+- From cwd `plugins/yakka`, `./script/spool.sh --harness cursor --event sessionStart` with payload `session_id=phase3`, `WORKFLOW_HOOKLOG_KICK=0`, and a temp queue: exit 0, one `*.evt`, envelope `harness=cursor` `event=sessionStart`.
+- Claude commands are `bash "${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/script/spool.sh" ...` (32). Codex commands are `bash "${PLUGIN_ROOT}/script/spool.sh" --harness codex` (13). None name `packages/` or `tools/`.
+- `python3 -m unittest tools/driver/tests/test_install_route.py` → 21 tests, OK. The Cursor local install test asserts the copied tree has `script/spool.sh`, the hooks file named by the manifest, and Claude/Codex commands containing `script/spool.sh` and not `packages/`.
+- Cursor CLI `2026.10.16` resolves a plugin `hooks` manifest field via `discoverHooksFromManifest`, and uses `hooks/hooks.json` only when that field is absent. `./hooks/cursor.json` is the file that resolver reads.
+- A Cursor session that loads this marketplace entry and fires a hook did not run. `agent -p --plugin-dir plugins/yakka` exits before a session: not logged in, and `agent login` stops on a Cursor credential page. This cloud agent loaded the installed marketplace plugin at commit `70e7258` with `gitPath: "."` and `enabledCapabilities: ["static"]`. That session loaded skills and wrote no queue events. `workflow drain` / `workflow status` were not run, because no session event was produced.
+
+The session clause of the Phase 3 outcome does not hold. No `Workflow-Phase` trailer.

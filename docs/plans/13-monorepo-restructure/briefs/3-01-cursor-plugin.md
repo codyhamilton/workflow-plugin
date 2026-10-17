@@ -129,3 +129,7 @@ Under 1,500 tokens. Status: `done` | `done with concerns` | `blocked` | `needs c
 A non-trivial bug outside your done evidence: report symptom, location, and root cause if found. Do not fix it here.
 
 Do not spawn agents beyond read-only research helpers. If this unit needs one, it was mis-sized: report `blocked` and say so.
+
+## Amendment
+
+`tools/cloud-env/bootstrap-workflow-skills.sh` is not an owned path. It only runs `install.sh`. The cloud route in `install.sh` is what installs `plugins/yakka/skills`. A re-dispatch does not edit the bootstrap script.
