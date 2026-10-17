@@ -1,4 +1,4 @@
-module github.com/codyhamilton/workflow-plugin/packages/workflow
+module github.com/codyhamilton/yakka/packages/yakka
 
 go 1.27.1
 

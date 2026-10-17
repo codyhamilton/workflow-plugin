@@ -4,7 +4,7 @@
 
 **Build** — `go build` in this module, or the wrapper's step-4 source build from `plugins/yakka/bin/workflow`.
 
-**Test** — `go test ./...` in `packages/workflow`.
+**Test** — `go test ./...` in `packages/yakka`.
 
 **Release** — `tools/release/build.sh` (four `workflow-<os>-<arch>` binaries and `SHA256SUMS`).
 

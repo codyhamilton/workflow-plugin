@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/screen"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/scorer"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/screen"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 const briefPath = "docs/plans/01-x/briefs/1-01-a.md"

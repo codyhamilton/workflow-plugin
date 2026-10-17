@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/facts"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/clientconfig"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/drain"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/facts"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 )
 
 const fixLine = "Fix: rewrite the file; the new write is the repair."
@@ -199,7 +199,7 @@ func (s *server) feedback(ctx context.Context, args map[string]any) (string, boo
 	if len(queued) > 0 && cfgErr == nil {
 		if !drain.Running(dir) {
 			if err := s.o.StartDrain(); err != nil {
-				fmt.Fprintln(os.Stderr, "workflow mcp: could not start the drain:", err)
+				fmt.Fprintln(os.Stderr, "yakka mcp: could not start the drain:", err)
 			}
 		}
 	}

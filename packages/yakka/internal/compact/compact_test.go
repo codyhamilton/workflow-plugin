@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/archive"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/ingest"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 var errStop = errors.New("compact_test: stop")

@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/clientconfig"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/drain"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/ingest"
 )
 
 // HostOptions configure Host.
@@ -138,7 +138,7 @@ func (s *Server) Host(ctx context.Context, o HostOptions) {
 		case s.cfg.Local():
 			tenant, ok = LocalTenant, true
 		case cfg.Key == "":
-			say("not hosting the drain: this service requires a key and the client has none; run workflow login")
+			say("not hosting the drain: this service requires a key and the client has none; run yakka login")
 		default:
 			if tenant, ok = s.tenantForKey(cfg.Key); !ok {
 				say("not hosting the drain: client config key maps to no tenant")

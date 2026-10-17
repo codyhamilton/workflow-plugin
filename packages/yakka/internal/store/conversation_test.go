@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 )
 
 func cvFact(n int, typ string, ts float64, f FactRow) FactRow {

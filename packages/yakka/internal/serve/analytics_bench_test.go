@@ -21,15 +21,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 
 	_ "modernc.org/sqlite"
 )
 
 // The design's performance bound (DESIGN.md plan 12, "Performance bound"): times every analytics
 // route, measure, dimension pair and in-cap bucket against a copy of a ledger and fails any case
-// whose p95 is over WORKFLOW_BENCH_P95_MS. It is skipped unless WORKFLOW_BENCH_DIR names a tenant
+// whose p95 is over YAKKA_BENCH_P95_MS. It is skipped unless YAKKA_BENCH_DIR names a tenant
 // directory (one containing ledger.db). The source is never opened or written: only ledger.db and
 // its -wal/-shm siblings are copied into a temp dir, and the copy is opened there. This file lives
 // in package serve rather than store because it drives HTTP routes, and store cannot import serve.
@@ -39,17 +39,17 @@ const (
 	benchTenant  = "bench"
 	benchDefRuns = 3
 	benchDefP95  = 500.0
-	benchLiveEnv = "WORKFLOW_BENCH_ALLOW_LIVE"
+	benchLiveEnv = "YAKKA_BENCH_ALLOW_LIVE"
 )
 
-// TestAnalyticsBench is the env-gated benchmark. WORKFLOW_BENCH_DIR names the source tenant dir;
-// WORKFLOW_BENCH_OUT writes the table; WORKFLOW_BENCH_RUNS sets timed runs per case (default 3,
-// after one discarded warm-up); WORKFLOW_BENCH_FILTER is a case-name substring; WORKFLOW_BENCH_P95_MS
+// TestAnalyticsBench is the env-gated benchmark. YAKKA_BENCH_DIR names the source tenant dir;
+// YAKKA_BENCH_OUT writes the table; YAKKA_BENCH_RUNS sets timed runs per case (default 3,
+// after one discarded warm-up); YAKKA_BENCH_FILTER is a case-name substring; YAKKA_BENCH_P95_MS
 // is the bound (default 500).
 func TestAnalyticsBench(t *testing.T) {
-	src := os.Getenv("WORKFLOW_BENCH_DIR")
+	src := os.Getenv("YAKKA_BENCH_DIR")
 	if src == "" {
-		t.Skip("set WORKFLOW_BENCH_DIR to a tenant directory to run the analytics benchmark")
+		t.Skip("set YAKKA_BENCH_DIR to a tenant directory to run the analytics benchmark")
 	}
 	if err := benchLiveRefused(src); err != nil {
 		t.Fatal(err)
@@ -64,9 +64,9 @@ func TestAnalyticsBench(t *testing.T) {
 		h:      h.h,
 		key:    benchKey,
 		cases:  cases,
-		runs:   benchEnvInt("WORKFLOW_BENCH_RUNS", benchDefRuns, 1),
-		filter: os.Getenv("WORKFLOW_BENCH_FILTER"),
-		p95ms:  benchEnvFloat("WORKFLOW_BENCH_P95_MS", benchDefP95),
+		runs:   benchEnvInt("YAKKA_BENCH_RUNS", benchDefRuns, 1),
+		filter: os.Getenv("YAKKA_BENCH_FILTER"),
+		p95ms:  benchEnvFloat("YAKKA_BENCH_P95_MS", benchDefP95),
 	}
 	out := r.run()
 	table := out.table()
@@ -77,9 +77,9 @@ func TestAnalyticsBench(t *testing.T) {
 	for _, c := range out.over {
 		t.Errorf("case %s: p95 %.1f ms over %.0f ms", c.name, c.p95ms(), r.p95ms)
 	}
-	if p := os.Getenv("WORKFLOW_BENCH_OUT"); p != "" {
+	if p := os.Getenv("YAKKA_BENCH_OUT"); p != "" {
 		if err := os.WriteFile(p, []byte(table+"\n"), 0o644); err != nil {
-			t.Fatalf("write WORKFLOW_BENCH_OUT: %v", err)
+			t.Fatalf("write YAKKA_BENCH_OUT: %v", err)
 		}
 	}
 	t.Logf("benchmark: %d cases, %s elapsed", len(out.cases), out.elapsed.Round(time.Millisecond))
@@ -122,10 +122,10 @@ func benchLiveRefused(dir string) error {
 	if err != nil {
 		return nil
 	}
-	live := filepath.Join(home, ".local", "share", "workflow")
+	live := filepath.Join(home, ".local", "share", "yakka")
 	d := filepath.Clean(dir)
 	if d == live || strings.HasPrefix(d, live+string(filepath.Separator)) {
-		return fmt.Errorf("WORKFLOW_BENCH_DIR %s is under the live ledger %s; set %s=1 to proceed (a copy is still made)", dir, live, benchLiveEnv)
+		return fmt.Errorf("YAKKA_BENCH_DIR %s is under the live ledger %s; set %s=1 to proceed (a copy is still made)", dir, live, benchLiveEnv)
 	}
 	return nil
 }

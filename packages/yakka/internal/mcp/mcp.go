@@ -19,7 +19,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/drain"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/drain"
 )
 
 // Options configures Serve. Zero values take defaults.
@@ -160,7 +160,7 @@ func (s *server) handle(ctx context.Context, line []byte) *response {
 			pv = p.ProtocolVersion
 		}
 		return ok(map[string]any{"protocolVersion": pv, "capabilities": map[string]any{"tools": map[string]any{"listChanged": false}},
-			"serverInfo": map[string]any{"name": "workflow", "version": s.o.Version}, "instructions": instructions})
+			"serverInfo": map[string]any{"name": "yakka", "version": s.o.Version}, "instructions": instructions})
 	case "ping":
 		return ok(map[string]any{})
 	case "tools/list":

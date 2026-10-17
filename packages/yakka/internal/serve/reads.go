@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 )
 
 var kindOrder = []string{"design", "brief", "report"}

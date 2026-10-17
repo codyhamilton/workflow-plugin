@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 func secretText() string { return "AKIA" + "IOSFODNN7" + "EXAMPLE" }

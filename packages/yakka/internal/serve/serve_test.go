@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 func do(t *testing.T, h http.Handler, method, url, key, body string) (int, string) {
@@ -151,17 +151,17 @@ func TestParseKeys(t *testing.T) {
 func TestLocalModeConfig(t *testing.T) {
 	env := func(m map[string]string) func(string) string { return func(k string) string { return m[k] } }
 	for _, addr := range []string{"", "127.0.0.1:0", "localhost:8770", "[::1]:8770", "127.0.0.2:1"} {
-		c, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"}))
+		c, err := ConfigFromEnv(env(map[string]string{"YAKKA_SERVE_ADDR": addr, "YAKKA_SERVE_DATA": "/d"}))
 		if err != nil || !c.Local() {
 			t.Errorf("%q: %v", addr, err)
 		}
 	}
 	for _, addr := range []string{"0.0.0.0:8770", ":8770", "[::]:8770", "192.168.1.5:8770", "example.com:80"} {
-		if _, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": addr, "WORKFLOW_SERVE_DATA": "/d"})); err == nil {
+		if _, err := ConfigFromEnv(env(map[string]string{"YAKKA_SERVE_ADDR": addr, "YAKKA_SERVE_DATA": "/d"})); err == nil {
 			t.Errorf("%q: keyless non-loopback bind accepted", addr)
 		}
 	}
-	if c, err := ConfigFromEnv(env(map[string]string{"WORKFLOW_SERVE_ADDR": "0.0.0.0:8770", "WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka"})); err != nil || c.Local() {
+	if c, err := ConfigFromEnv(env(map[string]string{"YAKKA_SERVE_ADDR": "0.0.0.0:8770", "YAKKA_SERVE_DATA": "/d", "YAKKA_SERVE_KEYS": "a=ka"})); err != nil || c.Local() {
 		t.Fatal("keyed wildcard bind refused", err)
 	}
 }
@@ -366,12 +366,12 @@ func TestCORSKeyedMode(t *testing.T) {
 }
 
 func TestCORSConfig(t *testing.T) {
-	env := map[string]string{"WORKFLOW_SERVE_DATA": "/d", "WORKFLOW_SERVE_KEYS": "a=ka", "WORKFLOW_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
+	env := map[string]string{"YAKKA_SERVE_DATA": "/d", "YAKKA_SERVE_KEYS": "a=ka", "YAKKA_SERVE_CORS_ORIGINS": " https://a.example, ,https://b.example"}
 	c, err := ConfigFromEnv(func(k string) string { return env[k] })
 	if err != nil || len(c.CORSOrigins) != 2 || c.CORSOrigins[0] != "https://a.example" || c.CORSOrigins[1] != "https://b.example" {
 		t.Fatal(c.CORSOrigins, err)
 	}
-	delete(env, "WORKFLOW_SERVE_CORS_ORIGINS")
+	delete(env, "YAKKA_SERVE_CORS_ORIGINS")
 	if c, _ := ConfigFromEnv(func(k string) string { return env[k] }); len(c.CORSOrigins) != 0 {
 		t.Fatal(c.CORSOrigins)
 	}

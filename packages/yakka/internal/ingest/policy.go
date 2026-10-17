@@ -20,7 +20,7 @@ func (a Action) String() string {
 type policyKey struct{ harness, event string }
 
 // policyTable maps (harness, event) to an action. Any pair not listed is Keep. The OpenCode Remove
-// entries must equal the plugin's remove-list in packages/opencode-workflow-hooks/src/index.ts
+// entries must equal the plugin's remove-list in packages/opencode-yakka-hooks/src/index.ts
 // (asserted by TestRemoveListMatchesPlugin).
 var policyTable = map[policyKey]Action{
 	{"opencode", "experimental.chat.system.transform"}: Remove,

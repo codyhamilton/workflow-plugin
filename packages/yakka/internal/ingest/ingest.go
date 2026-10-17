@@ -26,10 +26,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/secrets"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/archive"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/secrets"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 // Result statuses.

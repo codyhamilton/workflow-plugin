@@ -38,8 +38,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/secrets"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/secrets"
 )
 
 // File is one queue file: its name and raw bytes.

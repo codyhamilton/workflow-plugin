@@ -370,3 +370,21 @@ Surfaces: the brief's owned paths.
 Deviations: none. The report is a following commit so the rename commit stays content-free.
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### Phase 5 module-path rewrite (Decision 1 rebase protocol)
+
+From repo root, after `5-01` directory renames:
+
+```bash
+git mv packages/yakka/cmd/workflow packages/yakka/cmd/yakka
+find packages/yakka -type f \( -name '*.go' -o -name go.mod \) -exec sed -i 's|github.com/codyhamilton/workflow-plugin/packages/workflow|github.com/codyhamilton/yakka/packages/yakka|g' {} +
+find packages/yakka -type f -name '*.go' -exec sed -i 's|WORKFLOW_|YAKKA_|g' {} +
+find packages/yakka -type f -name '*.go' -exec sed -i \
+  -e 's|\.config/workflow/|\.config/yakka/|g' \
+  -e 's|\.config", "workflow"|.config", "yakka"|g' \
+  -e 's|share/workflow/|share/yakka/|g' \
+  -e 's|share", "workflow"|share", "yakka"|g' \
+  {} +
+```
+
+Literal follow-ons in the same unit (not covered by the `sed` lines above): `opencode-workflow-hooks` → `opencode-yakka-hooks` in `packages/yakka/internal/ingest/policy.go` and `policy_test.go`; user-facing `workflow` CLI strings → `yakka` in `packages/yakka/cmd/yakka` and stderr prefixes in `internal/{serve,mcp,drain}`; MCP `serverInfo.name` → `yakka`; `cmd/yakka` integration tests use a Go spool helper instead of `packages/hooklog/spool.sh` until hooklog env names land in `5-04`.

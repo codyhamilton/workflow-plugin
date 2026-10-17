@@ -16,12 +16,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 
 	_ "modernc.org/sqlite"
 )
 
-// advRPC is a minimal JSON-RPC line client over a `workflow mcp` child.
+// advRPC is a minimal JSON-RPC line client over a `yakka mcp` child.
 type advRPC struct {
 	t     *testing.T
 	in    io.WriteCloser
@@ -119,7 +119,7 @@ func TestAdvisoryOutcome(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e.base = append(e.base, "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_CHECKS_DIR="+checksDir)
+	e.base = append(e.base, "YAKKA_SERVE_DATA="+e.data, "YAKKA_CHECKS_DIR="+checksDir)
 	repo := filepath.Join(e.tmp, "repo")
 	gitRepo(t, repo, map[string]string{"README.md": "temp repo\n"})
 	top, _, _, err := keys.RepoPath(filepath.Join(repo, "README.md"))
@@ -271,7 +271,7 @@ func TestAdvisoryOutcome(t *testing.T) {
 		m := mcp.call("initialize", map[string]any{"protocolVersion": "2025-06-18", "capabilities": map[string]any{}, "clientInfo": map[string]any{"name": "t", "version": "0"}})
 		r, _ := m["result"].(map[string]any)
 		si, _ := r["serverInfo"].(map[string]any)
-		if r["protocolVersion"] != "2025-06-18" || si["name"] != "workflow" {
+		if r["protocolVersion"] != "2025-06-18" || si["name"] != "yakka" {
 			t.Fatalf("initialize: %v", m)
 		}
 		mcp.in.Write([]byte(`{"jsonrpc":"2.0","method":"notifications/initialized"}` + "\n"))
@@ -291,7 +291,7 @@ func TestAdvisoryOutcome(t *testing.T) {
 		stopServe()
 		waitFor(t, 15*time.Second, "lock free", func() bool { return !e.lockHeld() })
 		rel, abs := design(10, "# Queued\n\nwaiting to go\n")
-		spoolWrite("conv-q", abs, "# Queued\n\nwaiting to go\n", "WORKFLOW_BIN=/bin/true") // spool starts no drain; only the shim may
+		spoolWrite("conv-q", abs, "# Queued\n\nwaiting to go\n", "YAKKA_BIN=/bin/true") // spool starts no drain; only the shim may
 		waitFor(t, 15*time.Second, "lock free again", func() bool { return !e.lockHeld() })
 		before := len(e.starts())
 		txt, isErr, rerr := mcp.tool("artifact_feedback", map[string]any{"path": rel})
@@ -393,7 +393,7 @@ func TestAdvisoryOutcome(t *testing.T) {
 		stopServe()
 		waitFor(t, 15*time.Second, "lock free", func() bool { return !e.lockHeld() })
 		rel, abs := design(12, "# Queued again\n\nstill waiting\n")
-		spoolWrite("conv-q2", abs, "# Queued again\n\nstill waiting\n", "WORKFLOW_BIN=/bin/true")
+		spoolWrite("conv-q2", abs, "# Queued again\n\nstill waiting\n", "YAKKA_BIN=/bin/true")
 		for name, p := range map[string]string{"queued": rel, "delivered": target} {
 			txt, isErr, rerr := mcp.tool("artifact_feedback", map[string]any{"path": p})
 			t.Logf("down/%s: %s", name, advFirstLines(txt, 3))

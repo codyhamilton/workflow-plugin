@@ -16,7 +16,7 @@ var ErrLocked = errors.New("store: tenant directory locked")
 func lockPath(dir string) string { return filepath.Join(dir, ".lock") }
 
 func lockedErr(dir string) error {
-	return fmt.Errorf("%w: %s is locked by compaction or another exclusive holder; wait for `workflow ledger compact` to finish", ErrLocked, dir)
+	return fmt.Errorf("%w: %s is locked by compaction or another exclusive holder; wait for `yakka ledger compact` to finish", ErrLocked, dir)
 }
 
 // acquireLock opens (creating mode 0600) the tenant's .lock and takes it non-blocking with how

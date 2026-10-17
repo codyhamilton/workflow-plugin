@@ -13,15 +13,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/archive"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 	"github.com/klauspost/compress/zstd"
 )
 
 // TestRemoveListMatchesPlugin asserts the OpenCode plugin's remove-list equals the Go table's
 // OpenCode Remove entries.
 func TestRemoveListMatchesPlugin(t *testing.T) {
-	src, err := os.ReadFile(filepath.Join("..", "..", "..", "..", "packages", "opencode-workflow-hooks", "src", "index.ts"))
+	src, err := os.ReadFile(filepath.Join("..", "..", "..", "..", "packages", "opencode-yakka-hooks", "src", "index.ts"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/screen"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/scorer"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/screen"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 // qaScorer is contentScorer with its score filed under a catalog check, so the scores route has a

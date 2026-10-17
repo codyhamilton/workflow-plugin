@@ -81,8 +81,8 @@ func TestScanLinesAndOrder(t *testing.T) {
 
 func TestPlaceholdersDoNotHit(t *testing.T) {
 	for _, s := range []string{
-		"WORKFLOW_SERVE_KEYS=a=ka,b=kb",
-		"WORKFLOW_SERVE_KEYS=aaaaaaaaaaaaaaaa",
+		"YAKKA_SERVE_KEYS=a=ka,b=kb",
+		"YAKKA_SERVE_KEYS=aaaaaaaaaaaaaaaa",
 		"API_KEY=short",
 		"API_KEY=$OTHER_VARIABLE",
 		"API_KEY=<your-key-here>",

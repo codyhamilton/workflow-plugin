@@ -9,22 +9,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/clientconfig"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/clientconfig"
 )
 
-// RunStandalone is `workflow drain`: exit 0 when idle-exited, lock held by another or stopped.
+// RunStandalone is `yakka drain`: exit 0 when idle-exited, lock held by another or stopped.
 func RunStandalone(ctx context.Context, stderr io.Writer) int {
 	o := Options{Sink: ConfigSink, Log: stderr, Poll: 250 * time.Millisecond}
 	for env, dst := range map[string]*time.Duration{
-		"WORKFLOW_DRAIN_WINDOW":      &o.Window,
-		"WORKFLOW_DRAIN_LINGER":      &o.Linger,
-		"WORKFLOW_DRAIN_BACKOFF_MAX": &o.BackoffMax,
-		"WORKFLOW_DRAIN_GIVEUP":      &o.GiveUp,
+		"YAKKA_DRAIN_WINDOW":      &o.Window,
+		"YAKKA_DRAIN_LINGER":      &o.Linger,
+		"YAKKA_DRAIN_BACKOFF_MAX": &o.BackoffMax,
+		"YAKKA_DRAIN_GIVEUP":      &o.GiveUp,
 	} {
 		if v := os.Getenv(env); v != "" {
 			d, err := time.ParseDuration(v)
 			if err != nil {
-				fmt.Fprintf(stderr, "workflow drain: %s: %v\n", env, err)
+				fmt.Fprintf(stderr, "yakka drain: %s: %v\n", env, err)
 				return 2
 			}
 			*dst = d
@@ -35,7 +35,7 @@ func RunStandalone(ctx context.Context, stderr io.Writer) int {
 	}
 	reason, err := Run(ctx, o)
 	if err != nil {
-		fmt.Fprintln(stderr, "workflow drain:", err)
+		fmt.Fprintln(stderr, "yakka drain:", err)
 		return 1
 	}
 	fmt.Fprintf(stderr, "drain: exit: %s\n", reason)

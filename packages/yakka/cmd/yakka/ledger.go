@@ -1,4 +1,4 @@
-// Command workflow is the single binary of plan 09: serve, drain, mcp, status. ledger compact is
+// Command yakka is the single binary of plan 09: serve, drain, mcp, status. ledger compact is
 // the offline, resumable reclaim command of plan 12 Phase 2.
 package main
 
@@ -15,8 +15,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/compact"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/compact"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 // newCompactSession returns the context and Options for one compaction run. It is a package
@@ -26,7 +26,7 @@ var newCompactSession = func() (context.Context, context.CancelFunc, compact.Opt
 	return ctx, cancel, compact.Options{Progress: os.Stdout}
 }
 
-// runLedger dispatches `workflow ledger ...`: the offline `compact` reclaim and the offline
+// runLedger dispatches `yakka ledger ...`: the offline `compact` reclaim and the offline
 // `purge-deltas` removal of message.part.delta facts and archive lines.
 func runLedger(args []string) int {
 	if len(args) == 0 || (args[0] != "compact" && args[0] != "purge-deltas") {
@@ -56,7 +56,7 @@ func runLedger(args []string) int {
 func compactTenant(dir string) int {
 	tn, err := store.OpenExclusive(dir, store.Options{})
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger compact:", err)
 		return 1
 	}
 	defer tn.Close()
@@ -64,7 +64,7 @@ func compactTenant(dir string) int {
 	start := time.Now()
 	before, err := ledgerCounts(tn)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger compact:", err)
 		return 1
 	}
 	fmt.Printf("before: %s\n", before)
@@ -73,17 +73,17 @@ func compactTenant(dir string) int {
 	if !complete {
 		need, err := compact.NeedBytes(tn)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+			fmt.Fprintln(os.Stderr, "yakka ledger compact:", err)
 			return 1
 		}
 		free, err := compact.FreeBytes(dir)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+			fmt.Fprintln(os.Stderr, "yakka ledger compact:", err)
 			return 1
 		}
 		fmt.Printf("space: need %d MiB, have %d MiB\n", need>>20, free>>20)
 		if free < need {
-			fmt.Fprintf(os.Stderr, "workflow ledger compact: need %d MiB, have %d MiB\n", need>>20, free>>20)
+			fmt.Fprintf(os.Stderr, "yakka ledger compact: need %d MiB, have %d MiB\n", need>>20, free>>20)
 			return 1
 		}
 
@@ -94,22 +94,22 @@ func compactTenant(dir string) int {
 		cancel()
 		if runErr != nil {
 			if interrupted {
-				fmt.Fprintln(os.Stderr, "workflow ledger compact: interrupted; rerun the same command to resume")
+				fmt.Fprintln(os.Stderr, "yakka ledger compact: interrupted; rerun the same command to resume")
 			} else {
-				fmt.Fprintln(os.Stderr, "workflow ledger compact:", runErr)
+				fmt.Fprintln(os.Stderr, "yakka ledger compact:", runErr)
 			}
 			return 1
 		}
 	}
 
 	if err := vacuum(tn); err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger compact:", err)
 		return 1
 	}
 
 	after, err := ledgerCounts(tn)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger compact:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger compact:", err)
 		return 1
 	}
 	fmt.Printf("after: %s elapsed=%s\n", after, time.Since(start).Round(time.Millisecond))
@@ -122,12 +122,12 @@ func compactTenant(dir string) int {
 // (exit 1) when locked, short of space, or interrupted, and prints rows and counts before and after.
 func purgeDeltasTenant(dir string) int {
 	if _, err := os.Stat(filepath.Join(dir, "ledger.db")); err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", err)
 		return 1
 	}
 	tn, err := store.OpenExclusive(dir, store.Options{})
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", err)
 		return 1
 	}
 	defer tn.Close()
@@ -135,7 +135,7 @@ func purgeDeltasTenant(dir string) int {
 	start := time.Now()
 	before, err := ledgerCounts(tn)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", err)
 		return 1
 	}
 	fmt.Printf("before: %s\n", before)
@@ -144,12 +144,12 @@ func purgeDeltasTenant(dir string) int {
 	need := uint64(fileSize(filepath.Join(dir, "ledger.db")))
 	free, err := compact.FreeBytes(dir)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", err)
 		return 1
 	}
 	fmt.Printf("space: need %d MiB, have %d MiB\n", need>>20, free>>20)
 	if free < need {
-		fmt.Fprintf(os.Stderr, "workflow ledger purge-deltas: need %d MiB, have %d MiB\n", need>>20, free>>20)
+		fmt.Fprintf(os.Stderr, "yakka ledger purge-deltas: need %d MiB, have %d MiB\n", need>>20, free>>20)
 		return 1
 	}
 
@@ -160,9 +160,9 @@ func purgeDeltasTenant(dir string) int {
 	cancel()
 	if runErr != nil {
 		if interrupted {
-			fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas: interrupted; rerun the same command to resume")
+			fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas: interrupted; rerun the same command to resume")
 		} else {
-			fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", runErr)
+			fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", runErr)
 		}
 		return 1
 	}
@@ -170,13 +170,13 @@ func purgeDeltasTenant(dir string) int {
 		st.FactsDeleted, st.ArchiveDropped, st.FilesRewritten, st.FilesDeleted)
 
 	if err := vacuum(tn); err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", err)
 		return 1
 	}
 
 	after, err := ledgerCounts(tn)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "workflow ledger purge-deltas:", err)
+		fmt.Fprintln(os.Stderr, "yakka ledger purge-deltas:", err)
 		return 1
 	}
 	fmt.Printf("after: %s elapsed=%s\n", after, time.Since(start).Round(time.Millisecond))

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 // legacyLedger writes a tenant dir whose ledger.db is a pre-migration-5 database holding one fact.

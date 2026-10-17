@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/secrets"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/secrets"
 )
 
 type policyFixture struct {

@@ -21,7 +21,7 @@ import (
 
 var listenRE = regexp.MustCompile(`serve: listening on (\S+)`)
 
-// startHosted runs `workflow serve` with the queue and client config visible (so it can host the
+// startHosted runs `yakka serve` with the queue and client config visible (so it can host the
 // drain), on addr ("127.0.0.1:0" for any port). stderr goes to a file under logs/. It returns the
 // bound address read from the "listening on" line. extra env entries override the defaults.
 func (e *env) startHosted(addr string, extra ...string) string {
@@ -32,8 +32,8 @@ func (e *env) startHosted(addr string, extra ...string) string {
 		e.t.Fatal(err)
 	}
 	cmd := exec.Command(e.bin, "serve")
-	cmd.Env = append(append([]string{}, e.base...), "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr,
-		"WORKFLOW_SERVE_KEYS=t="+apiKey, "WORKFLOW_SERVE_POLL=500ms")
+	cmd.Env = append(append([]string{}, e.base...), "YAKKA_SERVE_DATA="+e.data, "YAKKA_SERVE_ADDR="+addr,
+		"YAKKA_SERVE_KEYS=t="+apiKey, "YAKKA_SERVE_POLL=500ms")
 	cmd.Env = append(cmd.Env, extra...)
 	cmd.Stderr = lf
 	if err := cmd.Start(); err != nil {
@@ -67,11 +67,28 @@ func (e *env) lockHeld() bool {
 }
 
 func (e *env) spoolEnv(extra []string, harness string, payload any) error {
-	b, _ := json.Marshal(payload)
-	cmd := exec.Command("bash", "../../../hooklog/spool.sh", "--harness", harness)
-	cmd.Env = append(append([]string{}, e.base...), extra...)
-	cmd.Stdin = bytes.NewReader(b)
-	return cmd.Run()
+	m, ok := payload.(map[string]any)
+	if !ok {
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(b, &m); err != nil {
+			return err
+		}
+	}
+	kick := true
+	kickBin := ""
+	env := append(append([]string{}, e.base...), extra...)
+	for _, kv := range extra {
+		if kv == "YAKKA_HOOKLOG_KICK=0" {
+			kick = false
+		}
+		if strings.HasPrefix(kv, "YAKKA_BIN=") {
+			kickBin = strings.TrimPrefix(kv, "YAKKA_BIN=")
+		}
+	}
+	return e.writeSpool(harness, "", m, kick, kickBin, env)
 }
 
 func (e *env) starts() []string {
@@ -111,7 +128,7 @@ WHERE a.type = 'artifact_version' AND a.path = ?`
 
 func TestCaptureOutcome(t *testing.T) {
 	e := newEnv(t)
-	e.base = append(e.base, "WORKFLOW_SERVE_DATA="+e.data)
+	e.base = append(e.base, "YAKKA_SERVE_DATA="+e.data)
 	repo := filepath.Join(e.tmp, "repo")
 	os.MkdirAll(repo, 0o755)
 	git(t, repo, "init", "-q")
@@ -255,7 +272,7 @@ func TestCaptureOutcome(t *testing.T) {
 		e.writeConfig(freePort(t))
 		time.Sleep(2 * time.Second) // several hosting ticks
 		for i := 0; i < 3; i++ {
-			if err := e.spoolEnv([]string{"WORKFLOW_HOOKLOG_KICK=0"}, "claude", map[string]any{"hook_event_name": "Stop", "session_id": "conv-else", "n": i}); err != nil {
+			if err := e.spoolEnv([]string{"YAKKA_HOOKLOG_KICK=0"}, "claude", map[string]any{"hook_event_name": "Stop", "session_id": "conv-else", "n": i}); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -322,7 +339,7 @@ func TestCaptureOutcome(t *testing.T) {
 // config's key, and stores under the local tenant.
 func TestLocalModeHosting(t *testing.T) {
 	e := newEnv(t)
-	bound := e.startHosted("127.0.0.1:0", "WORKFLOW_SERVE_KEYS=")
+	bound := e.startHosted("127.0.0.1:0", "YAKKA_SERVE_KEYS=")
 	e.writeConfig(bound)
 	waitFor(t, 10*time.Second, "serve holds the lock", e.lockHeld)
 	for i := 0; i < 3; i++ {

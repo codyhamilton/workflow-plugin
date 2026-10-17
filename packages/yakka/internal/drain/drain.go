@@ -8,11 +8,11 @@
 // tmp/ and rejected/ live inside it with mode 0700. A rejected file moves to rejected/<same name> and its
 // reasons go to rejected/<same name>.reason, one line per reason, "<fact id or file name>: <reason>".
 //
-// Run is the loop. Standalone (RunStandalone, behind `workflow drain`) builds its sink from a fresh
+// Run is the loop. Standalone (RunStandalone, behind `yakka drain`) builds its sink from a fresh
 // clientconfig.Load before every batch; serve hosts Run with Options.Hosted and an in-process Sink.
 //
-// Test-only environment for the standalone binary, as Go duration strings: WORKFLOW_DRAIN_WINDOW,
-// WORKFLOW_DRAIN_LINGER, WORKFLOW_DRAIN_BACKOFF_MAX, WORKFLOW_DRAIN_GIVEUP. WORKFLOW_QUEUE sets the
+// Test-only environment for the standalone binary, as Go duration strings: YAKKA_DRAIN_WINDOW,
+// YAKKA_DRAIN_LINGER, YAKKA_DRAIN_BACKOFF_MAX, YAKKA_DRAIN_GIVEUP. YAKKA_QUEUE sets the
 // queue directory.
 package drain
 
@@ -31,8 +31,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/facts"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/facts"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/ingest"
 )
 
 // Why Run returned.
@@ -82,13 +82,13 @@ type Options struct {
 	afterRelease func() // test hook: runs between lock release and rescan
 }
 
-// QueueDir is $WORKFLOW_QUEUE, else ~/.local/share/workflow/queue.
+// QueueDir is $YAKKA_QUEUE, else ~/.local/share/yakka/queue.
 func QueueDir() string {
-	if d := os.Getenv("WORKFLOW_QUEUE"); d != "" {
+	if d := os.Getenv("YAKKA_QUEUE"); d != "" {
 		return d
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".local", "share", "workflow", "queue")
+	return filepath.Join(home, ".local", "share", "yakka", "queue")
 }
 
 func (o *Options) defaults() {

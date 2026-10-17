@@ -1,9 +1,9 @@
 // Package clientconfig loads the one client config file the drain and the MCP shim share
-// (design 2, Config): ~/.config/workflow/client.toml with `endpoint` and `key`. The file means
-// remote mode and is written by `workflow login`; with no file the client is in local mode and
+// (design 2, Config): ~/.config/yakka/client.toml with `endpoint` and `key`. The file means
+// remote mode and is written by `yakka login`; with no file the client is in local mode and
 // talks to the keyless local service at LocalEndpoint.
 //
-// The path is $WORKFLOW_CLIENT_CONFIG when set (tests only), else $HOME/.config/workflow/client.toml.
+// The path is $YAKKA_CLIENT_CONFIG when set (tests only), else $HOME/.config/yakka/client.toml.
 // Only the subset design 2 shows is parsed: `name = "string"` lines, `#` comments and blank lines;
 // unknown names are ignored; any other line is an error that names the line number, never its text.
 // The key is never logged or placed in an error.
@@ -41,14 +41,14 @@ var lineRE = regexp.MustCompile(`^([A-Za-z_][A-Za-z0-9_-]*)\s*=\s*("(?:[^"\\]|\\
 
 // Path returns the config file path.
 func Path() string {
-	if p := os.Getenv("WORKFLOW_CLIENT_CONFIG"); p != "" {
+	if p := os.Getenv("YAKKA_CLIENT_CONFIG"); p != "" {
 		return p
 	}
 	home := os.Getenv("HOME")
 	if home == "" {
 		home, _ = os.UserHomeDir()
 	}
-	return filepath.Join(home, ".config", "workflow", "client.toml")
+	return filepath.Join(home, ".config", "yakka", "client.toml")
 }
 
 // Load reads and parses the config on every call, so edits need no restart. A missing file is

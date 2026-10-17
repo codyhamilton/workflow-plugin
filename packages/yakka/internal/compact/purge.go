@@ -12,8 +12,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/archive"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 // PurgeStats reports what a PurgeDeltas did: the count of message.part.delta facts deleted and the

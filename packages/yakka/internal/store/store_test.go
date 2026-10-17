@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 )
 
 func openT(t *testing.T, opts Options) *Tenant {

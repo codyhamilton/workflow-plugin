@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/ingest"
 )
 
 func spoolFile(t testing.TB, dir, name string) {

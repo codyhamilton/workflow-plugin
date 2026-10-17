@@ -308,8 +308,8 @@ func TestFake(t *testing.T) {
 
 func TestJevLive(t *testing.T) {
 	key := os.Getenv("TYPESAFE_API_KEY")
-	if os.Getenv("WORKFLOW_JEV_LIVE") != "1" || key == "" {
-		t.Skip("set WORKFLOW_JEV_LIVE=1 and TYPESAFE_API_KEY to run")
+	if os.Getenv("YAKKA_JEV_LIVE") != "1" || key == "" {
+		t.Skip("set YAKKA_JEV_LIVE=1 and TYPESAFE_API_KEY to run")
 	}
 	cs, err := LoadChecks(realQuality)
 	if err != nil {

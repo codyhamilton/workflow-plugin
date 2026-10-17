@@ -13,7 +13,7 @@ func write(t *testing.T, body string) {
 	if err := os.WriteFile(p, []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("WORKFLOW_CLIENT_CONFIG", p)
+	t.Setenv("YAKKA_CLIENT_CONFIG", p)
 }
 
 func TestLoad(t *testing.T) {
@@ -22,13 +22,13 @@ func TestLoad(t *testing.T) {
 	if err != nil || c.Endpoint != "http://127.0.0.1:8770" || c.Key != `k"1` {
 		t.Fatalf("got %+v %v", c, err)
 	}
-	if Path() != os.Getenv("WORKFLOW_CLIENT_CONFIG") {
+	if Path() != os.Getenv("YAKKA_CLIENT_CONFIG") {
 		t.Fatal("path")
 	}
 }
 
 func TestMissingFile(t *testing.T) {
-	t.Setenv("WORKFLOW_CLIENT_CONFIG", filepath.Join(t.TempDir(), "none.toml"))
+	t.Setenv("YAKKA_CLIENT_CONFIG", filepath.Join(t.TempDir(), "none.toml"))
 	c, err := Load()
 	if err != nil || !c.Local || c.Endpoint != LocalEndpoint || c.Key != "" || c.Mode() != "local" {
 		t.Fatalf("got %+v %v", c, err)
@@ -36,9 +36,9 @@ func TestMissingFile(t *testing.T) {
 }
 
 func TestDefaultPath(t *testing.T) {
-	t.Setenv("WORKFLOW_CLIENT_CONFIG", "")
+	t.Setenv("YAKKA_CLIENT_CONFIG", "")
 	t.Setenv("HOME", "/h")
-	if Path() != "/h/.config/workflow/client.toml" {
+	if Path() != "/h/.config/yakka/client.toml" {
 		t.Fatal(Path())
 	}
 }

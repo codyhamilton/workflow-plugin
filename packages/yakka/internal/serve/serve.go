@@ -18,10 +18,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/ingest"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/ingest"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/scorer"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 const maxBody = 16 << 20
@@ -46,29 +46,29 @@ const LocalTenant = "local"
 // Local reports local mode: no keys, every request is LocalTenant, and the bind is loopback.
 func (c Config) Local() bool { return len(c.Keys) == 0 }
 
-// ConfigFromEnv reads WORKFLOW_SERVE_ADDR, WORKFLOW_SERVE_DATA and WORKFLOW_SERVE_KEYS. With no
+// ConfigFromEnv reads YAKKA_SERVE_ADDR, YAKKA_SERVE_DATA and YAKKA_SERVE_KEYS. With no
 // keys the service runs in local mode and refuses any bind that is not loopback.
 func ConfigFromEnv(getenv func(string) string) (Config, error) {
-	c := Config{Addr: getenv("WORKFLOW_SERVE_ADDR"), Data: getenv("WORKFLOW_SERVE_DATA")}
+	c := Config{Addr: getenv("YAKKA_SERVE_ADDR"), Data: getenv("YAKKA_SERVE_DATA")}
 	if c.Addr == "" {
 		c.Addr = "127.0.0.1:8770"
 	}
 	if c.Data == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return c, errors.New("WORKFLOW_SERVE_DATA unset and no home directory")
+			return c, errors.New("YAKKA_SERVE_DATA unset and no home directory")
 		}
-		c.Data = filepath.Join(home, ".local/share/workflow/serve")
+		c.Data = filepath.Join(home, ".local/share/yakka/serve")
 	}
-	for _, o := range strings.Split(getenv("WORKFLOW_SERVE_CORS_ORIGINS"), ",") {
+	for _, o := range strings.Split(getenv("YAKKA_SERVE_CORS_ORIGINS"), ",") {
 		if o = strings.TrimSpace(o); o != "" {
 			c.CORSOrigins = append(c.CORSOrigins, o)
 		}
 	}
-	ks, err := ParseKeys(getenv("WORKFLOW_SERVE_KEYS"))
+	ks, err := ParseKeys(getenv("YAKKA_SERVE_KEYS"))
 	c.Keys = ks
 	if err == nil && c.Local() && !loopbackBind(c.Addr) {
-		err = fmt.Errorf("WORKFLOW_SERVE_KEYS is empty, so WORKFLOW_SERVE_ADDR must be loopback (it is %q)", c.Addr)
+		err = fmt.Errorf("YAKKA_SERVE_KEYS is empty, so YAKKA_SERVE_ADDR must be loopback (it is %q)", c.Addr)
 	}
 	return c, err
 }
@@ -100,16 +100,16 @@ func ParseKeys(s string) ([]KeyPair, error) {
 	for i, part := range strings.Split(s, ",") {
 		t, k, ok := strings.Cut(part, "=")
 		if !ok || k == "" {
-			return nil, fmt.Errorf("WORKFLOW_SERVE_KEYS entry %d is not tenant=key", i+1)
+			return nil, fmt.Errorf("YAKKA_SERVE_KEYS entry %d is not tenant=key", i+1)
 		}
 		if !tenantRE.MatchString(t) {
-			return nil, fmt.Errorf("WORKFLOW_SERVE_KEYS entry %d has an invalid tenant name", i+1)
+			return nil, fmt.Errorf("YAKKA_SERVE_KEYS entry %d has an invalid tenant name", i+1)
 		}
 		if o, dup := seenKey[k]; dup {
-			return nil, fmt.Errorf("WORKFLOW_SERVE_KEYS gives one key to two tenants (%q and %q)", o, t)
+			return nil, fmt.Errorf("YAKKA_SERVE_KEYS gives one key to two tenants (%q and %q)", o, t)
 		}
 		if seenTenant[t] {
-			return nil, fmt.Errorf("WORKFLOW_SERVE_KEYS names tenant %q twice", t)
+			return nil, fmt.Errorf("YAKKA_SERVE_KEYS names tenant %q twice", t)
 		}
 		seenKey[k], seenTenant[t] = t, true
 		out = append(out, KeyPair{t, k})
@@ -138,7 +138,7 @@ func Preflight(dataDir string) error {
 		}
 		if err := store.TrySharedLock(dir); err != nil {
 			if errors.Is(err, store.ErrLocked) {
-				return fmt.Errorf("workflow serve: tenant %q is locked by compaction; wait for or stop `workflow ledger compact` to finish", e.Name())
+				return fmt.Errorf("yakka serve: tenant %q is locked by compaction; wait for or stop `yakka ledger compact` to finish", e.Name())
 			}
 			return err
 		}
@@ -290,7 +290,7 @@ func (s *Server) reconcile(ts *tenantState) (done, unreachable bool) {
 	}
 	for _, h := range blobs {
 		if err := s.screen(ctx, ts.t, h); err != nil {
-			fmt.Fprintf(os.Stderr, "workflow serve: unscreened blob %s: %v\n", h, err)
+			fmt.Fprintf(os.Stderr, "yakka serve: unscreened blob %s: %v\n", h, err)
 			if errors.Is(err, scorer.ErrUnreachable) {
 				return false, true
 			}
@@ -319,7 +319,7 @@ func (s *Server) drainPending(ts *tenantState) (unreachable bool) {
 			delete(ts.fails, h)
 			continue
 		}
-		fmt.Fprintf(os.Stderr, "workflow serve: pending %s: %v\n", h, err)
+		fmt.Fprintf(os.Stderr, "yakka serve: pending %s: %v\n", h, err)
 		if errors.Is(err, scorer.ErrUnreachable) {
 			return true
 		}
@@ -357,7 +357,7 @@ func (s *Server) noteFailure(ts *tenantState, h string, cause error) {
 		r.Path, r.ConversationID = ci.LatestPath, ci.ConversationID
 	}
 	if err := ts.t.DropPending(s.ctx, h, r); err != nil {
-		fmt.Fprintf(os.Stderr, "workflow serve: pending %s: cannot record rejection: %v\n", h, err)
+		fmt.Fprintf(os.Stderr, "yakka serve: pending %s: cannot record rejection: %v\n", h, err)
 		f.next = time.Now().Add(maxBackoff) // keep it pending, but do not spin on the write
 		return
 	}
@@ -538,7 +538,7 @@ func (s *Server) auth(h tenantHandler) http.HandlerFunc {
 		if !ok {
 			msg := "unauthorized"
 			if !strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ") {
-				msg = "unauthorized: this service requires a key; run workflow login"
+				msg = "unauthorized: this service requires a key; run yakka login"
 			}
 			writeJSON(w, 401, map[string]string{"error": msg})
 			return

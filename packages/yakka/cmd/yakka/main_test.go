@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 )
 
 func freePort(t *testing.T) string {
@@ -34,18 +34,18 @@ func TestServeOutcome(t *testing.T) {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
 	data := filepath.Join(tmp, "data")
-	env := append(os.Environ(), "TYPESAFE_API_KEY=", "HOME="+tmp, "WORKFLOW_SERVE_DATA="+data, "WORKFLOW_SERVE_ADDR=127.0.0.1:0",
-		"WORKFLOW_QUEUE="+filepath.Join(tmp, "queue"), "WORKFLOW_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"))
+	env := append(os.Environ(), "TYPESAFE_API_KEY=", "HOME="+tmp, "YAKKA_SERVE_DATA="+data, "YAKKA_SERVE_ADDR=127.0.0.1:0",
+		"YAKKA_QUEUE="+filepath.Join(tmp, "queue"), "YAKKA_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"))
 
 	// no keys: refuses any bind that is not loopback
 	noKeys := exec.Command(bin, "serve")
-	noKeys.Env = append(env, "WORKFLOW_SERVE_KEYS=", "WORKFLOW_SERVE_ADDR=0.0.0.0:0")
+	noKeys.Env = append(env, "YAKKA_SERVE_KEYS=", "YAKKA_SERVE_ADDR=0.0.0.0:0")
 	if err := noKeys.Run(); err == nil {
 		t.Fatal("started without keys on a wildcard bind")
 	}
 
 	cmd := exec.Command(bin, "serve")
-	cmd.Env = append(env, "WORKFLOW_SERVE_KEYS=a=ka,b=kb")
+	cmd.Env = append(env, "YAKKA_SERVE_KEYS=a=ka,b=kb")
 	errPath := filepath.Join(tmp, "serve.log")
 	errFile, err := os.Create(errPath)
 	if err != nil {

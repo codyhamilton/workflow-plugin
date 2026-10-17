@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 func conversationTotalsMap(t store.ConversationTotals) map[string]any {

@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
 	_ "modernc.org/sqlite"
 )
 

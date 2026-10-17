@@ -50,9 +50,9 @@ func newEnv(t *testing.T) *env {
 		t.Fatal(err)
 	}
 	e.base = append(os.Environ(),
-		"HOME="+e.home, "WORKFLOW_QUEUE="+e.queue, "WORKFLOW_HOOKLOG_DIR="+e.hooklog,
-		"WORKFLOW_CLIENT_CONFIG="+e.cfg, "WORKFLOW_BIN="+e.wrapper, "TYPESAFE_API_KEY=",
-		"WORKFLOW_DRAIN_LINGER=2s", "WORKFLOW_DRAIN_BACKOFF_MAX=1s",
+		"HOME="+e.home, "YAKKA_QUEUE="+e.queue, "YAKKA_HOOKLOG_DIR="+e.hooklog,
+		"YAKKA_CLIENT_CONFIG="+e.cfg, "YAKKA_BIN="+e.wrapper, "TYPESAFE_API_KEY=",
+		"YAKKA_DRAIN_LINGER=2s", "YAKKA_DRAIN_BACKOFF_MAX=1s",
 	)
 	t.Cleanup(func() {
 		if b, err := os.ReadFile(filepath.Join(e.logs, "starts")); err == nil {
@@ -74,18 +74,18 @@ func (e *env) writeConfig(addr string) {
 	}
 }
 
-// startServe runs `workflow serve` on addr with no WORKFLOW_CLIENT_CONFIG and no WORKFLOW_QUEUE of
+// startServe runs `yakka serve` on addr with no YAKKA_CLIENT_CONFIG and no YAKKA_QUEUE of
 // its own, so it can never host a drain.
 func (e *env) startServe(addr string) {
 	e.t.Helper()
 	var env []string
 	for _, kv := range e.base {
-		if !strings.HasPrefix(kv, "WORKFLOW_CLIENT_CONFIG=") && !strings.HasPrefix(kv, "WORKFLOW_QUEUE=") {
+		if !strings.HasPrefix(kv, "YAKKA_CLIENT_CONFIG=") && !strings.HasPrefix(kv, "YAKKA_QUEUE=") {
 			env = append(env, kv)
 		}
 	}
 	cmd := exec.Command(e.bin, "serve")
-	cmd.Env = append(env, "WORKFLOW_SERVE_DATA="+e.data, "WORKFLOW_SERVE_ADDR="+addr, "WORKFLOW_SERVE_KEYS=t="+apiKey)
+	cmd.Env = append(env, "YAKKA_SERVE_DATA="+e.data, "YAKKA_SERVE_ADDR="+addr, "YAKKA_SERVE_KEYS=t="+apiKey)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Start(); err != nil {
@@ -114,11 +114,17 @@ func waitFor(t *testing.T, d time.Duration, what string, cond func() bool) {
 }
 
 func (e *env) spool(harness string, payload any) error {
-	b, _ := json.Marshal(payload)
-	cmd := exec.Command("bash", "../../../hooklog/spool.sh", "--harness", harness)
-	cmd.Env = e.base
-	cmd.Stdin = bytes.NewReader(b)
-	return cmd.Run()
+	m, ok := payload.(map[string]any)
+	if !ok {
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(b, &m); err != nil {
+			return err
+		}
+	}
+	return e.writeSpool(harness, "", m, true, "", e.base)
 }
 
 func (e *env) queued() int {

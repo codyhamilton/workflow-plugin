@@ -4,10 +4,10 @@ package serve
 // Instead of the design's route x measure x dimension matrix (analytics_bench_test.go), it issues
 // exactly the request set Overview and Usage send for the 7d, 30d, 90d and All time presets against a
 // copy of the large ledger, then ranks the slowest calls and explains their query plans. It is
-// skipped unless WORKFLOW_BENCH_DIR names a tenant directory. The source is never opened or written:
+// skipped unless YAKKA_BENCH_DIR names a tenant directory. The source is never opened or written:
 // openBenchCopy copies ledger.db into a temp dir and the copy is opened there.
 //
-// The request sets mirror the site as it stands (packages/workflow-analytics/src/routes/+page.svelte
+// The request sets mirror the site as it stands (packages/yakka-analytics/src/routes/+page.svelte
 // and src/routes/usage/+page.svelte) with no filters: Overview sends one /analytics/summary, one
 // /analytics/query per spark measure (bucket picked by the site's 400-bucket rule), and one heatmap
 // /analytics/query (hook_events, weekday x hour_of_day, bucket none); Usage sends five by-model
@@ -38,7 +38,7 @@ const (
 	pagesetRuns    = 5
 	pagesetConc    = 4
 	pagesetSlowN   = 8
-	pagesetOutEnv  = "WORKFLOW_PAGESET_OUT"
+	pagesetOutEnv  = "YAKKA_PAGESET_OUT"
 	pagesetMaxBuck = 400
 )
 
@@ -248,11 +248,11 @@ func pagesetMeasure(t *testing.T, h *benchHarness, reqs []pageRequest) []pageset
 
 func pagesetMS(d time.Duration) float64 { return float64(d) / float64(time.Millisecond) }
 
-// TestAnalyticsPageSet is the env-gated profiler (skipped unless WORKFLOW_BENCH_DIR is set).
+// TestAnalyticsPageSet is the env-gated profiler (skipped unless YAKKA_BENCH_DIR is set).
 func TestAnalyticsPageSet(t *testing.T) {
-	src := os.Getenv("WORKFLOW_BENCH_DIR")
+	src := os.Getenv("YAKKA_BENCH_DIR")
 	if src == "" {
-		t.Skip("set WORKFLOW_BENCH_DIR to a tenant directory to profile the page request sets")
+		t.Skip("set YAKKA_BENCH_DIR to a tenant directory to profile the page request sets")
 	}
 	if err := benchLiveRefused(src); err != nil {
 		t.Fatal(err)

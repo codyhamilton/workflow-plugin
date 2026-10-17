@@ -13,20 +13,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/archive"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/serve"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/archive"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/serve"
 
 	_ "modernc.org/sqlite"
 )
 
 // TestVerifyCopy checks a compacted ledger copy against the counts recorded
-// before compaction. It runs only when WORKFLOW_VERIFY_DIR names the tenant
-// directory and WORKFLOW_VERIFY_PRE names the key=value precounts file.
+// before compaction. It runs only when YAKKA_VERIFY_DIR names the tenant
+// directory and YAKKA_VERIFY_PRE names the key=value precounts file.
 func TestVerifyCopy(t *testing.T) {
-	dir := os.Getenv("WORKFLOW_VERIFY_DIR")
-	pre := os.Getenv("WORKFLOW_VERIFY_PRE")
+	dir := os.Getenv("YAKKA_VERIFY_DIR")
+	pre := os.Getenv("YAKKA_VERIFY_PRE")
 	if dir == "" || pre == "" {
-		t.Skip("set WORKFLOW_VERIFY_DIR and WORKFLOW_VERIFY_PRE")
+		t.Skip("set YAKKA_VERIFY_DIR and YAKKA_VERIFY_PRE")
 	}
 	c := readPrecounts(t, pre)
 

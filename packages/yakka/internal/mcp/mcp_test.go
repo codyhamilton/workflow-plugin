@@ -55,8 +55,8 @@ func newEnv(t *testing.T, texts *[]string) *env {
 	t.Setenv("TYPESAFE_API_KEY", "")
 	e := &env{t: t, texts: texts, repo: filepath.Join(tmp, "repo"), wt: filepath.Join(tmp, "wt"),
 		queue: filepath.Join(tmp, "queue"), cfg: filepath.Join(tmp, "client.toml")}
-	t.Setenv("WORKFLOW_QUEUE", e.queue)
-	t.Setenv("WORKFLOW_CLIENT_CONFIG", e.cfg)
+	t.Setenv("YAKKA_QUEUE", e.queue)
+	t.Setenv("YAKKA_CLIENT_CONFIG", e.cfg)
 	os.MkdirAll(filepath.Join(e.queue, "rejected"), 0o700)
 	os.MkdirAll(filepath.Join(e.repo, "docs/plans/x"), 0o755)
 	e.design = filepath.Join(e.repo, "docs/plans/x/DESIGN.md")
@@ -229,7 +229,7 @@ func TestShim(t *testing.T) {
 	t.Run("1 initialize", func(t *testing.T) {
 		c := newEnv(t, &texts).serve()
 		r := c.rpc("initialize", map[string]any{"protocolVersion": "2025-06-18"})["result"].(map[string]any)
-		if r["protocolVersion"] != "2025-06-18" || r["serverInfo"].(map[string]any)["name"] != "workflow" || r["instructions"] == nil {
+		if r["protocolVersion"] != "2025-06-18" || r["serverInfo"].(map[string]any)["name"] != "yakka" || r["instructions"] == nil {
 			t.Fatalf("initialize: %v", r)
 		}
 		r = c.rpc("initialize", map[string]any{"protocolVersion": "1999-01-01"})["result"].(map[string]any)

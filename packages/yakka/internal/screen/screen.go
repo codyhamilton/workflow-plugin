@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/keys"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/scorer"
-	"github.com/codyhamilton/workflow-plugin/packages/workflow/internal/store"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/keys"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/scorer"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
 )
 
 // young is how long a pending file with no fact row may wait for its fact to commit.
