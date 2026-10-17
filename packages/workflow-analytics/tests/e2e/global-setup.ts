@@ -51,7 +51,7 @@ export default async function globalSetup() {
 	// service and verdicts would be "pass"; without it every verdict is "unscreened", deterministically.
 	const env = { ...process.env, PATH: `${homedir()}/.local/go/bin:${process.env.PATH}`, TYPESAFE_API_KEY: '' };
 	const bin = path.join(tmp, 'workflow');
-	execFileSync('go', ['build', '-o', bin, './cmd/workflow'], { cwd: path.join(repoRoot, 'tools/workflow'), env, stdio: 'inherit' });
+	execFileSync('go', ['build', '-o', bin, './cmd/workflow'], { cwd: path.join(repoRoot, 'packages/workflow'), env, stdio: 'inherit' });
 
 	const procs: ChildProcess[] = [];
 	const start = async (extra: Record<string, string>, name: string) => {
@@ -60,7 +60,7 @@ export default async function globalSetup() {
 			...env,
 			WORKFLOW_SERVE_ADDR: `127.0.0.1:${port}`,
 			WORKFLOW_SERVE_DATA: path.join(tmp, name),
-			WORKFLOW_CHECKS_DIR: path.join(repoRoot, 'tools/quality'),
+			WORKFLOW_CHECKS_DIR: path.join(repoRoot, 'packages/workflow/catalogue'),
 			...extra
 		};
 		const p = spawn(bin, ['serve'], { env: serveEnv, stdio: 'ignore' });
