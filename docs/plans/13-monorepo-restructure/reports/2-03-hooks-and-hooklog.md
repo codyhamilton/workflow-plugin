@@ -21,7 +21,7 @@ rg 'tools/hooklog' hooks packages/hooklog
 → many hits across hooks/*.json and packages/hooklog/**
 ```
 
-**After** (commit `f434a1b`)
+**After**
 
 ```
 python3 -m unittest discover -s packages/hooklog/tests -v
