@@ -287,3 +287,11 @@ The Phase 4 carried item is unit 5-07.
 - Deviations: hooks bars use fixed dimensions because stored `dim` is the time-series split. Reports other than hooks, builder, and usage render one primary chart.
 - Agent: Composer, agent `918088a1-6355-4b53-93a6-ba393c67fec9`. The harness did not report turn count or final context size. Status `done`.
 - Check: `npm test -- src/lib/dashboard-tile.test.ts`: 3 passed. The report's SaveView mismatch is the pre-5-02 tree; `14e747e` is the save path on this branch.
+
+### 5-05-dashboard-page-grid
+
+- Built: the dashboard page renders tiles in the document on a two-column grid. Import states how many tiles and views were dropped. There is no iframe.
+- Surfaces: `packages/workflow-analytics/src/routes/dashboards/+page.svelte`. Commit `17b71d1`.
+- Deviations: none. The report repeats the SaveView mismatch; `SaveView.svelte` on this branch already calls `saveView(name, report, params)`.
+- Agent: Composer, agent `c76fb655-e2dc-4636-8075-2892d8b3cc4c`. The harness did not report turn count or final context size. Status `done`.
+- Check: no `iframe` or `embed` left in the dashboard page. `npm test -- src/lib/views.test.ts`: 28 passed.
