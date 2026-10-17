@@ -26,7 +26,7 @@ Cited from `docs/plans/13-client-registration/DESIGN.md`, settled:
 
 - "The public origin is `https://yakka.build`. The GitHub OAuth app's callback is `https://yakka.build/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin."
 - "`WORKFLOW_SERVE_KEYS` is unset."
-- Phase 4 outcome: "The fly app `workflow-collector` serves `https://yakka.build`. That origin answers `GET /v1/health` with no bearer and `GET /oauth/login` with a redirect to GitHub. The OAuth app callback is `https://yakka.build/oauth/callback`."
+- Phase 4 outcome: "The fly app `yakka` serves `https://yakka.build`. That origin answers `GET /v1/health` with no bearer and `GET /oauth/login` with a redirect to GitHub. The OAuth app callback is `https://yakka.build/oauth/callback`."
 
 Identity and admission (for operator setup only): authorize URL uses scopes `read:user` and `user:email` (design Domain: Identity and admission).
 
@@ -34,7 +34,7 @@ Identity and admission (for operator setup only): authorize URL uses scopes `rea
 
 - Ensure fly.io auth and org access for this worker (or report `blocked` if credentials are unavailable).
 - Create or attach the fly app from 4-01; provision the volume if not already present.
-- The public origin is `https://yakka.build`. Do not treat `https://workflow-collector.fly.dev` as the origin to prove.
+- The public origin is `https://yakka.build`. The Fly app name is `yakka`. Do not treat `https://yakka.fly.dev` as the origin to prove.
 - Set fly secrets from credentials already present in the environment or on an existing Fly app: `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`. Never write either value into the repo, a commit, or a log. If either value is missing, do not invent it and do not deploy.
 - `WORKFLOW_PUBLIC_URL` is `https://yakka.build` in `fly.toml`. Confirm **`WORKFLOW_SERVE_KEYS` is not set** on the app (`fly secrets list` / `fly config env`).
 - The GitHub OAuth app **Authorization callback URL** is already `https://yakka.build/oauth/callback`. Do not register a different callback.

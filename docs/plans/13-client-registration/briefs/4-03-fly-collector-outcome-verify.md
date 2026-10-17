@@ -19,7 +19,7 @@ Read ranges and grep; do not read a whole file to find one section, do not re-re
 
 ## Goal
 
-Prove the phase 4 runtime outcome on `https://yakka.build`: health and OAuth entry, token persistence across a machine restart, revocation persistence, and bearer CORS for the Pages origin without credentials. Do not prove `https://workflow-collector.fly.dev`.
+Prove the phase 4 runtime outcome on `https://yakka.build`: health and OAuth entry, token persistence across a machine restart, revocation persistence, and bearer CORS for the Pages origin without credentials. The Fly app name is `yakka`. Do not prove `https://yakka.fly.dev`.
 
 ## Contract
 
@@ -40,7 +40,7 @@ Cited from `docs/plans/13-client-registration/DESIGN.md`, settled:
 
 ## Changes
 
-- On the live origin `https://yakka.build`, obtain two issued tokens for the same tenant (or one `read_write` and one revoked) using **session APIs** (`POST /v1/tenants`, `POST /v1/tokens` with a future `expires_at`) or an existing admin session — not by committing plaintext to the repo. Redact tokens in the report except last four characters. Do not substitute `https://workflow-collector.fly.dev`.
+- On the live origin `https://yakka.build`, obtain two issued tokens for the same tenant (or one `read_write` and one revoked) using **session APIs** (`POST /v1/tenants`, `POST /v1/tokens` with a future `expires_at`) or an existing admin session — not by committing plaintext to the repo. Redact tokens in the report except last four characters. Do not substitute `https://yakka.fly.dev`.
 - **Ingest** once with a live `read_write` bearer (`POST /v1/ingest`); record tenant and a distinguishing fact id or path.
 - **Revoke** a second token (or the same token after a separate ingest check) before restart; confirm next ingest with that bearer is `401` and stores nothing.
 - **Restart** the fly machine (`fly machines restart` or `fly apps restart` per fly docs); wait until health is `200` again.

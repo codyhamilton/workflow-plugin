@@ -28,7 +28,7 @@ Cited from `docs/plans/13-client-registration/DESIGN.md`, settled:
 
 **Domain: Collector hosting**
 
-- "One fly.io machine runs the `workflow serve` binary as app `workflow-collector`. A volume holds `WORKFLOW_SERVE_DATA`. The public origin is `https://yakka.build`. The GitHub OAuth app's callback is `https://yakka.build/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin. `WORKFLOW_SERVE_KEYS` is unset. The GitHub client id and secret are fly secrets, not files in the repo. The product, CLI, packages, and Fly app name stay `workflow`."
+- "One fly.io machine runs the `workflow serve` binary as app `yakka`. A volume holds `WORKFLOW_SERVE_DATA`. The public origin is `https://yakka.build`. The GitHub OAuth app's callback is `https://yakka.build/oauth/callback`, and `WORKFLOW_PUBLIC_URL` is that origin. `WORKFLOW_SERVE_KEYS` is unset. The GitHub client id and secret are fly secrets, not files in the repo. The product, CLI, and packages stay `workflow`. The Fly app name is `yakka`."
 - "Cloudflare Pages, if still used, remains a static site that sends a pasted bearer from `/settings`. It does not receive the session cookie. The fly app sets `WORKFLOW_SERVE_CORS_ORIGINS` to that Pages origin. Credentialed CORS stays off."
 - Non-goals: "more than one machine; putting the fact ledger on anything other than the volume's tenant directories."
 

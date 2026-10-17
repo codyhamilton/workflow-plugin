@@ -300,8 +300,8 @@ on a compacted copy of the real ledger.
 ## Hosting
 
 - **Fly.io remote collector:** Plan 13 deploys the public `workflow serve` host on fly.io (`fly.toml`:
-  app `workflow-collector`, `WORKFLOW_PUBLIC_URL` `https://yakka.build`). The GitHub OAuth callback
-  is `https://yakka.build/oauth/callback`. The product name and the Fly app name stay `workflow`.
+  app `yakka`, `WORKFLOW_PUBLIC_URL` `https://yakka.build`). The GitHub OAuth callback
+  is `https://yakka.build/oauth/callback`. The product name stays `workflow`. The Fly app name is `yakka`.
   One machine runs the image built from the repo `Dockerfile` (analytics
   `build/` copied into `tools/workflow/internal/serve/site/`, then `workflow serve` on internal port
   8080). A fly volume `workflow_serve_data` mounts at `/data`; `WORKFLOW_SERVE_DATA=/data` holds the

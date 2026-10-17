@@ -7,6 +7,8 @@ cursor:
 
 **Status:** done
 
+**Correction:** The Fly app name is `yakka`. `fly.toml` `app` is `yakka`. Do not create `workflow-collector`. The public origin is `https://yakka.build`.
+
 ## What changed
 
 - **`fly.toml`**: app `workflow-collector`, `primary_region = "iad"`, HTTP on internal port **8080**, volume **`workflow_serve_data`** mounted at **`/data`** (`WORKFLOW_SERVE_DATA`). Non-secret env in `[env]`; no `WORKFLOW_SERVE_KEYS`.

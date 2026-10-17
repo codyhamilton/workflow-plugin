@@ -1,6 +1,6 @@
 ---
 cursor:
-  subagentId: "bc-a6d87835-33cb-509e-8621-1ead8277a408"
+  subagentId: "bc-88807259-84db-5de5-935e-f6344b0e49a5"
 ---
 
 # Report: 4-02 — Fly collector deploy
@@ -9,61 +9,97 @@ cursor:
 
 ## What changed
 
-Nothing on fly.io. No app, volume, secrets, or release was created (operator constraint: no `GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` in this environment; do not invent values or placeholder secrets).
+Destroyed the empty app `workflow-collector` in org `ctzns` (no machines, no release). It is gone.
 
-Added this report only.
+Created app `yakka` in org `ctzns`:
+
+- Volume `workflow_serve_data` id `vol_v3gppxdm66k9gmw4`, region `iad`, 1 GB, encrypted, not attached.
+- Dedicated IPv4 `137.66.6.45` (Fly bills this at $2/mo).
+- Dedicated IPv6 `2a09:8280:1::1bb:db4d:0`.
+- Certificate for `yakka.build`. Status: Not verified. Records to set: `A yakka.build → 137.66.6.45` and `AAAA yakka.build → 2a09:8280:1::1bb:db4d:0`.
+
+`fly.toml` `app` is `yakka`. `fly config validate` passed. No release, no machines, no secrets. `fly deploy` was not run.
+
+The product, CLI, and packages were not renamed. Public origin stays `https://yakka.build`.
 
 ## Checks
 
-**Before** (no deploy; app does not exist):
+**Before** (wrong app existed; OAuth env absent; `yakka.build` did not resolve):
 
 ```
-flyctl auth whoami
-→ 1b1db139-7037-53c8-a4c6-cde73c4f1733@tokens.fly.io
+flyctl apps list -o ctzns
+→ workflow-collector
 
-flyctl apps list -o l-fante
-→ lfante-api-production, lfante-api-staging (no workflow-collector)
+GITHUB_OAUTH_CLIENT_ID
+→ absent
+
+GITHUB_OAUTH_CLIENT_SECRET
+→ absent
+
+curl -sS -o /dev/null -w '%{http_code}' https://yakka.build/v1/health
+→ curl: (6) Could not resolve host: yakka.build
+→ 000
+```
+
+**After** (`workflow-collector` destroyed; `yakka` created; still no release):
+
+```
+flyctl apps list -o ctzns
+→ yakka only
 
 flyctl status -a workflow-collector
 → Could not find App "workflow-collector"
 
-env | grep '^GITHUB_OAUTH'
-→ (not set)
+flyctl status -a yakka
+→ Name yakka, Owner ctzns, Hostname yakka.fly.dev, Image -
 
-curl -sS -o /dev/null -w '%{http_code}' https://workflow-collector.fly.dev/v1/health
-→ curl: (6) Could not resolve host: workflow-collector.fly.dev
+flyctl ips list -a yakka
+→ v4 137.66.6.45 public ingress (dedicated)
+→ v6 2a09:8280:1::1bb:db4d:0 public ingress (dedicated)
+
+flyctl certs show yakka.build -a yakka
+→ Status Not verified
+→ No AAAA records were found
+
+flyctl secrets list -a yakka
+→ empty (no WORKFLOW_SERVE_KEYS)
+
+flyctl machines list -a yakka
+→ No machines are available on this app
+
+flyctl config validate -c fly.toml
+→ Configuration is valid
+→ app = "yakka"
+
+curl -sS -o /dev/null -w '%{http_code}' https://yakka.build/v1/health
+→ curl: (6) Could not resolve host: yakka.build
 → 000
 
-curl -sS -D - -o /dev/null https://workflow-collector.fly.dev/oauth/login
-→ curl: (6) Could not resolve host: workflow-collector.fly.dev
+curl -sS -D - -o /dev/null https://yakka.build/oauth/login
+→ curl: (6) Could not resolve host: yakka.build
 ```
-
-**After** (unchanged — deploy not attempted):
-
-Same outputs as before.
-
-`fly secrets list` / `fly config env` for `workflow-collector`: not applicable until the app exists.
 
 ## Handoff for 4-03
 
 | Item | Value |
 |---|---|
-| Intended public origin | `https://workflow-collector.fly.dev` (`WORKFLOW_PUBLIC_URL` in `fly.toml`) |
-| Fly app name | `workflow-collector` (not created) |
-| Volume | `workflow_serve_data` in `iad` per 4-01 (not created) |
-| Pages CORS origin | `fly.toml` still has placeholder `https://replace-with-pages-project.pages.dev` — set to the real Pages URL before or during deploy |
-| GitHub OAuth | Callback to register: `https://workflow-collector.fly.dev/oauth/callback`; scopes `read:user`, `user:email`. Real `GITHUB_OAUTH_CLIENT_ID` in env or `fly.toml`; `GITHUB_OAUTH_CLIENT_SECRET` via `fly secrets set` only |
+| Public origin to prove | `https://yakka.build` (does not resolve; not proven) |
+| Fly app | `yakka` in org `ctzns` |
+| Volume | `vol_v3gppxdm66k9gmw4` (`workflow_serve_data`, `iad`, unattached) |
+| DNS Cody must set | `A yakka.build → 137.66.6.45`; `AAAA yakka.build → 2a09:8280:1::1bb:db4d:0` |
+| Pages CORS origin | still unknown; `WORKFLOW_SERVE_CORS_ORIGINS` stays unset |
+| GitHub OAuth | Callback is already `https://yakka.build/oauth/callback`. `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent. Set both with `fly secrets set -a yakka`. Do not deploy until both are set. |
 
-**Resume steps:** `fly apps create workflow-collector` (or `fly launch` from repo), `fly volumes create workflow_serve_data -r iad -a workflow-collector`, set secrets, update GitHub OAuth app callback, replace placeholder client id and CORS origin, `fly deploy`, then run 4-03 evidence curls. Confirm `WORKFLOW_SERVE_KEYS` is never set.
+The addresses from the destroyed `workflow-collector` app (`109.105.218.231`, `2a09:8280:1::1bb:d911:0`) are not the records to set.
 
 ## Deviations
 
-Deploy and GitHub OAuth registration were skipped per run instructions when OAuth credentials are absent; aligns with brief “report `blocked`” when deploy cannot complete.
+Deploy was not run. The brief says not to deploy when either OAuth value is missing, and this run says to stop and name that blocker rather than invent values. Cody corrected the Fly app name from `workflow-collector` to `yakka` after the first create; that app was destroyed and `yakka` was created. Briefs 4-01, 4-02, and 4-03 and the phase 4 contract now name app `yakka`.
 
 ## Contract notes
 
-Brief matches DESIGN collector-hosting contract. No contradiction between brief and DESIGN cited contracts.
+The public origin is `https://yakka.build`. It is not live: DNS has no records, and the app has no release. `https://yakka.fly.dev` is not the close condition.
 
 ## Bugs
 
-None observed (no running collector).
+None in the product. The collector process is not running.

@@ -7,6 +7,8 @@ cursor:
 
 **Status:** done
 
+**Correction:** The Fly app name is `yakka`, and design 7 Hosting names that app. The product name stays `workflow`. The public origin is `https://yakka.build`.
+
 ## What changed
 
 - **`docs/design/07-analytics-site.md` — Hosting:** Added fly.io remote collector bullets (`fly.toml`, app `workflow-collector`, `WORKFLOW_SERVE_DATA` volume, OAuth on the collector origin, no `WORKFLOW_SERVE_KEYS`, `WORKFLOW_SERVE_CORS_ORIGINS` for Pages). Named `https://workflow-collector.fly.dev` from committed `fly.toml` / 4-01 (4-02 report not present). Clarified Cloudflare Pages as static pasted-token client via `/settings`, no session cookie, unchanged `pages_build_output_dir`. Noted carried item 1: `?tenant=` from `/v1/me` only on overview and `/profile`, not other report routes.
