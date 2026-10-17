@@ -553,6 +553,10 @@ Units:
 - Approach: known.
 - Depends on: Phase 3.
 
+Units:
+
+- 4-01 Layout contract. Brief: `docs/plans/13-monorepo-restructure/briefs/4-01-layout-contract.md`. Depends on: Phase 3. Runs alongside: nothing.
+
 ### Phase 5: Runtime runs as yakka
 
 - Why: the binary and hooks are what every harness executes, so they have to work under the new names before anything else points at them.

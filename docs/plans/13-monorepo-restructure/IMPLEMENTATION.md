@@ -297,3 +297,15 @@ Phase 3 outcome holds for the tree checks above. The logged-in Cursor session ch
 ### Carried
 
 1. Logged-in Cursor session check, manual, per the user instruction above. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `workflow drain` to a local `workflow serve` ships it and `workflow status` reports no failure.
+
+## Phase 4: The layout contract is stated and enforced
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-83baacb3-016f-585e-a573-6349677e0232
+Start: 2026-10-17T23:06:10Z
+
+Refine skipped. DESIGN.md says Phase 4 is one worker. Brief authored inline: `docs/plans/13-monorepo-restructure/briefs/4-01-layout-contract.md`.
+
+Phase 3 Carried item 1 is a logged-in Cursor session check. It does not touch a Phase 4 contract, boundary, or outcome, so it is not absorbed and it does not bounce the phase. It stays carried for the next refinement. This phase does not run it.
+
+`artifact_feedback` on the brief: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
