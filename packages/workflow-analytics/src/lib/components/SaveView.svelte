@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { store, type SavedView } from '$lib/views';
+	import {
+		store,
+		type SavedView,
+		reportFromPathname,
+		chartParamsFromQuery,
+		viewHref
+	} from '$lib/views';
 
 	// A reactive copy of the store, refreshed on every save/delete (and on a cross-tab storage event).
 	let saved = $state<SavedView[]>(store.listViews());
@@ -10,19 +16,14 @@
 	let open = $state(false);
 	let error = $state('');
 
-	// The current page as a stored URL: pathname plus query, never the embed flag.
-	const url = $derived.by(() => {
-		const q = new URLSearchParams(page.url.searchParams);
-		q.delete('embed');
-		const qs = q.toString();
-		return page.url.pathname + (qs ? `?${qs}` : '');
-	});
+	const report = $derived(reportFromPathname(page.url.pathname));
 
 	function save() {
 		const trimmed = name.trim();
-		if (!trimmed) return;
+		if (!trimmed || !report) return;
 		try {
-			store.saveView(trimmed, url);
+			const params = chartParamsFromQuery(report, page.url.searchParams);
+			store.saveView(trimmed, report, params);
 			name = '';
 			error = '';
 		} catch (e) {
@@ -37,9 +38,10 @@
 		data-testid="saveview-name"
 		placeholder="View name"
 		bind:value={name}
+		disabled={!report}
 		onkeydown={(e) => e.key === 'Enter' && save()}
 	/>
-	<button type="button" data-testid="saveview-save" onclick={save}>Save view</button>
+	<button type="button" data-testid="saveview-save" disabled={!report} onclick={save}>Save view</button>
 	<button
 		type="button"
 		data-testid="saveview-menu-toggle"
@@ -48,11 +50,14 @@
 	>
 		Saved views
 	</button>
+	{#if !report}
+		<p class="saveview-hint" data-testid="saveview-not-storable">Save is available on report pages only.</p>
+	{/if}
 	{#if open}
 		<ul class="list">
 			{#each saved as v (v.id)}
 				<li>
-					<a data-testid="saveview-item" href={v.url}>{v.name}</a>
+					<a data-testid="saveview-item" href={viewHref(v)}>{v.name}</a>
 					<button
 						type="button"
 						data-testid="saveview-delete"
@@ -86,6 +91,7 @@
 		gap: 0.5rem;
 		align-items: baseline;
 	}
+	.saveview-hint,
 	.saveview-error {
 		flex-basis: 100%;
 		margin: 0;

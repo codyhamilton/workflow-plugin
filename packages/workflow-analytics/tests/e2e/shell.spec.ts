@@ -149,11 +149,33 @@ test('a saved view is listed and survives a reload', async ({ page }) => {
 
 	const item = page.getByTestId('saveview-item').filter({ hasText: 'weekly' });
 	await expect(item).toBeVisible();
-	await expect(item).toHaveAttribute('href', /range=7d/);
+	await expect(item).toHaveAttribute('href', '/');
 
 	await page.reload();
 	await page.getByTestId('saveview-menu-toggle').click();
 	await expect(page.getByTestId('saveview-item').filter({ hasText: 'weekly' })).toBeVisible();
+});
+
+test('save view stores chart params only', async ({ page }) => {
+	await page.goto('/trends?range=7d&repo_id=r1&metric=commits&group=harness&bucket=day');
+	await page.getByTestId('saveview-name').fill('trends-view');
+	await page.getByTestId('saveview-save').click();
+
+	const raw = await page.evaluate(() => localStorage.getItem('workflow-analytics-views:views'));
+	expect(raw).toBeTruthy();
+	const views = JSON.parse(raw!) as Record<string, unknown>[];
+	const entry = views.find((v) => v.name === 'trends-view');
+	expect(entry).toBeTruthy();
+	expect(entry!.report).toBe('trends');
+	const params = entry!.params as Record<string, string>;
+	expect(params.metric).toBe('commits');
+	expect(params.group).toBe('harness');
+	expect(params.bucket).toBe('day');
+	expect(entry).not.toHaveProperty('range');
+	expect(entry).not.toHaveProperty('repo_id');
+	expect(entry).not.toHaveProperty('url');
+	expect(params).not.toHaveProperty('range');
+	expect(params).not.toHaveProperty('repo_id');
 });
 
 test('dashboards shares filter chrome; embed=1 no longer hides the shell', async ({ page }) => {
