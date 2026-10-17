@@ -193,11 +193,11 @@ export const EXECUTION_ROWS = [
 	{ repo_id: 'r1', plan: '01-x', conversation_id: 'c1', brief_path: P_BRIEF1, harness: 'claude', shape: 'complete', ts: at(4, 10) }
 ];
 
-/** /conversations, last_ts descending. */
+/** /conversations, last_ts descending. Usage columns are what serve returns on each row. */
 export const CONVERSATION_ROWS = [
-	{ conversation_id: 'c3', harness: 'claude', repos: ['r1'], first_ts: at(1, 9), last_ts: at(1, 10), hook_events: 1, artifact_versions: 2, commits: 0, kinds: ['brief'] },
-	{ conversation_id: 'c4', harness: 'cursor', repos: ['r1'], first_ts: at(1, 8), last_ts: at(1, 8), hook_events: 1, artifact_versions: 0, commits: 0, kinds: [] },
-	{ conversation_id: 'c5', harness: 'opencode', repos: ['r1'], first_ts: at(4, 7), last_ts: at(1, 7), hook_events: 3, artifact_versions: 0, commits: 0, kinds: [] },
-	{ conversation_id: 'c2', harness: 'cursor', repos: ['r2'], first_ts: at(2, 8), last_ts: at(2, 12), hook_events: 1, artifact_versions: 2, commits: 1, kinds: ['brief', 'design'] },
-	{ conversation_id: 'c1', harness: 'claude', repos: ['r1'], first_ts: at(5, 10), last_ts: at(3, 13), hook_events: 4, artifact_versions: 4, commits: 1, kinds: ['brief', 'design', 'report'] }
+	{ conversation_id: 'c3', harness: 'claude', repos: ['r1'], first_ts: at(1, 9), last_ts: at(1, 10), hook_events: 1, artifact_versions: 2, commits: 0, kinds: ['brief'], cost_usd: 0, model: '', model_calls: 0, tokens_in: 0, tokens_out: 0, unpriced_calls: 0 },
+	{ conversation_id: 'c4', harness: 'cursor', repos: ['r1'], first_ts: at(1, 8), last_ts: at(1, 8), hook_events: 1, artifact_versions: 0, commits: 0, kinds: [], cost_usd: 0, model: '', model_calls: 0, tokens_in: 0, tokens_out: 0, unpriced_calls: 0 },
+	{ conversation_id: 'c5', harness: 'opencode', repos: ['r1'], first_ts: at(4, 7), last_ts: at(1, 7), hook_events: 3, artifact_versions: 0, commits: 0, kinds: [], cost_usd: 0.0223, model: 'anthropic/claude-sonnet-5-5', model_calls: 3, tokens_in: 3500, tokens_out: 600, unpriced_calls: 1 },
+	{ conversation_id: 'c2', harness: 'cursor', repos: ['r2'], first_ts: at(2, 8), last_ts: at(2, 12), hook_events: 1, artifact_versions: 2, commits: 1, kinds: ['brief', 'design'], cost_usd: 0, model: '', model_calls: 0, tokens_in: 0, tokens_out: 0, unpriced_calls: 0 },
+	{ conversation_id: 'c1', harness: 'claude', repos: ['r1'], first_ts: at(5, 10), last_ts: at(3, 13), hook_events: 4, artifact_versions: 4, commits: 1, kinds: ['brief', 'design', 'report'], cost_usd: 0.133977, model: 'claude-opus-5-5', model_calls: 1, tokens_in: 2, tokens_out: 5505, unpriced_calls: 0 }
 ];

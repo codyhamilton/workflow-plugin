@@ -171,3 +171,29 @@ Built: comments in `packages/workflow/internal/ingest/normalise.go` and `package
 Surfaces: those two files.
 
 Deviations: none.
+
+`artifact_feedback` on this phase's briefs and reports: unreachable. Workflow MCP tool discovery failed.
+
+### Verification
+
+Closed on this branch at `/workspace` (not merged to master).
+
+- `bin/workflow --version`: temporary `HOME` so `~/.cache/workflow/0.1.0` was empty, `WORKFLOW_RELEASE_URL=http://127.0.0.1:9`, Go 1.27.1 first on `PATH` because the wrapper builds with `GOTOOLCHAIN=local`. Printed `workflow 0.1.0 a1cc5fda6e13`. `bin/VERSION` is `0.1.0`, the same field as before the move. `tools/workflow` is absent; the wrapper builds from `packages/workflow`.
+- Hook capture: Claude Code 2.1.302, `claude --plugin-dir /workspace -p …`, exited 1 with `Not logged in`. The session still spooled through `packages/hooklog/spool.sh`. A local `workflow serve` hosted the drain. The ledger has `SessionStart`, `UserPromptSubmit`, `MessageDisplay`, `StopFailure`, and `SessionEnd` for that session. No tool ran, so the session did not emit `PreToolUse`. The `PreToolUse` command in `hooks/hooks.json` (`bash "${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/packages/hooklog/spool.sh" --harness claude --event PreToolUse`), with `CLAUDE_PLUGIN_ROOT` set to this checkout, wrote that event into the same queue. The hosted drain shipped it. `workflow status`: queued 0, rejected 0, endpoint reachable, exit 0.
+- `tools/release/build.sh`: exit 0. `tools/release/dist` has `workflow-linux-amd64`, `workflow-linux-arm64`, `workflow-darwin-amd64`, `workflow-darwin-arm64`. `bin/SHA256SUMS` has those four names. Each binary contains `site/_app/immutable`. Sums were restored afterward so the tree does not keep generated checksums. The release suite's `test_7_build_sh` asserts the same.
+- Tests, clean environment (no `WORKFLOW_QUEUE`):
+  - `go test ./...` in `packages/workflow`: pass. One earlier `internal/serve` analytics summary failure passed on rerun. A later `cmd/workflow` failure was this shell's leaked `WORKFLOW_QUEUE`; a clean rerun passed (52s).
+  - `packages/hooklog` 36 OK; `tools/quality` 26 OK (one suite run failed `test_hook_events_ingest_and_join` 1!=2, then the test and the suite passed); `tools/jev-variants` 43 OK; `tools/driver` 69 OK; `tools/release` 10 OK with `/usr/bin/go` hidden for `test_6_no_go_no_asset`.
+  - `node --test packages/opencode-workflow-hooks/tests/test_hooks.mjs` on Node v22.23.3: 8 pass.
+  - `npm run test:e2e` in `packages/workflow-analytics`: 168 pass. The first run failed `fixture.spec.ts` because conversation rows now include usage columns the fixture omitted. Those columns come from serve, not from this phase's path edits. The fixture lists them, and the suite was re-run green.
+- Old paths: `rg` for `tools/workflow`, `tools/hooklog`, `tools/quality/criteria.json`, `tools/quality/checks`, and the path-segment forms, excluding `docs/plans/`, `docs/lab/`, and changelog lines from `## 2.10.0` downward, hits only `CHANGELOG.md` line 9, the new entry's old spool path, which the outcome allows.
+
+Departure: the logged-out Claude turn did not call a tool, so `PreToolUse` was written by that hook's command rather than by a tool call inside the session. `SessionStart` came from the session. Both went through `packages/hooklog/spool.sh` into the queue, and drain to the local serve reported no failure.
+
+## Closed
+
+Phase 2 outcome holds, with the hook-session departure recorded above.
+
+### Carried
+
+None.
