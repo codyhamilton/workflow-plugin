@@ -22,7 +22,7 @@ def is_prefetch(command):
 class SurfaceTests(unittest.TestCase):
     def test_shipped_registrations_capture_all_events(self):
         registrations = [('claude', 'hooks/hooks.json', CLAUDE), ('cursor', 'hooks/cursor.json', CURSOR),
-                         ('cursor', 'tools/hooklog/cursor-hooks.example.json', CURSOR),
+                         ('cursor', 'packages/hooklog/cursor-hooks.example.json', CURSOR),
                          ('codex', 'hooks/codex.json', CODEX)]
         for harness, file, expected in registrations:
             with self.subTest(file=file), tempfile.TemporaryDirectory() as tmp:
@@ -39,7 +39,7 @@ class SurfaceTests(unittest.TestCase):
                 for event, groups in config['hooks'].items():
                     if harness == 'claude' and event in ('WorktreeCreate', 'WorktreeRemove'):
                         self.assertEqual(groups, [])  # logger must not replace host operations
-                        commands = [f'bash "{ROOT}/tools/hooklog/spool.sh" --harness claude --event {event}']
+                        commands = [f'bash "{ROOT}/packages/hooklog/spool.sh" --harness claude --event {event}']
                     else:
                         hooks = groups if harness == 'cursor' else [h for g in groups for h in g['hooks']]
                         commands = [h['command'].replace('/ABS/PATH/workflow-plugin', str(ROOT)) for h in hooks]

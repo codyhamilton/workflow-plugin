@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 GOBIN = os.path.join(pwd.getpwuid(os.getuid()).pw_dir, ".local/go/bin")  # HOME may be a temp dir
 CONFIGS = {"claude": ["hooks/hooks.json"],
-           "cursor": ["hooks/cursor.json", "tools/hooklog/cursor-hooks.example.json"],
+           "cursor": ["hooks/cursor.json", "packages/hooklog/cursor-hooks.example.json"],
            "codex": ["hooks/codex.json"]}
 GIT_ENV = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
 
@@ -57,7 +57,7 @@ class WriteSurfaceTests(unittest.TestCase):
         cls.bin = str(t / "workflow")
         env = dict(os.environ, PATH=GOBIN + ":" + os.environ["PATH"], HOME=str(cls.home), GOCACHE=gocache,
                    GOMODCACHE=gomod, XDG_CACHE_HOME=str(cls.cache), TYPESAFE_API_KEY="", CGO_ENABLED="0")
-        build = subprocess.run(["go", "build", "-o", cls.bin, "./cmd/workflow"], cwd=ROOT / "tools/workflow",
+        build = subprocess.run(["go", "build", "-o", cls.bin, "./cmd/workflow"], cwd=ROOT / "packages/workflow",
                                env=env, capture_output=True, text=True, timeout=300)
         if build.returncode:
             raise RuntimeError("go build failed: " + build.stderr[-1500:])
@@ -102,7 +102,7 @@ class WriteSurfaceTests(unittest.TestCase):
 
     def commands(self, harness, event, file):
         if harness == "opencode":
-            return ['bash "%s/tools/hooklog/spool.sh" --harness opencode' % ROOT]
+            return ['bash "%s/packages/hooklog/spool.sh" --harness opencode' % ROOT]
         config = json.loads((ROOT / file).read_text())
         groups = config["hooks"][event]
         hooks = groups if harness == "cursor" else [h for g in groups for h in g["hooks"]]

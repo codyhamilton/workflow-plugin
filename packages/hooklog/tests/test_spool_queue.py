@@ -191,12 +191,12 @@ class GoPath(Base):
 
     def test_default_kick_target(self):
         root = os.path.join(self.d, "repo")
-        shutil.copytree(SPOOL.parent, os.path.join(root, "tools", "hooklog"), ignore=shutil.ignore_patterns("tests", "__pycache__"))
+        shutil.copytree(SPOOL.parent, os.path.join(root, "packages", "hooklog"), ignore=shutil.ignore_patterns("tests", "__pycache__"))
         os.makedirs(os.path.join(root, "bin"))
         stub = os.path.join(root, "bin", "workflow")
         Path(stub).write_text(f'#!/bin/sh\necho "$* q=$WORKFLOW_QUEUE" >> "{self.log}"\n')
         os.chmod(stub, 0o755)
-        cmd = ["bash", os.path.join(root, "tools", "hooklog", "spool.sh"), "--harness", "claude"]
+        cmd = ["bash", os.path.join(root, "packages", "hooklog", "spool.sh"), "--harness", "claude"]
         subprocess.run(cmd, input='{"session_id":"s1"}', capture_output=True, text=True,
                        env=env(WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1", HOME=self.home))
         self.assertEqual(self.calls(True), [f"drain q={self.q}"])
