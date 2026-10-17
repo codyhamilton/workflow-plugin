@@ -3,7 +3,7 @@
 Consumer: <the worker that will do this>.
 Owned paths: `<path>`, `<path>`. Touch nothing else.
 Commits: <"Leave changes in the working tree." | "Commit to the current branch when done evidence passes, with a plain-summary title.">
-Report: before committing, write `docs/plans/<plan>/reports/<brief-name>.md` (a handoff; rubric in `packages/workflow/catalogue/checks/execution-report.json`) and include it in the commit.
+Report: before committing, write `docs/plans/<plan>/reports/<brief-name>.md` (a handoff; rubric in `packages/yakka/catalogue/checks/execution-report.json`) and include it in the commit.
 Depends on: <unit(s), or nothing>.
 Runs alongside: <unit(s) with disjoint paths, or nothing>.
 Budget: <N files to read, about N lines to change, N tool turns>. Past the budget, stop: write a handoff under this brief's name in `IMPLEMENTATION.md` (done, not done, what you learned), commit if this brief commits, and report `over budget`.

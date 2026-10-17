@@ -30,7 +30,7 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-CATALOGUE = ROOT / "packages/workflow/catalogue"
+CATALOGUE = ROOT / "packages/yakka/catalogue"
 sys.path[:0] = [str(ROOT / "tools/transcript"), str(ROOT / "packages/hooklog")]
 CRIT = json.loads((CATALOGUE / "criteria.json").read_text())
 REG_VERSION = CRIT["version"]
