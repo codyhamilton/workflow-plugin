@@ -236,3 +236,38 @@ Not closed. Checked on this branch at `/workspace`.
 - A Cursor session that loads this marketplace entry and fires a hook did not run. `agent -p --plugin-dir plugins/yakka` exits before a session: not logged in, and `agent login` stops on a Cursor credential page. This cloud agent loaded the installed marketplace plugin at commit `70e7258` with `gitPath: "."` and `enabledCapabilities: ["static"]`. That session loaded skills and wrote no queue events. `workflow drain` / `workflow status` were not run, because no session event was produced.
 
 The session clause of the Phase 3 outcome does not hold. No `Workflow-Phase` trailer.
+
+### Re-dispatch verification
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-f5312021-387d-50a9-a137-726a1f40d3a6
+Start: 2026-10-17T19:06:00Z
+
+Not closed. The move was left as it is (`4d41202`, `d010965`). Checked again on this branch at `/workspace`.
+
+- Both marketplace files still name `workflow` with `source` `plugins/yakka`. `plugins/yakka/.cursor-plugin/plugin.json` is `2.12.0` and names `./hooks/cursor.json`. `skills/` and that hooks file exist. `packages/yakka` does not. `plugins/yakka/bin/VERSION` is `0.1.0`.
+- All 22 commands in `plugins/yakka/hooks/cursor.json` start with `./script/`. None contains `${CURSOR_PLUGIN_ROOT}`, `tools/hooklog`, or an absolute path. `script/spool.sh` and `script/prefetch-version.sh` exist.
+- From cwd `plugins/yakka`, `./script/spool.sh --harness cursor --event sessionStart` with payload `session_id=phase3-redispatch`, `WORKFLOW_HOOKLOG_KICK=0`, and a temp queue: exit 0, one `*.evt`, envelope `harness=cursor` `event=sessionStart`.
+- `python3 -m unittest tools/driver/tests/test_install_route.py` → 21 tests, OK.
+- `artifact_feedback` on the brief and the report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+A Cursor session that loads `plugins/yakka` and fires a hook did not run.
+
+- Cursor CLI `2026.10.16-e3cb207` is installed at `~/.local/bin/agent`. `agent status` is `Not logged in`. `CURSOR_API_KEY` is unset. Chrome has no Cursor cookies.
+- `agent -p --trust --plugin-dir /workspace/plugins/yakka` exits 1 before a session: `Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY environment variable.`
+- `NO_OPEN_BROWSER=1 agent login` prints `https://cursor.com/loginDeepControl?...&mode=login&redirectTarget=cli` and waits. Nothing on this machine can complete that page.
+- This cloud agent still resolved the account marketplace plugin `workflow` with `gitPath` `.`, commit `70e725836a4dde380501428bcbf4cbb61e2b7036`, and `enabledCapabilities` `["static"]`. Skills only. Hooks are not enabled. That load is not `plugins/yakka`.
+
+`workflow drain` and `workflow status` were not run. No session event was produced.
+
+The session clause of the Phase 3 outcome does not hold. No `Workflow-Phase` trailer.
+
+Unblock: authenticate the Cursor CLI on a checkout of this branch, then re-dispatch this verification. Do not redo the move.
+
+1. `curl https://cursor.com/install -fsS | bash` if `agent` is missing.
+2. Either export `CURSOR_API_KEY` from Cursor Dashboard → API Keys, or run `NO_OPEN_BROWSER=1 agent login` and finish the `loginDeepControl` link in a browser signed into that Cursor account.
+3. `agent status` must show logged in.
+4. Start a session that loads this tree: `agent -p --trust --plugin-dir "$(pwd)/plugins/yakka" --output-format text "List the workflow skills you loaded and stop."`
+5. A hook command under `plugins/yakka/script/` (`./script/spool.sh` or `./script/prefetch-version.sh`) must run, the event must land in the queue, `workflow drain` to a local `workflow serve` must ship it, and `workflow status` must report no failure.
+
+This cloud agent cannot be that proof until the installed marketplace plugin resolves `plugins/yakka` with hooks enabled. `--plugin-dir` is the session that can load the branch before merge.
