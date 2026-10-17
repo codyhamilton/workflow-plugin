@@ -14,10 +14,10 @@ test('area chart renders a filled area path and its line stroke', async ({ page 
 	await expect(page.getByTestId('builder-chart-chart')).toBeVisible();
 	await expectSettled(page);
 	await expect(
-		page.getByTestId('builder-chart-chart').locator('svg path[fill="#2563eb"]').first()
+		page.getByTestId('builder-chart-chart').locator('svg path[fill="#268bd2"]').first()
 	).toBeVisible();
 	await expect(
-		page.getByTestId('builder-chart-chart').locator('svg path[stroke="#2563eb"][fill="none"]').first()
+		page.getByTestId('builder-chart-chart').locator('svg path[stroke="#268bd2"][fill="none"]').first()
 	).toBeVisible();
 });
 

@@ -381,7 +381,10 @@
 		margin: 1rem 0 0;
 	}
 	.error {
-		color: var(--danger);
 		margin: 0;
+		padding: var(--space-1) var(--space-2);
+		border: 1px solid var(--danger);
+		background: var(--surface);
+		color: var(--text);
 	}
 </style>

@@ -22,6 +22,22 @@ describe('barOption', () => {
 		expect(option.series[0].data).toHaveLength(2);
 	});
 
+	it('marks the empty key unclickable', () => {
+		const option = barOption(
+			{
+				rows: [
+					{ key: '', value: 1 },
+					{ key: 'a', value: 2 }
+				]
+			},
+			TOKENS
+		);
+		const data = option.series[0].data;
+		expect(data[0].clickable).toBe(false);
+		expect(data[1].clickable).toBe(true);
+		expect(option.series[1].data[0].clickable).toBe(false);
+	});
+
 	it('marks the __other__ row unclickable and leaves the rest clickable', () => {
 		const option = barOption(
 			{

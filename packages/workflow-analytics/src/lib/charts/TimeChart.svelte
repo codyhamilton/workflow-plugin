@@ -5,7 +5,7 @@
 	import { timeOption, type TimeSeries } from './options';
 	import type { Tokens } from './theme';
 
-	const INERT_SERIES = new Set(['all', '__other__', '']);
+	const INERT_SERIES = new Set(['all', '__other__', '', '(none)']);
 
 	let {
 		testid,

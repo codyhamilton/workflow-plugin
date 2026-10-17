@@ -95,7 +95,15 @@
 	.saveview-error {
 		flex-basis: 100%;
 		margin: 0;
-		color: var(--muted);
 		font-size: 0.85rem;
+	}
+	.saveview-hint {
+		color: var(--muted);
+	}
+	.saveview-error {
+		padding: var(--space-1) var(--space-2);
+		border: 1px solid var(--danger);
+		background: var(--surface);
+		color: var(--text);
 	}
 </style>

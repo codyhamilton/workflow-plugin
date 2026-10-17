@@ -47,7 +47,7 @@
 
 	function treemapPick(d: { path: string[]; shift: boolean }) {
 		const key = d.path[d.path.length - 1];
-		if (key === undefined || key === '__other__') return;
+		if (key === undefined || key === '' || key === '__other__') return;
 		onpick?.(config.dims[d.path.length - 1] ?? config.dims[config.dims.length - 1] ?? '', key, d.shift);
 	}
 </script>

@@ -31,19 +31,19 @@
 	// __other__ is drawn but never picked.
 	function pick(params: any, native: any) {
 		const key = params?.data?.key;
-		if (typeof key === 'string' && key !== '__other__') onpick?.(dim, key, !!native?.shiftKey);
+		if (typeof key === 'string' && key !== '' && key !== '__other__') onpick?.(dim, key, !!native?.shiftKey);
 	}
 
 	const columns = $derived(['Category', ...series.map((s) => s.name)]);
 	const tableRows = $derived(
 		categories.map((c, i) => ({
 			cells: [c.label, ...series.map((s) => s.values[i] ?? 0)],
-			selectable: c.key !== '__other__'
+			selectable: c.key !== '' && c.key !== '__other__'
 		}))
 	);
 	function pickRow(i: number, shift: boolean) {
 		const c = categories[i];
-		if (c && c.key !== '__other__') onpick?.(dim, c.key, shift);
+		if (c && c.key !== '' && c.key !== '__other__') onpick?.(dim, c.key, shift);
 	}
 </script>
 

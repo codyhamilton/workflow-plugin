@@ -631,8 +631,10 @@
 				series={hooksBuildSeries(hooksTs, hooksBucket)}
 				bucket={(hooksTs.bucket ?? hooksBucket) as Bucket}
 				filterDim={hooksSplit}
-				onseries={({ key, shift }) =>
-					view.drill(hooksSplit, key === '(none)' ? '' : key, { shift })}
+				onseries={({ key, shift }) => {
+					if (key === '(none)' || key === '') return;
+					view.drill(hooksSplit, key, { shift });
+				}}
 				onbrush={({ from, to }) => view.setWindow(from, to)}
 			/>
 		{/if}

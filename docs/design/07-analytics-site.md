@@ -94,7 +94,8 @@ per-call rows in the conversation timeline.
   `hook_events`: `harness`, `repo_id`, `event`, `tool`; `artifact_versions`: `harness`, `repo_id`,
   `kind`, `plan`, `source`; `commits`: `harness`, `repo_id`; `conversations` (distinct per bucket):
   `harness`; `rejections`: `stage`. Missing values key as `""`. Series are sparse: a bucket with no
-  rows has no point; the site zero-fills between the first and last bucket when charting.
+  rows has no point. These metrics are counts; the site zero-fills a gap only on count series, and
+  leaves a score-series gap (see Site).
   Response `{"bucket","series":[{"key","points":[{"t","n"}]}]}`.
 - `GET /v1/analytics/scores` — `{"kind","checks":[{"name","n","min","p25","median","p75","max"}]}`,
   one object per catalog check for the kind. Population: distinct in-window content hashes of that
@@ -266,6 +267,7 @@ on a compacted copy of the real ledger.
 - **Chart builder.** `/builder` is driven only by `/v1/analytics/schema`: any measure, up to two
   dimensions and a bucket. Chart types are line, stacked area, bar, stacked bar, heatmap, treemap
   and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
+  No dimension and bucket `none` renders the scalar.
 - **Saved views and dashboards.** Both live in `localStorage` under the prefix
   `workflow-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
   `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
@@ -325,8 +327,8 @@ on a compacted copy of the real ledger.
 10. Compaction and the archive: `Read` stops at a torn frame until `Repair` runs; compaction re-archives already-slim rows as lossy lines; the `complete` shortcut can skip rows before `compact_cursor`; the disk check ignores the VACUUM copy.
 11. The OpenCode `config` hook is captured and is not on the remove list, and it can carry provider keys. Decide whether to add it to the remove list in ingest and the plugin.
 12. `partial` is emitted only by `/query`; `time/tzdata` is not imported in serve, `tz=Local` is accepted, filter value counts and `top` are unbounded, and the locked-tenant 503 echoes the tenant path.
-13. Builder: zero dimensions with bucket `none` renders a chart with no valid type; `data-ready` is true while the previous chart is still shown. Dashboards: the saved-view store does not validate stored entries on read.
-14. The Executions sankey filters client-side over the loaded first page, so counts trail the totals until the user pages on.
+13. Builder: `data-ready` is true while the previous chart is still shown. Dashboards: the saved-view store does not validate stored entries on read.
+14. Closed: an executions sankey edge sets `shape` on the URL. `counts` stay the window totals, and the next page of rows uses that `shape`.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
 
 ## Live cutover record (2026-10-11)

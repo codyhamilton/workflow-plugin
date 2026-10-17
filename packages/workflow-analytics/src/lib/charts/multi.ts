@@ -79,7 +79,7 @@ export function groupedBarProps(resp: QueryResponse): GroupedBarProps {
 	const categories = catKeys.map((key) => ({
 		key,
 		label: labelFor(catDim ?? '', key),
-		clickable: key !== OTHER
+		clickable: key !== '' && key !== OTHER
 	}));
 	const series = serKeys.map((name) => ({
 		name,

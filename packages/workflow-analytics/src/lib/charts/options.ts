@@ -57,7 +57,7 @@ export function barOption(p: BarProps, t: Tokens) {
 	const rows = p.rows ?? [];
 	const selectable = p.selectable !== false;
 	const max = rows.reduce((m, r) => Math.max(m, r.value), 0);
-	const clickable = (key: string) => selectable && key !== '__other__';
+	const clickable = (key: string) => selectable && key !== '' && key !== '__other__';
 	return {
 		animation: false,
 		backgroundColor: 'transparent',

@@ -106,13 +106,13 @@
 					type="button"
 					class="cell link"
 					data-testid="conv-{r.conversation_id}-harness"
-					onclick={(e) => view.drill('harness', r.harness, e)}>{r.harness}</button
+					onclick={(e) => view.drill('harness', r.harness, { shift: e.shiftKey })}>{r.harness}</button
 				>
 				<span class="cell" data-testid="conv-{r.conversation_id}-repos">
 					{#each r.repos as repo, i}<button
 							type="button"
 							class="link"
-							onclick={(e) => view.drill('repo_id', repo, e)}>{repo}</button>{#if i < r.repos.length - 1}, {/if}{/each}
+							onclick={(e) => view.drill('repo_id', repo, { shift: e.shiftKey })}>{repo}</button>{#if i < r.repos.length - 1}, {/if}{/each}
 				</span>
 				<time class="cell">{r.first_ts}</time>
 				<time class="cell">{r.last_ts}</time>
@@ -121,7 +121,7 @@
 						type="button"
 						class="cell link"
 						data-testid="conv-{r.conversation_id}-model"
-						onclick={(e) => view.drill('model', r.model, e)}>{r.model}</button
+						onclick={(e) => view.drill('model', r.model, { shift: e.shiftKey })}>{r.model}</button
 					>
 				{:else}
 					<span class="cell" data-testid="conv-{r.conversation_id}-model">—</span>

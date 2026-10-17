@@ -29,7 +29,7 @@
 	const tableRows = $derived(
 		rows.map((r) => ({
 			cells: [r.label ?? r.key, r.value],
-			selectable: selectable && r.key !== '__other__'
+			selectable: selectable && r.key !== '' && r.key !== '__other__'
 		}))
 	);
 
@@ -40,7 +40,7 @@
 	}
 	function pickRow(i: number, shift: boolean) {
 		const r = rows[i];
-		if (!r || r.key === '__other__' || !selectable) return;
+		if (!r || r.key === '' || r.key === '__other__' || !selectable) return;
 		onselect?.({ key: r.key, shift });
 	}
 </script>

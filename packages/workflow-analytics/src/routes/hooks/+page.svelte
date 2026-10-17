@@ -328,7 +328,11 @@
 			series={tsSeries}
 			bucket={chartBucket}
 			filterDim={splitDim}
-			onseries={({ key, shift }) => view.drill(splitDim, seriesDrillKey(key), { shift })}
+			onseries={({ key, shift }) => {
+				const raw = seriesDrillKey(key);
+				if (raw === '') return;
+				view.drill(splitDim, raw, { shift });
+			}}
 			onbrush={({ from, to }) => view.setWindow(from, to)}
 		/>
 	{/if}
