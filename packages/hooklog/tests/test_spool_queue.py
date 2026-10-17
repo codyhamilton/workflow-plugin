@@ -1,4 +1,4 @@
-"""spool.sh: conversation-ID file names, the Go queue path and the WORKFLOW_BIN kick. Temp dirs only."""
+"""spool.sh: conversation-ID file names, the Go queue path and the YAKKA_BIN kick. Temp dirs only."""
 import json
 import os
 import shutil
@@ -15,8 +15,8 @@ FIXTURE = json.loads((HERE / "fixtures" / "artifact_writes.json").read_text())
 
 
 def env(**kw):
-    e = {k: v for k, v in os.environ.items() if k not in ("WORKFLOW_BIN", "WORKFLOW_QUEUE")}
-    e.update(WORKFLOW_HOOKLOG_KICK="0", WORKFLOW_QUALITY_URL="")
+    e = {k: v for k, v in os.environ.items() if k not in ("YAKKA_BIN", "YAKKA_QUEUE")}
+    e.update(YAKKA_HOOKLOG_KICK="0", YAKKA_QUALITY_URL="")
     e.update(kw)
     return e
 
@@ -43,8 +43,8 @@ class QueueDefault(Base):
 
     def test_fixture_payloads_named_by_id(self):
         for item in FIXTURE:
-            r = run_spool(json.dumps(item["payload"]), item["harness"], WORKFLOW_QUEUE=self.q(),
-                          HOME=self.d, WORKFLOW_HOOKLOG_DIR=os.path.join(self.d, "legacy"))
+            r = run_spool(json.dumps(item["payload"]), item["harness"], YAKKA_QUEUE=self.q(),
+                          HOME=self.d, YAKKA_HOOKLOG_DIR=os.path.join(self.d, "legacy"))
             self.assertEqual(r.returncode, 0)
         files = evts(self.q())
         self.assertEqual(len(files), len(FIXTURE))
@@ -55,7 +55,7 @@ class QueueDefault(Base):
 
     def test_default_is_the_queue(self):
         legacy = os.path.join(self.d, "legacy")
-        r = run_spool('{"session_id":"s1"}', "claude", WORKFLOW_QUEUE=self.q(), WORKFLOW_HOOKLOG_DIR=legacy, HOME=self.d)
+        r = run_spool('{"session_id":"s1"}', "claude", YAKKA_QUEUE=self.q(), YAKKA_HOOKLOG_DIR=legacy, HOME=self.d)
         self.assertEqual(r.returncode, 0)
         files = evts(self.q())
         self.assertEqual(len(files), 1)
@@ -64,10 +64,10 @@ class QueueDefault(Base):
 
     def test_default_queue_under_home(self):
         run_spool('{"session_id":"s1"}', "claude", HOME=self.d)
-        self.assertEqual(len(evts(os.path.join(self.d, ".local/share/workflow/queue"))), 1)
+        self.assertEqual(len(evts(os.path.join(self.d, ".local/share/yakka/queue"))), 1)
 
     def test_no_id_dropped(self):
-        r = run_spool('{"hook_event_name":"Stop"}', WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        r = run_spool('{"hook_event_name":"Stop"}', YAKKA_QUEUE=self.q(), HOME=self.d)
         self.assertEqual(r.returncode, 0)
         self.assertEqual(evts(self.q()), [])
         self.assertEqual(list(Path(self.q()).glob("*.evt")), [])
@@ -76,27 +76,27 @@ class QueueDefault(Base):
         for harness in ("auto", None):
             cmd = ["bash", str(SPOOL)] + (["--harness", harness] if harness else [])
             r = subprocess.run(cmd, input='{"session_id":"s1"}', capture_output=True, text=True,
-                               env=env(WORKFLOW_QUEUE=self.q(), HOME=self.d))
+                               env=env(YAKKA_QUEUE=self.q(), HOME=self.d))
             self.assertEqual((r.returncode, r.stdout), (0, ""))
             self.assertEqual(evts(self.q()), [])
-        r = run_spool('{"conversation_id":"c1"}', "auto", "preToolUse", WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        r = run_spool('{"conversation_id":"c1"}', "auto", "preToolUse", YAKKA_QUEUE=self.q(), HOME=self.d)
         self.assertEqual(r.stdout, "")  # not cursor, so no response
-        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", YAKKA_QUEUE=self.q(), HOME=self.d)
         self.assertEqual(json.loads(r.stdout), {"permission": "allow"})
         self.assertEqual(len(evts(self.q())), 1)
 
     def test_sanitised_prefix(self):
-        run_spool('{"hook_event_name":"Stop","session_id" : "a/b c"}', WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        run_spool('{"hook_event_name":"Stop","session_id" : "a/b c"}', YAKKA_QUEUE=self.q(), HOME=self.d)
         files = evts(self.q())
         self.assertEqual(len(files), 1)
         self.assertTrue(files[0].name.startswith("a_b_c-"), files[0].name)
 
     def test_key_preference(self):
-        run_spool('{"conversation_id":"c1","session_id":"s1"}', WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        run_spool('{"conversation_id":"c1","session_id":"s1"}', YAKKA_QUEUE=self.q(), HOME=self.d)
         self.assertTrue(evts(self.q())[0].name.startswith("s1-"))
 
     def test_cursor_response(self):
-        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", WORKFLOW_QUEUE=self.q(), HOME=self.d)
+        r = run_spool('{"conversation_id":"c1"}', "cursor", "preToolUse", YAKKA_QUEUE=self.q(), HOME=self.d)
         self.assertEqual(json.loads(r.stdout), {"permission": "allow"})
         self.assertEqual(r.returncode, 0)
 
@@ -114,12 +114,12 @@ class GoPath(Base):
         self.home = os.path.join(self.d, "home")
         self.log = os.path.join(self.d, "stub.log")
         self.bin = os.path.join(self.d, "stub.sh")
-        Path(self.bin).write_text(f'#!/bin/sh\necho "$* q=$WORKFLOW_QUEUE" >> "{self.log}"\n')
+        Path(self.bin).write_text(f'#!/bin/sh\necho "$* q=$YAKKA_QUEUE" >> "{self.log}"\n')
         os.chmod(self.bin, 0o755)
 
     def spool(self, payload, **kw):
-        return run_spool(payload, WORKFLOW_BIN=self.bin, WORKFLOW_QUEUE=self.q,
-                         WORKFLOW_HOOKLOG_DIR=self.legacy, HOME=self.home, **kw)
+        return run_spool(payload, YAKKA_BIN=self.bin, YAKKA_QUEUE=self.q,
+                         YAKKA_HOOKLOG_DIR=self.legacy, HOME=self.home, **kw)
 
     def calls(self, wait=False):
         for _ in range(30 if wait else 1):
@@ -145,7 +145,7 @@ class GoPath(Base):
 
     def test_kick_invokes_stub(self):
         run_spool(
-            '{"session_id":"s1"}', WORKFLOW_BIN=self.bin, WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1")
+            '{"session_id":"s1"}', YAKKA_BIN=self.bin, YAKKA_QUEUE=self.q, YAKKA_HOOKLOG_KICK="1")
         self.assertEqual(self.calls(True), [f"drain q={self.q}"])
 
     def test_lock_held_no_kick(self):
@@ -155,7 +155,7 @@ class GoPath(Base):
         holder = subprocess.Popen(["flock", lock, "sleep", "5"])
         try:
             time.sleep(0.3)
-            run_spool('{"session_id":"s1"}', WORKFLOW_BIN=self.bin, WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1")
+            run_spool('{"session_id":"s1"}', YAKKA_BIN=self.bin, YAKKA_QUEUE=self.q, YAKKA_HOOKLOG_KICK="1")
             time.sleep(0.5)
             self.assertEqual(self.calls(), [])
         finally:
@@ -175,8 +175,8 @@ class GoPath(Base):
         self.assertEqual(list(Path(self.q, "tmp").iterdir()), [])
 
     def fallback(self, payload='{"session_id":"s1"}', **kw):
-        return run_spool(payload, WORKFLOW_BIN=self.sleeper, WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1",
-                         WORKFLOW_SPOOL_NOFLOCK="1", HOME=self.home, **kw)
+        return run_spool(payload, YAKKA_BIN=self.sleeper, YAKKA_QUEUE=self.q, YAKKA_HOOKLOG_KICK="1",
+                         YAKKA_SPOOL_NOFLOCK="1", HOME=self.home, **kw)
 
     def make_sleeper(self):
         self.sleeper = os.path.join(self.d, "sleeper.sh")
@@ -192,13 +192,14 @@ class GoPath(Base):
     def test_default_kick_target(self):
         root = os.path.join(self.d, "repo")
         shutil.copytree(SPOOL.parent, os.path.join(root, "packages", "hooklog"), ignore=shutil.ignore_patterns("tests", "__pycache__"))
-        os.makedirs(os.path.join(root, "bin"))
-        stub = os.path.join(root, "bin", "workflow")
-        Path(stub).write_text(f'#!/bin/sh\necho "$* q=$WORKFLOW_QUEUE" >> "{self.log}"\n')
+        plugin_bin = os.path.join(root, "plugins", "yakka", "bin")
+        os.makedirs(plugin_bin)
+        stub = os.path.join(plugin_bin, "yakka")
+        Path(stub).write_text(f'#!/bin/sh\necho "$* q=$YAKKA_QUEUE" >> "{self.log}"\n')
         os.chmod(stub, 0o755)
         cmd = ["bash", os.path.join(root, "packages", "hooklog", "spool.sh"), "--harness", "claude"]
         subprocess.run(cmd, input='{"session_id":"s1"}', capture_output=True, text=True,
-                       env=env(WORKFLOW_QUEUE=self.q, WORKFLOW_HOOKLOG_KICK="1", HOME=self.home))
+                       env=env(YAKKA_QUEUE=self.q, YAKKA_HOOKLOG_KICK="1", HOME=self.home))
         self.assertEqual(self.calls(True), [f"drain q={self.q}"])
 
     def test_mkdir_fallback_single_drain(self):

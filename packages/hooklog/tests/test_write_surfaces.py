@@ -55,10 +55,10 @@ class WriteSurfaceTests(unittest.TestCase):
         for d in (cls.home, cls.cache, cls.data):
             d.mkdir()
         gocache, gomod = goenv("GOCACHE"), goenv("GOMODCACHE")
-        cls.bin = str(t / "workflow")
+        cls.bin = str(t / "yakka")
         env = dict(os.environ, PATH=GOBIN + ":" + os.environ["PATH"], HOME=str(cls.home), GOCACHE=gocache,
                    GOMODCACHE=gomod, XDG_CACHE_HOME=str(cls.cache), TYPESAFE_API_KEY="", CGO_ENABLED="0")
-        build = subprocess.run(["go", "build", "-o", cls.bin, "./cmd/workflow"], cwd=ROOT / "packages/workflow",
+        build = subprocess.run(["go", "build", "-o", cls.bin, "./cmd/yakka"], cwd=ROOT / "packages/yakka",
                                env=env, capture_output=True, text=True, timeout=300)
         if build.returncode:
             raise RuntimeError("go build failed: " + build.stderr[-1500:])
@@ -69,13 +69,13 @@ class WriteSurfaceTests(unittest.TestCase):
         cls.cfg.write_text('endpoint = "http://127.0.0.1:%d"\nkey = "%s"\n' % (port, key))
         cls.cfg.chmod(0o600)
         cls.env = {"PATH": "/usr/bin:/bin", "HOME": str(cls.home), "XDG_CACHE_HOME": str(cls.cache),
-                   "WORKFLOW_QUEUE": str(cls.queue), "WORKFLOW_CLIENT_CONFIG": str(cls.cfg),
-                   "WORKFLOW_SERVE_DATA": str(cls.data), "WORKFLOW_BIN": cls.bin, "TYPESAFE_API_KEY": "",
-                   "WORKFLOW_HOOKLOG_KICK": "0", "CLAUDE_PLUGIN_ROOT": str(PLUGIN), "CURSOR_PLUGIN_ROOT": str(PLUGIN),
+                   "YAKKA_QUEUE": str(cls.queue), "YAKKA_CLIENT_CONFIG": str(cls.cfg),
+                   "YAKKA_SERVE_DATA": str(cls.data), "YAKKA_BIN": cls.bin, "TYPESAFE_API_KEY": "",
+                   "YAKKA_HOOKLOG_KICK": "0", "CLAUDE_PLUGIN_ROOT": str(PLUGIN), "CURSOR_PLUGIN_ROOT": str(PLUGIN),
                    "PLUGIN_ROOT": str(PLUGIN)}
         cls.log = open(t / "serve.log", "wb")
-        senv = dict(cls.env, WORKFLOW_SERVE_ADDR="127.0.0.1:%d" % port, WORKFLOW_SERVE_KEYS="t=" + key,
-                    WORKFLOW_SERVE_POLL="500ms")
+        senv = dict(cls.env, YAKKA_SERVE_ADDR="127.0.0.1:%d" % port, YAKKA_SERVE_KEYS="t=" + key,
+                    YAKKA_SERVE_POLL="500ms")
         cls.serve = subprocess.Popen([cls.bin, "serve"], env=senv, stderr=cls.log, stdout=cls.log)
         deadline = time.time() + 10
         while time.time() < deadline:

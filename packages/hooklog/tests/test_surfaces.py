@@ -17,7 +17,7 @@ START = {'claude': 'SessionStart', 'cursor': 'sessionStart', 'codex': 'SessionSt
 
 
 def is_prefetch(command):
-    return 'prefetch-version' in command or 'bin/workflow' in command
+    return 'prefetch-version' in command or 'bin/yakka' in command
 
 
 class SurfaceTests(unittest.TestCase):
@@ -30,8 +30,8 @@ class SurfaceTests(unittest.TestCase):
                 config = json.loads((ROOT / file).read_text())
                 self.assertEqual(set(config['hooks']), expected)
                 queue = Path(tmp) / 'queue'
-                env = dict(os.environ, HOME=tmp, WORKFLOW_QUEUE=str(queue), WORKFLOW_HOOKLOG_KICK='0', TYPESAFE_API_KEY='',
-                           WORKFLOW_BIN=str(Path(tmp) / 'stub'), CLAUDE_PLUGIN_ROOT=str(PLUGIN), CURSOR_PLUGIN_ROOT=str(PLUGIN),
+                env = dict(os.environ, HOME=tmp, YAKKA_QUEUE=str(queue), YAKKA_HOOKLOG_KICK='0', TYPESAFE_API_KEY='',
+                           YAKKA_BIN=str(Path(tmp) / 'stub'), CLAUDE_PLUGIN_ROOT=str(PLUGIN), CURSOR_PLUGIN_ROOT=str(PLUGIN),
                            PLUGIN_ROOT=str(PLUGIN))
                 stub = Path(tmp) / 'stub'
                 stub.write_text(f'#!/bin/sh\necho "$@" >> "{tmp}/stub.calls"\n')

@@ -1,7 +1,7 @@
 {
   "mcpServers": {
-    "workflow": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/bin/workflow",
+    "yakka": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/yakka",
       "args": ["mcp"]
     }
   }

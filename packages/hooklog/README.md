@@ -10,7 +10,7 @@
 
 Local, advisory capture of hook payloads as a session happens. All command hooks exit 0;
 OpenCode observers leave inputs and outputs unchanged. Captured events go to a queue directory,
-`${WORKFLOW_QUEUE:-~/.local/share/workflow/queue}`; `plugins/yakka/bin/workflow drain` ships them to the
+`${YAKKA_QUEUE:-~/.local/share/yakka/queue}`; `plugins/yakka/bin/yakka drain` ships them to the
 workflow service. Capture failures never deny or rewrite an action. Cursor receives the
 permissive response required by its pre-action schema.
 
@@ -34,25 +34,25 @@ exits. No python, no network, no waiting. Payloads with no conversation id are d
 get their permissive reply (`{"permission":"allow"}` etc.); capture can never block or fail the agent.
 The OpenCode plugin writes the same files itself.
 
-After spooling, `spool.sh` starts one detached `plugins/yakka/bin/workflow drain` (a lock keeps it to one;
-`WORKFLOW_HOOKLOG_KICK=0` disables, `WORKFLOW_BIN` names the binary). The drain posts the queued files
+After spooling, `spool.sh` starts one detached `plugins/yakka/bin/yakka drain` (a lock keeps it to one;
+`YAKKA_HOOKLOG_KICK=0` disables, `YAKKA_BIN` names the binary). The drain posts the queued files
 to the endpoint and deletes them; files the service refuses move to `rejected/`. The endpoint is
 the one in `~/.config/workflow/client.toml` (remote mode), or `http://127.0.0.1:8770` with no key
 when that file is absent (local mode). While the endpoint is unreachable the files wait. A running
 `workflow serve` on the same machine hosts the drain itself. `workflow status` reports the queue
 and the mode.
 
-`plugins/yakka/bin/workflow` is a wrapper: it uses `WORKFLOW_BIN`, then the cached binary under
-`${XDG_CACHE_HOME:-~/.cache}/workflow/<version>/`, then a checksummed download, then a source build.
-A `SessionStart` hook in each shipped config runs `bin/workflow --version` in the background so the
+`plugins/yakka/bin/yakka` is a wrapper: it uses `YAKKA_BIN`, then the cached binary under
+`${XDG_CACHE_HOME:-~/.cache}/yakka/<version>/`, then a checksummed download, then a source build.
+A `SessionStart` hook in each shipped config runs `bin/yakka --version` in the background so the
 first real call finds a warm cache. Shipped hooks run copies under `plugins/yakka/script/`.
 
 ## Setup
 
-There is no install step. For local mode, run `plugins/yakka/bin/workflow serve` however suits the machine (a
-terminal, a systemd user unit, launchd). With no `WORKFLOW_SERVE_KEYS` it runs keyless, binds
-`127.0.0.1:8770` (`WORKFLOW_SERVE_ADDR` may name another loopback address, never a public one),
-and stores data under `WORKFLOW_SERVE_DATA` (default `~/.local/share/workflow/serve`), tenant
+There is no install step. For local mode, run `plugins/yakka/bin/yakka serve` however suits the machine (a
+terminal, a systemd user unit, launchd). With no `YAKKA_SERVE_KEYS` it runs keyless, binds
+`127.0.0.1:8770` (`YAKKA_SERVE_ADDR` may name another loopback address, never a public one),
+and stores data under `YAKKA_SERVE_DATA` (default `~/.local/share/yakka/serve`), tenant
 `local`. To turn on screening, set `TYPESAFE_API_KEY` in serve's environment; it never goes in a
 hook config or `client.toml`.
 
@@ -128,7 +128,7 @@ observations; dedicated tool callbacks provide completed tool calls. Derived Pos
 Stop rows retain existing turn markers. Nested session/message/part envelopes resolve to the
 owning session; callbacks with no session are dropped.
 
-`WORKFLOW_OPENCODE_SIGNALS=0` disables soft signals independently of hooklog. Writes are ordered
+`YAKKA_OPENCODE_SIGNALS=0` disables soft signals independently of hooklog. Writes are ordered
 and teardown awaits capture; logger errors are swallowed. Callbacks never change permissions,
 arguments, prompts, headers, config, environment, tool definitions or experimental outputs.
 

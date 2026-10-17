@@ -4,7 +4,7 @@
 Capture is not here: hooks run `spool.sh` (bash), which drops the raw payload in the queue, and `workflow drain`
 (packages/workflow) normalises, scrubs and posts it. This module keeps `normalize()` and the archive readers.
 `record` remains as a compatibility shim for older registrations: it execs spool.sh.
-Store: $WORKFLOW_HOOKLOG_DIR or ~/.local/share/workflow-plugin/hooklog. Secrets are pattern-redacted and large fields
+Store: $YAKKA_HOOKLOG_DIR or ~/.local/share/yakka/hooklog. Secrets are pattern-redacted and large fields
 truncated in normalize(), before anything is archived or posted.
 
 Row (v=1): {v, ts, harness, session_id, hook_event, kind: user_prompt|tool_call|tool_pre|batch_end|step|agent_text|stop|event,
@@ -32,11 +32,11 @@ SECRET_KEY = re.compile(r"(?i)(authorization|cookie|api[_-]?key|token$|secret|pa
 
 
 def store_dir() -> Path:
-    return Path(os.environ.get("WORKFLOW_HOOKLOG_DIR") or Path.home() / ".local/share/workflow-plugin/hooklog")
+    return Path(os.environ.get("YAKKA_HOOKLOG_DIR") or Path.home() / ".local/share/yakka/hooklog")
 
 
 def spool_dir() -> Path:
-    return Path(os.environ.get("WORKFLOW_HOOKLOG_SPOOL") or store_dir() / "spool")
+    return Path(os.environ.get("YAKKA_HOOKLOG_SPOOL") or store_dir() / "spool")
 
 
 def scrub(text: str, limit: int) -> str:
@@ -181,7 +181,7 @@ def main() -> int:
             sys.stdout.flush()
             os.execvp("bash", ["bash", str(spool), "--harness", args.harness, "--event", args.event or ""])
         except Exception as exc:  # never break the agent; fall through to Cursor's response
-            if os.environ.get("WORKFLOW_HOOKLOG_DEBUG"):
+            if os.environ.get("YAKKA_HOOKLOG_DEBUG"):
                 print(f"hooklog: {exc}", file=sys.stderr)
         if args.harness == "cursor":
             ev = str(args.event or "").lower()

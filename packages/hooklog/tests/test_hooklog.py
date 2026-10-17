@@ -14,8 +14,8 @@ SPOOL = SCRIPT.parent / "spool.sh"
 
 
 def env_for(d, **kw):
-    e = {k: v for k, v in os.environ.items() if k not in ("WORKFLOW_BIN", "WORKFLOW_QUEUE")}
-    e.update(HOME=d, WORKFLOW_QUEUE=os.path.join(d, "queue"), WORKFLOW_HOOKLOG_KICK="0", WORKFLOW_QUALITY_URL="")
+    e = {k: v for k, v in os.environ.items() if k not in ("YAKKA_BIN", "YAKKA_QUEUE")}
+    e.update(HOME=d, YAKKA_QUEUE=os.path.join(d, "queue"), YAKKA_HOOKLOG_KICK="0", YAKKA_QUALITY_URL="")
     e.update(kw)
     return e
 
@@ -81,7 +81,7 @@ class T(unittest.TestCase):
                           "beforeReadFile", "beforeTabFileRead", "beforeSubmitPrompt"):
                 for payload in ("not json", '{"hook_event_name":"wrong"}'):
                     for disabled in ("on", "off"):
-                        result = spool("cursor", payload, d, event, WORKFLOW_HOOKLOG=disabled)
+                        result = spool("cursor", payload, d, event, YAKKA_HOOKLOG=disabled)
                         self.assertEqual(result.returncode, 0)
                         expected = {"continue": True} if event == "beforeSubmitPrompt" else {"permission": "allow"}
                         self.assertEqual(json.loads(result.stdout), expected)
