@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import DashboardTile from '$lib/components/DashboardTile.svelte';
 	import { view } from '$lib/view.svelte';
 	import { ImportError, store, type Dashboard, type SavedView } from '$lib/views';
 
-	// Each tile is a full page in an iframe, so past this the dashboard gets slow. The cap is a
-	// page-level guard: the store happily holds more.
 	const MAX_TILES = 12;
 
 	let dashboards = $state<Dashboard[]>(store.listDashboards());
@@ -13,6 +12,7 @@
 	let addId = $state('');
 	let importText = $state('');
 	let importError = $state('');
+	let importDrops = $state<{ tilesDropped: number; viewsDropped: number } | null>(null);
 
 	$effect(() =>
 		store.subscribe(() => {
@@ -23,23 +23,21 @@
 
 	const selectedId = $derived(page.url.searchParams.get('d'));
 	const selected = $derived(dashboards.find((d) => d.id === selectedId) ?? null);
-	const atCap = $derived(!!selected && selected.viewIds.length >= MAX_TILES);
+	const atCap = $derived(!!selected && selected.tiles.length >= MAX_TILES);
 
 	// One entry per tile, in dashboard order. `index` is the store's index for move/remove.
 	const tiles = $derived(
-		(selected?.viewIds ?? []).map((id, index) => {
-			const v = views.find((x) => x.id === id);
-			return { id, index, name: v?.name ?? '', src: v ? tileSrc(v) : '' };
+		(selected?.tiles ?? []).map((tile, index) => {
+			const v = views.find((x) => x.id === tile.viewId);
+			return {
+				viewId: tile.viewId,
+				w: tile.w,
+				index,
+				name: v?.name ?? '',
+				view: v ?? null
+			};
 		})
 	);
-
-	/** A saved view's url is site-relative (5-01); frame it with `embed=1` so the shell is hidden. */
-	function tileSrc(v: SavedView): string {
-		if (typeof location === 'undefined') return '';
-		const url = new URL(v.url, location.origin);
-		if (url.origin !== location.origin) return '';
-		return `${v.url}${v.url.includes('?') ? '&' : '?'}embed=1`;
-	}
 
 	function select(id: string | null) {
 		view.setParam('d', id);
@@ -62,7 +60,11 @@
 
 	function add() {
 		if (!selected || !addId || atCap) return;
-		store.addToDashboard(selected.id, addId);
+		try {
+			store.addToDashboard(selected.id, addId);
+		} catch {
+			// Store refuses past the cap; atCap notice covers this case.
+		}
 	}
 
 	function move(index: number, delta: number) {
@@ -90,10 +92,17 @@
 
 	function importJson(text: string) {
 		importError = '';
+		importDrops = null;
 		try {
-			const d = store.importDashboard(text);
+			const result = store.importDashboard(text);
 			importText = '';
-			select(d.id);
+			select(result.dashboard.id);
+			if (result.tilesDropped > 0 || result.viewsDropped > 0) {
+				importDrops = {
+					tilesDropped: result.tilesDropped,
+					viewsDropped: result.viewsDropped
+				};
+			}
 		} catch (e) {
 			importError =
 				e instanceof ImportError || e instanceof Error ? (e as Error).message : String(e);
@@ -114,8 +123,8 @@
 
 <h1>Dashboards</h1>
 <p>
-	A dashboard is an ordered grid of saved views. Each tile frames the view's own url with
-	<code>embed=1</code>, so it shows every kind of view without any per-view code.
+	A dashboard is an ordered two-column grid of saved views, rendered here under the same filter bar
+	and time window as the rest of analytics.
 </p>
 
 <section class="dashboards">
@@ -177,15 +186,20 @@
 		</div>
 
 		{#if atCap}
-			<p class="notice" role="status">Each tile is a full page; more than {MAX_TILES} is slow.</p>
+			<p class="notice" role="status">A dashboard can have at most {MAX_TILES} tiles.</p>
 		{/if}
 
 		{#if tiles.length === 0}
 			<p class="muted">No tiles yet. Save a view, then add it here.</p>
 		{/if}
 		<div class="grid">
-			{#each tiles as t (`${t.id}-${t.index}`)}
-				<div class="tile" data-testid="dash-tile">
+			{#each tiles as t (`${t.viewId}-${t.index}`)}
+				<div
+					class="tile"
+					class:span2={t.w === 2}
+					data-testid="dash-tile"
+					data-w={t.w}
+				>
 					<div class="tile-bar">
 						<span class="tile-name">{t.name || 'Saved view'}</span>
 						<button
@@ -209,11 +223,13 @@
 							onclick={() => drop(t.index)}>×</button
 						>
 					</div>
-					{#if t.src}
-						<iframe class="frame" src={t.src} loading="lazy" title={t.name}></iframe>
-					{:else}
-						<p class="muted frame-empty">This view's url is missing or points off-site.</p>
-					{/if}
+					<div class="tile-body">
+						{#if t.view}
+							<DashboardTile view={t.view} />
+						{:else}
+							<p class="muted tile-missing">This saved view is missing.</p>
+						{/if}
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -240,6 +256,21 @@
 	</button>
 	{#if importError}
 		<p class="error" role="alert" data-testid="dash-import-error">{importError}</p>
+	{/if}
+	{#if importDrops}
+		<p class="notice" role="status" data-testid="dash-import-drops">
+			{#if importDrops.viewsDropped > 0}
+				{importDrops.viewsDropped} view{importDrops.viewsDropped === 1 ? '' : 's'} dropped (unknown
+				report paths).
+			{/if}
+			{#if importDrops.viewsDropped > 0 && importDrops.tilesDropped > 0}
+				{' '}
+			{/if}
+			{#if importDrops.tilesDropped > 0}
+				{importDrops.tilesDropped} tile{importDrops.tilesDropped === 1 ? '' : 's'} dropped (cap is
+				{MAX_TILES}).
+			{/if}
+		</p>
 	{/if}
 </section>
 
@@ -311,15 +342,23 @@
 		.grid {
 			grid-template-columns: 1fr 1fr;
 		}
+		.tile.span2 {
+			grid-column: span 2;
+		}
 	}
 	.tile {
 		display: flex;
 		flex-direction: column;
-		height: 360px;
+		min-height: 360px;
 		border: 1px solid var(--border);
 		border-radius: 0.375rem;
 		overflow: hidden;
 		background: var(--surface);
+	}
+	.tile-body {
+		flex: 1;
+		min-height: 0;
+		padding: 0.5rem;
 	}
 	.tile-bar {
 		display: flex;
@@ -338,13 +377,8 @@
 	.tile-bar button {
 		padding: 0.1rem 0.4rem;
 	}
-	.frame {
-		flex: 1;
-		width: 100%;
-		border: 0;
-	}
-	.frame-empty {
-		margin: 1rem;
+	.tile-missing {
+		margin: 1rem 0 0;
 	}
 	.error {
 		color: var(--danger);
