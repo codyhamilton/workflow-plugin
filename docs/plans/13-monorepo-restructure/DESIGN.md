@@ -569,6 +569,15 @@ Units:
 - Approach: known.
 - Depends on: Phase 4.
 
+Units:
+
+- 5-01 Package renames (git mv only). Brief: `docs/plans/13-monorepo-restructure/briefs/5-01-package-renames.md`. Depends on: Phase 4. Runs alongside: nothing.
+- 5-02 Go yakka runtime package. Brief: `docs/plans/13-monorepo-restructure/briefs/5-02-go-yakka-runtime.md`. Depends on: 5-01. Runs alongside: 5-04, 5-06.
+- 5-03 Plugin `bin/yakka` and hook edge. Brief: `docs/plans/13-monorepo-restructure/briefs/5-03-plugin-bin-and-hook-edge.md`. Depends on: 5-02. Runs alongside: nothing.
+- 5-04 npm runtime packages. Brief: `docs/plans/13-monorepo-restructure/briefs/5-04-npm-runtime-packages.md`. Depends on: 5-01. Runs alongside: 5-02, 5-06.
+- 5-05 Release tooling, residual scan, package index. Brief: `docs/plans/13-monorepo-restructure/briefs/5-05-release-scan-and-index.md`. Depends on: 5-02, 5-03, 5-04. Runs alongside: nothing.
+- 5-06 Quality catalogue path and skill citations. Brief: `docs/plans/13-monorepo-restructure/briefs/5-06-quality-catalogue-and-skill-citations.md`. Depends on: 5-01. Runs alongside: 5-02, 5-04.
+
 ### Phase 6: Plugin and plan protocol are yakka
 
 - Why: this is the name users see and type, and the protocol every later plan writes.

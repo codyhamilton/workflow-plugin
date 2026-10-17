@@ -353,3 +353,5 @@ Run: https://cursor.com/agents/bc-9da6c3fb-f694-5216-b8c5-7912ba41224a
 Start: 2026-10-17T23:15:00Z
 
 `artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+Refine: Proceed. Six units. `5-01` first. Then `5-02`, `5-04`, and `5-06` alongside. Then `5-03`. Then `5-05`. Phase 4 Carried: item 1 stays carried (manual Cursor session; does not touch a Phase 5 contract). Item 2 stays carried (root `README.md` signal-log prose; Phase 7 docs). Item 3 absorbed into `5-03` (wrapper rename and `$ROOT/../../packages/yakka` source build) and `5-05` (`test_1_clean_cache_build`). `artifact_feedback` on each brief: unreachable (Workflow MCP `namespaceStatus: error`).
