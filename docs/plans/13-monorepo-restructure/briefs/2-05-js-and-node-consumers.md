@@ -46,3 +46,7 @@ Svelte routes named `/quality`, test IDs, and hook policy equality test in `test
 ## Report back
 
 Under 1,500 tokens. Status, commands run, deviations.
+
+## Amendment
+
+Bare `node --test` needs Node 22.18 or newer. On older Node the package command is `node --experimental-strip-types --test`. Analytics e2e stays with the orchestrator when `node_modules` is absent; the repoint itself is this unit.

@@ -87,3 +87,61 @@ Module-path rewrite (Decision 1 rebase protocol), from repo root:
 ```bash
 find packages/workflow -type f \( -name '*.go' -o -name go.mod \) -exec sed -i 's|github.com/codyhamilton/workflow-plugin/tools/workflow|github.com/codyhamilton/workflow-plugin/packages/workflow|g' {} +
 ```
+
+Literal rewrites the path units applied beside that command, for the same rebase protocol:
+
+- `tools/hooklog` → `packages/hooklog`
+- `tools/workflow` → `packages/workflow` in `bin/workflow`, release scripts, and test working directories
+- Catalogue reads move from `tools/quality/{criteria.json,checks}` to `packages/workflow/catalogue`. In `tools/quality` that is `ROOT / "packages/workflow/catalogue"`. In `packages/workflow` tests that used `../../../quality`, the relative form is `../../catalogue`.
+
+### 2-02-go-workflow-package
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-02-go-workflow-package.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/2-02-go-workflow-package.md`.
+Worker: Composer (`composer-2.5`), agent `bc-dea90b5f-a9ba-5d0e-b7b4-b96917f37aff`. The harness did not report turns or final context.
+Commit: `d647629`, merged fast-forward onto this branch.
+
+Built: module path `github.com/codyhamilton/workflow-plugin/packages/workflow`, internal imports, `bin/workflow` source-build from `packages/workflow`, catalogue and `pricing.json` test paths. `go test ./...` passed with GOTOOLCHAIN unset (auto 1.27.1).
+
+Surfaces: `packages/workflow/**`, `bin/workflow`, this file's rewrite command.
+
+Deviations: tests did not use `GOTOOLCHAIN=local` (the brief allows that when 1.27.1 will not run on the system Go). Catalogue, pricing, and `bin/workflow` edits sit outside the module `sed`.
+
+### 2-03-hooks-and-hooklog
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-03-hooks-and-hooklog.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/2-03-hooks-and-hooklog.md`.
+Worker: Composer (`composer-2.5`), agent `bc-a6e78bcf-5147-5b6f-aec7-6cefbd20a248`. The harness did not report turns or final context.
+Commits: `d565791`, plus `a2f71a4` dropping a wrong commit id from the report. Merged.
+
+Built: `hooks/{hooks,codex,cursor}.json`, hooklog README and `cursor-hooks.example.json`, and hooklog tests point at `packages/hooklog`. Hooklog unittest: 36 tests, OK.
+
+Surfaces: `hooks/**`, `packages/hooklog/**`.
+
+Deviations: `test_write_surfaces.py` builds from `packages/workflow`. Cursor command shape was only repointed off `tools/hooklog`.
+
+### 2-04-python-tooling-paths
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-04-python-tooling-paths.md` (amended: do not re-edit `bin/workflow`).
+Report: `docs/plans/13-monorepo-restructure/reports/2-04-python-tooling-paths.md`.
+Worker: Composer (`composer-2.5`), agent `bc-51c3b0f1-b8f0-5c32-afee-f8bf5fde4312`. The harness did not report turns or final context.
+Commit: `157401f`, merged. Its `bin/workflow` hunk matched 2-02, so the merge kept 2-02's copy.
+
+Built: `tools/quality` and `tools/jev-variants` import `packages/hooklog` and read `packages/workflow/catalogue`. Release scripts target `packages/workflow` and `packages/hooklog`. Suites: quality 26 OK, jev-variants 43 OK, release 10 OK (Go 1.27.2, `/usr/bin/go` hidden for `test_6_no_go_no_asset`).
+
+Surfaces: `tools/quality/**`, `tools/jev-variants/**`, `tools/release/**`.
+
+Deviations: the worker also edited `bin/workflow`, which 2-02 owns. The brief is amended so a re-dispatch does not touch it.
+
+### 2-05-js-and-node-consumers
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-05-js-and-node-consumers.md` (amended: Node version for bare `node --test`).
+Report: `docs/plans/13-monorepo-restructure/reports/2-05-js-and-node-consumers.md`.
+Worker: Composer (`composer-2.5`), agent `bc-fefc6e2b-b98f-593c-9660-ea15df130249`. The harness did not report turns or final context.
+Commit: `ff896ac`, merged.
+
+Built: analytics e2e and hosted setups use `packages/workflow` and `packages/workflow/catalogue`. OpenCode README, `src/index.ts` comments, and `test_hooks.mjs` use `packages/hooklog`. `node --test` on Node v22.23.3: 8 pass. System Node v22.14.0 needs `--experimental-strip-types` for the same 8 pass.
+
+Surfaces: `packages/workflow-analytics/tests/**`, `packages/opencode-workflow-hooks/{src/index.ts,tests/test_hooks.mjs,README.md}`.
+
+Deviations: analytics e2e not run (no `node_modules`). Orchestrator runs it at phase verification.

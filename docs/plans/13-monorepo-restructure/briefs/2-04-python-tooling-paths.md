@@ -51,3 +51,7 @@ Assumption 10: `tools/quality` stays a tool; only imports and catalogue reads ch
 ## Report back
 
 Under 1,500 tokens. Status, test output, deviations.
+
+## Amendment
+
+`bin/workflow` path literals belong to 2-02. That unit already replaced `tools/workflow` with `packages/workflow` there. A re-dispatch does not edit `bin/workflow`. The release suite's `test_6_no_go_no_asset` fails when `/usr/bin/go` exists and `packages/workflow/go.mod` is present; hide that binary for the run.
