@@ -6,6 +6,22 @@ User request, verbatim:
 
 > Have an agent work on a background design - collapsing workflow-lab, which should not be its own plugin (just skills at root, they're maintainer-only), as well as cleaning up the repo and distinguishing tools from packages (workflow bin to my mind is a package), organising the repo into a proper monorepo with packages/ containing the various packages it holds as independent deployable units
 
+Added intent, verbatim:
+
+> Ok we have some other issues to deal with. There should be an open plan for restructuring the plugin? We have to add to that. Cursor is not actually loading the plugin correctly nor triggering hooks. The commands in the hooks file for cursor aren't right, the scripts anyway run from plugin root so only need `./script/...` to execute, plus we should move the workflow plugin into the packages/ dir as a package (it's a plugin referenced from the marketplace entry).
+
+> plus we have a further plan for renaming across the board to yakka - I think it should be integrated into this plan
+
+The rename was a separate design (`docs/plans/15-rename-to-yakka/`). Its intent is now part of this plan, verbatim:
+
+> Help come up with a better name for this app. We've got `workflow` which is terribly generic. `miniflow` was another thought. It's all about the plan/design/refine/execute SDLC workflow
+
+> It makes more sense to keep yakka for both
+
+> do the /workflow:design
+
+That folder is no longer a design. Its bounded scope lives here.
+
 ## Problem
 
 The repo's directory names no longer say what anything is.
@@ -24,6 +40,11 @@ The repo's directory names no longer say what anything is.
   - `opencode-workflow-hooks`, an npm-shaped OpenCode plugin.
 - **The binary depends on a tool.** The binary's scorer loads its catalogue (`criteria.json` plus `checks/*.json`) from `tools/quality`, through `WORKFLOW_CHECKS_DIR` and through its tests. So a shipped unit depends on a maintainer tool.
 - **This round was deferred.** `docs/design/05-distribution.md` says "Not in this round: the monorepo reorganisation". This design is that round.
+- **Cursor is not loading this plugin, and its hooks are not firing.** That is a defect to close, not a path typo to tidy.
+  - `.cursor-plugin/marketplace.json` lists `workflow` with `source: "./"`, so the plugin root Cursor resolves is the repo root. Cursor's marketplace resolution looks for `<source>/.cursor-plugin/plugin.json` and discovers components inside that directory. The repo root is not a plugin directory among others; the lab entry already shows the shape that works (`source: "plugins/workflow-lab"`).
+  - `.cursor-plugin/plugin.json` points `hooks` at `./hooks/cursor.json`. Cursor's own default discovery path is `hooks/hooks.json`. The manifest override may be why nothing fires; the phase outcome is that hooks fire, whatever the file has to be named for Cursor to read it.
+  - Every command in `hooks/cursor.json` is `bash "${CURSOR_PLUGIN_ROOT}/tools/hooklog/spool.sh" ...` or the same prefix on `bin/workflow`. There is no `script/` directory. The sessionStart entry also prefetches `bin/workflow --version`.
+- **The product name is `workflow`.** It is too generic to search for, and in this repo it is also the word for the method. The plugin, the binary, the MCP server, the skill prefix, about 40 environment variables, the commit trailers and several directories all use it. The chosen name is `yakka`. Every later surface (releases, the analytics site, the remote service) costs more the longer the rename waits.
 
 Why this matters now:
 
@@ -43,45 +64,53 @@ Cleanup of tool internals, legacy services and research notes is out of scope.
 
 ## Solution Shape
 
-After this change the repo has three kinds of directory, each with one rule:
+After this change the repo has two trees, plus maintainer skills that are not installed:
 
-- **Plugin surface.** The repo root remains the `workflow` plugin.
-- **Packages.** `packages/<name>/` holds every independently buildable or deployable unit. Each carries its own manifest or README, which states how it is built, tested and released.
-- **Tools.** `tools/<name>/` holds maintainer and automation tooling. No runtime code path or config in the plugin surface or in a package resolves into `tools/`.
+- **Plugin.** One plugin package under `packages/`. Its directory name is Open Question 1. Repo-root marketplace manifests point at that directory. The package is the install root: skills, harness manifests, hooks, and the `script/` directory its Cursor hooks execute.
+- **Packages.** `packages/<name>/` holds every independently buildable or deployable unit, including that plugin. Each carries its own manifest or README, which states how it is built, tested and released.
+- **Tools.** `tools/<name>/` holds maintainer and automation tooling. No runtime code path or config in the plugin or in a package resolves into `tools/`.
 
-The lab plugin is gone. Its skills become Claude Code project skills under `.claude/skills/`, which load only when someone works inside this repo. The marketplace lists one plugin.
+The lab plugin is gone. Its skills become Claude Code project skills under `.claude/skills/`, which load only when someone works inside this repo. Each marketplace lists one plugin.
+
+After the rename phases the product is `yakka` everywhere it names itself. Readers still accept the old `Workflow-*` trailers and the old report fence, because git history and old transcripts cannot change. Installed setups get no other backward compatibility. They update by hand, following the CHANGELOG migration guide.
 
 Dependency direction:
 
-- Plugin surface → packages.
+- The plugin package → other packages.
 - Packages → packages.
 - Tools → anything.
 
-A committed check enforces this direction (Phase 3).
+A committed check enforces this direction (Phase 4).
 
-### Domain: Plugin surface (repo root)
+### Domain: Plugin package
 
-- Owns:
-  - `.claude-plugin/{marketplace,plugin}.json`, `.cursor-plugin/plugin.json`, `.codex-plugin/plugin.json`.
+- Owns, inside the plugin package (Open Question 1):
+  - `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`, `.codex-plugin/plugin.json`.
   - `skills/` (the six core skills).
   - `hooks/{hooks,cursor,codex}.json`, `.mcp.json`, `.codex-mcp.json`.
-  - `bin/{workflow,VERSION,SHA256SUMS,RELEASE_URL}`.
+  - `script/` — the scripts Cursor's hooks execute.
+  - `bin/{workflow,VERSION,SHA256SUMS,RELEASE_URL}`, until the rename phases replace `workflow` with `yakka`.
+- Owns, at the repo root:
+  - `.cursor-plugin/marketplace.json` and `.claude-plugin/marketplace.json`. Cursor's multi-plugin layout keeps the marketplace manifest at the repo root and the plugin manifest inside the package.
   - `install.sh`.
 - Contract:
-  - Marketplace `workflow-plugin` lists exactly one plugin, `workflow`, with `source: "./"`. The marketplace name, plugin name and repo URL are unchanged.
-  - Runtime configs never resolve into `tools/` or `.claude/`. Every executed path in `hooks/*.json`, `.mcp.json`, `.codex-mcp.json` and `bin/workflow` resolves under `${CLAUDE_PLUGIN_ROOT}` (or the harness equivalent) to `bin/` or `packages/<name>/`.
-  - Hook commands keep their shape. Each is `bash "<root>/packages/hooklog/spool.sh" --harness <h> [--event <E>]`, with arguments unchanged per harness; Codex passes no `--event`. Only the directory changes.
-  - `bin/workflow` keeps its four-step resolution and its cache key, `${XDG_CACHE_HOME:-~/.cache}/workflow/<bin/VERSION>/workflow-<os>-<arch>`. Its step-4 source build reads `packages/workflow`.
-  - `bin/VERSION` is not bumped. Cached binaries stay valid, and the version field of `workflow --version` is unchanged; only the commit field differs.
+  - Each marketplace lists exactly one plugin. Its `source` is the plugin package directory, not `"./"` and not the repo root. The Claude entry uses a subdir source for that same directory. Until the rename phases, the plugin name stays `workflow` and the marketplace name and repo URL stay as they are.
+  - Cursor loads that package. Component discovery runs inside it. A Cursor session with the plugin installed from that entry fires hooks.
+  - Cursor hook commands are plugin-root-relative `./script/...`. They do not use `${CURSOR_PLUGIN_ROOT}`, an absolute path, or a path that leaves the package. Arguments stay as they are today (`--harness cursor --event <event>` on the spool; the detached `--version` prefetch stays a second command). The scripts those commands name exist under the package's `script/` and are what actually runs. Cursor runs them with the plugin package as the working directory.
+  - Claude and Codex hook commands keep their shape: `bash "<root>/...spool.sh" --harness <h> [--event <E>]`, Codex with no `--event`. `<root>` is the plugin package. The path they name is inside the package (the same scripts `script/` provides, or `bin/` for the prefetch), not a sibling package the install does not contain.
+  - `packages/hooklog` remains the hook-edge package. The plugin package contains the copies its hooks execute, because a marketplace install of the package is the whole install root and does not include sibling packages. A repo checkout still source-builds the binary from its package.
+  - `bin/workflow` keeps its four-step resolution and its cache key, `${XDG_CACHE_HOME:-~/.cache}/workflow/<bin/VERSION>/workflow-<os>-<arch>`, until the rename phases. Its step-4 source build reads `packages/workflow` when the checkout contains it. A marketplace install that contains only the plugin package uses the released binary; it does not contain the Go module.
+  - `bin/VERSION` is not bumped before the rename phases. Cached binaries stay valid, and the version field of `workflow --version` is unchanged; only the commit field differs.
   - Plugin version bumps:
-    - Any phase that changes a shipped plugin file bumps the plugin manifests one minor version.
-    - The Claude, Cursor and Codex manifests move together, with a `CHANGELOG.md` entry.
-  - `install.sh` (every mode) and `tools/cloud-env/bootstrap-workflow-skills.sh` install core skills only. The `WORKFLOW_INSTALL_LAB` opt-in and every lab-install path are removed.
+    - A phase that changes a shipped plugin file and can merge on its own bumps the plugin manifests one minor version.
+    - The rename phases move every manifest to the next major once, together, with one `CHANGELOG.md` entry. They do not also take a minor.
+    - The Claude, Cursor and Codex manifests move together.
+  - `install.sh` (every mode) and `tools/cloud-env/bootstrap-workflow-skills.sh` install core skills only. The `WORKFLOW_INSTALL_LAB` opt-in and every lab-install path are removed. Cursor install materializes the plugin package, not the repo root.
   - Core skills may cite tools and paths in prose, as `execute` cites `tools/driver/`. They never reference `.claude/skills/` or a maintainer skill by path.
 - Non-goals:
-  - Moving the plugin itself into `packages/` (Assumption 2).
-  - Changing hook events, MCP tools or binary behaviour.
+  - Changing hook events, MCP tool names or binary behaviour, other than the names the rename phases change.
   - Retiring `install.sh`.
+  - Aliasing the old plugin name once the rename lands.
 
 ### Domain: Packages (`packages/<name>/`)
 
@@ -93,6 +122,7 @@ A committed check enforces this direction (Phase 3).
   | `packages/hooklog` | `tools/hooklog` | Hook capture edge: `spool.sh`, `hooklog.py`, scrub, example harness configs | README (bash and Python stdlib) |
   | `packages/workflow-analytics` | unchanged | SvelteKit static site; embedded into `packages/workflow`; optionally a Cloudflare Pages deploy | `package.json` (`private: true`) |
   | `packages/opencode-workflow-hooks` | unchanged | OpenCode plugin | `package.json` (public-shaped) |
+| the plugin package | repo-root plugin surface | Cursor, Claude and Codex plugin | harness plugin manifests |
 
 - Contract:
   - **README fields.** Each package README carries four labelled fields: **Consumers**, **Build**, **Test**, **Release**. Release states the mechanism, or "embedded in `<package>`", or "ships as plugin files".
@@ -148,22 +178,51 @@ A committed check enforces this direction (Phase 3).
   - Distributing these skills to plugin users, cloud installs or OpenCode installs.
   - Changing skill behaviour.
 
+### Domain: Names
+
+The rename applies on the layout above. Decision 3 records what is kept and what is retargeted. The contracts a phase has to prove:
+
+- The plugin name is `yakka` in every plugin manifest. Every marketplace manifest is named `yakka` and lists exactly one plugin, `yakka`, whose `source` is the plugin package.
+- The Go module is `github.com/codyhamilton/yakka/packages/yakka`, command `cmd/yakka`. `bin/yakka` keeps the four-step resolution. Cache, release assets and state directories use `yakka` as in the path table below. `bin/VERSION` is bumped, so no tag serves both asset names. `yakka --version` prints `yakka <version> <commit>`. MCP `serverInfo.name` is `yakka`.
+- Every identifier that starts with `WORKFLOW_` becomes `YAKKA_` with the same suffix, in shipped code and in maintainer tools, except `WORKFLOW_QUALITY_`. No code reads the old env vars or the old state paths.
+
+  | Was | Becomes |
+  |---|---|
+  | `~/.local/share/workflow/{queue,serve}` | `~/.local/share/yakka/{queue,serve}` |
+  | `~/.config/workflow/client.toml` | `~/.config/yakka/client.toml` |
+  | `~/.cache/workflow/` | `~/.cache/yakka/` |
+  | `~/.local/state/workflow/` | `~/.local/state/yakka/` |
+  | `~/.local/share/workflow-plugin/hooklog` | `~/.local/share/yakka/hooklog` |
+  | `~/.cache/workflow-plugin` (cloud-env checkout) | `~/.cache/yakka/src` |
+
+- npm: `@codyhamilton/yakka-analytics` (private; Pages project `yakka-analytics`) and `@codyhamilton/opencode-yakka-hooks` (export `yakka-signals.json`, plugin export `YakkaSignalsPlugin`). Analytics `localStorage` keys become `yakka-analytics-base`, `yakka-analytics-key` and `yakka-analytics-views:*`.
+- Writers emit `Yakka-Phase: <slug>:<n>`, `Yakka-Phase: <slug>:done`, a PR body starting `Yakka-Plan: docs/plans/<NN>-<slug>/`, and a `yakka-report` fence. Readers accept `Workflow-Phase` / `Yakka-Phase`, `Workflow-Plan:` / `Yakka-Plan:`, and both fences, permanently, through one shared key list in `tools/driver/`.
+- Repo URL `https://github.com/codyhamilton/yakka` everywhere a repo URL appears. `install.sh` installs Cursor to `~/.cursor/plugins/local/yakka` from the plugin package. The bootstrap script is `tools/cloud-env/bootstrap-yakka-skills.sh`. There is no forwarding stub at the old URL.
+- The CHANGELOG rename entry is the migration guide: the full `WORKFLOW_*` → `YAKKA_*` map, every state path above, per-harness remove-then-install commands, the `.gitignore` change (`.cursor/skills/workflow/` → `.cursor/skills/yakka/`), the MCP-prefix and skill-prefix note, and the maintainer actions (repo rename, release publish, serve data-dir move, `client.toml`, harness reinstall, cloud `environment.json`, optional Pages project, optional checkout rename).
+- The residual-name scan from the folded design is the done check. Its exclusions, forbidden patterns and allowed exceptions are unchanged. Refine decides whether it is a committed script or a one-off command; the patterns stay these.
+
+Maintainer actions outside the repo are listed in that guide and are not phases. This plan's own trailers may be `Workflow-Phase:` because it runs under the installed `workflow` plugin; the dual-read rule makes that harmless.
+
+- Non-goals: publishing the release or the npm packages; migrating data; rewriting commits, PR bodies or recorded events; renaming the legacy quality service beyond its catalogue path; renaming the common noun.
+
 ## Architectural Implications
 
 These stable docs become stale. Each phase updates the ones it invalidates.
 
 - `docs/ARCHITECTURE.md`: the component map, the lab skill rows, invariant 7, and the Stable References into `plugins/workflow-lab/`.
 - `docs/OVERVIEW.md`: "ten skills across two plugins", the Lab plugin section, and the `docs/lab/` note on where lab skills live.
-- `docs/design/05-distribution.md`: the Layout table, the per-harness config paths, and the Release paragraph. Its "Not in this round: monorepo reorganisation" line is replaced by a Layout section stating the three-kind rule.
+- `docs/design/05-distribution.md`: the Layout table, the per-harness config paths, and the Release paragraph. Its "Not in this round: monorepo reorganisation" line is replaced by a Layout section stating the packages-and-tools rule, with the plugin as a package.
 - `docs/design/system-architecture.md`: the "Maintainer lab" row points at `.claude/skills/`.
 - `docs/design/{01,03,07}-*.md`: these mention `tools/workflow` and `tools/hooklog` in path text.
+- The rename phases then rewrite the contract sections of those docs, plus `docs/design/04-advisory-surface.md` and `docs/design/system-architecture.md`, to the yakka names, and add the trailer dual-read rule to the PR Artifact Seam and the phase-boundary contract.
 
 History is not rewritten. `docs/plans/*` records, `docs/lab/` dated findings and proposals, and earlier `CHANGELOG.md` entries keep the old paths. They describe what was true then.
 
 Compatibility:
 
-- The installed plugin cache is a per-version copy of the whole repo. An old version's hooks call that version's own `tools/hooklog/spool.sh`, so installed plugins keep working.
+- An already-installed plugin is a copy of whatever that version's marketplace source was. Old installs keep running that copy until someone installs the package. They are not rewritten.
 - A user-pasted Cursor config that hard-codes an absolute `.../tools/hooklog/spool.sh`, as `cursor-hooks.example.json` showed, will break silently, because `spool.sh` exits 0. The Phase 2 CHANGELOG entry calls this out.
+- After the rename, an existing install keeps running `workflow` until it is removed and `yakka` is installed. Both enabled at once records every hook event twice. Anything that sets `WORKFLOW_*`, or relies on data under the old paths, is ignored by the new binary. Cloud environments that fetch the old bootstrap URL stop working. The CHANGELOG guide is the only migration. No code reads the old paths, and recorded events are not rewritten.
 
 Sequencing: plan 12 (`plan/12-analytics-dashboard-overhaul`) is mid-flight, with two of five phases closed. It touches:
 
@@ -173,6 +232,8 @@ Sequencing: plan 12 (`plan/12-analytics-dashboard-overhaul`) is mid-flight, with
 - in its Phases 4 and 5, `packages/workflow-analytics`.
 
 Its Phase 3 adds a Go test that reads `tools/transcript/pricing.json`. That is test-only and exempt from the package rule, but Phase 2 here must repoint it at the moved depth if needed. See Decision 1.
+
+Plan 14 has merged. Plan 12's close-out record is on master (`docs/plans/12-analytics-dashboard-overhaul.md`), so Decision 1's gate is already met.
 
 ## Decisions
 
@@ -191,9 +252,37 @@ Its Phase 3 adds a Go test that reads `tools/transcript/pricing.json`. That is t
   1. Rebase onto master. Rename detection replays the branch's edits into the new location.
   2. Rerun the recorded rewrite over the branch's own new files. It covers the Go module path, `tools/hooklog` → `packages/hooklog`, and the catalogue path.
 - Alternative not chosen: land the moves now, and have plan 12 rebase across them using the same protocol.
-  - Rejected because another orchestrator is building plan 12 right now.
-  - A module-path rewrite touches every `.go` file plan 12 edits, so it would turn plan 12's remaining three phases into conflict work.
-  - The restructure has no deadline that justifies that cost.
+  - Rejected because another orchestrator was building plan 12 when this decision was made.
+  - A module-path rewrite would have touched every `.go` file plan 12 edited.
+- The gate is met. Master contains `docs/plans/12-analytics-dashboard-overhaul.md`. Phases 2 and later are not waiting on plan 12.
+
+### Decision 2: The plugin is a package, and Cursor hooks are `./script/...`
+
+- Chosen:
+  - The plugin leaves the repo root and becomes a package under `packages/`. Marketplace entries point at that directory.
+  - Cursor hook commands are plugin-root-relative `./script/...`.
+  - `packages/hooklog` stays a separate package. The plugin package contains the scripts its own hooks run, because the install root is the package.
+- Supersedes Assumption 2, which had kept the plugin at the repo root with `source: "./"`.
+- Also supersedes the rename design's marketplace contract `source: "./"`. The source is the package directory. The rename changes the plugin's name, not that path's role.
+- The directory's name is Open Question 1. It is not assumed to be `packages/workflow` or `packages/yakka`, both of which are the Go binary's package.
+
+### Decision 3: The yakka rename is phases of this plan
+
+- Chosen: the scope bounded by `docs/plans/15-rename-to-yakka/` is Phases 5–7 here. That folder is not a second design and is not built on its own.
+- Kept from that design, unchanged:
+  - One name, `yakka`, for the product, the binary and the service. Not a split name.
+  - The GitHub repo, the marketplaces, the Go module and every repo URL become `yakka`. The repo rename itself stays a maintainer action outside this repo.
+  - `WORKFLOW_*` becomes `YAKKA_*` with the same suffix, except `WORKFLOW_QUALITY_`. No fallback, no data migration. State paths move as that design's table says. The CHANGELOG entry is the migration guide.
+  - Writers emit `Yakka-Phase:`, `Yakka-Plan:` and a `yakka-report` fence. Readers accept the old and new forms permanently.
+  - The legacy quality service keeps its names, apart from the catalogue path. History is not rewritten. The common noun "workflow" stays.
+  - npm packages stay scoped `@codyhamilton/`. `localStorage` keys rename. Analytics series may split at the rename.
+  - The residual-name scan, its exclusions and its allowed exceptions are that design's scan, unchanged. It is the definition of done for the rename phases.
+- Retargeted because the plugin is now a package:
+  - Names apply inside the plugin package. Marketplace `source` stays the package directory from Decision 2.
+  - Cursor hook commands stay `./script/...` through the rename. Claude and Codex commands change only the binary path, to the in-plugin `bin/yakka`.
+  - The binary package is `packages/yakka`, from `packages/workflow`. That directory is the Go module, not the plugin package.
+- Sequencing: Phases 5–7 run after Phase 4, on the layout this plan has just stated. They ship as one cut: one major version, one migration guide. Directory moves in Phases 2–4 use today's `workflow` names so those phases' outcomes stay checkable before the rename.
+- The rename design's "rejected: folding into plan 13" is reversed by the added intent.
 
 ## Assumption Ledger
 
@@ -211,6 +300,8 @@ Its Phase 3 adds a Go test that reads `tools/transcript/pricing.json`. That is t
   - `tools/driver` tests assert that exclusion.
 
 ### Assumption 2
+
+**Superseded by Decision 2.** The plugin moves under `packages/`, and the marketplace source points at that package. The original answer is kept so the reversal stays visible.
 
 - Question: Does the `workflow` plugin itself become `packages/workflow-plugin`, or stay at the repo root?
 - Answer chosen: it stays at the repo root (`source: "./"`).
@@ -324,11 +415,17 @@ Its Phase 3 adds a Go test that reads `tools/transcript/pricing.json`. That is t
 
 ## Open Questions
 
-None. The ledger holds every scope-shaping choice, and Decision 1 fixes when Phases 2 and 3 start.
+### Open question 1: the plugin package's directory name
+
+The plugin moves under `packages/`. The Go binary's package is `packages/workflow` through Phase 4 and `packages/yakka` from Phase 5. The user did not name the plugin directory. No phase may invent it, and the marketplace source is described as "the plugin package" until the name is chosen.
+
+What changes with the answer: the marketplace `source` path, install destinations that copy that directory, and every later phase that cites it. It does not change the decision that the plugin is a package, that Cursor commands are `./script/...`, or that the binary package and the plugin package are different directories.
 
 ## Phases
 
-There are three phases. Phase 1 is independent of plan 12. Phases 2 and 3 are gated by Decision 1.
+There are seven phases. Phase 1 can land on its own. Phases 2–4 are the layout, and Decision 1's gate on them is already met. Phases 5–7 are the rename and ship as one cut after Phase 4.
+
+Where a later phase renames or moves something an earlier phase proved, the later outcome is the one that holds at the end. The earlier outcome is what is true when that phase closes.
 
 Each outcome clause is tagged with how it is proven. All tagged clauses are required.
 
@@ -355,7 +452,7 @@ Each outcome clause is tagged with how it is proven. All tagged clauses are requ
   - Lab docs: `docs/lab/{README.md,JEV-METHODOLOGY.md,FINDINGS.md,RESEARCH/INDEX.md}`.
   - Stable docs: `docs/ARCHITECTURE.md`, `docs/OVERVIEW.md`, `docs/design/system-architecture.md`, `README.md`, `CHANGELOG.md`.
 - Approach: known.
-- Depends on: nothing. It may land before plan 12 merges.
+- Depends on: nothing.
 
 ### Phase 2: Runtime units become packages
 
@@ -379,7 +476,7 @@ Each outcome clause is tagged with how it is proven. All tagged clauses are requ
     - `tools/workflow/**` → `packages/workflow/**`, with `go.mod` and every internal import rewritten.
     - `tools/quality/{criteria.json,checks/**}` → `packages/workflow/catalogue/`.
     - `tools/hooklog/**` → `packages/hooklog/**`.
-  - Hook configs: `hooks/{hooks,cursor,codex}.json`; `packages/hooklog/{cursor-hooks.example.json,cursor-mcp.example.json,codex-mcp.example.toml,README.md}`.
+  - Hook configs: `hooks/{hooks,codex}.json` repoint at `packages/hooklog`. `hooks/cursor.json` is repointed only far enough that it no longer names `tools/hooklog`; Phase 3 replaces its commands. `packages/hooklog/{cursor-hooks.example.json,cursor-mcp.example.json,codex-mcp.example.toml,README.md}`.
   - Build: `bin/workflow`, which is the step-4 source-build path; `tools/release/{build.sh,phase5_outcome.py,test_release.py}`; `.gitignore`.
   - Go tests: the `LoadChecks` and catalogue paths in `packages/workflow/**/*_test.go`, including `screen_wiring_test.go`; plan 12's `pricing.json` test, if depth-dependent.
   - Python path fixes, the `sys.path` and `parents[N]` lookups:
@@ -393,44 +490,106 @@ Each outcome clause is tagged with how it is proven. All tagged clauses are requ
     - `.claude/skills/workflow-tuning/reference.md`.
   - Docs: `docs/design/{01,03,05,07}-*.md`, `README.md`, `CHANGELOG.md`, and the plugin manifest version bump.
 - Approach: known. The moves follow Decision 1's two-commit shape.
-- Depends on: Phase 1, and plan 12 merged to master.
+- Depends on: Phase 1. Plan 12 is already on master.
 
-### Phase 3: The layout contract is stated and enforced
+### Phase 3: Cursor loads the plugin package and its hooks fire
 
-- Why: without a check, the next unit guesses its directory again and adds another cross-tree path. The check makes the three-kind rule fail loudly instead of drifting, and the README fields make each package independently buildable by anyone reading it.
+- Why: Cursor is not loading this plugin, and the hooks file's commands never run. The plugin is a marketplace entry that should be a package, and those commands should be `./script/...` because Cursor runs them from the plugin root.
+- Outcome:
+  - [cmd] Both marketplace entries' `source` for the core plugin is the plugin package: `.cursor-plugin/marketplace.json` and `.claude-plugin/marketplace.json`. That directory contains `.cursor-plugin/plugin.json`, `skills/` and the hooks file the manifest names. Neither `source` is `"./"` or the repo root.
+  - [cmd] Every command in the Cursor hooks file is plugin-root-relative `./script/...`. None contains `${CURSOR_PLUGIN_ROOT}`, `tools/hooklog` or an absolute path. The named scripts exist under the package's `script/`.
+  - [cmd] With the working directory set to the plugin package, the spool command from that file, given a `sessionStart` payload, exits 0 and writes an event into the queue. The detached `--version` command from that file is the other `./script/...` entry.
+  - [cmd] Installing that marketplace entry and opening a Cursor session loads the plugin's skills and fires a hook. The fired command is one of those `./script/...` entries, and the event lands in the queue. `workflow drain` to a local `workflow serve` then ships it, and `workflow status` reports no failure.
+  - [test] The install-route tests show Cursor install copies the plugin package, and the installed tree contains `script/` and the hooks file. Claude and Codex hook commands in that tree resolve inside the package.
+- Surfaces:
+  - The plugin package (Open Question 1): skills, harness manifests, `hooks/`, `.mcp.json`, `.codex-mcp.json`, `bin/`, `script/`.
+  - Repo-root marketplaces: `.cursor-plugin/marketplace.json`, `.claude-plugin/marketplace.json`.
+  - Install: `install.sh` and the Cursor branch of `tools/driver` install tests.
+  - Hook edge: the scripts under `script/`, taken from `packages/hooklog` and `bin/workflow` so a package install does not need sibling directories.
+  - Docs: the per-harness path row in `docs/design/02-edge-capture.md` and `docs/design/05-distribution.md`, and `CHANGELOG.md`.
+- Approach: known. The command shape and the move are decided. The hooks filename is whatever Cursor must read for the session outcome to hold.
+- Depends on: Phase 2, so `script/` wraps the package-shaped hook edge. The directory name is Open Question 1 and is answered before this phase is briefed.
+
+### Phase 4: The layout contract is stated and enforced
+
+- Why: without a check, the next unit guesses its directory again and adds another cross-tree path. The check makes the packages-and-tools rule fail loudly instead of drifting, and the README fields make each package independently buildable by anyone reading it.
 - Outcome:
   - [test] The layout check passes on master. It is one stdlib Python test under `tools/release/` and runs with that suite.
   - [test] The check fails, naming the file and the offending path, in each of these cases. The test suite covers each case with a fixture.
-    1. An executed path in `hooks/*.json`, `.mcp.json`, `.codex-mcp.json` or `bin/workflow` resolves into `tools/` or `.claude/`.
+    1. An executed path in the plugin's hook configs, its MCP configs or `bin/workflow` resolves into `tools/` or `.claude/`.
     2. A non-exempt file under `packages/` contains a `tools/` path. "Non-exempt" means not a comment, Markdown, or test code or test config, as defined in the package contract.
     3. A file under `skills/` references `.claude/skills/`.
     4. A `packages/<name>/` lacks a README with the Consumers, Build, Test and Release fields.
-    5. `.claude-plugin/marketplace.json` lists more than one plugin.
+    5. Either marketplace lists more than one plugin, or its `source` is not the plugin package.
+    6. A command in the Cursor hooks file is not plugin-root-relative `./script/...`.
   - [test] `packages/opencode-workflow-hooks` resolves its signal-log default as Assumption 11 states, and `tools/driver` reads the same path.
   - [judgement] Both trees and the stable docs describe the new layout:
     - `tools/README.md` and `packages/README.md` index every directory under them, each with a one-line purpose.
-    - `docs/design/05-distribution.md` has a Layout section stating the three-kind rule, in place of its "Not in this round" line.
-    - `docs/ARCHITECTURE.md`'s component map shows the three kinds.
+    - `docs/design/05-distribution.md` has a Layout section stating the packages-and-tools rule, in place of its "Not in this round" line.
+    - `docs/ARCHITECTURE.md`'s component map shows the plugin package, the other packages and the tools.
 - Surfaces:
   - Check: the new layout test under `tools/release/`.
   - Indexes: `tools/README.md` and `packages/README.md` (new).
-  - Package READMEs: the field blocks in `packages/{workflow,hooklog,workflow-analytics,opencode-workflow-hooks}/README.md`. `packages/workflow/README.md` is new.
+  - Package READMEs: the field blocks in `packages/{workflow,hooklog,workflow-analytics,opencode-workflow-hooks}/README.md`, and in the plugin package. `packages/workflow/README.md` is new.
   - Signal log: `packages/opencode-workflow-hooks/python/{batch_flush_cli.py,batch_aggregator.py}`; `packages/opencode-workflow-hooks/tests/test_batch.py`; the readers of `.jev-signal-log.jsonl` in `tools/driver`.
   - Go comments: `packages/workflow/internal/{facts/facts.go,scorer/jev.go}`, reworded only if the check's comment exemption needs them to be.
   - Docs: `docs/design/05-distribution.md`, `docs/ARCHITECTURE.md`.
 - Approach: known.
-- Depends on: Phase 2. That carries plan 12's merge gate, which Phase 3's own refine also checks per Decision 1.
+- Depends on: Phase 3.
+
+### Phase 5: Runtime runs as yakka
+
+- Why: the binary and hooks are what every harness executes, so they have to work under the new names before anything else points at them.
+- Outcome:
+  - [cmd] From a `HOME` with no `yakka` state: `bin/yakka --version` prints `yakka <version> <commit>` through a source build; an event passed to the spool lands in `~/.local/share/yakka/queue`; `bin/yakka drain` delivers it to a keyless `bin/yakka serve` under `~/.local/share/yakka/serve/local/`; `bin/yakka mcp` answers `initialize` with `serverInfo.name = "yakka"`.
+  - [test] Every suite passes, including `tools/quality` and the analytics e2e setup loading `packages/yakka/catalogue`.
+  - [cmd] The residual-name scan reports nothing under the runtime packages (`packages/yakka`, `packages/hooklog`, `packages/yakka-analytics`, `packages/opencode-yakka-hooks`), the plugin package's `bin/`, `hooks/`, `script/` and MCP configs, and `tools/release/`. Plugin manifests and `skills/` are Phase 6. Catalogue citations in the skills are repointed here too.
+  - [cmd] Every Cursor hook command is still plugin-root-relative `./script/...`.
+- Surfaces: `packages/workflow` → `packages/yakka`; `packages/hooklog`; `packages/workflow-analytics` → `packages/yakka-analytics`; `packages/opencode-workflow-hooks` → `packages/opencode-yakka-hooks`; `bin/`; `tools/release/`; the plugin package's hooks, `script/` and `bin/`; the catalogue path in `tools/quality` and in `skills/execute` and `skills/refine`.
+- Approach: known.
+- Depends on: Phase 4.
+
+### Phase 6: Plugin and plan protocol are yakka
+
+- Why: this is the name users see and type, and the protocol every later plan writes.
+- Outcome:
+  - [cmd] Every plugin and marketplace manifest names `yakka` at the next major version, and each marketplace `source` is still the plugin package.
+  - [test] `tools/driver` resolves a branch whose closing commits carry `Workflow-Phase: <slug>:1` and `Yakka-Phase: <slug>:2` to phase 3 through `resolve`, `status` and `trigger`, and `report.py` parses both fences.
+  - [cmd] The trailer-completeness eval passes for each key.
+  - [test] `install.sh` in each mode, and `tools/cloud-env/bootstrap-yakka-skills.sh`, install into the `yakka`-named locations, with Cursor installing the plugin package.
+  - [cmd] The residual-name scan reports nothing under `skills/`, `.claude/skills/`, the plugin manifests, `install.sh`, `.gitignore` or `tools/`.
+  - [judgement] Each reading skill writes the `Yakka-*` forms and names the legacy forms it accepts in one sentence.
+- Surfaces: the plugin package's manifests and `skills/`; `.claude/skills/workflow-tuning` → `yakka-tuning`; `tools/driver/`; `tools/cloud-env/`; `tools/transcript/` and `tools/jev-variants/` identifiers; `install.sh`; `.gitignore`; `evals/scenarios/trailer-completeness/`.
+- Approach: known.
+- Depends on: Phase 5.
+
+### Phase 7: Docs and migration guide
+
+- Why: a hard break is only safe if the guide is complete. It is the only thing that tells existing installs what to do.
+- Outcome:
+  - [cmd] The residual-name scan over its whole scope reports nothing outside its exceptions.
+  - [cmd] The CHANGELOG rename entry carries one `YAKKA_*` row for every `WORKFLOW_*` identifier removed by Phases 5–6, every path in the state-path table, remove-and-install commands for Claude Code, Cursor, Codex and OpenCode, and the numbered maintainer actions.
+  - [cmd] `README.md` install instructions use `codyhamilton/yakka` and `yakka@yakka`.
+  - [judgement] `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md` and the contract sections of `docs/design/*` describe the yakka names and state the trailer dual-read rule.
+- Surfaces: `README.md`, `CHANGELOG.md`, `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`, the contract sections of `docs/design/*`, `docs/automation/post-build.md`, and the package and tool READMEs Phase 4 added.
+- Approach: known.
+- Depends on: Phases 5 and 6.
 
 Refine:
 
-- Phases 1 and 3 are each small enough for one worker and may skip `refine`.
-- Phase 2 needs `refine`. It spans the Go module, Python tooling, TypeScript and Node tests, and docs. Refine cuts the rename commit first, then parallel path-rewrite units by area.
+- Phases 1 and 4 are each small enough for one worker and may skip `refine`.
+- Phase 2 needs `refine`. It spans the Go module, Python tooling, TypeScript and Node tests, and docs. Refine cuts the git-mv commit first, then parallel path-rewrite units by area.
+- Phase 3 is one unit once Open Question 1 is answered, and may skip `refine`.
+- Phases 5–7 need `refine`. They are one cut, briefed against the layout Phases 2–4 actually left.
 
 ## Provenance Notes
 
 - **Posture.** This was a headless design, so there is no `PROVENANCE.md`. The Assumption Ledger carries every choice that would otherwise have been asked.
+- **Added scope.** Cursor load and hooks, the plugin package, and the yakka rename are Decisions 2 and 3. The rename design's own adversarial pass stands for Phases 5–7; this plan does not relitigate the name, the hard break or the dual-read rule. A second pass on the addition tagged the Phase 5 hook-shape clause, narrowed that phase's scan so manifests stay in Phase 6, and required both marketplace sources in the Phase 3 outcome. The layout check this note used to call Phase 3 is Phase 4.
 - **Grounding facts:**
-  - Marketplace `source: "./"` makes the installed cache the whole repo, so packages are reachable from `${CLAUDE_PLUGIN_ROOT}`.
+  - `.cursor-plugin/marketplace.json` gives `workflow` `source: "./"`. `.claude-plugin/marketplace.json` points the core plugin at the GitHub repo, and the lab plugin at `plugins/workflow-lab`.
+  - `hooks/cursor.json` commands use `${CURSOR_PLUGIN_ROOT}/tools/hooklog/spool.sh` and `${CURSOR_PLUGIN_ROOT}/bin/workflow`. Cursor's plugin docs discover hooks at `hooks/hooks.json` and show hook commands as `./scripts/...`. The decided command shape is the user's: `./script/...`.
+  - Plan 12's close-out record is on master. Plan 14 has merged.
   - The binary cache is keyed on `bin/VERSION`.
   - No ldflags, install URL or release script carries the module path.
   - There is no `.github/`, CI, `go.work`, root `package.json` or Makefile.
@@ -454,4 +613,4 @@ Refine:
   - Ledgered `tools/quality`.
   - Corrected the claim that the OpenCode package's docs read is test-only.
   - Dropped `evals/` and docs that carry no moved paths from the Phase 2 surfaces.
-- **Artifact feedback.** The first feedback flagged problem coverage, surface specificity, outcome checkability and proof labelling below the tenant's p25. The Problem's why-now and cleanup scope, the explicit surface lists, and the proof tags answer those.
+- **Artifact feedback.** The first feedback flagged problem coverage, surface specificity, outcome checkability and proof labelling below the tenant's p25. The Problem's why-now and cleanup scope, the explicit surface lists, and the proof tags answer those. Feedback on this addition was unreachable: the workflow MCP server failed tool discovery.
