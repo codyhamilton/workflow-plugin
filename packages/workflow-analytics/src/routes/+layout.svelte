@@ -30,13 +30,8 @@
 		['/settings', 'Settings']
 	];
 
-	// The dashboards route frames saved views with `embed=1`; embed mode renders the page alone.
-	const embed = $derived(page.url.searchParams.get('embed') === '1');
-	// Filters, chips, notices and the save control show everywhere except settings and dashboards
-	// (the dashboards route frames views that carry their own chrome off).
-	const chrome = $derived(
-		!embed && page.url.pathname !== '/settings' && page.url.pathname !== '/dashboards'
-	);
+	// Filters, chips, notices and the save control show everywhere except settings.
+	const chrome = $derived(page.url.pathname !== '/settings');
 
 	// Every link but Settings keeps the current filters in the query string.
 	function navHref(path: string): string {
@@ -87,10 +82,7 @@
 	</script>
 </svelte:head>
 
-{#if embed}
-	{@render children()}
-{:else}
-	<header>
+<header>
 		<strong>Workflow analytics</strong>
 		<div class="theme" role="group" aria-label="Theme">
 			<button
@@ -136,7 +128,6 @@
 		{/if}
 		{@render children()}
 	</main>
-{/if}
 
 <style>
 	:global(body) {

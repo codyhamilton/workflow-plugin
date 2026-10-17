@@ -156,11 +156,15 @@ test('a saved view is listed and survives a reload', async ({ page }) => {
 	await expect(page.getByTestId('saveview-item').filter({ hasText: 'weekly' })).toBeVisible();
 });
 
-test('embed mode renders the page without the shell', async ({ page }) => {
+test('dashboards shares filter chrome; embed=1 no longer hides the shell', async ({ page }) => {
+	await page.goto('/dashboards?range=7d');
+	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId('saveview-save')).toBeVisible();
+
 	await page.goto('/trends?range=7d&embed=1');
-	await expect(page.locator('header')).toHaveCount(0);
-	await expect(page.getByTestId('preset-7d')).toHaveCount(0);
-	await expect(page.getByTestId('saveview-save')).toHaveCount(0);
+	await expect(page.locator('header')).toHaveCount(1);
+	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId('saveview-save')).toBeVisible();
 	await expect(page.getByTestId('trends-chart')).toBeVisible();
 });
 
