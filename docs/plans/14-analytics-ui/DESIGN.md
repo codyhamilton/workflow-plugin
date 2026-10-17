@@ -194,6 +194,14 @@ One unit. Execute briefs it inline. The change is the same token replacement in 
 
 ### Phase 5 — In-document dashboards
 
+- Units:
+  - **5-01-view-store-config** — `briefs/5-01-view-store-config.md`. Depends on: nothing. Runs alongside: 5-03-remove-embed-chrome, 5-07-analytics-site-doc.
+  - **5-02-save-view-config** — `briefs/5-02-save-view-config.md`. Depends on: 5-01-view-store-config. Runs alongside: 5-03-remove-embed-chrome, 5-04-dashboard-tile-render (after 5-01).
+  - **5-03-remove-embed-chrome** — `briefs/5-03-remove-embed-chrome.md`. Depends on: nothing. Runs alongside: 5-01-view-store-config, 5-07-analytics-site-doc.
+  - **5-04-dashboard-tile-render** — `briefs/5-04-dashboard-tile-render.md`. Depends on: 5-01-view-store-config. Runs alongside: 5-03-remove-embed-chrome.
+  - **5-05-dashboard-page-grid** — `briefs/5-05-dashboard-page-grid.md`. Depends on: 5-01-view-store-config, 5-04-dashboard-tile-render, 5-03-remove-embed-chrome. Runs alongside: nothing.
+  - **5-06-dashboard-e2e** — `briefs/5-06-dashboard-e2e.md`. Depends on: 5-02-save-view-config, 5-05-dashboard-page-grid. Runs alongside: 5-07-analytics-site-doc.
+  - **5-07-analytics-site-doc** — `briefs/5-07-analytics-site-doc.md`. Depends on: nothing. Runs alongside: 5-01-view-store-config, 5-03-remove-embed-chrome, 5-06-dashboard-e2e.
 - Outcome:
   - Saving a view on `/usage` stores a config with no window and no filter keys. Adding it to a dashboard renders it in the dashboard page, not an iframe. Changing the dashboard window changes the tile's numbers. A second tile on the same dashboard uses that same window.
   - `embed=1` is not generated, and the layout no longer has an embed branch.
