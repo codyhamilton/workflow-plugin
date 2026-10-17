@@ -5,11 +5,11 @@ cursor:
 
 # Report: 4-03 — Fly collector outcome verify
 
-**Status:** blocked
+**Status:** done
 
 ## What changed
 
-Checked `https://yakka.build` after the ownership TXT was published and the certificate issued. Health, the GitHub login redirect, `WORKFLOW_SERVE_KEYS`, and restart persistence hold. The CORS sentence does not: `WORKFLOW_SERVE_CORS_ORIGINS` is unset and the Pages origin is still unknown. It was not invented.
+Checked `https://yakka.build` after the ownership TXT was published and the certificate issued. Health, the GitHub login redirect, `WORKFLOW_SERVE_KEYS`, and restart persistence hold. There is no Cloudflare Pages site, so the browser-origin CORS check is not applicable. `WORKFLOW_SERVE_CORS_ORIGINS` stays unset.
 
 ## Checks
 
@@ -65,22 +65,21 @@ GET /v1/analytics/summary?tenant=p4restart
   Origin: https://evil.example  → 200, no Access-Control-Allow-* headers
 ```
 
-No allowed-origin check. There is no Pages hostname in the design or `wrangler.toml` (`name = "workflow-analytics"` only).
+No allowed-origin check. Cody confirmed there is no Cloudflare Pages site, so there is no frontend origin to allow.
 
 `docs/design/07-analytics-site.md` names app `yakka`, `https://yakka.build`, and the Pages pasted-token path.
 
 ## Deviations
 
-The CORS half of the brief was not run. The brief says to set `WORKFLOW_SERVE_CORS_ORIGINS` to the real Pages origin. This run was told not to invent one.
+The CORS half of the brief was not run against a Pages origin. There is no such site. The secret stays unset.
 
 ## Contract notes
 
-Health, the callback, unset `WORKFLOW_SERVE_KEYS`, and restart/revocation hold on `https://yakka.build`. The outcome sentence that needs `WORKFLOW_SERVE_CORS_ORIGINS` set to the Pages origin is not proven.
+Health, the callback, unset `WORKFLOW_SERVE_KEYS`, and restart/revocation hold on `https://yakka.build`. The browser-origin CORS check is not applicable: there is no Cloudflare Pages site, and `WORKFLOW_SERVE_CORS_ORIGINS` stays unset.
 
 ## Unfinished
 
-1. Cody names the Pages origin. Set `WORKFLOW_SERVE_CORS_ORIGINS` to that exact origin. Do not invent one.
-2. Then `GET /v1/analytics/summary?tenant=p4restart` with a bearer and `Origin` set to that origin must return `Access-Control-Allow-Origin` equal to it and no `Access-Control-Allow-Credentials`. A different origin must get no `Access-Control-Allow-*` headers. The live token from this check is already revoked; issue a new read token for that request.
+None. The Pages CORS check is not applicable.
 
 ## Bugs
 

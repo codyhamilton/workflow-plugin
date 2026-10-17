@@ -27,7 +27,7 @@ Resumed: 2026-10-17T15:46:11Z.
 Run identity: https://cursor.com/agents/bc-1ec6b82c-d11a-5065-b210-5ffbb1fbf758
 Resuming HEAD: `2372142`
 
-`GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent from this environment (injected names are `GH_TOKEN` and `FLY_API_TOKEN`; `FLY_APP` is `yakka`). Both OAuth names were already staged on app `yakka`. This run did not call `fly secrets set` and did not print the values. `fly deploy --ha=false` released one machine and moved those secrets to Deployed. Public DNS for `yakka.build` is Cloudflare, which is expected. The certificate stayed Not verified until Cody published `TXT _fly-ownership.yakka.build` = `app-5ydex1q`. It is now Issued. `https://yakka.build/v1/health` is 200 and `/oauth/login` redirects to GitHub with the `yakka.build` callback. A `read_write` token ingested before `fly machines restart 8047ddb6475de8` and still ingested after it; a token revoked before the restart stayed 401. `WORKFLOW_SERVE_CORS_ORIGINS` is unset. The Pages origin is unknown and was not invented, so that sentence of the outcome is not proven. The phase is not closed.
+`GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are absent from this environment (injected names are `GH_TOKEN` and `FLY_API_TOKEN`; `FLY_APP` is `yakka`). Both OAuth names were already staged on app `yakka`. This run did not call `fly secrets set` and did not print the values. `fly deploy --ha=false` released one machine and moved those secrets to Deployed. Public DNS for `yakka.build` is Cloudflare, which is expected. The certificate stayed Not verified until Cody published `TXT _fly-ownership.yakka.build` = `app-5ydex1q`. It is now Issued. `https://yakka.build/v1/health` is 200 and `/oauth/login` redirects to GitHub with the `yakka.build` callback. A `read_write` token ingested before `fly machines restart 8047ddb6475de8` and still ingested after it; a token revoked before the restart stayed 401. `WORKFLOW_SERVE_CORS_ORIGINS` is unset. Cody confirmed there is no Cloudflare Pages site, so the browser-origin CORS check is not applicable and the secret stays unset. The other live checks hold. The phase is closed.
 
 Refined into four units, committed in `fad2d04`. 4-01 first. Then 4-02. After 4-02, 4-03 and 4-04 (4-04 also only needs 4-01). Phase 3 carried items stay out of this phase: other routes omitting `tenant`, the registry-open panic, e2e seeding, and the profile expiry prefill. 4-04 may note the tenant gap and must not claim full-site wiring.
 
@@ -54,14 +54,14 @@ artifact_feedback on the four phase 4 briefs: quality service unreachable at `ht
 - Built: Fly app `yakka` in org `ctzns`. Volume `workflow_serve_data` `vol_v3gppxdm66k9gmw4` in `iad` (1 GB), attached to machine `8047ddb6475de8` (`withered-waterfall-175`, started, shared-cpu-1x 1024MB, image `yakka:deployment-01M558Z6K3Q8GGZ2PXRZVERQ4E`). Dedicated IPv4 `137.66.6.45`. Dedicated IPv6 `2a09:8280:1::1bb:db4d:0`. Certificate `yakka.build` is Issued (Let's Encrypt) after `TXT _fly-ownership.yakka.build` = `app-5ydex1q`. The empty app `workflow-collector` was destroyed and was not recreated. `fly.toml` `app` is `yakka`.
 - Surfaces: the report. No manifest change in this resume.
 - `fly secrets list -a yakka` is `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`, both Deployed. `WORKFLOW_SERVE_KEYS` is unset. This environment still does not have those OAuth variables, so this run did not set them; they were already staged and the deploy released them. `https://yakka.build/v1/health` is 200 via fly.io. `/oauth/login` is 302 to GitHub with `redirect_uri=https://yakka.build/oauth/callback`.
-- Deviations: the earlier `l-fante` attempt created nothing (`bdeb88d`). A first create used the name `workflow-collector` and was destroyed after Cody corrected the name. This resume deployed without calling `fly secrets set`, because the env vars were absent and the staged secrets were already the OAuth pair. The Pages origin is still unknown.
+- Deviations: the earlier `l-fante` attempt created nothing (`bdeb88d`). A first create used the name `workflow-collector` and was destroyed after Cody corrected the name. This resume deployed without calling `fly secrets set`, because the env vars were absent and the staged secrets were already the OAuth pair. There is no Cloudflare Pages site, so `WORKFLOW_SERVE_CORS_ORIGINS` stays unset.
 - Agent: https://cursor.com/agents/bc-1ec6b82c-d11a-5065-b210-5ffbb1fbf758. Harness did not report turns or final context. Earlier handoff: https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5.
 
 ### 4-03-fly-collector-outcome-verify
 
 - Built: on `https://yakka.build`, health is 200, `/oauth/login` redirects to GitHub with the `yakka.build` callback, and `WORKFLOW_SERVE_KEYS` is unset. Tenant `p4restart` was created with Cody's existing admin session. A `read_write` token (`b96f310fbd8afc4597f777c63849c088`, last4 `rXSw`) ingested `p4#live-before` before `fly machines restart 8047ddb6475de8` and, after health returned 200, ingested `p4#live-after` and got `duplicate` for `p4#live-before`. Token `9f03e391efd9e99d324456bf42448407` was revoked before the restart and was 401 on ingest before and after. Summary for `p4restart` after the restart was 200 with `hook_events: 1`. The live verification token was revoked after that transcript. CORS was not set.
 - Surfaces: the report only.
-- Deviations: `WORKFLOW_SERVE_CORS_ORIGINS` was left unset. The Pages origin is not in the design or `wrangler.toml`, and this run was told not to invent it. An `Origin: https://evil.example` summary returned 200 with no `Access-Control-Allow-*` headers. That is the unset-env behavior, not the Pages-origin sentence.
+- Deviations: `WORKFLOW_SERVE_CORS_ORIGINS` stays unset. There is no Cloudflare Pages site, so the browser-origin CORS check is not applicable. An `Origin: https://evil.example` summary returned 200 with no `Access-Control-Allow-*` headers.
 - Agent: https://cursor.com/agents/bc-1ec6b82c-d11a-5065-b210-5ffbb1fbf758. Harness did not report turns or final context. Earlier handoff: https://cursor.com/agents/bc-88807259-84db-5de5-935e-f6344b0e49a5.
 
 ### Public origin `https://yakka.build`
@@ -74,23 +74,25 @@ Cody set the phase 4 close condition to `https://yakka.build`. The GitHub OAuth 
 - `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` are unset in this environment. Injected secret names are `GH_TOKEN` and `FLY_API_TOKEN`. `FLY_APP` is `yakka`. Both OAuth names are Deployed on the app. No values were invented, printed, or written down.
 - Public DNS stays Cloudflare. `TXT _fly-ownership.yakka.build` is `app-5ydex1q`. `fly certs check yakka.build -a yakka` is Issued and verified. `https://yakka.build/v1/health` is 200. `/oauth/login` is 302 to GitHub with `redirect_uri=https://yakka.build/oauth/callback`. TLS verifies with CN `yakka.build`.
 - Cloudflare SSL stayed Full (strict). The earlier port-80 301 to HTTPS is why Flexible would loop. It was not switched.
-- The phase is not closed. The Pages CORS sentence is the remaining outcome check.
+- There is no Cloudflare Pages site. `WORKFLOW_SERVE_CORS_ORIGINS` stays unset. The browser-origin CORS check is not applicable. The phase is closed on the other live checks.
 
 ### Phase 4 verification
 
-The public origin is up, and restart persistence holds. The phase is not closed. No `Workflow-Phase: client-registration:4` trailer.
+Outcome holds. There is no Cloudflare Pages frontend, so the browser-origin CORS sentence is not applicable and `WORKFLOW_SERVE_CORS_ORIGINS` stays unset.
 
 - App `yakka` is released in org `ctzns`: machine `8047ddb6475de8` started, volume `vol_v3gppxdm66k9gmw4` attached, secrets `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` Deployed, `WORKFLOW_SERVE_KEYS` unset. `workflow-collector` does not exist.
 - `https://yakka.build/v1/health` is 200 with no bearer. `/oauth/login` is 302 to `https://github.com/login/oauth/authorize` with `redirect_uri=https://yakka.build/oauth/callback`. The certificate is Issued.
 - Tenant `p4restart`, owned by the existing admin session: `read_write` token `b96f310fbd8afc4597f777c63849c088` ingested before and after `fly machines restart 8047ddb6475de8` (accepted, then `duplicate` for the same fact, plus a new accepted fact). Token `9f03e391efd9e99d324456bf42448407`, revoked before the restart, was 401 before and after. `GET /v1/analytics/summary?tenant=p4restart` after the restart was 200 with that tenant's hook event. Both verification tokens were revoked after the transcript.
-- `WORKFLOW_SERVE_CORS_ORIGINS` is unset. `Origin: https://evil.example` produced no `Access-Control-Allow-*` headers. The allowed Pages origin was not checked. `docs/design/07-analytics-site.md` names the fly collector at `https://yakka.build` and leaves Pages as the pasted-token client.
+- `WORKFLOW_SERVE_CORS_ORIGINS` is unset. There is no Pages site, so no frontend origin was configured. `Origin: https://evil.example` produced no `Access-Control-Allow-*` headers. `docs/design/07-analytics-site.md` names the fly collector at `https://yakka.build` and leaves the Pages pasted-token path as the static client for a Pages site that does not exist.
 
 artifact_feedback on the four phase 4 briefs and reports `4-01`, `4-02`, `4-03`, and `4-04`: service unreachable at `http://127.0.0.1:8770` (`state: not delivered`, no scores). No `workflow` binary is on this machine.
 
-### Remaining
+### Carried
 
-1. Cody names the Cloudflare Pages origin. Set `WORKFLOW_SERVE_CORS_ORIGINS` on app `yakka` to that exact origin. Do not invent one. Then prove `GET /v1/analytics/summary` with a bearer: that origin gets `Access-Control-Allow-Origin` equal to itself and no `Access-Control-Allow-Credentials`; any other origin gets no `Access-Control-Allow-*` headers. The verification tokens from this run are already revoked.
-2. Collector-mode `tenant` is still only on `/` and `/profile`. `Server.New` still panics if the registry cannot be opened or persisted. E2e still seeds `registry.json`. The profile expiry field is still prefilled in the browser.
+1. Collector-mode `tenant` is still only on `/` and `/profile`.
+2. `Server.New` still panics if the registry cannot be opened or persisted.
+3. E2e still seeds `registry.json`.
+4. The profile expiry field is still prefilled in the browser. The device page does not copy that. The server still has no default.
 
 ## Phase 2 — Issued tokens are the remote credential
 

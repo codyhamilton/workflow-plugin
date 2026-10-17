@@ -44,12 +44,12 @@ TLS to `yakka.build` verifies, certificate CN `yakka.build`.
 | Fly app | `yakka` in org `ctzns` |
 | Machine | `8047ddb6475de8` |
 | Volume | `vol_v3gppxdm66k9gmw4` attached |
-| Pages CORS origin | still unknown; `WORKFLOW_SERVE_CORS_ORIGINS` stays unset |
+| Pages CORS origin | not applicable; there is no Cloudflare Pages site; `WORKFLOW_SERVE_CORS_ORIGINS` stays unset |
 | GitHub OAuth | Callback on the live redirect is `https://yakka.build/oauth/callback` |
 
 ## Deviations
 
-OAuth values were not set from this environment. They were already staged and the deploy released them. The Pages origin is still unknown.
+OAuth values were not set from this environment. They were already staged and the deploy released them. There is no Cloudflare Pages site, so `WORKFLOW_SERVE_CORS_ORIGINS` stays unset.
 
 ## Contract notes
 
