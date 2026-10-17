@@ -39,7 +39,7 @@ Cited, binding: Release "Artifact names (`workflow-<os>-<arch>`)" become `yakka-
 
 ## Changes
 
-- Update `build.sh` to build from `packages/yakka`, embed from `packages/yakka-analytics`, output `yakka-*` binaries.
+- Update `build.sh` to build from `packages/yakka`, embed from `packages/yakka-analytics`, output `yakka-*` binaries. The embedded-site placeholder marker is `yakka-analytics-placeholder` after unit `5-07`. `build.sh` must look for that marker, not `workflow-analytics-placeholder`.
 - Update `test_release.py`: wrapper `plugins/yakka/bin/yakka`, version regex `^yakka 0\.…`, cache dir `yakka`, env `YAKKA_*`, paths `packages/yakka`, binary names `yakka-linux-amd64`, etc. `test_1_clean_cache_build` must pass (fixes Phase 4 Carried item 3 when combined with `5-03`).
 - Update `phase5_outcome.py` paths and env vars for yakka names; keep clause shape.
 - Implement `tools/release/scan_residual_names.py` per contract; wire a unittest or document the exact command in done evidence.

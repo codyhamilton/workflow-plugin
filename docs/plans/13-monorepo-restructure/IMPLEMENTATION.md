@@ -371,6 +371,21 @@ Deviations: none. The report is a following commit so the rename commit stays co
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
+### 5-03-plugin-bin-and-hook-edge
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-03-plugin-bin-and-hook-edge.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-03-plugin-bin-and-hook-edge.md`.
+Worker: Composer (`composer-2.5`), agent `bc-f795ec53-5b83-5921-9efb-de56a8ba0c45`. The harness did not report turns or final context.
+Commit: `337ba29`.
+
+Built: `plugins/yakka/bin/yakka` resolves step 4 at `$ROOT/../../packages/yakka` and `./cmd/yakka`. Cache and assets use `yakka`. `bin/VERSION` is `0.2.0`. Cold build printed `yakka 0.2.0 74c96af90acb`. Hooklog and `script/spool.sh` use `YAKKA_*` and `~/.local/share/yakka/queue`. Claude and Codex hooks and both MCP configs call `bin/yakka`. Cursor commands stay `./script/...`. Hooklog spool-queue tests: 20 OK.
+
+Surfaces: the brief's owned paths.
+
+Deviations: plugin `script/spool.sh` keeps a plugin-root drain fallback, so it is not byte-identical to `packages/hooklog/spool.sh`. `SHA256SUMS` filenames changed; digests wait for `5-05`. Hooklog README still has product-name prose.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
 ### 5-04-npm-runtime-packages
 
 Brief: `docs/plans/13-monorepo-restructure/briefs/5-04-npm-runtime-packages.md`.
