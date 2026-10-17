@@ -295,3 +295,29 @@ The Phase 4 carried item is unit 5-07.
 - Deviations: none. The report repeats the SaveView mismatch; `SaveView.svelte` on this branch already calls `saveView(name, report, params)`.
 - Agent: Composer, agent `c76fb655-e2dc-4636-8075-2892d8b3cc4c`. The harness did not report turn count or final context size. Status `done`.
 - Check: no `iframe` or `embed` left in the dashboard page. `npm test -- src/lib/views.test.ts`: 28 passed.
+
+### 5-06-dashboard-e2e
+
+- Built: dashboard e2e covers in-document tiles, a shared window, a 13-tile import, and a legacy URL import. Phase 5's dashboard segments expect export version 2.
+- Surfaces: `packages/workflow-analytics/tests/e2e/dashboards.spec.ts`, `phase5.spec.ts`. Commit `2eb5273`.
+- Deviations: the run used `E2E_PORT=4426`. The brief named 4418. The phase 5 interaction test still runs all of its segments under the brief's grep.
+- Agent: Composer, agent `b5549242-e52d-4b56-8d34-7844cf1174ac`. The harness did not report turn count or final context size. Status `done`.
+- Check: `E2E_PORT=4426 npx playwright test tests/e2e/dashboards.spec.ts tests/e2e/phase5.spec.ts -g "dashboard|builder view saved|exports and imports"`: 9 passed.
+
+### Verification
+
+Checked against the phase outcome, not the reports. From `packages/workflow-analytics`.
+
+- `npm test -- src/lib/views.test.ts src/lib/dashboard-tile.test.ts`: 31 passed. The view tests save a usage config with `measure` only, reject a window key, keep 12 of 13 imported tiles (`tilesDropped` 1), turn a stored `/usage` URL into that config, and count a non-report path in `viewsDropped`.
+- `E2E_PORT=4436 npx playwright test` on `dashboards.spec.ts` and `shell.spec.ts` filtered to save, embed, dashboards, import, window, and tile: 10 passed. A saved view stores chart params and omits the window and filter keys. Two hooks tiles follow the dashboard window rather than the ranges they were saved from. Changing the preset refetches those tiles. Importing 13 tiles keeps 12 and shows the drop notice. A legacy `/usage` URL keeps `measure` and drops `range` and `repo_id`. The dashboard page shows filter chrome. `embed=1` on `/trends` does not hide the shell.
+- No `embed` remains under `packages/workflow-analytics/src`, including `+layout.svelte`.
+- `docs/design/07-analytics-site.md` states `workflow-analytics-theme`, in-document tiles, the overview KPI links, the non-clickable marks, and zero-fill for count series only. It no longer says conversation totals cover only the returned events, and it no longer mentions `embed=1`.
+
+### Feedback
+
+`artifact_feedback` was not called on the seven briefs or seven reports. The workflow feedback namespace is in error in this session. Nothing is queued.
+
+### Carried
+
+- Design 7 open issue 13 still says a builder with zero dimensions and bucket `none` has no valid type. The dashboard contract says that case renders the scalar and is a valid saved view.
+- The `GET /v1/analytics/series` bullet in `docs/design/07-analytics-site.md` still says the site zero-fills between the first and last bucket when charting. The site section on the same page says zero-fill applies to count series only.
