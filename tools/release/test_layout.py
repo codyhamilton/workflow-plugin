@@ -70,8 +70,6 @@ def _is_package_scan_exempt(rel: str) -> bool:
         return True
     if _is_test_or_config_exempt(rel):
         return True
-    if "/internal/serve/site/" in rel.replace("\\", "/"):
-        return True
     return False
 
 
