@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { costLabel } from '../../src/lib/format';
 import { FILTER_REPO, SUMMARY_ALL, SUMMARY_R1, USAGE_ALL } from './fixture';
 import { expectSettled, trackRequests, useServe } from './helpers';
 
@@ -22,13 +23,49 @@ test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
 });
 
+test.describe('KPI links', () => {
+	test('conversations tile keeps repo_id on /conversations', async ({ page }) => {
+		await page.goto(`/?repo_id=${FILTER_REPO}`);
+		await expect(page.getByTestId('summary-conversations')).toBeVisible();
+		await page.locator('a').filter({ has: page.getByTestId('summary-conversations') }).click();
+		await expect(page).toHaveURL(new RegExp(`/conversations\\?.*repo_id=${FILTER_REPO}`));
+	});
+
+	test('artifact versions tile sets metric on /trends', async ({ page }) => {
+		await page.goto(`/?repo_id=${FILTER_REPO}`);
+		await expect(page.getByTestId('summary-artifact_versions')).toBeVisible();
+		await page.locator('a').filter({ has: page.getByTestId('summary-artifact_versions') }).click();
+		await expect(page).toHaveURL(new RegExp(`/trends\\?.*repo_id=${FILTER_REPO}.*metric=artifact_versions`));
+	});
+
+	test('hook events tile lands on /hooks', async ({ page }) => {
+		await page.goto(`/?repo_id=${FILTER_REPO}`);
+		await expect(page.getByTestId('summary-hook_events')).toBeVisible();
+		await page.locator('a').filter({ has: page.getByTestId('summary-hook_events') }).click();
+		await expect(page).toHaveURL(new RegExp(`/hooks\\?.*repo_id=${FILTER_REPO}`));
+	});
+
+	test('cost tile lands on /usage', async ({ page }) => {
+		await page.goto(`/?repo_id=${FILTER_REPO}`);
+		await expect(page.getByTestId('summary-cost_usd')).toBeVisible();
+		await page.locator('a').filter({ has: page.getByTestId('summary-cost_usd') }).click();
+		await expect(page).toHaveURL(new RegExp(`/usage\\?.*repo_id=${FILTER_REPO}`));
+	});
+});
+
 test('overview shows the fixture numbers for the whole window', async ({ page }) => {
 	await page.goto('/');
 	await expectNumbers(page, SUMMARY_ALL);
 	await expectNumbers(page, USAGE_TILES);
 	await expect(page.getByTestId('summary-tokens')).toHaveText(String(USAGE_ALL.tokens_in + USAGE_ALL.tokens_out));
 	await expect(page.getByTestId('summary-tokens_cache_read')).toHaveText(String(USAGE_ALL.tokens_cache_read));
-	await expect(page.getByTestId('summary-cost_usd')).toHaveText('$0.02, 2 unpriced');
+	await expect(page.getByTestId('summary-cost_usd')).toHaveText(
+		costLabel({
+			cost: USAGE_ALL.cost_usd,
+			unpriced: USAGE_ALL.unpriced_calls,
+			calls: USAGE_ALL.model_calls
+		})
+	);
 });
 
 test('repo_id in the URL filters, and survives a reload', async ({ page }) => {
@@ -66,8 +103,14 @@ test('no filter control offers an empty option', async ({ page }) => {
 
 test('cost tile never shows $0.00 while calls are unpriced', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByTestId('summary-cost_usd')).toHaveText('$0.02, 2 unpriced');
-	await expect(page.getByTestId('summary-unpriced_calls')).toHaveText('2');
+	await expect(page.getByTestId('summary-cost_usd')).toHaveText(
+		costLabel({
+			cost: USAGE_ALL.cost_usd,
+			unpriced: USAGE_ALL.unpriced_calls,
+			calls: USAGE_ALL.model_calls
+		})
+	);
+	await expect(page.getByTestId('summary-unpriced_calls')).toHaveText(String(USAGE_ALL.unpriced_calls));
 	await page.route('**/analytics/summary*', (route) =>
 		route.fulfill({
 			status: 200,

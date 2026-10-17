@@ -94,23 +94,64 @@ per-call rows in the conversation timeline.
   `hook_events`: `harness`, `repo_id`, `event`, `tool`; `artifact_versions`: `harness`, `repo_id`,
   `kind`, `plan`, `source`; `commits`: `harness`, `repo_id`; `conversations` (distinct per bucket):
   `harness`; `rejections`: `stage`. Missing values key as `""`. Series are sparse: a bucket with no
-  rows has no point; the site zero-fills between the first and last bucket when charting.
+  rows has no point. These metrics are counts; the site zero-fills a gap only on count series, and
+  leaves a score-series gap (see Site).
   Response `{"bucket","series":[{"key","points":[{"t","n"}]}]}`.
 - `GET /v1/analytics/scores` — `{"kind","checks":[{"name","n","min","p25","median","p75","max"}]}`,
   one object per catalog check for the kind. Population: distinct in-window content hashes of that
   kind, latest score per `(content_hash, check)`. Percentiles use the baseline method (sorted values,
   position `(n-1)*q` with linear interpolation, rounded to 3 places); empty is all zeros. This never
   writes or replaces `GET /v1/baselines`, which stays all-time; `/quality` shows the two side by side.
+- `GET /v1/analytics/distribution` — `measure` is required: one of `cost_usd`, `tokens_in`,
+  `tokens_out`, `tokens_cache_read`, `tokens_cache_write`, `tokens_reasoning`; else 400
+  `{"error":"unknown measure <m>"}`. `grain` is `call` (default) or `conversation`; else 400
+  `{"error":"unknown grain <g>"}`. `dim` is omitted or `model`; any other dimension is 400
+  `{"error":"unsupported dimension <d> for <measure>"}`. Call grain: one value per model call in the
+  window (the same call identity `model_calls` uses). Conversation grain: one value per conversation,
+  the sum of that measure over its calls; the conversation's `model` is the most frequent model on
+  those calls, ties to the smaller name, `""` when it has none (same rule as the conversation list).
+  For `cost_usd`, `n` is priced calls, `unpriced` is the rest, and percentiles and bins use priced
+  calls only; for a token measure, `unpriced` is 0 and every call is in `n` and in the bins.
+  `repo_id`, `harness`, `model`, and `conversation_id` apply; `kind`, `plan`, `norm_event`, `event`,
+  `tool`, and `source` are ignored and listed in `ignored_filters`. Response
+  `{"measure","grain","dim","rows":[{"k","n","unpriced","min","p25","median","p75","p95","max","bins":[{"lo","hi","n"}]}],"truncated"?,"ignored_filters"?}`.
+  `k` is the model, or `"all"` when `dim` is omitted. `top` defaults to 20, max 100, orders rows by
+  `n` descending; there is no `__other__` row; `truncated` is true when keys were dropped. Percentiles
+  use the `/scores` method; cost is rounded to 6 decimal places, token measures to 1. Bin edges are
+  fixed so models share an axis: tokens — a zero bin, then `[2^i, 2^(i+1))` for `i` from 0 through
+  19, then overflow at `2^20`; cost — a zero bin, `(0, 10^-4)`, then `[10^i, 10^(i+1))` for `i` from
+  -4 through 1, then overflow at `100`; `lo` inclusive, `hi` exclusive, except the overflow bin has
+  no `hi`. Scans existing columns; no hourly rollup and no `partial`. Wider than 400 days is 400
+  `{"error":"range too wide"}`.
+- `GET /v1/analytics/score-series` — `kind` is required, exactly one of `design`, `brief`, `report`.
+  `bucket` is required: `day`, `week`, or `month`. Wider than 400 days, or more than 400 buckets, is
+  400 `{"error":"range too wide"}`. `t` is the bucket start, RFC3339 in `tz`; `week` starts Monday
+  and `month` starts on the first, both in `tz` (same `t` rule as the executions `series`). A
+  point's population is distinct content hashes with a version timestamp in that bucket; several
+  versions of one hash in the bucket contribute the latest; a hash can appear in more than one
+  bucket (not the same population as `GET /v1/analytics/scores`, which is latest per hash over the
+  whole window). Response
+  `{"kind","bucket","checks":[{"name","points":[{"t","n","p25","median","p75"}]}]}`. Points are
+  sparse; checks with no points are omitted. Percentiles use the `/scores` method, rounded to 3
+  decimal places; no `partial`.
 - `GET /v1/analytics/executions` — grain is one brief `(repo_id, conversation_id,
-  docs/plans/<plan>/briefs/<stem>.md)` with an in-window version. `shape` is `complete` (the
+  docs/plans/<plan>/briefs/<stem>.md)` with an in-window version. Row `shape` is `complete` (the
   conversation has a commit in that repo and a version of `reports/<stem>.md` exists in that repo),
   `unreported` (commit, no report) or `started` (no commit); commit and report facts count even
-  outside the window. Response `{"counts":{complete,unreported,started},"rows":[{repo_id,plan,conversation_id,brief_path,harness,shape,ts}],"next"}`.
-  This is [design 1](01-event-model-and-ingest.md)'s derived execution view applied per brief and
-  computed at read time; it is not an ingest-side table.
+  outside the window. Repeatable query `shape` (`complete`, `unreported`, `started`; else 400
+  `{"error":"unknown shape <s>"}`) OR's values; omitted means all rows. `shape` filters `rows` and
+  the cursor only; `counts` stays the three window totals with `shape` ignored. Other filters apply to
+  both. Optional `bucket` `day`, `week`, or `month` adds `series` of exactly three objects, `key`
+  `complete`, `unreported`, `started`, in that order, each with sparse `points` of `{"t","n"}`; `t`
+  is bucket start in `tz` as for score-series; `shape` does not change `series`. Response
+  `{"counts":{complete,unreported,started},"rows":[{repo_id,plan,conversation_id,brief_path,harness,shape,ts}],"series"?,"next"}`. The cursor binds `shape` and `bucket` with the other filters. This is
+  [design 1](01-event-model-and-ingest.md)'s derived execution view applied per brief and computed at
+  read time; it is not an ingest-side table.
 - `GET /v1/analytics/conversations` — conversations with any in-window fact; counts and
   `first_ts`/`last_ts` from in-window facts only; `harness` is the most frequent (ties to the smaller
-  name); `repos` and `kinds` distinct. Ordered `last_ts` desc, `conversation_id` asc.
+  name); `repos` and `kinds` distinct. Each row adds `model` (most frequent model on in-window calls,
+  same tie rule), `model_calls`, `unpriced_calls`, `cost_usd`, `tokens_in`, `tokens_out` (counts
+  in-window). Ordered `last_ts` desc, `conversation_id` asc.
 - Paging (executions, conversations) is keyset in SQL: `limit` default 100, max 500 (**judgement**), `cursor` from a
   previous `next`; `next` absent on the last page. Executions order `ts` desc, `conversation_id`,
   `brief_path` asc. The cursor is opaque, bound to the route, the filters and the first page's
@@ -141,8 +182,18 @@ per-call rows in the conversation timeline.
   | `model_calls`, `tokens_in`, `tokens_out`, `tokens_cache_read`, `tokens_cache_write`, `tokens_reasoning`, `cost_usd`, `unpriced_calls` | `harness`, `repo_id`, `model`, `conversation_id` |
 
   Every measure also takes `hour_of_day` and `weekday`.
-- `GET /v1/analytics/conversation` (`id` required; unknown id is 404) — `{"conversation_id","harness","repos","models","first_ts","last_ts","totals":{tokens…,cost_usd},"events":[{"ts","type","norm_event","event","tool","model","path","kind","source","sha","tokens"?,"cost_usd"?}]}`
-  in time order, capped at 5,000 events (**judgement**) with `truncated`. It returns no bodies.
+- `GET /v1/analytics/conversation` (`id` required; unknown id is 404) — optional `from` and `to`,
+  RFC3339, inclusive; `from` after `to` is 400 `{"error":"from after to"}`. Dimension filters from
+  the shared set are not sent to this route. `events` is the whole run in time order, capped at 5,000
+  (**judgement**); `from` and `to` do not drop events. `truncated` applies to `events` only.
+  `totals` is the whole conversation, including events past the cap. When `from` or `to` is present,
+  `window_totals` is that range's full totals (not the capped slice); when both are omitted,
+  `window_totals` is absent. Response
+  `{"conversation_id","harness","repos","models","first_ts","last_ts","totals":{tokens…,cost_usd},"window_totals"?,"events":[…],"truncated"?}`.
+  It returns no bodies.
+
+Phase 2 leaves existing `/query` fields unchanged; `/schema`, `/summary`, `/series`, `/scores`, and
+`/baselines` are likewise unchanged.
 
 **Count semantics.** `hook_events` counts stored hook events. Events on the ingest policy's `remove`
 list are never stored, so they are not counted; a streamed message part counts once, through its
@@ -181,11 +232,20 @@ on a compacted copy of the real ledger.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
-- Charts render with Apache ECharts, tree-shaken, with one colour token set in light and dark themes
-  following the system preference. Each chart has a data-table toggle, and the site works down to
-  1024 px wide. `/explore` alone loads Perspective (client, viewer, server WASM) and says when the
-  slice is capped. No second chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill, Grafana, Metabase, Superset,
-  Lightdash, Cube and Tinybird each need a build-time snapshot or a second always-on service).
+- Charts render with Apache ECharts, tree-shaken, reading computed theme tokens (no hard-coded
+  colours). **Theme.** `localStorage` key `workflow-analytics-theme` holds `system`, `light`, or
+  `dark`; an absent key means `system`. The document root carries `data-theme="light"` or
+  `data-theme="dark"`. `system` follows `prefers-color-scheme` and later OS changes; `light` and
+  `dark` do not. Light surfaces: background `#fdf6e3`, surface `#eee8d5`, text `#657b83`, muted
+  `#586e75`, border `#93a1a1`. Dark surfaces: background `#002b36`, surface `#073642`, text
+  `#839496`, muted `#93a1a1`, border `#586e75`. Both modes: accent `#268bd2`, danger `#dc322f`.
+  Series order, both modes: `#268bd2`, `#859900`, `#b58900`, `#cb4b16`, `#dc322f`, `#d33682`,
+  `#6c71c4`, `#2aa198`. Body type stays `system-ui`. The space scale is 4, 8, 16, 24, 32 for shell
+  padding and control gaps. Each chart has a data-table toggle, and the site works down to 1024 px
+  wide. `/explore` alone loads Perspective (client, viewer, server WASM) and says when the slice is
+  capped. No second chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill,
+  Grafana, Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a
+  second always-on service).
 - **Window.** Presets Today, 24h, 7d, 30d, 90d, This month, YTD and All time, a custom range, and
   brush-to-zoom on any time-axis chart. Presets stay relative in a shared URL. Times display in the
   browser's zone, which is sent as `tz`. Each chart uses the finest bucket within the cap unless one
@@ -195,15 +255,31 @@ on a compacted copy of the real ledger.
   renders a superseded result. It shows `partial` and `ignored_filters` as notices. The server has
   no exclude parameter, so an exclude chip is sent as the complement of the facet values; an
   exclude on `conversation_id` is unsupported and marked so.
-- **Drill-down.** Every chart mark and table row for a dimension value applies it as a filter
-  (shift-click excludes it); `__other__` is not clickable. Active filters show as removable chips.
-  Any conversation ID opens its timeline, and counts link to the filtered explore slice.
+- **Drill-down.** Every chart mark and table row for a shared-filter dimension value applies it as a
+  filter (shift-click excludes it). `__other__`, the empty key, `hour_of_day`, `weekday`, and check
+  names are not clickable. Active filters show as removable chips. Any conversation ID opens its
+  timeline. Each overview KPI links to the report that owns the measure, keeping the current query
+  string; the link sets `measure` only when the target is `/trends` (`artifact_versions`,
+  `distinct_content`, or `commits`, one per tile). Conversations → `/conversations`. Hook events →
+  `/hooks`. Model calls, tokens, cost, and unpriced calls → `/usage`. Overview counts do not link to
+  `/explore`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
+  count, and the executions shape series); a score series leaves the gap.
 - **Chart builder.** `/builder` is driven only by `/v1/analytics/schema`: any measure, up to two
   dimensions and a bucket. Chart types are line, stacked area, bar, stacked bar, heatmap, treemap
   and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
-- **Saved views and dashboards.** A named saved view is a stored URL; a dashboard is an ordered grid
-  of saved views, rendered as framed `embed=1` pages and exportable and importable as JSON. Both
-  live in `localStorage` under the prefix `workflow-analytics-views`.
+  No dimension and bucket `none` renders the scalar.
+- **Saved views and dashboards.** Both live in `localStorage` under the prefix
+  `workflow-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
+  `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
+  `explore`, `builder`; `params` holds that report's chart controls only (`measure`, `dim`, `bucket`,
+  `chart`, `top`, `kind`, `metric`, `group`, `grain`), not the window or shared filters. A dashboard
+  is `{"id","name","tiles":[{"viewId","w"}]}` on a two-column grid (`w` is column span `1` or `2`).
+  At most 12 tiles; add refuses past 12; import keeps the first 12 tiles per dashboard, drops the
+  rest, and states how many were dropped. The dashboard page renders each tile in-document as a
+  component (no iframe); every tile uses the dashboard URL's window and shared
+  filters. Export and import are JSON of these objects. A stored URL whose path is a known report
+  becomes a view (chart keys copied into `params`; window and filter keys are not). Entries whose
+  path is not a known report are dropped, with a count in the notice.
 - A response that is not JSON (a static host answering `/v1` with HTML) is a connection error
   pointing at `/settings`.
 
@@ -250,10 +326,12 @@ on a compacted copy of the real ledger.
 9. Usage measures aggregate in Go over every kept row, so an All-time window is unbounded in memory and the usage read sorts and parses JSON per row (benchmark headroom is 464 ms of 500 ms). Fix: group in SQL or add a usage rollup.
 10. Compaction and the archive: `Read` stops at a torn frame until `Repair` runs; compaction re-archives already-slim rows as lossy lines; the `complete` shortcut can skip rows before `compact_cursor`; the disk check ignores the VACUUM copy.
 11. The OpenCode `config` hook is captured and is not on the remove list, and it can carry provider keys. Decide whether to add it to the remove list in ingest and the plugin.
-12. `partial` is emitted only by `/query`; conversation totals cover only the returned events when a timeline is truncated; `time/tzdata` is not imported in serve, `tz=Local` is accepted, filter value counts and `top` are unbounded, and the locked-tenant 503 echoes the tenant path.
-13. Builder: zero dimensions with bucket `none` renders a chart with no valid type; `data-ready` is true while the previous chart is still shown. Dashboards: import bypasses the 12-tile cap, a fragment in a saved URL drops `embed=1`, the saved-view store does not validate stored entries on read, and `/dashboards` has no settle signal.
-14. The Executions sankey filters client-side over the loaded first page, so counts trail the totals until the user pages on.
+12. `partial` is emitted only by `/query`; `time/tzdata` is not imported in serve, `tz=Local` is accepted, filter value counts and `top` are unbounded, and the locked-tenant 503 echoes the tenant path.
+13. Builder: `data-ready` is true while the previous chart is still shown. Dashboards: the saved-view store does not validate stored entries on read.
+14. Closed: an executions sankey edge sets `shape` on the URL. `counts` stay the window totals, and the next page of rows uses that `shape`.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
+16. The layout header and main use the 4/8/16/24/32 space scale. The filter bar, filter chips, and save-view control still use rem gaps. Pick scale steps and restyle those controls.
+17. Overview links to `/trends` set `metric` (`artifact_versions`, `distinct_content`, `commits`), which is the key that page reads. The drill-down sentence says those links set `measure`. Pick one query key and make the sentence and the page agree.
 
 ## Live cutover record (2026-10-11)
 

@@ -96,7 +96,7 @@ add('c5', 'opencode', 'r1', 'hook_event', 'transcript.assistant_message', at(1, 
 		tokens: { cache: { read: 100, write: 50 }, input: 2000, output: 300, reasoning: 10 }
 	}
 });
-// c1: claude, r1. One assistant usage message with a distinct id (Opus has no price row, so unpriced).
+// c1: claude, r1. One assistant usage message with a distinct id (Opus priced from pricing_table.json).
 add('c1', 'claude', 'r1', 'hook_event', 'transcript.assistant_message', at(5, 13), {
 	payload: {
 		hook_event_name: 'transcript.assistant_message',
@@ -143,22 +143,22 @@ export const SUMMARY_R1 = {
 	'screens-unscreened': 5
 };
 
-/** Whole-window usage measures: 4 calls, 2 priced by a reported cost (both Sonnet), 2 unpriced. */
+/** Whole-window usage measures: 4 calls, 3 priced (2 Sonnet reported + 1 Opus table-priced), 1 unpriced. */
 export const USAGE_ALL = {
 	model_calls: 4,
-	unpriced_calls: 2,
+	unpriced_calls: 1,
 	tokens_in: 3502, // 1000 + 500 + 2000 + 2
 	tokens_out: 6105, // 200 + 100 + 300 + 5505
 	tokens_cache_read: 99397, // 3000 + 0 + 100 + 96297
 	tokens_cache_write: 1372, // 400 + 0 + 50 + 922
 	tokens_reasoning: 60, // 50 + 0 + 10 + 0
-	cost_usd: 0.0223 // 0.0123 + 0.0100
+	cost_usd: 0.156277 // 0.0123 + 0.0100 Sonnet reported + 0.133977 Opus from table
 };
 /** Per-model usage, keyed by the derived model name the ingest normaliser stores. */
 export const USAGE_BY_MODEL = {
 	'anthropic/claude-sonnet-5-5': { calls: 2, unpriced: 0, cost_usd: 0.0223 },
 	'ollama-maxctx/qwen3-coder:30b-a3b-q4_K_M': { calls: 1, unpriced: 1, cost_usd: 0 },
-	'claude-opus-5-5': { calls: 1, unpriced: 1, cost_usd: 0 }
+	'claude-opus-5-5': { calls: 1, unpriced: 0, cost_usd: 0.133977 }
 };
 /** The `/conversation?id=c5` totals: c5's three OpenCode calls. */
 export const USAGE_C5 = {

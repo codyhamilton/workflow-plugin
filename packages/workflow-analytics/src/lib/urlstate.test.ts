@@ -81,6 +81,12 @@ describe('applyDrill', () => {
 		expect(applyDrill(s, 'harness', '__other__', false)).toBe(s);
 	});
 
+	it('ignores the empty key and returns the same reference', () => {
+		const s = parseUrlState(new URLSearchParams(''));
+		expect(applyDrill(s, 'model', '', false)).toBe(s);
+		expect(applyDrill(s, 'model', '', true)).toBe(s);
+	});
+
 	it('moves a value between include and exclude', () => {
 		const s = parseUrlState(new URLSearchParams('harness=claude&x.harness=cursor'));
 		const inc = applyDrill(s, 'harness', 'cursor', false);

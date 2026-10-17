@@ -15,6 +15,8 @@ import {
 	type PresetId,
 	type UrlState
 } from './urlstate';
+import { TILE_API_CHART_KEYS, tileExtraParams } from './dashboard-tile';
+import type { ReportId } from './views';
 import type { Facets } from './types';
 
 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -113,6 +115,26 @@ function paramsFor(route: Route, extra?: Record<string, string | string[]>): URL
 	return params;
 }
 
+/** Tile chart params override URL chart keys; window and shared filters stay from `page.url`. */
+function paramsForTile(
+	route: Route,
+	report: ReportId,
+	tileParams: Record<string, string | string[]>
+): URLSearchParams | null {
+	const state = currentState();
+	const win = resolveWindow(state, new Date(), tz, route);
+	const result = apiParams(state, win, facets, tz);
+	if (!('params' in result)) return null;
+	const params = result.params;
+	for (const key of TILE_API_CHART_KEYS) params.delete(key);
+	const extra = tileExtraParams(report, tileParams);
+	for (const [k, v] of Object.entries(extra)) {
+		params.delete(k);
+		for (const x of Array.isArray(v) ? v : [v]) params.append(k, x);
+	}
+	return params;
+}
+
 function setPreset(id: PresetId) {
 	const s = currentState();
 	navigate({ range: id, include: s.include, exclude: s.exclude });
@@ -167,6 +189,7 @@ export const view = {
 		return resolveWindow(currentState(), new Date(), tz, 'rest').clamped;
 	},
 	paramsFor,
+	paramsForTile,
 	setPreset,
 	setWindow,
 	drill,

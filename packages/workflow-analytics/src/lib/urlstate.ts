@@ -85,9 +85,9 @@ export function toSearch(state: UrlState, keep?: URLSearchParams): URLSearchPara
 	return out;
 }
 
-/** Add or remove a drill value on one side, moving it off the other; the "other" bucket does nothing. */
+/** Add or remove a drill value on one side, moving it off the other. The folded bucket and the empty key are not filters. */
 export function applyDrill(state: UrlState, key: DimKey, value: string, exclude: boolean): UrlState {
-	if (value === '__other__') return state;
+	if (value === '__other__' || value === '') return state;
 	const include = { ...state.include };
 	const excludeMap = { ...state.exclude };
 	const target = exclude ? excludeMap : include;

@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { EXECUTION_COUNTS, EXECUTION_ROWS, FILTER_REPO } from './fixture';
-import { useServe } from './helpers';
+import { expectSettled, trackRequests, useServe } from './helpers';
+
+test.use({ timezoneId: 'UTC' });
 
 test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
@@ -113,4 +115,58 @@ test('clicking a sankey link filters the table and toggles off', async ({ page }
 	await page.getByTestId('exec-link-commit-report').click();
 	await expect(page).not.toHaveURL(/shape=complete/);
 	await expectRows(page, EXECUTION_ROWS);
+});
+
+test('shape=complete is sent to the API, counts stay window totals, rows match', async ({ page }) => {
+	const seen = trackRequests(page, '/v1/analytics/executions');
+	await page.goto('/executions?shape=complete');
+	await expectCounts(page, EXECUTION_COUNTS);
+	await expectRows(page, EXECUTION_ROWS.filter((r) => r.shape === 'complete'));
+	const first = seen.urls().find((u) => !u.includes('cursor='));
+	expect(first).toBeTruthy();
+	expect(first!).toMatch(/shape=complete/);
+});
+
+test('shape=complete survives reload and limit=1 paging walk', async ({ page }) => {
+	const want = EXECUTION_ROWS.filter((r) => r.shape === 'complete');
+	await page.goto('/executions?shape=complete');
+	await expectRows(page, want);
+	const all = await rowTexts(page);
+	await page.goto('/executions?shape=complete&limit=1');
+	await expectCounts(page, EXECUTION_COUNTS);
+	await expect(rows(page)).toHaveCount(1);
+	await expect(page.getByRole('button', { name: 'Load more' })).toHaveCount(0);
+	expect(await rowTexts(page)).toEqual(all);
+	await page.reload();
+	await expectRows(page, want);
+});
+
+test('stacked shape series chart is visible', async ({ page }) => {
+	await page.goto('/executions');
+	await expect(page.getByTestId('exec-shape-series')).toBeVisible();
+	await expectSettled(page);
+});
+
+test('brushing the shape series narrows the window and refetches executions', async ({ page }) => {
+	await page.goto('/executions');
+	await expectSettled(page);
+	const seen = trackRequests(page, '/v1/analytics/executions');
+	seen.reset();
+	const chart = page.getByTestId('exec-shape-series').locator('.echart');
+	await chart.scrollIntoViewIfNeeded();
+	const box = await chart.boundingBox();
+	if (!box) throw new Error('no exec-shape-series chart box');
+	const y = box.y + box.height * 0.75;
+	await page.mouse.move(box.x + box.width * 0.2, y);
+	await page.mouse.down();
+	await page.mouse.move(box.x + box.width * 0.8, y, { steps: 8 });
+	await page.mouse.up();
+	await expect(page).toHaveURL(/[?&]from=/);
+	const u = new URL(page.url());
+	expect(u.searchParams.get('from')).toBeTruthy();
+	expect(u.searchParams.get('to')).toBeTruthy();
+	expect(u.searchParams.get('range')).toBeNull();
+	await expect
+		.poll(() => seen.urls().some((url) => new URL(url).searchParams.has('from')))
+		.toBe(true);
 });

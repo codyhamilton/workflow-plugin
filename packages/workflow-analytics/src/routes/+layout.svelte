@@ -1,6 +1,12 @@
 <script lang="ts">
 	import '$lib/theme.css';
 	import { page } from '$app/state';
+	import {
+		getThemePreference,
+		initTheme,
+		setThemePreference,
+		type ThemePreference
+	} from '$lib/charts/theme';
 	import FilterBar from '$lib/components/FilterBar.svelte';
 	import FilterChips from '$lib/components/FilterChips.svelte';
 	import Notices from '$lib/components/Notices.svelte';
@@ -24,16 +30,8 @@
 		['/settings', 'Settings']
 	];
 
-	// The dashboards route frames saved views with `embed=1`; embed mode renders the page alone.
-	const embed = $derived(page.url.searchParams.get('embed') === '1');
-	// Filters, chips, notices and the save control show everywhere except the settings, conversation
-	// and dashboards pages (the dashboards route frames views that carry their own chrome off).
-	const chrome = $derived(
-		!embed &&
-			page.url.pathname !== '/settings' &&
-			page.url.pathname !== '/conversation' &&
-			page.url.pathname !== '/dashboards'
-	);
+	// Filters, chips, notices and the save control show everywhere except settings.
+	const chrome = $derived(page.url.pathname !== '/settings');
 
 	// Every link but Settings keeps the current filters in the query string.
 	function navHref(path: string): string {
@@ -53,13 +51,59 @@
 		clearError();
 		pruneNotices();
 	});
+
+	let themePref = $state<ThemePreference>('system');
+	$effect(() => {
+		const off = initTheme();
+		themePref = getThemePreference();
+		return off;
+	});
+
+	function chooseTheme(pref: ThemePreference) {
+		setThemePreference(pref);
+		themePref = pref;
+	}
 </script>
 
-{#if embed}
-	{@render children()}
-{:else}
-	<header>
+<svelte:head>
+	<script>
+		(function () {
+			var key = 'workflow-analytics-theme';
+			var pref = 'system';
+			try {
+				var v = localStorage.getItem(key);
+				if (v === 'light' || v === 'dark' || v === 'system') pref = v;
+			} catch (e) {}
+			var dark =
+				pref === 'dark' ||
+				(pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+			document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+		})();
+	</script>
+</svelte:head>
+
+<header>
 		<strong>Workflow analytics</strong>
+		<div class="theme" role="group" aria-label="Theme">
+			<button
+				type="button"
+				data-testid="theme-system"
+				aria-pressed={themePref === 'system'}
+				onclick={() => chooseTheme('system')}>System</button
+			>
+			<button
+				type="button"
+				data-testid="theme-light"
+				aria-pressed={themePref === 'light'}
+				onclick={() => chooseTheme('light')}>Light</button
+			>
+			<button
+				type="button"
+				data-testid="theme-dark"
+				aria-pressed={themePref === 'dark'}
+				onclick={() => chooseTheme('dark')}>Dark</button
+			>
+		</div>
 		<nav>
 			{#each nav as [href, text] (href)}
 				<a href={navHref(href)} aria-current={page.url.pathname === href ? 'page' : undefined}>{text}</a>
@@ -84,7 +128,6 @@
 		{/if}
 		{@render children()}
 	</main>
-{/if}
 
 <style>
 	:global(body) {
@@ -97,16 +140,34 @@
 	header {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem 1.5rem;
+		gap: var(--space-3) var(--space-4);
 		align-items: baseline;
-		padding: 0.75rem 1.5rem;
+		padding: var(--space-3) var(--space-4);
 		background: var(--surface);
 		border-bottom: 1px solid var(--border);
+	}
+	.theme {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+	.theme button {
+		font: inherit;
+		color: var(--text);
+		background: var(--bg);
+		border: 1px solid var(--border);
+		padding: var(--space-1) var(--space-2);
+		cursor: pointer;
+	}
+	.theme button[aria-pressed='true'] {
+		border-color: var(--accent);
+		color: var(--accent);
+		font-weight: 600;
 	}
 	nav {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem 1rem;
+		gap: var(--space-2) var(--space-3);
 	}
 	nav a {
 		color: var(--text);
@@ -117,15 +178,15 @@
 		color: var(--accent);
 	}
 	main {
-		padding: 0 1.5rem 2rem;
+		padding: 0 var(--space-4) var(--space-5);
 		overflow-x: hidden;
 	}
 	.error {
-		margin: 1rem 0;
-		padding: 0.5rem 1rem;
-		border: 1px solid #b42318;
-		background: #fef3f2;
-		color: #7a271a;
+		margin: var(--space-3) 0;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--danger);
+		background: var(--surface);
+		color: var(--text);
 	}
 	.error p {
 		margin: 0.25rem 0;

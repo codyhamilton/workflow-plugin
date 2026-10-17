@@ -3,40 +3,44 @@
  * stylesheet or `src/routes/+layout.svelte`) so every chart can read these values
  * with getComputedStyle and no chart hard-codes a colour.
  */
-:root {
-	--bg: #ffffff;
-	--surface: #f5f5f5;
-	--text: #1a1a1a;
-	--muted: #6b7280;
-	--border: #d1d5db;
-	--accent: #2563eb;
-	--danger: #dc2626;
-	--series-1: #2563eb;
-	--series-2: #d97706;
-	--series-3: #059669;
-	--series-4: #db2777;
-	--series-5: #7c3aed;
-	--series-6: #0891b2;
-	--series-7: #ca8a04;
-	--series-8: #4b5563;
+:root,
+[data-theme='light'] {
+	--bg: #fdf6e3;
+	--surface: #eee8d5;
+	--text: #657b83;
+	--muted: #586e75;
+	--border: #93a1a1;
+	--accent: #268bd2;
+	--danger: #dc322f;
+	--series-1: #268bd2;
+	--series-2: #859900;
+	--series-3: #b58900;
+	--series-4: #cb4b16;
+	--series-5: #dc322f;
+	--series-6: #d33682;
+	--series-7: #6c71c4;
+	--series-8: #2aa198;
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 16px;
+	--space-4: 24px;
+	--space-5: 32px;
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--bg: #0f1115;
-		--surface: #1b1f27;
-		--text: #e5e7eb;
-		--muted: #9ca3af;
-		--border: #374151;
-		--accent: #60a5fa;
-		--danger: #f87171;
-		--series-1: #60a5fa;
-		--series-2: #fbbf24;
-		--series-3: #34d399;
-		--series-4: #f472b6;
-		--series-5: #a78bfa;
-		--series-6: #22d3ee;
-		--series-7: #facc15;
-		--series-8: #9ca3af;
-	}
+[data-theme='dark'] {
+	--bg: #002b36;
+	--surface: #073642;
+	--text: #839496;
+	--muted: #93a1a1;
+	--border: #586e75;
+	--accent: #268bd2;
+	--danger: #dc322f;
+	--series-1: #268bd2;
+	--series-2: #859900;
+	--series-3: #b58900;
+	--series-4: #cb4b16;
+	--series-5: #dc322f;
+	--series-6: #d33682;
+	--series-7: #6c71c4;
+	--series-8: #2aa198;
 }

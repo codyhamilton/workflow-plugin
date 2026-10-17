@@ -29,7 +29,7 @@
 	const tableRows = $derived(
 		rows.map((r) => ({
 			cells: [r.label ?? r.key, r.value],
-			selectable: selectable && r.key !== '__other__'
+			selectable: selectable && r.key !== '' && r.key !== '__other__'
 		}))
 	);
 
@@ -40,7 +40,7 @@
 	}
 	function pickRow(i: number, shift: boolean) {
 		const r = rows[i];
-		if (!r || r.key === '__other__' || !selectable) return;
+		if (!r || r.key === '' || r.key === '__other__' || !selectable) return;
 		onselect?.({ key: r.key, shift });
 	}
 </script>
@@ -79,10 +79,10 @@
 		z-index: 1;
 		font-size: 0.75rem;
 		padding: 0.15rem 0.5rem;
-		border: 1px solid var(--border, #d1d5db);
+		border: 1px solid var(--border);
 		border-radius: 4px;
-		background: var(--surface, #f5f5f5);
-		color: var(--text, #1a1a1a);
+		background: var(--surface);
+		color: var(--text);
 		cursor: pointer;
 	}
 </style>

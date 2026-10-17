@@ -31,11 +31,11 @@
 
 <style>
 	.notice {
-		margin: 0.5rem 0 0;
-		padding: 0.25rem 0.5rem;
-		border-left: 3px solid var(--accent);
+		margin: var(--space-2) 0 0;
+		padding: var(--space-1) var(--space-2);
+		border: 1px solid var(--danger);
 		background: var(--surface);
-		color: var(--muted);
+		color: var(--text);
 		font-size: 0.85rem;
 	}
 </style>

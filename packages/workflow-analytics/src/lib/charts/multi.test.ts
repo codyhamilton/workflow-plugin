@@ -90,6 +90,19 @@ describe('groupedBarProps', () => {
 		]);
 	});
 
+	it('marks the empty key unclickable', () => {
+		const r = resp({
+			dims: ['model'],
+			rows: [
+				{ k: [''], v: 1 },
+				{ k: ['alpha'], v: 2 }
+			]
+		});
+		const p = groupedBarProps(r);
+		expect(p.categories.find((c) => c.key === '')?.clickable).toBe(false);
+		expect(p.categories.find((c) => c.key === 'alpha')?.clickable).toBe(true);
+	});
+
 	it('keeps the __other__ category last and unclickable', () => {
 		const r = resp({
 			dims: ['model'],

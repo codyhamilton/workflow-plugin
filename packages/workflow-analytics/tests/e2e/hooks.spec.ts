@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { HOOKS_BY_EVENT, HOOKS_BY_HARNESS, HOOKS_BY_REPO, HOOKS_BY_TOOL } from './fixture';
-import { expectSettled, trackRequests, useServe } from './helpers';
+import { brush, expectSettled, trackRequests, useServe } from './helpers';
 
 // Hand-counted per dimension, whole window. `hooks-tool` carries the empty tool key as "(none)".
 const WANT: Record<string, Record<string, number>> = {
@@ -73,11 +73,56 @@ test('every bar table equals the fixture count', async ({ page }) => {
 	}
 });
 
-test('one load issues six /query requests', async ({ page }) => {
+test('one load issues seven /query requests', async ({ page }) => {
 	const requests = trackRequests(page, /analytics\/query/);
 	await page.goto('/hooks');
 	await expectSettled(page);
-	expect(requests.count()).toBe(6);
+	expect(requests.count()).toBe(7);
+});
+
+test('the hook-events time series requests hook_events with a time bucket and split dim', async ({
+	page
+}) => {
+	const requests = trackRequests(page, /analytics\/query/);
+	await page.goto('/hooks');
+	await expectSettled(page);
+	await expect(page.getByTestId('hooks-over-time')).toBeVisible();
+	const url = requests.urls().find((u) => {
+		const p = new URL(u).searchParams;
+		return (
+			p.get('measure') === 'hook_events' &&
+			p.get('dim') === 'norm_event' &&
+			p.get('bucket') &&
+			p.get('bucket') !== 'none'
+		);
+	});
+	expect(url, 'time series query').toBeTruthy();
+	const params = new URL(url!).searchParams;
+	expect(params.get('measure')).toBe('hook_events');
+	expect(params.get('dim')).toBe('norm_event');
+	const b = params.get('bucket');
+	expect(b).toBeTruthy();
+	expect(b).not.toBe('none');
+	await page.getByTestId('hooks-split').selectOption('tool');
+	await expectSettled(page);
+	const toolUrl = requests
+		.urls()
+		.filter((u) => u.includes('analytics/query'))
+		.reverse()
+		.find((u) => new URL(u).searchParams.get('dim') === 'tool');
+	expect(toolUrl, 'tool split query').toBeTruthy();
+});
+
+test('brushing the hooks time series narrows the window', async ({ page }) => {
+	await page.goto('/hooks');
+	await expectSettled(page);
+	await brush(page, 'hooks-over-time', 0.25, 0.75);
+	await expect(page).toHaveURL(/[?&]from=/);
+	const u = new URL(page.url());
+	expect(u.searchParams.get('from')).toBeTruthy();
+	expect(u.searchParams.get('to')).toBeTruthy();
+	expect(u.searchParams.get('range')).toBeNull();
+	await expectSettled(page);
 });
 
 test('clicking a harness bar adds an include chip and narrows the other bars', async ({ page }) => {

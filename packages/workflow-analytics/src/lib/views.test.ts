@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+	chartParamsFromQuery,
 	DASHBOARDS_KEY,
 	ImportError,
+	reportFromPathname,
 	VIEWS_KEY,
 	createStore,
+	viewHref,
 	type SavedView
 } from './views';
 
@@ -18,20 +21,50 @@ function fake(initial: Record<string, string> = {}) {
 	};
 }
 
+describe('reportFromPathname / chartParamsFromQuery', () => {
+	it('maps site paths to report ids', () => {
+		expect(reportFromPathname('/')).toBe('overview');
+		expect(reportFromPathname('/usage')).toBe('usage');
+		expect(reportFromPathname('/settings')).toBeNull();
+	});
+
+	it('keeps chart keys and drops window and filters', () => {
+		const q = new URLSearchParams('range=7d&measure=cost_usd&repo_id=r1&from=2020-01-01');
+		expect(chartParamsFromQuery('usage', q)).toEqual({ measure: 'cost_usd' });
+	});
+
+	it('stores hooks split under dim and round-trips split in viewHref', () => {
+		const q = new URLSearchParams('split=tool&bucket=day');
+		expect(chartParamsFromQuery('hooks', q)).toEqual({ dim: 'tool', bucket: 'day' });
+		const href = viewHref({
+			id: 'v1',
+			name: 'H',
+			report: 'hooks',
+			params: { dim: 'tool', bucket: 'day' }
+		});
+		expect(href).toBe('/hooks?split=tool&bucket=day');
+	});
+});
+
 describe('saveView', () => {
 	it('replaces a view with the same name in place and keeps its id', () => {
 		const s = createStore(fake());
-		const a = s.saveView('Home', '/a?range=1d');
-		const b = s.saveView('Home', '/b?range=7d');
+		const a = s.saveView('Home', 'overview', {});
+		const b = s.saveView('Home', 'usage', { measure: 'cost_usd' });
 		expect(b.id).toBe(a.id);
 		expect(s.listViews()).toHaveLength(1);
-		expect(s.listViews()[0].url).toBe('/b?range=7d');
+		expect(s.listViews()[0]).toEqual({
+			id: a.id,
+			name: 'Home',
+			report: 'usage',
+			params: { measure: 'cost_usd' }
+		});
 	});
 
-	it('applies the import url rule and throws ImportError on a bad url', () => {
+	it('throws ImportError on invalid report or params', () => {
 		const s = createStore(fake());
-		expect(() => s.saveView('X', 'no-slash')).toThrow(ImportError);
-		expect(() => s.saveView('X', '//evil')).toThrow(ImportError);
+		expect(() => s.saveView('X', 'nope' as SavedView['report'], {})).toThrow(ImportError);
+		expect(() => s.saveView('X', 'usage', { range: '7d' })).toThrow(ImportError);
 		expect(s.listViews()).toHaveLength(0);
 	});
 });
@@ -39,37 +72,52 @@ describe('saveView', () => {
 describe('deleteView', () => {
 	it('cascades into every dashboard', () => {
 		const s = createStore(fake());
-		const v1 = s.saveView('A', '/a');
-		const v2 = s.saveView('B', '/b');
+		const v1 = s.saveView('A', 'overview', {});
+		const v2 = s.saveView('B', 'trends', {});
 		const d = s.createDashboard('d');
 		s.addToDashboard(d.id, v1.id);
 		s.addToDashboard(d.id, v2.id);
 		s.deleteView(v1.id);
 		expect(s.listViews().map((v) => v.id)).toEqual([v2.id]);
-		expect(s.listDashboards()[0].viewIds).toEqual([v2.id]);
+		expect(s.listDashboards()[0].tiles.map((t) => t.viewId)).toEqual([v2.id]);
 	});
 });
 
 describe('dashboards', () => {
 	it('adds, moves and removes while preserving order, allowing duplicates', () => {
 		const s = createStore(fake());
-		const v1 = s.saveView('A', '/a');
-		const v2 = s.saveView('B', '/b');
-		const v3 = s.saveView('C', '/c');
+		const v1 = s.saveView('A', 'overview', {});
+		const v2 = s.saveView('B', 'trends', {});
+		const v3 = s.saveView('C', 'usage', {});
 		const d = s.createDashboard('d');
 		s.addToDashboard(d.id, v1.id);
 		s.addToDashboard(d.id, v2.id);
 		s.addToDashboard(d.id, v3.id);
-		expect(s.listDashboards()[0].viewIds).toEqual([v1.id, v2.id, v3.id]);
+		expect(s.listDashboards()[0].tiles.map((t) => t.viewId)).toEqual([v1.id, v2.id, v3.id]);
 
 		s.moveInDashboard(d.id, 0, 2);
-		expect(s.listDashboards()[0].viewIds).toEqual([v2.id, v3.id, v1.id]);
+		expect(s.listDashboards()[0].tiles.map((t) => t.viewId)).toEqual([v2.id, v3.id, v1.id]);
 
 		s.removeFromDashboard(d.id, 1);
-		expect(s.listDashboards()[0].viewIds).toEqual([v2.id, v1.id]);
+		expect(s.listDashboards()[0].tiles.map((t) => t.viewId)).toEqual([v2.id, v1.id]);
 
 		s.addToDashboard(d.id, v1.id);
-		expect(s.listDashboards()[0].viewIds).toEqual([v2.id, v1.id, v1.id]);
+		expect(s.listDashboards()[0].tiles.map((t) => t.viewId)).toEqual([v2.id, v1.id, v1.id]);
+	});
+
+	it('refuses a thirteenth tile', () => {
+		const s = createStore(fake());
+		const d = s.createDashboard('full');
+		const ids: string[] = [];
+		for (let i = 0; i < 12; i++) {
+			const v = s.saveView(`v${i}`, 'overview', {});
+			ids.push(v.id);
+			s.addToDashboard(d.id, v.id);
+		}
+		const extra = s.saveView('extra', 'overview', {});
+		expect(() => s.addToDashboard(d.id, extra.id)).toThrow(ImportError);
+		expect(s.listDashboards()[0].tiles).toHaveLength(12);
+		void ids;
 	});
 
 	it('throws a plain Error for an unknown dashboard id', () => {
@@ -80,54 +128,105 @@ describe('dashboards', () => {
 	});
 });
 
+describe('viewHref', () => {
+	it('builds a report path without window or filters', () => {
+		const view: SavedView = {
+			id: '1',
+			name: 'u',
+			report: 'usage',
+			params: { measure: 'cost_usd' }
+		};
+		expect(viewHref(view)).toBe('/usage?measure=cost_usd');
+	});
+});
+
 describe('export / import', () => {
 	function seed() {
 		const s = createStore(fake());
-		const v1 = s.saveView('Alpha', '/path?range=7d');
-		const v2 = s.saveView('Beta', '/other?kind=x');
+		const v1 = s.saveView('Alpha', 'usage', { measure: 'cost_usd' });
+		const v2 = s.saveView('Beta', 'trends', { metric: 'hook_events' });
 		const d = s.createDashboard('My Dash');
 		s.addToDashboard(d.id, v1.id);
 		s.addToDashboard(d.id, v2.id);
-		return s.exportDashboard(d.id);
+		return { s, json: s.exportDashboard(d.id), d };
 	}
 
-	it('serialises the exact format in dashboard order', () => {
-		const json = seed();
+	it('serialises version 2 in dashboard tile order', () => {
+		const { json } = seed();
 		expect(json).toBe(
-			'{"version":1,"name":"My Dash","views":[{"name":"Alpha","url":"/path?range=7d"},{"name":"Beta","url":"/other?kind=x"}]}'
+			'{"version":2,"name":"My Dash","tiles":[{"name":"Alpha","report":"usage","params":{"measure":"cost_usd"},"w":1},{"name":"Beta","report":"trends","params":{"metric":"hook_events"},"w":1}]}'
 		);
 	});
 
-	it('reproduces name, order and urls in a second store', () => {
-		const json = seed();
+	it('reproduces name, order and configs in a second store', () => {
+		const { json } = seed();
 		const b = createStore(fake());
 		const imported = b.importDashboard(json);
-		expect(imported.name).toBe('My Dash');
+		expect(imported.tilesDropped).toBe(0);
+		expect(imported.viewsDropped).toBe(0);
+		expect(imported.dashboard.name).toBe('My Dash');
 		expect(b.listDashboards()).toHaveLength(1);
-		expect(b.exportDashboard(imported.id)).toBe(json);
+		expect(b.exportDashboard(imported.dashboard.id)).toBe(json);
 	});
 
 	it('bumps a duplicate dashboard name and reuses matching views', () => {
-		const json = seed();
+		const { json } = seed();
 		const b = createStore(fake());
 		b.importDashboard(json);
 		const again = b.importDashboard(json);
-		expect(again.name).toBe('My Dash (2)');
+		expect(again.dashboard.name).toBe('My Dash (2)');
 		expect(b.listDashboards()).toHaveLength(2);
 		expect(b.listViews()).toHaveLength(2);
+	});
+
+	it('caps import at twelve tiles and reports tilesDropped', () => {
+		const s = createStore(fake());
+		const tiles = [];
+		for (let i = 0; i < 13; i++) {
+			tiles.push({ name: `t${i}`, report: 'overview', params: {}, w: 1 });
+		}
+		const json = JSON.stringify({ version: 2, name: 'big', tiles });
+		const result = s.importDashboard(json);
+		expect(result.tilesDropped).toBe(1);
+		expect(result.dashboard.tiles).toHaveLength(12);
+	});
+
+	it('migrates v1 urls into report params', () => {
+		const s = createStore(fake());
+		const json =
+			'{"version":1,"name":"x","views":[{"name":"u","url":"/usage?range=7d&measure=cost_usd&repo_id=r1"}]}';
+		const result = s.importDashboard(json);
+		expect(result.viewsDropped).toBe(0);
+		const v = s.listViews()[0];
+		expect(v.report).toBe('usage');
+		expect(v.params).toEqual({ measure: 'cost_usd' });
+		expect(result.dashboard.tiles).toHaveLength(1);
+	});
+
+	it('drops unknown report paths and counts viewsDropped', () => {
+		const s = createStore(fake());
+		const json = '{"version":1,"name":"x","views":[{"name":"u","url":"/settings?foo=1"}]}';
+		const result = s.importDashboard(json);
+		expect(result.viewsDropped).toBe(1);
+		expect(s.listViews()).toHaveLength(0);
+		expect(result.dashboard.tiles).toHaveLength(0);
 	});
 });
 
 describe('import errors', () => {
 	const cases: [string, string][] = [
 		['bad JSON', '{not json'],
-		['missing version', '{"name":"x","views":[]}'],
-		['non-1 version', '{"version":2,"name":"x","views":[]}'],
-		['non-array views', '{"version":1,"name":"x","views":{}}'],
-		['url without a leading slash', '{"version":1,"name":"x","views":[{"name":"a","url":"foo"}]}'],
-		['url with a // prefix', '{"version":1,"name":"x","views":[{"name":"a","url":"//evil"}]}'],
-		['url with a colon before the query', '{"version":1,"name":"x","views":[{"name":"a","url":"/a:b?c"}]}'],
-		['url over 2000 characters', `{"version":1,"name":"x","views":[{"name":"a","url":"/${'a'.repeat(2000)}"}]}`]
+		['missing version', '{"name":"x","tiles":[]}'],
+		['unsupported version', '{"version":3,"name":"x","tiles":[]}'],
+		['v1 non-array views', '{"version":1,"name":"x","views":{}}'],
+		['v2 non-array tiles', '{"version":2,"name":"x","tiles":{}}'],
+		['v1 url without a leading slash', '{"version":1,"name":"x","views":[{"name":"a","url":"foo"}]}'],
+		['v1 url with a // prefix', '{"version":1,"name":"x","views":[{"name":"a","url":"//evil"}]}'],
+		['v1 url with a colon before the query', '{"version":1,"name":"x","views":[{"name":"a","url":"/a:b?c"}]}'],
+		[
+			'v1 url over 2000 characters',
+			`{"version":1,"name":"x","views":[{"name":"a","url":"/${'a'.repeat(2000)}"}]}`
+		]
 	];
 
 	for (const [label, json] of cases) {
@@ -141,12 +240,17 @@ describe('import errors', () => {
 			expect(s.listDashboards()).toEqual([]);
 		});
 	}
+});
 
-	it('rejects a 2000-character url boundary correctly', () => {
-		const s = createStore(fake());
-		const ok: SavedView = s.saveView('ok', `/${'a'.repeat(1999)}`);
-		expect(ok.url).toHaveLength(2000);
-		expect(() => s.saveView('bad', `/${'a'.repeat(2000)}`)).toThrow(ImportError);
+describe('localStorage migration', () => {
+	it('migrates legacy url views and viewIds dashboards on read', () => {
+		const st = fake({
+			[VIEWS_KEY]: JSON.stringify([{ id: 'v1', name: 'U', url: '/usage?measure=cost_usd&range=7d' }]),
+			[DASHBOARDS_KEY]: JSON.stringify([{ id: 'd1', name: 'D', viewIds: ['v1'] }])
+		});
+		const s = createStore(st);
+		expect(s.listViews()[0]).toMatchObject({ report: 'usage', params: { measure: 'cost_usd' } });
+		expect(s.listDashboards()[0].tiles).toEqual([{ viewId: 'v1', w: 1 }]);
 	});
 });
 
@@ -161,11 +265,11 @@ describe('robustness', () => {
 			}
 		};
 		const s = createStore(throwing);
-		const v = s.saveView('A', '/a?range=1d');
+		const v = s.saveView('A', 'overview', {});
 		const d = s.createDashboard('D');
 		s.addToDashboard(d.id, v.id);
 		expect(s.listViews()).toHaveLength(1);
-		expect(s.listDashboards()[0].viewIds).toEqual([v.id]);
+		expect(s.listDashboards()[0].tiles.map((t) => t.viewId)).toEqual([v.id]);
 	});
 
 	it('reads corrupt JSON as empty', () => {
@@ -179,10 +283,10 @@ describe('robustness', () => {
 		const s = createStore(fake());
 		const fn = vi.fn();
 		const unsubscribe = s.subscribe(fn);
-		s.saveView('A', '/a');
+		s.saveView('A', 'overview', {});
 		expect(fn).toHaveBeenCalledTimes(1);
 		unsubscribe();
-		s.saveView('B', '/b');
+		s.saveView('B', 'trends', {});
 		expect(fn).toHaveBeenCalledTimes(1);
 	});
 });

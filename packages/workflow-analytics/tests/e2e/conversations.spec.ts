@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import { CONVERSATION_ROWS, FILTER_REPO } from './fixture';
-import { useServe } from './helpers';
+import { costLabel } from '../../src/lib/format';
+import { CONVERSATION_ROWS, FILTER_REPO, USAGE_C5 } from './fixture';
+import { trackRequests, useServe } from './helpers';
+
+const SONNET = 'anthropic/claude-sonnet-5-5';
 
 test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
@@ -44,6 +47,40 @@ test('a harness cell click adds a chip', async ({ page }) => {
 	await expect(page.getByTestId('chip-harness-claude')).toBeVisible();
 });
 
+test('c5 row shows model and cost from the API', async ({ page }) => {
+	await page.goto('/conversations');
+	await expect(page.getByTestId('conv-c5-model')).toHaveText(SONNET);
+	await expect(page.getByTestId('conv-c5-cost')).toHaveText(
+		costLabel({
+			cost: USAGE_C5.cost_usd,
+			unpriced: USAGE_C5.unpriced_calls,
+			calls: USAGE_C5.model_calls
+		})
+	);
+});
+
+test('loads per-conversation cost distribution for the window', async ({ page }) => {
+	const dist = trackRequests(page, /analytics\/distribution/);
+	await page.goto('/conversations');
+	await expect(page.getByTestId('conv-row').first()).toBeVisible();
+	await expect(page.getByTestId('conversations-distribution')).toBeVisible();
+	expect(dist.count()).toBeGreaterThan(0);
+	for (const u of dist.urls()) {
+		const p = new URL(u).searchParams;
+		expect(p.get('grain')).toBe('conversation');
+		expect(p.get('measure')).toBe('cost_usd');
+	}
+});
+
+test('model cell click filters by model and narrows the list', async ({ page }) => {
+	await page.goto('/conversations');
+	await expect(page.getByTestId('conv-row')).toHaveCount(CONVERSATION_ROWS.length);
+	await page.getByTestId('conv-c5-model').click();
+	await expect(page.getByTestId(`chip-model-${SONNET}`)).toBeVisible();
+	await expect(page.getByTestId('conv-row')).toHaveCount(1);
+	await expect(page.getByTestId('conv-c5-conversation_id')).toBeVisible();
+});
+
 test('limit=1 paging walk equals the unpaged rows', async ({ page }) => {
 	await page.goto('/conversations');
 	await expect(page.getByTestId('conv-row')).toHaveCount(CONVERSATION_ROWS.length);
@@ -69,7 +106,13 @@ test('virtualises 5000 rows: under 100 in the DOM, last row reachable', async ({
 		hook_events: 0,
 		artifact_versions: 0,
 		commits: 0,
-		kinds: []
+		kinds: [],
+		model: '',
+		model_calls: 0,
+		unpriced_calls: 0,
+		cost_usd: 0,
+		tokens_in: 0,
+		tokens_out: 0
 	}));
 	await page.route('**/v1/analytics/conversations*', (route) =>
 		route.fulfill({ json: { rows }, headers: { 'access-control-allow-origin': '*' } })

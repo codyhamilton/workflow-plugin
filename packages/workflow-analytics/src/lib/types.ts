@@ -61,11 +61,32 @@ export interface Baselines {
 	checks: Record<string, { n: number; p25: number; median: number; p75: number }>;
 }
 
+export interface ScoreSeriesPoint {
+	t: string;
+	n: number;
+	p25: number;
+	median: number;
+	p75: number;
+}
+
+export interface ScoreSeriesCheck {
+	name: string;
+	points: ScoreSeriesPoint[];
+}
+
+export interface ScoreSeries {
+	kind: Kind;
+	bucket: 'day' | 'week' | 'month';
+	checks: ScoreSeriesCheck[];
+}
+
 export type Shape = 'complete' | 'unreported' | 'started';
 export interface Executions {
 	counts: Record<Shape, number>;
 	rows: { repo_id: string; plan: string; conversation_id: string; brief_path: string; harness: string; shape: Shape; ts: string }[];
 	next?: string;
+	bucket?: 'day' | 'week' | 'month';
+	series?: { key: Shape; points: { t: string; n: number }[] }[];
 }
 
 export interface Conversations {
@@ -79,6 +100,12 @@ export interface Conversations {
 		artifact_versions: number;
 		commits: number;
 		kinds: Kind[];
+		model: string;
+		model_calls: number;
+		unpriced_calls: number;
+		cost_usd: number;
+		tokens_in: number;
+		tokens_out: number;
 	}[];
 	next?: string;
 }
@@ -144,6 +171,35 @@ export interface ConversationDetail {
 	first_ts: string;
 	last_ts: string;
 	totals: Totals;
+	window_totals?: Totals;
 	events: TimelineEvent[];
 	truncated?: boolean;
+}
+
+export interface DistributionBin {
+	lo: number;
+	hi?: number;
+	n: number;
+}
+
+export interface DistributionRow {
+	k: string;
+	n: number;
+	unpriced: number;
+	min: number;
+	p25: number;
+	median: number;
+	p75: number;
+	p95: number;
+	max: number;
+	bins: DistributionBin[];
+}
+
+export interface DistributionResponse {
+	measure: string;
+	grain: string;
+	dim?: string;
+	rows: DistributionRow[];
+	truncated?: boolean;
+	ignored_filters?: string[];
 }

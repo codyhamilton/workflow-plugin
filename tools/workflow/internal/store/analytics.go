@@ -81,10 +81,13 @@ type ExecRow struct {
 	TS                                                      float64
 }
 type ConvRow struct {
-	ConversationID, Harness               string
+	ConversationID, Harness, Model        string
 	Repos, Kinds                          []string
 	FirstTS, LastTS                       float64
 	HookEvents, ArtifactVersions, Commits int
+	ModelCalls, UnpricedCalls             int
+	TokensIn, TokensOut                   int
+	CostUSD                               float64
 }
 
 // ExecCursor is the keyset position in the executions order (ts desc, conversation_id, path, repo_id).
@@ -547,10 +550,87 @@ func (t *Tenant) Executions(ctx context.Context, f AnalyticsFilter) ([]ExecRow, 
 	return out, rows.Err()
 }
 
+func execShapeWhere(shapes []string) (clause string, args []any) {
+	if len(shapes) == 0 {
+		return "", nil
+	}
+	ph := make([]string, len(shapes))
+	args = make([]any, len(shapes))
+	for i, s := range shapes {
+		ph[i] = "?"
+		args[i] = s
+	}
+	return ` AND (` + execShapeSQL + `) IN (` + strings.Join(ph, ",") + `)`, args
+}
+
+// ExecSeriesPoint is one bucket count for an executions shape series.
+type ExecSeriesPoint struct {
+	T string
+	N int
+}
+
+// ExecSeriesEntry is sparse points for one execution shape (complete, unreported, started).
+type ExecSeriesEntry struct {
+	Key    string
+	Points []ExecSeriesPoint
+}
+
+// ExecutionsShapeSeries returns per-shape counts over time buckets for in-window briefs. f.Kinds and
+// other shared filters apply; shape query params do not affect series.
+func (t *Tenant) ExecutionsShapeSeries(ctx context.Context, f AnalyticsFilter, bucket string) ([]ExecSeriesEntry, error) {
+	w, args := f.factWhere()
+	cte := `
+	WITH b AS (
+		SELECT repo_id, conversation_id, path, harness, ts, plan,
+			ROW_NUMBER() OVER (PARTITION BY repo_id, conversation_id, path ORDER BY ts, rowid) AS rn
+		FROM facts WHERE type='artifact_version' AND kind='brief' AND ` + w + `)`
+	rows, err := t.rdb.QueryContext(ctx, cte+`
+	SELECT ts, `+execShapeSQL+` AS shape FROM b WHERE rn = 1`, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	byShape := map[string]map[string]int{}
+	for rows.Next() {
+		var ts float64
+		var shape string
+		if err := rows.Scan(&ts, &shape); err != nil {
+			return nil, err
+		}
+		bt := scoreSeriesBucketStart(ts, bucket, f.TZ)
+		m := byShape[shape]
+		if m == nil {
+			m = map[string]int{}
+			byShape[shape] = m
+		}
+		m[bt]++
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	order := []string{"complete", "unreported", "started"}
+	out := make([]ExecSeriesEntry, 0, len(order))
+	for _, key := range order {
+		var pts []ExecSeriesPoint
+		if m := byShape[key]; m != nil {
+			tsKeys := make([]string, 0, len(m))
+			for t := range m {
+				tsKeys = append(tsKeys, t)
+			}
+			sort.Strings(tsKeys)
+			for _, t := range tsKeys {
+				pts = append(pts, ExecSeriesPoint{T: t, N: m[t]})
+			}
+		}
+		out = append(out, ExecSeriesEntry{Key: key, Points: pts})
+	}
+	return out, nil
+}
+
 // ExecutionsPage returns one keyset page of Executions (ts desc, conversation_id, path, repo_id),
-// the shape counts over the whole filtered window, and whether more rows follow. It reads at most
-// limit+1 rows and never loads the whole window into Go.
-func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, cur *ExecCursor, limit int) ([]ExecRow, map[string]int, bool, error) {
+// the shape counts over the whole filtered window, and whether more rows follow. shapes filters rows
+// only, not counts. It reads at most limit+1 rows and never loads the whole window into Go.
+func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, shapes []string, cur *ExecCursor, limit int) ([]ExecRow, map[string]int, bool, error) {
 	w, args := f.factWhere()
 	cte := `
 	WITH b AS (
@@ -578,10 +658,12 @@ func (t *Tenant) ExecutionsPage(ctx context.Context, f AnalyticsFilter, cur *Exe
 	}
 	crows.Close()
 
+	shapeClause, shapeArgs := execShapeWhere(shapes)
 	q := cte + `
 	SELECT repo_id, plan, conversation_id, path, harness, ts, ` + execShapeSQL + `
-	FROM b WHERE rn = 1`
+	FROM b WHERE rn = 1` + shapeClause
 	pargs := append([]any{}, args...)
+	pargs = append(pargs, shapeArgs...)
 	if cur != nil && len(cur.Key) >= 3 {
 		q += ` AND (ts < ? OR (ts = ? AND (conversation_id, path, repo_id) > (?, ?, ?)))`
 		pargs = append(pargs, cur.TS, cur.TS, cur.Key[0], cur.Key[1], cur.Key[2])
@@ -679,6 +761,9 @@ func (t *Tenant) Conversations(ctx context.Context, f AnalyticsFilter) ([]ConvRo
 		}
 		return out[i].ConversationID < out[j].ConversationID
 	})
+	if err := t.fillConvUsage(ctx, f, out); err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
@@ -727,6 +812,9 @@ func (t *Tenant) ConversationsPage(ctx context.Context, f AnalyticsFilter, cur *
 		out = out[:limit]
 	}
 	if err := t.fillHarness(ctx, w, args, out); err != nil {
+		return nil, false, err
+	}
+	if err := t.fillConvUsage(ctx, f, out); err != nil {
 		return nil, false, err
 	}
 	return out, more, nil
@@ -784,6 +872,61 @@ func (t *Tenant) fillHarness(ctx context.Context, w string, wargs []any, out []C
 			}
 		}
 		out[i].Harness = best
+	}
+	return nil
+}
+
+// fillConvUsage sets each row's in-window kept-call usage totals and dominant model, using one
+// usageKeptRows fetch scoped to the page's conversation ids.
+func (t *Tenant) fillConvUsage(ctx context.Context, f AnalyticsFilter, out []ConvRow) error {
+	if len(out) == 0 {
+		return nil
+	}
+	ff := f
+	ff.ConversationIDs = make([]string, len(out))
+	for i := range out {
+		ff.ConversationIDs[i] = out[i].ConversationID
+	}
+	kept, err := t.usageKeptRows(ctx, ff)
+	if err != nil {
+		return err
+	}
+	type acc struct {
+		modelCalls, unpriced              int
+		tokensIn, tokensOut               int64
+		cost                              float64
+		models                            map[string]int
+	}
+	m := map[string]*acc{}
+	for _, r := range kept {
+		a := m[r.convID]
+		if a == nil {
+			a = &acc{models: map[string]int{}}
+			m[r.convID] = a
+		}
+		a.modelCalls++
+		a.tokensIn += r.tokIn
+		a.tokensOut += r.tokOut
+		usd, priced := Cost(r.harness, r.model, r.tokens(), r.costReported)
+		a.cost += usd
+		if !priced {
+			a.unpriced++
+		}
+		if r.model != "" {
+			a.models[r.model]++
+		}
+	}
+	for i := range out {
+		a := m[out[i].ConversationID]
+		if a == nil {
+			continue
+		}
+		out[i].Model = dominantModel(a.models)
+		out[i].ModelCalls = a.modelCalls
+		out[i].UnpricedCalls = a.unpriced
+		out[i].CostUSD = roundCost(a.cost)
+		out[i].TokensIn = int(a.tokensIn)
+		out[i].TokensOut = int(a.tokensOut)
 	}
 	return nil
 }

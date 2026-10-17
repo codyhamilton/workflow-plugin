@@ -310,11 +310,17 @@ func buildBenchCases(t *testing.T, h *benchHarness, to time.Time) []benchCase {
 		add("series/"+p.name, "/v1/analytics/series?metric=hook_events&bucket=day&group=none&"+win)
 		add("scores/"+p.name, "/v1/analytics/scores?kind=design&"+win)
 		add("executions/"+p.name, "/v1/analytics/executions?"+win)
+		add("executions/shape/"+p.name, "/v1/analytics/executions?shape=complete&"+win)
+		add("executions/shape-bucket/"+p.name, "/v1/analytics/executions?shape=complete&bucket=day&"+win)
 		add("conversations/"+p.name, "/v1/analytics/conversations?"+win)
 		add("explore/"+p.name, "/v1/analytics/explore?"+win)
+		add("distribution/cost/"+p.name, "/v1/analytics/distribution?measure=cost_usd&grain=call&"+win)
+		add("distribution/tokens/"+p.name, "/v1/analytics/distribution?measure=tokens_in&grain=call&"+win)
+		add("score-series/"+p.name, "/v1/analytics/score-series?kind=design&bucket=day&"+win)
+		convWin := "from=" + p.from.UTC().Format(time.RFC3339) + "&to=" + p.to.UTC().Format(time.RFC3339)
 		for i, id := range benchTopConversations(t, h.db, p.from, p.to, 3) {
 			q := url.Values{"id": []string{id}}
-			add(fmt.Sprintf("conversation/conv#%d/%s", i+1, p.name), "/v1/analytics/conversation?"+q.Encode()+"&"+win)
+			add(fmt.Sprintf("conversation/conv#%d/%s", i+1, p.name), "/v1/analytics/conversation?"+q.Encode()+"&"+convWin)
 		}
 	}
 	add("schema", "/v1/analytics/schema")
@@ -513,7 +519,7 @@ func TestAnalyticsBenchSmoke(t *testing.T) {
 	for _, c := range cases {
 		names[c.name] = true
 	}
-	for _, route := range []string{"facets", "summary", "series", "scores", "executions", "conversations", "explore"} {
+	for _, route := range []string{"facets", "summary", "series", "scores", "executions", "conversations", "explore", "distribution", "score-series"} {
 		found := false
 		for _, c := range cases {
 			if strings.HasPrefix(c.name, route+"/") {

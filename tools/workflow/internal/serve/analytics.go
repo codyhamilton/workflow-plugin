@@ -3,6 +3,7 @@ package serve
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"sort"
@@ -62,7 +63,8 @@ func decodeCursor(s string) (*cursor, bool) {
 func canonFilter(q url.Values) string {
 	out := url.Values{}
 	for _, k := range []string{"from", "to", "repo_id", "harness", "kind", "plan",
-		"norm_event", "event", "tool", "model", "source", "conversation_id", "tz", "all"} {
+		"norm_event", "event", "tool", "model", "source", "conversation_id", "tz", "all",
+		"shape", "bucket"} {
 		if v, ok := q[k]; ok {
 			c := append([]string(nil), v...)
 			sort.Strings(c)
@@ -364,20 +366,48 @@ func (s *Server) analyticsScores(w http.ResponseWriter, r *http.Request, _ strin
 	writeJSON(w, 200, map[string]any{"kind": kind, "checks": out})
 }
 
+func parseExecShapes(w http.ResponseWriter, q url.Values) ([]string, bool) {
+	allowed := map[string]bool{"complete": true, "unreported": true, "started": true}
+	var shapes []string
+	for _, s := range q["shape"] {
+		if !allowed[s] {
+			errJSON(w, 400, fmt.Sprintf("unknown shape %s", s))
+			return nil, false
+		}
+		shapes = append(shapes, s)
+	}
+	sort.Strings(shapes)
+	return shapes, true
+}
+
 func (s *Server) analyticsExecutions(w http.ResponseWriter, r *http.Request, _ string, ts *tenantState) {
 	limit, cur, ok := pageParams(w, r)
 	if !ok {
 		return
 	}
-	f, ok := parseFilter(w, r, filterOpts{route: "executions", cur: cur})
+	q := r.URL.Query()
+	shapes, ok := parseExecShapes(w, q)
 	if !ok {
+		return
+	}
+	bucket := q.Get("bucket")
+	if bucket != "" && bucket != "day" && bucket != "week" && bucket != "month" {
+		errJSON(w, 400, "bucket must be day, week, or month")
+		return
+	}
+	f, ok := parseFilter(w, r, filterOpts{route: "executions", cur: cur, weeks: bucket == "week"})
+	if !ok {
+		return
+	}
+	if bucket != "" && bucketSpan(f.From, f.To, bucket, f.TZ) > maxBuckets {
+		errJSON(w, 400, "range too wide")
 		return
 	}
 	var ec *store.ExecCursor
 	if cur != nil {
 		ec = &store.ExecCursor{TS: cur.TS, Key: cur.Key}
 	}
-	rows, cnt, more, err := ts.t.ExecutionsPage(r.Context(), f, ec, limit)
+	rows, cnt, more, err := ts.t.ExecutionsPage(r.Context(), f, shapes, ec, limit)
 	if err != nil {
 		readFailed(w)
 		return
@@ -396,6 +426,23 @@ func (s *Server) analyticsExecutions(w http.ResponseWriter, r *http.Request, _ s
 		out = append(out, row{x.RepoID, x.Plan, x.ConversationID, x.BriefPath, x.Harness, x.Shape, rfc(x.TS)})
 	}
 	resp := map[string]any{"counts": cnt, "rows": out}
+	if bucket != "" {
+		series, err := ts.t.ExecutionsShapeSeries(r.Context(), f, bucket)
+		if err != nil {
+			readFailed(w)
+			return
+		}
+		list := make([]map[string]any, len(series))
+		for i, e := range series {
+			pts := make([]map[string]any, len(e.Points))
+			for j, p := range e.Points {
+				pts[j] = map[string]any{"t": p.T, "n": p.N}
+			}
+			list[i] = map[string]any{"key": e.Key, "points": pts}
+		}
+		resp["bucket"] = bucket
+		resp["series"] = list
+	}
 	if more {
 		last := rows[len(rows)-1]
 		resp["next"] = cursor{Route: "executions", Filter: canonFilter(r.URL.Query()), From: f.From.UnixNano(), To: f.To.UnixNano(),
@@ -425,6 +472,7 @@ func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, 
 	type row struct {
 		ConversationID   string   `json:"conversation_id"`
 		Harness          string   `json:"harness"`
+		Model            string   `json:"model"`
 		Repos            []string `json:"repos"`
 		FirstTS          string   `json:"first_ts"`
 		LastTS           string   `json:"last_ts"`
@@ -432,11 +480,17 @@ func (s *Server) analyticsConversations(w http.ResponseWriter, r *http.Request, 
 		ArtifactVersions int      `json:"artifact_versions"`
 		Commits          int      `json:"commits"`
 		Kinds            []string `json:"kinds"`
+		ModelCalls       int      `json:"model_calls"`
+		UnpricedCalls    int      `json:"unpriced_calls"`
+		CostUSD          float64  `json:"cost_usd"`
+		TokensIn         int      `json:"tokens_in"`
+		TokensOut        int      `json:"tokens_out"`
 	}
 	out := []row{}
 	for _, x := range rows {
-		out = append(out, row{x.ConversationID, x.Harness, nz(x.Repos), rfc(x.FirstTS), rfc(x.LastTS),
-			x.HookEvents, x.ArtifactVersions, x.Commits, nz(x.Kinds)})
+		out = append(out, row{x.ConversationID, x.Harness, x.Model, nz(x.Repos), rfc(x.FirstTS), rfc(x.LastTS),
+			x.HookEvents, x.ArtifactVersions, x.Commits, nz(x.Kinds),
+			x.ModelCalls, x.UnpricedCalls, x.CostUSD, x.TokensIn, x.TokensOut})
 	}
 	resp := map[string]any{"rows": out}
 	if more {

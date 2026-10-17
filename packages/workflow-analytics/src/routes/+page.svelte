@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { untrack } from 'svelte';
 	import Heatmap from '$lib/charts/Heatmap.svelte';
 	import Sparkline from '$lib/charts/Sparkline.svelte';
@@ -26,6 +27,27 @@
 		['cost_usd', 'cost_usd'],
 		['unpriced_calls', 'unpriced_calls']
 	] as const;
+
+	type SparkId = (typeof SPARKS)[number][0];
+
+	function kpiHref(id: SparkId): string {
+		const trends = id === 'artifact_versions' || id === 'distinct_content' || id === 'commits';
+		const path =
+			id === 'conversations'
+				? '/conversations'
+				: id === 'hook_events'
+					? '/hooks'
+					: trends
+						? '/trends'
+						: '/usage';
+		if (trends) {
+			const q = new URLSearchParams(page.url.searchParams);
+			q.set('metric', id);
+			const s = q.toString();
+			return s ? `${path}?${s}` : path;
+		}
+		return path + page.url.search;
+	}
 
 	let summary = $state<Summary | null>(null);
 	let sparks = $state<Record<string, TimePoint[]>>({});
@@ -125,54 +147,54 @@
 <h1>Overview</h1>
 {#if summary}
 	<section class="tiles" data-testid="overview-summary">
-		<div class="tile">
+		<a class="tile" href={kpiHref('conversations')}>
 			<span class="n" data-testid="summary-conversations">{summary.conversations}</span>
 			<span class="name">conversations</span>
 			<Sparkline testid="overview-spark-conversations" points={sparks.conversations ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('hook_events')}>
 			<span class="n" data-testid="summary-hook_events">{summary.hook_events}</span>
 			<span class="name">hook events</span>
 			<Sparkline testid="overview-spark-hook_events" points={sparks.hook_events ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('artifact_versions')}>
 			<span class="n" data-testid="summary-artifact_versions">{summary.artifact_versions}</span>
 			<span class="name">artifact versions</span>
 			<Sparkline testid="overview-spark-artifact_versions" points={sparks.artifact_versions ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('distinct_content')}>
 			<span class="n" data-testid="summary-distinct_content">{summary.distinct_content}</span>
 			<span class="name">distinct content</span>
 			<Sparkline testid="overview-spark-distinct_content" points={sparks.distinct_content ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('commits')}>
 			<span class="n" data-testid="summary-commits">{summary.commits}</span>
 			<span class="name">commits</span>
 			<Sparkline testid="overview-spark-commits" points={sparks.commits ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('model_calls')}>
 			<span class="n" data-testid="summary-model_calls">{summary.model_calls}</span>
 			<span class="name">model calls</span>
 			<Sparkline testid="overview-spark-model_calls" points={sparks.model_calls ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('tokens_in')}>
 			<span class="n" data-testid="summary-tokens">{summary.tokens_in + summary.tokens_out}</span>
 			<span class="name">tokens</span>
 			<span class="sub">cache read <span data-testid="summary-tokens_cache_read">{summary.tokens_cache_read}</span></span>
 			<Sparkline testid="overview-spark-tokens_in" points={sparks.tokens_in ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('cost_usd')}>
 			<span class="n" data-testid="summary-cost_usd"
 				>{costLabel({ cost: summary.cost_usd, unpriced: summary.unpriced_calls, calls: summary.model_calls })}</span
 			>
 			<span class="name">cost</span>
 			<Sparkline testid="overview-spark-cost_usd" points={sparks.cost_usd ?? []} />
-		</div>
-		<div class="tile">
+		</a>
+		<a class="tile" href={kpiHref('unpriced_calls')}>
 			<span class="n" data-testid="summary-unpriced_calls">{summary.unpriced_calls}</span>
 			<span class="name">unpriced calls</span>
 			<Sparkline testid="overview-spark-unpriced_calls" points={sparks.unpriced_calls ?? []} />
-		</div>
+		</a>
 	</section>
 	{#each groups as g (g.title)}
 		<section class="group">
@@ -203,11 +225,19 @@
 	.tile {
 		min-width: 0;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #ddd;
+		border: 1px solid var(--border);
 		border-radius: 4px;
 		display: flex;
 		flex-direction: column;
 		gap: 0.15rem;
+		text-decoration: none;
+		color: inherit;
+	}
+	.tile:hover {
+		border-color: var(--accent);
+	}
+	.tile :global(.sparkline) {
+		pointer-events: none;
 	}
 	.n {
 		font-size: 1.6rem;
@@ -215,11 +245,11 @@
 	}
 	.name {
 		font-size: 0.8rem;
-		color: #555;
+		color: var(--muted);
 	}
 	.sub {
 		font-size: 0.75rem;
-		color: #777;
+		color: var(--muted);
 	}
 	.group {
 		margin-top: 1.25rem;

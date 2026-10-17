@@ -55,6 +55,29 @@ test('the layout fits 1024x768 without a horizontal scrollbar', async ({ page })
 	expect(scroll).toBeLessThanOrEqual(inner);
 });
 
+const SERIES = [
+	'#268bd2',
+	'#859900',
+	'#b58900',
+	'#cb4b16',
+	'#dc322f',
+	'#d33682',
+	'#6c71c4',
+	'#2aa198'
+];
+
+async function readThemeVars(page: import('@playwright/test').Page) {
+	return page.evaluate((series) => {
+		const cs = getComputedStyle(document.documentElement);
+		const token = (name: string) => cs.getPropertyValue(name).trim();
+		return {
+			bg: token('--bg'),
+			text: token('--text'),
+			series: series.map((_, i) => token(`--series-${i + 1}`))
+		};
+	}, SERIES);
+}
+
 test('the dark scheme swaps the background token', async ({ page }) => {
 	await page.goto('/');
 	const light = await page.evaluate(() =>
@@ -64,6 +87,40 @@ test('the dark scheme swaps the background token', async ({ page }) => {
 	await expect
 		.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()))
 		.not.toBe(light);
+});
+
+test('system dark mode uses solarized tokens on overview and settings', async ({ page }) => {
+	await page.addInitScript(() => localStorage.removeItem('workflow-analytics-theme'));
+	await page.emulateMedia({ colorScheme: 'dark' });
+	for (const path of ['/', '/settings']) {
+		await page.goto(path);
+		await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
+		const vars = await readThemeVars(page);
+		expect(vars.text).toBe('#839496');
+		expect(vars.series).toEqual(SERIES);
+	}
+});
+
+test('choosing Light updates tokens without reload and survives reload', async ({ page }) => {
+	await page.goto('/');
+	await page.getByTestId('theme-light').click();
+	await expect
+		.poll(async () => (await readThemeVars(page)).bg)
+		.toBe('#fdf6e3');
+	expect((await readThemeVars(page)).text).toBe('#657b83');
+	await page.reload();
+	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
+	expect((await readThemeVars(page)).text).toBe('#657b83');
+});
+
+test('system mode follows a later OS colour-scheme change', async ({ page }) => {
+	await page.addInitScript(() => localStorage.removeItem('workflow-analytics-theme'));
+	await page.emulateMedia({ colorScheme: 'light' });
+	await page.goto('/');
+	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
+	await page.getByTestId('theme-system').click();
+	await page.emulateMedia({ colorScheme: 'dark' });
+	await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
 });
 
 test('a burst of preset clicks reaches the facets endpoint at most twice', async ({ page }) => {
@@ -92,18 +149,44 @@ test('a saved view is listed and survives a reload', async ({ page }) => {
 
 	const item = page.getByTestId('saveview-item').filter({ hasText: 'weekly' });
 	await expect(item).toBeVisible();
-	await expect(item).toHaveAttribute('href', /range=7d/);
+	await expect(item).toHaveAttribute('href', '/');
 
 	await page.reload();
 	await page.getByTestId('saveview-menu-toggle').click();
 	await expect(page.getByTestId('saveview-item').filter({ hasText: 'weekly' })).toBeVisible();
 });
 
-test('embed mode renders the page without the shell', async ({ page }) => {
+test('save view stores chart params only', async ({ page }) => {
+	await page.goto('/trends?range=7d&repo_id=r1&metric=commits&group=harness&bucket=day');
+	await page.getByTestId('saveview-name').fill('trends-view');
+	await page.getByTestId('saveview-save').click();
+
+	const raw = await page.evaluate(() => localStorage.getItem('workflow-analytics-views:views'));
+	expect(raw).toBeTruthy();
+	const views = JSON.parse(raw!) as Record<string, unknown>[];
+	const entry = views.find((v) => v.name === 'trends-view');
+	expect(entry).toBeTruthy();
+	expect(entry!.report).toBe('trends');
+	const params = entry!.params as Record<string, string>;
+	expect(params.metric).toBe('commits');
+	expect(params.group).toBe('harness');
+	expect(params.bucket).toBe('day');
+	expect(entry).not.toHaveProperty('range');
+	expect(entry).not.toHaveProperty('repo_id');
+	expect(entry).not.toHaveProperty('url');
+	expect(params).not.toHaveProperty('range');
+	expect(params).not.toHaveProperty('repo_id');
+});
+
+test('dashboards shares filter chrome; embed=1 no longer hides the shell', async ({ page }) => {
+	await page.goto('/dashboards?range=7d');
+	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId('saveview-save')).toBeVisible();
+
 	await page.goto('/trends?range=7d&embed=1');
-	await expect(page.locator('header')).toHaveCount(0);
-	await expect(page.getByTestId('preset-7d')).toHaveCount(0);
-	await expect(page.getByTestId('saveview-save')).toHaveCount(0);
+	await expect(page.locator('header')).toHaveCount(1);
+	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByTestId('saveview-save')).toBeVisible();
 	await expect(page.getByTestId('trends-chart')).toBeVisible();
 });
 

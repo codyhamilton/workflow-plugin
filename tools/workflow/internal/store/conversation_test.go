@@ -44,7 +44,7 @@ func conversationMixed(t *testing.T) (*Tenant, float64) {
 func TestConversationTimeline(t *testing.T) {
 	ctx := context.Background()
 	tn, base := conversationMixed(t)
-	d, ok, err := tn.Conversation(ctx, "c1")
+	d, ok, err := tn.Conversation(ctx, "c1", ConversationBounds{})
 	if err != nil || !ok {
 		t.Fatalf("Conversation: ok=%v err=%v", ok, err)
 	}
@@ -110,7 +110,7 @@ func TestConversationDedupe(t *testing.T) {
 	if _, err := tn.Append(ctx, rows); err != nil {
 		t.Fatal(err)
 	}
-	d, ok, err := tn.Conversation(ctx, "c1")
+	d, ok, err := tn.Conversation(ctx, "c1", ConversationBounds{})
 	if err != nil || !ok {
 		t.Fatalf("Conversation: ok=%v err=%v", ok, err)
 	}
@@ -150,7 +150,7 @@ func TestConversationTruncate(t *testing.T) {
 	if _, err := tn.Append(ctx, rows); err != nil {
 		t.Fatal(err)
 	}
-	d, ok, err := tn.Conversation(ctx, "big")
+	d, ok, err := tn.Conversation(ctx, "big", ConversationBounds{})
 	if err != nil || !ok {
 		t.Fatalf("Conversation: ok=%v err=%v", ok, err)
 	}
@@ -167,7 +167,69 @@ func TestConversationTruncate(t *testing.T) {
 
 func TestConversationUnknown(t *testing.T) {
 	tn, _ := conversationMixed(t)
-	if _, ok, err := tn.Conversation(context.Background(), "nope"); err != nil || ok {
+	if _, ok, err := tn.Conversation(context.Background(), "nope", ConversationBounds{}); err != nil || ok {
 		t.Fatalf("unknown id: ok=%v err=%v", ok, err)
+	}
+}
+
+func TestConversationTotalsBeyondCap(t *testing.T) {
+	ctx := context.Background()
+	tn := openT(t, Options{})
+	base := float64(time.Date(2026, 9, 28, 13, 0, 0, 0, time.UTC).Unix())
+	rows := make([]FactRow, 0, 5002)
+	for i := 1; i <= 5001; i++ {
+		rows = append(rows, cvFact(i, "hook_event", base+float64(i), FactRow{Type: "hook_event", ConversationID: "cap",
+			Harness: "claude", Event: "PreToolUse", TS: base + float64(i), RepoID: "repoA", NormEvent: "tool_use"}))
+	}
+	rows = append(rows, cvFact(5002, "hook_event", base+5002, FactRow{Type: "hook_event", ConversationID: "cap",
+		Harness: "claude", Event: "transcript.assistant_message", TS: base + 5002, RepoID: "repoA", NormEvent: "usage",
+		Model: "kimi-k2.5", TokIn: 2000, TokOut: 100}))
+	if _, err := tn.Append(ctx, rows); err != nil {
+		t.Fatal(err)
+	}
+	d, ok, err := tn.Conversation(ctx, "cap", ConversationBounds{})
+	if err != nil || !ok {
+		t.Fatalf("Conversation: ok=%v err=%v", ok, err)
+	}
+	if !d.Truncated || len(d.Events) != 5000 {
+		t.Fatalf("truncated=%v events=%d", d.Truncated, len(d.Events))
+	}
+	if d.Totals.ModelCalls != 1 || d.Totals.TokensIn != 2000 {
+		t.Errorf("totals = %#v", d.Totals)
+	}
+	var sumIn int64
+	for _, e := range d.Events {
+		if e.Tokens != nil {
+			sumIn += e.Tokens.In
+		}
+	}
+	if sumIn != 0 {
+		t.Errorf("capped events token sum = %d, usage is past cap", sumIn)
+	}
+}
+
+func TestConversationWindowTotals(t *testing.T) {
+	ctx := context.Background()
+	tn, base := conversationMixed(t)
+	from := base + 3
+	to := base + 4
+	d, ok, err := tn.Conversation(ctx, "c1", ConversationBounds{From: &from, To: &to})
+	if err != nil || !ok {
+		t.Fatalf("Conversation: ok=%v err=%v", ok, err)
+	}
+	if d.WindowTotals == nil {
+		t.Fatal("window_totals missing")
+	}
+	if d.WindowTotals.ModelCalls != 0 {
+		t.Errorf("window model_calls = %d, usage at ts=%v is outside range", d.WindowTotals.ModelCalls, base+2)
+	}
+	if len(d.Events) != 5 {
+		t.Fatalf("events = %d, want full run", len(d.Events))
+	}
+	if d.Events[2].Tokens == nil {
+		t.Errorf("usage event still listed: %#v", d.Events[2])
+	}
+	if d.Totals.ModelCalls != 1 {
+		t.Errorf("run totals = %#v", d.Totals)
 	}
 }

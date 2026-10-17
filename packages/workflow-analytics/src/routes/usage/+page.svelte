@@ -2,14 +2,25 @@
 	import { untrack } from 'svelte';
 	import { pickBucket } from '$lib/buckets';
 	import BarChart from '$lib/charts/BarChart.svelte';
+	import DistributionChart from '$lib/charts/DistributionChart.svelte';
+	import type { DistributionMeasure } from '$lib/charts/distribution';
 	import TimeChart from '$lib/charts/TimeChart.svelte';
 	import type { TimeSeries } from '$lib/charts/options';
 	import { costLabel, label, num } from '$lib/format';
 	import { resolveWindow } from '$lib/params';
 	import { getJSON, Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
-	import type { QueryResponse } from '$lib/types';
+	import type { DistributionResponse, QueryResponse } from '$lib/types';
 	import { view } from '$lib/view.svelte';
+
+	const DIST_MEASURES: { name: DistributionMeasure; label: string }[] = [
+		{ name: 'cost_usd', label: 'cost_usd' },
+		{ name: 'tokens_in', label: 'tokens_in' },
+		{ name: 'tokens_out', label: 'tokens_out' },
+		{ name: 'tokens_cache_read', label: 'tokens_cache_read' },
+		{ name: 'tokens_cache_write', label: 'tokens_cache_write' },
+		{ name: 'tokens_reasoning', label: 'tokens_reasoning' }
+	];
 
 	/** One measure's rows as a `model -> value` map (the only dim this page asks for). */
 	function values(resp: QueryResponse | null): Record<string, number> {
@@ -38,6 +49,8 @@
 	let toutResp = $state<QueryResponse | null>(null);
 	let costTimeResp = $state<QueryResponse | null>(null);
 	let tokensTimeResp = $state<QueryResponse | null>(null);
+	let distResp = $state<DistributionResponse | null>(null);
+	let distMeasure = $state<DistributionMeasure>('cost_usd');
 
 	// Over the whole ledger every time bucket exceeds the API's 400-bucket cap, so All time uses the
 	// same 399-day clamp the rest routes take (as Trends does): `all` becomes explicit from/to.
@@ -55,6 +68,7 @@
 	$effect(() => {
 		const bkt = bucket;
 		const win = qwin;
+		void view.state;
 		// Wait for facets of the current window when an exclude needs their complement (as Overview
 		// does); `view.paramsFor` is otherwise read untracked so a late facet response cannot re-run
 		// this effect and supersede queries already in flight.
@@ -87,7 +101,34 @@
 		run('usage-by-model-tokens-in', { measure: 'tokens_in', ...byModel }, (r) => (tinResp = r));
 		run('usage-by-model-tokens-out', { measure: 'tokens_out', ...byModel }, (r) => (toutResp = r));
 		run('usage-over-time', { measure: 'cost_usd', dim: 'model', bucket: bkt }, (r) => (costTimeResp = r));
-		run('usage-tokens-over-time', { measure: 'tokens_out', bucket: bkt }, (r) => (tokensTimeResp = r));
+		run(
+			'usage-tokens-over-time',
+			{ measure: 'tokens_out', dim: 'model', bucket: bkt },
+			(r) => (tokensTimeResp = r)
+		);
+		return () => {
+			live = false;
+		};
+	});
+
+	$effect(() => {
+		const measure = distMeasure;
+		void view.state;
+		const needsFacets = Object.keys(view.state.exclude).length > 0;
+		if (needsFacets && !view.facetsReady) return;
+		let live = true;
+		const params = untrack(() => view.paramsFor('rest', { measure, grain: 'call' }));
+		if (!params) return;
+		getJSON<DistributionResponse>('usage-distribution', 'analytics/distribution', params).then(
+			(r) => {
+				if (!live) return;
+				clearError();
+				distResp = r;
+			},
+			(e) => {
+				if (live && !(e instanceof Superseded)) setError(e);
+			}
+		);
 		return () => {
 			live = false;
 		};
@@ -131,7 +172,8 @@
 		return key === OTHER || key === '';
 	}
 	const costSeries = $derived(points(costTimeResp));
-	const tokenSeries = $derived(points(tokensTimeResp, 'tokens_out'));
+	const tokenSeries = $derived(points(tokensTimeResp));
+	const distBins = $derived(distResp?.rows.find((r) => r.k === 'all')?.bins ?? []);
 
 	function pick(key: string, shift: boolean) {
 		if (key === '__other__') return;
@@ -194,13 +236,60 @@
 <h2>Cost by model</h2>
 <BarChart testid="usage-cost-by-model" rows={costRows} unit="usd" selectable onselect={({ key, shift }) => pick(key, shift)} />
 
+<h2>Per-call distribution</h2>
+<div class="controls">
+	<label>measure
+		<select
+			data-testid="usage-distribution-measure"
+			value={distMeasure}
+			onchange={(e) => (distMeasure = e.currentTarget.value as DistributionMeasure)}
+		>
+			{#each DIST_MEASURES as m (m.name)}<option value={m.name}>{m.label}</option>{/each}
+		</select>
+	</label>
+</div>
+{#if distBins.length > 0}
+	<DistributionChart testid="usage-distribution" measure={distMeasure} bins={distBins} />
+{/if}
+
 <h2>Cost over time</h2>
-<TimeChart testid="usage-over-time" series={costSeries} {bucket} stacked />
+{#if costTimeResp}
+	<TimeChart
+		testid="usage-over-time"
+		series={costSeries}
+		{bucket}
+		stacked
+		filterDim="model"
+		onseries={({ key, shift }) => pick(key, shift)}
+		onbrush={({ from, to }) => view.setWindow(from, to)}
+	/>
+{/if}
 
 <h2>Tokens out over time</h2>
-<TimeChart testid="usage-tokens-over-time" series={tokenSeries} {bucket} />
+{#if tokensTimeResp}
+	<TimeChart
+		testid="usage-tokens-over-time"
+		series={tokenSeries}
+		{bucket}
+		stacked
+		filterDim="model"
+		onseries={({ key, shift }) => pick(key, shift)}
+		onbrush={({ from, to }) => view.setWindow(from, to)}
+	/>
+{/if}
 
 <style>
+	.controls {
+		display: flex;
+		gap: 1rem;
+		margin-bottom: 0.5rem;
+	}
+	.controls label {
+		display: flex;
+		flex-direction: column;
+		font-size: 0.8rem;
+		gap: 0.25rem;
+	}
 	.banner {
 		margin: 0 0 0.75rem;
 		padding: 0.4rem 0.75rem;
