@@ -431,6 +431,21 @@ Deviations: `discover -s tools/quality` still runs 0 tests. The suite lives unde
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
+### 5-05-release-scan-and-index
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-05-release-scan-and-index.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-05-release-scan-and-index.md`.
+Worker: Composer (`composer-2.5`), agent `bc-4c4d3425-5a0b-54d6-bd8a-1b7724d7952c`. The harness did not report turns or final context.
+Commit: `0647e6a`.
+
+Built: `tools/release/build.sh` builds `packages/yakka` and embeds `packages/yakka-analytics`, writing `yakka-*` artifacts. `test_release.py` targets `plugins/yakka/bin/yakka` and `YAKKA_*`. `scan_residual_names.py --scope phase5` is the residual-name scan. `test_layout.py` scans `bin/yakka`. Package READMEs and `packages/README.md` name the renamed directories and keep the four fields. Release unittest: 19 OK. Scan exit 0. `phase5_outcome.py` reported six clauses PASS.
+
+Surfaces: the brief's owned paths.
+
+Deviations: `test_6_no_go_no_asset` moves `packages/yakka/go.mod` aside when a system `go` binary exists, because `/usr/bin/go` is not writable. `test_9_probe_home_go` puts `~/.local/go/bin` first on `PATH`. The scanner builds forbidden literals at runtime so its own source stays inside the phase 5 scope. Layout fails if `packages/yakka-analytics/node_modules` is present.
+
+`artifact_feedback` on this report and on the phase 5 briefs: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
 ### Phase 5 module-path rewrite (Decision 1 rebase protocol)
 
 From repo root, after `5-01` directory renames:
