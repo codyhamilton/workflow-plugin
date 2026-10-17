@@ -178,7 +178,7 @@ class BuildTests(Base):
         r = subprocess.run(["bash", BUILD], env=env,
                            capture_output=True, text=True, timeout=600, cwd=ROOT)
         self.assertEqual(r.returncode, 0, r.stderr)
-        dirty = subprocess.run(["git", "status", "--porcelain", "tools/workflow/internal/serve/site"],
+        dirty = subprocess.run(["git", "status", "--porcelain", "packages/workflow/internal/serve/site"],
                                capture_output=True, text=True, cwd=ROOT)
         self.assertEqual(dirty.stdout, "")
         names = sorted(os.listdir(out))

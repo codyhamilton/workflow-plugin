@@ -4,7 +4,7 @@
 
 Split is a deterministic hash of the session id (60% discovery, 20% dev, 20% heldout) so it never shifts when
 sessions are added. Sessions under this tool's own scratch/test directories are excluded. Existing entries keep
-their split. Hook logs (tools/hooklog) are added with --hooklog-dir.
+their split. Hook logs (`packages/hooklog`) are added with --hooklog-dir.
 """
 
 from __future__ import annotations

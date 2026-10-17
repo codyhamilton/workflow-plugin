@@ -17,7 +17,7 @@ else
 fi
 if command -v npm >/dev/null 2>&1; then NPM=$(command -v npm); else echo "build.sh: no Node toolchain" >&2; exit 1; fi
 PKG="$ROOT/packages/workflow-analytics"
-SITE="$ROOT/tools/workflow/internal/serve/site"
+SITE="$ROOT/packages/workflow/internal/serve/site"
 SAVE=$(mktemp -d "${TMPDIR:-/tmp}/build-site.XXXXXX")
 cp "$SITE/index.html" "$SAVE/index.html"
 # Always leave site/ as the committed placeholder, whether the build succeeded or not.
@@ -38,7 +38,7 @@ mkdir -p "$OUT_DIR"
 OUT_ABS=$(cd "$OUT_DIR" && pwd -P)
 for os in linux darwin; do
   for arch in amd64 arm64; do
-    (cd tools/workflow && CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOTOOLCHAIN=local "$GO" build -trimpath \
+    (cd packages/workflow && CGO_ENABLED=0 GOOS=$os GOARCH=$arch GOTOOLCHAIN=local "$GO" build -trimpath \
       -ldflags "-X main.version=$VERSION -X main.commit=$COMMIT" \
       -o "$OUT_ABS/workflow-$os-$arch" ./cmd/workflow)
   done

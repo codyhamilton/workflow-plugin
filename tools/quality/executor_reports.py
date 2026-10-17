@@ -1,7 +1,7 @@
 """Extract subagent (executor) passages that complain about the brief/plan, with the task prompt they were given.
 Usage: executor_reports.py <project-dir> > rows.jsonl   (scrubbed with hooklog.scrub)"""
 import glob, json, os, re, sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "hooklog"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "packages", "hooklog"))
 from hooklog import scrub
 
 PAT = re.compile(r"(brief (says|states|is wrong|is ambiguous|contradict)|not in (the )?brief|brief (does not|doesn't|omits|missing)|ambigu|contradict|assumption|cannot be (met|satisfied)|impossible|unclear|stale|doesn't match|does not match)", re.I)
