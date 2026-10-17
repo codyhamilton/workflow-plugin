@@ -382,7 +382,22 @@ Built: `plugins/yakka/bin/yakka` resolves step 4 at `$ROOT/../../packages/yakka`
 
 Surfaces: the brief's owned paths.
 
-Deviations: plugin `script/spool.sh` keeps a plugin-root drain fallback, so it is not byte-identical to `packages/hooklog/spool.sh`. `SHA256SUMS` filenames changed; digests wait for `5-05`. Hooklog README still has product-name prose.
+Deviations: plugin `script/spool.sh` keeps a plugin-root drain fallback, so it is not byte-identical to `packages/hooklog/spool.sh`. `SHA256SUMS` filenames changed; digests wait for `5-05`. Hooklog README still has product-name prose. Those hooklog names, plus leftover `WORKFLOW_*` in the OpenCode tests, the `workflow-analytics-placeholder` marker, fixture repo ids, and `bin/RELEASE_URL`, are `5-07`.
+
+### 5-07-residual-runtime-names
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-07-residual-runtime-names.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-07-residual-runtime-names.md`.
+Worker: Composer (`composer-2.5`), agent `bc-303fb974-8204-5a7a-978a-b0ff3cbda965`. The harness did not report turns or final context.
+Commit: `3a5082d`.
+
+Built: hooklog examples and comments, package repository URLs, spool test env, the analytics placeholder marker `yakka-analytics-placeholder`, compact-test `repo_id` values, and `plugins/yakka/bin/RELEASE_URL` use yakka names. The phase 5 pattern search on this unit's paths, excluding package READMEs and `secrets_test.go`, went from 46 hits to 0. Batch tests 6 OK. Hooklog tests 36 OK. `go test` on `internal/serve` and `internal/compact` passed.
+
+Surfaces: the brief's owned paths.
+
+Deviations: none. `packages/yakka/internal/secrets/secrets_test.go` still contains `Workflow-Phase:` fixture text. The scan exception for recorded trailer text covers it. `5-05` must implement that exception, and `build.sh` must look for `yakka-analytics-placeholder`.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
