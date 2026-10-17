@@ -271,3 +271,29 @@ Unblock: authenticate the Cursor CLI on a checkout of this branch, then re-dispa
 5. A hook command under `plugins/yakka/script/` (`./script/spool.sh` or `./script/prefetch-version.sh`) must run, the event must land in the queue, `workflow drain` to a local `workflow serve` must ship it, and `workflow status` must report no failure.
 
 This cloud agent cannot be that proof until the installed marketplace plugin resolves `plugins/yakka` with hooks enabled. `--plugin-dir` is the session that can load the branch before merge.
+
+### Close
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-58053383-6150-52b5-9af5-51ae159c3b0c
+Start: 2026-10-17T22:56:00Z
+
+The user overrode the session blocker, verbatim: "no, just continue with the plan until completion and don't block on testing it, you won't be able to. that has to be manual."
+
+The logged-in Cursor session check is carried as manual verification. This close did not run `agent login` and does not claim a Cursor session loaded `plugins/yakka` or fired a hook. The plugin move was left as it is (`4d41202`, `d010965`).
+
+Tree checks, reconfirmed on this branch at `/workspace`:
+
+- Both marketplace files name `workflow` with `source` `plugins/yakka`. `plugins/yakka/.cursor-plugin/plugin.json` is `2.12.0` and names `./hooks/cursor.json`. `skills/` and that hooks file exist. `packages/yakka` does not. `plugins/yakka/bin/VERSION` is `0.1.0`.
+- All 22 commands in `plugins/yakka/hooks/cursor.json` start with `./script/`. None contains `${CURSOR_PLUGIN_ROOT}`, `tools/hooklog`, or an absolute path. `script/spool.sh` and `script/prefetch-version.sh` exist.
+- From cwd `plugins/yakka`, `./script/spool.sh --harness cursor --event sessionStart` with payload `session_id=phase3-close`, `WORKFLOW_HOOKLOG_KICK=0`, and a temp queue: exit 0, one `*.evt`, envelope `harness=cursor` `event=sessionStart`.
+- `python3 -m unittest tools/driver/tests/test_install_route.py` → 21 tests, OK.
+- `artifact_feedback` on the brief and the report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+## Closed
+
+Phase 3 outcome holds for the tree checks above. The logged-in Cursor session check — loading `plugins/yakka`, a `./script/...` hook firing, the event landing in the queue, `workflow drain` to a local `workflow serve`, and `workflow status` reporting no failure — is manual verification, carried below.
+
+### Carried
+
+1. Logged-in Cursor session check, manual, per the user instruction above. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `workflow drain` to a local `workflow serve` ships it and `workflow status` reports no failure.
