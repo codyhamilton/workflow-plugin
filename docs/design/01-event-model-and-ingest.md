@@ -150,7 +150,7 @@ One table in `internal/ingest` maps `(harness, event)` to `keep` or `remove`; a 
 `session_start`, `session_end`, `prompt`, `tool_pre`, `tool_post`, `tool_fail`, `batch_end`,
 `assistant_message`, `usage`, `turn_end`, `subagent_start`, `subagent_end`, `compact`,
 `message_part` or `other`. The per-harness mapping is a table in `internal/ingest`, seeded from
-`tools/hooklog/hooklog.py`'s kinds; the native `event` is kept beside it. Tool names are not
+`packages/hooklog/hooklog.py`'s kinds; the native `event` is kept beside it. Tool names are not
 normalised across harnesses.
 
 **Model, usage and cost.** Extracted at ingest where the payload has them:
@@ -218,5 +218,5 @@ What goes:
 - The `artifact_submit.py hook` registration on every harness, and its CLI form.
 - The submitted predicate. Idempotent ingest makes it unnecessary.
 - Synchronous `posted …` / `posting still owed` feedback.
-- `tools/hooklog/tests/test_artifact_submit_surfaces.py`, which asserts the old shape and is
+- `packages/hooklog/tests/test_artifact_submit_surfaces.py`, which asserts the old shape and is
   rewritten for the drain.

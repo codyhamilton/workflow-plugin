@@ -285,7 +285,7 @@ on a compacted copy of the real ledger.
 
 ## Hosting
 
-- The site's build output is copied into `tools/workflow/internal/serve/site/` before `go build`
+- The site's build output is copied into `packages/workflow/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
   `index.html` is missing or is the placeholder, then restores the committed placeholder on exit.
 - The committed placeholder `index.html` contains the marker `workflow-analytics-placeholder`. While
@@ -305,7 +305,7 @@ on a compacted copy of the real ledger.
 
 1. Precheck rejection rows carry empty `repo_id`/`harness`, so any `repo_id` or `harness` filter
    drops rejections to zero in `summary` and `explore` (`rejWhere`,
-   `tools/workflow/internal/store/analytics.go`). `/query` reports the filter in `ignored_filters`
+   `packages/workflow/internal/store/analytics.go`). `/query` reports the filter in `ignored_filters`
    instead, but the other routes still need a decision on whether a rejection belongs to a repo (for
    example through its conversation's facts).
 2. The hosted site sends no `X-Frame-Options` / `frame-ancestors`; a framed remote `/settings` could

@@ -12,7 +12,9 @@ need bash, and a Windows-native harness opening a WSL repo is out of scope.
 
 | Path | Holds |
 |---|---|
-| `tools/workflow/` | Go module: `cmd/workflow` and `internal/` packages |
+| `packages/workflow/` | Go module: `cmd/workflow`, `internal/`, and embedded analytics site |
+| `packages/workflow/catalogue/` | Jev criteria and check JSON shipped with the binary |
+| `packages/hooklog/` | Hook capture edge: `spool.sh`, drain helpers, harness examples |
 | `bin/workflow` | bash wrapper, committed |
 | `bin/VERSION` | the release version the wrapper fetches |
 | `bin/SHA256SUMS` | checksums for that version's four binaries, committed |
@@ -71,7 +73,7 @@ maintainer's agreement. Until a release exists, the wrapper's step 4 is the work
 | Harness | File | Registers |
 |---|---|---|
 | Claude Code | `hooks/hooks.json`, `.mcp.json` | `spool.sh --harness claude`; shim as stdio |
-| Cursor | `hooks/cursor.json`, `tools/hooklog/cursor-hooks.example.json` | `spool.sh --harness cursor` |
+| Cursor | `hooks/cursor.json`, `packages/hooklog/cursor-hooks.example.json` | `spool.sh --harness cursor` |
 | Codex | `hooks/codex.json` | `spool.sh --harness codex` |
 | OpenCode | `packages/opencode-workflow-hooks` | writes spool files with the design 2 name; kicks `bin/workflow drain` |
 
@@ -80,14 +82,13 @@ All four drop the `artifact_submit.py` registration.
 ## Retired
 
 - The systemd drain timer and service, and `install-drain.sh`.
-- `tools/hooklog/drain.py`, once `workflow drain` replaces it.
+- `packages/hooklog/drain.py`, once `workflow drain` replaces it.
 - The HTTP MCP registration of the legacy service.
 
 The legacy `workflow-quality.service` keeps running for the lab until the maintainer stops it.
 
 ## Not in this round
 
-- The monorepo reorganisation.
 - Updating pinned plugin copies (the Codex copy at `451e009`); each picks up the new configs when
   the maintainer updates it.
 - Registration and key issue (design 3).

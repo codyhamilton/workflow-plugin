@@ -110,7 +110,7 @@ Local, advisory capture uses the same JSONL store across Claude Code, Cursor, Op
 **Claude 33 | Cursor 22 | OpenCode 18 Hooks + 28 bus | Codex 12**. Cursor's catalog actually names
 21 events (18 agent + 2 Tab + workspaceOpen), all registered; no undocumented 22nd name is invented.
 Claude has 31 active commands and 2 integration-only worktree keys: standalone worktree hooks
-replace host operations, which conflicts with observe-only capture. See [hooklog](tools/hooklog/README.md)
+replace host operations, which conflicts with observe-only capture. See [hooklog](packages/hooklog/README.md)
 for registrations, these contract gaps, turn counting and smoke notes.
 
 ## Quick install
@@ -311,7 +311,7 @@ codex exec -m gpt-6.1-sol -c model_reasoning_effort=high "…"
 codex exec -m gpt-6-luna -c model_reasoning_effort=high "…"
 ```
 
-Pass the prompt on the command line (close stdin) so `codex exec` does not hang. **`~/.codex/config.toml` may still default to `gpt-5.4`** — always pass **`-m`** for Sol/Luna. Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). Codex hooklog captures all 12 lifecycle events via the plugin's `hooks/codex.json` (selected by `.codex-plugin/plugin.json`); see [hooklog setup](tools/hooklog/README.md#codex). Hosted tools such as WebSearch skip PreToolUse/PostToolUse. The skills installer still has no Codex mode; BDK wiring is deferred.
+Pass the prompt on the command line (close stdin) so `codex exec` does not hang. **`~/.codex/config.toml` may still default to `gpt-5.4`** — always pass **`-m`** for Sol/Luna. Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). Codex hooklog captures all 12 lifecycle events via the plugin's `hooks/codex.json` (selected by `.codex-plugin/plugin.json`); see [hooklog setup](packages/hooklog/README.md#codex). Hosted tools such as WebSearch skip PreToolUse/PostToolUse. The skills installer still has no Codex mode; BDK wiring is deferred.
 
 ## Manual installation
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.11.0 — 2026-10-17
+
+- Move the Go binary module to `packages/workflow/`, hook capture to `packages/hooklog/`, and the
+  Jev criteria plus check JSON to `packages/workflow/catalogue/`. Release builds, hooks, and
+  tooling read those paths; `tools/quality/` remains the legacy HTTP service only.
+- If your Cursor hooks (or another harness config) hard-code an absolute path to
+  `.../tools/hooklog/spool.sh` from an older example, update it to `.../packages/hooklog/spool.sh`
+  (or reinstall from the plugin). `spool.sh` exits 0 even when the path is wrong, so a stale path
+  fails silently and events are not captured.
+
 ## 2.10.0 — 2026-10-17
 
 - Remove the separate lab marketplace plugin. Six maintainer-only skills (`iterate`, `jev-variants`,

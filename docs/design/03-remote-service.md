@@ -228,8 +228,8 @@ https://api.typesafe.ai/v1/systemone`, as `tools/transcript/lib/jev_client.py` d
 kind's checks as `score` questions, plus one screen question asking whether the text contains a
 credential. A screen score at or above its flag level is a flag.
 
-Checks are the existing check definitions (`tools/quality/criteria.json` plus
-`tools/quality/checks/*.json`), loaded from files at start; the execution report kind takes the
+Checks are the existing check definitions (`packages/workflow/catalogue/criteria.json` plus
+`packages/workflow/catalogue/checks/*.json`), loaded from files at start; the execution report kind takes the
 candidate checks in design 1. Rubric wording for the
 execution report is defined once and shared with the skill (design 1).
 
