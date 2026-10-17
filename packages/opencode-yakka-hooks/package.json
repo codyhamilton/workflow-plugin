@@ -1,5 +1,5 @@
 {
-  "name": "@codyhamilton/opencode-workflow-hooks",
+  "name": "@codyhamilton/opencode-yakka-hooks",
   "version": "0.2.0",
   "description": "OpenCode plugin: full-surface advisory hooklog capture and PostToolBatch soft signals",
   "type": "module",
@@ -7,16 +7,16 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/codyhamilton/workflow-plugin.git",
-    "directory": "packages/opencode-workflow-hooks"
+    "directory": "packages/opencode-yakka-hooks"
   },
   "exports": {
     ".": "./src/index.ts",
-    "./workflow-signals.json": "./workflow-signals.json"
+    "./yakka-signals.json": "./yakka-signals.json"
   },
   "files": [
     "src",
     "python",
-    "workflow-signals.json",
+    "yakka-signals.json",
     "opencode.json.example",
     "README.md"
   ],
@@ -25,7 +25,7 @@
   },
   "keywords": [
     "opencode",
-    "workflow",
+    "yakka",
     "jev",
     "hooks"
   ],

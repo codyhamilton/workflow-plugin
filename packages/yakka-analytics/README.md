@@ -1,4 +1,4 @@
-# workflow-analytics
+# yakka-analytics
 
 **Consumers** — the `workflow` binary that embeds the built static site.
 

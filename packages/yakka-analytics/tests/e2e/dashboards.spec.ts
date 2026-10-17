@@ -205,7 +205,7 @@ test('legacy v1 URL import keeps chart params and drops unknown paths', async ({
 	await expect(page.getByTestId('dash-tile')).toHaveCount(1);
 	await expect(page.getByTestId('dash-import-drops')).toContainText('1 view dropped');
 
-	const raw = await page.evaluate(() => localStorage.getItem('workflow-analytics-views:views'));
+	const raw = await page.evaluate(() => localStorage.getItem('yakka-analytics-views:views'));
 	const views = JSON.parse(raw!) as { name: string; report: string; params: Record<string, string> }[];
 	const usage = views.find((v) => v.name === 'usage-cost');
 	expect(usage?.report).toBe('usage');

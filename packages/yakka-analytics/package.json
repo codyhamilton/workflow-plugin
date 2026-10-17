@@ -1,14 +1,14 @@
 {
-  "name": "@codyhamilton/workflow-analytics",
+  "name": "@codyhamilton/yakka-analytics",
   "version": "0.1.0",
-  "description": "Static report site over a workflow serve tenant's analytics API",
+  "description": "Static report site over a yakka serve tenant's analytics API",
   "private": true,
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/codyhamilton/workflow-plugin.git",
-    "directory": "packages/workflow-analytics"
+    "directory": "packages/yakka-analytics"
   },
   "scripts": {
     "dev": "vite dev",

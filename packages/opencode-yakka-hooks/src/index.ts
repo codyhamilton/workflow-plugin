@@ -22,16 +22,16 @@ function defaultRepoRoot(ctxDir: string): string {
 }
 
 function flushHelperPath(): string {
-  if (process.env.WORKFLOW_BATCH_FLUSH_CLI) {
-    return process.env.WORKFLOW_BATCH_FLUSH_CLI
+  if (process.env.YAKKA_BATCH_FLUSH_CLI) {
+    return process.env.YAKKA_BATCH_FLUSH_CLI
   }
   return path.join(packageRoot(), "python", "batch_flush_cli.py")
 }
 
 // Queue capture: one file per event in the shared queue, same name and envelope as packages/hooklog/spool.sh's queue branch
-// (<conversation>-<ts>-<pid>-<rand>.evt, written under tmp/ then renamed); `bin/workflow drain` ingests it.
+// (<conversation>-<ts>-<pid>-<rand>.evt, written under tmp/ then renamed); `bin/yakka drain` ingests it.
 function queueDir(): string {
-  return process.env.WORKFLOW_QUEUE || path.join(os.homedir(), ".local", "share", "workflow", "queue")
+  return process.env.YAKKA_QUEUE || path.join(os.homedir(), ".local", "share", "yakka", "queue")
 }
 
 // package location: src/ -> package -> packages -> repo root
@@ -41,10 +41,10 @@ function repoRoot(): string {
 
 function spawnBin(args: string[]): void {
   try {
-    const bin = process.env.WORKFLOW_BIN
+    const bin = process.env.YAKKA_BIN
     const child = bin
       ? spawn(bin, args, { detached: true, stdio: "ignore" })
-      : spawn("bash", [path.join(repoRoot(), "bin", "workflow"), ...args], { detached: true, stdio: "ignore" })
+      : spawn("bash", [path.join(repoRoot(), "plugins", "yakka", "bin", "yakka"), ...args], { detached: true, stdio: "ignore" })
     child.on("error", () => {})
     child.unref()
   } catch {
@@ -52,7 +52,7 @@ function spawnBin(args: string[]): void {
   }
 }
 
-const kickEnabled = () => process.env.WORKFLOW_HOOKLOG_KICK !== "0"
+const kickEnabled = () => process.env.YAKKA_HOOKLOG_KICK !== "0"
 let lastKick = 0
 
 function kickDrain(): void {
@@ -83,7 +83,7 @@ const REMOVE_EVENTS = ["experimental.chat.system.transform", "chat.params", "cha
 // remove-list:end
 
 async function recordHooklog(payload: Record<string, unknown>): Promise<void> {
-  if (/^(0|off|false)$/i.test(process.env.WORKFLOW_HOOKLOG || "")) return
+  if (/^(0|off|false)$/i.test(process.env.YAKKA_HOOKLOG || "")) return
   if ((REMOVE_EVENTS as readonly string[]).includes(String(payload.hook_event_name || ""))) return
   try {
     const sid = typeof payload.session_id === "string" ? payload.session_id.replace(/[^A-Za-z0-9._-]/g, "_") : ""
@@ -123,11 +123,11 @@ function flushBatch(sessionID: string, ctxDir: string, transcriptPath: string | 
     })),
   }
 
-  const python = process.env.PYTHON || process.env.WORKFLOW_PYTHON || "python3"
+  const python = process.env.PYTHON || process.env.YAKKA_PYTHON || "python3"
   const env = {
     ...process.env,
-    WORKFLOW_REPO_ROOT: process.env.WORKFLOW_REPO_ROOT || defaultRepoRoot(ctxDir),
-    WORKFLOW_INSTALL_MODE: process.env.WORKFLOW_INSTALL_MODE || "opencode",
+    YAKKA_REPO_ROOT: process.env.YAKKA_REPO_ROOT || defaultRepoRoot(ctxDir),
+    YAKKA_INSTALL_MODE: process.env.YAKKA_INSTALL_MODE || "opencode",
   }
 
   try {
@@ -166,8 +166,8 @@ function sessionId(value: unknown, seen = new WeakSet<object>()): string | undef
   return undefined
 }
 
-export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
-  const enabled = process.env.WORKFLOW_OPENCODE_SIGNALS !== "0"
+export const YakkaSignalsPlugin: Plugin = async (ctx) => {
+  const enabled = process.env.YAKKA_OPENCODE_SIGNALS !== "0"
   const ctxDir = ctx.directory
   if (kickEnabled()) spawnBin(["--version"]) // warm the binary cache; never awaited
   const pendingBySession = new Map<string, PendingCall[]>()
@@ -253,4 +253,4 @@ export const WorkflowSignalsPlugin: Plugin = async (ctx) => {
   }
 }
 
-export default WorkflowSignalsPlugin
+export default YakkaSignalsPlugin

@@ -1,5 +1,5 @@
-export const BASE_KEY = 'workflow-analytics-base';
-export const TOKEN_KEY = 'workflow-analytics-key';
+export const BASE_KEY = 'yakka-analytics-base';
+export const TOKEN_KEY = 'yakka-analytics-key';
 
 export class ApiError extends Error {
 	status: number;

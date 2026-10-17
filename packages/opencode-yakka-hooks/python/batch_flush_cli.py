@@ -12,7 +12,7 @@ from batch_aggregator import OpenCodeBatchAggregator
 
 
 def default_jev_signal_log_path() -> Path:
-    override = os.environ.get("WORKFLOW_JEV_SIGNAL_LOG")
+    override = os.environ.get("YAKKA_JEV_SIGNAL_LOG")
     if override:
         return Path(override)
     state_home = os.environ.get("XDG_STATE_HOME")
@@ -20,7 +20,7 @@ def default_jev_signal_log_path() -> Path:
         base = Path(state_home)
     else:
         base = Path.home() / ".local" / "state"
-    return base / "workflow" / "jev-signal-log.jsonl"
+    return base / "yakka" / "jev-signal-log.jsonl"
 
 
 def main() -> None:

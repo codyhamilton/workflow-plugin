@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-// Runs against a binary built by tools/release/build.sh (WORKFLOW_BIN). The global setup starts its
+// Runs against a binary built by tools/release/build.sh (YAKKA_BIN). The global setup starts its
 // `serve` and exports the origin as HOSTED_BASE; the spec uses it as baseURL.
 export default defineConfig({
 	testDir: 'tests/hosted',

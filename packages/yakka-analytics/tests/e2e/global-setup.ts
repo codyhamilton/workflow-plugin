@@ -1,4 +1,4 @@
-// Builds the workflow binary, starts a local-mode and a keyed `workflow serve`, posts the fixture to
+// Builds the yakka binary, starts a local-mode and a keyed `yakka serve`, posts the fixture to
 // both, and writes their base URLs and the key to a JSON file the specs read (path in E2E_STATE).
 import { type ChildProcess, execFileSync, spawn } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -23,7 +23,7 @@ function freePort(): Promise<number> {
 
 async function waitHealth(base: string, proc: ChildProcess) {
 	for (let i = 0; i < 100; i++) {
-		if (proc.exitCode !== null) throw new Error(`workflow serve exited early (${proc.exitCode})`);
+		if (proc.exitCode !== null) throw new Error(`yakka serve exited early (${proc.exitCode})`);
 		try {
 			if ((await fetch(`${base}/v1/health`)).ok) return;
 		} catch {
@@ -50,17 +50,17 @@ export default async function globalSetup() {
 	// TYPESAFE_API_KEY is cleared: with it set, serve would send the fixture to the real screening
 	// service and verdicts would be "pass"; without it every verdict is "unscreened", deterministically.
 	const env = { ...process.env, PATH: `${homedir()}/.local/go/bin:${process.env.PATH}`, TYPESAFE_API_KEY: '' };
-	const bin = path.join(tmp, 'workflow');
-	execFileSync('go', ['build', '-o', bin, './cmd/workflow'], { cwd: path.join(repoRoot, 'packages/workflow'), env, stdio: 'inherit' });
+	const bin = path.join(tmp, 'yakka');
+	execFileSync('go', ['build', '-o', bin, './cmd/yakka'], { cwd: path.join(repoRoot, 'packages/yakka'), env, stdio: 'inherit' });
 
 	const procs: ChildProcess[] = [];
 	const start = async (extra: Record<string, string>, name: string) => {
 		const port = await freePort();
 		const serveEnv = {
 			...env,
-			WORKFLOW_SERVE_ADDR: `127.0.0.1:${port}`,
-			WORKFLOW_SERVE_DATA: path.join(tmp, name),
-			WORKFLOW_CHECKS_DIR: path.join(repoRoot, 'packages/workflow/catalogue'),
+			YAKKA_SERVE_ADDR: `127.0.0.1:${port}`,
+			YAKKA_SERVE_DATA: path.join(tmp, name),
+			YAKKA_CHECKS_DIR: path.join(repoRoot, 'packages/yakka/catalogue'),
 			...extra
 		};
 		const p = spawn(bin, ['serve'], { env: serveEnv, stdio: 'ignore' });
@@ -77,7 +77,7 @@ export default async function globalSetup() {
 	try {
 		const local = await start({}, 'local');
 		const keyed = await start(
-			{ WORKFLOW_SERVE_KEYS: `e2e=${key}`, WORKFLOW_SERVE_CORS_ORIGINS: `http://127.0.0.1:${PREVIEW_PORT}` },
+			{ YAKKA_SERVE_KEYS: `e2e=${key}`, YAKKA_SERVE_CORS_ORIGINS: `http://127.0.0.1:${PREVIEW_PORT}` },
 			'keyed'
 		);
 		const body = JSON.stringify({ facts: FACTS });

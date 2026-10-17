@@ -117,8 +117,8 @@ export class ImportError extends Error {
 	}
 }
 
-export const VIEWS_KEY = 'workflow-analytics-views:views';
-export const DASHBOARDS_KEY = 'workflow-analytics-views:dashboards';
+export const VIEWS_KEY = 'yakka-analytics-views:views';
+export const DASHBOARDS_KEY = 'yakka-analytics-views:dashboards';
 
 type Backing = Pick<Storage, 'getItem' | 'setItem'>;
 
@@ -329,7 +329,7 @@ function memoryStorage(): Backing {
 function usableLocalStorage(): Storage | undefined {
 	try {
 		if (typeof localStorage === 'undefined') return undefined;
-		const probe = 'workflow-analytics-views:probe';
+		const probe = 'yakka-analytics-views:probe';
 		localStorage.setItem(probe, '1');
 		localStorage.removeItem(probe);
 		return localStorage;

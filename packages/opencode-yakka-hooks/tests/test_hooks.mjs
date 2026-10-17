@@ -14,7 +14,7 @@ const removed = ['experimental.chat.system.transform', 'chat.params', 'chat.head
 const spoolSh = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'packages', 'hooklog', 'spool.sh')
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
 
-// Isolated env: temp HOME/queue/cache, stub WORKFLOW_BIN that records its args, no keys.
+// Isolated env: temp HOME/queue/cache, stub YAKKA_BIN that records its args, no keys.
 async function sandbox(extra = {}) {
   const tmp = await mkdtemp(path.join(os.tmpdir(), 'workflow-hooks-'))
   const saved = { ...process.env }
@@ -23,9 +23,9 @@ async function sandbox(extra = {}) {
   await writeFile(stub, `#!/bin/sh\necho "$@" >> ${log}\n`)
   await chmod(stub, 0o755)
   Object.assign(process.env, {
-    HOME: tmp, XDG_CACHE_HOME: path.join(tmp, 'cache'), WORKFLOW_QUEUE: path.join(tmp, 'queue'),
-    WORKFLOW_BIN: stub, WORKFLOW_HOOKLOG: 'on', WORKFLOW_OPENCODE_SIGNALS: '0',
-    WORKFLOW_HOOKLOG_KICK: '0', TYPESAFE_API_KEY: '', ...extra,
+    HOME: tmp, XDG_CACHE_HOME: path.join(tmp, 'cache'), YAKKA_QUEUE: path.join(tmp, 'queue'),
+    YAKKA_BIN: stub, YAKKA_HOOKLOG: 'on', YAKKA_OPENCODE_SIGNALS: '0',
+    YAKKA_HOOKLOG_KICK: '0', TYPESAFE_API_KEY: '', ...extra,
   })
   const calls = async () => { try { return (await readFile(log, 'utf8')).trim().split('\n').filter(Boolean) } catch { return [] } }
   const done = async () => {
@@ -75,7 +75,7 @@ test('18 callbacks and 28 bus types queue payloads, sessions and boundaries', as
     assert(ts.every(t => typeof t === 'number'))
     // unwritable queue cannot throw into the hook chain
     await writeFile(path.join(sb.tmp, 'file'), 'x')
-    process.env.WORKFLOW_QUEUE = path.join(sb.tmp, 'file')
+    process.env.YAKKA_QUEUE = path.join(sb.tmp, 'file')
     await hooks['permission.ask'](input, output)
     assert.equal(output.status, 'ask')
   } finally { await sb.done() }
@@ -136,8 +136,8 @@ test('message.part.delta queues nothing while message.part.updated still queues'
   } finally { await sb.done() }
 })
 
-test('kick runs WORKFLOW_BIN drain at most once per 10 s; load prefetches --version', async () => {
-  const sb = await sandbox({ WORKFLOW_HOOKLOG_KICK: '1' })
+test('kick runs YAKKA_BIN drain at most once per 10 s; load prefetches --version', async () => {
+  const sb = await sandbox({ YAKKA_HOOKLOG_KICK: '1' })
   try {
     const hooks = await plugin({ directory: '/tmp/project' })
     const ev = { sessionID: 'k', tool: 'write', callID: 'c', args: {} }
@@ -161,7 +161,7 @@ test('KICK=0 disables kick and prefetch', async () => {
 })
 
 test('no legacy submit helper spawn under any event', async () => {
-  const sb = await sandbox({ WORKFLOW_LEGACY: '1' })
+  const sb = await sandbox({ YAKKA_LEGACY: '1' })
   try {
     const hooks = await plugin({ directory: '/tmp/project' })
     const output = { title: 'written', output: 'preserved' }

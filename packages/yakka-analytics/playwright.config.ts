@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { defineConfig } from '@playwright/test';
 
 // The preview origin is configurable (E2E_PORT, default 4391) so two worktrees can run at once; the
-// keyed serve lists the same origin in WORKFLOW_SERVE_CORS_ORIGINS.
+// keyed serve lists the same origin in YAKKA_SERVE_CORS_ORIGINS.
 export const PREVIEW_PORT = Number(process.env.E2E_PORT) || 4391;
 
 // Generated once in the main process; workers inherit them through the environment.

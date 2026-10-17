@@ -29,7 +29,7 @@ describe('normalise', () => {
 	});
 
 	it('uses the stored base and strips leading slashes from the path', () => {
-		store['workflow-analytics-base'] = 'https://api.example.com/';
+		store['yakka-analytics-base'] = 'https://api.example.com/';
 		expect(normalise('/analytics/query', new URLSearchParams('a=1'))).toBe(
 			'https://api.example.com/v1/analytics/query?a=1'
 		);

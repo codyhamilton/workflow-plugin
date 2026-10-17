@@ -10,8 +10,8 @@ test('settings stores base and key; the keyed serve sees a bearer header; cleari
 	await page.getByTestId('settings-save').click();
 
 	const stored = await page.evaluate(() => ({
-		base: localStorage.getItem('workflow-analytics-base'),
-		key: localStorage.getItem('workflow-analytics-key')
+		base: localStorage.getItem('yakka-analytics-base'),
+		key: localStorage.getItem('yakka-analytics-key')
 	}));
 	expect(stored).toEqual({ base: s.keyed, key: s.key });
 
@@ -28,7 +28,7 @@ test('settings stores base and key; the keyed serve sees a bearer header; cleari
 	await page.goto('/settings');
 	await page.getByTestId('settings-key').fill('');
 	await page.getByTestId('settings-save').click();
-	expect(await page.evaluate(() => localStorage.getItem('workflow-analytics-key'))).toBe('');
+	expect(await page.evaluate(() => localStorage.getItem('yakka-analytics-key'))).toBe('');
 	await page.goto('/');
 	await expect(page.getByTestId('error-panel')).toBeVisible();
 	await expect(page.getByTestId('error-panel')).toContainText('unauthorized');

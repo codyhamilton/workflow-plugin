@@ -14,10 +14,10 @@ from typing import Any
 
 
 def repo_root() -> Path:
-    override = os.environ.get("WORKFLOW_REPO_ROOT")
+    override = os.environ.get("YAKKA_REPO_ROOT")
     if override:
         return Path(override).resolve()
-    # packages/opencode-workflow-hooks/python/this_file.py → repo is parents[3]
+    # packages/opencode-yakka-hooks/python/this_file.py → repo is parents[3]
     return Path(__file__).resolve().parents[3]
 
 

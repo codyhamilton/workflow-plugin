@@ -1,4 +1,4 @@
-// Starts the release binary named by WORKFLOW_BIN in local mode, posts the e2e fixture, waits for
+// Starts the release binary named by YAKKA_BIN in local mode, posts the e2e fixture, waits for
 // screening to finish, and exports the serve origin as HOSTED_BASE.
 import { type ChildProcess, spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -21,18 +21,18 @@ function freePort(): Promise<number> {
 }
 
 export default async function globalSetup() {
-	const bin = process.env.WORKFLOW_BIN;
-	if (!bin) throw new Error('WORKFLOW_BIN is not set: give the absolute path of a binary built by tools/release/build.sh');
-	if (!path.isAbsolute(bin)) throw new Error(`WORKFLOW_BIN must be an absolute path, got ${bin}`);
+	const bin = process.env.YAKKA_BIN;
+	if (!bin) throw new Error('YAKKA_BIN is not set: give the absolute path of a binary built by tools/release/build.sh');
+	if (!path.isAbsolute(bin)) throw new Error(`YAKKA_BIN must be an absolute path, got ${bin}`);
 	const tmp = mkdtempSync(path.join(tmpdir(), 'wa-hosted-'));
 	const port = await freePort();
 	const base = `http://127.0.0.1:${port}`;
 	const proc: ChildProcess = spawn(bin, ['serve'], {
 		env: {
 			...process.env,
-			WORKFLOW_SERVE_ADDR: `127.0.0.1:${port}`,
-			WORKFLOW_SERVE_DATA: path.join(tmp, 'data'),
-			WORKFLOW_CHECKS_DIR: path.join(repoRoot, 'packages/workflow/catalogue'),
+			YAKKA_SERVE_ADDR: `127.0.0.1:${port}`,
+			YAKKA_SERVE_DATA: path.join(tmp, 'data'),
+			YAKKA_CHECKS_DIR: path.join(repoRoot, 'packages/yakka/catalogue'),
 			TYPESAFE_API_KEY: ''
 		},
 		stdio: 'ignore'
@@ -44,7 +44,7 @@ export default async function globalSetup() {
 	try {
 		let up = false;
 		for (let i = 0; i < 100 && !up; i++) {
-			if (proc.exitCode !== null) throw new Error(`workflow serve exited early (${proc.exitCode})`);
+			if (proc.exitCode !== null) throw new Error(`yakka serve exited early (${proc.exitCode})`);
 			try {
 				up = (await fetch(`${base}/v1/health`)).ok;
 			} catch {

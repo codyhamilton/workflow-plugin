@@ -18,8 +18,8 @@ export async function useServe(page: Page, which: 'local' | 'keyed') {
 	const key = which === 'keyed' ? s.key : null;
 	await page.addInitScript(
 		([b, k]) => {
-			localStorage.setItem('workflow-analytics-base', b as string);
-			if (k) localStorage.setItem('workflow-analytics-key', k as string);
+			localStorage.setItem('yakka-analytics-base', b as string);
+			if (k) localStorage.setItem('yakka-analytics-key', k as string);
 		},
 		[base, key]
 	);

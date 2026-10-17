@@ -28,8 +28,8 @@ describe('apiGet', () => {
 	});
 
 	it('uses the stored base without a trailing slash and sends the bearer token', async () => {
-		store['workflow-analytics-base'] = 'https://api.example.com/';
-		store['workflow-analytics-key'] = 'sekret';
+		store['yakka-analytics-base'] = 'https://api.example.com/';
+		store['yakka-analytics-key'] = 'sekret';
 		await apiGet('analytics/summary');
 		const [url, init] = fetchMock.mock.calls[0];
 		expect(url).toBe('https://api.example.com/v1/analytics/summary');
@@ -38,7 +38,7 @@ describe('apiGet', () => {
 
 	it('reads storage on every call', async () => {
 		await apiGet('baselines');
-		store['workflow-analytics-key'] = 'k2';
+		store['yakka-analytics-key'] = 'k2';
 		await apiGet('baselines');
 		expect(new Headers(fetchMock.mock.calls[0][1]?.headers).has('authorization')).toBe(false);
 		expect(new Headers(fetchMock.mock.calls[1][1]?.headers).get('authorization')).toBe('Bearer k2');

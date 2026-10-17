@@ -68,7 +68,7 @@
 <svelte:head>
 	<script>
 		(function () {
-			var key = 'workflow-analytics-theme';
+			var key = 'yakka-analytics-theme';
 			var pref = 'system';
 			try {
 				var v = localStorage.getItem(key);

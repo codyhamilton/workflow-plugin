@@ -1,28 +1,28 @@
-# @codyhamilton/opencode-workflow-hooks
+# @codyhamilton/opencode-yakka-hooks
 
 **Consumers** — OpenCode `file://` plugin registration.
 
 **Build** — none (OpenCode loads the TypeScript).
 
-**Test** — `node --test packages/opencode-workflow-hooks/tests/test_hooks.mjs` and `python3 -m unittest discover -s packages/opencode-workflow-hooks/tests`.
+**Test** — `node --test packages/opencode-yakka-hooks/tests/test_hooks.mjs` and `python3 -m unittest discover -s packages/opencode-yakka-hooks/tests`.
 
 **Release** — ships as plugin files (see also `packages/hooklog` for queue capture).
 
 OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus types** into
-`~/.local/share/workflow-plugin/hooklog/opencode/<session>.jsonl` and **approximates** Claude
+`~/.local/share/yakka-plugin/hooklog/opencode/<session>.jsonl` and **approximates** Claude
 `PostToolBatch` soft signals:
 
 1. Buffer each `tool.execute.after` per session.
 2. Flush one batch per model step on `message.updated` or `session.idle`.
-3. Spawn `python/batch_flush_cli.py` → shared `gate_thresholds` / `post_tool_batch_signal` → append `${XDG_STATE_HOME:-~/.local/state}/workflow/jev-signal-log.jsonl` (or `WORKFLOW_JEV_SIGNAL_LOG`).
-4. Optional analytics dual-write when `WORKFLOW_ANALYTICS_URL` is set (`host_kind: opencode` when `WORKFLOW_INSTALL_MODE=opencode`).
+3. Spawn `python/batch_flush_cli.py` → shared `gate_thresholds` / `post_tool_batch_signal` → append `${XDG_STATE_HOME:-~/.local/state}/yakka/jev-signal-log.jsonl` (or `YAKKA_JEV_SIGNAL_LOG`).
+4. Optional analytics dual-write when `YAKKA_ANALYTICS_URL` is set (`host_kind: opencode` when `YAKKA_INSTALL_MODE=opencode`).
 
 **Advisory only** — never blocks tools or changes exit codes. Does not call `assert_phase --deterministic` or enforce Flash review guidance.
 
-Every hook and bus event except five is written as one file in the queue (`WORKFLOW_QUEUE`), named and wrapped
+Every hook and bus event except five is written as one file in the queue (`YAKKA_QUEUE`), named and wrapped
 as `packages/hooklog/spool.sh --harness opencode` does; an event with no session ID is dropped. After a
-write the plugin kicks `bin/workflow drain` (detached, at most once per 10 s) and warms the binary
-with `bin/workflow --version` once at load. Capture never waits on the binary or the network, and
+write the plugin kicks `bin/yakka drain` (detached, at most once per 10 s) and warms the binary
+with `bin/yakka --version` once at load. Capture never waits on the binary or the network, and
 failures never reach OpenCode.
 
 Not forwarded: `experimental.chat.system.transform`, `chat.params`, `chat.headers`, `shell.env` and
@@ -32,7 +32,7 @@ prompt bodies; the next three carry secrets (API keys, auth headers, environment
 part. Their hooks stay registered and write nothing. The list is declared once in `src/index.ts`
 between `remove-list` markers, and a test asserts the Go ingest policy carries an equal list.
 
-Threshold constants for documentation: `workflow-signals.json` (source of truth remains `gate_thresholds.py` in the workflow-plugin lab).
+Threshold constants for documentation: `yakka-signals.json` (source of truth remains `gate_thresholds.py` in the workflow-plugin lab).
 
 ## Install (workflow-plugin checkout)
 
@@ -48,7 +48,7 @@ Register the plugin in **project** or **global** `opencode.json` (restart OpenCo
 ```json
 {
   "plugin": [
-    "file:///absolute/path/to/workflow-plugin/packages/opencode-workflow-hooks/src/index.ts"
+    "file:///absolute/path/to/workflow-plugin/packages/opencode-yakka-hooks/src/index.ts"
   ]
 }
 ```
@@ -58,7 +58,7 @@ Relative `file://` from repo root (when OpenCode cwd is the checkout):
 ```json
 {
   "plugin": [
-    "file://packages/opencode-workflow-hooks/src/index.ts"
+    "file://packages/opencode-yakka-hooks/src/index.ts"
   ]
 }
 ```
@@ -73,34 +73,34 @@ git pull origin master
 ./install.sh --opencode-skills
 
 # ~/.config/opencode/opencode.json (or project opencode.json)
-# Add plugin entry with absolute file:// URL to packages/opencode-workflow-hooks/src/index.ts
+# Add plugin entry with absolute file:// URL to packages/opencode-yakka-hooks/src/index.ts
 ```
 
 ## Environment
 
 | Variable | Default | Role |
 |----------|---------|------|
-| `WORKFLOW_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
-| `WORKFLOW_QUEUE` | `~/.local/share/workflow/queue` | Queue directory; one `<session>-<ts>-<pid>-<rand>.evt` file per event, as `packages/hooklog/spool.sh` writes it |
-| `WORKFLOW_BIN` | `bash <repo>/bin/workflow` | Binary the plugin kicks as `drain` after a write, and runs as `--version` once at load to warm its cache |
-| `WORKFLOW_HOOKLOG_KICK` | on | Set `0` to disable the drain kick (at most one per 10 s) and the load prefetch |
-| `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
-| `WORKFLOW_REPO_ROOT` | auto (package → repo root) | Python gate imports |
-| `WORKFLOW_JEV_SIGNAL_LOG` | `~/.local/state/workflow/jev-signal-log.jsonl` | Signal JSONL path (`$XDG_STATE_HOME/workflow/...` when set) |
-| `WORKFLOW_INSTALL_MODE` | `opencode` (set by plugin spawn) | Analytics `host_kind` |
-| `WORKFLOW_ANALYTICS_URL` | unset | Remote dual-write when set |
-| `WORKFLOW_ANALYTICS_TOKEN` | unset | Bearer token for analytics POST |
-| `WORKFLOW_BATCH_FLUSH_CLI` | package `python/batch_flush_cli.py` | Override flush helper |
-| `PYTHON` / `WORKFLOW_PYTHON` | `python3` | Interpreter for flush |
+| `YAKKA_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
+| `YAKKA_QUEUE` | `~/.local/share/yakka/queue` | Queue directory; one `<session>-<ts>-<pid>-<rand>.evt` file per event, as `packages/hooklog/spool.sh` writes it |
+| `YAKKA_BIN` | `bash <repo>/plugins/yakka/bin/yakka` | Binary the plugin kicks as `drain` after a write, and runs as `--version` once at load to warm its cache |
+| `YAKKA_HOOKLOG_KICK` | on | Set `0` to disable the drain kick (at most one per 10 s) and the load prefetch |
+| `YAKKA_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
+| `YAKKA_REPO_ROOT` | auto (package → repo root) | Python gate imports |
+| `YAKKA_JEV_SIGNAL_LOG` | `~/.local/state/yakka/jev-signal-log.jsonl` | Signal JSONL path (`$XDG_STATE_HOME/yakka/...` when set) |
+| `YAKKA_INSTALL_MODE` | `opencode` (set by plugin spawn) | Analytics `host_kind` |
+| `YAKKA_ANALYTICS_URL` | unset | Remote dual-write when set |
+| `YAKKA_ANALYTICS_TOKEN` | unset | Bearer token for analytics POST |
+| `YAKKA_BATCH_FLUSH_CLI` | package `python/batch_flush_cli.py` | Override flush helper |
+| `PYTHON` / `YAKKA_PYTHON` | `python3` | Interpreter for flush |
 
 ## Tests
 
 ```bash
 # Callback/bus smoke, including unchanged permission/args/headers/compaction outputs (Node 22.18+)
-node --experimental-strip-types --test packages/opencode-workflow-hooks/tests/test_hooks.mjs
+node --experimental-strip-types --test packages/opencode-yakka-hooks/tests/test_hooks.mjs
 
 # Package unit tests
-python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
+python3 -m unittest discover -s packages/opencode-yakka-hooks/tests -v
 
 # Lab proofs (shim to this package)
 ./docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/run_proofs.sh
@@ -109,9 +109,9 @@ python3 -m unittest discover -s packages/opencode-workflow-hooks/tests -v
 ## npm link (optional)
 
 ```bash
-cd packages/opencode-workflow-hooks
+cd packages/opencode-yakka-hooks
 npm link
-# In opencode.json: "@codyhamilton/opencode-workflow-hooks@0.2.0"
+# In opencode.json: "@codyhamilton/opencode-yakka-hooks@0.2.0"
 ```
 
 Publishing to npm is optional; `file://` from the monorepo checkout is the supported path for Coding Harness Manager.

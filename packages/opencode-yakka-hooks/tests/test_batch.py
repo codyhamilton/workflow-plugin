@@ -25,24 +25,21 @@ from gate_thresholds import evaluate_gate  # noqa: E402
 
 
 class BatchAggregatorTests(unittest.TestCase):
-    def test_default_signal_log_matches_driver(self) -> None:
-        driver_dir = _REPO / "tools" / "driver"
-        sys.path.insert(0, str(driver_dir))
-        from jev_signal_log import resolve_jev_signal_log_path  # noqa: E402
-
-        for env in (
-            {},
-            {"XDG_STATE_HOME": "/tmp/xdg-state"},
-            {"WORKFLOW_JEV_SIGNAL_LOG": "/tmp/custom-jev.jsonl"},
-        ):
-            os.environ.pop("WORKFLOW_JEV_SIGNAL_LOG", None)
+    def test_default_signal_log_path(self) -> None:
+        cases = (
+            ({}, Path.home() / ".local" / "state" / "yakka" / "jev-signal-log.jsonl"),
+            (
+                {"XDG_STATE_HOME": "/tmp/xdg-state"},
+                Path("/tmp/xdg-state") / "yakka" / "jev-signal-log.jsonl",
+            ),
+            ({"YAKKA_JEV_SIGNAL_LOG": "/tmp/custom-jev.jsonl"}, Path("/tmp/custom-jev.jsonl")),
+        )
+        for env, want in cases:
+            os.environ.pop("YAKKA_JEV_SIGNAL_LOG", None)
             os.environ.pop("XDG_STATE_HOME", None)
             for k, v in env.items():
                 os.environ[k] = v
-            self.assertEqual(
-                default_jev_signal_log_path(),
-                resolve_jev_signal_log_path(),
-            )
+            self.assertEqual(default_jev_signal_log_path(), want)
 
     def test_repo_root_points_at_workflow_plugin(self) -> None:
         self.assertTrue((repo_root() / "tools" / "driver").is_dir())
@@ -76,9 +73,9 @@ class BatchAggregatorTests(unittest.TestCase):
     def test_flush_cli_stdin(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "signal.jsonl"
-            os.environ["WORKFLOW_JEV_SIGNAL_LOG"] = str(log)
+            os.environ["YAKKA_JEV_SIGNAL_LOG"] = str(log)
             os.environ["WORKFLOW_SIGNAL_STATE_DIR"] = str(Path(tmp) / "state")
-            os.environ["WORKFLOW_REPO_ROOT"] = str(_REPO)
+            os.environ["YAKKA_REPO_ROOT"] = str(_REPO)
             payload = {
                 "session_id": "cli-test",
                 "cwd": str(_REPO),

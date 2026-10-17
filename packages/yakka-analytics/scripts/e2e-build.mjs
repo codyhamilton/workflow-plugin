@@ -9,7 +9,7 @@ if (!key || !dummy) {
 }
 const env = {
 	...process.env,
-	WORKFLOW_SERVE_KEYS: `e2e=${key}`,
+	YAKKA_SERVE_KEYS: `e2e=${key}`,
 	PUBLIC_E2E_TOKEN: dummy,
 	VITE_E2E_TOKEN: dummy,
 	E2E_FORBIDDEN: [key, dummy].join(',')

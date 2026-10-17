@@ -34,7 +34,7 @@ export const DEFAULT_TOKENS: Tokens = {
 	series: LIGHT_SERIES
 };
 
-export const THEME_KEY = 'workflow-analytics-theme';
+export const THEME_KEY = 'yakka-analytics-theme';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 

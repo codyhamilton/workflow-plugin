@@ -90,7 +90,7 @@ test('the dark scheme swaps the background token', async ({ page }) => {
 });
 
 test('system dark mode uses solarized tokens on overview and settings', async ({ page }) => {
-	await page.addInitScript(() => localStorage.removeItem('workflow-analytics-theme'));
+	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
 	await page.emulateMedia({ colorScheme: 'dark' });
 	for (const path of ['/', '/settings']) {
 		await page.goto(path);
@@ -114,7 +114,7 @@ test('choosing Light updates tokens without reload and survives reload', async (
 });
 
 test('system mode follows a later OS colour-scheme change', async ({ page }) => {
-	await page.addInitScript(() => localStorage.removeItem('workflow-analytics-theme'));
+	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
 	await page.emulateMedia({ colorScheme: 'light' });
 	await page.goto('/');
 	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
@@ -161,7 +161,7 @@ test('save view stores chart params only', async ({ page }) => {
 	await page.getByTestId('saveview-name').fill('trends-view');
 	await page.getByTestId('saveview-save').click();
 
-	const raw = await page.evaluate(() => localStorage.getItem('workflow-analytics-views:views'));
+	const raw = await page.evaluate(() => localStorage.getItem('yakka-analytics-views:views'));
 	expect(raw).toBeTruthy();
 	const views = JSON.parse(raw!) as Record<string, unknown>[];
 	const entry = views.find((v) => v.name === 'trends-view');

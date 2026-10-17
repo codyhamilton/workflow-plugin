@@ -43,7 +43,7 @@
 		'/conversations': 'Conversations',
 		'/explore': 'Explore'
 	};
-	const LAST_LIST_KEY = 'workflow-analytics-last-list';
+	const LAST_LIST_KEY = 'yakka-analytics-last-list';
 
 	function readLastList(): { href: string; name: string } | null {
 		try {
