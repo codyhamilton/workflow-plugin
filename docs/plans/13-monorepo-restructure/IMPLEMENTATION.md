@@ -355,3 +355,18 @@ Start: 2026-10-17T23:15:00Z
 `artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
 Refine: Proceed. Six units. `5-01` first. Then `5-02`, `5-04`, and `5-06` alongside. Then `5-03`. Then `5-05`. Phase 4 Carried: item 1 stays carried (manual Cursor session; does not touch a Phase 5 contract). Item 2 stays carried (root `README.md` signal-log prose; Phase 7 docs). Item 3 absorbed into `5-03` (wrapper rename and `$ROOT/../../packages/yakka` source build) and `5-05` (`test_1_clean_cache_build`). `artifact_feedback` on each brief: unreachable (Workflow MCP `namespaceStatus: error`).
+
+### 5-01-package-renames
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-01-package-renames.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-01-package-renames.md`.
+Worker: Composer (`composer-2.5`), agent `bc-bdf4d173-9837-50de-a938-4a2adf680e02`. The harness did not report turns or final context.
+Commits: `1995a11` (rename only, 229 files, 0 insertions, 0 deletions), `3b8f9bc` (the unit report).
+
+Built: `packages/workflow` → `packages/yakka`, `packages/workflow-analytics` → `packages/yakka-analytics`, `packages/opencode-workflow-hooks` → `packages/opencode-yakka-hooks`. `packages/hooklog` stayed.
+
+Surfaces: the brief's owned paths.
+
+Deviations: none. The report is a following commit so the rename commit stays content-free.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
