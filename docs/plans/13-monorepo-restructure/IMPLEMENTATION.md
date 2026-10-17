@@ -64,3 +64,18 @@ None.
 Refine: Proceed. Commit `f51e6f0`. Six units. 2-01 first. Then 2-02, 2-03, 2-04, and 2-05 alongside. Then 2-06. Phase 1 Carried was none. Coarse check of phases 1–7 found no bounce. `artifact_feedback` unreachable: Workflow MCP tool discovery failed.
 
 Decision 1 gate passed: `origin/master` contains `docs/plans/12-analytics-dashboard-overhaul.md`.
+
+### 2-01-package-renames
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/2-01-package-renames.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/2-01-package-renames.md`.
+Worker: Composer (`composer-2.5`), agent `bc-64c761b1-1ff6-5ea0-a68c-29e55e90ba5c`. The harness did not report turns or final context.
+Commits: `cff6f64` (rename only, 119 files, 0 insertions, 0 deletions), `c758796` (the unit report). The report is not inside the rename commit because that commit must stay content-free.
+
+Built: `tools/workflow` → `packages/workflow`, `tools/hooklog` → `packages/hooklog`, `tools/quality/criteria.json` and `tools/quality/checks/` → `packages/workflow/catalogue/`. Other `tools/quality/` files stayed.
+
+Surfaces: the brief's owned paths.
+
+Deviations: none in the report. The report lives in a following commit so the rename commit stays empty of content edits.
+
+`artifact_feedback` on this report: not yet called.
