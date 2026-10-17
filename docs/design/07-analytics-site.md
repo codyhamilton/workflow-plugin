@@ -231,11 +231,20 @@ on a compacted copy of the real ledger.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
-- Charts render with Apache ECharts, tree-shaken, with one colour token set in light and dark themes
-  following the system preference. Each chart has a data-table toggle, and the site works down to
-  1024 px wide. `/explore` alone loads Perspective (client, viewer, server WASM) and says when the
-  slice is capped. No second chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill, Grafana, Metabase, Superset,
-  Lightdash, Cube and Tinybird each need a build-time snapshot or a second always-on service).
+- Charts render with Apache ECharts, tree-shaken, reading computed theme tokens (no hard-coded
+  colours). **Theme.** `localStorage` key `workflow-analytics-theme` holds `system`, `light`, or
+  `dark`; an absent key means `system`. The document root carries `data-theme="light"` or
+  `data-theme="dark"`. `system` follows `prefers-color-scheme` and later OS changes; `light` and
+  `dark` do not. Light surfaces: background `#fdf6e3`, surface `#eee8d5`, text `#657b83`, muted
+  `#586e75`, border `#93a1a1`. Dark surfaces: background `#002b36`, surface `#073642`, text
+  `#839496`, muted `#93a1a1`, border `#586e75`. Both modes: accent `#268bd2`, danger `#dc322f`.
+  Series order, both modes: `#268bd2`, `#859900`, `#b58900`, `#cb4b16`, `#dc322f`, `#d33682`,
+  `#6c71c4`, `#2aa198`. Body type stays `system-ui`. The space scale is 4, 8, 16, 24, 32 for shell
+  padding and control gaps. Each chart has a data-table toggle, and the site works down to 1024 px
+  wide. `/explore` alone loads Perspective (client, viewer, server WASM) and says when the slice is
+  capped. No second chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill,
+  Grafana, Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a
+  second always-on service).
 - **Window.** Presets Today, 24h, 7d, 30d, 90d, This month, YTD and All time, a custom range, and
   brush-to-zoom on any time-axis chart. Presets stay relative in a shared URL. Times display in the
   browser's zone, which is sent as `tz`. Each chart uses the finest bucket within the cap unless one
@@ -245,15 +254,30 @@ on a compacted copy of the real ledger.
   renders a superseded result. It shows `partial` and `ignored_filters` as notices. The server has
   no exclude parameter, so an exclude chip is sent as the complement of the facet values; an
   exclude on `conversation_id` is unsupported and marked so.
-- **Drill-down.** Every chart mark and table row for a dimension value applies it as a filter
-  (shift-click excludes it); `__other__` is not clickable. Active filters show as removable chips.
-  Any conversation ID opens its timeline, and counts link to the filtered explore slice.
+- **Drill-down.** Every chart mark and table row for a shared-filter dimension value applies it as a
+  filter (shift-click excludes it). `__other__`, the empty key, `hour_of_day`, `weekday`, and check
+  names are not clickable. Active filters show as removable chips. Any conversation ID opens its
+  timeline. Each overview KPI links to the report that owns the measure, keeping the current query
+  string; the link sets `measure` only when the target is `/trends` (`artifact_versions`,
+  `distinct_content`, or `commits`, one per tile). Conversations → `/conversations`. Hook events →
+  `/hooks`. Model calls, tokens, cost, and unpriced calls → `/usage`. Overview counts do not link to
+  `/explore`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
+  count, and the executions shape series); a score series leaves the gap.
 - **Chart builder.** `/builder` is driven only by `/v1/analytics/schema`: any measure, up to two
   dimensions and a bucket. Chart types are line, stacked area, bar, stacked bar, heatmap, treemap
   and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
-- **Saved views and dashboards.** A named saved view is a stored URL; a dashboard is an ordered grid
-  of saved views, rendered as framed `embed=1` pages and exportable and importable as JSON. Both
-  live in `localStorage` under the prefix `workflow-analytics-views`.
+- **Saved views and dashboards.** Both live in `localStorage` under the prefix
+  `workflow-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
+  `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
+  `explore`, `builder`; `params` holds that report's chart controls only (`measure`, `dim`, `bucket`,
+  `chart`, `top`, `kind`, `metric`, `group`, `grain`), not the window or shared filters. A dashboard
+  is `{"id","name","tiles":[{"viewId","w"}]}` on a two-column grid (`w` is column span `1` or `2`).
+  At most 12 tiles; add refuses past 12; import keeps the first 12 tiles per dashboard, drops the
+  rest, and states how many were dropped. The dashboard page renders each tile in-document as a
+  component (no iframe); every tile uses the dashboard URL's window and shared
+  filters. Export and import are JSON of these objects. A stored URL whose path is a known report
+  becomes a view (chart keys copied into `params`; window and filter keys are not). Entries whose
+  path is not a known report are dropped, with a count in the notice.
 - A response that is not JSON (a static host answering `/v1` with HTML) is a connection error
   pointing at `/settings`.
 
@@ -300,8 +324,8 @@ on a compacted copy of the real ledger.
 9. Usage measures aggregate in Go over every kept row, so an All-time window is unbounded in memory and the usage read sorts and parses JSON per row (benchmark headroom is 464 ms of 500 ms). Fix: group in SQL or add a usage rollup.
 10. Compaction and the archive: `Read` stops at a torn frame until `Repair` runs; compaction re-archives already-slim rows as lossy lines; the `complete` shortcut can skip rows before `compact_cursor`; the disk check ignores the VACUUM copy.
 11. The OpenCode `config` hook is captured and is not on the remove list, and it can carry provider keys. Decide whether to add it to the remove list in ingest and the plugin.
-12. `partial` is emitted only by `/query`; conversation totals cover only the returned events when a timeline is truncated; `time/tzdata` is not imported in serve, `tz=Local` is accepted, filter value counts and `top` are unbounded, and the locked-tenant 503 echoes the tenant path.
-13. Builder: zero dimensions with bucket `none` renders a chart with no valid type; `data-ready` is true while the previous chart is still shown. Dashboards: import bypasses the 12-tile cap, a fragment in a saved URL drops `embed=1`, the saved-view store does not validate stored entries on read, and `/dashboards` has no settle signal.
+12. `partial` is emitted only by `/query`; `time/tzdata` is not imported in serve, `tz=Local` is accepted, filter value counts and `top` are unbounded, and the locked-tenant 503 echoes the tenant path.
+13. Builder: zero dimensions with bucket `none` renders a chart with no valid type; `data-ready` is true while the previous chart is still shown. Dashboards: the saved-view store does not validate stored entries on read.
 14. The Executions sankey filters client-side over the loaded first page, so counts trail the totals until the user pages on.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
 
