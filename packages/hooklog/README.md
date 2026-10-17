@@ -1,5 +1,13 @@
 # hooklog
 
+**Consumers** — copies under `plugins/yakka/script/` and the OpenCode plugin queue files.
+
+**Build** — none (bash and Python stdlib).
+
+**Test** — `python3 -m unittest discover -s packages/hooklog/tests`.
+
+**Release** — ships as plugin files.
+
 Local, advisory capture of hook payloads as a session happens. All command hooks exit 0;
 OpenCode observers leave inputs and outputs unchanged. Captured events go to a queue directory,
 `${WORKFLOW_QUEUE:-~/.local/share/workflow/queue}`; `plugins/yakka/bin/workflow drain` ships them to the

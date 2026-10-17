@@ -1,12 +1,20 @@
 # @codyhamilton/opencode-workflow-hooks
 
+**Consumers** — OpenCode `file://` plugin registration.
+
+**Build** — none (OpenCode loads the TypeScript).
+
+**Test** — `node --test packages/opencode-workflow-hooks/tests/test_hooks.mjs` and `python3 -m unittest discover -s packages/opencode-workflow-hooks/tests`.
+
+**Release** — ships as plugin files (see also `packages/hooklog` for queue capture).
+
 OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus types** into
 `~/.local/share/workflow-plugin/hooklog/opencode/<session>.jsonl` and **approximates** Claude
 `PostToolBatch` soft signals:
 
 1. Buffer each `tool.execute.after` per session.
 2. Flush one batch per model step on `message.updated` or `session.idle`.
-3. Spawn `python/batch_flush_cli.py` → shared `gate_thresholds` / `post_tool_batch_signal` → append `tools/driver/.jev-signal-log.jsonl` (or `WORKFLOW_JEV_SIGNAL_LOG`).
+3. Spawn `python/batch_flush_cli.py` → shared `gate_thresholds` / `post_tool_batch_signal` → append `${XDG_STATE_HOME:-~/.local/state}/workflow/jev-signal-log.jsonl` (or `WORKFLOW_JEV_SIGNAL_LOG`).
 4. Optional analytics dual-write when `WORKFLOW_ANALYTICS_URL` is set (`host_kind: opencode` when `WORKFLOW_INSTALL_MODE=opencode`).
 
 **Advisory only** — never blocks tools or changes exit codes. Does not call `assert_phase --deterministic` or enforce Flash review guidance.
@@ -78,7 +86,7 @@ git pull origin master
 | `WORKFLOW_HOOKLOG_KICK` | on | Set `0` to disable the drain kick (at most one per 10 s) and the load prefetch |
 | `WORKFLOW_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
 | `WORKFLOW_REPO_ROOT` | auto (package → repo root) | Python gate imports |
-| `WORKFLOW_JEV_SIGNAL_LOG` | `tools/driver/.jev-signal-log.jsonl` | Signal JSONL path |
+| `WORKFLOW_JEV_SIGNAL_LOG` | `~/.local/state/workflow/jev-signal-log.jsonl` | Signal JSONL path (`$XDG_STATE_HOME/workflow/...` when set) |
 | `WORKFLOW_INSTALL_MODE` | `opencode` (set by plugin spawn) | Analytics `host_kind` |
 | `WORKFLOW_ANALYTICS_URL` | unset | Remote dual-write when set |
 | `WORKFLOW_ANALYTICS_TOKEN` | unset | Bearer token for analytics POST |

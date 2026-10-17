@@ -10,6 +10,8 @@ need bash, and a Windows-native harness opening a WSL repo is out of scope.
 
 ## Layout
 
+The monorepo separates **`packages/`** (libraries and the Go binary), **`tools/`** (maintainer automation), and **`plugins/yakka`** (the installable workflow plugin: skills, hooks, `script/`, `bin/`).
+
 | Path | Holds |
 |---|---|
 | `packages/workflow/` | Go module: `cmd/workflow`, `internal/`, and embedded analytics site |

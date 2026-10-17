@@ -9,7 +9,8 @@ import time
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-WRAPPER = os.path.join(ROOT, "bin", "workflow")
+PLUGIN_ROOT = os.path.join(ROOT, "plugins", "yakka")
+WRAPPER = os.path.join(PLUGIN_ROOT, "bin", "workflow")
 BUILD = os.path.join(ROOT, "tools", "release", "build.sh")
 GOBIN = os.path.expanduser("~/.local/go/bin")
 VERSION = "0.1.0"
@@ -63,7 +64,7 @@ class Base(unittest.TestCase):
 
     def fake_root(self, sums_for=None):
         root = os.path.join(self.tmp, "root")
-        shutil.copytree(os.path.join(ROOT, "bin"), os.path.join(root, "bin"))
+        shutil.copytree(os.path.join(PLUGIN_ROOT, "bin"), os.path.join(root, "bin"))
         return root
 
     def release_dir(self, binary, flip=False):
@@ -158,7 +159,7 @@ class WrapperTests(Base):
         open(stub, "w").write("#!/bin/sh\necho stub $WORKFLOW_ROOT $1\n")
         os.chmod(stub, 0o755)
         r = self.run_wrapper(go=False, WORKFLOW_BIN=stub)
-        self.assertEqual(r.stdout.strip(), "stub %s --version" % ROOT)
+        self.assertEqual(r.stdout.strip(), "stub %s --version" % PLUGIN_ROOT)
 
     def test_8_bash32_lint(self):
         src = open(WRAPPER).read()

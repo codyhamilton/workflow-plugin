@@ -5,16 +5,11 @@ The seams: what each skill owns, what passes between them, and the invariants th
 ## Component Map
 
 ```
-workflow-plugin/ (repo root — the `workflow` core plugin)
-├── .claude-plugin/{plugin.json, marketplace.json}
-├── .cursor-plugin/plugin.json
-├── skills/                    → core: cloud-safe, no interactive dead-ends
-│   ├── design/                → templates/{DESIGN,PROVENANCE}.md
-│   ├── refine/                → templates/brief.md
-│   ├── execute/
-│   ├── comprehensive-review/
-│   ├── close-out/
-│   └── post-build/            → briefs/{fixer,verifier,qa-planner,qa-driver}.md
+workflow-plugin/ (repo root)
+├── plugins/yakka/             → workflow plugin install root (skills, hooks, script/, bin/)
+├── packages/                  → workflow, hooklog, workflow-analytics, opencode-workflow-hooks
+├── tools/                     → driver, release, quality, transcript, … (maintainer/automation)
+├── .claude-plugin/marketplace.json, .cursor-plugin/marketplace.json  → source: plugins/yakka
 ├── .claude/skills/            → maintainer project skills (not installed by install.sh)
 │   └── {setup,iterate,jev-variants,transcript-parser,white-paper,workflow-tuning}/
 ├── docs/{OVERVIEW,ARCHITECTURE}.md, docs/automation/, docs/plans/, docs/analysis/

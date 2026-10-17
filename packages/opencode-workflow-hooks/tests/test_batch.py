@@ -17,6 +17,7 @@ _REPO = _PKG.parents[1]
 sys.path.insert(0, str(_PY))
 
 from batch_aggregator import OpenCodeBatchAggregator, repo_root, simulate_model_steps  # noqa: E402
+from batch_flush_cli import default_jev_signal_log_path  # noqa: E402
 
 JEV_PROOFS = _REPO / "docs/lab/RESEARCH/2026-09-30-jev-cheap-judgement-signals/proofs"
 sys.path.insert(0, str(JEV_PROOFS))
@@ -24,6 +25,25 @@ from gate_thresholds import evaluate_gate  # noqa: E402
 
 
 class BatchAggregatorTests(unittest.TestCase):
+    def test_default_signal_log_matches_driver(self) -> None:
+        driver_dir = _REPO / "tools" / "driver"
+        sys.path.insert(0, str(driver_dir))
+        from jev_signal_log import resolve_jev_signal_log_path  # noqa: E402
+
+        for env in (
+            {},
+            {"XDG_STATE_HOME": "/tmp/xdg-state"},
+            {"WORKFLOW_JEV_SIGNAL_LOG": "/tmp/custom-jev.jsonl"},
+        ):
+            os.environ.pop("WORKFLOW_JEV_SIGNAL_LOG", None)
+            os.environ.pop("XDG_STATE_HOME", None)
+            for k, v in env.items():
+                os.environ[k] = v
+            self.assertEqual(
+                default_jev_signal_log_path(),
+                resolve_jev_signal_log_path(),
+            )
+
     def test_repo_root_points_at_workflow_plugin(self) -> None:
         self.assertTrue((repo_root() / "tools" / "driver").is_dir())
 

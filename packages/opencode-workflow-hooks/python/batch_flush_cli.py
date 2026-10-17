@@ -8,9 +8,19 @@ import os
 import sys
 from pathlib import Path
 
-from batch_aggregator import OpenCodeBatchAggregator, repo_root
+from batch_aggregator import OpenCodeBatchAggregator
 
-DEFAULT_LOG = repo_root() / "tools" / "driver" / ".jev-signal-log.jsonl"
+
+def default_jev_signal_log_path() -> Path:
+    override = os.environ.get("WORKFLOW_JEV_SIGNAL_LOG")
+    if override:
+        return Path(override)
+    state_home = os.environ.get("XDG_STATE_HOME")
+    if state_home:
+        base = Path(state_home)
+    else:
+        base = Path.home() / ".local" / "state"
+    return base / "workflow" / "jev-signal-log.jsonl"
 
 
 def main() -> None:
@@ -18,7 +28,7 @@ def main() -> None:
     if not raw.strip():
         return
     payload = json.loads(raw)
-    log_path = Path(os.environ.get("WORKFLOW_JEV_SIGNAL_LOG", DEFAULT_LOG))
+    log_path = default_jev_signal_log_path()
     agg = OpenCodeBatchAggregator(log_path=log_path, cwd=payload.get("cwd"))
     session_id = str(payload.get("session_id") or "")
     transcript_path = str(payload.get("transcript_path") or "")
