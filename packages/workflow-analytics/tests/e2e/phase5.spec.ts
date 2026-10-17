@@ -164,8 +164,9 @@ test('a builder view saved and added to a dashboard survives a reload', async ({
 	await page.reload();
 	await expect(page.getByTestId('dash-item').filter({ hasText: 'Ops' })).toBeVisible();
 	await expect(page.getByTestId('dash-tile')).toHaveCount(1);
-	const frame = page.frameLocator('[data-testid="dash-tile"] iframe').first();
-	await expect(frame.getByTestId('builder-chart')).toBeVisible({ timeout: 15_000 });
+	await expect(page.getByTestId('dash-tile').getByTestId('builder-chart')).toBeVisible({
+		timeout: 15_000
+	});
 });
 
 // 5. Export the dashboard JSON and import it into a fresh browser profile.
@@ -179,7 +180,9 @@ test('a dashboard exports and imports into a fresh profile', async ({ page, brow
 	expect(download.suggestedFilename()).toBe('Ops.json');
 	const filePath = (await download.path())!;
 	const json = JSON.parse(readFileSync(filePath, 'utf8'));
-	expect(json).toMatchObject({ version: 1, name: 'Ops' });
+	expect(json).toMatchObject({ version: 2, name: 'Ops' });
+	expect(json.tiles).toHaveLength(1);
+	expect(json.tiles[0]).toMatchObject({ name: 'Cost split', report: 'builder' });
 
 	// A fresh context has empty localStorage; add the serve init script before the first navigation.
 	const ctx = await browser.newContext({ timezoneId: 'UTC' });
@@ -191,8 +194,9 @@ test('a dashboard exports and imports into a fresh profile', async ({ page, brow
 	await expect(fresh).toHaveURL(/\/dashboards\?d=/);
 	await expect(fresh.getByTestId('dash-item').filter({ hasText: 'Ops' })).toBeVisible();
 	await expect(fresh.getByTestId('dash-tile')).toHaveCount(1);
-	const frame = fresh.frameLocator('[data-testid="dash-tile"] iframe').first();
-	await expect(frame.getByTestId('builder-chart')).toBeVisible({ timeout: 15_000 });
+	await expect(fresh.getByTestId('dash-tile').getByTestId('builder-chart')).toBeVisible({
+		timeout: 15_000
+	});
 	await ctx.close();
 });
 
@@ -242,8 +246,7 @@ test('builder, dashboard and executions interactions settle under 1s', async ({ 
 	await expectSettled(page);
 	timings['builder-measure'] = performance.now() - t;
 
-	// (c) dashboard create-and-add. The dashboards route has no data-ready mark (its tiles are
-	// iframes), so this one measures to the tile appearing rather than expectSettled.
+	// (c) dashboard create-and-add: tile appears and the in-document builder chart mounts.
 	await page.goto('/builder');
 	await expectSettled(page);
 	await page.getByTestId('saveview-name').fill('Perf view');
@@ -257,6 +260,7 @@ test('builder, dashboard and executions interactions settle under 1s', async ({ 
 	await page.getByTestId('dash-add-select').selectOption({ label: 'Perf view' });
 	await page.getByTestId('dash-add').click();
 	await expect(page.getByTestId('dash-tile')).toHaveCount(1);
+	await expect(page.getByTestId('dash-tile').getByTestId('builder-chart')).toBeVisible();
 	timings['dashboard-create-add'] = performance.now() - t;
 
 	// (d) executions sankey link click (a client-side table filter).
