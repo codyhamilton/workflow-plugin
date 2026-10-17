@@ -19,7 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "hooklog"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages/hooklog"))
 import bodies
 import hookevents as he  # noqa: E402
 import lifecycle as lc  # noqa: E402

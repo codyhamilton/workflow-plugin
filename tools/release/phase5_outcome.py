@@ -42,12 +42,12 @@ def unittest_cmd(file, *names):
 
 
 def no_retired_refs():
-    paths = [ROOT / "hooks", ROOT / ".mcp.json", ROOT / "tools/hooklog/README.md", ROOT / "bin",
+    paths = [ROOT / "hooks", ROOT / ".mcp.json", ROOT / "packages/hooklog/README.md", ROOT / "bin",
              ROOT / "tools/release", ROOT / "packages/opencode-workflow-hooks/src",
              ROOT / "packages/opencode-workflow-hooks/README.md",
              ROOT / "packages/opencode-workflow-hooks/opencode.json.example"]
     for pat in ("*.json", "*.sh", "*.example.*"):
-        paths += (ROOT / "tools/hooklog").glob(pat)
+        paths += (ROOT / "packages/hooklog").glob(pat)
     files = []
     for p in paths:
         if p.is_dir():
@@ -71,8 +71,8 @@ def no_retired_refs():
 
 
 def retired_files_gone():
-    names = ["tools/hooklog/drain.py", "tools/hooklog/install-drain.sh",
-             "tools/hooklog/workflow-hooklog-drain.service", "tools/hooklog/workflow-hooklog-drain.timer"]
+    names = ["packages/hooklog/drain.py", "packages/hooklog/install-drain.sh",
+             "packages/hooklog/workflow-hooklog-drain.service", "packages/hooklog/workflow-hooklog-drain.timer"]
     return not any((ROOT / n).exists() for n in names)
 
 
@@ -82,7 +82,8 @@ def main():
         ("version-clean-build", lambda: sh(unittest_cmd("tools.release.test_release", "WrapperTests.test_1_clean_cache_build"))),
         ("concurrent-first-runs", lambda: sh(unittest_cmd("tools.release.test_release", "WrapperTests.test_2_concurrent"))),
         ("release-build", lambda: sh(unittest_cmd("tools.release.test_release", "BuildTests.test_7_build_sh"))),
-        ("write-replay", lambda: sh([sys.executable, "-m", "unittest", "-v", "tools.hooklog.tests.test_write_surfaces"])),
+        ("write-replay", lambda: sh([sys.executable, "-m", "unittest", "discover", "-s", "packages/hooklog/tests",
+                                     "-p", "test_write_surfaces.py", "-v"])),
         ("no-retired-refs", no_retired_refs),
         ("retired-files-gone", retired_files_gone),
     ]

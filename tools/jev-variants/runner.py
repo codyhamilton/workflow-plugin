@@ -27,7 +27,7 @@ from jev_variants import (canonical, expand, load_corpus, load_registry, read_le
                           validate_registry, validate_round)
 from state_builder import build_state  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "hooklog"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages/hooklog"))
 from hooklog import scrub  # noqa: E402
 
 SEP = "__"
