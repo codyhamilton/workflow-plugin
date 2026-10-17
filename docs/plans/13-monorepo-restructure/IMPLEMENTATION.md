@@ -371,6 +371,36 @@ Deviations: none. The report is a following commit so the rename commit stays co
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
+### 5-04-npm-runtime-packages
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-04-npm-runtime-packages.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-04-npm-runtime-packages.md`.
+Worker: Composer (`composer-2.5`), agent `bc-c474769f-abc5-5bd0-9b3a-865b7b559292`. The harness did not report turns or final context.
+Commit: `30088a5` on `cursor/phase5-npm-packages-224a`, fast-forwarded onto this branch. Ran alongside `5-06` in a separate worktree.
+
+Built: `@codyhamilton/yakka-analytics` and `@codyhamilton/opencode-yakka-hooks`. Storage keys `yakka-analytics-*`. Runtime env `YAKKA_*`. Export `yakka-signals.json` / `YakkaSignalsPlugin`. Signal-log default `${XDG_STATE_HOME:-~/.local/state}/yakka/jev-signal-log.jsonl`. Analytics setups build `packages/yakka` and set `YAKKA_CHECKS_DIR`. Hooks tests 8 pass with `--experimental-strip-types`. Batch tests 6 OK. Analytics e2e not run.
+
+Surfaces: `packages/yakka-analytics/**`, `packages/opencode-yakka-hooks/**`.
+
+Deviations: `test_hooks.mjs` still passes `WORKFLOW_QUEUE` and `WORKFLOW_HOOKLOG_KICK` into `packages/hooklog/spool.sh` until hooklog renames those vars. `test_batch.py` still sets `WORKFLOW_SIGNAL_STATE_DIR` and `WORKFLOW_ANALYTICS_URL` for lab proofs. The driver parity assertion was dropped because `tools/driver` still reads `WORKFLOW_JEV_SIGNAL_LOG` (Phase 6). Hosted spec keeps the `workflow-analytics-placeholder` marker.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 5-06-quality-catalogue-and-skill-citations
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/5-06-quality-catalogue-and-skill-citations.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/5-06-quality-catalogue-and-skill-citations.md`.
+Worker: Composer (`composer-2.5`), agent `bc-93f3a899-ee79-5fe3-a462-643a7b7f0870`. The harness did not report turns or final context.
+Commit: `50d3dec` on `cursor/phase5-quality-citations-224a`, merged onto this branch. Ran alongside `5-04` in a separate worktree.
+
+Built: `tools/quality/quality.py` catalogue path is `packages/yakka/catalogue`. Skill rubric citations in `plugins/yakka/skills/execute/SKILL.md` and `plugins/yakka/skills/refine/templates/brief.md` point at `packages/yakka/catalogue/checks/execution-report.json`. The other owned quality modules had no old catalogue path. `python3 -m unittest discover -s tools/quality/tests` → 26 OK.
+
+Surfaces: the brief's owned paths.
+
+Deviations: `discover -s tools/quality` still runs 0 tests. The suite lives under `tools/quality/tests`. That mismatch predates this unit.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
 ### Phase 5 module-path rewrite (Decision 1 rebase protocol)
 
 From repo root, after `5-01` directory renames:
