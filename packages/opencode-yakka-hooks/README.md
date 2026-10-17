@@ -32,11 +32,11 @@ prompt bodies; the next three carry secrets (API keys, auth headers, environment
 part. Their hooks stay registered and write nothing. The list is declared once in `src/index.ts`
 between `remove-list` markers, and a test asserts the Go ingest policy carries an equal list.
 
-Threshold constants for documentation: `yakka-signals.json` (source of truth remains `gate_thresholds.py` in the workflow-plugin lab).
+Threshold constants for documentation: `yakka-signals.json` (source of truth remains `gate_thresholds.py` in the yakka lab).
 
-## Install (workflow-plugin checkout)
+## Install (yakka checkout)
 
-From a clone of [workflow-plugin](https://github.com/codyhamilton/workflow-plugin):
+From a clone of [yakka](https://github.com/codyhamilton/yakka):
 
 ```bash
 # Skills (separate from this plugin)
@@ -48,7 +48,7 @@ Register the plugin in **project** or **global** `opencode.json` (restart OpenCo
 ```json
 {
   "plugin": [
-    "file:///absolute/path/to/workflow-plugin/packages/opencode-yakka-hooks/src/index.ts"
+    "file:///absolute/path/to/yakka/packages/opencode-yakka-hooks/src/index.ts"
   ]
 }
 ```
@@ -68,7 +68,7 @@ See [`opencode.json.example`](opencode.json.example).
 ### codyh-ubuntu (Coding Harness Manager)
 
 ```bash
-cd ~/workspace/workflow-plugin   # or your clone path
+cd ~/workspace/yakka   # or your clone path
 git pull origin master
 ./install.sh --opencode-skills
 

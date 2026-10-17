@@ -95,7 +95,7 @@ def _scan_plugin_executed_paths(repo: Path) -> list[Violation]:
         p = repo / "plugins" / "yakka" / name
         if p.is_file():
             targets.append(p)
-    wf = repo / "plugins" / "yakka" / "bin" / "workflow"
+    wf = repo / "plugins" / "yakka" / "bin" / "yakka"
     if wf.is_file():
         targets.append(wf)
 

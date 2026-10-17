@@ -10,12 +10,12 @@ import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PLUGIN_ROOT = os.path.join(ROOT, "plugins", "yakka")
-WRAPPER = os.path.join(PLUGIN_ROOT, "bin", "workflow")
+WRAPPER = os.path.join(PLUGIN_ROOT, "bin", "yakka")
 BUILD = os.path.join(ROOT, "tools", "release", "build.sh")
 GOBIN = os.path.expanduser("~/.local/go/bin")
-VERSION = "0.1.0"
+VERSION = open(os.path.join(PLUGIN_ROOT, "bin", "VERSION")).read().strip()
 SYS_PATH = "/usr/bin:/bin"
-LINE = re.compile(r"^workflow 0\.1\.0 [0-9a-f]{12}$")
+LINE = re.compile(r"^yakka %s [0-9a-f]{12}$" % re.escape(VERSION))
 
 
 def goenv(name):
@@ -41,8 +41,8 @@ class Base(unittest.TestCase):
         os.makedirs(self.home)
         os.makedirs(self.cache)
         self.os, self.arch = plat()
-        self.bin_name = "workflow-%s-%s" % (self.os, self.arch)
-        self.vdir = os.path.join(self.cache, "workflow", VERSION)
+        self.bin_name = "yakka-%s-%s" % (self.os, self.arch)
+        self.vdir = os.path.join(self.cache, "yakka", VERSION)
 
     def env(self, go=True, **extra):
         path = (GOBIN + ":" + SYS_PATH) if go else SYS_PATH
@@ -122,8 +122,8 @@ class WrapperTests(Base):
         shutil.copy(self.built(), built_copy)
         shutil.rmtree(self.vdir)
         rel, root = self.release_dir(built_copy)
-        r = self.run_wrapper(wrapper=os.path.join(root, "bin", "workflow"), go=False,
-                             WORKFLOW_RELEASE_URL="file://" + rel)
+        r = self.run_wrapper(wrapper=os.path.join(root, "bin", "yakka"), go=False,
+                             YAKKA_RELEASE_URL="file://" + rel)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertRegex(r.stdout.strip(), LINE)
         self.assertTrue(os.path.exists(self.built()))
@@ -134,15 +134,21 @@ class WrapperTests(Base):
         shutil.copy(self.built(), built_copy)
         shutil.rmtree(self.vdir)
         rel, root = self.release_dir(built_copy, flip=True)
-        r = self.run_wrapper(wrapper=os.path.join(root, "bin", "workflow"), go=False,
-                             WORKFLOW_RELEASE_URL="file://" + rel)
+        r = self.run_wrapper(wrapper=os.path.join(root, "bin", "yakka"), go=False,
+                             YAKKA_RELEASE_URL="file://" + rel)
         self.assertIn("checksum mismatch", r.stderr)
         self.assertNotEqual(r.returncode, 0)
         self.assertFalse(os.path.exists(self.built()))
         self.assertEqual([n for n in os.listdir(self.vdir) if n.startswith("tmp.")], [])
 
     def test_6_no_go_no_asset(self):
-        r = self.run_wrapper(go=False)
+        mod = os.path.join(ROOT, "packages", "yakka", "go.mod")
+        hidden = mod + ".release_test_hidden"
+        shutil.move(mod, hidden)
+        try:
+            r = self.run_wrapper(go=False)
+        finally:
+            shutil.move(hidden, mod)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("no release asset and no Go toolchain", r.stderr)
 
@@ -150,15 +156,16 @@ class WrapperTests(Base):
         d = os.path.join(self.home, ".local", "go", "bin")
         os.makedirs(d)
         os.symlink(os.path.join(GOBIN, "go"), os.path.join(d, "go"))
-        r = self.run_wrapper(go=False, GOROOT=goenv("GOROOT"))
+        # Prefer Go 1.27+ on PATH; when /usr/bin/go is hidden, the HOME/.local/go symlink is used.
+        r = self.run_wrapper(go=False, GOROOT=goenv("GOROOT"), PATH=GOBIN + ":" + SYS_PATH)
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertRegex(r.stdout.strip(), LINE)
 
-    def test_10_workflow_bin(self):
+    def test_10_yakka_bin(self):
         stub = os.path.join(self.tmp, "stub")
-        open(stub, "w").write("#!/bin/sh\necho stub $WORKFLOW_ROOT $1\n")
+        open(stub, "w").write("#!/bin/sh\necho stub $YAKKA_ROOT $1\n")
         os.chmod(stub, 0o755)
-        r = self.run_wrapper(go=False, WORKFLOW_BIN=stub)
+        r = self.run_wrapper(go=False, YAKKA_BIN=stub)
         self.assertEqual(r.stdout.strip(), "stub %s --version" % PLUGIN_ROOT)
 
     def test_8_bash32_lint(self):
@@ -179,12 +186,12 @@ class BuildTests(Base):
         r = subprocess.run(["bash", BUILD], env=env,
                            capture_output=True, text=True, timeout=600, cwd=ROOT)
         self.assertEqual(r.returncode, 0, r.stderr)
-        dirty = subprocess.run(["git", "status", "--porcelain", "packages/workflow/internal/serve/site"],
+        dirty = subprocess.run(["git", "status", "--porcelain", "packages/yakka/internal/serve/site"],
                                capture_output=True, text=True, cwd=ROOT)
         self.assertEqual(dirty.stdout, "")
         names = sorted(os.listdir(out))
-        self.assertEqual(names, ["workflow-darwin-amd64", "workflow-darwin-arm64",
-                                 "workflow-linux-amd64", "workflow-linux-arm64"])
+        self.assertEqual(names, ["yakka-darwin-amd64", "yakka-darwin-arm64",
+                                 "yakka-linux-amd64", "yakka-linux-arm64"])
         lines = open(sums).read().splitlines()
         self.assertEqual(len(lines), 4)
         self.assertEqual([l.split("  ")[1] for l in lines], names)
