@@ -9,61 +9,79 @@ cursor:
 
 ## What changed
 
-Nothing verified on `https://yakka.build`. 4-02 released machine `8047ddb6475de8`, and that origin still returns Cloudflare 525. No ingest, revoke, restart, or CORS check was run. `https://yakka.fly.dev` was not used as a substitute.
+Checked `https://yakka.build` after the ownership TXT was published and the certificate issued. Health, the GitHub login redirect, `WORKFLOW_SERVE_KEYS`, and restart persistence hold. The CORS sentence does not: `WORKFLOW_SERVE_CORS_ORIGINS` is unset and the Pages origin is still unknown. It was not invented.
 
 ## Checks
 
-**Before** (from the previous report): host did not resolve, no machines.
+**Before** (certificate Not verified): `https://yakka.build/v1/health` was Cloudflare 525.
 
-**After** (release exists; close origin does not answer):
+**After** (Let's Encrypt certificate verified; machine `8047ddb6475de8` restarted once during the check):
 
 ```
-curl -sS -o /dev/null -w '%{http_code}' https://yakka.build/v1/health
-→ 525
-→ server: cloudflare
-→ body: error code: 525
+fly certs check yakka.build -a yakka
+→ Issued, Let's Encrypt, verified
 
-curl -sS -D - -o /dev/null https://yakka.build/oauth/login
-→ 525
-→ server: cloudflare
-
-curl -sS -D - -o /dev/null http://yakka.build/v1/health
-→ 301 Location: https://yakka.build/v1/health
+curl https://yakka.build/v1/health
+→ 200 {"ok":true,"version":"dev",...}
 → via: 1.1 fly.io
 
-fly certs check yakka.build -a yakka
-→ Not verified
-→ add TXT _fly-ownership.yakka.build = app-5ydex1q
-
-dig +short TXT _fly-ownership.yakka.build
-→ empty
-
-https://yakka.fly.dev/v1/health
-→ 200 (not the close condition)
-
-https://yakka.fly.dev/oauth/login
-→ 302 to https://github.com/login/oauth/authorize
+curl https://yakka.build/oauth/login
+→ 302 Location https://github.com/login/oauth/authorize
 → redirect_uri=https://yakka.build/oauth/callback
-→ not the close condition
+→ client_id present, not recorded
+
+fly secrets list -a yakka
+→ GITHUB_OAUTH_CLIENT_ID
+→ GITHUB_OAUTH_CLIENT_SECRET
+→ no WORKFLOW_SERVE_KEYS
+
+fly config env
+→ WORKFLOW_PUBLIC_URL, WORKFLOW_SERVE_ADDR, WORKFLOW_SERVE_DATA
+→ no WORKFLOW_SERVE_CORS_ORIGINS
 ```
 
-No ingest, revoke, restart, or CORS transcript. Restart persistence needs a session on the close origin, and the Pages origin for `WORKFLOW_SERVE_CORS_ORIGINS` is still unknown.
+Using Cody's existing admin session (not printed), tenant `p4restart`:
+
+```
+POST /v1/tokens read_write  → 201 id b96f310fbd8afc4597f777c63849c088 last4 rXSw
+POST /v1/tokens read_write  → 201 id 9f03e391efd9e99d324456bf42448407 last4 7Cis
+POST /v1/ingest live        → 200 accepted id p4#live-before
+POST /v1/tokens/9f03e391efd9e99d324456bf42448407/revoke → 204
+POST /v1/ingest revoked     → 401 unauthorized
+fly machines restart 8047ddb6475de8
+GET /v1/health              → 200
+POST /v1/ingest live        → 200 accepted id p4#live-after
+POST /v1/ingest p4#live-before again → 200 duplicate (same tenant)
+POST /v1/ingest revoked     → 401 unauthorized
+GET /v1/analytics/summary?tenant=p4restart → 200 conversations 1, hook_events 1
+```
+
+The live verification token was revoked after that transcript (204, next ingest 401). Plaintext was not written down.
+
+CORS, env still unset:
+
+```
+GET /v1/analytics/summary?tenant=p4restart
+  Origin: https://evil.example  → 200, no Access-Control-Allow-* headers
+```
+
+No allowed-origin check. There is no Pages hostname in the design or `wrangler.toml` (`name = "workflow-analytics"` only).
+
+`docs/design/07-analytics-site.md` names app `yakka`, `https://yakka.build`, and the Pages pasted-token path.
 
 ## Deviations
 
-None. The brief says to stay blocked when the public origin is not proven and not to invent a fly.dev or local stand-in.
+The CORS half of the brief was not run. The brief says to set `WORKFLOW_SERVE_CORS_ORIGINS` to the real Pages origin. This run was told not to invent one.
 
 ## Contract notes
 
-Health, the GitHub redirect, restart, and CORS are all on `https://yakka.build`. That URL is a Cloudflare 525 because Fly has no certificate for the name. Orange-cloud DNS is expected. The missing record is `TXT _fly-ownership.yakka.build` = `app-5ydex1q`. Cloudflare SSL must stay Full (strict): the app's port 80 response is a 301 to HTTPS, so Flexible will loop. `WORKFLOW_SERVE_CORS_ORIGINS` is unset because the Pages origin is still unknown.
+Health, the callback, unset `WORKFLOW_SERVE_KEYS`, and restart/revocation hold on `https://yakka.build`. The outcome sentence that needs `WORKFLOW_SERVE_CORS_ORIGINS` set to the Pages origin is not proven.
 
 ## Unfinished
 
-1. Publish `TXT _fly-ownership.yakka.build` = `app-5ydex1q`. Leave the Cloudflare proxy on. Do not point the apex A/AAAA at `137.66.6.45` / `2a09:8280:1::1bb:db4d:0`. Keep SSL Full (strict).
-2. `fly certs check yakka.build -a yakka` until the certificate is issued. Then `https://yakka.build/v1/health` must be 200 and `https://yakka.build/oauth/login` must 302 to GitHub with `redirect_uri` `https://yakka.build/oauth/callback`.
-3. Re-run ingest before and after `fly machines restart`, and confirm the revoked bearer is still 401. `fly secrets list -a yakka` must still omit `WORKFLOW_SERVE_KEYS`.
-4. CORS still needs the real Pages origin in `WORKFLOW_SERVE_CORS_ORIGINS`. Do not invent one.
+1. Cody names the Pages origin. Set `WORKFLOW_SERVE_CORS_ORIGINS` to that exact origin. Do not invent one.
+2. Then `GET /v1/analytics/summary?tenant=p4restart` with a bearer and `Origin` set to that origin must return `Access-Control-Allow-Origin` equal to it and no `Access-Control-Allow-Credentials`. A different origin must get no `Access-Control-Allow-*` headers. The live token from this check is already revoked; issue a new read token for that request.
 
 ## Bugs
 
-None observed on the process. `https://yakka.fly.dev/v1/health` is 200. The custom hostname's TLS handshake to Fly fails, which is the missing certificate, not an app error.
+None. The summary window does not count the pre-restart fact because its `ts` was 1. The post-restart fact used a current timestamp and showed up as `hook_events: 1`.
