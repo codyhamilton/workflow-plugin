@@ -12,3 +12,17 @@ Starting HEAD: `e1f01b4` on `cursor/python-local-client`.
 Refined in `df7e427` into four units. 1-01, then 1-02, then 1-03 share `plugins/yakka/client/yakka.py`. 1-04 runs alongside that chain. Briefs say not to push; the orchestrator merges alongside worktrees onto `cursor/python-local-client` and pushes that ref only.
 
 `artifact_feedback` on the four phase 1 briefs: unreachable. Refine reported the same. The namespace was checked again after the briefs landed and was still in error.
+
+### 1-01-clientconfig-keys-secrets
+
+- Built: `plugins/yakka/client/yakka.py` loads config, derives keys, and scrubs secrets. `drain` exits 2 with `yakka drain: not implemented`. Other commands exit 2 with `unknown command`. Ported tests live in `test_clientconfig.py`, `test_keys.py`, and `test_secrets.py`.
+- Commit: `97b58d7`, on the branch via fast-forward. Report: `docs/plans/16-python-local-client/reports/1-01-clientconfig-keys-secrets.md`.
+- Deviations: none. No contradiction with the brief.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+### 1-04-hook-kick
+
+- Built: `spool.sh` and the OpenCode `["drain"]` spawn start `python3 plugins/yakka/client/yakka.py drain` when `YAKKA_BIN` is unset. Design 2 names that process. `YAKKA_BIN` set still execs that program with `drain`.
+- Commit: `a189949`, merged in `f04757e`. Report: `docs/plans/16-python-local-client/reports/1-04-hook-kick.md`.
+- Deviations: the new OpenCode unset-bin test sleeps 10 seconds so it runs after `kickDrain`'s module-level cooldown. Not a contract contradiction; the brief is unchanged.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
