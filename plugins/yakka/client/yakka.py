@@ -489,21 +489,7 @@ class _ReadResult:
 
 
 def _fact_json(v: dict[str, Any]) -> bytes:
-    def _default(o: Any) -> Any:
-        if isinstance(o, _Number):
-            if any(c in o.s for c in ".eE"):
-                return float(o.s)
-            try:
-                return int(o.s)
-            except ValueError:
-                return float(o.s)
-        raise TypeError(type(o))
-
-    return (
-        json.dumps(v, ensure_ascii=False, sort_keys=True, default=_default).encode(
-            "utf-8"
-        )
-    )
+    return _serialize_json_value(v).encode("utf-8")
 
 
 def Build(ctx: Any, files: List[File]) -> List[Output]:
@@ -1043,8 +1029,14 @@ class HTTPSink:
     def Send(
         self, ctx: "DrainContext", facts: List[bytes]
     ) -> Tuple[DrainResponse, Optional[BaseException]]:
-        parsed = [json.loads(f) for f in facts]
-        body = json.dumps({"facts": parsed}).encode("utf-8")
+        raw_facts: List[bytes] = []
+        for f in facts:
+            try:
+                json.loads(f)
+            except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
+                return DrainResponse(), _ERR_NETWORK
+            raw_facts.append(f)
+        body = b'{"facts":[' + b",".join(raw_facts) + b"]}"
         url = self.Endpoint.rstrip("/") + "/v1/ingest"
         req = urllib.request.Request(url, data=body, method="POST")
         req.add_header("Content-Type", "application/json")

@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import unittest
 from typing import Any
+from unittest import mock
 
 import yakka
 
@@ -428,6 +429,47 @@ class TestSecretInCommittedBlob(unittest.TestCase):
         for f in out.Facts:
             s = f if isinstance(f, (bytes, bytearray)) else json.dumps(f).encode()
             self.assertNotIn(sec.encode(), s)
+
+
+class TestNumberLiteralRoundTrip(unittest.TestCase):
+    def test_ts_nanosecond_literal_in_build_and_httpsink(self) -> None:
+        ts = "1729000000.123456789"
+        payload = {"hook_event_name": "Stop", "session_id": "s1"}
+        event = payload["hook_event_name"]
+        data = (
+            f'{{"ts":{ts},"harness":"claude","event":{json.dumps(event)}}}\n'
+            + json.dumps(payload, separators=(",", ":"))
+        ).encode()
+        out = yakka.Build(None, [yakka.File(Name="conv-1", Data=data)])[0]
+        self.assertEqual(len(out.Facts), 1)
+        fact = out.Facts[0]
+        if not isinstance(fact, (bytes, bytearray)):
+            fact = fact.encode()
+        self.assertIn(f'"ts":{ts}'.encode(), fact)
+
+        captured: list[bytes] = []
+        resp_body = b'{"results":[{"id":"conv-1#0","status":"accepted"}]}'
+
+        class _FakeResp:
+            status = 200
+            headers: dict[str, str] = {}
+
+            def read(self, n: int) -> bytes:
+                return resp_body
+
+        def fake_urlopen(req: Any, timeout: float = 30.0) -> _FakeResp:
+            captured.append(req.data)
+            return _FakeResp()
+
+        sink = yakka.HTTPSink(Endpoint="http://127.0.0.1:9", Key="k")
+        ctx = yakka.DrainContext.with_timeout(30.0)
+        with mock.patch("urllib.request.urlopen", fake_urlopen):
+            resp, err = sink.Send(ctx, [bytes(fact)])
+        self.assertIsNone(err)
+        self.assertEqual(resp.Status, 200)
+        self.assertEqual(len(captured), 1)
+        self.assertIn(ts.encode(), captured[0])
+        self.assertIn(f'"ts":{ts}'.encode(), captured[0])
 
 
 class TestWritePaths(unittest.TestCase):

@@ -42,11 +42,13 @@ The OpenCode test for an unset `YAKKA_BIN` waits out the module-level kick coold
 
 ## Review
 
-Independent review started at `b9c2a42` and finished on `74c82fa`. Verdict PASS. One high finding: an HTTP 200 whose body was JSON but not a results object aborted the drain. Go retries that body. The fix matches that rule and a ported test keeps the queue file. Stale README and design sentences that still described a downloaded binary were corrected in the same review. No blocker or high remains.
+Independent review started at `b9c2a42` and the first pass finished on `74c82fa`. An HTTP 200 whose body was JSON but not a results object aborted the drain. Go retries that body. That fix matches the Go rule, and a ported test keeps the queue file. Stale README and design sentences that still described a downloaded binary were corrected in the same pass.
+
+A later pass of the same SHA found a second high: `Build` and `HTTPSink.Send` turned `ts` through float64, so a spool timestamp such as `1729000000.123456789` changed and the row hash diverged from Go. `_fact_json` now keeps the digit text, and `Send` posts the fact bytes unchanged. `test_ts_nanosecond_literal_in_build_and_httpsink` locks that. No blocker or high remains after that fix.
 
 ## QA
 
-There was no separate QA file. The build record ran the ported suite on Python 3.12 and 3.10, the Go client tests that still boot `yakka serve`, the hooklog surface tests, the OpenCode hook tests, and the wrapper tests. This review re-ran `python3 -m unittest discover -s plugins/yakka/client -t plugins/yakka/client -p 'test_*.py'` on 3.12.3: 51 tests, exit 0, including the unreadable-200 case.
+There was no separate QA file. The build record ran the ported suite on Python 3.12 and 3.10, the Go client tests that still boot `yakka serve`, the hooklog surface tests, the OpenCode hook tests, and the wrapper tests. Review re-ran `python3 -m unittest discover -s plugins/yakka/client -t plugins/yakka/client -p 'test_*.py'` on 3.12.3: 52 tests, exit 0, including the unreadable-200 case and the nanosecond `ts` literal.
 
 ## Residual Risks
 
@@ -54,6 +56,14 @@ The plugin drain and the drain inside `yakka serve` are two implementations with
 
 ## Follow-ups
 
-None.
+These stayed after the highs were fixed. They are parity gaps with the Go client, not a second behavior the design asked for.
+
+- Queued age is printed as a whole number of seconds. Go prints a rounded duration (`3s`, `1m30s`), with halves away from zero.
+- A 404 from artifact feedback adds `nothing queued or rejected locally`. Go uses that sentence only when the service is unreachable.
+- Secret patterns treat `\b` as a Unicode boundary. Go's RE2 `\b` is ASCII, so a token after a non-ASCII letter is scrubbed there and not here.
+- An invalid `client.toml` exits the standalone drain. Go keeps the file and retries inside the lock. The half-set env pair still exits before a request, in both.
+- `HTTPSink.Send` maps `URLError` and `OSError` to a retry. A short read, or a key that is not a legal header, escapes that path. The header failure's text includes `Bearer` and the key. Go returns a fixed network error and does not return the key.
+- Redirects copy `Authorization` onto the next request, including another host. Go drops the header unless the new host is the same host or a subdomain.
+- A non-UTF-8 byte on MCP stdio raises `UnicodeDecodeError` and ends the process. Go returns a parse error and keeps reading.
 
 The contracts that outlive this change are in [design 2](../design/02-edge-capture.md), [design 3](../design/03-remote-service.md), [design 4](../design/04-advisory-surface.md), and [design 5](../design/05-distribution.md).
