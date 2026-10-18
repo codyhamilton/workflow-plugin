@@ -2,7 +2,7 @@
 
 ## Repo
 
-- URL: https://github.com/codyhamilton/workflow-plugin
+- URL: https://github.com/codyhamilton/yakka
 - Commit: in-tree fixture. `verify.py` rebuilds git history from `reference/DESIGN.md` and `reference/expected.json`. There is no external pinned SHA and no second clone.
 
 ## Task
