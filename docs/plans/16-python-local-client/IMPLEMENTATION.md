@@ -83,3 +83,10 @@ Refined in `ca5bbb7` into two units. 2-01 owns the Python `mcp` command and its 
 - Commit: `61b8b58`, fast-forwarded onto the branch. Report: `docs/plans/16-python-local-client/reports/2-02-mcp-registrations.md`.
 - Deviations: none named. The report's frontmatter names the worker; the brief template has no identity frontmatter. Not a contract contradiction; the brief is unchanged.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+### 2-01-mcp-command
+
+- Built: `python3 plugins/yakka/client/yakka.py mcp` is a stdio JSON-RPC server with `artifact_feedback`, `list_checks`, and `search_artifacts`. `test_mcp.py` ports `TestShim`. `Running()` closes the lock file when `flock` is busy. `test_drain.py` closes the fake HTTP server after shutdown.
+- Commit: `b24f344`, merged in `0c909e3`. Report: `docs/plans/16-python-local-client/reports/2-01-mcp-command.md`.
+- Deviations: none named. No contradiction with the brief. The worker did not run the 3.10 unittest gate (`python3.10` was absent). `test_half_set_env_refusal_drain` can fail with `Address already in use` on `127.0.0.1:8770` when that port is held; a rerun passed when it was free.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
