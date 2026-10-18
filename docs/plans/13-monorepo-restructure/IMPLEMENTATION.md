@@ -539,3 +539,9 @@ Built: `install.sh` and cloud bootstrap use `YAKKA_*`, `plugins/yakka`, `~/.cach
 Built: `WORKFLOW_ALIGNMENT_*` is `YAKKA_ALIGNMENT_*` and the TypeSafe question id is `yakka_alignment`. The jev-variants fixture install root uses `yakka`. Surfaces: `tools/transcript/lib/jev_client.py`, `tools/jev-variants/case4/build4.py`. Deviations: none. Left `pair.py` corpus slug `workflow-plugin` and the `workflow_report` fixture field, as the brief required. Transcript tests 11 OK; jev-variants tests 43 OK. Commit `fe1687c`. Agent `bc-85aeee90-118e-51b3-8946-00600dd2157f` reported done. The harness did not report turns or final context.
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 6-03-driver-and-trailer-eval
+
+Built: one shared trailer-key list in `tools/driver/trailer_keys.py`. `resolve` and `report` accept `Workflow-Phase` and `Yakka-Phase`, and both report fences. Driver env and the signal log use `YAKKA_*` and `~/.local/state/yakka/jev-signal-log.jsonl`. `check_skills.py` uses `yakka-tuning` and the yakka install paths. Trailer-completeness `verify.py` runs checks 1–4 for each key. Surfaces: `tools/driver/**`, `evals/scenarios/trailer-completeness/**`. Deviations: two `test_cursor_setup_*` cases skip because `docs/lab/bootstrap/cursor-cloud-setup.sh` still calls `bootstrap-workflow-skills.sh` (outside the brief). `test_outcome_scenario.py` ignores the new `once.skip_reason` wording. Commit `c9d5d15`. Agent `bc-f0f28f90-1745-53b4-8fca-1172fcf355e7` reported done with concerns. The harness did not report turns or final context. Driver tests: 74 OK, 2 skipped. `verify.py` exit 0 for both keys.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
