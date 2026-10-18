@@ -26,6 +26,22 @@ PHASE5_FILES = (
     "plugins/yakka/.codex-mcp.json",
 )
 
+PHASE6_PREFIXES = (
+    "plugins/yakka/skills/",
+    ".claude/skills/",
+    "tools/",
+)
+
+PHASE6_FILES = (
+    "install.sh",
+    ".gitignore",
+    "plugins/yakka/.claude-plugin/plugin.json",
+    "plugins/yakka/.cursor-plugin/plugin.json",
+    "plugins/yakka/.codex-plugin/plugin.json",
+    ".cursor-plugin/marketplace.json",
+    ".claude-plugin/marketplace.json",
+)
+
 GLOBAL_SKIP_PREFIXES = (
     "docs/plans/",
     "docs/lab/",
@@ -129,6 +145,12 @@ def in_phase5_scope(rel: str) -> bool:
     return any(rel.startswith(p) for p in PHASE5_PREFIXES)
 
 
+def in_phase6_scope(rel: str) -> bool:
+    if rel in PHASE6_FILES:
+        return True
+    return any(rel.startswith(p) for p in PHASE6_PREFIXES)
+
+
 def globally_excluded(rel: str) -> bool:
     if any(rel.startswith(p) for p in GLOBAL_SKIP_PREFIXES):
         return True
@@ -218,6 +240,8 @@ def files_for_scope(scope: str) -> list[str]:
     all_files = git_ls_files()
     if scope == "phase5":
         return sorted(f for f in all_files if in_phase5_scope(f) and not globally_excluded(f))
+    if scope == "phase6":
+        return sorted(f for f in all_files if in_phase6_scope(f) and not globally_excluded(f))
     if scope == "all":
         return sorted(f for f in all_files if not globally_excluded(f))
     raise SystemExit("unknown scope: %s" % scope)
@@ -225,7 +249,7 @@ def files_for_scope(scope: str) -> list[str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scope", choices=("phase5", "all"), default="phase5")
+    ap.add_argument("--scope", choices=("phase5", "phase6", "all"), default="phase5")
     args = ap.parse_args()
     failures: list[str] = []
     for rel in files_for_scope(args.scope):

@@ -15,6 +15,10 @@ class ScanResidualNamesTests(unittest.TestCase):
         r = subprocess.run([sys.executable, str(SCAN), "--scope", "phase5"], cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
 
+    def test_phase6_clean_in_repo(self):
+        r = subprocess.run([sys.executable, str(SCAN), "--scope", "phase6"], cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
     def test_fixture_hit(self):
         import importlib.util
 

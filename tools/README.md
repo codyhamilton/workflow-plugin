@@ -8,6 +8,6 @@ Direction: **`plugins/yakka` → packages. Packages → packages. Tools → anyt
 | `driver` | Phase closure primitives |
 | `interception` | TypeSafe lever and window-status joins |
 | `jev-variants` | Variant-search registry |
-| `quality` | Legacy quality service; catalogue lives in `packages/workflow` |
+| `quality` | Legacy quality service; catalogue lives in `packages/yakka` |
 | `release` | Four-platform binary build |
 | `transcript` | Session cost metrics |
