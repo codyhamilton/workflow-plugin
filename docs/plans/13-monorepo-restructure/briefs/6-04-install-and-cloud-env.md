@@ -53,7 +53,7 @@ Settled: Phase 3 Carried item 1 is not this unit.
 
 Before:
 
-- `python3 -m unittest tools/driver/tests/test_install_route.py` → fails on path/env expectations (record failing assertion).
+- `python3 -m unittest tools/driver/tests/test_install_route.py` → fails on path/env expectations (record failing assertion). Amendment after the unit: the suite was 21 OK before the rename, because it still matched the legacy installer. After the rename it fails until `6-03` repoints those expectations. A re-dispatch does not need a pre-change failure.
 
 After (driver tests may still fail until `6-03`; this unit's owned checks must pass):
 

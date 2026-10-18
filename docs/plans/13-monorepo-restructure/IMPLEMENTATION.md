@@ -515,3 +515,27 @@ Start: 2026-10-18T00:07:36Z
 `artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
 Refine: Proceed. Commit `cf0f1c5`. Six units. Wave 1: `6-01`, `6-02`, `6-04`, `6-05` alongside. Then `6-03`. Then `6-06`. Phase 5 Carried: item 1 stays carried (manual Cursor session; does not touch a Phase 6 contract). Item 2 stays carried (root `README.md` signal-log prose; Phase 7 docs). Item 3 absorbed into `6-03` (`jev_signal_log.py` and `YAKKA_*` parity). `artifact_feedback` on the briefs: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`); feedback was not called.
+
+### 6-01-plugin-manifests
+
+Built: marketplace and plugin manifests name `yakka` at version `3.0.0`; marketplace `source` stays `plugins/yakka`. Surfaces: `.claude-plugin/marketplace.json`, `.cursor-plugin/marketplace.json`, `plugins/yakka/.claude-plugin/plugin.json`, `plugins/yakka/.cursor-plugin/plugin.json`, `plugins/yakka/.codex-plugin/plugin.json`. Deviations: none. Commit `0c6a108`. Agent `bc-1eefda5f-d5d0-5253-8e7e-36aa360c284a` reported done. The harness did not report turns or final context.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 6-02-skills-and-tuning-rename
+
+Built: core skills write `Yakka-Phase`, `Yakka-Plan`, and `yakka-report`, with one legacy-acceptance sentence in `execute`, `comprehensive-review`, and `post-build`. `.claude/skills/workflow-tuning` is `.claude/skills/yakka-tuning`. Surfaces: `plugins/yakka/skills/{design,execute,comprehensive-review,post-build}/SKILL.md`, `.claude/skills/{setup,transcript-parser,yakka-tuning}`. Deviations: none. `principles.md` still names legacy markers in historical seam prose; `check_skills.py` stays with `6-03`. Commit `a9efa4a`. Agent `bc-af656898-8836-518e-9135-e3d35bbbfd49` reported done. The harness did not report turns or final context.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 6-04-install-and-cloud-env
+
+Built: `install.sh` and cloud bootstrap use `YAKKA_*`, `plugins/yakka`, `~/.cache/yakka/src`, and `.cursor/skills/yakka/`. Bootstrap script is `tools/cloud-env/bootstrap-yakka-skills.sh`. Surfaces: `install.sh`, `.gitignore`, `tools/cloud-env/**`. Deviations: also updated `tools/cloud-env/environment.json.example` (inside the owned tree) so the README and the skills-path search match. Brief contradiction: `test_install_route.py` was 21 OK before the rename and is red after it (9 failures, 1 error) until `6-03`. The brief's "before" line is amended. Commit `e2d7992`. Agent `bc-9ed1bf4c-b459-5984-a30f-d9fc6cbd5396` reported done with concerns. The harness did not report turns or final context.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 6-05-transcript-and-jev-variants
+
+Built: `WORKFLOW_ALIGNMENT_*` is `YAKKA_ALIGNMENT_*` and the TypeSafe question id is `yakka_alignment`. The jev-variants fixture install root uses `yakka`. Surfaces: `tools/transcript/lib/jev_client.py`, `tools/jev-variants/case4/build4.py`. Deviations: none. Left `pair.py` corpus slug `workflow-plugin` and the `workflow_report` fixture field, as the brief required. Transcript tests 11 OK; jev-variants tests 43 OK. Commit `fe1687c`. Agent `bc-85aeee90-118e-51b3-8946-00600dd2157f` reported done. The harness did not report turns or final context.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
