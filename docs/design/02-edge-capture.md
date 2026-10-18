@@ -48,7 +48,8 @@ with the same lock.
 
 **Start.** After its rename, a hook probes the lock non-blocking. Held means a drain is running and
 the hook returns. Free means it starts `python3 plugins/yakka/client/yakka.py drain` in the
-background (with `setsid` when available). The probe takes
+background (with `setsid` when available). `YAKKA_BIN` set and executable starts that program with
+`drain` instead. The probe takes
 the lock for an instant, so the drain acquires with a short blocking wait (about 1 s), not `-n`. A
 burst that beats the first drain to the lock starts a few extra processes that fail to acquire and
 exit; this is accepted, and measured (see Tests).

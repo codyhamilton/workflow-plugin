@@ -34,23 +34,23 @@ exits. No python, no network, no waiting. Payloads with no conversation id are d
 get their permissive reply (`{"permission":"allow"}` etc.); capture can never block or fail the agent.
 The OpenCode plugin writes the same files itself.
 
-After spooling, `spool.sh` starts one detached `plugins/yakka/bin/yakka drain` (a lock keeps it to one;
-`YAKKA_HOOKLOG_KICK=0` disables, `YAKKA_BIN` names the binary). The drain posts the queued files
+After spooling, the plugin `script/spool.sh` starts one detached drain (a lock keeps it to one;
+`YAKKA_HOOKLOG_KICK=0` disables it). `YAKKA_BIN` set and executable is that program with `drain`;
+otherwise the kick is `python3 plugins/yakka/client/yakka.py drain`. The drain posts the queued files
 to the endpoint and deletes them; files the service refuses move to `rejected/`. Endpoint and bearer
 follow the same resolution as design 2: both `YAKKA_ENDPOINT` and `YAKKA_KEY` override
 `client.toml`; exactly one of them set is a hard error; otherwise the file, else local
 `http://127.0.0.1:8770` with no key. While the endpoint is unreachable the files wait. A running
-`yakka serve` on the same machine hosts the drain itself. `yakka status` reports the queue
+`yakka serve` on the same machine hosts the Go drain itself, behind the same lock. `yakka status` reports the queue
 and the mode.
 
-`plugins/yakka/bin/yakka` is a wrapper: it uses `YAKKA_BIN`, then the cached binary under
-`${XDG_CACHE_HOME:-~/.cache}/yakka/<version>/`, then a checksummed download, then a source build.
-A `SessionStart` hook in each shipped config runs `bin/yakka --version` in the background so the
-first real call finds a warm cache. Shipped hooks run copies under `plugins/yakka/script/`.
+`plugins/yakka/bin/yakka` execs `python3` on `plugins/yakka/client/yakka.py` for `drain`, `mcp`,
+`login`, `status`, and `version`. It does not cache, download, or build a client. There is no
+SessionStart prefetch. Shipped hooks run `plugins/yakka/script/spool.sh`.
 
 ## Setup
 
-There is no install step. For local mode, run `plugins/yakka/bin/yakka serve` however suits the machine (a
+There is no install step. For local mode, run the Go collector `yakka serve` from `packages/yakka` however suits the machine (a
 terminal, a systemd user unit, launchd). Loopback serve is keyless, binds `127.0.0.1:8770`
 (`YAKKA_SERVE_ADDR` may name another loopback address, never a public one), and stores data under
 `YAKKA_SERVE_DATA` (default `~/.local/share/yakka/serve`), tenant `local`. To turn on
@@ -63,7 +63,7 @@ example a cloud worker). `YAKKA_CLIENT_CONFIG` overrides only the file path.
 
 ## MCP
 
-The advisory shim is the stdio command `plugins/yakka/bin/yakka mcp`. Claude Code picks it up from the
+The advisory shim is the stdio command `python3 plugins/yakka/client/yakka.py mcp`. Claude Code picks it up from the
 repo's [`plugins/yakka/.mcp.json`](../../plugins/yakka/.mcp.json). For Cursor, merge
 [`cursor-mcp.example.json`](cursor-mcp.example.json) into `~/.cursor/mcp.json`; for Codex, merge
 [`codex-mcp.example.toml`](codex-mcp.example.toml) into `~/.codex/config.toml`. Replace

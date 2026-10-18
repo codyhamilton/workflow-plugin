@@ -38,8 +38,9 @@ Binaries are never committed.
 
 `plugins/yakka/bin/yakka version` and `plugins/yakka/bin/yakka --version` print `yakka <version> <commit>`.
 
-Constraints: bash 3.2 compatible (macOS). The spool kick still starts `plugins/yakka/bin/yakka drain`
-detached; hooks do not wait on the drain or the shim.
+Constraints: bash 3.2 compatible (macOS). With `YAKKA_BIN` unset, the spool kick starts
+`python3 plugins/yakka/client/yakka.py drain` detached; hooks do not wait on the drain or the shim.
+`YAKKA_BIN` set and executable is that program with `drain`.
 
 ## Local bootstrap
 
@@ -83,7 +84,7 @@ fetch or build it.
 | Claude Code | `plugins/yakka/hooks/hooks.json`, `plugins/yakka/.mcp.json` | `plugins/yakka/script/spool.sh --harness claude`; shim as stdio |
 | Cursor | `plugins/yakka/hooks/cursor.json`, `packages/hooklog/cursor-hooks.example.json` | `./script/spool.sh --harness cursor` |
 | Codex | `plugins/yakka/hooks/codex.json` | `plugins/yakka/script/spool.sh --harness codex` |
-| OpenCode | `packages/opencode-yakka-hooks` | writes spool files with the design 2 name; kicks `plugins/yakka/bin/yakka drain` |
+| OpenCode | `packages/opencode-yakka-hooks` | writes spool files with the design 2 name; kicks `python3 plugins/yakka/client/yakka.py drain` |
 
 All four drop the `artifact_submit.py` registration.
 

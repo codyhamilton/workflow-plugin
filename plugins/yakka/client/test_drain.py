@@ -226,6 +226,30 @@ class DrainTests(unittest.TestCase):
             srv.shutdown()
             srv.server_close()
 
+    def test_200_null_body_keeps_files(self) -> None:
+        dir_path = self._tmpdir
+        _spool_file(dir_path, "a-1")
+
+        def h(c: _Call, w: Any, ids: List[str]) -> bool:
+            body = b"null"
+            w.send_response(200)
+            w.send_header("Content-Type", "application/json")
+            w.send_header("Content-Length", str(len(body)))
+            w.end_headers()
+            w.wfile.write(body)
+            return True
+
+        url, _, srv = _start_fake(h)
+        try:
+            ctx = yakka.DrainContext.with_timeout(0.7)
+            reason, err = yakka.Run(ctx, _opts(dir_path, url))
+            self.assertIsNone(err)
+            self.assertEqual(reason, yakka.ReasonStopped)
+            self.assertEqual(_count(dir_path, ".evt"), 1)
+        finally:
+            srv.shutdown()
+            srv.server_close()
+
     def test_backoff_unauthorized_keeps_files(self) -> None:
         dir_path = self._tmpdir
         _spool_file(dir_path, "a-1")

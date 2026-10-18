@@ -1072,9 +1072,24 @@ class HTTPSink:
         if status == 200:
             try:
                 r = json.loads(data)
-                out.Results = r.get("results", [])
             except (json.JSONDecodeError, TypeError):
                 out.Status = 502
+            else:
+                if not isinstance(r, dict):
+                    out.Status = 502
+                else:
+                    results = r.get("results", [])
+                    if results is None:
+                        out.Results = []
+                    elif not isinstance(results, list):
+                        out.Status = 502
+                    else:
+                        for item in results:
+                            if not isinstance(item, dict):
+                                out.Status = 502
+                                break
+                        else:
+                            out.Results = results
         return out, None
 
 
@@ -1187,7 +1202,7 @@ def _try_lock(dir_path: str) -> Tuple[Optional[Any], Optional[BaseException]]:
         return None, err
     try:
         fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError as err:
+    except OSError as err:
         f.close()
         return None, err
     return f, None
@@ -1235,16 +1250,19 @@ def Running(dir_path: str) -> bool:
     except OSError:
         return False
     try:
-        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError:
+        try:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return True
+        except OSError:
+            return False
+        try:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        except OSError:
+            pass
+        return False
+    finally:
         f.close()
-        return True
-    try:
-        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-    except OSError:
-        pass
-    f.close()
-    return False
 
 
 def _drain_sleep(ctx: DrainContext, duration: float) -> bool:
@@ -1706,7 +1724,7 @@ def _mcp_start_drain() -> Optional[BaseException]:
         script = os.path.abspath(__file__)
         cmd = ["python3", script, "drain"]
     try:
-        subprocess.Popen(
+        proc = subprocess.Popen(
             cmd,
             start_new_session=True,
             close_fds=True,
@@ -1716,6 +1734,7 @@ def _mcp_start_drain() -> Optional[BaseException]:
         )
     except OSError as err:
         return err
+    threading.Thread(target=proc.wait, daemon=True).start()
     return None
 
 

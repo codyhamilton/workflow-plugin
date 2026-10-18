@@ -94,8 +94,7 @@ file.
 ## Registration
 
 Every harness registers the shim as a stdio command: `python3 plugins/yakka/client/yakka.py mcp`.
-Phase 3 will also route `plugins/yakka/bin/yakka mcp` through that script; this phase's
-registrations point at the script directly. The HTTP registration of `127.0.0.1:8765/mcp` is
+`plugins/yakka/bin/yakka mcp` execs that same script. The HTTP registration of `127.0.0.1:8765/mcp` is
 removed.
 
 ## Tests

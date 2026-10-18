@@ -1,6 +1,6 @@
 #!/bin/bash
 # Dispatches plugin commands to the Python client, or execs YAKKA_BIN when set.
-# bash 3.2 compatible. See docs/plans/16-python-local-client/DESIGN.md.
+# bash 3.2 compatible. See docs/design/05-distribution.md.
 ROOT=$(cd "$(dirname "$0")/.." && pwd -P) || exit 1
 export YAKKA_ROOT="$ROOT"
 CLIENT="$ROOT/client/yakka.py"
