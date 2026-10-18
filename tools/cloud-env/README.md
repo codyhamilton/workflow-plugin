@@ -50,7 +50,7 @@ After setup (no network required):
 python3 /path/to/yakka/tools/driver/check_skills.py
 ```
 
-Unattended cloud bootstrap installs **core only**. Maintainer skills under `.claude/skills/` are not copied into the consuming repo. `WORKFLOW_INSTALL_LAB=1` is ignored (backward compatibility).
+Unattended cloud bootstrap installs **core only**. Maintainer skills under `.claude/skills/` are not copied into the consuming repo. Legacy install-lab environment settings are not read (backward compatibility).
 
 ## Environment variables
 
@@ -61,6 +61,5 @@ Unattended cloud bootstrap installs **core only**. Maintainer skills under `.cla
 | `YAKKA_REPO_URL` | yakka GitHub URL | Fork or mirror |
 | `YAKKA_INSTALL_BRANCH` | `master` | Tracked branch |
 | `YAKKA_INSTALL_SH` | — | Skip fetch; run alternate installer (tests) |
-| `WORKFLOW_INSTALL_LAB` | unset | Ignored (legacy; no longer installs skills) |
 
 More context: [`docs/lab/CONSUMING_REPO.md`](../../docs/lab/CONSUMING_REPO.md).

@@ -10,7 +10,7 @@
 # re-syncs skills.
 #
 # Core only — maintainer skills under .claude/skills/ are not installed here.
-# WORKFLOW_INSTALL_LAB=1 is accepted for backward compatibility and ignored.
+# Legacy install-lab env values are accepted for backward compatibility and ignored.
 #
 # Environment:
 #   YAKKA_WORKSPACE        Consuming git repo root (default: git root or /workspace)

@@ -2,7 +2,7 @@ import os,re,json,hashlib,glob,collections
 W=os.path.expanduser("~/workspace")
 def proj(p):
     t=p.split("/")[0]
-    for k in("open-pajero-maps","garcia-music","silver-chronicle","workflow-plugin","lemmings","free-frontier","chm-briefs","corpus-ops"):
+    for k in("open-pajero-maps","garcia-music","silver-chronicle","yakka","lemmings","free-frontier","chm-briefs","corpus-ops"):
         if t.startswith(k): return k
     return t
 HD=re.compile(r"^(#{2,4})\s+(.*)$",re.M)

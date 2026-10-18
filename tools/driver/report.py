@@ -10,7 +10,7 @@ from typing import Any
 from trailer_keys import REPORT_FENCE_TAGS
 
 _fence_alternation = "|".join(re.escape(tag) for tag in REPORT_FENCE_TAGS)
-WORKFLOW_REPORT_FENCE = re.compile(
+REPORT_FENCE = re.compile(
     rf"```(?:{_fence_alternation})\s*\n(.*?)\n```",
     re.DOTALL | re.IGNORECASE,
 )
@@ -35,7 +35,7 @@ class ReportParseError(ValueError):
 
 
 def parse_workflow_report(text: str) -> WorkflowReport:
-    match = WORKFLOW_REPORT_FENCE.search(text)
+    match = REPORT_FENCE.search(text)
     if not match:
         raise ReportParseError(
             "No ```workflow-report or ```yakka-report fenced block in agent output"

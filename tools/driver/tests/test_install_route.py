@@ -508,11 +508,6 @@ class TestBootstrapArtifacts(unittest.TestCase):
             self.assertIn("STUB_INSTALLER", proc.stderr)
 
     def test_cursor_setup_uses_local_installer_core_only(self) -> None:
-        legacy = (BOOTSTRAP / "cursor-cloud-setup.sh").read_text(encoding="utf-8")
-        if "bootstrap-workflow-skills.sh" in legacy:
-            self.skipTest(
-                "cursor-cloud-setup.sh still delegates to removed bootstrap-workflow-skills.sh"
-            )
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp) / "home"
             ws = Path(tmp) / "ws"
@@ -593,8 +588,6 @@ class TestBootstrapArtifacts(unittest.TestCase):
 
     def test_cursor_setup_delegates_to_cloud_bootstrap(self) -> None:
         legacy = (BOOTSTRAP / "cursor-cloud-setup.sh").read_text(encoding="utf-8")
-        if "bootstrap-workflow-skills.sh" in legacy:
-            self.skipTest("cursor-cloud-setup.sh not repointed to bootstrap-yakka-skills.sh yet")
         self.assertIn("tools/cloud-env/bootstrap-yakka-skills.sh", legacy)
         self.assertIn("exec bash", legacy)
 
