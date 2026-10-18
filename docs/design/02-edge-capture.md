@@ -21,8 +21,8 @@ remote by config, may be down, and may refuse content.
                          └── reads queue/ and rejected/ for this conversation
 ```
 
-One queue directory per user serves every harness: `$WORKFLOW_QUEUE`, default
-`~/.local/share/workflow/queue`, with `tmp/` and `rejected/` inside it. The harness is in the envelope, not the path.
+One queue directory per user serves every harness: `$YAKKA_QUEUE`, default
+`~/.local/share/yakka/queue`, with `tmp/` and `rejected/` inside it. The harness is in the envelope, not the path.
 The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Spool
@@ -40,13 +40,13 @@ The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Drain
 
-`workflow drain`, part of the `workflow` binary ([design 3](03-remote-service.md#runtime)). One
+`yakka drain`, part of the `yakka` binary ([design 3](03-remote-service.md#runtime)). One
 instance per user, holding an exclusive flock on `queue/.drain.lock` for its lifetime. In local mode
-the lock may instead be held by `workflow serve`, which hosts the same drain module
+the lock may instead be held by `yakka serve`, which hosts the same drain module
 ([design 3](03-remote-service.md#local-serve-hosts-the-drain)).
 
 **Start.** After its rename, a hook probes the lock non-blocking. Held means a drain is running and
-the hook returns. Free means it starts `setsid bin/workflow drain` in the background. The probe takes
+the hook returns. Free means it starts `setsid plugins/yakka/bin/yakka drain` in the background. The probe takes
 the lock for an instant, so the drain acquires with a short blocking wait (about 1 s), not `-n`. A
 burst that beats the first drain to the lock starts a few extra processes that fail to acquire and
 exit; this is accepted, and measured (see Tests).
@@ -112,7 +112,7 @@ assignments) runs on every fact before it leaves the machine.
 **No local archive.** The remote is the record. The per-session JSONL archive via `hooklog.append`
 is dropped from the drain path. `rejected/` is the only thing kept locally.
 
-**No queue cap** for now, since all data is kept. `workflow status` reports queue size, oldest file,
+**No queue cap** for now, since all data is kept. `yakka status` reports queue size, oldest file,
 `rejected/` count and whether a drain is running.
 
 **macOS.** No `flock(1)`. The hook-side probe falls back to a `mkdir` lock with a PID check; the
@@ -120,8 +120,8 @@ drain uses `flock(2)` as on Linux.
 
 ## Config
 
-One file, read by both the drain and the shim: `~/.config/workflow/client.toml`, mode 0600. Its
-presence means remote mode; it is written by `workflow login` (not built yet).
+One file, read by both the drain and the shim: `~/.config/yakka/client.toml`, mode 0600. Its
+presence means remote mode; it is written by `yakka login` (not built yet).
 
 ```toml
 endpoint = "https://quality.example"
@@ -215,7 +215,7 @@ but until updated they keep running the old hooks.
 ## Changes from what exists
 
 `spool.sh` and the Python `drain.py` already do one file per event, the tmp-then-rename write, the
-flock probe and kick, and a `bad/` folder. The drain is rewritten as `workflow drain` in Go
+flock probe and kick, and a `bad/` folder. The drain is rewritten as `yakka drain` in Go
 (design 3); `drain.py` is removed once it lands. Remaining:
 
 - File names lead with the conversation ID; payloads without one are not spooled.

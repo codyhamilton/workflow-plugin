@@ -14,14 +14,14 @@ idle, and take a write-heavy, bursty stream without the hooks ever waiting on it
 
 ## Runtime
 
-One Go binary, `workflow`, with subcommands:
+One Go binary, `yakka`, with subcommands:
 
 | Subcommand | Role | Design |
 |---|---|---|
-| `workflow serve` | this service, local or remote | 3 |
-| `workflow drain` | the drain | 2 |
-| `workflow mcp` | the stdio advisory shim | 2, 4 |
-| `workflow status` | queue and drain state | 2 |
+| `yakka serve` | this service, local or remote | 3 |
+| `yakka drain` | the drain | 2 |
+| `yakka mcp` | the stdio advisory shim | 2, 4 |
+| `yakka status` | queue and drain state | 2 |
 
 - Targets: linux and darwin, amd64 and arm64. WSL is linux. No Windows-native build.
 - No cgo. SQLite is the pure-Go `modernc.org/sqlite`, so all four targets cross-compile from one
@@ -40,7 +40,7 @@ The same binary and code path in both. Differences are configuration only.
 | | Local | Remote |
 |---|---|---|
 | Bind | `127.0.0.1:8770` | as configured, behind a TLS proxy |
-| Data | `~/.local/share/workflow/serve` | as configured |
+| Data | `~/.local/share/yakka/serve` | as configured |
 | Tenants | one | many |
 | Drain | hosted in-process (below) | none; clients run their own |
 
@@ -52,10 +52,10 @@ Server configuration is environment only:
 
 | Variable | Meaning |
 |---|---|
-| `WORKFLOW_SERVE_ADDR` | listen address, default `127.0.0.1:8770` |
-| `WORKFLOW_SERVE_DATA` | data directory |
-| `WORKFLOW_SERVE_KEYS` | `tenant=key[,tenant=key…]`; unset or empty means keyless local mode |
-| `WORKFLOW_SERVE_CORS_ORIGINS` | comma-separated exact origins allowed to read a keyed server from a browser; unset or empty means no CORS headers; ignored in local mode, which allows loopback origins ([design 7](07-analytics-site.md#browser-access)) |
+| `YAKKA_SERVE_ADDR` | listen address, default `127.0.0.1:8770` |
+| `YAKKA_SERVE_DATA` | data directory |
+| `YAKKA_SERVE_KEYS` | `tenant=key[,tenant=key…]`; unset or empty means keyless local mode |
+| `YAKKA_SERVE_CORS_ORIGINS` | comma-separated exact origins allowed to read a keyed server from a browser; unset or empty means no CORS headers; ignored in local mode, which allows loopback origins ([design 7](07-analytics-site.md#browser-access)) |
 | `TYPESAFE_API_KEY` | scorer credential; server side only, never in any client config |
 
 Registration, key issue and rotation are out of scope. A key maps to exactly one tenant; the client
@@ -68,7 +68,7 @@ never names its tenant. Keys are compared in constant time and never logged.
 - Browser guards: the `Host` header must be a loopback name (stops DNS rebinding), and a POST must
   be `Content-Type: application/json` (a cross-origin form cannot send it without a preflight).
 
-A keyed service sent no key answers 401 saying a key is required (`workflow login`).
+A keyed service sent no key answers 401 saying a key is required (`yakka login`).
 
 ## API
 
@@ -128,7 +128,7 @@ One directory per tenant: `<data>/<tenant>/`.
 - `pending/<hash>`: content awaiting the screen (below).
 - `archive/<YYYY-MM>/<conversation_id>.jsonl.zst`: received hook bodies (below).
 
-`workflow serve` takes a shared lock on the tenant directory while the tenant is open; offline
+`yakka serve` takes a shared lock on the tenant directory while the tenant is open; offline
 compaction takes it exclusively. Serve refuses to start on a tenant that compaction holds, and
 compaction refuses while serve runs, so SQLite never has two writers.
 
@@ -176,13 +176,13 @@ final frame; readers ignore it and `archive.Repair` rewrites the file without it
 
 ### Compaction
 
-`workflow ledger compact --tenant-dir <dir>` brings a ledger written before the slim shape to it. It
+`yakka ledger compact --tenant-dir <dir>` brings a ledger written before the slim shape to it. It
 is offline, takes the tenant's exclusive lock, and is resumable: a rerun after an interruption ends
 in the same state. In batches it archives each body, deletes `remove` rows with no archive line,
 strips the payload, fills the columns (and `kind`, `plan`, `source`, `sha` on artifact and commit
 facts), then rebuilds the rollups, sets `meta.compaction` to `complete` and runs `VACUUM`. It prints
 the free space it needs and refuses when that is unavailable, and reports rows and bytes before and
-after. `workflow ledger purge-deltas --tenant-dir <dir>` is the same kind of offline pass for
+after. `yakka ledger purge-deltas --tenant-dir <dir>` is the same kind of offline pass for
 history that predates the `message.part.delta` removal: it deletes those facts and archive lines
 and rebuilds the rollups.
 
@@ -228,20 +228,20 @@ https://api.typesafe.ai/v1/systemone`, as `tools/transcript/lib/jev_client.py` d
 kind's checks as `score` questions, plus one screen question asking whether the text contains a
 credential. A screen score at or above its flag level is a flag.
 
-Checks are the existing check definitions (`packages/workflow/catalogue/criteria.json` plus
-`packages/workflow/catalogue/checks/*.json`), loaded from files at start; the execution report kind takes the
+Checks are the existing check definitions (`packages/yakka/catalogue/criteria.json` plus
+`packages/yakka/catalogue/checks/*.json`), loaded from files at start; the execution report kind takes the
 candidate checks in design 1. Rubric wording for the
 execution report is defined once and shared with the skill (design 1).
 
 ## Local serve hosts the drain
 
-In local mode `workflow serve` also drains the user's queue, as a long-lived drain.
+In local mode `yakka serve` also drains the user's queue, as a long-lived drain.
 
 - It takes `queue/.drain.lock` and holds it while running, so hooks find the lock held and start
   nothing.
 - No hook kicks it, so it watches the queue directory (inotify on Linux, kqueue on macOS) with a
   slow poll as a fallback. The design 2 batch window still applies.
-- It runs the same drain module as `workflow drain`, with an in-process sink in place of HTTP. The
+- It runs the same drain module as `yakka drain`, with an in-process sink in place of HTTP. The
   sink calls the same ingest function as the handler, so the precheck and screening apply. In
   process never means unchecked.
 - It drains only when the client config's endpoint is this server (same host and port). Otherwise
@@ -275,4 +275,4 @@ Cheap, in temp directories, never the live queue or data.
 6. Compaction: a legacy-shaped fixture compacts to no payloads, no `remove` rows and an archive whose
    distinct row hashes equal the kept hook facts; an interrupted run resumes to the same state; serve
    refuses to start while compaction holds the lock.
-7. Idle footprint: RSS and cold start of `workflow serve` and `workflow mcp`.
+7. Idle footprint: RSS and cold start of `yakka serve` and `yakka mcp`.

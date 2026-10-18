@@ -1,6 +1,6 @@
 # Design Intent 7: Analytics Site
 
-The person-facing view of one tenant's workflow ledger: read-only aggregate routes on `workflow
+The person-facing view of one tenant's yakka ledger: read-only aggregate routes on `yakka
 serve`, and a static Svelte site that renders them. Part of
 [system-architecture.md](system-architecture.md); it reads the service in
 [03-remote-service.md](03-remote-service.md) and is a separate surface from the agent's
@@ -8,9 +8,9 @@ serve`, and a static Svelte site that renders them. Part of
 
 ## Shape
 
-`packages/workflow-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
-CSS, JS; no SSR). Locally, `workflow serve` embeds that build and serves it on the same origin as
-`/v1`. Remotely, the same build is a Cloudflare Pages site that calls a keyed `workflow serve` with a
+`packages/yakka-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
+CSS, JS; no SSR). Locally, `yakka serve` embeds that build and serves it on the same origin as
+`/v1`. Remotely, the same build is a Cloudflare Pages site that calls a keyed `yakka serve` with a
 browser-supplied bearer token. Aggregation stays in SQLite; the browser receives JSON aggregates and
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
@@ -207,7 +207,7 @@ otherwise its tokens × the model's price in a pricing table that `serve` embeds
 only a new binary. Codex input tokens include cached input, so cached tokens are not charged twice.
 
 **Performance bound.** A committed benchmark (`analytics_bench_test.go`, run against any ledger path
-via `WORKFLOW_BENCH_DIR`) times every route, each preset (24h, 7d, 30d, 90d, all time), every measure
+via `YAKKA_BENCH_DIR`) times every route, each preset (24h, 7d, 30d, 90d, all time), every measure
 with 0, 1 and 2 dimensions and every bucket within the cap. The bound is p95 under 500 ms per case, met
 on a compacted copy of the real ledger.
 
@@ -218,7 +218,7 @@ on a compacted copy of the real ledger.
   Authorization, Content-Type`, `Allow-Methods: GET, OPTIONS` and `Vary: Origin`; `OPTIONS` is 204.
   Other origins get no CORS headers, so a public page cannot read a keyless loopback ledger.
   `localGuard` (loopback `Host`, JSON-only POST) runs first.
-- Keyed mode: the same headers only for an origin listed exactly in `WORKFLOW_SERVE_CORS_ORIGINS`
+- Keyed mode: the same headers only for an origin listed exactly in `YAKKA_SERVE_CORS_ORIGINS`
   ([design 3](03-remote-service.md#configuration-first-round)). No wildcard, no reflected origin.
 - No cookies and no `Access-Control-Allow-Credentials`. The site sends `Authorization` only when a
   token is configured.
@@ -226,14 +226,14 @@ on a compacted copy of the real ledger.
 ## The site
 
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
-  `workflow-analytics-base` and `workflow-analytics-key`. An empty base means same-origin `/v1`. The
+  `yakka-analytics-base` and `yakka-analytics-key`. An empty base means same-origin `/v1`. The
   token is sent only as `Authorization: Bearer` and never written into the build or the repo; the
   build's bundle check fails if a key appears in it.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
 - Charts render with Apache ECharts, tree-shaken, reading computed theme tokens (no hard-coded
-  colours). **Theme.** `localStorage` key `workflow-analytics-theme` holds `system`, `light`, or
+  colours). **Theme.** `localStorage` key `yakka-analytics-theme` holds `system`, `light`, or
   `dark`; an absent key means `system`. The document root carries `data-theme="light"` or
   `data-theme="dark"`. `system` follows `prefers-color-scheme` and later OS changes; `light` and
   `dark` do not. Light surfaces: background `#fdf6e3`, surface `#eee8d5`, text `#657b83`, muted
@@ -269,7 +269,7 @@ on a compacted copy of the real ledger.
   and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
   No dimension and bucket `none` renders the scalar.
 - **Saved views and dashboards.** Both live in `localStorage` under the prefix
-  `workflow-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
+  `yakka-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
   `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
   `explore`, `builder`; `params` holds that report's chart controls only (`measure`, `dim`, `bucket`,
   `chart`, `top`, `kind`, `metric`, `group`, `grain`), not the window or shared filters. A dashboard
@@ -285,10 +285,10 @@ on a compacted copy of the real ledger.
 
 ## Hosting
 
-- The site's build output is copied into `packages/workflow/internal/serve/site/` before `go build`
+- The site's build output is copied into `packages/yakka/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
   `index.html` is missing or is the placeholder, then restores the committed placeholder on exit.
-- The committed placeholder `index.html` contains the marker `workflow-analytics-placeholder`. While
+- The committed placeholder `index.html` contains the marker `yakka-analytics-placeholder`. While
   it is embedded, every non-`/v1` path is 404 `{"error":"analytics bundle not embedded"}`, so `go
   test` needs no Node.
 - With the real build embedded: `GET`/`HEAD` only (else 405). An existing file is served with its
@@ -296,22 +296,22 @@ on a compacted copy of the real ledger.
   `Cache-Control: no-cache`; files under `_app/immutable/` are `public, max-age=31536000,
   immutable`. `/v1` and `/v1/*` are never HTML. In keyed mode the static files need no key; they
   carry no tenant data.
-- `packages/workflow-analytics/wrangler.toml` declares `pages_build_output_dir = "./build"`, the same
+- `packages/yakka-analytics/wrangler.toml` declares `pages_build_output_dir = "./build"`, the same
   build. With no `404.html`, Pages serves it as a single-page app. Creating the Pages project,
-  attaching a hostname and setting `WORKFLOW_SERVE_CORS_ORIGINS` to that origin are operator
+  attaching a hostname and setting `YAKKA_SERVE_CORS_ORIGINS` to that origin are operator
   actions.
 
 ## Open issues
 
 1. Precheck rejection rows carry empty `repo_id`/`harness`, so any `repo_id` or `harness` filter
    drops rejections to zero in `summary` and `explore` (`rejWhere`,
-   `packages/workflow/internal/store/analytics.go`). `/query` reports the filter in `ignored_filters`
+   `packages/yakka/internal/store/analytics.go`). `/query` reports the filter in `ignored_filters`
    instead, but the other routes still need a decision on whether a rejection belongs to a repo (for
    example through its conversation's facts).
 2. The hosted site sends no `X-Frame-Options` / `frame-ancestors`; a framed remote `/settings` could
    be clickjacked into redirecting the stored token.
 3. `cors` sets `Vary: Origin` only for allowed origins (a shared cache could serve a header-less
-   response to an allowed origin); `WORKFLOW_SERVE_CORS_ORIGINS` entries are never validated, so a
+   response to an allowed origin); `YAKKA_SERVE_CORS_ORIGINS` entries are never validated, so a
    trailing slash silently never matches.
 4. `build.sh` runs `npm ci` only when `node_modules/` is absent, so a release can embed stale
    dependencies; a SIGKILLed run leaves the built site in `site/`, which the next run then saves as
