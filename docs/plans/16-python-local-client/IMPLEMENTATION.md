@@ -143,3 +143,10 @@ Refined in `d3beccc` into four units. 3-01 owns the Python login, status, and ve
 - Commit: `2d4de0a`, merged in `4ec3c82`. Report: `docs/plans/16-python-local-client/reports/3-03-sessionstart-prefetch.md`.
 - Deviations: committed on `work/3-03` for the alongside run. Not a contract contradiction; the brief is unchanged.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+### 3-02-bin-yakka-wrapper
+
+- Built: `plugins/yakka/bin/yakka` execs `python3` on `client/yakka.py` for `drain`, `mcp`, `login`, `status`, `version`, and `--version`. `YAKKA_BIN` still overrides. `serve` and `ledger` exit 1 with a collector message and do not download or build. `WrapperTests` cover that dispatch. `BuildTests.test_7_build_sh` still passes.
+- Commit: `bc8548f`, merged in `956096e`. Report: `docs/plans/16-python-local-client/reports/3-02-bin-yakka-wrapper.md`.
+- Deviations: committed on `work/3-02` for the alongside run. `Base.env()` calls `goenv` only when `go=True`, so wrapper tests do not need a Go toolchain. Not a contract contradiction; the brief is unchanged.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
