@@ -7,7 +7,7 @@
 
 ## Task
 
-Close a two-phase plan so `Workflow-Phase:` trailers on `master..HEAD` are `<slug>:1`, `<slug>:2`, and `<slug>:done`. A wrong-slug trailer on the same branch must not count as closure. The phase-2 closing record must pass the driver's deterministic outcome-evidence check.
+Close a two-phase plan so phase trailers on `master..HEAD` are `<slug>:1`, `<slug>:2`, and `<slug>:done`. The verifier exercises each canonical key (`Workflow-Phase` and `Yakka-Phase`) with the same commit values. Example: `Workflow-Phase: my-plan:1`. A wrong-slug trailer on the same branch must not count as closure. The phase-2 closing record must pass the driver's deterministic outcome-evidence check.
 
 ## Reference Notes
 

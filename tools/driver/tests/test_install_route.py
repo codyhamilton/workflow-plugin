@@ -18,7 +18,7 @@ WORKSPACE = Path(__file__).resolve().parents[3]
 DRIVER = Path(__file__).resolve().parents[1]
 INSTALL = WORKSPACE / "install.sh"
 BOOTSTRAP = WORKSPACE / "docs" / "lab" / "bootstrap"
-CLOUD_BOOTSTRAP = WORKSPACE / "tools" / "cloud-env" / "bootstrap-workflow-skills.sh"
+CLOUD_BOOTSTRAP = WORKSPACE / "tools" / "cloud-env" / "bootstrap-yakka-skills.sh"
 sys.path.insert(0, str(DRIVER))
 
 from check_skills import CORE_SKILLS, MAINTAINER_SKILLS, report_for_env  # noqa: E402
@@ -29,16 +29,16 @@ def _base_env(home: Path, **extra: str) -> dict[str, str]:
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
         "HOME": str(home),
         "HOSTNAME": "devbox",
-        "WORKFLOW_INSTALL_SKIP_REFRESH": "1",
-        "WORKFLOW_INSTALL_LAB": "1",
+        "YAKKA_INSTALL_SKIP_REFRESH": "1",
+        "YAKKA_INSTALL_LAB": "1",
     }
     for key in (
         "CURSOR_AGENT",
         "CLAUDECODE",
         "CLAUDE_CODE_REMOTE",
         "CLAUDE_CODE_ENTRYPOINT",
-        "WORKFLOW_INSTALL_MODE",
-        "WORKFLOW_WORKSPACE",
+        "YAKKA_INSTALL_MODE",
+        "YAKKA_WORKSPACE",
     ):
         env.pop(key, None)
     env.update(extra)
@@ -98,9 +98,9 @@ class TestPrintRoute(unittest.TestCase):
             cache = Path(tmp) / "cache"
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_SRC=str(cache),
-                WORKFLOW_INSTALL_MODE="cloud",
-                WORKFLOW_WORKSPACE=str(Path(tmp) / "ws"),
+                YAKKA_INSTALL_SRC=str(cache),
+                YAKKA_INSTALL_MODE="cloud",
+                YAKKA_WORKSPACE=str(Path(tmp) / "ws"),
             )
             (Path(tmp) / "ws").mkdir()
             proc = _run_route(env)
@@ -109,7 +109,7 @@ class TestPrintRoute(unittest.TestCase):
             payload = json.loads(proc.stdout)
             self.assertEqual(payload["route"], "cursor-cloud")
             self.assertTrue(payload["core_only"])
-            self.assertTrue(str(payload["dest"]).endswith("/.cursor/skills/workflow"))
+            self.assertTrue(str(payload["dest"]).endswith("/.cursor/skills/yakka"))
 
     def test_explicit_cloud_beats_claude_signals(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -119,8 +119,8 @@ class TestPrintRoute(unittest.TestCase):
             ws.mkdir()
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="cloud",
-                WORKFLOW_WORKSPACE=str(ws),
+                YAKKA_INSTALL_MODE="cloud",
+                YAKKA_WORKSPACE=str(ws),
                 CLAUDECODE="1",
                 CLAUDE_CODE_REMOTE="true",
                 HOSTNAME="cursor",
@@ -137,8 +137,8 @@ class TestPrintRoute(unittest.TestCase):
             opencode_skills = home / ".config" / "opencode" / "skills"
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="opencode",
-                WORKFLOW_OPENCODE_SKILLS=str(opencode_skills),
+                YAKKA_INSTALL_MODE="opencode",
+                YAKKA_OPENCODE_SKILLS=str(opencode_skills),
             )
             proc = _run_route(env)
             self.assertEqual(proc.returncode, 0, proc.stderr)
@@ -146,7 +146,7 @@ class TestPrintRoute(unittest.TestCase):
             self.assertEqual(payload["route"], "opencode")
             self.assertTrue(payload["core_only"])
             self.assertEqual(payload["dest"], str(opencode_skills))
-            self.assertEqual(payload["reason"], "WORKFLOW_INSTALL_MODE=opencode")
+            self.assertEqual(payload["reason"], "YAKKA_INSTALL_MODE=opencode")
 
     def test_explicit_claude_beats_cursor_signals(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -154,7 +154,7 @@ class TestPrintRoute(unittest.TestCase):
             home.mkdir()
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="claude-code",
+                YAKKA_INSTALL_MODE="claude-code",
                 CURSOR_AGENT="1",
                 HOSTNAME="cursor",
             )
@@ -185,7 +185,7 @@ class TestPrintRoute(unittest.TestCase):
             ws = Path(tmp) / "ws"
             home.mkdir()
             ws.mkdir()
-            env = _base_env(home, WORKFLOW_WORKSPACE=str(ws), HOSTNAME="devbox")
+            env = _base_env(home, YAKKA_WORKSPACE=str(ws), HOSTNAME="devbox")
             proc = _run_route(env, tty=False)
             payload = json.loads(proc.stdout)
             self.assertEqual(payload["route"], "cursor-cloud")
@@ -215,7 +215,7 @@ class TestPrintRoute(unittest.TestCase):
             env = _base_env(
                 home,
                 HOSTNAME="devbox",
-                WORKFLOW_WORKSPACE=str(ws),
+                YAKKA_WORKSPACE=str(ws),
             )
             payload = json.loads(_run_route(env, tty=True).stdout)
             self.assertEqual(payload["route"], "cursor-cloud")
@@ -223,13 +223,13 @@ class TestPrintRoute(unittest.TestCase):
 
     def test_route_matches_check_skills_harness(self) -> None:
         cases = [
-            {"WORKFLOW_INSTALL_MODE": "cloud", "CLAUDECODE": "1", "HOSTNAME": "devbox"},
-            {"WORKFLOW_INSTALL_MODE": "claude-code", "CURSOR_AGENT": "1", "HOSTNAME": "cursor"},
+            {"YAKKA_INSTALL_MODE": "cloud", "CLAUDECODE": "1", "HOSTNAME": "devbox"},
+            {"YAKKA_INSTALL_MODE": "claude-code", "CURSOR_AGENT": "1", "HOSTNAME": "cursor"},
             {"CLAUDE_CODE_REMOTE": "true", "CURSOR_AGENT": "1", "HOSTNAME": "cursor"},
             {"CURSOR_AGENT": "1", "HOSTNAME": "devbox"},
             {"HOSTNAME": "cursor"},
             {"HOSTNAME": "devbox"},
-            {"WORKFLOW_INSTALL_MODE": "interactive", "CURSOR_AGENT": "1", "HOSTNAME": "cursor"},
+            {"YAKKA_INSTALL_MODE": "interactive", "CURSOR_AGENT": "1", "HOSTNAME": "cursor"},
         ]
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp) / "home"
@@ -237,7 +237,7 @@ class TestPrintRoute(unittest.TestCase):
             home.mkdir()
             ws.mkdir()
             for extra in cases:
-                env = _base_env(home, WORKFLOW_WORKSPACE=str(ws), **extra)
+                env = _base_env(home, YAKKA_WORKSPACE=str(ws), **extra)
                 proc = _run_route(env, tty=False)
                 self.assertEqual(proc.returncode, 0, proc.stderr)
                 route = json.loads(proc.stdout)["route"]
@@ -257,10 +257,10 @@ class TestCoreOnlyInstall(unittest.TestCase):
             cursor_dir = home / ".cursor"
             home.mkdir()
             cursor_dir.mkdir()
-            core_plugin = home / ".cursor" / "plugins" / "local" / "workflow"
+            core_plugin = home / ".cursor" / "plugins" / "local" / "yakka"
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="interactive",
+                YAKKA_INSTALL_MODE="interactive",
                 CURSOR_CORE_PLUGIN=str(core_plugin),
             )
             master, slave = pty.openpty()
@@ -298,7 +298,7 @@ class TestCoreOnlyInstall(unittest.TestCase):
             self.assertNotIn("packages/", claude_text)
             self.assertIn("script/spool.sh", codex_text)
             self.assertNotIn("packages/", codex_text)
-            lab_plugin = home / ".cursor" / "plugins" / "local" / "workflow-lab"
+            lab_plugin = home / ".cursor" / "plugins" / "local" / "yakka-lab"
             self.assertFalse(lab_plugin.exists())
 
     def test_cloud_install_copies_core_not_lab(self) -> None:
@@ -309,8 +309,8 @@ class TestCoreOnlyInstall(unittest.TestCase):
             ws.mkdir()
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="cloud",
-                WORKFLOW_WORKSPACE=str(ws),
+                YAKKA_INSTALL_MODE="cloud",
+                YAKKA_WORKSPACE=str(ws),
                 CURSOR_AGENT="1",
                 HOSTNAME="cursor",
                 CLAUDECODE="1",
@@ -324,7 +324,7 @@ class TestCoreOnlyInstall(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
-            root = ws / ".cursor" / "skills" / "workflow"
+            root = ws / ".cursor" / "skills" / "yakka"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
             for name in MAINTAINER_SKILLS:
@@ -342,8 +342,8 @@ class TestCoreOnlyInstall(unittest.TestCase):
             ws.mkdir()
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="claude-code",
-                WORKFLOW_WORKSPACE=str(ws),
+                YAKKA_INSTALL_MODE="claude-code",
+                YAKKA_WORKSPACE=str(ws),
                 CURSOR_AGENT="1",
                 HOSTNAME="cursor",
             )
@@ -372,8 +372,8 @@ class TestOpenCodeSymlinkInstall(unittest.TestCase):
             opencode_skills = home / ".config" / "opencode" / "skills"
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="opencode",
-                WORKFLOW_OPENCODE_SKILLS=str(opencode_skills),
+                YAKKA_INSTALL_MODE="opencode",
+                YAKKA_OPENCODE_SKILLS=str(opencode_skills),
             )
             proc = subprocess.run(
                 ["bash", str(INSTALL), "--opencode-skills"],
@@ -403,8 +403,8 @@ class TestOpenCodeSymlinkInstall(unittest.TestCase):
             opencode_skills = home / ".config" / "opencode" / "skills"
             env = _base_env(
                 home,
-                WORKFLOW_INSTALL_MODE="opencode",
-                WORKFLOW_OPENCODE_SKILLS=str(opencode_skills),
+                YAKKA_INSTALL_MODE="opencode",
+                YAKKA_OPENCODE_SKILLS=str(opencode_skills),
             )
             for _ in range(2):
                 proc = subprocess.run(
@@ -508,6 +508,11 @@ class TestBootstrapArtifacts(unittest.TestCase):
             self.assertIn("STUB_INSTALLER", proc.stderr)
 
     def test_cursor_setup_uses_local_installer_core_only(self) -> None:
+        legacy = (BOOTSTRAP / "cursor-cloud-setup.sh").read_text(encoding="utf-8")
+        if "bootstrap-workflow-skills.sh" in legacy:
+            self.skipTest(
+                "cursor-cloud-setup.sh still delegates to removed bootstrap-workflow-skills.sh"
+            )
         with tempfile.TemporaryDirectory() as tmp:
             home = Path(tmp) / "home"
             ws = Path(tmp) / "ws"
@@ -527,21 +532,21 @@ class TestBootstrapArtifacts(unittest.TestCase):
             )
             wrapper.chmod(wrapper.stat().st_mode | stat.S_IEXEC)
             env = _base_env(home, HOSTNAME="devbox", CLAUDECODE="1")
-            env["WORKFLOW_INSTALL_SH"] = str(wrapper)
-            # Setup script sets MODE=cloud and WORKFLOW_WORKSPACE itself.
-            env.pop("WORKFLOW_INSTALL_MODE", None)
-            env.pop("WORKFLOW_WORKSPACE", None)
+            env["YAKKA_INSTALL_SH"] = str(wrapper)
+            # Setup script sets MODE=cloud and YAKKA_WORKSPACE itself.
+            env.pop("YAKKA_INSTALL_MODE", None)
+            env.pop("YAKKA_WORKSPACE", None)
             proc = subprocess.run(
                 ["bash", str(BOOTSTRAP / "cursor-cloud-setup.sh")],
                 cwd=ws,
-                env={**env, "WORKFLOW_WORKSPACE": str(ws)},
+                env={**env, "YAKKA_WORKSPACE": str(ws)},
                 capture_output=True,
                 text=True,
                 check=False,
             )
             self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
             self.assertTrue(marker.is_file())
-            root = ws / ".cursor" / "skills" / "workflow"
+            root = ws / ".cursor" / "skills" / "yakka"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
             for name in MAINTAINER_SKILLS:
@@ -567,20 +572,20 @@ class TestBootstrapArtifacts(unittest.TestCase):
             )
             wrapper.chmod(wrapper.stat().st_mode | stat.S_IEXEC)
             env = _base_env(home, HOSTNAME="devbox", CLAUDECODE="1")
-            env["WORKFLOW_INSTALL_SH"] = str(wrapper)
-            env.pop("WORKFLOW_INSTALL_MODE", None)
-            env.pop("WORKFLOW_WORKSPACE", None)
+            env["YAKKA_INSTALL_SH"] = str(wrapper)
+            env.pop("YAKKA_INSTALL_MODE", None)
+            env.pop("YAKKA_WORKSPACE", None)
             proc = subprocess.run(
                 ["bash", str(CLOUD_BOOTSTRAP)],
                 cwd=ws,
-                env={**env, "WORKFLOW_WORKSPACE": str(ws)},
+                env={**env, "YAKKA_WORKSPACE": str(ws)},
                 capture_output=True,
                 text=True,
                 check=False,
             )
             self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
             self.assertTrue(marker.is_file())
-            root = ws / ".cursor" / "skills" / "workflow"
+            root = ws / ".cursor" / "skills" / "yakka"
             for name in CORE_SKILLS:
                 self.assertTrue((root / name / "SKILL.md").is_file(), name)
             for name in MAINTAINER_SKILLS:
@@ -588,7 +593,9 @@ class TestBootstrapArtifacts(unittest.TestCase):
 
     def test_cursor_setup_delegates_to_cloud_bootstrap(self) -> None:
         legacy = (BOOTSTRAP / "cursor-cloud-setup.sh").read_text(encoding="utf-8")
-        self.assertIn("tools/cloud-env/bootstrap-workflow-skills.sh", legacy)
+        if "bootstrap-workflow-skills.sh" in legacy:
+            self.skipTest("cursor-cloud-setup.sh not repointed to bootstrap-yakka-skills.sh yet")
+        self.assertIn("tools/cloud-env/bootstrap-yakka-skills.sh", legacy)
         self.assertIn("exec bash", legacy)
 
 

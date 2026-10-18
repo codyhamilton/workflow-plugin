@@ -17,6 +17,7 @@ EXPECTED_TRAILERS = [
     "trailer-completeness:2",
     "trailer-completeness:done",
 ]
+TRAILER_KEYS = ("Workflow-Phase", "Yakka-Phase")
 
 
 def _env_without_keys() -> dict[str, str]:
@@ -41,17 +42,17 @@ def _run(
 
 
 class TestTrailerCompletenessVerifier(unittest.TestCase):
-    def test_verifier_passes_and_matches_baseline(self) -> None:
-        proc = _run()
-        self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
-        data = json.loads(proc.stdout)
+    def _assert_per_key_outcome(self, data: dict) -> None:
         self.assertEqual(data["verifier"], "pass")
-        self.assertEqual(data["checks"], {
-            "status": "pass",
-            "trailers": "pass",
-            "once": "pass",
-            "assert": "pass",
-        })
+        self.assertEqual(
+            data["checks"],
+            {
+                "status": "pass",
+                "trailers": "pass",
+                "once": "pass",
+                "assert": "pass",
+            },
+        )
         self.assertEqual(data["failures"], [])
         self.assertEqual(data["trailers"], EXPECTED_TRAILERS)
         self.assertEqual(data["ignored_trailers"], ["other-slug:1"])
@@ -67,19 +68,45 @@ class TestTrailerCompletenessVerifier(unittest.TestCase):
         self.assertIsNone(data["cost"]["cost_usd"])
         self.assertEqual(data["cost"]["reason"], "no ANTHROPIC_API_KEY or CURSOR_API_KEY")
         self.assertEqual(data["classify"], "not used")
+
+    def test_verifier_passes_and_workflow_key_matches_baseline(self) -> None:
+        proc = _run()
+        self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+        data = json.loads(proc.stdout)
+        self.assertEqual(data["verifier"], "pass")
+        self.assertEqual(data["trailer_keys_exercised"], list(TRAILER_KEYS))
+        for key in TRAILER_KEYS:
+            self._assert_per_key_outcome(data["by_trailer_key"][key])
+            self.assertEqual(data["by_trailer_key"][key]["trailer_key"], key)
         self.assertNotIn("session_kind", proc.stdout)
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
-        self.assertEqual(data, baseline)
+        workflow = data["by_trailer_key"]["Workflow-Phase"]
+        for field in (
+            "checks",
+            "failures",
+            "trailers",
+            "ignored_trailers",
+            "status",
+            "assert",
+            "cost",
+            "classify",
+        ):
+            self.assertEqual(workflow[field], baseline[field])
+        self.assertEqual(workflow["once"]["skipped"], baseline["once"]["skipped"])
+        self.assertEqual(workflow["once"]["exit_code"], baseline["once"]["exit_code"])
+        self.assertIn("done trailer", workflow["once"]["skip_reason"] or "")
 
     def test_missing_phase_trailer_fails(self) -> None:
         proc = _run(["--omit-trailer", "trailer-completeness:2"])
         self.assertEqual(proc.returncode, 1, proc.stdout)
         data = json.loads(proc.stdout)
         self.assertEqual(data["verifier"], "fail")
-        self.assertEqual(data["checks"]["trailers"], "fail")
-        self.assertEqual(data["checks"]["status"], "fail")
-        self.assertNotIn("trailer-completeness:2", data["trailers"])
-        self.assertEqual(data["classify"], "not used")
+        for key in TRAILER_KEYS:
+            key_data = data["by_trailer_key"][key]
+            self.assertEqual(key_data["verifier"], "fail")
+            self.assertEqual(key_data["checks"]["trailers"], "fail")
+            self.assertEqual(key_data["checks"]["status"], "fail")
+            self.assertNotIn("trailer-completeness:2", key_data["trailers"])
 
     def test_provider_stub_does_not_fail_trailer_row(self) -> None:
         env = _env_without_keys()
@@ -88,11 +115,11 @@ class TestTrailerCompletenessVerifier(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
         data = json.loads(proc.stdout)
         self.assertEqual(data["verifier"], "pass")
-        self.assertEqual(data["trailers"], EXPECTED_TRAILERS)
-        self.assertFalse(data["cost"]["available"])
-        self.assertIsNone(data["cost"]["cost_usd"])
-        self.assertIn("not implemented", data["cost"]["reason"])
-        self.assertEqual(data["classify"], "not used")
+        for key in TRAILER_KEYS:
+            self.assertEqual(data["by_trailer_key"][key]["trailers"], EXPECTED_TRAILERS)
+            self.assertFalse(data["by_trailer_key"][key]["cost"]["available"])
+            self.assertIsNone(data["by_trailer_key"][key]["cost"]["cost_usd"])
+            self.assertIn("not implemented", data["by_trailer_key"][key]["cost"]["reason"])
 
 
 if __name__ == "__main__":

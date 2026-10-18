@@ -133,6 +133,17 @@ class TestGitFixtures(unittest.TestCase):
             self.assertEqual(st.open, "done")
             self.assertTrue(st.done)
 
+    def test_dual_trailer_keys_open_phase_three(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            plan_dir = init_fixture_repo(root)
+            commit_trailer(root, "close p1", f"{FIXTURE_SLUG}:1", trailer_key="Workflow-Phase")
+            commit_trailer(root, "close p2", f"{FIXTURE_SLUG}:2", trailer_key="Yakka-Phase")
+            st = resolve_plan_folder(plan_dir, repo_root=root, default_branch="master")
+            self.assertEqual(st.open, "phase")
+            self.assertEqual(st.phase, 3)
+            self.assertEqual(st.closed, [f"{FIXTURE_SLUG}:1", f"{FIXTURE_SLUG}:2"])
+
     def test_malformed_trailer_does_not_close_phase(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

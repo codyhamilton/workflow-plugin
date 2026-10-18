@@ -87,7 +87,10 @@ def trigger_once(
             status=status,
             default_branch=resolved_default_branch,
             skipped=True,
-            skip_reason="Run already has Workflow-Phase done trailer; nothing to dispatch.",
+            skip_reason=(
+                "Run already has Workflow-Phase or Yakka-Phase done trailer; "
+                "nothing to dispatch."
+            ),
             dispatch=None,
             report=None,
             report_parse_error=None,
