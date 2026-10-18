@@ -90,3 +90,25 @@ Refined in `ca5bbb7` into two units. 2-01 owns the Python `mcp` command and its 
 - Commit: `b24f344`, merged in `0c909e3`. Report: `docs/plans/16-python-local-client/reports/2-01-mcp-command.md`.
 - Deviations: none named. No contradiction with the brief. The worker did not run the 3.10 unittest gate (`python3.10` was absent). `test_half_set_env_refusal_drain` can fail with `Address already in use` on `127.0.0.1:8770` when that port is held; a rerun passed when it was free.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+`artifact_feedback` on `reports/2-01-mcp-command.md` and `reports/2-02-mcp-registrations.md`: unreachable. The Yakka namespace is still in error and has no tools.
+
+### Phase 2 verification
+
+Checked from `8755dd9`, not from the reports.
+
+- `python3` (3.12.3) `python3 -m unittest discover -s plugins/yakka/client -t plugins/yakka/client -p 'test_*.py'`: 43 tests, exit 0.
+- `python3.10` (3.10.22), the same command: 43 tests, exit 0. Python 3.10.22 was installed on the machine from the deadsnakes PPA and was not committed.
+- `go test ./internal/mcp -count=1` in `packages/yakka`: exit 0.
+- `python3 plugins/yakka/client/yakka.py mcp` with stdin closed: exit 0.
+- A live stdio session of that process: `tools/list` returned `artifact_feedback`, `list_checks`, and `search_artifacts`. `list_checks` and `search_artifacts` against `http://127.0.0.1:1` returned `service unreachable at http://127.0.0.1:1` with `isError` false.
+- A queued `docs/plans/x/DESIGN.md` returned `state: queued` and was not an MCP error. `YAKKA_BIN` set and executable was spawned with argument `drain`. Unset, the spawn was `python3 /workspace/plugins/yakka/client/yakka.py drain`. With `.drain.lock` held, no process was spawned.
+- The four harness registrations use `command` `python3` and args ending in the client script plus `mcp`. `python3 -m json.tool` on `plugins/yakka/.mcp.json` and `packages/hooklog/cursor-mcp.example.json`: exit 0.
+- `docs/design/04-advisory-surface.md` names `python3 plugins/yakka/client/yakka.py mcp`. The remaining `bin/yakka mcp` line is the Phase 3 forward reference.
+
+Outcome holds.
+
+### Carried
+
+1. `plugins/yakka/client/test_drain.py` `test_half_set_env_refusal_drain` binds `127.0.0.1:8770` and fails with `Address already in use` when that port is held. A rerun passes when the port is free.
+2. `docs/plans/16-python-local-client/reports/2-02-mcp-registrations.md` has identity frontmatter. The brief template does not. The brief is unchanged.
