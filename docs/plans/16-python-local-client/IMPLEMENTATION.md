@@ -136,3 +136,10 @@ Refined in `d3beccc` into four units. 3-01 owns the Python login, status, and ve
 - Commit: `a9f8bc8`, fast-forwarded onto the branch. Report: `docs/plans/16-python-local-client/reports/3-04-design-03-05.md`.
 - Deviations: committed on `work/3-04` because the four units ran alongside; the brief names `cursor/python-local-client`. Not a contract contradiction; the brief is unchanged.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+### 3-03-sessionstart-prefetch
+
+- Built: Claude, Codex, and Cursor SessionStart no longer run `--version` or `prefetch-version.sh`. The script is deleted. The hooklog example SessionStart is spool only. OpenCode no longer spawns `--version` on load. `test_surfaces.py` expects `prefetch_seen == 0` and does not wait on a `--version` stub. The drain kick is unchanged.
+- Commit: `2d4de0a`, merged in `4ec3c82`. Report: `docs/plans/16-python-local-client/reports/3-03-sessionstart-prefetch.md`.
+- Deviations: committed on `work/3-03` for the alongside run. Not a contract contradiction; the brief is unchanged.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
