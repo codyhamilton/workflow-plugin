@@ -56,6 +56,7 @@ TRAILER_EXCEPTION_PREFIXES = (
 )
 
 DATE_SECTION = re.compile(r"^#{1,6}\s+.*\d{4}-\d{2}-\d{2}")
+RENAME_CHANGELOG_HEADING = re.compile(r"^##\s+.*\brename\b", re.I | re.M)
 
 
 def _w() -> str:
@@ -154,11 +155,16 @@ def in_phase6_scope(rel: str) -> bool:
 def globally_excluded(rel: str) -> bool:
     if any(rel.startswith(p) for p in GLOBAL_SKIP_PREFIXES):
         return True
-    if rel == "CHANGELOG.md" and not rename_changelog_cutoff():
-        return False
-    if rel == "CHANGELOG.md" and rename_changelog_cutoff():
-        return True  # whole file skipped until Phase 7 implements line-level cut
     return False
+
+
+def changelog_sections_to_skip(text: str) -> list[tuple[int, int]]:
+    if not text:
+        return []
+    match = RENAME_CHANGELOG_HEADING.search(text)
+    if not match:
+        return []
+    return [(match.start(), len(text))]
 
 
 def design_sections_to_skip(text: str) -> list[tuple[int, int]]:
@@ -216,23 +222,31 @@ def scan_file(rel: str, raw: bytes) -> list[tuple[int, str]]:
         text = raw.decode("utf-8")
     except UnicodeDecodeError:
         return []
-    design_spans = design_sections_to_skip(text) if rel.startswith("docs/design/") and rel.endswith(".md") else []
+    design_spans = (
+        design_sections_to_skip(text) if rel.startswith("docs/design/") and rel.endswith(".md") else []
+    )
+    changelog_spans = (
+        changelog_sections_to_skip(text) if rel == "CHANGELOG.md" and rename_changelog_cutoff() else []
+    )
+    skip_spans = design_spans + changelog_spans
     hits: list[tuple[int, str]] = []
     w = _w()
-    for lineno, line in enumerate(text.splitlines(), 1):
-        if design_spans:
-            line_start = text.index(line) if line in text else 0
-            if offset_in_spans(line_start, design_spans):
-                continue
+    offset = 0
+    for lineno, line in enumerate(text.splitlines(keepends=True), 1):
+        if skip_spans and offset_in_spans(offset, skip_spans):
+            offset += len(line)
+            continue
+        line_body = line.rstrip("\r\n")
         json_only = rel.endswith(".json")
         for label, pat in PATTERNS:
             if label.endswith(": in JSON") and not json_only:
                 continue
-            if pat.search(line):
-                if pat.pattern in TRAILER_PATTERN_TEXTS and trailer_exception(rel, line):
+            if pat.search(line_body):
+                if pat.pattern in TRAILER_PATTERN_TEXTS and trailer_exception(rel, line_body):
                     continue
                 hits.append((lineno, label))
                 break
+        offset += len(line)
     return hits
 
 
