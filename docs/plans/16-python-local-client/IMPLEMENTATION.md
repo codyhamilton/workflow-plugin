@@ -157,3 +157,30 @@ Refined in `d3beccc` into four units. 3-01 owns the Python login, status, and ve
 - Commit: `2534d15`, merged in `6c413a5`. Report: `docs/plans/16-python-local-client/reports/3-01-login-status-version.md`.
 - Deviations: committed on `work/3-01` for the alongside run. The worker did not run the 3.10 unittest gate (`python3.10` was absent and `apt-get` was denied). Not a contract contradiction; the brief is unchanged.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+`artifact_feedback` on `reports/3-01-login-status-version.md`, `reports/3-02-bin-yakka-wrapper.md`, `reports/3-03-sessionstart-prefetch.md`, and `reports/3-04-design-03-05.md`: unreachable. The Yakka namespace is still in error and has no tools.
+
+### Phase 3 verification
+
+Checked from `4f888f0`, not from the reports.
+
+- `python3` (3.12.3) `python3 -m unittest discover -s plugins/yakka/client -t plugins/yakka/client -p 'test_*.py'`: 50 tests, exit 0.
+- `python3.10` (3.10.22), the same command: 50 tests, exit 0. Python 3.10.22 was installed on the machine from the deadsnakes PPA and was not committed.
+- `python3 -m unittest packages.hooklog.tests.test_surfaces`: 4 tests, exit 0.
+- `node --experimental-strip-types --test tests/test_hooks.mjs` in `packages/opencode-yakka-hooks`: 9 pass, 0 fail. The load path does not expect `--version`.
+- `python3 tools/release/test_release.py WrapperTests`: 9 tests, exit 0. `BuildTests.test_7_build_sh`: exit 0 (12s) with Go 1.27.1.
+- `go test ./internal/login -count=1`: exit 0. `go test ./cmd/yakka -run 'TestLoginCommandMissingEndpoint|TestStatus|TestHalfSetEnvRefusal|TestLoginDrainReadWriteAndReadOnly' -count=1`: exit 0.
+- `plugins/yakka/bin/yakka version` printed `yakka 0.2.0 unknown`, exit 0. `YAKKA_COMMIT=abc123 plugins/yakka/bin/yakka --version` printed `yakka 0.2.0 abc123`. A `python3` stub on `PATH` showed the wrapper execs `python3 plugins/yakka/client/yakka.py` for `login`, `status`, `drain`, `mcp`, `version`, and `--version`. `YAKKA_BIN=/bin/echo` ran that program instead.
+- `plugins/yakka/bin/yakka serve` and `ledger` exited 1 with the Go-collector message. `~/.cache/yakka` was not created.
+- Live `bin/yakka status` against `GET /v1/health` printed queue path, `queued: 1`, oldest age, `rejected: 1`, `drain: not running`, remote config, and `reachable`, exit 0. The same queue against `127.0.0.1:1` printed `unreachable` and exited 1.
+- Live `bin/yakka login --endpoint` completed the device exchange and wrote `client.toml` at mode 0600.
+- `plugins/yakka/script/prefetch-version.sh` is gone. Claude and Codex SessionStart hooks have no `--version`. Cursor `sessionStart` and `packages/hooklog/cursor-hooks.example.json` are spool only.
+- `docs/design/03-remote-service.md` and `docs/design/05-distribution.md` name `python3 plugins/yakka/client/yakka.py` as the plugin client and keep `yakka serve` as the Go binary. Design 5 still names `tools/release/build.sh` and `plugins/yakka/bin/SHA256SUMS` as the collector release.
+
+Outcome holds.
+
+### Carried
+
+1. `plugins/yakka/client/test_login.py` leaves the loopback callback socket open (`ResourceWarning` on Python 3.10 and 3.12). Tests pass.
+2. `tools/release/test_release.py` leaves a log or `SUMS` file unclosed (`ResourceWarning`). Test-only.
+3. Phase 3 reports have identity frontmatter. The brief template does not. The briefs are unchanged.
