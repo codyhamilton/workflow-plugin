@@ -70,3 +70,9 @@ Started: 2026-10-18T17:28:00Z.
 Starting HEAD: `feb1b90` on `cursor/python-local-client`.
 
 `artifact_feedback`: the Yakka MCP namespace failed during live tool discovery (`namespaceStatus: error`, no tools). The service is unreachable. Each due call is recorded as unreachable and the run continues.
+
+Refined in `ca5bbb7` into two units. 2-01 owns the Python `mcp` command and its tests. 2-02 owns harness registrations and design 4. They run alongside each other on disjoint paths. Phase 1 carried items are placed in 2-01.
+
+`artifact_feedback` on `briefs/2-01-mcp-command.md` and `briefs/2-02-mcp-registrations.md`: unreachable. A search of the Yakka namespace for `artifact_feedback` returned no tools. The namespace was checked again and is still in error.
+
+2-01 and 2-02 commit in local worktrees (`work/2-01`, `work/2-02`) and do not push those refs. The orchestrator merges them onto `cursor/python-local-client` and pushes that ref only.
