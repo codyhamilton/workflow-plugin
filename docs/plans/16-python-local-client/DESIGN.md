@@ -170,6 +170,15 @@ Three phases. The count and order are fixed. `refine` briefs each phase; none of
 - Approach: known
 - Depends on: nothing
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 1-01 Client config, keys, and secrets | [briefs/1-01-clientconfig-keys-secrets.md](briefs/1-01-clientconfig-keys-secrets.md) | nothing | 1-04 |
+| 1-02 Fact building | [briefs/1-02-facts.md](briefs/1-02-facts.md) | 1-01 | 1-04 |
+| 1-03 Drain command | [briefs/1-03-drain.md](briefs/1-03-drain.md) | 1-02 | 1-04 |
+| 1-04 Hook kick and design 2 | [briefs/1-04-hook-kick.md](briefs/1-04-hook-kick.md) | nothing | 1-01, 1-02, 1-03 |
+
 ### Phase 2 — MCP is the Python stdio server
 
 - Outcome: Each harness MCP registration starts `python3 plugins/yakka/client/yakka.py mcp` on stdio and does not resolve a binary. The ported `internal/mcp` tests pass, including the httptest `serve()` helper: `tools/list` is the three tools; `artifact_feedback` returns `queued`, `rejected`, `bad config`, `not delivered`, `stale`, and `delivered`, with baseline lines on `delivered`; `list_checks` and `search_artifacts` are the existing GETs; a queued path starts `YAKKA_BIN` with `drain` when that is set and executable, otherwise `python3 plugins/yakka/client/yakka.py drain`, and only when the lock is free; a down service is not an MCP error. `docs/design/04-advisory-surface.md` names this process.
