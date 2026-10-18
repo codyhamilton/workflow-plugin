@@ -1,5 +1,5 @@
 {
-  "name": "workflow-plugin",
+  "name": "yakka",
   "owner": {
     "name": "William Hamilton",
     "email": "codyh@ctzns.net"
@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "workflow",
+      "name": "yakka",
       "description": "Cloud-safe core workflow skills for Cursor: design, refine, execute, comprehensive-review, close-out, post-build",
       "author": {
         "name": "William Hamilton",

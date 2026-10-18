@@ -1,13 +1,13 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "workflow-plugin",
+  "name": "yakka",
   "description": "Private workflow plugin marketplace",
   "owner": {
     "name": "William Hamilton"
   },
   "plugins": [
     {
-      "name": "workflow",
+      "name": "yakka",
       "description": "Cloud-safe core: design, refine, execute, comprehensive-review, close-out, post-build. No interactive gates that dead-end headless; installable in cloud build and pipeline environments.",
       "author": {
         "name": "William Hamilton",
