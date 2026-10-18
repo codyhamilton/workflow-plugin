@@ -3,15 +3,20 @@
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
+import random
 import re
 import shutil
 import subprocess
 import sys
+import time
+import urllib.error
+import urllib.request
 from dataclasses import dataclass, field
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 # --- clientconfig ---
 
@@ -983,12 +988,674 @@ def WritePaths(raw: Optional[bytes]) -> Optional[List[str]]:
     return paths
 
 
+# --- drain ---
+
+ReasonIdle = "idle"
+ReasonLockHeld = "lock held by another drain"
+ReasonGaveUp = "backoff at cap and no new file"
+ReasonStopped = "stopped"
+
+_MAX_DRAIN_FILES = 500
+_MAX_DRAIN_BYTES = 8 << 20
+
+
+class _NetErr(Exception):
+    pass
+
+
+_ERR_NETWORK: BaseException = _NetErr()
+
+
+class _DiscardIO:
+    def write(self, s: str) -> int:
+        return len(s)
+
+    def flush(self) -> None:
+        pass
+
+
+_DISCARD_IO = _DiscardIO()
+
+
+@dataclass
+class DrainResponse:
+    Status: int = 0
+    RetryAfter: float = 0.0
+    Results: List[dict[str, Any]] = field(default_factory=list)
+
+
+class HTTPSink:
+    def __init__(
+        self,
+        Endpoint: str = "",
+        Key: str = "",
+        Client: Any = None,
+    ) -> None:
+        self.Endpoint = Endpoint
+        self.Key = Key
+        self.Client = Client
+
+    def Send(
+        self, ctx: "DrainContext", facts: List[bytes]
+    ) -> Tuple[DrainResponse, Optional[BaseException]]:
+        parsed = [json.loads(f) for f in facts]
+        body = json.dumps({"facts": parsed}).encode("utf-8")
+        url = self.Endpoint.rstrip("/") + "/v1/ingest"
+        req = urllib.request.Request(url, data=body, method="POST")
+        req.add_header("Content-Type", "application/json")
+        if self.Key:
+            req.add_header("Authorization", "Bearer " + self.Key)
+        timeout = 30.0
+        if self.Client is not None and hasattr(self.Client, "timeout"):
+            timeout = self.Client.timeout
+        try:
+            try:
+                resp = urllib.request.urlopen(req, timeout=timeout)
+                status = resp.status
+                headers = resp.headers
+                data = resp.read(64 << 20)
+            except urllib.error.HTTPError as e:
+                status = e.code
+                headers = e.headers
+                data = e.read(64 << 20)
+        except (urllib.error.URLError, OSError):
+            return DrainResponse(), _ERR_NETWORK
+        out = DrainResponse(Status=status)
+        ra = headers.get("Retry-After", "").strip()
+        if ra.isdigit():
+            out.RetryAfter = float(ra)
+        if status == 200:
+            try:
+                r = json.loads(data)
+                out.Results = r.get("results", [])
+            except (json.JSONDecodeError, TypeError):
+                out.Status = 502
+        return out, None
+
+
+def ConfigSink() -> Tuple[Optional[HTTPSink], Optional[BaseException]]:
+    try:
+        c = Load()
+    except (ErrPartialEnv, OSError, ValueError) as err:
+        return None, err
+    return HTTPSink(Endpoint=c.Endpoint, Key=c.Key), None
+
+
+@dataclass
+class Options:
+    Dir: str = ""
+    Sink: Optional[Callable[[], Tuple[Any, Optional[BaseException]]]] = None
+    Window: float = 0.0
+    Linger: float = 0.0
+    BackoffMax: float = 0.0
+    BackoffMin: float = 0.0
+    GiveUp: float = 0.0
+    Poll: float = 0.0
+    LockWait: float = 0.0
+    Wake: Any = None
+    Hosted: bool = False
+    Log: Any = None
+    afterRelease: Optional[Callable[[], None]] = None
+
+    def defaults(self) -> None:
+        if not self.Dir:
+            self.Dir = QueueDir()
+        if self.Window <= 0:
+            self.Window = 1.5
+        if self.Linger <= 0:
+            self.Linger = 60.0
+        if self.BackoffMax <= 0:
+            self.BackoffMax = 300.0
+        if self.BackoffMin <= 0:
+            self.BackoffMin = 0.5
+        if self.GiveUp <= 0:
+            self.GiveUp = 900.0
+        if self.Poll <= 0:
+            self.Poll = 0.25
+        if self.LockWait <= 0:
+            self.LockWait = 1.0
+        if self.BackoffMin > self.BackoffMax:
+            self.BackoffMin = self.BackoffMax
+        if self.Log is None:
+            self.Log = _DISCARD_IO
+
+
+class DrainContext:
+    def __init__(
+        self,
+        deadline: Optional[float] = None,
+        cancelled: bool = False,
+    ) -> None:
+        self._deadline = deadline
+        self._cancelled = cancelled
+
+    @classmethod
+    def with_timeout(cls, seconds: float) -> "DrainContext":
+        return cls(deadline=time.monotonic() + seconds)
+
+    def cancel(self) -> None:
+        self._cancelled = True
+
+    def cancelled(self) -> bool:
+        if self._cancelled:
+            return True
+        if self._deadline is not None and time.monotonic() > self._deadline:
+            return True
+        return False
+
+    def err(self) -> Optional[BaseException]:
+        if self.cancelled():
+            return InterruptedError()
+        return None
+
+
+def QueueDir() -> str:
+    d = os.environ.get("YAKKA_QUEUE", "")
+    if d:
+        return d
+    home = os.environ.get("HOME", "") or os.path.expanduser("~")
+    return os.path.join(home, ".local", "share", "yakka", "queue")
+
+
+def EnsureDirs(dir_path: str) -> Optional[OSError]:
+    for d in (
+        dir_path,
+        os.path.join(dir_path, "tmp"),
+        os.path.join(dir_path, "rejected"),
+    ):
+        try:
+            os.makedirs(d, mode=0o700, exist_ok=True)
+        except OSError as err:
+            return err
+    return None
+
+
+def _lock_path(dir_path: str) -> str:
+    return os.path.join(dir_path, ".drain.lock")
+
+
+def _try_lock(dir_path: str) -> Tuple[Optional[Any], Optional[BaseException]]:
+    path = _lock_path(dir_path)
+    try:
+        f = open(path, "a+b")
+    except OSError as err:
+        return None, err
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as err:
+        f.close()
+        return None, err
+    return f, None
+
+
+def _release_lock(f: Any) -> None:
+    if f is not None:
+        try:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        except OSError:
+            pass
+        try:
+            f.close()
+        except OSError:
+            pass
+
+
+def _acquire(
+    ctx: DrainContext,
+    dir_path: str,
+    wait: float,
+    poll: float,
+    forever: bool,
+) -> Tuple[Optional[Any], Optional[BaseException]]:
+    deadline = time.monotonic() + wait
+    step = poll if forever else 0.02
+    while True:
+        f, err = _try_lock(dir_path)
+        if f is not None:
+            return f, None
+        if err is not None and not isinstance(err, BlockingIOError):
+            return None, err
+        if not forever and time.monotonic() > deadline:
+            return None, BlockingIOError()
+        if not _drain_sleep(ctx, step):
+            return None, InterruptedError()
+        if ctx.cancelled():
+            return None, InterruptedError()
+
+
+def Running(dir_path: str) -> bool:
+    path = _lock_path(dir_path)
+    try:
+        f = open(path, "r+b")
+    except OSError:
+        return False
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return True
+    try:
+        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+    except OSError:
+        pass
+    f.close()
+    return False
+
+
+def _drain_sleep(ctx: DrainContext, duration: float) -> bool:
+    if duration <= 0:
+        return not ctx.cancelled()
+    end = time.monotonic() + duration
+    while time.monotonic() < end:
+        if ctx.cancelled():
+            return False
+        time.sleep(min(0.02, end - time.monotonic()))
+    return True
+
+
+@dataclass
+class _QueueEntry:
+    name: str
+    mod: float
+
+
+def _list_queue(dir_path: str) -> List[_QueueEntry]:
+    try:
+        names = os.listdir(dir_path)
+    except OSError:
+        return []
+    out: List[_QueueEntry] = []
+    for n in names:
+        if n.startswith(".") or not n.endswith(".evt"):
+            continue
+        p = os.path.join(dir_path, n)
+        if not os.path.isfile(p):
+            continue
+        out.append(_QueueEntry(n, os.path.getmtime(p)))
+    out.sort(key=lambda e: (e.mod, e.name))
+    return out
+
+
+@dataclass
+class QueueStatusData:
+    Dir: str
+    Queued: int
+    OldestAge: float
+    Rejected: int
+    Running: bool
+
+
+def QueueStatus(dir_path: str) -> QueueStatusData:
+    st = QueueStatusData(
+        Dir=dir_path,
+        Queued=0,
+        OldestAge=-1.0,
+        Rejected=0,
+        Running=Running(dir_path),
+    )
+    es = _list_queue(dir_path)
+    st.Queued = len(es)
+    if es:
+        st.OldestAge = time.time() - es[0].mod
+    rej = os.path.join(dir_path, "rejected")
+    try:
+        for n in os.listdir(rej):
+            if n.endswith(".evt"):
+                st.Rejected += 1
+    except OSError:
+        pass
+    return st
+
+
+class _Runner:
+    def __init__(self, o: Options) -> None:
+        self.o = o
+        self.seen: dict[str, bool] = {}
+        self.last_new = time.monotonic()
+
+    def logf(self, fmt: str, *args: Any) -> None:
+        self.o.Log.write("drain: " + (fmt % args) + "\n")
+        self.o.Log.flush()
+
+    def scan(self) -> List[_QueueEntry]:
+        es = _list_queue(self.o.Dir)
+        cur = {e.name: True for e in es}
+        now = time.monotonic()
+        for e in es:
+            if not self.seen.get(e.name):
+                self.last_new = now
+        self.seen = cur
+        return es
+
+    def wait_for_work(self, ctx: DrainContext) -> bool:
+        linger_end = None
+        if not self.o.Hosted:
+            linger_end = time.monotonic() + self.o.Linger
+        while True:
+            if ctx.cancelled():
+                return False
+            if linger_end is not None and time.monotonic() >= linger_end:
+                return False
+            if self.o.Wake is not None:
+                try:
+                    self.o.Wake.acquire(block=False)
+                except Exception:
+                    pass
+            if len(self.scan()) > 0:
+                return True
+            if not _drain_sleep(ctx, self.o.Poll):
+                return False
+
+
+def Run(ctx: DrainContext, o: Options) -> Tuple[str, Optional[BaseException]]:
+    o.defaults()
+    if o.Sink is None:
+        return "", OSError("drain: no sink")
+    err = EnsureDirs(o.Dir)
+    if err is not None:
+        return "", err
+    r = _Runner(o)
+    lock, err = _acquire(ctx, o.Dir, o.LockWait, o.Poll, o.Hosted)
+    if err is not None:
+        if ctx.cancelled():
+            return ReasonStopped, None
+        if isinstance(err, BlockingIOError):
+            return ReasonLockHeld, None
+        return "", err
+    r.logf("acquired lock pid=%d", os.getpid())
+    fresh = True
+    backoff = 0.0
+    try:
+        while True:
+            if ctx.cancelled():
+                return ReasonStopped, None
+            files = r.scan()
+            if not files:
+                fresh = True
+                backoff = 0.0
+                if not r.wait_for_work(ctx):
+                    if ctx.cancelled():
+                        return ReasonStopped, None
+                    _release_lock(lock)
+                    lock = None
+                    if o.afterRelease is not None:
+                        o.afterRelease()
+                    if len(r.scan()) == 0:
+                        return ReasonIdle, None
+                    lock, err = _acquire(ctx, o.Dir, o.LockWait, o.Poll, False)
+                    if err is not None:
+                        if ctx.cancelled():
+                            return ReasonStopped, None
+                        return ReasonLockHeld, None
+                    r.logf("acquired lock pid=%d", os.getpid())
+                continue
+            if fresh:
+                fresh = False
+                if not _drain_sleep(ctx, o.Window):
+                    return ReasonStopped, None
+                files = r.scan()
+            sink, err = o.Sink()
+            if err is not None:
+                r.logf("config unavailable; retrying")
+                if not o.Hosted and (time.monotonic() - r.last_new) >= o.GiveUp:
+                    return ReasonGaveUp, None
+                if not _drain_sleep(ctx, max(o.Poll, 1.0)):
+                    return ReasonStopped, None
+                continue
+            if len(files) > _MAX_DRAIN_FILES:
+                files = files[:_MAX_DRAIN_FILES]
+            res = r.batch(ctx, sink, files)
+            if not res[0]:
+                backoff = 0.0
+                continue
+            wait = res[1]
+            if wait <= 0:
+                if backoff == 0:
+                    backoff = o.BackoffMin
+                else:
+                    backoff = min(backoff * 2, o.BackoffMax)
+                wait = backoff / 2 + random.random() * (backoff / 2)
+            r.scan()
+            if (
+                not o.Hosted
+                and backoff >= o.BackoffMax
+                and (time.monotonic() - r.last_new) >= o.GiveUp
+            ):
+                return ReasonGaveUp, None
+            if not _drain_sleep(ctx, wait):
+                return ReasonStopped, None
+    finally:
+        _release_lock(lock)
+
+
+@dataclass
+class _BatchItem:
+    name: str
+    facts: List[bytes]
+    reasons: List[str]
+
+
+def _prefix(name: str, reasons: List[str]) -> List[str]:
+    return [name + ": " + s for s in reasons]
+
+
+class _RunnerBatch(_Runner):
+    def batch(
+        self, ctx: DrainContext, sink: HTTPSink, files: List[_QueueEntry]
+    ) -> Tuple[bool, float]:
+        in_files: List[File] = []
+        for e in files:
+            path = os.path.join(self.o.Dir, e.name)
+            try:
+                with open(path, "rb") as f:
+                    data = f.read()
+            except OSError:
+                continue
+            in_files.append(File(Name=e.name, Data=data))
+        items: List[_BatchItem] = []
+        for out in Build(None, in_files):
+            if not out.Facts:
+                if out.Reasons:
+                    self.reject(out.Name, _prefix(out.Name, out.Reasons))
+                else:
+                    self.remove(out.Name)
+                continue
+            items.append(_BatchItem(out.Name, list(out.Facts), list(out.Reasons)))
+        while items:
+            n, size = 0, 0
+            while n < len(items):
+                s = sum(len(f) for f in items[n].facts)
+                if n > 0 and size + s > _MAX_DRAIN_BYTES:
+                    break
+                size += s
+                n += 1
+            retry, wait = self.send(ctx, sink, items[:n])
+            if retry:
+                return True, wait
+            items = items[n:]
+        return False, 0.0
+
+    def send(
+        self, ctx: DrainContext, sink: HTTPSink, items: List[_BatchItem]
+    ) -> Tuple[bool, float]:
+        all_facts: List[bytes] = []
+        for it in items:
+            all_facts.extend(it.facts)
+        resp, err = sink.Send(ctx, all_facts)
+        if err is not None:
+            if not ctx.cancelled():
+                self.logf(
+                    "attempt failed: network error (%d files kept)", len(items)
+                )
+            return True, 0.0
+        if resp.Status == 200:
+            return self.apply(items, all_facts, resp)
+        if resp.Status == 429:
+            wait = max(resp.RetryAfter, 0.001)
+            self.logf(
+                "attempt failed: status=429 retry-after=%s (%d files kept)",
+                wait,
+                len(items),
+            )
+            return True, wait
+        if resp.Status in (400, 413):
+            if len(items) == 1:
+                self.logf("file rejected: status=%d", resp.Status)
+                it = items[0]
+                self.reject(
+                    it.name,
+                    _prefix(
+                        it.name,
+                        [str(resp.Status)] + list(it.reasons),
+                    ),
+                )
+                return False, 0.0
+            self.logf("status=%d: splitting %d files", resp.Status, len(items))
+            h = len(items) // 2
+            retry, wait = self.send(ctx, sink, items[:h])
+            if retry:
+                return True, wait
+            return self.send(ctx, sink, items[h:])
+        self.logf(
+            "attempt failed: status=%d (%d files kept)", resp.Status, len(items)
+        )
+        return True, 0.0
+
+    def apply(
+        self,
+        items: List[_BatchItem],
+        all_facts: List[bytes],
+        resp: DrainResponse,
+    ) -> Tuple[bool, float]:
+        if len(resp.Results) != len(all_facts):
+            self.logf(
+                "attempt failed: %d results for %d facts (%d files kept)",
+                len(resp.Results),
+                len(all_facts),
+                len(items),
+            )
+            return True, 0.0
+        for res in resp.Results:
+            st = res.get("status", "")
+            if st not in ("accepted", "duplicate", "rejected"):
+                self.logf(
+                    "attempt failed: unknown result status (%d files kept)",
+                    len(items),
+                )
+                return True, 0.0
+        i = 0
+        for it in items:
+            rej: List[str] = []
+            for _ in it.facts:
+                res = resp.Results[i]
+                i += 1
+                if res.get("status") == "rejected":
+                    reason = res.get("reason") or "rejected"
+                    rej.append(res.get("id", "") + ": " + reason)
+            rej.extend(_prefix(it.name, it.reasons))
+            if rej:
+                self.reject(it.name, rej)
+            else:
+                self.remove(it.name)
+        return False, 0.0
+
+    def remove(self, name: str) -> None:
+        path = os.path.join(self.o.Dir, name)
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
+        except OSError as err:
+            self.logf("delete failed: %s", err)
+
+    def reject(self, name: str, reasons: List[str]) -> None:
+        dst = os.path.join(self.o.Dir, "rejected", name)
+        lines = []
+        for s in reasons:
+            lines.append(s.replace("\r", " ").replace("\n", " ") + "\n")
+        reason_path = dst + ".reason"
+        try:
+            with open(reason_path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+        except OSError as err:
+            self.logf("reason write failed: %s", err)
+        src = os.path.join(self.o.Dir, name)
+        try:
+            os.rename(src, dst)
+        except FileNotFoundError:
+            pass
+        except OSError as err:
+            self.logf("reject move failed: %s", err)
+
+
+_Runner.batch = _RunnerBatch.batch  # type: ignore[method-assign]
+_Runner.send = _RunnerBatch.send  # type: ignore[method-assign]
+_Runner.apply = _RunnerBatch.apply  # type: ignore[method-assign]
+_Runner.remove = _RunnerBatch.remove  # type: ignore[method-assign]
+_Runner.reject = _RunnerBatch.reject  # type: ignore[method-assign]
+
+
+def _parse_go_duration(s: str) -> float:
+    import re
+
+    units = {
+        "ns": 1e-9,
+        "us": 1e-6,
+        "µs": 1e-6,
+        "ms": 1e-3,
+        "s": 1.0,
+        "m": 60.0,
+        "h": 3600.0,
+    }
+    pos = 0
+    total = 0.0
+    while pos < len(s):
+        m = re.match(r"([0-9]+(?:\.[0-9]*)?)(ns|us|µs|ms|s|m|h)", s[pos:])
+        if not m:
+            raise ValueError(f"invalid duration {s!r}")
+        total += float(m.group(1)) * units[m.group(2)]
+        pos += m.end()
+    if pos != len(s):
+        raise ValueError(f"invalid duration {s!r}")
+    return total
+
+
+def RunStandalone(ctx: DrainContext, stderr: Any) -> int:
+    try:
+        Load()
+    except ErrPartialEnv as err:
+        print("yakka drain:", err, file=stderr)
+        return 1
+    o = Options(Sink=ConfigSink, Log=stderr, Poll=0.25)
+    for env, attr in (
+        ("YAKKA_DRAIN_WINDOW", "Window"),
+        ("YAKKA_DRAIN_LINGER", "Linger"),
+        ("YAKKA_DRAIN_BACKOFF_MAX", "BackoffMax"),
+        ("YAKKA_DRAIN_GIVEUP", "GiveUp"),
+    ):
+        v = os.environ.get(env, "")
+        if v:
+            try:
+                setattr(o, attr, _parse_go_duration(v))
+            except ValueError as err:
+                print(f"yakka drain: {env}: {err}", file=stderr)
+                return 2
+    o.defaults()
+    if o.BackoffMax > 0 and o.BackoffMax < 0.5:
+        o.BackoffMin = o.BackoffMax
+    reason, err = Run(ctx, o)
+    if err is not None:
+        print("yakka drain:", err, file=stderr)
+        return 1
+    print(f"drain: exit: {reason}", file=stderr)
+    return 0
+
+
 # --- command dispatch ---
 
 
 def cmd_drain(argv: List[str]) -> int:
-    print("yakka drain: not implemented", file=sys.stderr)
-    return 2
+    ctx = DrainContext()
+    return RunStandalone(ctx, sys.stderr)
 
 
 def main(argv: List[str]) -> int:
