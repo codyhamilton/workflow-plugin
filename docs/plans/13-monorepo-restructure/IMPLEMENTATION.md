@@ -602,6 +602,8 @@ Deviations: the env inventory also covered `packages/hooklog` and `packages/open
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
+Verification of the Phase 7 CHANGELOG clause against `git diff d7b78c1 f11f303` found six removed `WORKFLOW_*` identifiers absent from the table: `WORKFLOW_ALIGNMENT_CRITERIA`, `WORKFLOW_ALIGNMENT_INSTRUCTIONS`, `WORKFLOW_LEGACY`, `WORKFLOW_REPORT_FENCE`, `WORKFLOW_SIGNAL_STATE_DIR`, `WORKFLOW_ARTIFACT_SUBMIT_CLI`. Unit `7-07` adds those rows. `WORKFLOW_QUALITY_URL` stays the existing exception.
+
 ### 7-02-root-readme
 
 Brief: `docs/plans/13-monorepo-restructure/briefs/7-02-root-readme.md`.

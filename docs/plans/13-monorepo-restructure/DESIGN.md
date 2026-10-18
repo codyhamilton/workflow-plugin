@@ -623,6 +623,7 @@ Units:
 - 7-04 Design contract sections. Brief: `docs/plans/13-monorepo-restructure/briefs/7-04-design-contract-sections.md`. Depends on: Phases 5 and 6. Runs alongside: `7-01`, `7-02`, `7-03`, `7-05`.
 - 7-05 Automation post-build and eval fixture prose. Brief: `docs/plans/13-monorepo-restructure/briefs/7-05-automation-and-eval-prose.md`. Depends on: Phases 5 and 6. Runs alongside: `7-01`, `7-02`, `7-03`, `7-04`.
 - 7-06 CHANGELOG scan cut and full-repo residual scan. Brief: `docs/plans/13-monorepo-restructure/briefs/7-06-scan-changelog-cut-and-full-scope.md`. Depends on: `7-01`, `7-02`, `7-03`, `7-04`, `7-05`. Runs alongside: nothing.
+- 7-07 CHANGELOG rows for identifiers the migration table missed. Brief: `docs/plans/13-monorepo-restructure/briefs/7-07-changelog-missing-identifiers.md`. Depends on: `7-01`. Runs alongside: nothing.
 
 Refine:
 
