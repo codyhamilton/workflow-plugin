@@ -586,3 +586,78 @@ Start: 2026-10-18T00:36:14Z
 `artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
 
 Refine: Proceed. Commit `d5fb766`. Six units. Wave 1: `7-01`, `7-02`, `7-03`, `7-04`, `7-05` alongside. Then `7-06`. Phase 6 Carried: item 1 stays carried (manual Cursor session; does not touch a Phase 7 contract). Item 2 absorbed into `7-02` (root README signal log). `artifact_feedback` on the briefs: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`); feedback was not called. Refine worker: Composer (`composer-2.5`), agent `bc-24895b02-ffe5-559e-bd31-84fc2d6cad2d`. The harness did not report turns or final context.
+
+### 7-01-changelog-migration-guide
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-01-changelog-migration-guide.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-01-changelog-migration-guide.md`.
+Worker: Composer (`composer-2.5`), agent `bc-9307e6d8-5b6e-52fa-ba1d-0bbc8b53dbb1`. The harness did not report turns or final context.
+Commit: `4feeeff`.
+
+Built: top `CHANGELOG.md` entry `## 3.0.0 — 2026-10-18 — rename to yakka` with the `WORKFLOW_*` → `YAKKA_*` map, the state-path table, remove-then-install blocks for Claude Code, Cursor, Codex and OpenCode, the `.gitignore` note, the MCP and skill-prefix note, and numbered maintainer actions.
+
+Surfaces: `CHANGELOG.md`.
+
+Deviations: the env inventory also covered `packages/hooklog` and `packages/opencode-yakka-hooks`. `WORKFLOW_HOOKLOG_CLI` is documented as removed with no `YAKKA_*` successor. `YAKKA_QUALITY_URL` and `YAKKA_LEGACY` are omitted from the table.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 7-02-root-readme
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-02-root-readme.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-02-root-readme.md`.
+Worker: Composer (`composer-2.5`), agent `bc-254a418a-1a8e-5c31-91ed-93929e3e3646`. The harness did not report turns or final context.
+Commit: `bba9d41`.
+
+Built: root `README.md` install instructions use `codyhamilton/yakka` and `yakka@yakka`. The signal log is `~/.local/state/yakka/jev-signal-log.jsonl` via `YAKKA_JEV_SIGNAL_LOG`. Layout prose names `plugins/yakka` and the yakka packages.
+
+Surfaces: `README.md`.
+
+Deviations: legacy trailer acceptance points at `CHANGELOG.md` and does not spell `Workflow-Phase:` (the residual scanner flags that string). Added a Cursor desktop install bullet for `~/.cursor/plugins/local/yakka`.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 7-03-overview-and-architecture
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-03-overview-and-architecture.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-03-overview-and-architecture.md`.
+Worker: Composer (`composer-2.5`), agent `bc-a26ab401-58b3-5a27-9db9-0964961bccac`. The harness did not report turns or final context.
+Commit: `6cdca2b`.
+
+Built: `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` name the yakka plugin, packages, `YAKKA_*` paths, and `yakka-tuning`. ARCHITECTURE states the trailer dual-read rule.
+
+Surfaces: `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`.
+
+Deviations: none.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 7-04-design-contract-sections
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-04-design-contract-sections.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-04-design-contract-sections.md`.
+Worker: Composer (`composer-2.5`), agent `bc-d1541f51-873e-5853-a318-22f56baa1298`. The harness did not report turns or final context.
+Commit: `cd8e96e`.
+
+Built: contract sections in `docs/design/02`, `03`, `04`, `05`, `07`, and `system-architecture.md` use yakka names. The trailer dual-read rule is in `system-architecture.md`. `01-event-model-and-ingest.md` and `conversation-indexer.md` were already clean and were left unchanged.
+
+Surfaces: `docs/design/{02,03,04,05,07}-*.md`, `docs/design/system-architecture.md`.
+
+Deviations: `04-advisory-surface.md` links to the dual-read section instead of repeating it. `05-distribution.md` `RELEASE_URL` points at `github.com/codyhamilton/yakka`.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 7-05-automation-and-eval-prose
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-05-automation-and-eval-prose.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-05-automation-and-eval-prose.md`.
+Worker: Composer (`composer-2.5`), agent `bc-7bbf10da-cbf5-59a1-8d03-4b0c370855c9`. The harness did not report turns or final context.
+Commit: `cdc52ed`.
+
+Built: `docs/automation/post-build.md` names `plugins/yakka` and `.cursor/skills/yakka/`. The trailer-completeness fixture repo URL is `https://github.com/codyhamilton/yakka`.
+
+Surfaces: `docs/automation/post-build.md`, `evals/scenarios/trailer-completeness/source.md`.
+
+Deviations: none.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
