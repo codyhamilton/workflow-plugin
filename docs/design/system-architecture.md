@@ -19,7 +19,7 @@ its own design. Skill behaviour stays in each `SKILL.md`; the skill-level seams 
  Remote service         ingest API · ledger · derived views · scorer client      (replaceable backends)
         │ reads
  Agent advisory tools   read-only MCP: "what should I decide?"
- Maintainer lab         jev-variants · held-out set · white paper                (not part of the pipeline)
+ Maintainer skills      .claude/skills/ — jev-variants · held-out set · white paper (not part of the pipeline)
 ```
 
 The scorer is **Jev via TypeSafe System One**, behind a client interface. The model behind it is
@@ -72,7 +72,7 @@ are maintainer operations and move to the REST API or CLI.
 |---|---|---|
 | 1 | [Event model and ingest contract](01-event-model-and-ingest.md) | join keys, artifact identity, derived execution view, execution report, envelope types |
 | 2 | [Edge capture](02-edge-capture.md) | spool, drain daemon, client config, MCP shim plumbing, per-harness install and trust |
-| 3 | [Remote service](03-remote-service.md) | runtime (Go `workflow` binary), API versioning, auth and tenancy, precheck, storage, screening and scoring, local drain hosting |
+| 3 | [Remote service](03-remote-service.md) | runtime (Go `yakka` binary), API versioning, auth and tenancy, precheck, storage, screening and scoring, local drain hosting |
 | 4 | [Agent advisory surface](04-advisory-surface.md) | the read-only MCP, hook feedback, behaviour when the remote is unreachable |
 | 5 | [Distribution](05-distribution.md) | plugin layout, per-harness packaging, the pinned Codex copy |
 | 6 | Lab and analysis | held-out set, white paper, check-to-cost revisit |
@@ -80,3 +80,19 @@ are maintainer operations and move to the REST API or CLI.
 
 Order: 1 first, since the rest depend on its keys and envelope types. 2 and 3 can then proceed
 together.
+
+## Plan folder and phase closure
+
+Plan artifacts live under `docs/plans/<NN>-<slug>/` on the PR branch. The PR body's first line is the
+mechanical locator: `Yakka-Plan: docs/plans/<NN>-<slug>/` (`NN` is best-effort ordering; the slug is
+the key). Build-stage contents are `DESIGN.md`, `briefs/`, and `IMPLEMENTATION.md` (plus optional
+`PROVENANCE.md`); pipeline stages add `REVIEW.md`, `QA.md`, and remediation briefs before the
+candidate SHA. Folders created before the rename may carry `PLAN.md` instead of `DESIGN.md`; readers
+accept whichever exists.
+
+Phase closure is a git trailer on the commit that closes a phase: writers emit `Yakka-Phase:
+<slug>:<n>` and `Yakka-Phase: <slug>:done` when the design is finished. Readers accept
+`Workflow-Phase` / `Yakka-Phase`, `Workflow-Plan:` / `Yakka-Plan:`, and both report fence tags,
+permanently, through one shared key list in `tools/driver/`. Execution reports use a `yakka-report`
+fence; the same dual-read rule applies there. Nothing in this section rewrites git history or old PR
+bodies.

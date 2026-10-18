@@ -11,7 +11,7 @@ Plugin **skills** (`design`, `execute`, …) are installed separately. They are 
 | Cursor cloud | `docs/lab/bootstrap/cursor-cloud-setup.sh` in the **image** install, then snapshot | Agents boot from a prebaked image. Skills are read at process start. There is no session hook. |
 | Claude Code on the web | Copy `docs/lab/bootstrap/session-start.sh` + settings fragment | Fresh container per session. `reloadSkills` makes the install visible on that session. |
 
-Both paths install **core only** (never `workflow-lab`). `WORKFLOW_INSTALL_MODE=cloud` or `claude-code` forces the route.
+Both paths install **core only** (never maintainer skills under `.claude/skills/`). `YAKKA_INSTALL_MODE=cloud` or `claude-code` forces the route.
 
 The **driver** is a small Python toolkit the bot calls in a fixed loop:
 
@@ -151,17 +151,17 @@ python3 tools/driver/check_skills.py
   "harness": "cursor-cloud",
   "skills_found": ["design", "refine", "execute", "comprehensive-review", "close-out", "post-build"],
   "missing": [],
-  "skills_root": "<workspace>/.cursor/skills/workflow"
+  "skills_root": "<workspace>/.cursor/skills/yakka"
 }
 ```
 
 | `harness` | `skills_root` |
 |-----------|----------------|
-| `cursor-cloud` | `<workspace>/.cursor/skills/workflow/<skill>/SKILL.md` |
+| `cursor-cloud` | `<workspace>/.cursor/skills/yakka/<skill>/SKILL.md` |
 | `claude-code` | `~/.claude/skills/<skill>/SKILL.md` |
 | `interactive` | none — unattended install did not run; `ok` is false |
 
-Exit 0 only when `ok` is true. A skill counts when `<skill>/SKILL.md` is a file. Lab skills are ignored. Detection matches `install.sh` (explicit `WORKFLOW_INSTALL_MODE`, then Claude signals, then Cursor cloud signals or a non-interactive shell). This is disk presence, not a claim that the harness listed the skills in chat.
+Exit 0 only when `ok` is true. A skill counts when `<skill>/SKILL.md` is a file. Lab skills are ignored. Detection matches `install.sh` (explicit `YAKKA_INSTALL_MODE`, then Claude signals, then Cursor cloud signals or a non-interactive shell). This is disk presence, not a claim that the harness listed the skills in chat.
 
 ## Grok Bot integration
 
@@ -193,7 +193,7 @@ python3 tools/driver/mcp_server.py --stdio
 
 ### Kill line (this environment)
 
-No headless `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` is available in the workflow-plugin CI/agent VM. **Live dispatch is not claimed here.** Spike B ships the provider interface, dry-run path, fixture-driven contract tests, and Grok Bot call documentation. Nesting-only harnesses that could run `execute` as a subagent gain no benefit from an extra process until a headless key is configured on the bot host.
+No headless `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` is available in the yakka CI/agent VM. **Live dispatch is not claimed here.** Spike B ships the provider interface, dry-run path, fixture-driven contract tests, and Grok Bot call documentation. Nesting-only harnesses that could run `execute` as a subagent gain no benefit from an extra process until a headless key is configured on the bot host.
 
 ## Tests
 
@@ -201,7 +201,7 @@ No headless `ANTHROPIC_API_KEY` or `CURSOR_API_KEY` is available in the workflow
 python3 -m unittest discover -s tools/driver/tests -p 'test_*.py'
 ```
 
-Includes `check_skills.py` and `install.sh --print-route` / core-only copy (`WORKFLOW_INSTALL_SKIP_REFRESH=1`, no network). Also runs `evals/scenarios/trailer-completeness/verify.py`.
+Includes `check_skills.py` and `install.sh --print-route` / core-only copy (`YAKKA_INSTALL_SKIP_REFRESH=1`, no network). Also runs `evals/scenarios/trailer-completeness/verify.py`.
 
 ## Outcome row (step 6)
 

@@ -1,39 +1,20 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "workflow-plugin",
+  "name": "yakka",
   "description": "Private workflow plugin marketplace",
   "owner": {
     "name": "William Hamilton"
   },
   "plugins": [
     {
-      "name": "workflow",
+      "name": "yakka",
       "description": "Cloud-safe core: design, refine, execute, comprehensive-review, close-out, post-build. No interactive gates that dead-end headless; installable in cloud build and pipeline environments.",
       "author": {
         "name": "William Hamilton",
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": {
-        "source": "github",
-        "repo": "codyhamilton/workflow-plugin",
-        "ref": "master"
-      }
-    },
-    {
-      "name": "workflow-lab",
-      "description": "Local lab: setup, iterate, transcript-parser, workflow-tuning. Interactive and/or local-filesystem-bound; never required by the pipeline.",
-      "author": {
-        "name": "William Hamilton",
-        "email": "codyh@ctzns.net"
-      },
-      "category": "development",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/codyhamilton/workflow-plugin.git",
-        "path": "plugins/workflow-lab",
-        "ref": "master"
-      }
+      "source": "plugins/yakka"
     }
   ]
 }

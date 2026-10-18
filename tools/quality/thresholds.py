@@ -1,7 +1,7 @@
 """Extract numeric thresholds (with surrounding context) from plan briefs found anywhere in a git repo's history.
 Usage: thresholds.py <repo> > rows.jsonl   Rows are scrubbed; one row per threshold line."""
 import json, os, re, subprocess, sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "hooklog"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "packages", "hooklog"))
 from hooklog import scrub
 
 CMP = re.compile(r"(≤|≥|<=|>=|\bat most\b|\bat least\b|\bno more than\b|\bno fewer than\b|\bmust not exceed\b|\bunder \d|\bover \d|\bwithin \d|\bbelow \d|\babove \d|[<>]\s?\d)", re.I)

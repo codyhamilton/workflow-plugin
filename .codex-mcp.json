@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "workflow": {
-      "command": "./bin/workflow",
-      "args": ["mcp"],
-      "cwd": "."
-    }
-  }
-}

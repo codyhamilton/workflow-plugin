@@ -1,8 +1,8 @@
-# Workflow Plugin — Overview
+# Yakka — Overview
 
 ## What It Is
 
-A workflow plugin for Claude Code, Cursor, and (with documented limits) OpenCode — ten skills split across two plugins — for a design → phased refine/execute → review → close-out workflow. The loop is the same in intent; harness integration is not: unattended multi-phase driver, Claude `SessionStart`, and live `PostToolBatch` signals are Claude/Cursor today. OpenCode installs skills via symlinks under `~/.config/opencode/skills/` (see `README.md` § OpenCode); there is no OpenCode driver provider yet. **Codex** is a separate CLI harness (not an OpenCode provider): pin Sol/Luna; soft effort×fit routing (ask CHM when unsure) — [`docs/lab/GUIDANCE-codex-harness.md`](lab/GUIDANCE-codex-harness.md).
+A yakka plugin for Claude Code, Cursor, and (with documented limits) OpenCode — six core skills shipped with the plugin, plus maintainer project skills at `.claude/skills/` — for a design → phased refine/execute → review → close-out workflow. The loop is the same in intent; harness integration is not: unattended multi-phase driver, Claude `SessionStart`, and live `PostToolBatch` signals are Claude/Cursor today. OpenCode installs skills via symlinks under `~/.config/opencode/skills/` (see `README.md` § OpenCode); there is no OpenCode driver provider yet. **Codex** is a separate CLI harness (not an OpenCode provider): pin Sol/Luna; soft effort×fit routing (ask CHM when unsure) — [`docs/lab/GUIDANCE-codex-harness.md`](lab/GUIDANCE-codex-harness.md).
 
 ## Who Uses It
 
@@ -16,29 +16,31 @@ Teams and individual developers who want:
 
 ## The Skills
 
-**Core plugin (`workflow`)** — cloud-safe, no interactive dead-ends, installable in build and pipeline environments:
+**Core plugin (`yakka`)** — cloud-safe, no interactive dead-ends, installable in build and pipeline environments:
 
 1. **design** — Produces `DESIGN.md`: verbatim intent, problem, solution shape as domain boundaries and contracts, and phases each with a provable outcome, its surfaces, and an approach flag (known or open). Ground is delegated to cheap recon agents. Interactive (checkpoint held) or headless (assumption ledger), by explicit declaration. Phase count is fixed at sign-off.
 2. **refine** — Refines the next phase only: reads the design, `IMPLEMENTATION.md`, and the previous phase's carried items, decomposes the phase into units with disjoint ownership and budgets, writes one complete brief per unit, and adds the phase's Units list to `DESIGN.md`. The first refinement also coarse-checks every phase. Bounces to `design` when a contract, boundary, or outcome is missing. Skipped for a one-unit phase.
-3. **execute** — Builds one phase per orchestrator: dispatches `refine` when the phase has no units, routes briefs by path to rightsized workers, records each unit in `IMPLEMENTATION.md` as it lands, verifies the phase outcome with a cheap-tier check, and closes the phase record with the git trailer `Workflow-Phase: <slug>:<n>` — then always stops and reports, never dispatching a successor itself. After the last phase: terminal review and close-out, or pipeline pre-flight; lands the PR carrying the `Workflow-Plan:` marker.
+3. **execute** — Builds one phase per orchestrator: dispatches `refine` when the phase has no units, routes briefs by path to rightsized workers, records each unit in `IMPLEMENTATION.md` as it lands, verifies the phase outcome with a cheap-tier check, and closes the phase record with the git trailer `Yakka-Phase: <slug>:<n>` — then always stops and reports, never dispatching a successor itself. After the last phase: terminal review and close-out, or pipeline pre-flight; lands the PR carrying the `Yakka-Plan:` marker. Readers still accept legacy `Workflow-Phase` / `Workflow-Plan:` markers and the legacy report fence (see [ARCHITECTURE.md](ARCHITECTURE.md#trailer-dual-read)).
 4. **comprehensive-review** — Independent review keyed to the design's phase outcomes. Fixes mechanical findings in place, briefs structural ones for remediation, writes `REVIEW.md` with a machine-actionable post-fix verdict, includes the intent-and-assumptions lens and a plan-sufficiency judgment. Reconstructs intent for a PR with no design.
 5. **close-out** — Collapses the plan folder into one record file, `docs/plans/<NN>-<slug>.md` (what was built per phase, deviations, review, QA, risks, follow-ups), promotes contracts that outlive the change to `docs/design/`, deletes the folder in one commit.
 6. **post-build** — The pipeline stage against a PR: classify and right-size, `comprehensive-review`, bounded remediation and fresh verification for briefed findings, conditional `QA.md` and exact-SHA deploy proof and browser QA, one end-of-work required-checks gate, an uncommitted merge-readiness report. Workers run from standing briefs in the skill's `briefs/`; repo mechanics come from a per-repo adapter skill.
 
-**Lab plugin (`workflow-lab`)** — local and/or interactive; never required by the pipeline:
+**Maintainer project skills** (`.claude/skills/`, not installed by `install.sh`) — for repo maintainers working in this checkout:
 
 7. **setup** — Bootstraps `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for repos that lack them.
 8. **iterate** — Long-horizon exploration for goals whose criteria are not knowable up front: sequential divergent candidates, a divergence gate, synthesis, consolidation, a hardening relay. Also the method for a design phase flagged approach-open, with that phase's outcome as the fixed yardstick.
-9. **transcript-parser** — Extracts cost metrics from a session transcript into eval cost-comparison format.
-10. **workflow-tuning** — Holds the design principles and the lessons corpus; runs evals; harvests retros and merged PRs' pipeline outcomes.
+9. **jev-variants** — Jev Stage A variant registry and matrix expansion (`tools/jev-variants/`).
+10. **transcript-parser** — Extracts cost metrics from a session transcript into eval cost-comparison format.
+11. **white-paper** — Evidence-backed research loop for hypotheses that deserve a consolidated paper.
+12. **yakka-tuning** — Holds the design principles and the lessons corpus; runs evals; harvests retros and merged PRs' pipeline outcomes.
 
-**Workflow Optimiser docs** (`docs/lab/`) — durable research and ops notebook (goals, dated findings, proposals, analysis index, external research library). The Workflow Optimiser agent maintains this tree; interactive lab skills remain under `plugins/workflow-lab/`.
+**Workflow Optimiser docs** (`docs/lab/`) — durable research and ops notebook (goals, dated findings, proposals, analysis index, external research library). The Workflow Optimiser agent maintains this tree; maintainer skills live under `.claude/skills/`.
 
-**Driver tool** (`tools/driver/`) — a third, optional way to run the refine/execute loop across phases, beside the two plugins above. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`). OpenCode is out of scope for the driver until a provider exists; use human/`execute` coordination or Claude/Cursor for unattended loops.
+**Driver tool** (`tools/driver/`) — an optional way to run the refine/execute loop across phases, beside human-orchestrated `execute`. Not an agent context: a process, provider-abstracted over the Claude Agent SDK and Cursor's headless agent, chosen by whichever key is present in the environment, run by a person or by an agent holding that key. Agent-orchestrated is the default and works without it — either a human dispatching each phase, or, where the harness has two levels of subagent nesting, a naive coordinator dispatching `execute` per phase in series. The driver exists to test and validate that economics and to reach harnesses agent-orchestration can't: a single-level-nesting harness can run one `execute` invocation but can't also wrap a coordinator around it, and routes to the driver instead (`docs/plans/06-phase-driver/DESIGN.md`). OpenCode is out of scope for the driver until a provider exists; use human/`execute` coordination or Claude/Cursor for unattended loops.
 
 **Codex (separate harness)** — OpenAI `codex` CLI alongside Claude; Sol/Luna pins and soft routing guidance — [`docs/lab/GUIDANCE-codex-harness.md`](lab/GUIDANCE-codex-harness.md). Not a driver provider; no BDK wiring in-tree yet.
 
-**OpenCode (partial)** — skills only: `./install.sh --opencode-skills` or `WORKFLOW_INSTALL_MODE=opencode` symlinks `skills/*` into `~/.config/opencode/skills/`. Phase running maps to the `execute` skill; harness persona name `orchestrate` is separate from skill names. Built-in OpenCode `plan` is not workflow `design`. **DeepSeek Flash** is encouraged for brief/unit work when rationing capacity; sign-off only is gated in [`docs/lab/GUIDANCE-flash-review-gate.md`](lab/GUIDANCE-flash-review-gate.md) (Sonnet 5.5 review of Flash work, then Claude Code or Grok phase sign-off — no Flash auto close-out).
+**OpenCode (partial)** — skills only: `./install.sh --opencode-skills` or `YAKKA_INSTALL_MODE=opencode` symlinks `skills/*` into `~/.config/opencode/skills/`. Phase running maps to the `execute` skill; harness persona name `orchestrate` is separate from skill names. Built-in OpenCode `plan` is not workflow `design`. **DeepSeek Flash** is encouraged for brief/unit work when rationing capacity; sign-off only is gated in [`docs/lab/GUIDANCE-flash-review-gate.md`](lab/GUIDANCE-flash-review-gate.md) (Sonnet 5.5 review of Flash work, then Claude Code or Grok phase sign-off — no Flash auto close-out).
 
 ## Core Intent
 
@@ -61,13 +63,13 @@ Optimize for outcome quality per token. Prevent:
 - Coordination travels as authored briefs routed verbatim. Briefs carry a budget, verification-first done evidence, and a bounded report.
 - Posture is declared by the invoker, never inferred: interactive/headless for design; terminal/pipeline review for execute; close-out's placement follows. Whether another phase runs after one closes is deliberately not this kind of posture — `execute` always stops and reports; it is a property of the invocation instead (a bare call, a coordinator, or the driver).
 - Nothing in the repo carries status. Every plan ends in one record file.
-- Skills state outcomes and the constraints an agent could not infer; they do not narrate steps an agent can derive. Design rationale lives in `workflow-tuning/principles.md`.
+- Skills state outcomes and the constraints an agent could not infer; they do not narrate steps an agent can derive. Design rationale lives in `yakka-tuning/principles.md`.
 
 ## Stability Boundaries
 
 **Stable**:
 - The core/lab partition and each skill's purpose
-- The design → phased refine/execute → review → close-out loop, and the PR artifact seam (`Workflow-Plan:` marker, `docs/plans/<NN>-<slug>/`)
+- The design → phased refine/execute → review → close-out loop, and the PR artifact seam (`Yakka-Plan:` marker, `docs/plans/<NN>-<slug>/`; readers accept legacy `Workflow-Plan:`)
 - The artifact taxonomy: durable carries intent and outcome, run-scoped is consumed at close-out, nothing carries status
 - Verbatim intent in `DESIGN.md`'s Intent section
 - No commit follows the tested commit

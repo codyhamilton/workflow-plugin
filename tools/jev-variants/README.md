@@ -1,6 +1,6 @@
 # jev-variants
 
-Registry, validator and matrix expander for the Jev Stage A variant search (see `plugins/workflow-lab/skills/jev-variants/SKILL.md` for the agent protocol).
+Registry, validator and matrix expander for the Jev Stage A variant search (see `.claude/skills/jev-variants/SKILL.md` for the agent protocol).
 
 - Axes: `signals/`, `states/`, `markers/` JSON files under a registry root; filename and `id` are a content hash of `spec`, so results stay tied to what ran.
 - `brief <role>` prints a self-contained prompt for a variant-authoring agent (the primary way to drive opencode/Flash runs); `template <kind>` prints an example spec.
@@ -24,4 +24,4 @@ Tests: `python3 -m unittest discover -s tests` from this directory.
   probabilities, and usage. Secrets are scrubbed from the state before sending. Resumable (rows are keyed by cell id).
 - **Cost:** `usage` returns tokens only (no dollars), so ledger costs are the round's `est_cost_per_call_usd` and are flagged
   `cost_estimated`. Score answers are continuous (expected value over the levels, e.g. 0.03 on a 0–3 scale).
-- **Turns from hook logs:** see `tools/hooklog/README.md` (verified live for Claude and Cursor).
+- **Turns from hook logs:** see `packages/hooklog/README.md` (verified live for Claude and Cursor).

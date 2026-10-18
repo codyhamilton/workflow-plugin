@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "yakka": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/yakka",
+      "args": ["mcp"]
+    }
+  }
+}

@@ -30,6 +30,16 @@ class TestReportParse(unittest.TestCase):
         self.assertEqual(report.phase, 2)
         self.assertIn("Fixture", report.reason or "")
 
+    def test_yakka_report_fence(self) -> None:
+        text = (
+            "Summary\n\n```yakka-report\n"
+            '{"status": "closed", "phase": 1}\n'
+            "```\n"
+        )
+        report = parse_workflow_report(text)
+        self.assertEqual(report.status, "closed")
+        self.assertEqual(report.phase, 1)
+
 
 class TestTriggerDryRun(unittest.TestCase):
     def test_dry_run_incomplete_not_fake_close(self) -> None:

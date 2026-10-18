@@ -1,0 +1,35 @@
+{
+  "name": "@codyhamilton/opencode-yakka-hooks",
+  "version": "0.2.0",
+  "description": "OpenCode plugin: full-surface advisory hooklog capture and PostToolBatch soft signals",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codyhamilton/yakka.git",
+    "directory": "packages/opencode-yakka-hooks"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./yakka-signals.json": "./yakka-signals.json"
+  },
+  "files": [
+    "src",
+    "python",
+    "yakka-signals.json",
+    "opencode.json.example",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "keywords": [
+    "opencode",
+    "yakka",
+    "jev",
+    "hooks"
+  ],
+  "scripts": {
+    "test:hooks": "node --experimental-strip-types --test tests/test_hooks.mjs"
+  }
+}

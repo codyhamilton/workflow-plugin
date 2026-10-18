@@ -15,7 +15,7 @@ similar work exists.
 
 ## Shape
 
-`workflow mcp` is a stdio MCP server, spawned by each harness, reading the client config
+`yakka mcp` is a stdio MCP server, spawned by each harness, reading the client config
 (design 2). It forwards to the service's advisory reads and adds local queue state. Every tool is
 read-only.
 
@@ -86,14 +86,15 @@ file.
 - Frontmatter IDs (`design_id`, `brief_id`) are dropped from templates; the artifact key is
   `(repo_id, path)`.
 - Commit titles drop `[exec <id>]`. The execution is a derived view keyed by conversation
-  (design 1); `Workflow-Phase:` trailers stay, since phase closure is a repo fact.
+  (design 1). Phase closure stays on the closing commit as a git trailer and PR plan marker (see
+  [system-architecture.md](system-architecture.md#plan-folder-and-phase-closure)).
 - The execution report at `docs/plans/<plan>/reports/<brief-name>.md` becomes a required output of
   each worker (design 1).
 
 ## Registration
 
 Every harness registers the shim as a stdio command through the wrapper (design 5):
-`bin/workflow mcp`. The HTTP registration of `127.0.0.1:8765/mcp` is removed.
+`plugins/yakka/bin/yakka mcp`. The HTTP registration of `127.0.0.1:8765/mcp` is removed.
 
 ## Tests
 

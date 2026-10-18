@@ -30,8 +30,9 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-sys.path[:0] = [str(ROOT / "tools/transcript"), str(ROOT / "tools/hooklog")]
-CRIT = json.loads((HERE / "criteria.json").read_text())
+CATALOGUE = ROOT / "packages/yakka/catalogue"
+sys.path[:0] = [str(ROOT / "tools/transcript"), str(ROOT / "packages/hooklog")]
+CRIT = json.loads((CATALOGUE / "criteria.json").read_text())
 REG_VERSION = CRIT["version"]
 
 

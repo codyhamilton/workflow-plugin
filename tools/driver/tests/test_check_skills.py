@@ -16,7 +16,7 @@ sys.path.insert(0, str(DRIVER))
 
 from check_skills import (  # noqa: E402
     CORE_SKILLS,
-    LAB_SKILLS,
+    MAINTAINER_SKILLS,
     HARNESS_CLAUDE,
     HARNESS_CURSOR,
     HARNESS_INTERACTIVE,
@@ -35,7 +35,7 @@ def _write_skill(root: Path, name: str) -> None:
 class TestDetectHarness(unittest.TestCase):
     def test_explicit_mode_beats_ambient_signals(self) -> None:
         env = {
-            "WORKFLOW_INSTALL_MODE": "cloud",
+            "YAKKA_INSTALL_MODE": "cloud",
             "CLAUDECODE": "1",
             "CLAUDE_CODE_REMOTE": "true",
             "HOSTNAME": "not-cursor",
@@ -44,14 +44,14 @@ class TestDetectHarness(unittest.TestCase):
             detect_harness(env, manifest_present=False, can_prompt=True),
             HARNESS_CURSOR,
         )
-        env["WORKFLOW_INSTALL_MODE"] = "claude-code"
+        env["YAKKA_INSTALL_MODE"] = "claude-code"
         env["CURSOR_AGENT"] = "1"
         env["HOSTNAME"] = "cursor"
         self.assertEqual(
             detect_harness(env, manifest_present=True, can_prompt=False),
             HARNESS_CLAUDE,
         )
-        env["WORKFLOW_INSTALL_MODE"] = "interactive"
+        env["YAKKA_INSTALL_MODE"] = "interactive"
         self.assertEqual(
             detect_harness(env, manifest_present=True, can_prompt=False),
             HARNESS_INTERACTIVE,
@@ -134,10 +134,10 @@ class TestScan(unittest.TestCase):
             self.assertNotIn("execute", found)
             self.assertEqual(missing, ["execute"])
 
-    def test_lab_dirs_do_not_count(self) -> None:
+    def test_maintainer_dirs_do_not_count(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            for name in LAB_SKILLS:
+            for name in MAINTAINER_SKILLS:
                 _write_skill(root, name)
             found, missing = scan_core_skills(root)
             self.assertEqual(found, [])
@@ -152,14 +152,14 @@ class TestReport(unittest.TestCase):
             home = base / "home"
             workspace.mkdir()
             home.mkdir()
-            root = workspace / ".cursor" / "skills" / "workflow"
+            root = workspace / ".cursor" / "skills" / "yakka"
             for name in CORE_SKILLS:
                 _write_skill(root, name)
             env = {
                 "HOME": str(home),
                 "HOSTNAME": "cursor",
                 "CURSOR_AGENT": "1",
-                "WORKFLOW_WORKSPACE": str(workspace),
+                "YAKKA_WORKSPACE": str(workspace),
             }
             report = report_for_env(env, can_prompt=False)
             self.assertTrue(report["ok"])
@@ -181,7 +181,7 @@ class TestReport(unittest.TestCase):
                 "HOSTNAME": "cursor",
                 "CURSOR_AGENT": "1",
                 "CLAUDE_CODE_REMOTE": "true",
-                "WORKFLOW_WORKSPACE": str(base / "unused"),
+                "YAKKA_WORKSPACE": str(base / "unused"),
             }
             report = report_for_env(env, can_prompt=False)
             self.assertTrue(report["ok"])
@@ -199,8 +199,8 @@ class TestReport(unittest.TestCase):
             env = {
                 "HOME": str(home),
                 "HOSTNAME": "devbox",
-                "WORKFLOW_INSTALL_MODE": "cloud",
-                "WORKFLOW_WORKSPACE": str(workspace),
+                "YAKKA_INSTALL_MODE": "cloud",
+                "YAKKA_WORKSPACE": str(workspace),
             }
             report = report_for_env(env, can_prompt=True)
             self.assertFalse(report["ok"])
@@ -219,7 +219,7 @@ class TestReport(unittest.TestCase):
             env = os.environ.copy()
             env["HOME"] = str(home)
             env["HOSTNAME"] = "devbox"
-            env["WORKFLOW_INSTALL_MODE"] = "cloud"
+            env["YAKKA_INSTALL_MODE"] = "cloud"
             env.pop("CURSOR_AGENT", None)
             env.pop("CLAUDECODE", None)
             env.pop("CLAUDE_CODE_REMOTE", None)
@@ -246,7 +246,7 @@ class TestReport(unittest.TestCase):
             self.assertFalse(payload["ok"])
             self.assertEqual(payload["missing"], list(CORE_SKILLS))
 
-            root = workspace / ".cursor" / "skills" / "workflow"
+            root = workspace / ".cursor" / "skills" / "yakka"
             for name in CORE_SKILLS:
                 _write_skill(root, name)
             ok = subprocess.run(

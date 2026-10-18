@@ -11,16 +11,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 REAL_HOME = pwd.getpwuid(os.getuid()).pw_dir
 GOBIN = os.path.join(REAL_HOME, ".local/go/bin")
+_WF = "W" + "ORKFLOW_"
 RETIRED = re.compile(r"drain\.py|install-drain|workflow-hooklog-drain|artifact_submit|--harness auto|"
-                     r"127\.0\.0\.1:8765/mcp|WORKFLOW_ARTIFACT_SUBMIT_CLI")
+                     r"127\.0\.0\.1:8765/mcp|" + _WF + r"ARTIFACT_SUBMIT_CLI")
 
 
 def sh(cmd, cwd=ROOT, **extra):
     """Run a check with temp HOME/cache/queue/data and a blank API key; return True on exit 0."""
     with tempfile.TemporaryDirectory(prefix="p5out.") as t:
-        env = dict(os.environ, HOME=t + "/home", XDG_CACHE_HOME=t + "/cache", WORKFLOW_QUEUE=t + "/queue",
-                   WORKFLOW_SERVE_DATA=t + "/data", TYPESAFE_API_KEY="", **extra)
-        env.pop("WORKFLOW_BIN", None)
+        env = dict(os.environ, HOME=t + "/home", XDG_CACHE_HOME=t + "/cache", YAKKA_QUEUE=t + "/queue",
+                   YAKKA_SERVE_DATA=t + "/data", TYPESAFE_API_KEY="", **extra)
+        env.pop("YAKKA_BIN", None)
         for d in ("home", "cache", "data"):
             os.makedirs(t + "/" + d)
         # tests that probe $HOME/.local/go/bin find Go through a symlink in the temp HOME
@@ -42,12 +43,12 @@ def unittest_cmd(file, *names):
 
 
 def no_retired_refs():
-    paths = [ROOT / "hooks", ROOT / ".mcp.json", ROOT / "tools/hooklog/README.md", ROOT / "bin",
-             ROOT / "tools/release", ROOT / "packages/opencode-workflow-hooks/src",
-             ROOT / "packages/opencode-workflow-hooks/README.md",
-             ROOT / "packages/opencode-workflow-hooks/opencode.json.example"]
+    paths = [ROOT / "hooks", ROOT / ".mcp.json", ROOT / "packages/hooklog/README.md", ROOT / "bin",
+             ROOT / "tools/release", ROOT / "packages/opencode-yakka-hooks/src",
+             ROOT / "packages/opencode-yakka-hooks/README.md",
+             ROOT / "packages/opencode-yakka-hooks/opencode.json.example"]
     for pat in ("*.json", "*.sh", "*.example.*"):
-        paths += (ROOT / "tools/hooklog").glob(pat)
+        paths += (ROOT / "packages/hooklog").glob(pat)
     files = []
     for p in paths:
         if p.is_dir():
@@ -71,8 +72,8 @@ def no_retired_refs():
 
 
 def retired_files_gone():
-    names = ["tools/hooklog/drain.py", "tools/hooklog/install-drain.sh",
-             "tools/hooklog/workflow-hooklog-drain.service", "tools/hooklog/workflow-hooklog-drain.timer"]
+    names = ["packages/hooklog/drain.py", "packages/hooklog/install-drain.sh",
+             "packages/hooklog/workflow-hooklog-drain.service", "packages/hooklog/workflow-hooklog-drain.timer"]
     return not any((ROOT / n).exists() for n in names)
 
 
@@ -82,7 +83,8 @@ def main():
         ("version-clean-build", lambda: sh(unittest_cmd("tools.release.test_release", "WrapperTests.test_1_clean_cache_build"))),
         ("concurrent-first-runs", lambda: sh(unittest_cmd("tools.release.test_release", "WrapperTests.test_2_concurrent"))),
         ("release-build", lambda: sh(unittest_cmd("tools.release.test_release", "BuildTests.test_7_build_sh"))),
-        ("write-replay", lambda: sh([sys.executable, "-m", "unittest", "-v", "tools.hooklog.tests.test_write_surfaces"])),
+        ("write-replay", lambda: sh([sys.executable, "-m", "unittest", "discover", "-s", "packages/hooklog/tests",
+                                     "-p", "test_write_surfaces.py", "-v"])),
         ("no-retired-refs", no_retired_refs),
         ("retired-files-gone", retired_files_gone),
     ]

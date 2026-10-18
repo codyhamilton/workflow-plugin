@@ -20,7 +20,7 @@ HARNESS_FEATURES: dict[str, set[str]] = {
                "turn_index", "context_size", "repeat_counts", "file_targets"},
     "cursor": {"user_prompts", "tool_names", "tool_args", "assistant_text",
                "turn_index", "context_size", "repeat_counts", "file_targets"},
-    # hooklog rows (tools/hooklog): outputs present where the harness hook supplies them; no assistant text
+    # hooklog rows (packages/hooklog): outputs present where the harness hook supplies them; no assistant text
     "hooklog": {"user_prompts", "tool_names", "tool_args", "tool_output_text", "turn_index", "repeat_counts", "file_targets"},
 }
 

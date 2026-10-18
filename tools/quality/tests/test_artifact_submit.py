@@ -60,7 +60,7 @@ class ArtifactServiceFixture:
             "WORKFLOW_QUALITY_URL": f"http://127.0.0.1:{self.srv.server_port}",
             "WORKFLOW_QUALITY_TOKEN": "test-bearer", "WORKFLOW_QUALITY_TIMEOUT": "0.5",
             "WORKFLOW_QUALITY_DIR": str(Path(self.temp.name) / "decoy"),
-            "WORKFLOW_HOOKLOG_DIR": str(Path(self.temp.name) / "spool"),
+            "YAKKA_HOOKLOG_DIR": str(Path(self.temp.name) / "spool"),
         })
         self.env.start()
         self.addCleanup(self.env.stop)
@@ -236,7 +236,7 @@ class SubmitTests(ArtifactServiceFixture, unittest.TestCase):
             response = submit.run_hook(self.payload(), "claude")
         self.assertIn("posting still owed", response["hookSpecificOutput"]["additionalContext"])
         self.assertEqual(self.design.read_bytes(), original)
-        spool = Path(os.environ["WORKFLOW_HOOKLOG_DIR"]) / "claude/session.jsonl"
+        spool = Path(os.environ["YAKKA_HOOKLOG_DIR"]) / "claude/session.jsonl"
         row = json.loads(spool.read_text())
         self.assertFalse(row["ok"])
         self.assertEqual(row["tool_name"], "artifact_submit")

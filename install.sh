@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DEFAULT_REPO_HTTPS_URL="https://github.com/codyhamilton/workflow-plugin.git"
-INSTALL_BRANCH="${WORKFLOW_INSTALL_BRANCH:-master}"
-CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/workflow}"
-CURSOR_LAB_PLUGIN="${CURSOR_LAB_PLUGIN:-$HOME/.cursor/plugins/local/workflow-lab}"
-INSTALL_SRC_CACHE="${WORKFLOW_INSTALL_SRC:-$HOME/.cache/workflow-plugin/install-src}"
-WORKFLOW_WORKSPACE_SKILLS_NAME="${WORKFLOW_WORKSPACE_SKILLS_NAME:-workflow}"
-OPENCODE_SKILLS_ROOT="${WORKFLOW_OPENCODE_SKILLS:-$HOME/.config/opencode/skills}"
+DEFAULT_REPO_HTTPS_URL="https://github.com/codyhamilton/yakka"
+INSTALL_BRANCH="${YAKKA_INSTALL_BRANCH:-master}"
+CURSOR_CORE_PLUGIN="${CURSOR_CORE_PLUGIN:-$HOME/.cursor/plugins/local/yakka}"
+INSTALL_SRC_CACHE="${YAKKA_INSTALL_SRC:-$HOME/.cache/yakka/src}"
+YAKKA_WORKSPACE_SKILLS_NAME="${YAKKA_WORKSPACE_SKILLS_NAME:-yakka}"
+OPENCODE_SKILLS_ROOT="${YAKKA_OPENCODE_SKILLS:-$HOME/.config/opencode/skills}"
 
 # Capture before any function runs — inside functions BASH_SOURCE[0] is the
 # function name (e.g. "main" for piped scripts), not the installer path.
 _INSTALLER_SOURCE="${BASH_SOURCE[0]:-}"
 
 is_cursor_cloud_agent() {
-  [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]] && return 0
+  [[ "${YAKKA_INSTALL_MODE:-}" == "cloud" ]] && return 0
   [[ "${CURSOR_AGENT:-}" == "1" ]] && return 0
   [[ "${HOSTNAME:-}" == "cursor" ]] && return 0
   [[ -f "$HOME/.cursor/plugins/cache/.cloud-plugin-manifest.json" ]] && return 0
@@ -26,7 +25,7 @@ is_cursor_cloud_agent() {
 # before falling through to the generic non-interactive/Cursor branch so a
 # Claude Code session never gets routed into .cursor/skills/.
 is_claude_code_agent() {
-  [[ "${WORKFLOW_INSTALL_MODE:-}" == "claude-code" ]] && return 0
+  [[ "${YAKKA_INSTALL_MODE:-}" == "claude-code" ]] && return 0
   [[ "${CLAUDECODE:-}" == "1" ]] && return 0
   [[ -n "${CLAUDE_CODE_ENTRYPOINT:-}" ]] && return 0
   [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]] && return 0
@@ -38,7 +37,7 @@ can_prompt_interactively() {
 }
 
 is_interactive_install() {
-  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]] && can_prompt_interactively
+  [[ "${YAKKA_INSTALL_MODE:-}" == "interactive" ]] && can_prompt_interactively
 }
 
 # curl | bash delivers the script on stdin — BASH_SOURCE is "-" or unset, not a file path.
@@ -49,7 +48,7 @@ is_piped_installer() {
 
 should_auto_install_cursor_core() {
   is_interactive_install && return 1
-  [[ "${WORKFLOW_INSTALL_MODE:-}" == "interactive" ]] && return 1
+  [[ "${YAKKA_INSTALL_MODE:-}" == "interactive" ]] && return 1
 
   # Runtime cloud agent signals (may be unset during environment setup).
   is_cursor_cloud_agent && return 0
@@ -63,18 +62,18 @@ should_auto_install_cursor_core() {
 }
 
 auto_install_reason() {
-  if [[ "${WORKFLOW_INSTALL_MODE:-}" == "opencode" ]]; then
-    echo "WORKFLOW_INSTALL_MODE=opencode"
-  elif [[ "${WORKFLOW_INSTALL_MODE:-}" == "claude-code" ]]; then
-    echo "WORKFLOW_INSTALL_MODE=claude-code"
+  if [[ "${YAKKA_INSTALL_MODE:-}" == "opencode" ]]; then
+    echo "YAKKA_INSTALL_MODE=opencode"
+  elif [[ "${YAKKA_INSTALL_MODE:-}" == "claude-code" ]]; then
+    echo "YAKKA_INSTALL_MODE=claude-code"
   elif [[ "${CLAUDECODE:-}" == "1" ]]; then
     echo "CLAUDECODE=1"
   elif [[ -n "${CLAUDE_CODE_ENTRYPOINT:-}" ]]; then
     echo "CLAUDE_CODE_ENTRYPOINT=${CLAUDE_CODE_ENTRYPOINT}"
   elif [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]]; then
     echo "CLAUDE_CODE_REMOTE=true"
-  elif [[ "${WORKFLOW_INSTALL_MODE:-}" == "cloud" ]]; then
-    echo "WORKFLOW_INSTALL_MODE=cloud"
+  elif [[ "${YAKKA_INSTALL_MODE:-}" == "cloud" ]]; then
+    echo "YAKKA_INSTALL_MODE=cloud"
   elif [[ "${CURSOR_AGENT:-}" == "1" ]]; then
     echo "CURSOR_AGENT=1"
   elif [[ "${HOSTNAME:-}" == "cursor" ]]; then
@@ -89,8 +88,8 @@ auto_install_reason() {
 }
 
 find_workspace_root() {
-  if [[ -n "${WORKFLOW_WORKSPACE:-}" ]]; then
-    echo "$(cd "$WORKFLOW_WORKSPACE" && pwd)"
+  if [[ -n "${YAKKA_WORKSPACE:-}" ]]; then
+    echo "$(cd "$YAKKA_WORKSPACE" && pwd)"
     return 0
   fi
   if git rev-parse --show-toplevel &>/dev/null; then
@@ -106,16 +105,16 @@ find_workspace_root() {
 
 workspace_skills_dest() {
   local workspace="$1"
-  echo "$workspace/.cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME"
+  echo "$workspace/.cursor/skills/$YAKKA_WORKSPACE_SKILLS_NAME"
 }
 
-# Explicit WORKFLOW_INSTALL_MODE wins over ambient harness variables so an
+# Explicit YAKKA_INSTALL_MODE wins over ambient harness variables so an
 # image bake (mode=cloud) is not captured by a stray CLAUDECODE, and a
 # Claude hook (mode=claude-code) is not captured by HOSTNAME=cursor.
 # Unset mode keeps the historical order: Claude signals, then Cursor cloud
 # signals, then piped or non-interactive (workspace skills, core only).
 resolve_install_route() {
-  local mode="${WORKFLOW_INSTALL_MODE:-}"
+  local mode="${YAKKA_INSTALL_MODE:-}"
   case "$mode" in
     claude-code) echo claude-code; return ;;
     cloud) echo cursor-cloud; return ;;
@@ -177,7 +176,7 @@ ask() {
 
 refresh_git_checkout() {
   # Tests and offline copies set this. Production installs still update.
-  [[ "${WORKFLOW_INSTALL_SKIP_REFRESH:-}" == "1" ]] && return 0
+  [[ "${YAKKA_INSTALL_SKIP_REFRESH:-}" == "1" ]] && return 0
   local dir="$1"
   [[ -d "$dir/.git" ]] || return 0
   git -C "$dir" remote get-url origin &>/dev/null || return 0
@@ -197,8 +196,8 @@ refresh_git_checkout() {
 
 https_repo_url() {
   local url=""
-  if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
-    url="$WORKFLOW_REPO_URL"
+  if [[ -n "${YAKKA_REPO_URL:-}" ]]; then
+    url="$YAKKA_REPO_URL"
   elif [[ -n "${SCRIPT_DIR:-}" ]] && git -C "$SCRIPT_DIR" rev-parse --is-inside-work-tree &>/dev/null; then
     url="$(git -C "$SCRIPT_DIR" config --get remote.origin.url || echo "$DEFAULT_REPO_HTTPS_URL")"
   else
@@ -218,6 +217,34 @@ https_repo_url() {
   esac
 }
 
+is_valid_plugin_source() {
+  local src="$1"
+  [[ -d "$src/skills" && -f "$src/.cursor-plugin/plugin.json" ]]
+}
+
+plugin_source_for_checkout() {
+  local base="$1"
+  local src="$base/plugins/yakka"
+  if is_valid_plugin_source "$src"; then
+    echo "$src"
+    return 0
+  fi
+  return 1
+}
+
+resolve_plugin_source() {
+  local src=""
+  if src="$(plugin_source_for_checkout "$SCRIPT_DIR")"; then
+    echo "$src"
+    return 0
+  fi
+  if src="$(plugin_source_for_checkout "$INSTALL_SRC_CACHE")"; then
+    echo "$src"
+    return 0
+  fi
+  return 1
+}
+
 # When run as `curl … | bash`, the script is not on disk next to skills/. Clone
 # (or refresh) a shallow checkout so the rest of the installer can copy files.
 ensure_script_dir() {
@@ -225,7 +252,7 @@ ensure_script_dir() {
   local src="${_INSTALLER_SOURCE:-}"
   if [[ -n "$src" && "$src" != "-" && -f "$src" ]]; then
     candidate="$(cd "$(dirname "$src")" && pwd)"
-    if [[ -d "$candidate/skills" ]]; then
+    if plugin_source_for_checkout "$candidate" >/dev/null; then
       refresh_git_checkout "$candidate"
       echo "$candidate"
       return
@@ -233,8 +260,8 @@ ensure_script_dir() {
   fi
 
   local url="$DEFAULT_REPO_HTTPS_URL"
-  if [[ -n "${WORKFLOW_REPO_URL:-}" ]]; then
-    url="$WORKFLOW_REPO_URL"
+  if [[ -n "${YAKKA_REPO_URL:-}" ]]; then
+    url="$YAKKA_REPO_URL"
   fi
   case "$url" in
     git@github.com:*) url="https://github.com/${url#git@github.com:}" ;;
@@ -261,16 +288,11 @@ if [[ "$INSTALL_ARG" == "--print-route" ]]; then
   exit 0
 fi
 if [[ "$INSTALL_ARG" == "--opencode-skills" ]]; then
-  WORKFLOW_INSTALL_MODE="${WORKFLOW_INSTALL_MODE:-opencode}"
+  YAKKA_INSTALL_MODE="${YAKKA_INSTALL_MODE:-opencode}"
   INSTALL_ARG=""
 fi
 
 SCRIPT_DIR="$(ensure_script_dir)"
-
-is_valid_plugin_source() {
-  local src="$1"
-  [[ -d "$src/skills" && -f "$src/.cursor-plugin/plugin.json" ]]
-}
 
 # Cursor rejects symlinks that point outside ~/.cursor/plugins/local/. Always
 # materialize a real directory tree under the local plugins folder.
@@ -294,15 +316,10 @@ ensure_cursor_core_plugin() {
   mkdir -p "$(dirname "$CURSOR_CORE_PLUGIN")"
 
   local src=""
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR"
-  elif is_valid_plugin_source "$INSTALL_SRC_CACHE"; then
-    src="$INSTALL_SRC_CACHE"
-  fi
-
-  if [[ -n "$src" ]]; then
-    refresh_git_checkout "$src"
-    local src_real dest_real
+  if src="$(resolve_plugin_source)"; then
+    local checkout src_real dest_real
+    checkout="$(cd "$src/../.." && pwd -P)"
+    refresh_git_checkout "$checkout"
     src_real="$(readlink -f "$src")"
     dest_real="$(readlink -f "$CURSOR_CORE_PLUGIN" 2>/dev/null || echo "$CURSOR_CORE_PLUGIN")"
     if [[ "$src_real" != "$dest_real" ]]; then
@@ -312,37 +329,26 @@ ensure_cursor_core_plugin() {
     fi
   fi
 
-  local url
+  local url checkout
   url="$(https_repo_url)"
-  if [[ -d "$CURSOR_CORE_PLUGIN/.git" ]]; then
-    refresh_git_checkout "$CURSOR_CORE_PLUGIN"
+  checkout="$INSTALL_SRC_CACHE"
+  mkdir -p "$(dirname "$checkout")"
+  if [[ -d "$checkout/.git" ]]; then
+    refresh_git_checkout "$checkout"
   else
-    if [[ -e "$CURSOR_CORE_PLUGIN" ]]; then
-      echo "  Replacing existing install at $CURSOR_CORE_PLUGIN"
-      rm -rf "$CURSOR_CORE_PLUGIN"
+    if [[ -e "$checkout" ]]; then
+      echo "  Replacing existing installer checkout at $checkout"
+      rm -rf "$checkout"
     fi
-    echo "  Cloning plugin to $CURSOR_CORE_PLUGIN"
-    git clone --depth 1 --branch "$INSTALL_BRANCH" "$url" "$CURSOR_CORE_PLUGIN"
+    echo "  Cloning installer checkout to $checkout"
+    git clone --depth 1 --branch "$INSTALL_BRANCH" "$url" "$checkout"
   fi
+  if ! src="$(plugin_source_for_checkout "$checkout")"; then
+    echo "  ERROR: checkout at $checkout is missing plugins/yakka" >&2
+    return 1
+  fi
+  copy_plugin_tree "$src" "$CURSOR_CORE_PLUGIN"
   verify_cursor_core_plugin "$CURSOR_CORE_PLUGIN"
-}
-
-# The lab plugin is a subtree of the same repo (plugins/workflow-lab/), not a
-# separate remote — copy it out of the already-current core checkout rather
-# than cloning again. Requires the core plugin to have been installed first.
-ensure_cursor_lab_plugin() {
-  local src="$CURSOR_CORE_PLUGIN/plugins/workflow-lab"
-  if [[ ! -d "$src" ]]; then
-    echo "  workflow-lab not found in core checkout at $src — skipping."
-    return
-  fi
-  if [[ -e "$CURSOR_LAB_PLUGIN" ]]; then
-    echo "  Replacing existing install at $CURSOR_LAB_PLUGIN"
-    rm -rf "$CURSOR_LAB_PLUGIN"
-  fi
-  mkdir -p "$(dirname "$CURSOR_LAB_PLUGIN")"
-  echo "  Copying lab plugin to $CURSOR_LAB_PLUGIN"
-  cp -a "$src"/. "$CURSOR_LAB_PLUGIN"/
 }
 
 verify_cursor_core_plugin() {
@@ -359,6 +365,18 @@ verify_cursor_core_plugin() {
   fi
   if [[ ! -d "$plugin/skills" ]]; then
     echo "  ERROR: missing $plugin/skills/" >&2
+    errors=$((errors + 1))
+  fi
+  if [[ ! -x "$plugin/script/spool.sh" ]]; then
+    echo "  ERROR: missing or non-executable $plugin/script/spool.sh" >&2
+    errors=$((errors + 1))
+  fi
+  local hooks_rel="hooks/cursor.json"
+  if [[ -f "$plugin/.cursor-plugin/plugin.json" ]]; then
+    hooks_rel=$(python3 -c "import json; print(json.load(open('$plugin/.cursor-plugin/plugin.json'))['hooks'].lstrip('./'))")
+  fi
+  if [[ ! -f "$plugin/$hooks_rel" ]]; then
+    echo "  ERROR: missing hooks file $plugin/$hooks_rel" >&2
     errors=$((errors + 1))
   fi
 
@@ -388,17 +406,15 @@ ensure_cursor_workspace_skills() {
 
   if ! workspace="$(find_workspace_root)"; then
     echo "  ERROR: cannot find workspace root for skill install." >&2
-    echo "  Set WORKFLOW_WORKSPACE to your repository root and re-run." >&2
+    echo "  Set YAKKA_WORKSPACE to your repository root and re-run." >&2
     return 1
   fi
 
   dest="$(workspace_skills_dest "$workspace")"
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR/skills"
-  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
-    src="$INSTALL_SRC_CACHE/skills"
+  if src="$(resolve_plugin_source)"; then
+    src="$src/skills"
   else
-    echo "  ERROR: no workflow skills source found." >&2
+    echo "  ERROR: no yakka skills source found." >&2
     return 1
   fi
 
@@ -414,12 +430,10 @@ ensure_claude_user_skills() {
   local dest="$HOME/.claude/skills"
   local src=""
 
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR/skills"
-  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
-    src="$INSTALL_SRC_CACHE/skills"
+  if src="$(resolve_plugin_source)"; then
+    src="$src/skills"
   else
-    echo "  ERROR: no workflow skills source found." >&2
+    echo "  ERROR: no yakka skills source found." >&2
     return 1
   fi
 
@@ -539,15 +553,12 @@ verify_symlinked_skills() {
 }
 
 ensure_opencode_skills() {
-  local include_lab="${WORKFLOW_OPENCODE_INCLUDE_LAB:-0}"
   local src=""
 
-  if is_valid_plugin_source "$SCRIPT_DIR"; then
-    src="$SCRIPT_DIR/skills"
-  elif [[ -d "$INSTALL_SRC_CACHE/skills" ]]; then
-    src="$INSTALL_SRC_CACHE/skills"
+  if src="$(resolve_plugin_source)"; then
+    src="$src/skills"
   else
-    echo "  ERROR: no workflow skills source found." >&2
+    echo "  ERROR: no yakka skills source found." >&2
     return 1
   fi
 
@@ -555,58 +566,38 @@ ensure_opencode_skills() {
   echo "  OpenCode skills dir: $OPENCODE_SKILLS_ROOT"
   symlink_skills "$src" "$OPENCODE_SKILLS_ROOT"
   verify_symlinked_skills "$OPENCODE_SKILLS_ROOT" "OpenCode core skills"
-
-  if [[ "$include_lab" == "1" ]]; then
-    local lab_src="$SCRIPT_DIR/plugins/workflow-lab/skills"
-    if [[ ! -d "$lab_src" && -d "$INSTALL_SRC_CACHE/plugins/workflow-lab/skills" ]]; then
-      lab_src="$INSTALL_SRC_CACHE/plugins/workflow-lab/skills"
-    fi
-    if [[ -d "$lab_src" ]]; then
-      echo "  Including workflow-lab skills"
-      symlink_skills "$lab_src" "$OPENCODE_SKILLS_ROOT"
-      verify_symlinked_skills "$OPENCODE_SKILLS_ROOT" "OpenCode skills (core + lab)"
-    else
-      echo "  workflow-lab skills not found — skipping lab symlink pass."
-    fi
-  fi
 }
 
-echo "workflow-plugin installer"
+echo "yakka installer"
 echo "========================="
 
 route="$(resolve_install_route)"
 case "$route" in
   opencode)
-    echo "OpenCode skills install ($(auto_install_reason)) — symlinking core workflow skills."
+    echo "OpenCode skills install ($(auto_install_reason)) — symlinking core yakka skills."
     echo "  Preferred layout: $OPENCODE_SKILLS_ROOT/<skill> → <checkout>/skills/<skill>"
     echo "  (Symlinks only — no copy into ~/.claude/skills.)"
     echo ""
     ensure_opencode_skills
     echo "  Done. Core skills linked under: $OPENCODE_SKILLS_ROOT"
     echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-    if [[ "${WORKFLOW_OPENCODE_INCLUDE_LAB:-0}" == "1" ]]; then
-      echo "  Lab skills were included (WORKFLOW_OPENCODE_INCLUDE_LAB=1)."
-    else
-      echo "  (workflow-lab not linked; set WORKFLOW_OPENCODE_INCLUDE_LAB=1 or re-run interactively.)"
-    fi
     echo ""
     echo "Installation complete."
     exit 0
     ;;
   claude-code)
-    echo "Claude Code detected ($(auto_install_reason)) — installing core workflow skills to ~/.claude/skills/."
+    echo "Claude Code detected ($(auto_install_reason)) — installing core yakka skills to ~/.claude/skills/."
     echo "  (Personal-scope skills — nothing written to the repo workspace.)"
     echo ""
     ensure_claude_user_skills
     echo "  Done. Core skills available at: $HOME/.claude/skills/"
     echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-    echo "  (workflow-lab is not installed automatically; install it interactively if needed.)"
     echo ""
     echo "Installation complete."
     exit 0
     ;;
   cursor-cloud)
-    echo "Non-interactive install ($(auto_install_reason)) — installing core workflow skills to workspace .cursor/skills/."
+    echo "Non-interactive install ($(auto_install_reason)) — installing core yakka skills to workspace .cursor/skills/."
     echo "  (Cloud agents load project skills from .cursor/skills/, not plugins/local/.)"
     echo "  Cursor discovers those skills when the agent process starts. Bake this install"
     echo "  into the image; there is no session hook that reloads skills mid-turn."
@@ -616,8 +607,7 @@ case "$route" in
     dest="$(workspace_skills_dest "$workspace")"
     echo "  Done. Core skills available at: $dest"
     echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
-    echo "  Add .cursor/skills/$WORKFLOW_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
-    echo "  (workflow-lab is not installed in cloud agent environments.)"
+    echo "  Add .cursor/skills/$YAKKA_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
     echo ""
     echo "Installation complete."
     exit 0
@@ -626,14 +616,14 @@ esac
 
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then
-  if ask "Install workflow core skills (design, refine, execute, comprehensive-review, close-out, post-build) into Claude Code (~/.claude/skills/)?"; then
-    install_skills "$SCRIPT_DIR/skills" "$HOME/.claude/skills"
+  if ask "Install yakka core skills (design, refine, execute, comprehensive-review, close-out, post-build) into Claude Code (~/.claude/skills/)?"; then
+    if src="$(resolve_plugin_source)"; then
+      install_skills "$src/skills" "$HOME/.claude/skills"
+    else
+      echo "  ERROR: no yakka skills source found." >&2
+      exit 1
+    fi
     echo "  Done. Core skills available immediately in Claude Code."
-  fi
-  echo ""
-  if ask "Also install workflow-lab skills (setup, iterate, transcript-parser, workflow-tuning)? Local/interactive only — skip this in cloud build environments."; then
-    install_skills "$SCRIPT_DIR/plugins/workflow-lab/skills" "$HOME/.claude/skills"
-    echo "  Done. Lab skills available immediately in Claude Code."
   fi
 else
   echo "Claude Code (~/.claude) not found — skipping."
@@ -643,38 +633,24 @@ echo ""
 
 # OpenCode — symlink skills into ~/.config/opencode/skills/ (preferred over ~/.claude/skills).
 if [[ -d "$HOME/.config/opencode" || -d "$OPENCODE_SKILLS_ROOT" ]]; then
-  if ask "Install workflow core skills into OpenCode ($OPENCODE_SKILLS_ROOT/) as symlinks to this checkout?"; then
-    WORKFLOW_OPENCODE_INCLUDE_LAB=0
+  if ask "Install yakka core skills into OpenCode ($OPENCODE_SKILLS_ROOT/) as symlinks to this checkout?"; then
     ensure_opencode_skills
     echo "  Done. Core skills symlinked for OpenCode."
-    echo ""
-    if ask "Also symlink workflow-lab skills into OpenCode? Local/interactive only."; then
-      WORKFLOW_OPENCODE_INCLUDE_LAB=1
-      ensure_opencode_skills
-      echo "  Done. Lab skills symlinked for OpenCode."
-    fi
   fi
 else
   echo "OpenCode (~/.config/opencode) not found — skipping."
-  echo "  To install anyway: WORKFLOW_INSTALL_MODE=opencode ./install.sh"
+  echo "  To install anyway: YAKKA_INSTALL_MODE=opencode ./install.sh"
   echo "  or: ./install.sh --opencode-skills"
 fi
 
 echo ""
 
-# Cursor — materialize repo into ~/.cursor/plugins/local/workflow (core), then
-# optionally copy the lab subtree into ~/.cursor/plugins/local/workflow-lab
+# Cursor — materialize repo into ~/.cursor/plugins/local/yakka (core).
 if [[ -d "$HOME/.cursor" ]]; then
-  if ask "Install workflow core plugin into Cursor (~/.cursor/plugins/local/)?"; then
+  if ask "Install yakka core plugin into Cursor (~/.cursor/plugins/local/)?"; then
     ensure_cursor_core_plugin
     echo "  Done. Restart Cursor to pick up the plugin."
     echo "  Plugin path: $CURSOR_CORE_PLUGIN (re-run install.sh to update)"
-    echo ""
-    if ask "Also install workflow-lab plugin into Cursor?"; then
-      ensure_cursor_lab_plugin
-      echo "  Done. Restart Cursor to pick up the lab plugin."
-      echo "  Plugin path: $CURSOR_LAB_PLUGIN (re-run install.sh to update; tracks the core checkout)"
-    fi
   fi
 else
   echo "Cursor (~/.cursor) not found — skipping."

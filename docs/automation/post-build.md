@@ -31,7 +31,7 @@ A re-triggered run resumes; it does not repeat. During preflight, treat committe
 ## Configure the automation
 
 1. Create one automation with an orchestrator-capable parent model, granted access to the repository's non-production branches only.
-2. Make the workflow plugin's core skills available in the automation context via the plugin's documented install path — do not vendor them into the repository. Harnesses differ on how skills surface (registry listing vs project-local paths); the prompt below accepts either.
+2. Make the yakka plugin's core skills available in the automation context via the install at `plugins/yakka` — do not vendor them into the repository. Harnesses differ on how skills surface (registry listing vs project-local paths); the prompt below accepts either.
 3. Ensure the repository carries its **adapter skill**, conventionally named `post-build-automation` (production boundaries, required checks, deploy-proof commands, QA environment, worker routing), with `disable-model-invocation: true` so only the automation loads it.
 4. Add the secrets the adapter names to the automation's environment. Pass variable names in prompts, never values.
 5. Use the canonical prompt below. Add no extra workflow policy — policy lives in the skill and the adapter, where it is versioned. The prompt is a stage map and load instruction only; do not restate safety invariants, resumability, or the final output schema.
@@ -43,11 +43,12 @@ Replace the bracketed values; keep the rest verbatim. The skill owns phase mecha
 ```text
 Run the post-build workflow for <PR / current non-production branch>.
 
-Load the workflow plugin's `post-build` skill for portable stage semantics,
-and the repo's `post-build-automation` adapter skill if it exists. Prefer the
-harness skill registry / available-skills list. If a named skill is missing
-there, resolve it from the usual install locations without inventing a new
-layout: Cursor project skills under `.cursor/skills/workflow/`; Claude Code
+Load the yakka plugin's `post-build` skill from `plugins/yakka/skills/` for
+portable stage semantics, and the repo's `post-build-automation` adapter
+skill if it exists. Prefer the harness skill registry / available-skills list.
+If a named skill is missing there, resolve it from the usual install locations
+without inventing a new layout: Cursor project skills under
+`.cursor/skills/yakka/`; Claude Code
 under `~/.claude/skills/` or a repo `.claude/skills/`; the adapter may also
 live under the repo's skill tree under the same name.
 

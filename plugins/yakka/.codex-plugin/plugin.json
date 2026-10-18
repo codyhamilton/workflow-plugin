@@ -1,0 +1,12 @@
+{
+  "name": "yakka",
+  "description": "Cloud-safe core workflow skills for Codex: design, refine, execute, comprehensive-review, close-out, post-build",
+  "version": "3.0.0",
+  "author": {
+    "name": "William Hamilton",
+    "email": "codyh@ctzns.net"
+  },
+  "skills": "./skills/",
+  "mcpServers": "./.codex-mcp.json",
+  "hooks": "./hooks/codex.json"
+}

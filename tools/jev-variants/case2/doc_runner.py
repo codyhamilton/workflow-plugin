@@ -1,8 +1,9 @@
 """Case-2 runner: brief -> Jev complexity questions, 3 state variants. Usage: doc_runner.py [--limit N]"""
 import json,sys,os,time,hashlib
 from concurrent.futures import ThreadPoolExecutor
-R="/home/codyh/.cursor/plugins/local/workflow-plugin/tools"
-sys.path[:0]=[R+"/transcript",R+"/hooklog"]
+from pathlib import Path
+_ROOT = Path(__file__).resolve().parents[3]
+sys.path[:0]=[str(_ROOT / "tools/transcript"), str(_ROOT / "packages/hooklog")]
 from lib.jev_client import post_systemone, JEV_MODEL
 from hooklog import scrub
 U=json.load(open("items.json"))

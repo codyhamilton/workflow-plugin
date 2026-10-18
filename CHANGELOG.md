@@ -1,5 +1,188 @@
 # Changelog
 
+## 3.0.0 — 2026-10-18 — rename to yakka
+
+Major rename: the product, plugin, Go binary, MCP server, environment variables, and
+on-disk state directories are **yakka**. Plugin manifests are `3.0.0`. There is no automatic
+data migration — follow this section before relying on hooks, MCP, or `yakka serve`.
+
+**Remove the old `workflow` install before installing `yakka`.** An enabled `workflow` plugin
+plus `yakka` records every hook event twice. Unset any `WORKFLOW_*` variables you still export
+(the binary and hooks read `YAKKA_*` only, except the quality-service vars noted below).
+
+### Environment variables (`WORKFLOW_*` → `YAKKA_*`)
+
+Every shipped identifier that started with `WORKFLOW_` now uses `YAKKA_` with the same suffix.
+Update shell profiles, systemd units, and CI env blocks accordingly.
+
+| Was | Becomes |
+|---|---|
+| `WORKFLOW_ALIGNMENT_CRITERIA` | `YAKKA_ALIGNMENT_CRITERIA` |
+| `WORKFLOW_ALIGNMENT_INSTRUCTIONS` | `YAKKA_ALIGNMENT_INSTRUCTIONS` |
+| `WORKFLOW_ANALYTICS_TOKEN` | `YAKKA_ANALYTICS_TOKEN` |
+| `WORKFLOW_ANALYTICS_URL` | `YAKKA_ANALYTICS_URL` |
+| `WORKFLOW_ARTIFACT_SUBMIT_CLI` | removed (retired-pattern token; no `YAKKA_` successor) |
+| `WORKFLOW_BATCH_FLUSH_CLI` | `YAKKA_BATCH_FLUSH_CLI` |
+| `WORKFLOW_BENCH_ALLOW_LIVE` | `YAKKA_BENCH_ALLOW_LIVE` |
+| `WORKFLOW_BENCH_DIR` | `YAKKA_BENCH_DIR` |
+| `WORKFLOW_BENCH_FILTER` | `YAKKA_BENCH_FILTER` |
+| `WORKFLOW_BENCH_OUT` | `YAKKA_BENCH_OUT` |
+| `WORKFLOW_BENCH_P95_MS` | `YAKKA_BENCH_P95_MS` |
+| `WORKFLOW_BENCH_RUNS` | `YAKKA_BENCH_RUNS` |
+| `WORKFLOW_BIN` | `YAKKA_BIN` |
+| `WORKFLOW_CHECKS_DIR` | `YAKKA_CHECKS_DIR` |
+| `WORKFLOW_CLIENT_CONFIG` | `YAKKA_CLIENT_CONFIG` |
+| `WORKFLOW_DRAIN_BACKOFF_MAX` | `YAKKA_DRAIN_BACKOFF_MAX` |
+| `WORKFLOW_DRAIN_GIVEUP` | `YAKKA_DRAIN_GIVEUP` |
+| `WORKFLOW_DRAIN_LINGER` | `YAKKA_DRAIN_LINGER` |
+| `WORKFLOW_DRAIN_WINDOW` | `YAKKA_DRAIN_WINDOW` |
+| `WORKFLOW_HOOKLOG` | `YAKKA_HOOKLOG` |
+| `WORKFLOW_HOOKLOG_DEBUG` | `YAKKA_HOOKLOG_DEBUG` |
+| `WORKFLOW_HOOKLOG_DIR` | `YAKKA_HOOKLOG_DIR` |
+| `WORKFLOW_HOOKLOG_KICK` | `YAKKA_HOOKLOG_KICK` |
+| `WORKFLOW_HOOKLOG_SPOOL` | `YAKKA_HOOKLOG_SPOOL` |
+| `WORKFLOW_INSTALL_BRANCH` | `YAKKA_INSTALL_BRANCH` |
+| `WORKFLOW_INSTALL_LAB` | `YAKKA_INSTALL_LAB` (still accepted; ignored — lab skills are not installed) |
+| `WORKFLOW_INSTALL_MODE` | `YAKKA_INSTALL_MODE` |
+| `WORKFLOW_INSTALL_SH` | `YAKKA_INSTALL_SH` |
+| `WORKFLOW_INSTALL_SKIP_REFRESH` | `YAKKA_INSTALL_SKIP_REFRESH` |
+| `WORKFLOW_INSTALL_SRC` | `YAKKA_INSTALL_SRC` |
+| `WORKFLOW_JEV_LIVE` | `YAKKA_JEV_LIVE` |
+| `WORKFLOW_JEV_SIGNAL_LOG` | `YAKKA_JEV_SIGNAL_LOG` |
+| `WORKFLOW_LEGACY` | `YAKKA_LEGACY` |
+| `WORKFLOW_OPENCODE_SIGNALS` | `YAKKA_OPENCODE_SIGNALS` |
+| `WORKFLOW_OPENCODE_SKILLS` | `YAKKA_OPENCODE_SKILLS` |
+| `WORKFLOW_PAGESET_OUT` | `YAKKA_PAGESET_OUT` |
+| `WORKFLOW_PLUGIN_CACHE` | `YAKKA_PLUGIN_CACHE` |
+| `WORKFLOW_PYTHON` | `YAKKA_PYTHON` |
+| `WORKFLOW_QUEUE` | `YAKKA_QUEUE` |
+| `WORKFLOW_RELEASE_URL` | `YAKKA_RELEASE_URL` |
+| `WORKFLOW_REPORT_FENCE` | `REPORT_FENCE` (no `YAKKA_` prefix; Python constant in `tools/driver/report.py`) |
+| `WORKFLOW_REPO_ROOT` | `YAKKA_REPO_ROOT` |
+| `WORKFLOW_REPO_URL` | `YAKKA_REPO_URL` |
+| `WORKFLOW_ROOT` | `YAKKA_ROOT` |
+| `WORKFLOW_SERVE_ADDR` | `YAKKA_SERVE_ADDR` |
+| `WORKFLOW_SERVE_CORS_ORIGINS` | `YAKKA_SERVE_CORS_ORIGINS` |
+| `WORKFLOW_SERVE_DATA` | `YAKKA_SERVE_DATA` |
+| `WORKFLOW_SERVE_KEYS` | `YAKKA_SERVE_KEYS` |
+| `WORKFLOW_SERVE_POLL` | `YAKKA_SERVE_POLL` |
+| `WORKFLOW_SIGNAL_STATE_DIR` | removed (unused test assignments; no successor) |
+| `WORKFLOW_SPOOL_NOFLOCK` | `YAKKA_SPOOL_NOFLOCK` |
+| `WORKFLOW_VERIFY_DIR` | `YAKKA_VERIFY_DIR` |
+| `WORKFLOW_VERIFY_PRE` | `YAKKA_VERIFY_PRE` |
+| `WORKFLOW_WORKSPACE` | `YAKKA_WORKSPACE` |
+| `WORKFLOW_WORKSPACE_SKILLS_NAME` | `YAKKA_WORKSPACE_SKILLS_NAME` |
+
+**Exception:** `WORKFLOW_QUALITY_*` is unchanged (legacy local quality HTTP service in
+`tools/quality/`). Do not rename `WORKFLOW_QUALITY_URL` or related quality-service vars.
+`WORKFLOW_HOOKLOG_CLI` is removed; hooks spool to the queue directory only.
+
+### State paths
+
+| Was | Becomes |
+|---|---|
+| `~/.local/share/workflow/{queue,serve}` | `~/.local/share/yakka/{queue,serve}` |
+| `~/.config/workflow/client.toml` | `~/.config/yakka/client.toml` |
+| `~/.cache/workflow/` | `~/.cache/yakka/` |
+| `~/.local/state/workflow/` | `~/.local/state/yakka/` |
+| `~/.local/share/workflow-plugin/hooklog` | `~/.local/share/yakka/hooklog` |
+| `~/.cache/workflow-plugin` (cloud-env checkout) | `~/.cache/yakka/src` |
+
+Default Jev signal log: `${XDG_STATE_HOME:-~/.local/state}/yakka/jev-signal-log.jsonl`
+(override with `YAKKA_JEV_SIGNAL_LOG`). Cached release binary:
+`${XDG_CACHE_HOME:-~/.cache}/yakka/<bin/VERSION>/yakka-<os>-<arch>`.
+
+### Per-harness remove, then install
+
+1. **Claude Code**
+   1. Remove the old marketplace plugin (`workflow` / `workflow@workflow` or any checkout still
+      named `workflow`).
+   2. Add marketplace `codyhamilton/yakka` if needed, then install: `/plugin install yakka@yakka`.
+   3. Confirm MCP server `yakka` runs `${CLAUDE_PLUGIN_ROOT}/bin/yakka mcp` (see
+      `plugins/yakka/.mcp.json`).
+   4. Re-run `./install.sh` with `YAKKA_INSTALL_MODE=claude-code` (or let Claude hooks run it)
+      so core skills land in `~/.claude/skills/`.
+
+2. **Cursor**
+   1. Remove `~/.cursor/plugins/local/workflow` (and any symlinked repo-root plugin left from
+      older marketplace layouts).
+   2. Run `./install.sh` from a `yakka` checkout (or curl the raw installer from
+      `https://github.com/codyhamilton/yakka`). Interactive mode materializes
+      `~/.cursor/plugins/local/yakka` from `plugins/yakka` (real directory tree, not a symlink).
+   3. For Cursor Cloud Agents, point environment setup at
+      `tools/cloud-env/bootstrap-yakka-skills.sh` (not `bootstrap-workflow-skills.sh`). It sets
+      `YAKKA_INSTALL_MODE=cloud` and syncs skills to `<workspace>/.cursor/skills/yakka/`.
+   4. Restart Cursor so hooks and skills reload.
+
+3. **Codex**
+   1. Remove the old `workflow` plugin registration and any user-level `[mcp_servers.workflow]`
+      entry from `~/.codex/config.toml`.
+   2. Trust the `yakka` plugin at install root `plugins/yakka` (marketplace install) with hooks
+      `hooks/codex.json` and MCP via `plugins/yakka/.codex-mcp.json` → `./bin/yakka mcp`.
+   3. Ensure hook commands resolve inside the plugin root (`bin/yakka`, `script/spool.sh`).
+
+4. **OpenCode**
+   1. Remove OpenCode skill symlinks or copies that pointed at the old `workflow` checkout.
+   2. Install the OpenCode package `packages/opencode-yakka-hooks` per its README (npm link or
+      project config).
+   3. Run `YAKKA_INSTALL_MODE=opencode ./install.sh` to symlink core skills into
+      `${YAKKA_OPENCODE_SKILLS:-~/.config/opencode/skills}` (default skill directories:
+      `design`, `refine`, `execute`, `comprehensive-review`, `close-out`, `post-build`).
+   4. Export `YAKKA_*` queue/hook env vars as needed (see table above); defaults use
+      `~/.local/share/yakka/queue`.
+
+### `.gitignore` (consuming repos)
+
+Replace `.cursor/skills/workflow/` with `.cursor/skills/yakka/` (or add the new path if you
+track ignore rules for cloud-installed workspace skills).
+
+### MCP and skill prefixes
+
+- **MCP tools (Cursor):** `mcp__plugin_yakka_*` (server name `yakka` in `plugins/yakka/.mcp.json`).
+- **Skills:** invoke by shipped directory name under `plugins/yakka/skills/` (`design`, `refine`,
+  `execute`, `comprehensive-review`, `close-out`, `post-build`). Claude/Cursor skill discovery uses
+  those names; there is no `/workflow:` prefix on 3.x.
+
+Trailers and report fences: writers emit `Yakka-Phase:`, `Yakka-Plan:`, and `yakka-report`
+fences; readers still accept legacy `Workflow-*` forms.
+
+### Maintainer actions (outside this repo)
+
+1. Rename the GitHub repository to `codyhamilton/yakka` and update remotes (`git remote set-url`).
+2. Publish the `3.0.0` release (new `bin/VERSION`; assets are `yakka-<os>-<arch>`).
+3. Move `yakka serve` data: `~/.local/share/workflow/serve` → `~/.local/share/yakka/serve`
+   (and queue under `~/.local/share/yakka/queue` if you kept the old queue path).
+4. Move `~/.config/workflow/client.toml` → `~/.config/yakka/client.toml` (or set
+   `YAKKA_CLIENT_CONFIG`).
+5. Reinstall every harness (Claude, Cursor, Codex, OpenCode) using the steps above.
+6. Update Cursor Cloud `environment.json` install command to
+   `bootstrap-yakka-skills.sh` and `YAKKA_WORKSPACE` / `~/.cache/yakka/src` paths.
+7. (Optional) Rename the Cloudflare Pages project to `yakka-analytics`.
+8. (Optional) Rename local checkout directories from `workflow-plugin` to `yakka`.
+
+## 2.12.0 — 2026-10-17
+
+- The workflow plugin install root is `plugins/yakka`. Marketplace entries list `source`:
+  `plugins/yakka`. Cursor hook commands are plugin-root-relative `./script/...` (`spool.sh` and
+  `prefetch-version.sh` under `plugins/yakka/script/`).
+
+## 2.11.0 — 2026-10-17
+
+- Move the Go binary module to `packages/workflow/`, hook capture to `packages/hooklog/`, and the
+  Jev criteria plus check JSON to `packages/workflow/catalogue/`. Release builds, hooks, and
+  tooling read those paths; `tools/quality/` remains the legacy HTTP service only.
+- If your Cursor hooks (or another harness config) hard-code an absolute path to
+  `.../tools/hooklog/spool.sh` from an older example, update it to `.../packages/hooklog/spool.sh`
+  (or reinstall from the plugin). `spool.sh` exits 0 even when the path is wrong, so a stale path
+  fails silently and events are not captured.
+
+## 2.10.0 — 2026-10-17
+
+- Remove the separate lab marketplace plugin. Six maintainer-only skills (`iterate`, `jev-variants`,
+  `setup`, `transcript-parser`, `white-paper`, `workflow-tuning`) live as Claude Code project skills
+  under `.claude/skills/` at the repo root. `install.sh` and cloud bootstrap install core skills only;
+  `WORKFLOW_INSTALL_LAB=1` is ignored.
+
 ## 2.9.2 — 2026-10-05
 
 - Codex gets its own MCP config, `.codex-mcp.json` (`./bin/workflow mcp`, `cwd` the plugin root). Codex does not expand

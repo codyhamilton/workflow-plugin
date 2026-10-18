@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "workflow": {
-      "command": "/ABS/PATH/workflow-plugin/bin/workflow",
-      "args": ["mcp"]
-    }
-  }
-}

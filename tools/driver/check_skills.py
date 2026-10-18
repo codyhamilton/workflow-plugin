@@ -26,15 +26,17 @@ CORE_SKILLS: tuple[str, ...] = (
     "post-build",
 )
 
-# plugins/workflow-lab. Unattended install must not require these.
-LAB_SKILLS: tuple[str, ...] = (
-    "setup",
+# Maintainer project skills at .claude/skills/. Unattended install must not copy these.
+MAINTAINER_SKILLS: tuple[str, ...] = (
     "iterate",
+    "jev-variants",
+    "setup",
     "transcript-parser",
-    "workflow-tuning",
+    "white-paper",
+    "yakka-tuning",
 )
 
-WORKSPACE_SKILLS_NAME = "workflow"
+WORKSPACE_SKILLS_NAME = "yakka"
 HARNESS_CLAUDE = "claude-code"
 HARNESS_CURSOR = "cursor-cloud"
 HARNESS_INTERACTIVE = "interactive"
@@ -85,7 +87,7 @@ def detect_harness(
     is decided inside install.sh. On Claude remote and Cursor cloud, stdin is
     not a TTY, which is the case this function is for.
     """
-    mode = env.get("WORKFLOW_INSTALL_MODE") or ""
+    mode = env.get("YAKKA_INSTALL_MODE") or ""
     if mode == "claude-code":
         return HARNESS_CLAUDE
     if mode == "cloud":
@@ -117,7 +119,7 @@ def manifest_path(home: Path) -> Path:
 
 
 def find_workspace_root(env: Mapping[str, str], *, cwd: Path | None = None) -> Path | None:
-    override = env.get("WORKFLOW_WORKSPACE") or ""
+    override = env.get("YAKKA_WORKSPACE") or ""
     if override:
         path = Path(override).expanduser()
         if path.is_dir():
@@ -209,7 +211,7 @@ def report_for_env(
         can_prompt=can_prompt,
     )
     workspace = find_workspace_root(env, cwd=cwd)
-    skills_name = env.get("WORKFLOW_WORKSPACE_SKILLS_NAME") or WORKSPACE_SKILLS_NAME
+    skills_name = env.get("YAKKA_WORKSPACE_SKILLS_NAME") or WORKSPACE_SKILLS_NAME
     root = skills_root_for(
         harness,
         home=home,
@@ -230,7 +232,7 @@ def main(argv: list[str] | None = None) -> int:
         "--workspace",
         type=Path,
         default=None,
-        help="Repository root (default: WORKFLOW_WORKSPACE, git toplevel, or /workspace)",
+        help="Repository root (default: YAKKA_WORKSPACE, git toplevel, or /workspace)",
     )
     parser.add_argument(
         "--home",
@@ -250,7 +252,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.home is not None:
         env["HOME"] = str(args.home)
     if args.workspace is not None:
-        env["WORKFLOW_WORKSPACE"] = str(args.workspace)
+        env["YAKKA_WORKSPACE"] = str(args.workspace)
 
     report = report_for_env(
         env,

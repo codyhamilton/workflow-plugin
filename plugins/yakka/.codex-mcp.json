@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "yakka": {
+      "command": "./bin/yakka",
+      "args": ["mcp"],
+      "cwd": "."
+    }
+  }
+}

@@ -62,7 +62,13 @@ def init_fixture_repo(root: Path) -> Path:
     return plan_dir
 
 
-def commit_trailer(root: Path, message: str, trailer: str) -> None:
+def commit_trailer(
+    root: Path,
+    message: str,
+    trailer: str,
+    *,
+    trailer_key: str = "Workflow-Phase",
+) -> None:
     subprocess.run(
         [
             "git",
@@ -71,7 +77,7 @@ def commit_trailer(root: Path, message: str, trailer: str) -> None:
             "-m",
             message,
             "--trailer",
-            f"Workflow-Phase: {trailer}",
+            f"{trailer_key}: {trailer}",
         ],
         cwd=root,
         check=True,

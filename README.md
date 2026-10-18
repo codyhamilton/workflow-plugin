@@ -1,7 +1,7 @@
-# workflow-plugin
+# yakka
 
-Private plugin marketplace containing workflow skills for plan, execute, and review, split across
-a cloud-safe core plugin and a local lab plugin.
+Private plugin marketplace containing yakka skills for design, execute, and review:
+one cloud-safe core plugin, plus maintainer project skills at `.claude/skills/`.
 
 ## Breaking change: the folder-status taxonomy is removed
 
@@ -23,18 +23,18 @@ provenance — leave them as they are. New plan folders from this version on fol
 merged). A design bounds the change — intent, problem, domain contracts, ownership — and cuts it
 into phases each closed by a provable outcome, with the phase count fixed at sign-off. `refine`
 now briefs one phase at a time against the code the previous phase left; `execute` runs one phase
-per orchestrator, verifies the outcome, records carried items with the closing `Workflow-Phase:`
+per orchestrator, verifies the outcome, records carried items with the closing `Yakka-Phase:`
 trailer, then always stops and reports. Review runs once, after the last phase. The folder path `docs/plans/<NN>-<slug>/` and the
-`Workflow-Plan:` marker are unchanged, and folders already carrying `PLAN.md` are still read.
+`Yakka-Plan:` marker are unchanged, and folders already carrying `PLAN.md` are still read. Older commits may still carry legacy phase/plan trailers; see `CHANGELOG.md` for the rename.
 Skills are also rewritten to state outcomes and constraints rather than steps; see
-`workflow-tuning/principles.md` #1 and `docs/analysis/2026-09-08-workflow-vs-field.md` §7.
+`yakka-tuning/principles.md` #1 and `docs/analysis/2026-09-08-workflow-vs-field.md` §7.
 
 ## Operating hypotheses
 
-The workflow design rests on these assumptions. Some are informally validated (noted where), none are proven in the cloud-pipeline context. We build to them now and evaluate later — a dedicated eval effort, out of scope for the current revisions, will test them. Each is falsifiable and names its validation route: **eval** (harness scenario runs, see `evals/`) or **observational** (harvested from real pipeline outcomes via workflow-tuning).
+The workflow design rests on these assumptions. Some are informally validated (noted where), none are proven in the cloud-pipeline context. We build to them now and evaluate later — a dedicated eval effort, out of scope for the current revisions, will test them. Each is falsifiable and names its validation route: **eval** (harness scenario runs, see `evals/`) or **observational** (harvested from real pipeline outcomes via yakka-tuning).
 
 1. **Verbatim intent survives; paraphrase decays.** Capturing the human's actual words (request, issue, task) lets downstream agents match what was done to why — anchoring review placement, QA derivation, and gap-filling. Paraphrase loses the intent that matters. *(Informally validated in human workflows. Observational.)*
-2. **Briefs beat messengers.** Context authored once by its owner and routed verbatim to its consumer outperforms orchestrator paraphrase — in subagent prompt quality (especially long-context jobs) and in review-remediation accuracy. *(Strong observational support: a mid-run skill edit in a 67-subagent `iterate` session gave a clean before/after — gate prompts decayed 1199→213 chars with guidance inline, and held at 2833–3716 across three later cycles once it moved into verbatim-passed briefs. See lesson 20 in `workflow-tuning/reference.md`. Still untested head-to-head as a plugin-wide invariant. Eval.)*
+2. **Briefs beat messengers.** Context authored once by its owner and routed verbatim to its consumer outperforms orchestrator paraphrase — in subagent prompt quality (especially long-context jobs) and in review-remediation accuracy. *(Strong observational support: a mid-run skill edit in a 67-subagent `iterate` session gave a clean before/after — gate prompts decayed 1199→213 chars with guidance inline, and held at 2833–3716 across three later cycles once it moved into verbatim-passed briefs. See lesson 20 in `yakka-tuning/reference.md`. Still untested head-to-head as a plugin-wide invariant. Eval.)*
 3. **A plan is a deliverable, not a stop on the way to a build.** A dedicated planning context produces more accurate plans than a fused plan-build workflow, and separation enables gating, plan validation, adversarial planning, and plans that are valuable unbuilt. *(Observed in iterate's divergence cycles; untested as a head-to-head. Eval.)*
 4. **Status belongs to the tracker, not the repo.** Removing the repo backlog (folder-status taxonomy, roadmap sync) sheds structural-compliance load without losing recoverability, because durable artifacts carry intent and outcome while PRs carry status. *(Untested. Observational.)*
 5. **Orienting-why beats persuading-why.** Skills that state the failures they prevent help agents fill unspecified gaps; prose that argues the design's correctness costs context without changing behavior. *(Untested. Eval.)*
@@ -57,9 +57,10 @@ Beyond validating the hypotheses head-to-head, candidate variations to try when 
 
 ## Skills
 
-Two plugins. **Core** (`workflow`) is cloud-safe — no interactive gates that dead-end headless, no
-local-filesystem dependencies — and is what a build/pipeline environment installs. **Lab**
-(`workflow-lab`) is local and/or interactive; the pipeline never requires it.
+One shipped plugin. **Core** (`yakka`) is cloud-safe — no interactive gates that dead-end headless,
+no local-filesystem dependencies — and is what a build/pipeline environment installs. **Maintainer
+skills** under `.claude/skills/` are Claude Code project skills for this repo checkout; the pipeline
+never installs or requires them.
 
 The loop: **design → (refine → execute → verify → close) per phase → review → close-out.** A design
 fixes phases each closed by a provable outcome; each phase is refined against the code the previous
@@ -68,29 +69,33 @@ skipped for a one-unit phase.
 
 | Plugin | Skill | Description |
 |--------|-------|-------------|
-| `workflow` (core) | `design` | Bound a change: verbatim intent, domain contracts, phases with provable outcomes; interactive or headless posture |
-| `workflow` (core) | `refine` | Decompose the next phase into units and write one complete brief per unit against the current code; bounce the design if a contract, boundary, or outcome is missing |
-| `workflow` (core) | `execute` | Build one phase: route briefs to rightsized workers, verify the outcome, record carried items and close with a trailer, then stop and report; terminal review and close-out after the last phase |
-| `workflow` (core) | `comprehensive-review` | Independent review keyed to the design's phase outcomes; fixes mechanical findings in place, briefs structural ones |
-| `workflow` (core) | `close-out` | End a plan: collapse the folder into one record file at `docs/plans/<NN>-<slug>.md`, promote durable contracts to `docs/design/`, delete the folder in one commit |
-| `workflow` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
-| `workflow-lab` | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
-| `workflow-lab` | `iterate` | Divergent candidates, judge, reconcile, extrapolate — for goals with no fixed spec, or for a design phase flagged approach-open |
-| `workflow-lab` | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
-| `workflow-lab` | `workflow-tuning` | Improve the workflow itself — design principles, lessons from retros and merged-PR outcomes, evals |
+| `yakka` (core) | `design` | Bound a change: verbatim intent, domain contracts, phases with provable outcomes; interactive or headless posture |
+| `yakka` (core) | `refine` | Decompose the next phase into units and write one complete brief per unit against the current code; bounce the design if a contract, boundary, or outcome is missing |
+| `yakka` (core) | `execute` | Build one phase: route briefs to rightsized workers, verify the outcome, record carried items and close with a trailer, then stop and report; terminal review and close-out after the last phase |
+| `yakka` (core) | `comprehensive-review` | Independent review keyed to the design's phase outcomes; fixes mechanical findings in place, briefs structural ones |
+| `yakka` (core) | `close-out` | End a plan: collapse the folder into one record file at `docs/plans/<NN>-<slug>.md`, promote durable contracts to `docs/design/`, delete the folder in one commit |
+| `yakka` (core) | `post-build` | Pipeline stage against a PR: classify/right-size, review, bounded remediation for briefed findings, conditional QA + exact-SHA deploy proof, end-of-work required-checks gate, merge-readiness report (repo mechanics via a per-repo adapter skill) |
+| (maintainer) | `setup` | Bootstrap `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` for a repo that lacks them |
+| (maintainer) | `iterate` | Divergent candidates, judge, reconcile, extrapolate — for goals with no fixed spec, or for a design phase flagged approach-open |
+| (maintainer) | `jev-variants` | Jev Stage A variant search protocol (`tools/jev-variants/`) |
+| (maintainer) | `transcript-parser` | Extract cost metrics (agents, tool turns, context, wall time) from a session transcript |
+| (maintainer) | `white-paper` | Evidence-backed research loop for consolidated lab papers |
+| (maintainer) | `yakka-tuning` | Improve the yakka plugin itself — design principles, lessons from retros and merged-PR outcomes, evals |
 
-**Workflow Optimiser workspace:** research, goals, findings, and proposals for tuning this plugin live in [`docs/lab/`](docs/lab/) (maintained in-repo; separate from the interactive `workflow-lab` skills under `plugins/workflow-lab/`).
+Maintainer skills live under [`.claude/skills/`](.claude/skills/) and are not copied by `install.sh`.
+
+**Workflow Optimiser workspace:** research, goals, findings, and proposals for tuning this plugin live in [`docs/lab/`](docs/lab/) (maintained in-repo alongside maintainer skills).
 
 ### Grok Bot / unattended driver
 
-Skills from this plugin are **not** auto-visible to Grok Bot or other cloud drivers until the **consuming** repo bootstraps them. Cursor cloud: run [`tools/cloud-env/bootstrap-workflow-skills.sh`](tools/cloud-env/bootstrap-workflow-skills.sh) as the environment setup command (tracks **master**, syncs `.cursor/skills/workflow/`; daily rebuild keeps it fresh — see [`tools/cloud-env/README.md`](tools/cloud-env/README.md)). Legacy alias: `docs/lab/bootstrap/cursor-cloud-setup.sh`. Claude Code on the web: SessionStart hook (`docs/lab/bootstrap/session-start.sh`). The measurable loop is driver CLIs, not chat classify:
+Skills from this plugin are **not** auto-visible to Grok Bot or other cloud drivers until the **consuming** repo bootstraps them. Cursor cloud: run [`tools/cloud-env/bootstrap-yakka-skills.sh`](tools/cloud-env/bootstrap-yakka-skills.sh) as the environment setup command (tracks **master**, syncs `.cursor/skills/yakka/`; daily rebuild keeps it fresh — see [`tools/cloud-env/README.md`](tools/cloud-env/README.md)). Legacy alias: `docs/lab/bootstrap/cursor-cloud-setup.sh`. Claude Code on the web: SessionStart hook (`docs/lab/bootstrap/session-start.sh`). The measurable loop is driver CLIs, not chat classify:
 
 0. `python3 tools/driver/check_skills.py` — exit 0 when the six core skill directories are on disk for this harness
 1. `python3 tools/driver/status.py <plan-folder>` — open phase from git trailers
 2. `python3 tools/driver/run.py <plan-folder> --once` — one phase; provider by API key
 3. `python3 tools/driver/assert_phase.py --state <compact-state.json>` — phase-boundary assert (Jev logged; deterministic pass/fail)
 
-Repeat 1–3 until `done` or `unsuccessful`. Lab skills are not required. Details: [`tools/driver/README.md`](tools/driver/README.md) and paste template [`docs/lab/CONSUMING_REPO.md`](docs/lab/CONSUMING_REPO.md).
+Repeat 1–3 until `done` or `unsuccessful`. Maintainer skills are not required. Details: [`tools/driver/README.md`](tools/driver/README.md) and paste template [`docs/lab/CONSUMING_REPO.md`](docs/lab/CONSUMING_REPO.md).
 
 **Bot discovery pattern:** status → trigger → asserts. Listing skills in chat is not enough for Grok Bot — bake or hook skills first, then call the driver CLIs. Harness routing (when to use Codex vs Claude vs Composer vs OpenCode Flash): [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md).
 
@@ -100,47 +105,47 @@ per stage, triggered once per build handoff, with repo mechanics supplied by a p
 
 ## Hooklog (2.7.0)
 
-Local, advisory capture uses the same JSONL store across Claude Code, Cursor, OpenCode and Codex:
-`~/.local/share/workflow-plugin/hooklog/<harness>/<session>.jsonl`. The requested catalog totals are
+Local, advisory capture spools hook payloads to `${YAKKA_QUEUE:-~/.local/share/yakka/queue}`; `plugins/yakka/bin/yakka drain` ships them to the yakka service (or local serve). OpenCode also writes session JSONL under `~/.local/share/yakka-plugin/hooklog/opencode/`. The requested catalog totals are
 **Claude 33 | Cursor 22 | OpenCode 18 Hooks + 28 bus | Codex 12**. Cursor's catalog actually names
 21 events (18 agent + 2 Tab + workspaceOpen), all registered; no undocumented 22nd name is invented.
 Claude has 31 active commands and 2 integration-only worktree keys: standalone worktree hooks
-replace host operations, which conflicts with observe-only capture. See [hooklog](tools/hooklog/README.md)
+replace host operations, which conflicts with observe-only capture. See [hooklog](packages/hooklog/README.md)
 for registrations, these contract gaps, turn counting and smoke notes.
 
 ## Quick install
 
 ```sh
-git clone git@github.com:codyhamilton/workflow-plugin.git
-cd workflow-plugin
+git clone git@github.com:codyhamilton/yakka.git
+cd yakka
 ./install.sh
 ```
 
 The installer detects **Claude Code** and **Cursor** (and asks before installing into each). It does
-**not** auto-detect OpenCode — use the OpenCode path below (`WORKFLOW_INSTALL_MODE=opencode` or
-`./install.sh --opencode-skills`). Core and lab are separate prompts on the interactive path, so a
-cloud build image can accept core only. No other config required for Claude/Cursor routes.
+**not** auto-detect OpenCode — use the OpenCode path below (`YAKKA_INSTALL_MODE=opencode` or
+`./install.sh --opencode-skills`). Interactive prompts cover each harness separately; unattended
+routes install **core only**. No other config required for Claude/Cursor routes.
 
 When run non-interactively (piped via `curl | bash`, or invoked by an agent's Bash tool, which
-never has a TTY), the installer skips the prompts and auto-installs **core only** (never
-`workflow-lab`). `WORKFLOW_INSTALL_MODE=cloud`, `claude-code`, or `interactive` forces that route
-and wins over ambient variables.
+never has a TTY), the installer skips the prompts and auto-installs **core only**. Maintainer
+skills are never copied. `YAKKA_INSTALL_MODE=cloud`, `claude-code`, or `interactive` forces that
+route and wins over ambient variables.
 
 - **Claude Code** (`CLAUDECODE`, `CLAUDE_CODE_ENTRYPOINT`, or `CLAUDE_CODE_REMOTE` detected — true
   for local Claude Code sessions and Claude Code on the web alike) → `~/.claude/skills/`. Personal
   scope: nothing is written into the repo working tree, so there's nothing to `.gitignore`.
 - **Cursor cloud agent** (`CURSOR_AGENT`, `HOSTNAME=cursor`, or the cloud plugin manifest detected)
-  → `<workspace>/.cursor/skills/workflow/`, since Cursor cloud only scans project-local skills.
+  → `<workspace>/.cursor/skills/yakka/`, since Cursor cloud only scans project-local skills.
   Add that path to `.gitignore`. Cursor loads those skills when the agent process starts. Wire
-  `tools/cloud-env/bootstrap-workflow-skills.sh` as the Cloud Agent environment setup command (legacy
+  `tools/cloud-env/bootstrap-yakka-skills.sh` as the Cloud Agent environment setup command (legacy
   alias: `docs/lab/bootstrap/cursor-cloud-setup.sh`); there is no session hook that reloads skills
   on the first turn.
+- **Cursor desktop (core plugin)** → `~/.cursor/plugins/local/yakka` (copied from `plugins/yakka` in the checkout).
 - **OpenCode** (explicit only) → symlinks under `~/.config/opencode/skills/<skill>` pointing at
-  `<checkout>/skills/<skill>`. See [OpenCode (partial compatibility)](#opencode-partial-compatibility).
+  `<checkout>/plugins/yakka/skills/<skill>`. See [OpenCode (partial compatibility)](#opencode-partial-compatibility).
 
-`WORKFLOW_INSTALL_MODE=opencode` or `./install.sh --opencode-skills` runs only the OpenCode symlink
-path (idempotent). Optional: `WORKFLOW_OPENCODE_INCLUDE_LAB=1` to link lab skills too;
-`WORKFLOW_OPENCODE_SKILLS` overrides the destination root (default `~/.config/opencode/skills`).
+`YAKKA_INSTALL_MODE=opencode` or `./install.sh --opencode-skills` runs only the OpenCode symlink
+path (idempotent). `YAKKA_OPENCODE_SKILLS` overrides the destination root (default
+`~/.config/opencode/skills`).
 
 `./install.sh --print-route` prints the chosen route, destination, and `core_only` as JSON and does
 not copy files. After install, `python3 tools/driver/check_skills.py` exits 0 when the six core
@@ -162,7 +167,7 @@ set -euo pipefail
 [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]] || exit 0
 # Redirect the installer's own progress output to stderr — stdout is
 # reserved for the control JSON below, which Claude Code parses.
-curl -fsSL https://raw.githubusercontent.com/codyhamilton/workflow-plugin/master/install.sh | bash >&2
+curl -fsSL https://raw.githubusercontent.com/codyhamilton/yakka/master/install.sh | bash >&2
 # Skill discovery runs before SessionStart hooks finish by default, so
 # skills installed above wouldn't be visible until the *next* session —
 # which never comes in a one-shot cloud container. reloadSkills forces a
@@ -197,28 +202,28 @@ actually loaded.
 
 | | Path A — direct install | Path B — marketplace plugin |
 |---|---|---|
-| Installed by | `./install.sh` | `/plugin install workflow@workflow-plugin` |
-| Lives at | `~/.claude/skills/<skill>/` (or `.cursor/skills/workflow/`, `~/.cursor/plugins/local/workflow`) | `~/.claude/plugins/cache/workflow-plugin/<plugin>/<version>/` |
-| Source of truth | a copy made at install time | a git clone at `~/.claude/plugins/marketplaces/workflow-plugin`, pinned by `gitCommitSha` in `~/.claude/plugins/installed_plugins.json` |
-| Skills appear as | `design`, `execute`, … | `workflow:design`, `workflow:execute`, … |
-| Updates when | you re-run `./install.sh` | you run `/plugin update workflow@workflow-plugin` |
+| Installed by | `./install.sh` | `/plugin install yakka@yakka` |
+| Lives at | `~/.claude/skills/<skill>/` (or `.cursor/skills/yakka/`, `~/.cursor/plugins/local/yakka`) | `~/.claude/plugins/cache/yakka/yakka/<version>/` |
+| Source of truth | a copy made at install time | a git clone at `~/.claude/plugins/marketplaces/yakka`, pinned by `gitCommitSha` in `~/.claude/plugins/installed_plugins.json` |
+| Skills appear as | `design`, `execute`, … | `yakka:design`, `yakka:execute`, … |
+| Updates when | you re-run `./install.sh` | you run `/plugin update yakka@yakka` |
 
 Neither path notices that the other exists, and neither notices that this repo moved on.
 
 **To tell which is live**, look at how the skills are named in the harness's skill list: a
-`workflow:`/`workflow-lab:` prefix means Path B, bare names mean Path A. Then read the file that
+`yakka:` prefix means Path B, bare names mean Path A. Then read the file that
 name resolves to — not this repo:
 
 ```sh
 # Path B: what is pinned, and what the loaded copy actually says
-grep -A6 '"workflow@workflow-plugin"' ~/.claude/plugins/installed_plugins.json
-grep -rn "\[NEW\]" ~/.claude/plugins/cache/workflow-plugin/     # should return nothing
+grep -A6 '"yakka@yakka"' ~/.claude/plugins/installed_plugins.json
+grep -rn "\[NEW\]" ~/.claude/plugins/cache/yakka/     # should return nothing
 
 # Path A
 ls ~/.claude/skills/
 ```
 
-**To update Path B**, `/plugin update workflow@workflow-plugin` (and `workflow-lab@workflow-plugin`).
+**To update Path B**, `/plugin update yakka@yakka`.
 That refetches the marketplace clone, re-pins `gitCommitSha`, and repopulates the version-numbered
 cache directory. Editing the cache by hand does not re-pin it and will be overwritten.
 
@@ -227,7 +232,7 @@ still resolves is worse than no copy at all.
 
 ## OpenCode (partial compatibility)
 
-OpenCode can run the same **workflow skills** as Claude Code and Cursor, but the harness differs (and **Codex is not OpenCode** — see [Codex (separate harness)](#codex-separate-harness)):
+OpenCode can run the same **yakka core skills** as Claude Code and Cursor, but the harness differs (and **Codex is not OpenCode** — see [Codex (separate harness)](#codex-separate-harness)):
 there is **no** OpenCode driver provider in `tools/driver/` yet, **no** Claude `SessionStart` hook,
 and **no** live `PostToolBatch` signal path on a default install (Claude Code uses the command hook;
 OpenCode has per-tool execute hooks only until you register the optional signals plugin). Unattended multi-phase loops remain
@@ -237,14 +242,14 @@ OpenCode has per-tool execute hooks only until you register the optional signals
 edits in the repo are picked up without copying:
 
 ```sh
-# From a clone of this repo (or set WORKFLOW_INSTALL_MODE=opencode anywhere install.sh is available)
+# From a clone of this repo (or set YAKKA_INSTALL_MODE=opencode anywhere install.sh is available)
 ./install.sh --opencode-skills
 # Equivalent:
-WORKFLOW_INSTALL_MODE=opencode ./install.sh
+YAKKA_INSTALL_MODE=opencode ./install.sh
 ```
 
-That creates `~/.config/opencode/skills/<name>` → `<checkout>/skills/<name>` (for example
-`~/workspace/workflow-plugin/skills/design`). **Symlinks only** — the installer does not force
+That creates `~/.config/opencode/skills/<name>` → `<checkout>/plugins/yakka/skills/<name>` (for example
+`~/workspace/yakka/plugins/yakka/skills/design`). **Symlinks only** — the installer does not force
 `~/.claude/skills` for OpenCode. OpenCode may also read Claude's personal skills directory on some
 setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` via symlink-to-checkout.
 
@@ -252,8 +257,8 @@ setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` vi
 
 | Topic | OpenCode | This plugin |
 |-------|----------|-------------|
-| Multi-phase delegation persona | Keep harness name **`orchestrate`** (delegation/orchestration). On this machine it is **task-and-skill only** | Not a skill rename — workflow keeps skill names below. `orchestrate` is not the phase-runner |
-| Phase runner (one phase per fresh context) | Map to skill **`execute`** | `execute` closes a phase with `Workflow-Phase:` and stops; there is no separate OpenCode-primary "phase-runner" skill |
+| Multi-phase delegation persona | Keep harness name **`orchestrate`** (delegation/orchestration). On this machine it is **task-and-skill only** | Not a skill rename — yakka keeps skill names below. `orchestrate` is not the phase-runner |
+| Phase runner (one phase per fresh context) | Map to skill **`execute`** | `execute` closes a phase with `Yakka-Phase:` and stops; there is no separate OpenCode-primary "phase-runner" skill |
 | Planning | Built-in OpenCode command **`plan`** | Workflow skill **`design`** — different artifact (`DESIGN.md`, phases, outcomes). Leave OpenCode's built-in `plan` alone; use `design` for this workflow |
 | Agent definitions | OpenCode agent personas / config | ≠ Claude agent markdown files, ≠ Cursor plugin agents under `.cursor-plugin/` |
 
@@ -261,9 +266,9 @@ setups; the **preferred** layout for OpenCode is `~/.config/opencode/skills/` vi
 **`assert_phase --deterministic`** remains the hard kill line for phase boundaries.
 
 **OpenCode soft signals (optional plugin):** installable in-repo package
-[`packages/opencode-workflow-hooks/`](packages/opencode-workflow-hooks/) (`@codyhamilton/opencode-workflow-hooks`).
+[`packages/opencode-yakka-hooks/`](packages/opencode-yakka-hooks/) (`@codyhamilton/opencode-yakka-hooks`).
 It buffers `tool.execute.after`, flushes on `message.updated` / `session.idle`, and appends
-`tools/driver/.jev-signal-log.jsonl` via the shared Jev gate (never blocks the agent). Design:
+`${XDG_STATE_HOME:-~/.local/state}/yakka/jev-signal-log.jsonl` (override with `YAKKA_JEV_SIGNAL_LOG`) via the shared Jev gate (never blocks the agent). Design:
 [`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
 
 Add to `opencode.json` (restart OpenCode):
@@ -271,13 +276,13 @@ Add to `opencode.json` (restart OpenCode):
 ```json
 {
   "plugin": [
-    "file://packages/opencode-workflow-hooks/src/index.ts"
+    "file://packages/opencode-yakka-hooks/src/index.ts"
   ]
 }
 ```
 
-Use an absolute `file://` URL if the project root is not the workflow-plugin checkout. Full steps:
-[`packages/opencode-workflow-hooks/README.md`](packages/opencode-workflow-hooks/README.md). Lab proofs:
+Use an absolute `file://` URL if the project root is not the yakka checkout. Full steps:
+[`packages/opencode-yakka-hooks/README.md`](packages/opencode-yakka-hooks/README.md). Lab proofs:
 `docs/lab/RESEARCH/2026-09-30-opencode-hooks-plugin/proofs/run_proofs.sh`.
 
 There is no native `PostToolBatch`, no `SubagentStop` / `Stop` parity, and Cursor Cloud still logs through the driver JSONL path.
@@ -286,12 +291,9 @@ There is no native `PostToolBatch`, no `SubagentStop` / `Stop` parity, and Curso
 to ration orchestrator capacity (OpenCode map or equivalent). Sign-off rules only — see
 [`docs/lab/GUIDANCE-flash-review-gate.md`](docs/lab/GUIDANCE-flash-review-gate.md): Flash on the build path
 ⇒ **no auto close-out**; **mandatory Sonnet 5.5** review of Flash work; then **hold** for **Claude Code or Grok**
-to review the phase and sign off (`Workflow-Phase:`). Pattern: Flash draft → Sonnet 5.5 review → Claude or Grok validation/sign-off.
+to review the phase and sign off (`Yakka-Phase:`). Pattern: Flash draft → Sonnet 5.5 review → Claude or Grok validation/sign-off.
 `install.sh` and the OpenCode signals plugin do not encode that chain. The hooks proposal records the same invariant:
 [`docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md`](docs/lab/PROPOSALS/2026-09-30-opencode-hooks-plugin.md).
-
-Lab skills: interactive install can symlink `workflow-lab` too, or
-`WORKFLOW_OPENCODE_INCLUDE_LAB=1 WORKFLOW_INSTALL_MODE=opencode ./install.sh`.
 
 ## Codex (separate harness)
 
@@ -309,7 +311,7 @@ codex exec -m gpt-6.1-sol -c model_reasoning_effort=high "…"
 codex exec -m gpt-6-luna -c model_reasoning_effort=high "…"
 ```
 
-Pass the prompt on the command line (close stdin) so `codex exec` does not hang. **`~/.codex/config.toml` may still default to `gpt-5.4`** — always pass **`-m`** for Sol/Luna. Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). Codex hooklog captures all 12 lifecycle events via the plugin's `hooks/codex.json` (selected by `.codex-plugin/plugin.json`); see [hooklog setup](tools/hooklog/README.md#codex). Hosted tools such as WebSearch skip PreToolUse/PostToolUse. The skills installer still has no Codex mode; BDK wiring is deferred.
+Pass the prompt on the command line (close stdin) so `codex exec` does not hang. **`~/.codex/config.toml` may still default to `gpt-5.4`** — always pass **`-m`** for Sol/Luna. Reasoning is a **config override** (`-c model_reasoning_effort=…`), not `--reasoning-effort`. Phase sign-off remains Claude Code or Grok — see [`docs/lab/GUIDANCE-codex-harness.md`](docs/lab/GUIDANCE-codex-harness.md). Codex hooklog captures all 12 lifecycle events via `plugins/yakka/hooks/codex.json` (selected by `plugins/yakka/.codex-plugin/plugin.json`); see [hooklog setup](packages/hooklog/README.md#codex). Hosted tools such as WebSearch skip PreToolUse/PostToolUse. The skills installer still has no Codex mode; BDK wiring is deferred.
 
 ## Manual installation
 
@@ -318,14 +320,11 @@ Pass the prompt on the command line (close stdin) so `codex exec` does not hang.
 Copy core skills directly:
 
 ```sh
-cp -r skills/* ~/.claude/skills/
+cp -r plugins/yakka/skills/* ~/.claude/skills/
 ```
 
-Add the lab skills too, for local/interactive use:
-
-```sh
-cp -r plugins/workflow-lab/skills/* ~/.claude/skills/
-```
+Maintainer skills are already available in this checkout under `.claude/skills/` for Claude Code
+project-skill discovery at the repo root.
 
 ### OpenCode
 
@@ -333,7 +332,7 @@ Prefer symlinks (see [OpenCode (partial compatibility)](#opencode-partial-compat
 
 ```sh
 mkdir -p ~/.config/opencode/skills
-for d in skills/*/; do
+for d in plugins/yakka/skills/*/; do
   name="$(basename "$d")"
   ln -sfn "$(pwd)/$d" "$HOME/.config/opencode/skills/$name"
 done
@@ -342,74 +341,69 @@ done
 Or run `./install.sh --opencode-skills` from the checkout.
 
 **Soft signals plugin (optional):** register
-[`packages/opencode-workflow-hooks`](packages/opencode-workflow-hooks/) in `opencode.json` — see
-[`packages/opencode-workflow-hooks/README.md`](packages/opencode-workflow-hooks/README.md).
+[`packages/opencode-yakka-hooks`](packages/opencode-yakka-hooks/) in `opencode.json` — see
+[`packages/opencode-yakka-hooks/README.md`](packages/opencode-yakka-hooks/README.md).
 
 Skills are available immediately. For marketplace-style install (so colleagues can
-`/plugin install workflow@workflow-plugin`), register this repo in
+`/plugin install yakka@yakka`), register this repo in
 `~/.claude/plugins/known_marketplaces.json`:
 
 ```json
 {
-  "workflow-plugin": {
+  "yakka": {
     "source": {
       "source": "github",
-      "repo": "codyhamilton/workflow-plugin"
+      "repo": "codyhamilton/yakka"
     },
-    "installLocation": "~/.claude/plugins/marketplaces/workflow-plugin"
+    "installLocation": "~/.claude/plugins/marketplaces/yakka"
   }
 }
 ```
 
-Then install either or both plugins:
+Then install the core plugin:
 
 ```
-/plugin install workflow@workflow-plugin
-/plugin install workflow-lab@workflow-plugin
+/plugin install yakka@yakka
 ```
 
-Skills become available as `workflow:design`, `workflow:execute`, `workflow-lab:iterate`, etc.
+Skills become available as `yakka:design`, `yakka:execute`, etc. Maintainer skills require
+working in the yakka checkout (`.claude/skills/`).
 
 ### Cursor
 
 Clone the repo into Cursor's local plugins directory for the core plugin, then restart Cursor:
 
 ```sh
-git clone git@github.com:codyhamilton/workflow-plugin.git ~/.cursor/plugins/local/workflow
+git clone git@github.com:codyhamilton/yakka.git ~/.cursor/plugins/local/yakka
 ```
 
-For the lab plugin too, copy its subtree into a second local plugin directory:
-
-```sh
-cp -rL ~/.cursor/plugins/local/workflow/plugins/workflow-lab ~/.cursor/plugins/local/workflow-lab
-```
-
-Or run `./install.sh` and accept the Cursor prompts (core, then optionally lab).
+Or run `./install.sh` and accept the Cursor prompt for the core plugin (copies `plugins/yakka` into `~/.cursor/plugins/local/yakka`).
 
 ## Structure
 
 ```
-workflow-plugin/                    (repo root — the `workflow` core plugin)
-├── .claude-plugin/
-│   ├── plugin.json
-│   └── marketplace.json            (lists both plugins)
-├── .cursor-plugin/plugin.json
-├── skills/                         (core plugin's skills)
-│   ├── design/
-│   ├── refine/
-│   ├── execute/
-│   ├── comprehensive-review/
-│   ├── close-out/
-│   └── post-build/                 (briefs/ for its workers)
-├── docs/
-│   ├── lab/                        (Optimiser research/ops: goals, findings, proposals)
-│   └── automation/                 (operator guides for external automation triggers)
-└── plugins/workflow-lab/           (lab plugin, its own manifests + skills/)
-    ├── .claude-plugin/plugin.json
-    ├── .cursor-plugin/plugin.json
-    └── skills/
-        ├── setup/
-        ├── iterate/
-        ├── transcript-parser/
-        └── workflow-tuning/
+yakka/                              (monorepo root)
+├── .claude-plugin/marketplace.json (lists the yakka plugin)
+├── install.sh
+├── plugins/yakka/                  (core Cursor / Claude / Codex plugin)
+│   ├── bin/yakka                   (CLI: drain, serve, …)
+│   ├── skills/                     (design, refine, execute, …)
+│   ├── hooks/
+│   └── script/
+├── packages/
+│   ├── yakka/                      (Go runtime and service)
+│   ├── hooklog/                    (spool + ingest edge)
+│   ├── yakka-analytics/
+│   └── opencode-yakka-hooks/
+├── tools/                          (driver, release, cloud-env, …)
+├── .claude/skills/                 (maintainer project skills; not installed by install.sh)
+│   ├── setup/
+│   ├── iterate/
+│   ├── jev-variants/
+│   ├── transcript-parser/
+│   ├── white-paper/
+│   └── yakka-tuning/
+└── docs/
+    ├── lab/                        (Optimiser research/ops: goals, findings, proposals)
+    └── automation/                 (operator guides for external automation triggers)
 ```

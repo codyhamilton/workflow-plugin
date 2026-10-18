@@ -21,8 +21,8 @@ remote by config, may be down, and may refuse content.
                          └── reads queue/ and rejected/ for this conversation
 ```
 
-One queue directory per user serves every harness: `$WORKFLOW_QUEUE`, default
-`~/.local/share/workflow/queue`, with `tmp/` and `rejected/` inside it. The harness is in the envelope, not the path.
+One queue directory per user serves every harness: `$YAKKA_QUEUE`, default
+`~/.local/share/yakka/queue`, with `tmp/` and `rejected/` inside it. The harness is in the envelope, not the path.
 The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Spool
@@ -40,13 +40,13 @@ The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Drain
 
-`workflow drain`, part of the `workflow` binary ([design 3](03-remote-service.md#runtime)). One
+`yakka drain`, part of the `yakka` binary ([design 3](03-remote-service.md#runtime)). One
 instance per user, holding an exclusive flock on `queue/.drain.lock` for its lifetime. In local mode
-the lock may instead be held by `workflow serve`, which hosts the same drain module
+the lock may instead be held by `yakka serve`, which hosts the same drain module
 ([design 3](03-remote-service.md#local-serve-hosts-the-drain)).
 
 **Start.** After its rename, a hook probes the lock non-blocking. Held means a drain is running and
-the hook returns. Free means it starts `setsid bin/workflow drain` in the background. The probe takes
+the hook returns. Free means it starts `setsid plugins/yakka/bin/yakka drain` in the background. The probe takes
 the lock for an instant, so the drain acquires with a short blocking wait (about 1 s), not `-n`. A
 burst that beats the first drain to the lock starts a few extra processes that fail to acquire and
 exit; this is accepted, and measured (see Tests).
@@ -112,7 +112,7 @@ assignments) runs on every fact before it leaves the machine.
 **No local archive.** The remote is the record. The per-session JSONL archive via `hooklog.append`
 is dropped from the drain path. `rejected/` is the only thing kept locally.
 
-**No queue cap** for now, since all data is kept. `workflow status` reports queue size, oldest file,
+**No queue cap** for now, since all data is kept. `yakka status` reports queue size, oldest file,
 `rejected/` count and whether a drain is running.
 
 **macOS.** No `flock(1)`. The hook-side probe falls back to a `mkdir` lock with a PID check; the
@@ -123,23 +123,23 @@ drain uses `flock(2)` as on Linux.
 The drain and the shim resolve endpoint and bearer key the same way on every batch (no restart
 needed to pick up a change):
 
-1. **`WORKFLOW_ENDPOINT` and `WORKFLOW_KEY` both set** — remote mode with those values. They win over
+1. **`YAKKA_ENDPOINT` and `YAKKA_KEY` both set** — remote mode with those values. They win over
    `client.toml`.
-2. **Exactly one of them set** — bad config. `workflow drain`, `workflow mcp`, and `workflow status`
+2. **Exactly one of them set** — bad config. `yakka drain`, `yakka mcp`, and `yakka status`
    exit before any request; they do not read the file and do not contact loopback.
 3. **Neither set, and `client.toml` present** — remote mode from the file (`endpoint`, `key`), mode
-   0600, default path `~/.config/workflow/client.toml`.
+   0600, default path `~/.config/yakka/client.toml`.
 4. **Neither set, and no file** — local mode: `http://127.0.0.1:8770` with no bearer.
 
-`WORKFLOW_CLIENT_CONFIG` overrides only the file path (tests and explicit installs).
+`YAKKA_CLIENT_CONFIG` overrides only the file path (tests and explicit installs).
 
 ```toml
 endpoint = "https://collector.example"
 key = "wk_…"                           # issued bearer for the collector (read or read_write)
 ```
 
-- **`workflow login`** writes `client.toml` after the collector's device page issues a token (optional
-  `--endpoint` for the collector origin). There is no `workflow init`.
+- **`yakka login`** writes `client.toml` after the collector's device page issues a token (optional
+  `--endpoint` for the collector origin). There is no `yakka init`.
 - A hand-written `client.toml` still works. A remote agent with no browser (for example Claude or
   Codex in the cloud) uses the env pair instead of a file.
 - The key is an issued service bearer, never `TYPESAFE_API_KEY`, which stays on the server only.
@@ -207,9 +207,9 @@ Each harness ships its own hook config, passing a literal `--harness`.
 
 | Harness | Config | Trust step |
 |---|---|---|
-| Claude Code | plugin `hooks/hooks.json` | none beyond plugin install |
-| Codex | plugin `hooks/codex.json`, selected by `.codex-plugin/plugin.json` | the user approves hooks in `/hooks`; until then nothing is captured |
-| Cursor | `hooks/cursor.json` | none |
+| Claude Code | `plugins/yakka/hooks/hooks.json` | none beyond plugin install |
+| Codex | `plugins/yakka/hooks/codex.json`, selected by `plugins/yakka/.codex-plugin/plugin.json` | the user approves hooks in `/hooks`; until then nothing is captured |
+| Cursor | `plugins/yakka/hooks/cursor.json` | none |
 | OpenCode | plugin calling `spool.sh` | none |
 
 The OpenCode plugin does not forward the `remove` events of the ingest policy
@@ -225,7 +225,7 @@ but until updated they keep running the old hooks.
 ## Changes from what exists
 
 `spool.sh` and the Python `drain.py` already do one file per event, the tmp-then-rename write, the
-flock probe and kick, and a `bad/` folder. The drain is rewritten as `workflow drain` in Go
+flock probe and kick, and a `bad/` folder. The drain is rewritten as `yakka drain` in Go
 (design 3); `drain.py` is removed once it lands. Remaining:
 
 - File names lead with the conversation ID; payloads without one are not spooled.

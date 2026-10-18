@@ -6,7 +6,7 @@ Curated bibliography for optimising workflow-plugin. Each entry: **takeaway** â†
 
 Deep dive for synthesis: [`2026-09-30-workflow-systems.md`](2026-09-30-workflow-systems.md).
 
-**Dated research packs** (inputs to evidence-backed `PROPOSALS/` white papers; see the [`white-paper` skill](../../../plugins/workflow-lab/skills/white-paper/SKILL.md)):
+**Dated research packs** (inputs to evidence-backed `PROPOSALS/` white papers; see the [`white-paper` skill](../../../.claude/skills/white-paper/SKILL.md)):
 
 | Pack | Question | Proposal (if any) |
 |------|----------|-------------------|

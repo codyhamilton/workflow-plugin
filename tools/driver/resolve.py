@@ -1,4 +1,4 @@
-"""Deterministic phase status from DESIGN.md and Workflow-Phase trailers."""
+"""Deterministic phase status from DESIGN.md and phase git trailers."""
 
 from __future__ import annotations
 
@@ -6,6 +6,8 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+
+from trailer_keys import PHASE_TRAILER_KEYS
 
 PHASE_HEADING = re.compile(r"^### Phase \d+", re.MULTILINE)
 SLUG_FROM_DIR = re.compile(r"^\d+-(.+)$")
@@ -128,21 +130,24 @@ def resolve_status(
 
 def git_trailer_lines(repo_root: Path, default_ref: str) -> list[str]:
     rev_range = f"{default_ref}..HEAD"
-    proc = subprocess.run(
-        [
-            "git",
-            "log",
-            rev_range,
-            "--format=%(trailers:key=Workflow-Phase,valueonly)",
-        ],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0:
-        raise ResolveError(proc.stderr.strip() or f"git log {rev_range} failed")
-    return [ln for ln in proc.stdout.splitlines() if ln.strip()]
+    lines: list[str] = []
+    for key in PHASE_TRAILER_KEYS:
+        proc = subprocess.run(
+            [
+                "git",
+                "log",
+                rev_range,
+                f"--format=%(trailers:key={key},valueonly)",
+            ],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            raise ResolveError(proc.stderr.strip() or f"git log {rev_range} failed")
+        lines.extend(ln for ln in proc.stdout.splitlines() if ln.strip())
+    return lines
 
 
 def detect_default_branch(repo_root: Path, override: str | None) -> str:

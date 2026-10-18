@@ -1,6 +1,6 @@
 # Design Intent 7: Analytics Site
 
-The person-facing view of one tenant's workflow ledger: read-only aggregate routes on `workflow
+The person-facing view of one tenant's yakka ledger: read-only aggregate routes on `yakka
 serve`, and a static Svelte site that renders them. Part of
 [system-architecture.md](system-architecture.md); it reads the service in
 [03-remote-service.md](03-remote-service.md) and is a separate surface from the agent's
@@ -8,14 +8,18 @@ serve`, and a static Svelte site that renders them. Part of
 
 ## Shape
 
-`packages/workflow-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
-CSS, JS; no SSR). Locally, `workflow serve` embeds that build and serves it on the same origin as
-`/v1`. On a remote collector (non-loopback bind with the GitHub OAuth env set), the same embedded
-build is same-origin with `/v1`: the person signs in at `/login` (`GET /oauth/login` → GitHub →
-`/oauth/callback`), the collector sets a `workflow_session` cookie, and dashboard `GET`s use
-`credentials: 'include'` with no `Authorization` header. `GET /v1/me` supplies the GitHub identity and
-owned tenant list; data routes carry `?tenant=` from that response. Cross-origin Cloudflare Pages
-still calls a keyed `workflow serve` with a browser-supplied bearer token from `/settings`. Aggregation stays in SQLite; the browser receives JSON aggregates and
+`packages/yakka-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
+CSS, JS; no SSR). Locally, and in release binaries, `yakka serve` embeds that build and serves it
+on the same origin as `/v1`. The production Fly image does not embed it. Pages hosts
+`https://yakka.build` and `https://www.yakka.build`; the API is `https://api.yakka.build`
+(`YAKKA_PUBLIC_URL`). Sign-in starts at `/login`. On Pages that link navigates to the API
+`GET /oauth/login`, which sets the host-only state cookie and sends the browser to GitHub.
+GitHub's registered callback stays `https://yakka.build/oauth/callback`. That Pages page shows
+status and sends a credentialed request to the API `/oauth/callback`. The API sets the host-only
+`workflow_session` cookie and returns status JSON. It does not redirect. Dashboard session routes
+use `credentials: 'include'` and no bearer. `GET /v1/me` supplies the GitHub identity and owned
+tenant list; data routes carry `?tenant=` from that response. Analytics `GET`s may still send a
+pasted bearer from `/settings`. Aggregation stays in SQLite; the browser receives JSON aggregates and
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
 
@@ -215,7 +219,7 @@ otherwise its tokens × the model's price in a pricing table that `serve` embeds
 only a new binary. Codex input tokens include cached input, so cached tokens are not charged twice.
 
 **Performance bound.** A committed benchmark (`analytics_bench_test.go`, run against any ledger path
-via `WORKFLOW_BENCH_DIR`) times every route, each preset (24h, 7d, 30d, 90d, all time), every measure
+via `YAKKA_BENCH_DIR`) times every route, each preset (24h, 7d, 30d, 90d, all time), every measure
 with 0, 1 and 2 dimensions and every bucket within the cap. The bound is p95 under 500 ms per case, met
 on a compacted copy of the real ledger.
 
@@ -226,11 +230,13 @@ on a compacted copy of the real ledger.
   Authorization, Content-Type`, `Allow-Methods: GET, OPTIONS` and `Vary: Origin`; `OPTIONS` is 204.
   Other origins get no CORS headers, so a public page cannot read a keyless loopback ledger.
   `localGuard` (loopback `Host`, JSON-only POST) runs first.
-- Keyed mode: the same headers only for an origin listed exactly in `WORKFLOW_SERVE_CORS_ORIGINS`
+- Keyed mode: the same headers only for an origin listed exactly in `YAKKA_SERVE_CORS_ORIGINS`
   ([design 3](03-remote-service.md#configuration-first-round)). No wildcard, no reflected origin.
-- Collector mode: the session cookie is same-origin only; CORS stays without credentials. The embedded
-  site sends no `Authorization` header and does not read `workflow-analytics-key` from
-  `localStorage`. Pages sends `Authorization` only when a token is configured in `/settings`.
+- Remote collector: state-changing `Origin` checks and credentialed CORS allow
+  `https://yakka.build`, `https://www.yakka.build`, the public API origin, and each exact entry
+  of `YAKKA_SERVE_CORS_ORIGINS`. Credentialed responses set `Access-Control-Allow-Credentials: true`
+  and allow `GET`, `POST`, `PUT`, and `OPTIONS`. The session cookie stays host-only on the API
+  (no `Domain`). Local and keyed modes stay without credentials, `GET` and `OPTIONS` only.
 
 ## The site
 
@@ -239,15 +245,17 @@ on a compacted copy of the real ledger.
   the session owns no matching `?tenant=` yet (not a logged-out 401). `POST /logout` clears the
   session.
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
-  `workflow-analytics-base` and `workflow-analytics-key`. An empty base means same-origin `/v1`
-  (collector session path). A non-empty base is the cross-origin Pages path: the token is sent only
-  as `Authorization: Bearer` and never written into the build or the repo; the build's bundle check
-  fails if a key appears in it.
+  `yakka-analytics-base` and `yakka-analytics-key`. An empty base on an embedded serve is
+  same-origin `/v1`. An empty base on `yakka.build` or `www.yakka.build` is
+  `https://api.yakka.build`. Session routes (`/v1/me`, tenants, tokens, device authorize) use the
+  session cookie and no bearer when the base is empty or is that API origin. Analytics `GET`s send
+  a stored bearer when the base is non-empty and a key is set. The token is never written into the
+  build or the repo; the build's bundle check fails if a key appears in it.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
 - Charts render with Apache ECharts, tree-shaken, reading computed theme tokens (no hard-coded
-  colours). **Theme.** `localStorage` key `workflow-analytics-theme` holds `system`, `light`, or
+  colours). **Theme.** `localStorage` key `yakka-analytics-theme` holds `system`, `light`, or
   `dark`; an absent key means `system`. The document root carries `data-theme="light"` or
   `data-theme="dark"`. `system` follows `prefers-color-scheme` and later OS changes; `light` and
   `dark` do not. Light surfaces: background `#fdf6e3`, surface `#eee8d5`, text `#657b83`, muted
@@ -283,7 +291,7 @@ on a compacted copy of the real ledger.
   and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
   No dimension and bucket `none` renders the scalar.
 - **Saved views and dashboards.** Both live in `localStorage` under the prefix
-  `workflow-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
+  `yakka-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
   `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
   `explore`, `builder`; `params` holds that report's chart controls only (`measure`, `dim`, `bucket`,
   `chart`, `top`, `kind`, `metric`, `group`, `grain`), not the window or shared filters. A dashboard
@@ -299,25 +307,21 @@ on a compacted copy of the real ledger.
 
 ## Hosting
 
-- **Fly.io remote collector:** Plan 13 deploys the public `workflow serve` host on fly.io (`fly.toml`:
-  app `yakka`, `WORKFLOW_PUBLIC_URL` `https://yakka.build`). The GitHub OAuth callback
-  is `https://yakka.build/oauth/callback`. The product name stays `workflow`. The Fly app name is `yakka`.
-  One machine runs the image built from the repo `Dockerfile` (analytics
-  `build/` copied into `tools/workflow/internal/serve/site/`, then `workflow serve` on internal port
-  8080). A fly volume `workflow_serve_data` mounts at `/data`; `WORKFLOW_SERVE_DATA=/data` holds the
-  registry and tenant ledgers across restarts. `WORKFLOW_SERVE_KEYS` is unset. GitHub OAuth uses that
-  collector origin (`GET /oauth/login`, callback `https://yakka.build/oauth/callback`); `GITHUB_OAUTH_CLIENT_ID`
-  and `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. The embedded site is same-origin with `/v1` on that host: session
-  cookie after `/login`, no pasted key in the build. On the collector dashboard, `?tenant=` from
-  `GET /v1/me` is wired on the overview and on `/profile` where tenant context applies; other
-  report routes do not append it yet. There is no Cloudflare Pages site for this collector, so
-  `WORKFLOW_SERVE_CORS_ORIGINS` is unset. If a Pages origin is added later, set that variable to the
-  exact origin so a browser there can `GET /v1/analytics/*` with a pasted bearer. Credentialed CORS
-  stays off.
-- The site's build output is copied into `tools/workflow/internal/serve/site/` before `go build`
+- **Fly.io remote collector:** `fly.toml` app `yakka`, `YAKKA_PUBLIC_URL` `https://api.yakka.build`.
+  That value is the device-exchange `endpoint`, the `Secure` cookie flag, and the 401 login hint.
+  It is not the GitHub `redirect_uri`. GitHub's callback stays `https://yakka.build/oauth/callback`.
+  One machine runs the image built from the repo `Dockerfile`, which does not embed the analytics
+  site, and listens on internal port 8080. A fly volume `workflow_serve_data` mounts at `/data`;
+  `YAKKA_SERVE_DATA=/data` holds the registry and tenant ledgers across restarts.
+  `YAKKA_SERVE_KEYS` is unset. `YAKKA_SERVE_CORS_ORIGINS` is
+  `https://yakka.build,https://www.yakka.build`. `GITHUB_OAUTH_CLIENT_ID` and
+  `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. `yakka login` against
+  `https://api.yakka.build` opens the Pages `/device` page; the form posts to the API, and the CLI
+  writes that API `endpoint` plus the minted token into `client.toml`.
+- The site's build output is copied into `packages/yakka/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
   `index.html` is missing or is the placeholder, then restores the committed placeholder on exit.
-- The committed placeholder `index.html` contains the marker `workflow-analytics-placeholder`. While
+- The committed placeholder `index.html` contains the marker `yakka-analytics-placeholder`. While
   it is embedded, every non-`/v1` path is 404 `{"error":"analytics bundle not embedded"}`, so `go
   test` needs no Node.
 - With the real build embedded: `GET`/`HEAD` only (else 405). An existing file is served with its
@@ -325,25 +329,25 @@ on a compacted copy of the real ledger.
   `Cache-Control: no-cache`; files under `_app/immutable/` are `public, max-age=31536000,
   immutable`. `/v1` and `/v1/*` are never HTML. In keyed mode the static files need no key; they
   carry no tenant data.
-- **Cloudflare Pages (static pasted-token client):** `packages/workflow-analytics/wrangler.toml`
-  declares `pages_build_output_dir = "./build"`, the same artifact as the embedded collector build.
-  Pages is a static host only: `/settings` stores the collector API base and a pasted bearer in
-  `localStorage`; the site never receives the collector `workflow_session` cookie. With no
-  `404.html`, Pages serves it as a single-page app. Creating the Pages project, attaching a hostname,
-  and setting the fly collector's `WORKFLOW_SERVE_CORS_ORIGINS` to that exact origin are operator
-  actions.
+- **Cloudflare Pages:** `packages/yakka-analytics/wrangler.toml` declares
+  `pages_build_output_dir = "./build"`, the same artifact release binaries embed. Custom domains
+  are `yakka.build` and `www.yakka.build`. No site env vars and no token in the build. With no
+  `404.html`, Pages serves unknown paths as `/` (`fallback: 'index.html'`). `/oauth/callback` is a
+  Pages page: it shows status and `fetch`es the API callback with credentials. The API returns JSON
+  and `Set-Cookie`; it does not redirect. `/device` is the same Pages page; its form posts to
+  `https://api.yakka.build/v1/device/authorize`.
 
 ## Open issues
 
 1. Precheck rejection rows carry empty `repo_id`/`harness`, so any `repo_id` or `harness` filter
    drops rejections to zero in `summary` and `explore` (`rejWhere`,
-   `tools/workflow/internal/store/analytics.go`). `/query` reports the filter in `ignored_filters`
+   `packages/yakka/internal/store/analytics.go`). `/query` reports the filter in `ignored_filters`
    instead, but the other routes still need a decision on whether a rejection belongs to a repo (for
    example through its conversation's facts).
 2. The hosted site sends no `X-Frame-Options` / `frame-ancestors`; a framed remote `/settings` could
    be clickjacked into redirecting the stored token.
 3. `cors` sets `Vary: Origin` only for allowed origins (a shared cache could serve a header-less
-   response to an allowed origin); `WORKFLOW_SERVE_CORS_ORIGINS` entries are never validated, so a
+   response to an allowed origin); `YAKKA_SERVE_CORS_ORIGINS` entries are never validated, so a
    trailing slash silently never matches.
 4. `build.sh` runs `npm ci` only when `node_modules/` is absent, so a release can embed stale
    dependencies; a SIGKILLed run leaves the built site in `site/`, which the next run then saves as
@@ -370,7 +374,7 @@ on a compacted copy of the real ledger.
 
 The local `workflow-serve.service` (systemd user unit) moved from build ace7370 to master b9034da with the site embedded.
 
-- Backup: a zstd tar of the whole tenant dir under `/var/tmp/wf-cutover-<stamp>/`, checked against the live ledger by sha256 and `integrity_check` (ok). The old tenant dir is kept at `~/.local/share/workflow/cutover-hold/local.pre-cutover` for rollback.
+- Backup: a zstd tar of the whole tenant dir under `/var/tmp/wf-cutover-<stamp>/`, checked against the live ledger by sha256 and `integrity_check` (ok). The old tenant dir is kept at `~/.local/share/yakka/cutover-hold/local.pre-cutover` for rollback.
 - Compaction ran on a restored copy because `/home` lacked the roughly 8 GiB the in-place check needs. Rows went from 9,276,949 to 438,910 and the ledger from 12.99 GB to 338 MB (13m42s). `purge-deltas` then removed 0 rows (23.6 s). The result was copied back into `serve/local`.
 - Downtime was about 26.5 minutes. Hooks buffered events to the queue, and the new serve's hosted drain ingested them.
 - Checked: health `compaction: complete`, `/v1/analytics/schema`, a 7-day query (unpriced calls 1, down from 84.7% of calls before pricing), `/` and `/usage` returning 200, new events ingested, a `message.part.delta` POST accepted with no fact stored, `integrity_check` ok, and the hook_events rollup equal to the facts count.

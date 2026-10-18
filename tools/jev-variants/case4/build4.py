@@ -1,5 +1,5 @@
 import json,re,sys
-sys.path.insert(0,"/home/codyh/.cursor/plugins/local/workflow-plugin/tools/driver")
+sys.path.insert(0,"/home/codyh/.cursor/plugins/local/yakka/tools/driver")
 from phase_assert import deterministic_outcome_evidence
 B=json.load(open("blocks.json"))
 def pick(plan,head_pat):

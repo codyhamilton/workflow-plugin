@@ -5,7 +5,7 @@ Rebuilds a fixture git history from reference/DESIGN.md and reference/expected.j
 then checks:
 
 1. tools/driver/status.py matches the expected open/closed/done row
-2. Workflow-Phase trailers on master..HEAD match the expected list
+2. Phase trailers on master..HEAD match the expected list (per exercised key)
    (a declared wrong-slug trailer must be present and must not close a phase)
 3. tools/driver/run.py --once on that done history skips
 4. tools/driver/assert_phase.py --deterministic passes on reference/assert_state.json
@@ -32,6 +32,9 @@ DRIVER = REPO / "tools" / "driver"
 REFERENCE = SCENARIO / "reference"
 COMMAND = "python3 evals/scenarios/trailer-completeness/verify.py"
 STATUS_KEYS = ("plan", "slug", "open", "phase", "closed", "done")
+
+sys.path.insert(0, str(DRIVER))
+from trailer_keys import PHASE_TRAILER_KEYS  # noqa: E402
 
 
 def _run(
@@ -74,7 +77,13 @@ def _init_repo(root: Path, design: str, plan_rel: str) -> Path:
     return plan_dir
 
 
-def _commit_trailer(root: Path, message: str, trailer: str) -> None:
+def _commit_trailer(
+    root: Path,
+    message: str,
+    trailer: str,
+    *,
+    trailer_key: str,
+) -> None:
     _git(
         root,
         "commit",
@@ -82,7 +91,7 @@ def _commit_trailer(root: Path, message: str, trailer: str) -> None:
         "-m",
         message,
         "--trailer",
-        f"Workflow-Phase: {trailer}",
+        f"{trailer_key}: {trailer}",
     )
 
 
@@ -94,13 +103,13 @@ def _select_commits(commits: list[dict[str, str]], omit: list[str]) -> list[dict
     return [c for c in commits if c["trailer"] not in omitted]
 
 
-def _raw_trailers(root: Path) -> list[str]:
+def _raw_trailers(root: Path, trailer_key: str) -> list[str]:
     proc = _run(
         [
             "git",
             "log",
             "master..HEAD",
-            "--format=%(trailers:key=Workflow-Phase,valueonly)",
+            f"--format=%(trailers:key={trailer_key},valueonly)",
         ],
         root,
     )
@@ -139,6 +148,7 @@ def _observe_cost(
     commits: list[dict[str, str]],
     phase1: str,
     env: dict[str, str],
+    trailer_key: str,
 ) -> dict[str, Any]:
     anthropic = bool(env.get("ANTHROPIC_API_KEY", "").strip())
     cursor = bool(env.get("CURSOR_API_KEY", "").strip())
@@ -165,7 +175,12 @@ def _observe_cost(
         root = Path(tmp)
         plan_dir = _init_repo(root, design, plan_rel)
         for commit in prefix:
-            _commit_trailer(root, commit["message"], commit["trailer"])
+            _commit_trailer(
+                root,
+                commit["message"],
+                commit["trailer"],
+                trailer_key=trailer_key,
+            )
         proc = _run(
             [
                 sys.executable,
@@ -207,8 +222,13 @@ def _observe_cost(
     }
 
 
-def evaluate(omit: list[str] | None = None, env: dict[str, str] | None = None) -> dict[str, Any]:
-    """Run the stand-in and return the outcome object. Exit is decided by the caller."""
+def evaluate(
+    omit: list[str] | None = None,
+    env: dict[str, str] | None = None,
+    *,
+    trailer_key: str,
+) -> dict[str, Any]:
+    """Run the stand-in for one git trailer key. Exit is decided by the caller."""
     omit = list(omit or [])
     env = dict(os.environ if env is None else env)
     expected = _load_expected()
@@ -221,7 +241,12 @@ def evaluate(omit: list[str] | None = None, env: dict[str, str] | None = None) -
         root = Path(tmp)
         plan_dir = _init_repo(root, design, expected["plan_dir"])
         for commit in commits:
-            _commit_trailer(root, commit["message"], commit["trailer"])
+            _commit_trailer(
+                root,
+                commit["message"],
+                commit["trailer"],
+                trailer_key=trailer_key,
+            )
 
         status_proc = _run(
             [
@@ -248,7 +273,7 @@ def evaluate(omit: list[str] | None = None, env: dict[str, str] | None = None) -
             root,
             env,
         )
-        oldest_first = _raw_trailers(root)
+        oldest_first = _raw_trailers(root, trailer_key)
 
     status_data = _parse_json(status_proc.stdout) if status_proc.returncode == 0 else None
     actual_status = _status_slice(status_data) if status_data else None
@@ -312,6 +337,7 @@ def evaluate(omit: list[str] | None = None, env: dict[str, str] | None = None) -
         commits=commits,
         phase1=f"{slug}:1",
         env=env,
+        trailer_key=trailer_key,
     )
 
     checks = {
@@ -324,6 +350,7 @@ def evaluate(omit: list[str] | None = None, env: dict[str, str] | None = None) -
     }
     return {
         "scenario": "trailer-completeness",
+        "trailer_key": trailer_key,
         "command": COMMAND,
         "verifier": "pass" if not failures else "fail",
         "checks": checks,
@@ -348,13 +375,26 @@ def main(argv: list[str] | None = None) -> int:
         "--omit-trailer",
         action="append",
         default=[],
-        help="Drop this Workflow-Phase value from the fixture history (negative check).",
+        help="Drop this phase-trailer value from the fixture history (negative check).",
     )
     args = parser.parse_args(argv)
-    outcome = evaluate(omit=args.omit_trailer)
-    json.dump(outcome, sys.stdout, indent=2)
+    by_key: dict[str, Any] = {}
+    all_pass = True
+    for key in PHASE_TRAILER_KEYS:
+        outcome = evaluate(omit=args.omit_trailer, trailer_key=key)
+        by_key[key] = outcome
+        if outcome["verifier"] != "pass":
+            all_pass = False
+    payload = {
+        "scenario": "trailer-completeness",
+        "command": COMMAND,
+        "trailer_keys_exercised": list(PHASE_TRAILER_KEYS),
+        "by_trailer_key": by_key,
+        "verifier": "pass" if all_pass else "fail",
+    }
+    json.dump(payload, sys.stdout, indent=2)
     sys.stdout.write("\n")
-    return 0 if outcome["verifier"] == "pass" else 1
+    return 0 if all_pass else 1
 
 
 if __name__ == "__main__":
