@@ -129,3 +129,10 @@ Refined in `d3beccc` into four units. 3-01 owns the Python login, status, and ve
 `artifact_feedback` on `briefs/3-01-login-status-version.md`, `briefs/3-02-bin-yakka-wrapper.md`, `briefs/3-03-sessionstart-prefetch.md`, and `briefs/3-04-design-03-05.md`: unreachable. The Yakka namespace was checked again after the briefs landed and is still in error with no tools.
 
 3-01 through 3-04 commit in local worktrees (`work/3-01`, `work/3-02`, `work/3-03`, `work/3-04`) and do not push those refs. The orchestrator merges them onto `cursor/python-local-client` and pushes that ref only.
+
+### 3-04-design-03-05
+
+- Built: design 3 splits the Go collector (`serve`, hosted drain, `ledger`) from the plugin client `python3 plugins/yakka/client/yakka.py`. Design 5's wrapper is Python dispatch only; SessionStart prefetch prose is gone; `SHA256SUMS` and `tools/release/build.sh` stay the collector release.
+- Commit: `a9f8bc8`, fast-forwarded onto the branch. Report: `docs/plans/16-python-local-client/reports/3-04-design-03-05.md`.
+- Deviations: committed on `work/3-04` because the four units ran alongside; the brief names `cursor/python-local-client`. Not a contract contradiction; the brief is unchanged.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
