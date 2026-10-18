@@ -76,3 +76,10 @@ Refined in `ca5bbb7` into two units. 2-01 owns the Python `mcp` command and its 
 `artifact_feedback` on `briefs/2-01-mcp-command.md` and `briefs/2-02-mcp-registrations.md`: unreachable. A search of the Yakka namespace for `artifact_feedback` returned no tools. The namespace was checked again and is still in error.
 
 2-01 and 2-02 commit in local worktrees (`work/2-01`, `work/2-02`) and do not push those refs. The orchestrator merges them onto `cursor/python-local-client` and pushes that ref only.
+
+### 2-02-mcp-registrations
+
+- Built: the four harness MCP configs start `python3` on `client/yakka.py` with argument `mcp`. Design 4 Shape and Registration name `python3 plugins/yakka/client/yakka.py mcp`.
+- Commit: `61b8b58`, fast-forwarded onto the branch. Report: `docs/plans/16-python-local-client/reports/2-02-mcp-registrations.md`.
+- Deviations: none named. The report's frontmatter names the worker; the brief template has no identity frontmatter. Not a contract contradiction; the brief is unchanged.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
