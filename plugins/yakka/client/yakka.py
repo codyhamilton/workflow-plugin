@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import fcntl
 import hashlib
 import json
@@ -17,6 +18,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from dataclasses import dataclass, field
 from queue import Empty, Queue
 from typing import Any, Callable, List, Optional, Tuple, Union
@@ -2315,7 +2317,340 @@ def cmd_mcp(argv: List[str]) -> int:
     return 0
 
 
+# --- login ---
+
+_login_endpoint_line_re = re.compile(
+    r'^endpoint\s*=\s*("(?:[^"\\]|\\.)*")\s*(?:#.*)?$'
+)
+
+
+@dataclass
+class LoginOptions:
+    Endpoint: str = ""
+    Stderr: Any = None
+    OpenBrowser: Optional[Callable[[str], Optional[BaseException]]] = None
+    Timeout: float = 600.0
+
+
+def normalize_origin(raw: str) -> Tuple[str, Optional[BaseException]]:
+    raw = raw.strip().rstrip("/")
+    u = urllib.parse.urlparse(raw)
+    if u.scheme not in ("http", "https") or not u.netloc:
+        return "", ValueError(
+            "endpoint must be a collector origin (scheme and host, no path)"
+        )
+    if u.path not in ("", "/"):
+        return "", ValueError(
+            "endpoint must be a collector origin (scheme and host, no path)"
+        )
+    return f"{u.scheme}://{u.netloc}", None
+
+
+def resolve_endpoint(flag: str) -> Tuple[str, Optional[BaseException]]:
+    flag = flag.strip()
+    if flag:
+        return normalize_origin(flag)
+    path = Path()
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = f.read()
+    except FileNotFoundError:
+        return "", OSError(
+            "no collector endpoint (use --endpoint or set endpoint in client config)"
+        )
+    except OSError as err:
+        return "", OSError(f"read config: {err}")
+    for line in data.split("\n"):
+        line = line.strip()
+        m = _login_endpoint_line_re.match(line)
+        if not m:
+            continue
+        try:
+            v = json.loads(m.group(1))
+        except json.JSONDecodeError:
+            continue
+        if not v:
+            continue
+        return normalize_origin(v)
+    return "", OSError(
+        "no collector endpoint (use --endpoint or set endpoint in client config)"
+    )
+
+
+def _login_random_state() -> Tuple[str, Optional[BaseException]]:
+    try:
+        return os.urandom(16).hex(), None
+    except OSError as err:
+        return "", err
+
+
+def device_page_url(collector: str, state: str, redirect_uri: str) -> str:
+    q = urllib.parse.urlencode({"state": state, "redirect_uri": redirect_uri})
+    base = collector
+    u = urllib.parse.urlparse(collector)
+    if u.scheme == "https" and u.netloc.lower() == "api.yakka.build":
+        base = "https://yakka.build"
+    return base.rstrip("/") + "/device?" + q
+
+
+def _login_exchange(
+    collector: str, code: str, state: str, redirect_uri: str, timeout: float
+) -> Tuple[str, str, Optional[BaseException]]:
+    body = json.dumps(
+        {"code": code, "state": state, "redirect_uri": redirect_uri}
+    ).encode("utf-8")
+    url = collector.rstrip("/") + "/v1/device/exchange"
+    req = urllib.request.Request(url, data=body, method="POST")
+    req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            status = resp.status
+            data = resp.read()
+    except urllib.error.HTTPError as e:
+        return "", "", OSError(f"exchange failed ({e.code})")
+    except (urllib.error.URLError, OSError) as err:
+        return "", "", OSError(f"exchange request: {err}")
+    if status != 200:
+        return "", "", OSError(f"exchange failed ({status})")
+    try:
+        out = json.loads(data.decode())
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return "", "", OSError("invalid exchange response")
+    if not isinstance(out, dict):
+        return "", "", OSError("invalid exchange response")
+    token = out.get("token", "")
+    if not token:
+        return "", "", OSError("invalid exchange response")
+    ep = out.get("endpoint", "")
+    if not isinstance(ep, str):
+        ep = ""
+    return token, ep, None
+
+
+def write_client_config(path: str, endpoint: str, key: str) -> Optional[BaseException]:
+    try:
+        os.makedirs(os.path.dirname(path), mode=0o755, exist_ok=True)
+    except OSError as err:
+        return err
+    content = f'endpoint = {json.dumps(endpoint)}\nkey = {json.dumps(key)}\n'
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+    except OSError as err:
+        return err
+    return None
+
+
+def default_open_browser(url: str) -> Optional[BaseException]:
+    cmd = os.environ.get("YAKKA_LOGIN_BROWSER", "").strip()
+    if cmd:
+        try:
+            subprocess.Popen([cmd, url], close_fds=True)
+        except OSError as err:
+            return err
+        return None
+    if sys.platform == "darwin":
+        prog = "open"
+    elif sys.platform == "win32":
+        try:
+            subprocess.Popen(["cmd", "/c", "start", url], close_fds=True)
+        except OSError as err:
+            return err
+        return None
+    else:
+        prog = "xdg-open"
+    try:
+        subprocess.Popen([prog, url], close_fds=True)
+    except OSError as err:
+        return err
+    return None
+
+
+def run_login(opts: LoginOptions) -> int:
+    stderr = opts.Stderr if opts.Stderr is not None else sys.stderr
+    timeout = opts.Timeout if opts.Timeout > 0 else 600.0
+    collector, err = resolve_endpoint(opts.Endpoint)
+    if err is not None:
+        print("yakka login:", err, file=stderr)
+        return 1
+    state, err = _login_random_state()
+    if err is not None:
+        print("yakka login:", err, file=stderr)
+        return 1
+    try:
+        server = HTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler)
+    except OSError as err:
+        print("yakka login:", err, file=stderr)
+        return 1
+    host, port = server.server_address
+    redirect_uri = f"http://{host}:{port}/callback"
+    device_url = device_page_url(collector, state, redirect_uri)
+    done: Queue[Optional[BaseException]] = Queue(maxsize=1)
+
+    class _CallbackHandler(BaseHTTPRequestHandler):
+        def log_message(self, fmt: str, *args: Any) -> None:
+            pass
+
+        def do_GET(self) -> None:
+            if self.path.split("?", 1)[0] != "/callback":
+                self.send_error(404)
+                return
+            q = urllib.parse.parse_qs(
+                urllib.parse.urlparse(self.path).query, keep_blank_values=True
+            )
+            if (q.get("state") or [""])[0] != state:
+                self.send_error(400, "invalid state")
+                return
+            code = (q.get("code") or [""])[0]
+            if not code:
+                self.send_error(400, "missing code")
+                return
+            token, ep, ex_err = _login_exchange(
+                collector, code, state, redirect_uri, min(timeout, 30.0)
+            )
+            if ex_err is not None:
+                done.put(ex_err)
+                self.send_error(502, "exchange failed")
+                return
+            if not ep:
+                ep = collector
+            cfg_path = Path()
+            werr = write_client_config(cfg_path, ep, token)
+            if werr is not None:
+                done.put(werr)
+                self.send_error(500, "config write failed")
+                return
+            body = (
+                "<!DOCTYPE html><html><body><p>Login complete. "
+                "You can close this window.</p></body></html>"
+            )
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(body.encode("utf-8"))
+            done.put(None)
+
+    server.RequestHandlerClass = _CallbackHandler
+
+    def _serve() -> None:
+        server.serve_forever(poll_interval=0.1)
+
+    th = threading.Thread(target=_serve, daemon=True)
+    th.start()
+    open_fn = opts.OpenBrowser if opts.OpenBrowser is not None else default_open_browser
+    berr = open_fn(device_url)
+    if berr is not None:
+        print("yakka login: open browser:", berr, file=stderr)
+        server.shutdown()
+        return 1
+    deadline = time.monotonic() + timeout
+    exit_code = 1
+    try:
+        while time.monotonic() < deadline:
+            try:
+                result = done.get(timeout=0.25)
+            except Empty:
+                continue
+            if result is not None:
+                print("yakka login:", result, file=stderr)
+                exit_code = 1
+            else:
+                print(f"yakka login: wrote {Path()}", file=stderr)
+                exit_code = 0
+            break
+        else:
+            print(
+                "yakka login: timed out waiting for authorization",
+                file=stderr,
+            )
+    finally:
+        server.shutdown()
+        server.server_close()
+    return exit_code
+
+
+# --- status ---
+
+
+def run_status(w: Any) -> int:
+    st = QueueStatus(QueueDir())
+    print(f"queue: {st.Dir}", file=w)
+    print(f"queued: {st.Queued}", file=w)
+    if st.OldestAge < 0:
+        print("oldest: -", file=w)
+    else:
+        print(f"oldest: {int(st.OldestAge)}", file=w)
+    print(f"rejected: {st.Rejected}", file=w)
+    if st.Running:
+        print("drain: running", file=w)
+    else:
+        print("drain: not running", file=w)
+    try:
+        cfg = Load()
+    except ErrPartialEnv as err:
+        print(f"config: {err}", file=w)
+        print("endpoint: -", file=w)
+        return 1
+    except (OSError, ValueError):
+        print(f"config: {Path()} (invalid)", file=w)
+        print("endpoint: -", file=w)
+        return 0
+    if cfg.Local:
+        print("config: none (local mode)", file=w)
+    else:
+        print(f"config: {Path()} (remote mode)", file=w)
+    reach = "unreachable"
+    url = cfg.Endpoint.rstrip("/") + "/v1/health"
+    req = urllib.request.Request(url, method="GET")
+    try:
+        with urllib.request.urlopen(req, timeout=2.0) as resp:
+            if 200 <= resp.status < 300:
+                reach = "reachable"
+    except (urllib.error.URLError, OSError, urllib.error.HTTPError):
+        pass
+    print(f"endpoint: {cfg.Endpoint} {reach}", file=w)
+    if reach == "unreachable" and st.Queued > 0:
+        return 1
+    return 0
+
+
+def _plugin_version_text() -> str:
+    path = os.path.join(os.path.dirname(__file__), "..", "bin", "VERSION")
+    with open(path, encoding="utf-8") as f:
+        return f.read().strip()
+
+
 # --- command dispatch ---
+
+
+def cmd_login(argv: List[str]) -> int:
+    parser = argparse.ArgumentParser(prog="yakka login")
+    parser.add_argument(
+        "--endpoint",
+        default="",
+        help="collector origin (https URL, no path)",
+    )
+    try:
+        args = parser.parse_args(argv[2:])
+    except SystemExit as e:
+        code = e.code
+        return int(code) if isinstance(code, int) and code != 0 else 2
+    return run_login(LoginOptions(Endpoint=args.endpoint, Stderr=sys.stderr))
+
+
+def cmd_status(argv: List[str]) -> int:
+    if len(argv) > 2:
+        print("usage: yakka status (no arguments)\n", file=sys.stderr)
+        return 2
+    return run_status(sys.stdout)
+
+
+def cmd_version(argv: List[str]) -> int:
+    ver = _plugin_version_text()
+    commit = os.environ.get("YAKKA_COMMIT") or "unknown"
+    print(f"yakka {ver} {commit}")
+    return 0
 
 
 def cmd_drain(argv: List[str]) -> int:
@@ -2328,10 +2663,16 @@ def main(argv: List[str]) -> int:
         print("yakka: unknown command", file=sys.stderr)
         return 2
     cmd = argv[1]
+    if cmd in ("--version", "version"):
+        return cmd_version(argv)
     if cmd == "drain":
         return cmd_drain(argv)
     if cmd == "mcp":
         return cmd_mcp(argv)
+    if cmd == "login":
+        return cmd_login(argv)
+    if cmd == "status":
+        return cmd_status(argv)
     print("yakka: unknown command", file=sys.stderr)
     return 2
 

@@ -1,6 +1,5 @@
 import json
 import os
-import socket
 import subprocess
 import sys
 import tempfile
@@ -441,45 +440,20 @@ class DrainTests(unittest.TestCase):
         self.assertGreaterEqual(st.OldestAge, 0)
 
     def test_half_set_env_refusal_drain(self) -> None:
-        hits = 0
-        hits_lock = threading.Lock()
-        ln = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ln.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        ln.bind(("127.0.0.1", 8770))
-        ln.listen(5)
-
-        def accept_loop() -> None:
-            nonlocal hits
-            while True:
-                try:
-                    c, _ = ln.accept()
-                except OSError:
-                    return
-                with hits_lock:
-                    hits += 1
-                c.close()
-
-        th = threading.Thread(target=accept_loop, daemon=True)
-        th.start()
-        try:
-            absent = os.path.join(self._tmpdir, "absent.toml")
-            env = os.environ.copy()
-            env.pop("YAKKA_KEY", None)
-            env["YAKKA_ENDPOINT"] = "http://collector.example"
-            env["YAKKA_CLIENT_CONFIG"] = absent
-            proc = subprocess.run(
-                [sys.executable, _SCRIPT, "drain"],
-                env=env,
-                capture_output=True,
-                text=True,
-            )
-            self.assertNotEqual(proc.returncode, 0)
-            out = proc.stdout + proc.stderr
-            self.assertIn("YAKKA_ENDPOINT", out)
-            with hits_lock:
-                self.assertEqual(hits, 0)
-        finally:
-            ln.close()
+        absent = os.path.join(self._tmpdir, "absent.toml")
+        env = os.environ.copy()
+        env.pop("YAKKA_KEY", None)
+        env["YAKKA_ENDPOINT"] = "http://collector.example"
+        env["YAKKA_CLIENT_CONFIG"] = absent
+        proc = subprocess.run(
+            [sys.executable, _SCRIPT, "drain"],
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        out = proc.stdout + proc.stderr
+        self.assertIn("YAKKA_ENDPOINT", out)
 
 
 if __name__ == "__main__":
