@@ -61,3 +61,12 @@ Outcome holds.
 
 1. `Running()` in `plugins/yakka/client/yakka.py` returns true when `flock` is busy and does not close the lock file. Phase 2's lock check should close it.
 2. `plugins/yakka/client/test_drain.py` leaves the fake HTTP server socket open (`ResourceWarning`). Test-only.
+
+## Phase 2 — MCP is the Python stdio server
+
+Tool: Cursor (Grok 4.7 orchestrator, Composer 2.5 workers).
+Run: https://cursor.com/agents/bc-75c9930f-d6d2-5704-b3c0-550b4e9d222f
+Started: 2026-10-18T17:28:00Z.
+Starting HEAD: `feb1b90` on `cursor/python-local-client`.
+
+`artifact_feedback`: the Yakka MCP namespace failed during live tool discovery (`namespaceStatus: error`, no tools). The service is unreachable. Each due call is recorded as unreachable and the run continues.
