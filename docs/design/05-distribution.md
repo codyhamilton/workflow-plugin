@@ -95,3 +95,11 @@ The legacy `workflow-quality.service` keeps running for the lab until the mainta
 - Updating pinned plugin copies (the Codex copy at `451e009`); each picks up the new configs when
   the maintainer updates it.
 - Registration and key issue (design 3).
+
+## Layout rules
+
+`plugins/yakka` may depend on packages. Packages may depend on packages. Tools may depend on either. A package's runtime code and config do not resolve a path into `tools/`. `tools/release/test_layout.py` fails the build when that direction breaks, when a marketplace lists anything but the one plugin at `plugins/yakka`, or when a Cursor hook command is not `./script/...`. Each package README states Consumers, Build, Test, and Release.
+
+Identifiers that start with `WORKFLOW_` are `YAKKA_` with the same suffix, except `WORKFLOW_QUALITY_*` on the legacy quality service. Readers of phase trailers accept `Workflow-Phase` and `Yakka-Phase`, and both report fences, through `tools/driver/trailer_keys.py`. Writers emit the `Yakka-*` forms.
+
+`docs/lab/bootstrap/session-start.sh` and `docs/lab/CONSUMING_REPO.md` still fetch `codyhamilton/workflow-plugin` and the old cloud bootstrap script name. `install.sh` and `tools/cloud-env/bootstrap-yakka-skills.sh` do not. `packages/hooklog` tests set `YAKKA_QUALITY_URL`, which the hook edge does not read. `tools/driver/README.md` still shows only the legacy trailer and report fence; the driver accepts both.
