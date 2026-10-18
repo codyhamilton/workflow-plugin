@@ -663,3 +663,51 @@ Surfaces: `docs/automation/post-build.md`, `evals/scenarios/trailer-completeness
 Deviations: none.
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 7-06-scan-changelog-cut-and-full-scope
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-06-scan-changelog-cut-and-full-scope.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-06-scan-changelog-cut-and-full-scope.md`.
+Worker: Composer (`composer-2.5`), agent `bc-3e0579a0-e82c-5ea8-ac5c-7c2f54ad19ff`. The harness did not report turns or final context.
+Commit: `1f5ec1e`.
+
+Built: `scan_residual_names.py` skips CHANGELOG from the first `## … rename …` heading through the end of the file, and `--scope all` is covered by `test_all_clean_in_repo`. Phase 5 and phase 6 scopes still exit 0.
+
+Surfaces: `tools/release/scan_residual_names.py`, `tools/release/test_scan_residual_names.py`.
+
+Deviations: none.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 7-07-changelog-missing-identifiers
+
+Brief: `docs/plans/13-monorepo-restructure/briefs/7-07-changelog-missing-identifiers.md`.
+Report: `docs/plans/13-monorepo-restructure/reports/7-07-changelog-missing-identifiers.md`.
+Worker: Claude Sonnet (`claude-sonnet-5-5-medium`), agent `bc-f974f435-960f-5b01-a510-c973c2d0cff3`. The harness did not report turns or final context. Dispatched after the Composer `7-01` table omitted six identifiers removed between the phase 4 and phase 6 closes.
+Commit: `03eed42`.
+
+Built: six rows in the `3.0.0` environment table for `WORKFLOW_ALIGNMENT_CRITERIA`, `WORKFLOW_ALIGNMENT_INSTRUCTIONS`, `WORKFLOW_ARTIFACT_SUBMIT_CLI`, `WORKFLOW_LEGACY`, `WORKFLOW_REPORT_FENCE`, and `WORKFLOW_SIGNAL_STATE_DIR`.
+
+Surfaces: `CHANGELOG.md`.
+
+Deviations: none.
+
+`artifact_feedback` on this report and on the phase 7 briefs: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### Verification
+
+Closed on this branch at `/workspace`. A logged-in Cursor session was not run.
+
+- `python3 tools/release/scan_residual_names.py --scope all` → exit 0, no output. `--scope phase5` and `--scope phase6` → exit 0, no output. `python3 -m unittest tools/release/test_scan_residual_names.py` → 4 tests OK.
+- Every `WORKFLOW_*` token removed between `d7b78c1` (phase 4 close) and `f11f303` (phase 6 close) appears in the `## 3.0.0 — 2026-10-18 — rename to yakka` section (56 identifiers, none missing). The state-path table has all six Domain: Names rows. Remove-then-install steps name Claude Code, Cursor, Codex, and OpenCode. Maintainer actions are numbered 1–8 (repo rename, release publish, serve data-dir move, `client.toml`, harness reinstall, cloud `environment.json`, optional Pages project, optional checkout rename).
+- `README.md` install instructions contain `codyhamilton/yakka` and `yakka@yakka`. The signal log line is `${XDG_STATE_HOME:-~/.local/state}/yakka/jev-signal-log.jsonl` with `YAKKA_JEV_SIGNAL_LOG`.
+- Judgement: `docs/OVERVIEW.md` and `docs/ARCHITECTURE.md` name the yakka plugin, packages, and `YAKKA_*` paths. ARCHITECTURE's Trailer dual-read section quotes the Domain: Names reader rule. `docs/design/system-architecture.md` states that rule under Plan folder and phase closure. `docs/design/04-advisory-surface.md` points at that section. `docs/design/05-distribution.md` Layout names `packages/yakka` and `plugins/yakka`.
+
+## Closed
+
+Phase 7 outcome holds. The full-scope residual scan is clean. The CHANGELOG rename entry is the migration guide. README install uses `codyhamilton/yakka` and `yakka@yakka`. The stable docs describe yakka and the trailer dual-read rule.
+
+### Carried
+
+1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `yakka drain` to a local `yakka serve` ships it and `yakka status` reports no failure.
+2. `packages/hooklog/tests/test_hooklog.py` and `test_spool_queue.py` set `YAKKA_QUALITY_URL`. `tools/quality` still reads `WORKFLOW_QUALITY_URL`. The `3.0.0` changelog tells operators not to rename `WORKFLOW_QUALITY_*`. The test env name and the service env name no longer match.
