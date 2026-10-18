@@ -26,3 +26,10 @@ Refined in `df7e427` into four units. 1-01, then 1-02, then 1-03 share `plugins/
 - Commit: `a189949`, merged in `f04757e`. Report: `docs/plans/16-python-local-client/reports/1-04-hook-kick.md`.
 - Deviations: the new OpenCode unset-bin test sleeps 10 seconds so it runs after `kickDrain`'s module-level cooldown. Not a contract contradiction; the brief is unchanged.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+### 1-02-facts
+
+- Built: `File`, `Output`, `Build`, and `WritePaths` on `plugins/yakka/client/yakka.py`. `test_facts.py` ports the Go `facts` tests and reads `packages/hooklog/tests/fixtures/`. `drain` still exits 2.
+- Commit: `a23e3cd`. Report: `docs/plans/16-python-local-client/reports/1-02-facts.md`.
+- Deviations: none named. Ingest assertions call Go `ingest.Ingest` through a test-only file the suite deletes; no Go file is committed. No contradiction with the brief.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
