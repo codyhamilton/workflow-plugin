@@ -68,6 +68,8 @@ Plugin and marketplace manifests are `yakka` 3.0.0. Writers emit `Yakka-Phase`, 
 
 Terminal review at `2f4e3bcb096a63c3f81bb09cf396845afc74e166`. Verdict PASS_WITH_FOLLOWUPS. No blocker or high finding, so no fixer ran. Phase 3 is partial only on the logged-in Cursor session, which the user said not to block on. The other phase outcomes hold, with later renames standing in for the names those phases proved.
 
+Automation review at `fa198181cf6327fecd04ed77e734f63876994168` plus follow-up commit. Verdict PASS_WITH_FOLLOWUPS. Fixed: residual-name scan literals in `docs/design/05-distribution.md`; production OAuth sign-in URL and Pages callback API base; `session-start.sh` URL aligned with README. No blocker or high finding outstanding.
+
 ## Residual Risks
 
 - Nobody has installed this marketplace entry in a logged-in Cursor session and watched a `./script/...` hook reach the queue, then `yakka drain` into a local `yakka serve`.
@@ -77,7 +79,7 @@ Terminal review at `2f4e3bcb096a63c3f81bb09cf396845afc74e166`. Verdict PASS_WITH
 
 ## Follow-ups
 
-Recorded in [design 5](../design/05-distribution.md) under Layout rules: the lab bootstrap files that still fetch `codyhamilton/workflow-plugin`, the unused `YAKKA_QUALITY_URL` in the hooklog tests, and `tools/driver/README.md` still showing only the legacy trailer and fence.
+Recorded in [design 5](../design/05-distribution.md) under Layout rules: `docs/lab/CONSUMING_REPO.md` still fetches `codyhamilton/workflow-plugin`, the unused `YAKKA_QUALITY_URL` in the hooklog tests, and `tools/driver/README.md` still showing only the legacy trailer and fence.
 
 ## Decisions Worth Keeping
 
