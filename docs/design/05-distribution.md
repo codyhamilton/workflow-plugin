@@ -18,37 +18,28 @@ The monorepo separates **`packages/`** (libraries and the Go binary), **`tools/`
 | `packages/yakka/catalogue/` | Jev criteria and check JSON shipped with the binary |
 | `packages/hooklog/` | Hook capture edge: `spool.sh`, drain helpers, harness examples |
 | `plugins/yakka/` | Yakka plugin install root: skills, harness manifests, `hooks/`, `script/`, `bin/` |
-| `plugins/yakka/bin/yakka` | bash wrapper, committed |
-| `plugins/yakka/bin/VERSION` | the release version the wrapper fetches |
-| `plugins/yakka/bin/SHA256SUMS` | checksums for that version's four binaries, committed |
-| `plugins/yakka/bin/RELEASE_URL` | release download base, `https://github.com/codyhamilton/yakka/releases/download` |
+| `plugins/yakka/bin/yakka` | bash wrapper that execs `python3` on `plugins/yakka/client/yakka.py` for plugin commands, committed |
+| `plugins/yakka/bin/VERSION` | collector release version (maintainer metadata; not used by the wrapper) |
+| `plugins/yakka/bin/SHA256SUMS` | checksums for the collector release's four binaries, committed; not hook input |
+| `plugins/yakka/bin/RELEASE_URL` | collector release download base, `https://github.com/codyhamilton/yakka/releases/download` |
 | `tools/release/build.sh` | builds the four binaries and writes `SHA256SUMS` |
 
 Binaries are never committed.
 
 ## Wrapper
 
-`plugins/yakka/bin/yakka` resolves a binary, then `exec`s it with all arguments. In order:
+`plugins/yakka/bin/yakka` dispatches plugin commands to the Python client:
 
-1. `YAKKA_BIN`, if set (development).
-2. `~/.cache/yakka/<version>/yakka-<os>-<arch>`, if present.
-3. Download `<RELEASE_URL>/v<version>/yakka-<os>-<arch>` with `curl` (falling back to `wget`) into a
-   temp file, verify it against `SHA256SUMS` (`sha256sum`, falling back to `shasum -a 256`), refuse
-   a mismatch, and `mv` it into the cache.
-4. If no release asset exists and a Go toolchain and the module source are present, build into the
-   cache (development, unverified by checksum). Builds are serialised with a `mkdir` lock in the
-   cache directory; a second caller waits for it.
-5. Otherwise print why on stderr and exit non-zero.
+1. `YAKKA_BIN`, if set, overrides the wrapper script itself (development).
+2. Otherwise `exec python3` on `plugins/yakka/client/yakka.py` with the subcommand for `drain`, `mcp`,
+   `login`, `status`, and `version` / `--version`.
+3. `serve` and `ledger` are not available through the wrapper: print why on stderr and exit non-zero
+   (operators run the Go collector from `packages/yakka`).
 
-`yakka --version` prints `yakka <version> <commit>`.
+`plugins/yakka/bin/yakka version` and `plugins/yakka/bin/yakka --version` print `yakka <version> <commit>`.
 
-Constraints: bash 3.2 compatible (macOS), no `flock`, concurrent first runs safe because the final
-step is an atomic rename.
-
-The first download never happens in a hook's foreground: the spool kick starts the drain detached,
-and the shim's first start pays it once. A source build can take tens of seconds, longer than a
-harness waits for an MCP server, so every harness's `SessionStart` hook also runs
-`bin/yakka --version` detached, which fills the cache before the agent needs the shim.
+Constraints: bash 3.2 compatible (macOS). The spool kick still starts `plugins/yakka/bin/yakka drain`
+detached; hooks do not wait on the drain or the shim.
 
 ## Local bootstrap
 
@@ -79,9 +70,11 @@ queue grows; `yakka status` reports it as a failure, not as idle.
 
 ## Release
 
-`tools/release/build.sh` cross-compiles with `CGO_ENABLED=0` and writes `plugins/yakka/bin/SHA256SUMS`. Publishing
-the release (GitHub release assets for `bin/VERSION`) is a publish action and happens only with the
-maintainer's agreement. Until a release exists, the wrapper's step 4 is the working path.
+`tools/release/build.sh` cross-compiles the **collector** binary with `CGO_ENABLED=0` and writes
+`plugins/yakka/bin/SHA256SUMS`. Publishing the release (GitHub release assets for `bin/VERSION`) is a
+publish action and happens only with the maintainer's agreement. Operators who need `yakka serve` or
+`yakka ledger` run the Go binary from a release asset or a local `go build`; the plugin wrapper does not
+fetch or build it.
 
 ## Per-harness configs
 
