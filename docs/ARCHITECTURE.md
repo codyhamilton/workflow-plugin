@@ -1,29 +1,31 @@
-# Workflow Plugin — Architecture
+# Yakka — Architecture
 
 The seams: what each skill owns, what passes between them, and the invariants that hold across all of them. Each `SKILL.md` is the authority on its own behaviour.
 
 ## Component Map
 
 ```
-workflow-plugin/ (repo root)
-├── plugins/yakka/             → workflow plugin install root (skills, hooks, script/, bin/)
-├── packages/                  → workflow, hooklog, workflow-analytics, opencode-workflow-hooks
+(repo root)
+├── plugins/yakka/             → yakka plugin install root (skills, hooks, script/, bin/)
+├── packages/                  → yakka, hooklog, yakka-analytics, opencode-yakka-hooks
 ├── tools/                     → driver, release, quality, transcript, … (maintainer/automation)
 ├── .claude-plugin/marketplace.json, .cursor-plugin/marketplace.json  → source: plugins/yakka
 ├── .claude/skills/            → maintainer project skills (not installed by install.sh)
-│   └── {setup,iterate,jev-variants,transcript-parser,white-paper,workflow-tuning}/
+│   └── {setup,iterate,jev-variants,transcript-parser,white-paper,yakka-tuning}/
 ├── docs/{OVERVIEW,ARCHITECTURE}.md, docs/automation/, docs/plans/, docs/analysis/
 └── evals/{scenarios,results}/
 ```
 
-A skill directory holds only what an agent loads while working: `SKILL.md`, `templates/`, `briefs/`, `scripts/`. Rationale lives in `workflow-tuning/principles.md`; operator guides under `docs/`.
+Runtime state and config use the `YAKKA_*` environment family (for example `YAKKA_CHECKS_DIR`, `YAKKA_INSTALL_MODE`) and XDG paths under `~/.local/share/yakka/`, `~/.cache/yakka/`, `~/.local/state/yakka/`, and `~/.config/yakka/` — see `docs/design/` contract sections for the full path table.
+
+A skill directory holds only what an agent loads while working: `SKILL.md`, `templates/`, `briefs/`, `scripts/`. Rationale lives in `yakka-tuning/principles.md`; operator guides under `docs/`.
 
 ## The Loop
 
 ```
 design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──▶ review ──▶ close-out
                      │ refine → execute → verify → close │
-                     └─── stop + report (Workflow-Phase:) ┘
+                     └─── stop + report (Yakka-Phase:) ┘
                                                    terminal:  comprehensive-review in-run, close-out, PR
                                                    pipeline:  PR → post-build → merge → close-out
 ```
@@ -41,7 +43,7 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 | `setup` (maintainer) | Bootstrapping stable docs | `docs/OVERVIEW.md`, `docs/ARCHITECTURE.md` |
 | `iterate` (maintainer) | Divergent exploration; approach-open phases | `OUTCOMES.md`, per-cycle artifacts |
 | `transcript-parser` (maintainer) | Transcript → cost metrics | a `cost-comparison.md` section |
-| `workflow-tuning` (maintainer) | The workflow itself | `principles.md`, `reference.md` |
+| `yakka-tuning` (maintainer) | The workflow itself | `principles.md`, `reference.md` |
 
 ## Cross-Skill Contracts
 
@@ -49,7 +51,7 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 
 **execute → refine → execute**: `execute` builds the next phase without a Units list by dispatching `refine` as a separate context, then routing its briefs. A one-unit phase is briefed inline by `execute`. The handoff into the next phase is `IMPLEMENTATION.md`'s closed phase record, including its Carried section, which the next `refine` must place or bounce.
 
-**phase boundary**: `execute` always stops at its closing commit — the one carrying the git trailer `Workflow-Phase: <slug>:<n>` — and reports; it never dispatches its own successor. Whether another phase runs is a property of the invocation (a bare call, a coordinator instructed to run to completion, or the driver), never a posture declared to or read from `execute`. The open phase resolves cold, from `<default>..HEAD`'s trailers against `DESIGN.md`'s phase count: the lowest phase with no trailer; **wrap-up** when every phase has one and there is no `Workflow-Phase: <slug>:done`; **done** once that trailer lands too. A cheap-tier verification of the phase outcome gates the closing commit. A fresh orchestrator per phase. Termination is the design's phase count; more phases than signed off is a design change.
+**phase boundary**: `execute` always stops at its closing commit — the one carrying the git trailer `Yakka-Phase: <slug>:<n>` — and reports; it never dispatches its own successor. Whether another phase runs is a property of the invocation (a bare call, a coordinator instructed to run to completion, or the driver), never a posture declared to or read from `execute`. The open phase resolves cold, from `<default>..HEAD`'s trailers against `DESIGN.md`'s phase count: the lowest phase with no trailer; **wrap-up** when every phase has one and there is no `Yakka-Phase: <slug>:done`; **done** once that trailer lands too. A cheap-tier verification of the phase outcome gates the closing commit. A fresh orchestrator per phase. Termination is the design's phase count; more phases than signed off is a design change.
 
 **approach-open phases**: `execute` reports `unsuccessful` and stops unless the invoker declared how they run. `iterate` (lab) is the intended method, with the phase outcome as a fixed yardstick; core never depends on it.
 
@@ -57,7 +59,7 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 
 **execute → comprehensive-review**: once, after the last phase, in terminal posture. Pipeline posture substitutes pre-flight self-verification because `post-build` exists downstream.
 
-**execute → post-build**: the PR itself — branch, commits, `Workflow-Plan:` marker. No live call.
+**execute → post-build**: the PR itself — branch, commits, `Yakka-Plan:` marker. No live call.
 
 **post-build → comprehensive-review**: dispatched by name; `post-build` branches on the verdict without interpretation and routes remediation briefs by path.
 
@@ -67,7 +69,13 @@ design ──sign-off──▶ ┌ per phase, in the design's order ┐ ──�
 
 **setup → design**: filesystem presence only; `design` never blocks on stable docs.
 
-**comprehensive-review → workflow-tuning**: one-way, artifact-only, via the plan-sufficiency judgment.
+**comprehensive-review → yakka-tuning**: one-way, artifact-only, via the plan-sufficiency judgment.
+
+## Trailer dual-read
+
+Writers and readers for phase trailers, plan markers, and execution-report fences:
+
+> Writers emit `Yakka-Phase: <slug>:<n>`, `Yakka-Phase: <slug>:done`, a PR body starting `Yakka-Plan: docs/plans/<NN>-<slug>/`, and a `yakka-report` fence. Readers accept `Workflow-Phase` / `Yakka-Phase`, `Workflow-Plan:` / `Yakka-Plan:`, and both fences, permanently, through one shared key list in `tools/driver/`.
 
 ## PR Artifact Seam
 
@@ -77,7 +85,7 @@ backstops submission to the same workflow-quality HTTP ledger, checking the late
 body hash and current conversation evidence. It never mutates plan files or blocks
 writes; outcomes flow through hooklog. See [Hook backstop](lab/QUALITY-SERVICE.md#hook-backstop).
 
-- **Location**: `docs/plans/<NN>-<slug>/` on the PR branch. The PR body's first line, `Workflow-Plan: docs/plans/<NN>-<slug>/`, is the only mechanical locator. `NN` is best-effort ordering; the slug is the key.
+- **Location**: `docs/plans/<NN>-<slug>/` on the PR branch. The PR body's first line, `Yakka-Plan: docs/plans/<NN>-<slug>/`, is the only mechanical locator (readers also accept `Workflow-Plan:`). `NN` is best-effort ordering; the slug is the key.
 - **Build-stage contents**: `DESIGN.md` (required; phases carry their Units lists once refined), `briefs/` (amended in place on reported contradictions), `IMPLEMENTATION.md` (required; per-unit outcomes, per-phase verification and Carried sections), optional `PROVENANCE.md`.
 - **Pipeline-stage contents**, committed before the candidate SHA: `REVIEW.md`, `QA.md` (matrix only, omitted when QA does not apply), `briefs/remediation-<NN>.md`.
 - **External-only**: classification, checks outcomes, SHA-specific QA results and media.
@@ -114,7 +122,7 @@ Declared by the invoker, never inferred. Every posture has a safe default.
 5. A phase closes on a provable outcome, verified against real behaviour. Outcomes define phases; surfaces define units.
 6. Refinement is per phase, against the code as it stands; the design's phase count bounds the loop.
 7. Core never depends on maintainer skills; maintainer skills may compose core.
-8. `workflow-tuning` never auto-runs.
+8. `yakka-tuning` never auto-runs.
 9. No commit follows the tested commit. Nothing in this plugin merges.
 10. Every plan ends in one record file.
 
@@ -123,6 +131,6 @@ Declared by the invoker, never inferred. Every posture has a safe default.
 - [OVERVIEW.md](OVERVIEW.md)
 - [../README.md](../README.md)
 - [automation/post-build.md](automation/post-build.md)
-- [../.claude/skills/workflow-tuning/principles.md](../.claude/skills/workflow-tuning/principles.md)
-- [../.claude/skills/workflow-tuning/reference.md](../.claude/skills/workflow-tuning/reference.md)
+- [../.claude/skills/yakka-tuning/principles.md](../.claude/skills/yakka-tuning/principles.md)
+- [../.claude/skills/yakka-tuning/reference.md](../.claude/skills/yakka-tuning/reference.md)
 - [analysis/2026-09-08-workflow-vs-field.md](analysis/2026-09-08-workflow-vs-field.md) — the review this shape came from
