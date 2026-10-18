@@ -81,9 +81,19 @@ export function isCollectorMode(hostname?: string): boolean {
 	return originOf(configured) === API_ORIGIN || isPagesHost(hostname);
 }
 
+/**
+ * Origin that sets and reads the OAuth state cookie.
+ * Pages talks to the production API. Any other host, including an embedded serve, stays
+ * same-origin. A stored analytics base is not this origin: the state cookie is not sent there.
+ */
+export function oauthApiBase(hostname?: string): string {
+	const host = hostname ?? (typeof location !== 'undefined' ? location.hostname : '');
+	return isPagesHost(host) ? API_ORIGIN : '';
+}
+
 /** GitHub login navigation. On Pages this hits the API so the state cookie is host-only there. */
 export function oauthLoginPath(hostname: string, returnTo = ''): string {
-	const base = isPagesHost(hostname) ? API_ORIGIN : '';
+	const base = oauthApiBase(hostname);
 	const q = returnTo ? `?return=${encodeURIComponent(returnTo)}` : '';
 	return `${base}/oauth/login${q}`;
 }

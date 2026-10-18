@@ -682,6 +682,10 @@ func TestProductionGitHubCallbackIsPages(t *testing.T) {
 	if u.Query().Get("redirect_uri") != "https://yakka.build/oauth/callback" {
 		t.Fatalf("redirect_uri %q", u.Query().Get("redirect_uri"))
 	}
+	code, body := do(t, s.Handler(), "GET", "/v1/analytics/summary", "", "")
+	if code != 401 || !strings.Contains(body, "sign in at https://yakka.build/login") || strings.Contains(body, "api.yakka.build/login") {
+		t.Fatalf("production login hint: %d %s", code, body)
+	}
 	other := remoteTestConfig(t, t.TempDir(), gh.URL)
 	req = httptest.NewRequest("GET", "/oauth/login", nil)
 	rec = httptest.NewRecorder()

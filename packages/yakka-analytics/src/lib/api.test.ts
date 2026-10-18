@@ -6,6 +6,8 @@ import {
 	createToken,
 	fetchMe,
 	isValidLoopbackRedirectUri,
+	oauthApiBase,
+	oauthLoginPath,
 	revokeToken
 } from './api';
 
@@ -128,6 +130,17 @@ describe('apiGet', () => {
 		expect(meURL).toBe('https://api.yakka.build/v1/me');
 		expect(meInit?.credentials).toBe('include');
 		expect(new Headers(meInit?.headers).has('authorization')).toBe(false);
+	});
+
+	it('oauth completion uses the API on Pages and same-origin elsewhere, ignoring a stored base', () => {
+		store['yakka-analytics-base'] = 'https://collector.example';
+		expect(oauthApiBase('yakka.build')).toBe('https://api.yakka.build');
+		expect(oauthApiBase('www.yakka.build')).toBe('https://api.yakka.build');
+		expect(oauthApiBase('localhost')).toBe('');
+		expect(oauthLoginPath('yakka.build', '/device?state=abc')).toBe(
+			'https://api.yakka.build/oauth/login?return=' + encodeURIComponent('/device?state=abc')
+		);
+		expect(oauthLoginPath('localhost')).toBe('/oauth/login');
 	});
 
 	it('isValidLoopbackRedirectUri accepts loopback http(s) only', () => {

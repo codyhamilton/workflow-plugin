@@ -334,6 +334,10 @@ func (s *Server) authorizeRequest(r *http.Request) authResult {
 
 func (s *Server) remoteUnauthorizedMsg() string {
 	login := s.publicOrigin() + "/login"
+	// The production API does not embed the site. Sign-in is the Pages /login page.
+	if s.publicOrigin() == apiProductionOrigin {
+		login = pagesOrigin + "/login"
+	}
 	return "unauthorized: this service requires a token; sign in at " + login
 }
 

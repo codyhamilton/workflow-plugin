@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { resolvedBase } from '$lib/api';
+	import { oauthApiBase } from '$lib/api';
 
 	let status = $state<'working' | 'ok' | 'denied' | 'failed'>('working');
 	let detail = $state('Signing in…');
@@ -9,7 +9,7 @@
 	onMount(() => {
 		const code = page.url.searchParams.get('code') ?? '';
 		const state = page.url.searchParams.get('state') ?? '';
-		const base = resolvedBase(page.url.hostname);
+		const base = oauthApiBase(page.url.hostname);
 		const url = `${base}/oauth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
 		void (async () => {
 			try {
