@@ -32,12 +32,12 @@ SESSION_KIND_INSTRUCTIONS = (
     "Use mixed only when two kinds are roughly equal; other only as last resort."
 )
 
-WORKFLOW_ALIGNMENT_INSTRUCTIONS = (
+YAKKA_ALIGNMENT_INSTRUCTIONS = (
     "How aligned is this session with a deliberate iterate-style workflow "
     "(research → plan → execute → review), versus ad-hoc chatting or thrashing?"
 )
 
-WORKFLOW_ALIGNMENT_CRITERIA: list[str] = [
+YAKKA_ALIGNMENT_CRITERIA: list[str] = [
     "Ad-hoc chat or thrashing; no clear phase discipline",
     "Loose goal; some structure but skips planning or review",
     "Clear phases present; mostly on-rails for the task",
@@ -63,10 +63,10 @@ def build_questions(*, include_workflow_alignment: bool = True) -> dict[str, Any
         },
     }
     if include_workflow_alignment:
-        questions["workflow_alignment"] = {
+        questions["yakka_alignment"] = {
             "type": "score",
-            "instructions": WORKFLOW_ALIGNMENT_INSTRUCTIONS,
-            "criteria": WORKFLOW_ALIGNMENT_CRITERIA,
+            "instructions": YAKKA_ALIGNMENT_INSTRUCTIONS,
+            "criteria": YAKKA_ALIGNMENT_CRITERIA,
         }
     return questions
 
