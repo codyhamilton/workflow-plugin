@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readdir, readFile, rm, writeFile, chmod } from 'node:fs/promises'
+import { mkdtemp, mkdir, readdir, readFile, rm, writeFile, chmod } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -180,4 +180,29 @@ test('remove list block in src/index.ts is the stable source for the Go equality
   const m = src.match(/\/\/ remove-list:begin\n([\s\S]*?)\/\/ remove-list:end/)
   assert(m, 'markers present')
   assert.deepEqual([...m[1].matchAll(/"([^"]+)"/g)].map(x => x[1]), removed)
+})
+
+test('unset YAKKA_BIN drain kick spawns python3 on the client script', async () => {
+  await sleep(10_100) // spawnBin kickDrain shares a 10 s module cooldown with earlier tests
+  const sb = await sandbox({ YAKKA_HOOKLOG_KICK: '1' })
+  try {
+    const pyBin = path.join(sb.tmp, 'bin')
+    const pyLog = path.join(sb.tmp, 'py.log')
+    await mkdir(pyBin, { recursive: true })
+    const fakePy = path.join(pyBin, 'python3')
+    await writeFile(fakePy, `#!/bin/sh\necho "$@" >> ${pyLog}\n`)
+    await chmod(fakePy, 0o755)
+    delete process.env.YAKKA_BIN
+    process.env.PATH = `${pyBin}${path.delimiter}${process.env.PATH || ''}`
+    const hooks = await plugin({ directory: '/tmp/project' })
+    await hooks['tool.execute.after']({ sessionID: 'k', tool: 'write', callID: 'c', args: {} }, { output: 'a' })
+    let line = ''
+    for (let i = 0; i < 50; i++) {
+      line = await readFile(pyLog, 'utf8').catch(() => '')
+      if (line) break
+      await sleep(100)
+    }
+    assert.match(line, /plugins\/yakka\/client\/yakka\.py/)
+    assert.match(line, /\bdrain\b/)
+  } finally { await sb.done() }
 })
