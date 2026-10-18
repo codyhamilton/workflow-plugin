@@ -576,3 +576,11 @@ Phase 6 outcome holds. Manifests are yakka 3.0.0 with source `plugins/yakka`. Th
 
 1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `yakka drain` to a local `yakka serve` ships it and `yakka status` reports no failure.
 2. Root `README.md` still documents the signal log as `tools/driver/.jev-signal-log.jsonl`. Phase 7 docs.
+
+## Phase 7: Docs and migration guide
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-dd8b9a81-4565-5c06-9172-18bedb16a56d
+Start: 2026-10-18T00:36:14Z
+
+`artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
