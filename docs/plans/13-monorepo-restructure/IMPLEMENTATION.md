@@ -478,3 +478,30 @@ Surfaces: `packages/yakka/**`, plus the rewrite block in this file.
 Deviations: `cmd/yakka` tests write the queue in Go instead of calling `packages/hooklog/spool.sh`, because hooklog still reads `WORKFLOW_*`. Hooklog belongs to `5-03`, not `5-04`. Also renamed `drain`, `ledger`, and `login` CLI strings, and a test path in `packages/yakka/README.md`.
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### Verification
+
+Closed on this branch at `/workspace` (not merged to master). Go 1.27.1 at `~/.local/go/bin`. A temp `HOME` with no yakka state, `YAKKA_RELEASE_URL=http://127.0.0.1:9`.
+
+- `plugins/yakka/bin/yakka --version` printed `yakka 0.2.0 f7dce57564cc`. `bin/VERSION` is `0.2.0`. The step-4 probe `plugins/yakka/../../packages/yakka/go.mod` exists. That is the path Phase 4 carried as one directory short.
+- Spool: `packages/hooklog/spool.sh --harness claude --event Stop` with `YAKKA_HOOKLOG_KICK=0` and payload `session_id=phase5` wrote one `*.evt` under `$HOME/.local/share/yakka/queue`.
+- Keyless `plugins/yakka/bin/yakka serve` listened on `127.0.0.1:8770` and hosted the drain. A following `yakka drain` exited 0 with "lock held by another drain" because serve already held it. `yakka status`: queued 0, rejected 0, endpoint reachable. `$HOME/.local/share/yakka/serve/local/ledger.db` has 1 `hook_event` row.
+- `yakka mcp` `initialize` returned `serverInfo.name` `yakka` and `serverInfo.version` `0.2.0`.
+- All 22 commands in `plugins/yakka/hooks/cursor.json` start with `./script/`.
+- `python3 tools/release/scan_residual_names.py --scope phase5` → exit 0, no output.
+- Suites, clean `HOME=/home/ubuntu` and no leaked `YAKKA_*`:
+  - `go test ./...` in `packages/yakka`: pass.
+  - `packages/hooklog` 36 OK; `tools/quality/tests` 26 OK after `7c219f8` (the spool test now sets `YAKKA_HOOKLOG_DIR`, which `hooklog.store_dir` reads; the first run failed on `WORKFLOW_HOOKLOG_DIR`); `tools/jev-variants/tests` 43 OK; `tools/driver/tests` 72 OK; `tools/release` 19 OK once `packages/yakka-analytics/node_modules` is absent (the layout case names `tools/` paths inside that tree).
+  - `node --experimental-strip-types --test packages/opencode-yakka-hooks/tests/test_hooks.mjs`: 8 pass. Batch tests: 6 OK.
+  - `npm run test:e2e` in `packages/yakka-analytics`: 168 passed. `tests/e2e/global-setup.ts` sets `YAKKA_CHECKS_DIR` to `packages/yakka/catalogue`.
+- A logged-in Cursor session was not run.
+
+## Closed
+
+Phase 5 outcome holds. The binary, queue, keyless serve, and MCP identity are yakka. The source-build probe is `$ROOT/../../packages/yakka`.
+
+### Carried
+
+1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `yakka drain` to a local `yakka serve` ships it and `yakka status` reports no failure.
+2. Root `README.md` still documents the signal log as `tools/driver/.jev-signal-log.jsonl`. Phase 7 docs.
+3. `tools/driver/jev_signal_log.py` still resolves `~/.local/state/workflow/jev-signal-log.jsonl` via `WORKFLOW_JEV_SIGNAL_LOG`. `packages/opencode-yakka-hooks` now defaults to `~/.local/state/yakka/jev-signal-log.jsonl` via `YAKKA_JEV_SIGNAL_LOG`. Phase 6 owns the `tools/driver` identifiers. The two resolvers no longer match.
