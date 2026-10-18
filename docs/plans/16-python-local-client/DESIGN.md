@@ -200,6 +200,15 @@ Three phases. The count and order are fixed. `refine` briefs each phase; none of
 - Approach: known
 - Depends on: Phase 1 and Phase 2
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 3-01 Login, status, and version | [briefs/3-01-login-status-version.md](briefs/3-01-login-status-version.md) | Phase 1 (1-01–1-03), Phase 2 (2-01) | 3-02, 3-03, 3-04 |
+| 3-02 Plugin entry wrapper | [briefs/3-02-bin-yakka-wrapper.md](briefs/3-02-bin-yakka-wrapper.md) | Phase 1, Phase 2 | 3-01, 3-03, 3-04 |
+| 3-03 SessionStart prefetch removal | [briefs/3-03-sessionstart-prefetch.md](briefs/3-03-sessionstart-prefetch.md) | nothing | 3-01, 3-02, 3-04 |
+| 3-04 Design 3 and design 5 plugin client | [briefs/3-04-design-03-05.md](briefs/3-04-design-03-05.md) | nothing | 3-01, 3-02, 3-03 |
+
 ## Provenance Notes
 
 The checkpoint is waved. Downstream review challenges the ledger.
