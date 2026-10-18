@@ -601,6 +601,7 @@ Units:
 - 6-05 Transcript and jev-variants identifiers. Brief: `docs/plans/13-monorepo-restructure/briefs/6-05-transcript-and-jev-variants.md`. Depends on: Phase 5. Runs alongside: `6-01`, `6-02`, `6-04`.
 - 6-03 Driver dual-read and trailer-completeness eval. Brief: `docs/plans/13-monorepo-restructure/briefs/6-03-driver-and-trailer-eval.md`. Depends on: `6-02`, `6-04`. Runs alongside: nothing.
 - 6-06 Phase 6 residual-name scan. Brief: `docs/plans/13-monorepo-restructure/briefs/6-06-residual-scan-phase6.md`. Depends on: `6-01`, `6-02`, `6-03`, `6-04`, `6-05`. Runs alongside: nothing.
+- 6-07 Clear phase 6 scan hits. Brief: `docs/plans/13-monorepo-restructure/briefs/6-07-clear-phase6-scan-hits.md`. Depends on: `6-06`. Runs alongside: nothing.
 
 ### Phase 7: Docs and migration guide
 

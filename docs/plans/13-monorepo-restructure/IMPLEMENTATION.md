@@ -545,3 +545,9 @@ Built: `WORKFLOW_ALIGNMENT_*` is `YAKKA_ALIGNMENT_*` and the TypeSafe question i
 Built: one shared trailer-key list in `tools/driver/trailer_keys.py`. `resolve` and `report` accept `Workflow-Phase` and `Yakka-Phase`, and both report fences. Driver env and the signal log use `YAKKA_*` and `~/.local/state/yakka/jev-signal-log.jsonl`. `check_skills.py` uses `yakka-tuning` and the yakka install paths. Trailer-completeness `verify.py` runs checks 1–4 for each key. Surfaces: `tools/driver/**`, `evals/scenarios/trailer-completeness/**`. Deviations: two `test_cursor_setup_*` cases skip because `docs/lab/bootstrap/cursor-cloud-setup.sh` still calls `bootstrap-workflow-skills.sh` (outside the brief). `test_outcome_scenario.py` ignores the new `once.skip_reason` wording. Commit `c9d5d15`. Agent `bc-f0f28f90-1745-53b4-8fca-1172fcf355e7` reported done with concerns. The harness did not report turns or final context. Driver tests: 74 OK, 2 skipped. `verify.py` exit 0 for both keys.
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 6-06-residual-scan-phase6
+
+Built: `--scope phase6` on `tools/release/scan_residual_names.py`, `test_phase6_clean_in_repo`, and the `packages/yakka` line in `tools/README.md`. Phase 5 scope still exits 0. Deviations: none. The phase 6 scan exits 1 with 12 hits under `tools/cloud-env/`, `tools/driver/`, and `tools/jev-variants/case2/pair.py`. The unit's brief forbids editing those paths. `test_phase6_clean_in_repo` fails until they are cleared. Commit `c662e09`. Agent `bc-9257bc18-3987-5ef0-a8a7-91b8e4d15e7b` reported done with concerns. The harness did not report turns or final context. Follow-up unit `6-07` owns the hits and the skipped cursor-cloud setup tests.
+
+`artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
