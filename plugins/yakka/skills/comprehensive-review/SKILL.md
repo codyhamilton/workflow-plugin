@@ -1,6 +1,6 @@
 ---
 name: comprehensive-review
-description: Independent review of a change against its design's phase outcomes. Use when reviewing a PR (plan folder from the `Workflow-Plan:` marker) or after local execution. Fixes mechanical findings in place, briefs structural ones for remediation, reconstructs intent for a PR with no design.
+description: Independent review of a change against its design's phase outcomes. Use when reviewing a PR (plan folder from the `Yakka-Plan:` marker) or after local execution. Fixes mechanical findings in place, briefs structural ones for remediation, reconstructs intent for a PR with no design.
 ---
 
 # Comprehensive Review
@@ -9,7 +9,7 @@ You did not build this; that independence is the value. Your output is read by a
 
 ## Inputs
 
-- The plan folder: from the PR body's `Workflow-Plan: docs/plans/<NN>-<slug>/` line, or given directly. Never found by scanning or sorting folders.
+- The plan folder: from the PR body's `Yakka-Plan: docs/plans/<NN>-<slug>/` line, or given directly. Never found by scanning or sorting folders. Legacy git history and older agent output may use `Workflow-Phase`, `Workflow-Plan`, or a `workflow-report` fence instead; treat those forms equivalently when present.
 - `DESIGN.md` (verbatim intent, phase outcomes, assumption ledger) and the diff. A folder from before the rename carries `PLAN.md` instead; its acceptance criteria stand in for phase outcomes.
 - No plan folder on a functional change: create one on the path convention, reconstruct intent from the PR, linked issue, and commits into `RECOVERED-INTENT.md`, say the intent is reconstructed, and review at reduced confidence.
 
@@ -22,7 +22,7 @@ You did not build this; that independence is the value. Your output is read by a
   - **Fixed in place** — mechanical, localized, obviously correct against the contract. Applied, verified, recorded with its resolution. Closed: no brief, no re-review.
   - **Briefed** — needs design judgment, or touches surfaces beyond the finding: `briefs/remediation-<NN>.md`, complete enough for a clean agent (defect, location, why it matters, fix approach, done evidence). Not attempted here.
   - **Follow-up** — real, not worth blocking on. Listed as non-blocking.
-- A plan-sufficiency judgment is recorded: was the design enough to determine intent, place the findings, and derive QA? Read later by `workflow-tuning`; never invoke it.
+- A plan-sufficiency judgment is recorded: was the design enough to determine intent, place the findings, and derive QA? Read later by `yakka-tuning`; never invoke it.
 - `REVIEW.md` is in the plan folder, committed to the PR branch when reviewing a PR.
 
 ## REVIEW.md

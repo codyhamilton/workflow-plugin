@@ -44,7 +44,7 @@ Declared by the invoker, never inferred. Default: interactive.
 
 - `docs/plans/<NN>-<slug>/`, one per change or PR. The slug is the key; `NN` is best-effort ordering and nothing may locate a folder by it.
 - The folder existing means the work is being built or was built. Deferred or speculative work is a `docs/design/` doc or a tracker issue.
-- The PR will carry `Workflow-Plan: docs/plans/<NN>-<slug>/` as the first line of its body; the folder must exist at that path.
+- The PR will carry `Yakka-Plan: docs/plans/<NN>-<slug>/` as the first line of its body; the folder must exist at that path.
 - `DESIGN.md` from `templates/DESIGN.md`; Intent is the first write. `PROVENANCE.md` from `templates/PROVENANCE.md`, interactive only.
 - `close-out` collapses the folder into `docs/plans/<NN>-<slug>.md` and deletes it. Write `DESIGN.md` as the source that record is built from.
 

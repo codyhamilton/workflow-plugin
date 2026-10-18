@@ -1,4 +1,4 @@
-# Workflow Tuning Reference
+# Yakka Tuning Reference
 
 Observed lessons from real plan artifacts and execution traces across multiple repos. Empirical, not
 architectural — the reasoning the skills are *built on* lives in [principles.md](principles.md).
@@ -103,7 +103,7 @@ hazard — a design doc per slice is justified only when the contract surface is
 (The plan folders these observations came from predate the current naming convention. They remain
 valid as historical provenance; do not read their paths as the convention.)
 
-### 8. Practical rule for `DESIGN.md` — **Landed** (`plan`, `workflow-tuning`'s Documentation Economy)
+### 8. Practical rule for `DESIGN.md` — **Landed** (`plan`, `yakka-tuning`'s Documentation Economy)
 
 Require plan-scoped `DESIGN.md` only when at least one is true:
 

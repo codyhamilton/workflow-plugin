@@ -27,7 +27,7 @@ A worker prompt is an absolute path to its standing brief in this skill's `brief
 
 ## Discovery and classification
 
-- Plan folder: the PR body's `Workflow-Plan: docs/plans/<NN>-<slug>/` line. Fallback for a markerless PR: the unique parent directory of a changed `IMPLEMENTATION.md` (else `DESIGN.md`, or a legacy `PLAN.md`) under `docs/plans/` since the merge base. Exactly one candidate or stop and ask; never tie-break by number, time, or order.
+- Plan folder: the PR body's `Yakka-Plan: docs/plans/<NN>-<slug>/` line. Legacy git history and older agent output may use `Workflow-Phase`, `Workflow-Plan`, or a `workflow-report` fence instead; treat those forms equivalently when present. Fallback for a markerless PR: the unique parent directory of a changed `IMPLEMENTATION.md` (else `DESIGN.md`, or a legacy `PLAN.md`) under `docs/plans/` since the merge base. Exactly one candidate or stop and ask; never tie-break by number, time, or order.
 - No plan folder: non-functional trivial or small changes proceed ad hoc; functional changes get `comprehensive-review`, which reconstructs intent. Create a folder only when review or QA artifacts need a home.
 - Preflight: clean worktree, non-default branch, diff plausibly covered by the plan. Unexplained material changes outside scope stop the stage.
 - Classify from the diff and plan context, and record it: intent `planned` / `recovered` / `ad-hoc`; surface `functional` / `non-functional` / `mixed`; size `trivial` / `small` / `normal` / `large`. Over-classify when unsure; a docs majority never hides a behavioural hunk.

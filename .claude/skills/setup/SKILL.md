@@ -94,7 +94,7 @@ If partial content from existing docs was found in phase 3, merge it into the ap
 
 After writing the docs, tell the user:
 
-> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`). You can now run `/workflow:design` to start a design session — it will read these docs automatically."
+> "Stable docs are in place (`docs/OVERVIEW.md`, `docs/ARCHITECTURE.md`). You can now run `/yakka:design` to start a design session — it will read these docs automatically."
 
 ## Rules
 

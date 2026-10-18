@@ -1,6 +1,6 @@
 ---
 name: transcript-parser
-description: Parse an AI tool session transcript to extract cost metrics (agents spawned, tool turns per agent, tool type breakdown, context estimate, wall time) in eval cost-comparison format. Use after a plan-execute run to populate a cost-comparison.md, or during workflow-tuning to compare execution approaches.
+description: Parse an AI tool session transcript to extract cost metrics (agents spawned, tool turns per agent, tool type breakdown, context estimate, wall time) in eval cost-comparison format. Use after a plan-execute run to populate a cost-comparison.md, or during yakka-tuning to compare execution approaches.
 ---
 
 # Transcript Parser

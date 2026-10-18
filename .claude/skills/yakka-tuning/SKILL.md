@@ -1,10 +1,10 @@
 ---
-name: workflow-tuning
+name: yakka-tuning
 description: Captures observed lessons about plan/execute/review workflows, documentation economy, execution cost, phasing, and review posture. Use when refining plan, execute, or review skills; designing workflow evals; or comparing real plan artifacts to decide what workflow improvements are worth making.
 disable-model-invocation: true
 ---
 
-# Workflow Tuning
+# Yakka Tuning
 
 ## Purpose
 
