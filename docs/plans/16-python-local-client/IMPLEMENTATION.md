@@ -112,3 +112,14 @@ Outcome holds.
 
 1. `plugins/yakka/client/test_drain.py` `test_half_set_env_refusal_drain` binds `127.0.0.1:8770` and fails with `Address already in use` when that port is held. A rerun passes when the port is free.
 2. `docs/plans/16-python-local-client/reports/2-02-mcp-registrations.md` has identity frontmatter. The brief template does not. The brief is unchanged.
+
+## Phase 3 — The plugin entry is the Python client
+
+Tool: Cursor (Grok 4.7 orchestrator, Composer 2.5 workers).
+Run: https://cursor.com/agents/bc-73d9504b-60a7-5a37-b678-4a22bef6d789
+Started: 2026-10-18T18:10:02Z.
+Starting HEAD: `d14c82d` on `cursor/python-local-client`.
+
+`artifact_feedback`: the Yakka MCP namespace failed during live tool discovery (`namespaceStatus: error`, no tools). The service is unreachable. Each due call is recorded as unreachable and the run continues.
+
+Phase 3 has no Units list. `refine` is dispatched as a separate context before any implementation unit.
