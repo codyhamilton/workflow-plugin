@@ -123,3 +123,9 @@ Starting HEAD: `d14c82d` on `cursor/python-local-client`.
 `artifact_feedback`: the Yakka MCP namespace failed during live tool discovery (`namespaceStatus: error`, no tools). The service is unreachable. Each due call is recorded as unreachable and the run continues.
 
 Phase 3 has no Units list. `refine` is dispatched as a separate context before any implementation unit.
+
+Refined in `d3beccc` into four units. 3-01 owns the Python login, status, and version commands. 3-02 owns `plugins/yakka/bin/yakka`. 3-03 owns SessionStart prefetch removal. 3-04 owns design 3 and design 5. They run alongside each other on disjoint paths. Phase 2 carried item 1 (port 8770) is placed in 3-01. Carried item 2 is informational and is not a unit.
+
+`artifact_feedback` on `briefs/3-01-login-status-version.md`, `briefs/3-02-bin-yakka-wrapper.md`, `briefs/3-03-sessionstart-prefetch.md`, and `briefs/3-04-design-03-05.md`: unreachable. The Yakka namespace was checked again after the briefs landed and is still in error with no tools.
+
+3-01 through 3-04 commit in local worktrees (`work/3-01`, `work/3-02`, `work/3-03`, `work/3-04`) and do not push those refs. The orchestrator merges them onto `cursor/python-local-client` and pushes that ref only.
