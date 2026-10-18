@@ -551,3 +551,28 @@ Built: one shared trailer-key list in `tools/driver/trailer_keys.py`. `resolve` 
 Built: `--scope phase6` on `tools/release/scan_residual_names.py`, `test_phase6_clean_in_repo`, and the `packages/yakka` line in `tools/README.md`. Phase 5 scope still exits 0. Deviations: none. The phase 6 scan exits 1 with 12 hits under `tools/cloud-env/`, `tools/driver/`, and `tools/jev-variants/case2/pair.py`. The unit's brief forbids editing those paths. `test_phase6_clean_in_repo` fails until they are cleared. Commit `c662e09`. Agent `bc-9257bc18-3987-5ef0-a8a7-91b8e4d15e7b` reported done with concerns. The harness did not report turns or final context. Follow-up unit `6-07` owns the hits and the skipped cursor-cloud setup tests.
 
 `artifact_feedback` on this report: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### 6-07-clear-phase6-scan-hits
+
+Built: the twelve phase 6 scan hits are gone. `REPORT_FENCE` replaces `WORKFLOW_REPORT_FENCE`. Cloud-env prose no longer spells the unread install-lab variable. The driver README uses `YAKKA_INSTALL_*` and `.cursor/skills/yakka`. The jev-variants corpus slug is `yakka`. `docs/lab/bootstrap/cursor-cloud-setup.sh` execs `bootstrap-yakka-skills.sh`, and the two cursor-setup tests run. Surfaces: `tools/cloud-env/{README.md,bootstrap-yakka-skills.sh}`, `tools/driver/{README.md,report.py}`, `tools/driver/tests/test_install_route.py`, `tools/jev-variants/case2/pair.py`, `docs/lab/bootstrap/cursor-cloud-setup.sh`. Deviations: none. Commit `b0a1cd3`. Agent `bc-b93bed63-1cbf-53bb-ab8d-909844962f94` reported done. The harness did not report turns or final context.
+
+`artifact_feedback` on this report and on the phase 6 briefs: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+### Verification
+
+Closed on this branch at `/workspace`. Prior plugin version on `3be6649` was `2.12.0`. The three plugin manifests are now `yakka` `3.0.0`. Both marketplaces are named `yakka`, list one plugin `yakka`, and keep `source` `plugins/yakka`.
+
+- A temp repo with `Workflow-Phase: fixture-plan:1` then `Yakka-Phase: fixture-plan:2` and a three-phase DESIGN: `tools/driver/status.py --default-branch master` returned `open: phase`, `phase: 3`, `closed: [fixture-plan:1, fixture-plan:2]`. `tools/driver/run.py --once --dry-run` dispatched `kind: phase`, `phase: 3`. `parse_workflow_report` returned phase 1 for a `workflow-report` fence and phase 2 for a `yakka-report` fence.
+- `python3 evals/scenarios/trailer-completeness/verify.py` exited 0. `trailer_keys_exercised` is `Workflow-Phase` and `Yakka-Phase`. Both keys pass checks status, trailers, once, and assert.
+- `python3 -m unittest discover -s tools/driver/tests -p 'test_*.py'` → 74 tests OK, none skipped. That includes `test_install_route.py` (each install mode, `bootstrap-yakka-skills.sh`, Cursor core install of `plugins/yakka`).
+- `python3 tools/release/scan_residual_names.py --scope phase6` → exit 0, no output. `--scope phase5` → exit 0, no output. `test_scan_residual_names.py` → 3 tests OK.
+- Judgement: `execute`, `comprehensive-review`, and `post-build` write `Yakka-Phase`, `Yakka-Plan`, and `yakka-report`, and each has one sentence that accepts `Workflow-Phase`, `Workflow-Plan`, and `workflow-report`. `design` writes `Yakka-Plan` and does not read a trailer. A logged-in Cursor session was not run.
+
+## Closed
+
+Phase 6 outcome holds. Manifests are yakka 3.0.0 with source `plugins/yakka`. The driver reads both trailer keys and both report fences. The trailer-completeness eval passes for each key. Install routes and the residual scan are clean.
+
+### Carried
+
+1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `yakka drain` to a local `yakka serve` ships it and `yakka status` reports no failure.
+2. Root `README.md` still documents the signal log as `tools/driver/.jev-signal-log.jsonl`. Phase 7 docs.
