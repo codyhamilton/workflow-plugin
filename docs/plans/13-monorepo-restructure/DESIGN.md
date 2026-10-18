@@ -615,6 +615,15 @@ Units:
 - Approach: known.
 - Depends on: Phases 5 and 6.
 
+Units:
+
+- 7-01 CHANGELOG migration guide. Brief: `docs/plans/13-monorepo-restructure/briefs/7-01-changelog-migration-guide.md`. Depends on: Phases 5 and 6. Runs alongside: `7-02`, `7-03`, `7-04`, `7-05`.
+- 7-02 Root README install and layout prose. Brief: `docs/plans/13-monorepo-restructure/briefs/7-02-root-readme.md`. Depends on: Phases 5 and 6. Runs alongside: `7-01`, `7-03`, `7-04`, `7-05`.
+- 7-03 OVERVIEW and ARCHITECTURE. Brief: `docs/plans/13-monorepo-restructure/briefs/7-03-overview-and-architecture.md`. Depends on: Phases 5 and 6. Runs alongside: `7-01`, `7-02`, `7-04`, `7-05`.
+- 7-04 Design contract sections. Brief: `docs/plans/13-monorepo-restructure/briefs/7-04-design-contract-sections.md`. Depends on: Phases 5 and 6. Runs alongside: `7-01`, `7-02`, `7-03`, `7-05`.
+- 7-05 Automation post-build and eval fixture prose. Brief: `docs/plans/13-monorepo-restructure/briefs/7-05-automation-and-eval-prose.md`. Depends on: Phases 5 and 6. Runs alongside: `7-01`, `7-02`, `7-03`, `7-04`.
+- 7-06 CHANGELOG scan cut and full-repo residual scan. Brief: `docs/plans/13-monorepo-restructure/briefs/7-06-scan-changelog-cut-and-full-scope.md`. Depends on: `7-01`, `7-02`, `7-03`, `7-04`, `7-05`. Runs alongside: nothing.
+
 Refine:
 
 - Phases 1 and 4 are each small enough for one worker and may skip `refine`.
