@@ -172,6 +172,7 @@ class DrainTests(unittest.TestCase):
                 )
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_delivery_auth_header(self) -> None:
         dir_path = self._tmpdir
@@ -182,6 +183,7 @@ class DrainTests(unittest.TestCase):
             self.assertEqual(state.calls[0].auth, "Bearer k")
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_backoff_503_keeps_files(self) -> None:
         dir_path = self._tmpdir
@@ -204,6 +206,7 @@ class DrainTests(unittest.TestCase):
             self.assertGreater(g3, g1)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_backoff_dropped_connection(self) -> None:
         dir_path = self._tmpdir
@@ -222,6 +225,7 @@ class DrainTests(unittest.TestCase):
             self.assertEqual(_count(dir_path, ".evt"), 0)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_backoff_unauthorized_keeps_files(self) -> None:
         dir_path = self._tmpdir
@@ -241,6 +245,7 @@ class DrainTests(unittest.TestCase):
             self.assertEqual(_count(os.path.join(dir_path, "rejected"), ""), 0)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_backoff_gives_up_at_cap(self) -> None:
         dir_path = self._tmpdir
@@ -259,6 +264,7 @@ class DrainTests(unittest.TestCase):
             self.assertEqual(_count(dir_path, ".evt"), 1)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_retry_after_429(self) -> None:
         dir_path = self._tmpdir
@@ -282,6 +288,7 @@ class DrainTests(unittest.TestCase):
             self.assertLessEqual(d, 1.6)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_split_413(self) -> None:
         dir_path = self._tmpdir
@@ -304,6 +311,7 @@ class DrainTests(unittest.TestCase):
             self.assertEqual(state.n(), 1 + 2 + 4)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_split_single_file_rejected(self) -> None:
         dir_path = self._tmpdir
@@ -328,6 +336,7 @@ class DrainTests(unittest.TestCase):
                 self.assertEqual(f.read(), "b-2.evt: 413\n")
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_split_400_single_file(self) -> None:
         dir_path = self._tmpdir
@@ -348,6 +357,7 @@ class DrainTests(unittest.TestCase):
                 self.assertEqual(f.read(), "a-1.evt: 400\n")
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_idle_exit_race(self) -> None:
         dir_path = self._tmpdir
@@ -369,6 +379,7 @@ class DrainTests(unittest.TestCase):
             self.assertEqual(_count(dir_path, ".evt"), 0)
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_race_second_drain_exits(self) -> None:
         dir_path = self._tmpdir
@@ -400,6 +411,7 @@ class DrainTests(unittest.TestCase):
             self.assertFalse(yakka.Running(dir_path))
         finally:
             srv.shutdown()
+            srv.server_close()
 
     def test_invalid_config_gives_up(self) -> None:
         dir_path = self._tmpdir
