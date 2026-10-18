@@ -186,6 +186,13 @@ Three phases. The count and order are fixed. `refine` briefs each phase; none of
 - Approach: known
 - Depends on: Phase 1
 
+#### Units
+
+| Unit | Brief | Depends on | Alongside |
+|---|---|---|---|
+| 2-01 MCP command | [briefs/2-01-mcp-command.md](briefs/2-01-mcp-command.md) | Phase 1 (1-01–1-03) | 2-02 |
+| 2-02 MCP registrations and design 4 | [briefs/2-02-mcp-registrations.md](briefs/2-02-mcp-registrations.md) | nothing | 2-01 |
+
 ### Phase 3 — The plugin entry is the Python client
 
 - Outcome: `plugins/yakka/bin/yakka login`, `status`, and `version` / `--version` exec `python3 plugins/yakka/client/yakka.py` with that command. `login` writes `client.toml` at mode 0600 from the device exchange. `status` prints the existing lines and probes `GET /v1/health`. `version` prints `yakka <version> <commit>`. The same entry's `drain` and `mcp` dispatch to that script, and `serve` or `ledger` exits non-zero without a download or a build. SessionStart no longer prefetches: `packages/hooklog/tests/test_surfaces.py` reports `prefetch_seen == 0` and does not require a `--version` stub call, `packages/hooklog/cursor-hooks.example.json` SessionStart is only the spool, and `packages/opencode-yakka-hooks/tests/test_hooks.mjs` no longer expects `--version` on load. The ported tests that do not boot `yakka serve` pass: `packages/yakka/internal/login`, `TestLoginCommandMissingEndpoint`, `TestStatus`, and the status half of `TestHalfSetEnvRefusal`. `TestLoginDrainReadWriteAndReadOnly` stays a Go test and still passes. `docs/design/03-remote-service.md` and `docs/design/05-distribution.md` state that the plugin client is this program and that `serve` remains the Go binary, whose release build still exists.
