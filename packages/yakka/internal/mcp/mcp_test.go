@@ -442,6 +442,24 @@ func TestShim(t *testing.T) {
 			t.Error("service called for untracked path")
 		}
 	})
+	t.Run("env bearer GET", func(t *testing.T) {
+		e := newEnv(t, &texts)
+		os.Remove(e.cfg)
+		t.Setenv("YAKKA_ENDPOINT", e.stub.URL)
+		t.Setenv("YAKKA_KEY", secretKey)
+		t.Setenv("YAKKA_CLIENT_CONFIG", filepath.Join(t.TempDir(), "missing.toml"))
+		before := e.hits.Load()
+		c := e.serve()
+		text, isErr := c.tool("list_checks", map[string]any{"kind": "design"})
+		if isErr {
+			t.Fatalf("list_checks: %s", text)
+		}
+		if e.hits.Load() <= before {
+			t.Fatal("expected HTTP with env bearer")
+		}
+		want(t, text, "clarity [levels no/partly/yes]: Is it clear?")
+	})
+
 	t.Run("tools list_checks and search", func(t *testing.T) {
 		c := newEnv(t, &texts).serve()
 		a, _ := c.tool("list_checks", map[string]any{"kind": "design"})

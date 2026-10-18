@@ -55,12 +55,24 @@ harness waits for an MCP server, so every harness's `SessionStart` hook also run
 There is no install command. Local setup varies too much by system (systemd, launchd, a terminal)
 for the plugin to presume one, and local mode needs no generated state:
 
-- `yakka serve` with no `YAKKA_SERVE_KEYS` runs keyless on `127.0.0.1:8770` and stores under
-  tenant `local`. How it is kept running is the user's choice.
+- On loopback, `yakka serve` runs keyless on `127.0.0.1:8770` and stores under tenant `local`,
+  whether or not the GitHub OAuth env vars are set (they are ignored). Setting `YAKKA_SERVE_KEYS`
+  to anything but empty makes the process exit before it listens. How loopback serve is kept running
+  is the user's choice.
 - With no `~/.config/yakka/client.toml`, the drain and the shim use `http://127.0.0.1:8770`
   with no key.
-- Remote mode is opted into with `yakka login` (not built yet), which ensures a tenant and key
-  exist and writes `client.toml`.
+- A non-loopback bind with `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, and
+  `YAKKA_PUBLIC_URL` set is a remote collector. `YAKKA_SERVE_KEYS` is not a credential there:
+  any non-empty value makes the process exit before it listens, on loopback or not. The collector
+  is the API. Production Pages (`https://yakka.build`) holds the site, including GitHub's callback
+  `https://yakka.build/oauth/callback`, which asks the API to set a host-only `workflow_session`
+  cookie and return JSON. Local and release binaries still embed the site on the same origin.
+  Clients and agents use issued bearer tokens (not the session cookie). **`yakka login`**
+  (`--endpoint` optional) opens the Pages `/device` page when the endpoint is
+  `https://api.yakka.build`, and that server's `/device` otherwise, then writes `endpoint` and
+  `key` into `client.toml`. Hand-edit the file,
+  or set **`YAKKA_ENDPOINT`** and **`YAKKA_KEY`** in the agent environment, when there is no
+  browser. There is no `yakka init`.
 
 With no `serve` running and no remote configured, the drain finds the endpoint unreachable and the
 queue grows; `yakka status` reports it as a failure, not as idle.

@@ -9,9 +9,17 @@ serve`, and a static Svelte site that renders them. Part of
 ## Shape
 
 `packages/yakka-analytics` is a SvelteKit site built with the static adapter to `build/` (HTML,
-CSS, JS; no SSR). Locally, `yakka serve` embeds that build and serves it on the same origin as
-`/v1`. Remotely, the same build is a Cloudflare Pages site that calls a keyed `yakka serve` with a
-browser-supplied bearer token. Aggregation stays in SQLite; the browser receives JSON aggregates and
+CSS, JS; no SSR). Locally, and in release binaries, `yakka serve` embeds that build and serves it
+on the same origin as `/v1`. The production Fly image does not embed it. Pages hosts
+`https://yakka.build` and `https://www.yakka.build`; the API is `https://api.yakka.build`
+(`YAKKA_PUBLIC_URL`). Sign-in starts at `/login`. On Pages that link navigates to the API
+`GET /oauth/login`, which sets the host-only state cookie and sends the browser to GitHub.
+GitHub's registered callback stays `https://yakka.build/oauth/callback`. That Pages page shows
+status and sends a credentialed request to the API `/oauth/callback`. The API sets the host-only
+`workflow_session` cookie and returns status JSON. It does not redirect. Dashboard session routes
+use `credentials: 'include'` and no bearer. `GET /v1/me` supplies the GitHub identity and owned
+tenant list; data routes carry `?tenant=` from that response. Analytics `GET`s may still send a
+pasted bearer from `/settings`. Aggregation stays in SQLite; the browser receives JSON aggregates and
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
 
@@ -30,13 +38,15 @@ change what the agent does in a run (principle 2).
 | `/builder` | Chart builder | any measure, up to two dimensions and a bucket |
 | `/dashboards` | Dashboards | ordered grids of saved views |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
+| `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
-Every report except `/settings` shares one filter set held in the page URL: window, `repo_id`,
-`harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`, `conversation_id`. The
-URL is the view: filters, window, active view and every chart configuration (measure, dimensions,
-bucket, chart type, top) serialise into the query string, so pasting it reproduces the view, and
-filters survive navigation between views. There is no server-side saved-view store (the ledger has no
-user identity to own one).
+Every report except `/settings` and `/login` shares one filter set held in the page URL: window,
+`repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`,
+`conversation_id`. The URL is the view: filters, window, active view and every chart configuration
+(measure, dimensions, bucket, chart type, top) serialise into the query string, so pasting it
+reproduces the view, and filters survive navigation between views. Saved views and dashboards stay in
+`localStorage`; the collector knows the signed-in GitHub user via the session, not via a server-side
+view store.
 
 What the request's words mean on the ledger: an **agent** is a `conversation_id`; a **hook** is a
 `hook_event` split by `event` and `payload.tool_name` (no cross-harness tool taxonomy); **build /
@@ -47,8 +57,10 @@ type** is the artifact kind plus its check distributions.
 ## Analytics reads
 
 Additive `/v1` routes. Every analytics `GET` resolves the tenant exactly as `GET /v1/artifacts`
-does: local mode maps to tenant `local` and ignores any token; keyed mode requires `Authorization:
-Bearer <key>`. `GET /v1/health` stays unauthenticated and is not an analytics route. Unknown routes
+does: local mode maps to tenant `local` and ignores any token and any session; remote collector mode
+accepts either `Authorization: Bearer` (issued token) or a `workflow_session` cookie with `?tenant=`
+for a tenant the session owns; a cross-origin Pages client sends only the pasted bearer from
+`/settings`. `GET /v1/health` stays unauthenticated and is not an analytics route. Unknown routes
 under `/v1/` are JSON 404; errors are `{"error":"<text>"}`. The routes read only the ledger's columns: no payload bodies (the ledger holds none, design 1), no
 artifact text and no search snippets. Model, token and cost fields are served as aggregates and as
 per-call rows in the conversation timeline.
@@ -220,15 +232,25 @@ on a compacted copy of the real ledger.
   `localGuard` (loopback `Host`, JSON-only POST) runs first.
 - Keyed mode: the same headers only for an origin listed exactly in `YAKKA_SERVE_CORS_ORIGINS`
   ([design 3](03-remote-service.md#configuration-first-round)). No wildcard, no reflected origin.
-- No cookies and no `Access-Control-Allow-Credentials`. The site sends `Authorization` only when a
-  token is configured.
+- Remote collector: state-changing `Origin` checks and credentialed CORS allow
+  `https://yakka.build`, `https://www.yakka.build`, the public API origin, and each exact entry
+  of `YAKKA_SERVE_CORS_ORIGINS`. Credentialed responses set `Access-Control-Allow-Credentials: true`
+  and allow `GET`, `POST`, `PUT`, and `OPTIONS`. The session cookie stays host-only on the API
+  (no `Domain`). Local and keyed modes stay without credentials, `GET` and `OPTIONS` only.
 
 ## The site
 
+- On the collector, an unauthenticated analytics `GET` is 401 and the layout sends the browser to
+  `/login`. After GitHub admission, the cookie backs same-origin reads; a 403 `no such tenant` means
+  the session owns no matching `?tenant=` yet (not a logged-out 401). `POST /logout` clears the
+  session.
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
-  `yakka-analytics-base` and `yakka-analytics-key`. An empty base means same-origin `/v1`. The
-  token is sent only as `Authorization: Bearer` and never written into the build or the repo; the
-  build's bundle check fails if a key appears in it.
+  `yakka-analytics-base` and `yakka-analytics-key`. An empty base on an embedded serve is
+  same-origin `/v1`. An empty base on `yakka.build` or `www.yakka.build` is
+  `https://api.yakka.build`. Session routes (`/v1/me`, tenants, tokens, device authorize) use the
+  session cookie and no bearer when the base is empty or is that API origin. Analytics `GET`s send
+  a stored bearer when the base is non-empty and a key is set. The token is never written into the
+  build or the repo; the build's bundle check fails if a key appears in it.
 - That token is as sensitive as the tenant key and is not rotated or expired: any script on the
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
@@ -285,6 +307,17 @@ on a compacted copy of the real ledger.
 
 ## Hosting
 
+- **Fly.io remote collector:** `fly.toml` app `yakka`, `YAKKA_PUBLIC_URL` `https://api.yakka.build`.
+  That value is the device-exchange `endpoint`, the `Secure` cookie flag, and the 401 login hint.
+  It is not the GitHub `redirect_uri`. GitHub's callback stays `https://yakka.build/oauth/callback`.
+  One machine runs the image built from the repo `Dockerfile`, which does not embed the analytics
+  site, and listens on internal port 8080. A fly volume `workflow_serve_data` mounts at `/data`;
+  `YAKKA_SERVE_DATA=/data` holds the registry and tenant ledgers across restarts.
+  `YAKKA_SERVE_KEYS` is unset. `YAKKA_SERVE_CORS_ORIGINS` is
+  `https://yakka.build,https://www.yakka.build`. `GITHUB_OAUTH_CLIENT_ID` and
+  `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. `yakka login` against
+  `https://api.yakka.build` opens the Pages `/device` page; the form posts to the API, and the CLI
+  writes that API `endpoint` plus the minted token into `client.toml`.
 - The site's build output is copied into `packages/yakka/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
   `index.html` is missing or is the placeholder, then restores the committed placeholder on exit.
@@ -296,10 +329,13 @@ on a compacted copy of the real ledger.
   `Cache-Control: no-cache`; files under `_app/immutable/` are `public, max-age=31536000,
   immutable`. `/v1` and `/v1/*` are never HTML. In keyed mode the static files need no key; they
   carry no tenant data.
-- `packages/yakka-analytics/wrangler.toml` declares `pages_build_output_dir = "./build"`, the same
-  build. With no `404.html`, Pages serves it as a single-page app. Creating the Pages project,
-  attaching a hostname and setting `YAKKA_SERVE_CORS_ORIGINS` to that origin are operator
-  actions.
+- **Cloudflare Pages:** `packages/yakka-analytics/wrangler.toml` declares
+  `pages_build_output_dir = "./build"`, the same artifact release binaries embed. Custom domains
+  are `yakka.build` and `www.yakka.build`. No site env vars and no token in the build. With no
+  `404.html`, Pages serves unknown paths as `/` (`fallback: 'index.html'`). `/oauth/callback` is a
+  Pages page: it shows status and `fetch`es the API callback with credentials. The API returns JSON
+  and `Set-Cookie`; it does not redirect. `/device` is the same Pages page; its form posts to
+  `https://api.yakka.build/v1/device/authorize`.
 
 ## Open issues
 
@@ -332,12 +368,13 @@ on a compacted copy of the real ledger.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
 16. The layout header and main use the 4/8/16/24/32 space scale. The filter bar, filter chips, and save-view control still use rem gaps. Pick scale steps and restyle those controls.
 17. Overview links to `/trends` set `metric` (`artifact_versions`, `distinct_content`, `commits`), which is the key that page reads. The drill-down sentence says those links set `measure`. Pick one query key and make the sentence and the page agree.
+18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser; a device code keeps the token plaintext in `registry.json` until exchange.
 
 ## Live cutover record (2026-10-11)
 
 The local `workflow-serve.service` (systemd user unit) moved from build ace7370 to master b9034da with the site embedded.
 
-- Backup: a zstd tar of the whole tenant dir under `/var/tmp/wf-cutover-<stamp>/`, checked against the live ledger by sha256 and `integrity_check` (ok). The old tenant dir is kept at `~/.local/share/workflow/cutover-hold/local.pre-cutover` for rollback.
+- Backup: a zstd tar of the whole tenant dir under `/var/tmp/wf-cutover-<stamp>/`, checked against the live ledger by sha256 and `integrity_check` (ok). The old tenant dir is kept at `~/.local/share/yakka/cutover-hold/local.pre-cutover` for rollback.
 - Compaction ran on a restored copy because `/home` lacked the roughly 8 GiB the in-place check needs. Rows went from 9,276,949 to 438,910 and the ledger from 12.99 GB to 338 MB (13m42s). `purge-deltas` then removed 0 rows (23.6 s). The result was copied back into `serve/local`.
 - Downtime was about 26.5 minutes. Hooks buffered events to the queue, and the new serve's hosted drain ingested them.
 - Checked: health `compaction: complete`, `/v1/analytics/schema`, a 7-day query (unpriced calls 1, down from 84.7% of calls before pricing), `/` and `/usage` returning 200, new events ingested, a `message.part.delta` POST accepted with no fact stored, `integrity_check` ok, and the hook_events rollup equal to the facts count.

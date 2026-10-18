@@ -29,7 +29,7 @@ func freePort(t *testing.T) string {
 
 func TestServeOutcome(t *testing.T) {
 	tmp := t.TempDir()
-	bin := filepath.Join(tmp, "workflow")
+	bin := filepath.Join(tmp, "yakka")
 	if out, err := exec.Command("go", "build", "-o", bin, ".").CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
@@ -37,15 +37,25 @@ func TestServeOutcome(t *testing.T) {
 	env := append(os.Environ(), "TYPESAFE_API_KEY=", "HOME="+tmp, "YAKKA_SERVE_DATA="+data, "YAKKA_SERVE_ADDR=127.0.0.1:0",
 		"YAKKA_QUEUE="+filepath.Join(tmp, "queue"), "YAKKA_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"))
 
-	// no keys: refuses any bind that is not loopback
-	noKeys := exec.Command(bin, "serve")
-	noKeys.Env = append(env, "YAKKA_SERVE_KEYS=", "YAKKA_SERVE_ADDR=0.0.0.0:0")
-	if err := noKeys.Run(); err == nil {
-		t.Fatal("started without keys on a wildcard bind")
+	// non-loopback without OAuth env refuses before listen
+	noOAuth := exec.Command(bin, "serve")
+	noOAuth.Env = append(env, "YAKKA_SERVE_ADDR=0.0.0.0:0")
+	if out, err := noOAuth.CombinedOutput(); err == nil {
+		t.Fatal("started on wildcard bind without OAuth")
+	} else if !strings.Contains(string(out), "GITHUB_OAUTH") {
+		t.Fatalf("expected OAuth error: %s", out)
+	}
+
+	keysSet := exec.Command(bin, "serve")
+	keysSet.Env = append(env, "YAKKA_SERVE_KEYS=a=ka", "YAKKA_SERVE_ADDR=127.0.0.1:0")
+	if out, err := keysSet.CombinedOutput(); err == nil {
+		t.Fatal("started with YAKKA_SERVE_KEYS on loopback")
+	} else if !strings.Contains(string(out), "YAKKA_SERVE_KEYS") {
+		t.Fatalf("expected YAKKA_SERVE_KEYS error: %s", out)
 	}
 
 	cmd := exec.Command(bin, "serve")
-	cmd.Env = append(env, "YAKKA_SERVE_KEYS=a=ka,b=kb")
+	cmd.Env = append(env, "YAKKA_SERVE_KEYS=")
 	errPath := filepath.Join(tmp, "serve.log")
 	errFile, err := os.Create(errPath)
 	if err != nil {
@@ -81,6 +91,9 @@ func TestServeOutcome(t *testing.T) {
 	body, _ := json.Marshal(map[string]any{"facts": facts})
 	call := func(method, path, key string, b []byte) (int, string) {
 		req, _ := http.NewRequest(method, base+path, bytes.NewReader(b))
+		if len(b) > 0 {
+			req.Header.Set("Content-Type", "application/json")
+		}
 		if key != "" {
 			req.Header.Set("Authorization", "Bearer "+key)
 		}
@@ -93,7 +106,7 @@ func TestServeOutcome(t *testing.T) {
 		return resp.StatusCode, string(out)
 	}
 	for round, want := range []string{"accepted", "duplicate"} {
-		code, out := call("POST", "/v1/ingest", "ka", body)
+		code, out := call("POST", "/v1/ingest", "", body)
 		var r struct {
 			Results []struct{ ID, Status, Reason string }
 		}
@@ -112,7 +125,7 @@ func TestServeOutcome(t *testing.T) {
 	q := "/v1/artifacts?repo_id=r&path=docs/plans/01-x/DESIGN.md"
 	ok := false
 	for i := 0; i < 100 && !ok; i++ {
-		code, out := call("GET", q, "ka", nil)
+		code, out := call("GET", q, "", nil)
 		ok = code == 200 && strings.Contains(out, `"verdict":"unscreened"`)
 		if !ok {
 			time.Sleep(50 * time.Millisecond)
@@ -121,14 +134,8 @@ func TestServeOutcome(t *testing.T) {
 	if !ok {
 		t.Fatal("artifact never unscreened")
 	}
-	if code, _ := call("GET", q, "kb", nil); code != 404 {
-		t.Fatal("kb:", code)
-	}
-	if code, _ := call("GET", q, "", nil); code != 401 {
-		t.Fatal("no key:", code)
-	}
-	if code, _ := call("GET", q, "zz", nil); code != 401 {
-		t.Fatal("wrong key:", code)
+	if code, out := call("GET", q, "zz", nil); code != 200 || !strings.Contains(out, `"verdict":"unscreened"`) {
+		t.Fatal("local mode ignores bearer:", code, out)
 	}
 
 	cmd.Process.Signal(syscall.SIGTERM)

@@ -15,18 +15,19 @@ func rep(s string, n int) string { return strings.Repeat(s, n) }
 // samples are built at runtime so no source line is credential-shaped.
 func samples() map[string]string {
 	return map[string]string{
-		"private_key_block": "-----" + "BEGIN RSA PRIVATE" + " KEY-----\nMIIB\n-----" + "END RSA PRIVATE KEY-----",
-		"sk_key":            "key is sk" + "-" + rep("a1", 12),
-		"github_token":      "tok gh" + "p_" + rep("A1", 12),
-		"github_pat":        "tok github" + "_pat_" + rep("A1", 15),
-		"aws_access_key":    "id AK" + "IA" + rep("7Q", 8),
-		"slack_token":       "x xo" + "xb-" + rep("12", 8),
-		"google_api_key":    "k AI" + "za" + rep("Ab_", 12)[:35],
-		"stripe_key":        "k sk" + "_live_" + rep("a9", 10),
-		"jwt":               "t ey" + "J" + rep("a", 12) + "." + rep("b", 12) + "." + rep("c", 12),
-		"bearer_token":      "Authorization: Bear" + "er " + rep("Ab1", 8),
-		"connection_string": "db postgres" + "://admin:" + "s3cr3tpass" + "@db.example:5432/x",
-		"env_assignment":    "MY_API_" + "KEY=" + "abcd1234efgh",
+		"private_key_block":  "-----" + "BEGIN RSA PRIVATE" + " KEY-----\nMIIB\n-----" + "END RSA PRIVATE KEY-----",
+		"sk_key":             "key is sk" + "-" + rep("a1", 12),
+		"github_token":       "tok gh" + "p_" + rep("A1", 12),
+		"github_pat":         "tok github" + "_pat_" + rep("A1", 15),
+		"aws_access_key":     "id AK" + "IA" + rep("7Q", 8),
+		"slack_token":        "x xo" + "xb-" + rep("12", 8),
+		"google_api_key":     "k AI" + "za" + rep("Ab_", 12)[:35],
+		"stripe_key":         "k sk" + "_live_" + rep("a9", 10),
+		"jwt":                "t ey" + "J" + rep("a", 12) + "." + rep("b", 12) + "." + rep("c", 12),
+		"bearer_token":       "Authorization: Bear" + "er " + rep("Ab1", 8),
+		"connection_string":  "db postgres" + "://admin:" + "s3cr3tpass" + "@db.example:5432/x",
+		"env_assignment":     "MY_API_" + "KEY=" + "abcd1234efgh",
+		"workflow_api_token": "tok wk" + "_" + rep("a1", 16),
 	}
 }
 

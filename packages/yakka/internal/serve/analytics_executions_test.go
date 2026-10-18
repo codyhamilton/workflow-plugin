@@ -22,7 +22,7 @@ func executionsHTTPServer(t *testing.T) (*Server, string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	base := time.Now().UTC().Truncate(24 * time.Hour).AddDate(0, 0, -5)
+	base := time.Now().UTC().Truncate(24*time.Hour).AddDate(0, 0, -5)
 	at := func(day, hh, mm int) float64 {
 		return float64(base.AddDate(0, 0, day).Add(time.Duration(hh)*time.Hour + time.Duration(mm)*time.Minute).Unix())
 	}

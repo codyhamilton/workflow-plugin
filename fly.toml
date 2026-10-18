@@ -1,0 +1,33 @@
+# Fly.io collector: one machine, persistent YAKKA_SERVE_DATA, GitHub OAuth remote serve.
+# Fly app name is yakka. API origin is https://api.yakka.build.
+# The analytics site is Cloudflare Pages at https://yakka.build and https://www.yakka.build.
+# GitHub's callback stays https://yakka.build/oauth/callback (the Pages page, not this origin).
+# Set GITHUB_OAUTH_CLIENT_ID and GITHUB_OAUTH_CLIENT_SECRET with `fly secrets set` (never in this file).
+
+app = "yakka"
+primary_region = "iad"
+
+[build]
+
+[env]
+  YAKKA_SERVE_ADDR = "0.0.0.0:8080"
+  YAKKA_SERVE_DATA = "/data"
+  YAKKA_PUBLIC_URL = "https://api.yakka.build"
+  YAKKA_SERVE_CORS_ORIGINS = "https://yakka.build,https://www.yakka.build"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[mounts]]
+  source = "workflow_serve_data"
+  destination = "/data"

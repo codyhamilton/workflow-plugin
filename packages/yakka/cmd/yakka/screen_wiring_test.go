@@ -12,7 +12,7 @@ import (
 
 func TestServeScorerWiring(t *testing.T) {
 	tmp := t.TempDir()
-	bin := filepath.Join(tmp, "workflow")
+	bin := filepath.Join(tmp, "yakka")
 	if out, err := exec.Command("go", "build", "-o", bin, ".").CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, out)
 	}
@@ -21,7 +21,7 @@ func TestServeScorerWiring(t *testing.T) {
 		cmd := exec.Command(bin, "serve")
 		cmd.Env = append(os.Environ(), "HOME="+tmp, "YAKKA_SERVE_DATA="+filepath.Join(tmp, "data"), "YAKKA_SERVE_ADDR=127.0.0.1:0",
 			"YAKKA_QUEUE="+filepath.Join(tmp, "queue"), "YAKKA_CLIENT_CONFIG="+filepath.Join(tmp, "client.toml"),
-			"YAKKA_SERVE_KEYS=a=ka", "TYPESAFE_API_KEY=", "YAKKA_CHECKS_DIR=")
+			"TYPESAFE_API_KEY=", "YAKKA_CHECKS_DIR=")
 		cmd.Env = append(cmd.Env, extra...)
 		var out bytes.Buffer
 		cmd.Stderr = &out

@@ -31,6 +31,7 @@ var patterns = []pattern{
 	{name: "slack_token", re: regexp.MustCompile(`\bxox[abprs]-[A-Za-z0-9\-]{10,}`)},
 	{name: "google_api_key", re: regexp.MustCompile(`\bAIza[0-9A-Za-z_\-]{35}`)},
 	{name: "stripe_key", re: regexp.MustCompile(`\b[sr]k_live_[0-9A-Za-z]{16,}`)},
+	{name: "workflow_api_token", re: regexp.MustCompile(`\bwk_[A-Za-z0-9_-]{32,}`)},
 	{name: "jwt", re: regexp.MustCompile(`\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}`)},
 	{name: "bearer_token", re: regexp.MustCompile(`(?i)\bbearer[ \t]+[A-Za-z0-9._~+/\-]{20,}=*`)},
 	{name: "connection_string", re: regexp.MustCompile(`\b[A-Za-z][A-Za-z0-9+.\-]*://[^\s:/@]+:([^\s@/]+)@[^\s/]+`), group: 1, ok: func(v string) bool { return !placeholder(v, false) }},

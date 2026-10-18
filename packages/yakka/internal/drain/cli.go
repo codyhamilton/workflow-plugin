@@ -2,6 +2,7 @@ package drain
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,10 @@ import (
 
 // RunStandalone is `yakka drain`: exit 0 when idle-exited, lock held by another or stopped.
 func RunStandalone(ctx context.Context, stderr io.Writer) int {
+	if _, err := clientconfig.Load(); errors.Is(err, clientconfig.ErrPartialEnv) {
+		fmt.Fprintln(stderr, "yakka drain:", err)
+		return 1
+	}
 	o := Options{Sink: ConfigSink, Log: stderr, Poll: 250 * time.Millisecond}
 	for env, dst := range map[string]*time.Duration{
 		"YAKKA_DRAIN_WINDOW":      &o.Window,
@@ -42,7 +47,7 @@ func RunStandalone(ctx context.Context, stderr io.Writer) int {
 	return 0
 }
 
-// Status is the queue report of `workflow status`.
+// Status is the queue report of `yakka status`.
 type Status struct {
 	Dir       string
 	Queued    int
@@ -69,7 +74,7 @@ func QueueStatus(dir string) Status {
 	return st
 }
 
-// RunStatus is `workflow status`. Exit 1 only when the endpoint is unreachable and files are queued.
+// RunStatus is `yakka status`. Exit 1 only when the endpoint is unreachable and files are queued.
 func RunStatus(w io.Writer) int {
 	st := QueueStatus(QueueDir())
 	fmt.Fprintf(w, "queue: %s\n", st.Dir)
@@ -86,6 +91,11 @@ func RunStatus(w io.Writer) int {
 		fmt.Fprintln(w, "drain: not running")
 	}
 	cfg, err := clientconfig.Load()
+	if errors.Is(err, clientconfig.ErrPartialEnv) {
+		fmt.Fprintf(w, "config: %v\n", err)
+		fmt.Fprintln(w, "endpoint: -")
+		return 1
+	}
 	if err != nil {
 		fmt.Fprintf(w, "config: %s (invalid)\n", clientconfig.Path())
 		fmt.Fprintln(w, "endpoint: -")

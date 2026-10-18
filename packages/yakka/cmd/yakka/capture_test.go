@@ -33,7 +33,7 @@ func (e *env) startHosted(addr string, extra ...string) string {
 	}
 	cmd := exec.Command(e.bin, "serve")
 	cmd.Env = append(append([]string{}, e.base...), "YAKKA_SERVE_DATA="+e.data, "YAKKA_SERVE_ADDR="+addr,
-		"YAKKA_SERVE_KEYS=t="+apiKey, "YAKKA_SERVE_POLL=500ms")
+		"YAKKA_SERVE_POLL=500ms")
 	cmd.Env = append(cmd.Env, extra...)
 	cmd.Stderr = lf
 	if err := cmd.Start(); err != nil {
@@ -67,28 +67,11 @@ func (e *env) lockHeld() bool {
 }
 
 func (e *env) spoolEnv(extra []string, harness string, payload any) error {
-	m, ok := payload.(map[string]any)
-	if !ok {
-		b, err := json.Marshal(payload)
-		if err != nil {
-			return err
-		}
-		if err := json.Unmarshal(b, &m); err != nil {
-			return err
-		}
-	}
-	kick := true
-	kickBin := ""
-	env := append(append([]string{}, e.base...), extra...)
-	for _, kv := range extra {
-		if kv == "YAKKA_HOOKLOG_KICK=0" {
-			kick = false
-		}
-		if strings.HasPrefix(kv, "YAKKA_BIN=") {
-			kickBin = strings.TrimPrefix(kv, "YAKKA_BIN=")
-		}
-	}
-	return e.writeSpool(harness, "", m, kick, kickBin, env)
+	b, _ := json.Marshal(payload)
+	cmd := exec.Command("bash", "../../../hooklog/spool.sh", "--harness", harness)
+	cmd.Env = append(append([]string{}, e.base...), extra...)
+	cmd.Stdin = bytes.NewReader(b)
+	return cmd.Run()
 }
 
 func (e *env) starts() []string {
@@ -231,7 +214,7 @@ func TestCaptureOutcome(t *testing.T) {
 			return e.ledger(`SELECT count(*) FROM facts WHERE type='artifact_version'
 				AND instr(raw, '"source":"commit"') > 0`) >= 1
 		})
-		db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "t", "ledger.db")+"?mode=ro")
+		db, err := sql.Open("sqlite", "file:"+filepath.Join(e.data, "local", "ledger.db")+"?mode=ro")
 		if err != nil {
 			t.Fatal(err)
 		}
