@@ -150,3 +150,10 @@ Refined in `d3beccc` into four units. 3-01 owns the Python login, status, and ve
 - Commit: `bc8548f`, merged in `956096e`. Report: `docs/plans/16-python-local-client/reports/3-02-bin-yakka-wrapper.md`.
 - Deviations: committed on `work/3-02` for the alongside run. `Base.env()` calls `goenv` only when `go=True`, so wrapper tests do not need a Go toolchain. Not a contract contradiction; the brief is unchanged.
 - Agent: Composer 2.5. Turns and final context were not reported by the harness.
+
+### 3-01-login-status-version
+
+- Built: `login`, `status`, and `version` / `--version` on `plugins/yakka/client/yakka.py`. Login writes config at mode 0600 from the device exchange. Status prints the queue lines and probes `GET /v1/health`. Version prints `yakka <version> <commit>`. `test_login.py` and `test_status.py` port the Go cases that do not boot `yakka serve`. `test_half_set_env_refusal_drain` no longer binds `127.0.0.1:8770`.
+- Commit: `2534d15`, merged in `6c413a5`. Report: `docs/plans/16-python-local-client/reports/3-01-login-status-version.md`.
+- Deviations: committed on `work/3-01` for the alongside run. The worker did not run the 3.10 unittest gate (`python3.10` was absent and `apt-get` was denied). Not a contract contradiction; the brief is unchanged.
+- Agent: Composer 2.5. Turns and final context were not reported by the harness.
