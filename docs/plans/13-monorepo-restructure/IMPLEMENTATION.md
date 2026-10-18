@@ -505,3 +505,13 @@ Phase 5 outcome holds. The binary, queue, keyless serve, and MCP identity are ya
 1. Logged-in Cursor session check, still manual, from Phase 3. On a checkout of this branch: install the marketplace entry, open a Cursor session that loads `plugins/yakka`, confirm a `./script/...` hook fires and the event lands in the queue, then `yakka drain` to a local `yakka serve` ships it and `yakka status` reports no failure.
 2. Root `README.md` still documents the signal log as `tools/driver/.jev-signal-log.jsonl`. Phase 7 docs.
 3. `tools/driver/jev_signal_log.py` still resolves `~/.local/state/workflow/jev-signal-log.jsonl` via `WORKFLOW_JEV_SIGNAL_LOG`. `packages/opencode-yakka-hooks` now defaults to `~/.local/state/yakka/jev-signal-log.jsonl` via `YAKKA_JEV_SIGNAL_LOG`. Phase 6 owns the `tools/driver` identifiers. The two resolvers no longer match.
+
+## Phase 6: Plugin and plan protocol are yakka
+
+Tool: Cursor cloud agent
+Run: https://cursor.com/agents/bc-b1b39a7a-e44c-5d87-b85e-fcc2150503b2
+Start: 2026-10-18T00:07:36Z
+
+`artifact_feedback` before refine: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`).
+
+Refine: Proceed. Commit `cf0f1c5`. Six units. Wave 1: `6-01`, `6-02`, `6-04`, `6-05` alongside. Then `6-03`. Then `6-06`. Phase 5 Carried: item 1 stays carried (manual Cursor session; does not touch a Phase 6 contract). Item 2 stays carried (root `README.md` signal-log prose; Phase 7 docs). Item 3 absorbed into `6-03` (`jev_signal_log.py` and `YAKKA_*` parity). `artifact_feedback` on the briefs: unreachable. Workflow MCP tool discovery failed (`namespaceStatus: error`); feedback was not called.
