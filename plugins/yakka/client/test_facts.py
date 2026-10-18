@@ -1,0 +1,464 @@
+import json
+import os
+import pwd
+import subprocess
+import tempfile
+import unittest
+from typing import Any
+
+import yakka
+
+_REPO_ROOT = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)
+)
+_FIXTURES = os.path.join(_REPO_ROOT, "packages", "hooklog", "tests", "fixtures")
+_YAKKA_PKG = os.path.join(_REPO_ROOT, "packages", "yakka")
+
+NOTES = "line one\nline two\nline three\nline four\nline five\nline six\n"
+
+
+def _run_git(dir_path: str, *args: str) -> str:
+    env = os.environ.copy()
+    env.update(
+        {
+            "GIT_CONFIG_GLOBAL": "/dev/null",
+            "GIT_AUTHOR_NAME": "t",
+            "GIT_AUTHOR_EMAIL": "t@x",
+            "GIT_COMMITTER_NAME": "t",
+            "GIT_COMMITTER_EMAIL": "t@x",
+        }
+    )
+    cmd = ["git", "-C", dir_path, *args]
+    out = subprocess.run(cmd, check=True, capture_output=True, text=True, env=env)
+    return out.stdout.strip()
+
+
+def _put(dir_path: str, rel: str, body: str) -> None:
+    p = os.path.join(dir_path, rel)
+    os.makedirs(os.path.dirname(p), mode=0o755, exist_ok=True)
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(body)
+
+
+def _new_repo() -> tuple[str, str, str]:
+    dir_path = os.path.realpath(tempfile.mkdtemp())
+    _run_git(dir_path, "init", "-q")
+    _put(dir_path, "notes/old.txt", NOTES)
+    _put(dir_path, "docs/plans/x/briefs/gone.md", "# gone\n")
+    _run_git(dir_path, "add", ".")
+    _run_git(dir_path, "commit", "-q", "-m", "first")
+    _put(dir_path, "docs/plans/x/DESIGN.md", "# Design\n")
+    _put(dir_path, "docs/plans/x/briefs/a.md", "# Brief\n")
+    _put(dir_path, "other.txt", "x\n")
+    _run_git(dir_path, "mv", "notes/old.txt", "notes/new.txt")
+    _run_git(dir_path, "add", ".")
+    _run_git(dir_path, "commit", "-q", "-m", "second")
+    repo_id, err = yakka.RepoID(dir_path)
+    if err:
+        raise err
+    sha = _run_git(dir_path, "rev-parse", "HEAD")
+    return dir_path, sha, repo_id
+
+
+def _queue_file(name: str, harness: str, payload: dict[str, Any]) -> yakka.File:
+    b = json.dumps(payload, separators=(",", ":"))
+    event = payload["hook_event_name"]
+    data = (
+        f'{{"ts":1700000000.5,"harness":{json.dumps(harness)},"event":{json.dumps(event)}}}\n'
+        + b
+    ).encode()
+    return yakka.File(Name=name, Data=data)
+
+
+def _decode(out: yakka.Output) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    for f in out.Facts:
+        raw = f if isinstance(f, (bytes, bytearray)) else f.encode()
+        result.append(json.loads(raw))
+    return result
+
+
+def _load_fixtures(file: str, *repl: str) -> list[dict[str, Any]]:
+    path = os.path.join(_FIXTURES, file)
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    for i in range(0, len(repl), 2):
+        text = text.replace(repl[i], repl[i + 1])
+    obj = json.loads(text)
+    if isinstance(obj, list):
+        return obj
+    return obj["fixtures"]
+
+
+_GO_INGEST_BRIDGE = r"""
+package facts
+
+import (
+	"context"
+	"encoding/json"
+	"os"
+	"testing"
+
+	"github.com/codyhamilton/yakka/packages/yakka/internal/ingest"
+	"github.com/codyhamilton/yakka/packages/yakka/internal/store"
+)
+
+func TestPythonIngestBridge(t *testing.T) {
+	factsPath := os.Getenv("YAKKA_FACTS_FILE")
+	storeDir := os.Getenv("YAKKA_STORE_DIR")
+	if factsPath == "" || storeDir == "" {
+		t.Skip("bridge env not set")
+	}
+	b, err := os.ReadFile(factsPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var facts []json.RawMessage
+	if err := json.Unmarshal(b, &facts); err != nil {
+		t.Fatal(err)
+	}
+	ten, err := store.Open(storeDir, store.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ten.Close()
+	res, err := ingest.Ingest(context.Background(), ten, facts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res) != len(facts) {
+		t.Fatalf("results %d for %d facts", len(res), len(facts))
+	}
+	for _, x := range res {
+		if x.Status == ingest.Rejected {
+			t.Fatalf("rejected: %+v", x)
+		}
+	}
+}
+"""
+
+_FACTS_BRIDGE_GO = os.path.join(
+    _YAKKA_PKG, "internal", "facts", "z_python_ingest_bridge_test.go"
+)
+
+
+def _assert_ingest(facts: list) -> None:
+    raw_facts: list[bytes] = []
+    for f in facts:
+        if isinstance(f, (bytes, bytearray)):
+            raw_facts.append(bytes(f))
+        elif isinstance(f, dict):
+            raw_facts.append(json.dumps(f, separators=(",", ":")).encode())
+        else:
+            raw_facts.append(f)
+    with tempfile.TemporaryDirectory() as store_dir:
+        with tempfile.NamedTemporaryFile("wb", suffix=".json", delete=False) as tf:
+            tf.write(b"[" + b",".join(raw_facts) + b"]")
+            facts_path = tf.name
+        wrote_bridge = False
+        try:
+            if not os.path.exists(_FACTS_BRIDGE_GO):
+                with open(_FACTS_BRIDGE_GO, "w", encoding="utf-8") as gf:
+                    gf.write(_GO_INGEST_BRIDGE)
+                wrote_bridge = True
+            home = pwd.getpwuid(os.getuid()).pw_dir
+            base_env = {
+                k: v
+                for k, v in os.environ.items()
+                if k not in ("HOME", "GOPATH", "GOMODCACHE", "GOCACHE")
+            }
+            base_env["HOME"] = home
+            env = dict(base_env)
+            for key, go_key in (
+                ("GOPATH", "GOPATH"),
+                ("GOMODCACHE", "GOMODCACHE"),
+                ("GOCACHE", "GOCACHE"),
+            ):
+                proc_env = subprocess.run(
+                    ["go", "env", go_key],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    env=base_env,
+                )
+                env[key] = proc_env.stdout.strip()
+            env["HOME"] = home
+            env["YAKKA_FACTS_FILE"] = facts_path
+            env["YAKKA_STORE_DIR"] = store_dir
+            proc = subprocess.run(
+                ["go", "test", "-run", "^TestPythonIngestBridge$", "./internal/facts"],
+                cwd=_YAKKA_PKG,
+                capture_output=True,
+                text=True,
+                env=env,
+            )
+        finally:
+            os.unlink(facts_path)
+            if wrote_bridge:
+                try:
+                    os.unlink(_FACTS_BRIDGE_GO)
+                except OSError:
+                    pass
+        if proc.returncode != 0:
+            raise AssertionError(
+                f"ingest bridge exit {proc.returncode}: {proc.stdout}\n{proc.stderr}"
+            )
+
+
+class TestWritesFixtures(unittest.TestCase):
+    def test_writes_fixtures(self) -> None:
+        rdir, _, repo_id = _new_repo()
+        fx = _load_fixtures("artifact_writes.json")
+        self.assertEqual(len(fx), 11)
+        _put(rdir, "docs/plans/example/DESIGN.md", "# Design example\n")
+        _put(rdir, "docs/plans/example/briefs/01.md", "# Brief example\n")
+        all_facts: list = []
+        for i, f in enumerate(fx):
+            f["payload"]["cwd"] = rdir
+            out = yakka.Build(
+                None, [_queue_file(f"q{i}", f["harness"], f["payload"])]
+            )[0]
+            fs = _decode(out)
+            self.assertEqual(len(fs), 2)
+            self.assertEqual(len(out.Reasons), 0)
+            self.assertEqual(fs[0]["type"], "hook_event")
+            self.assertEqual(fs[0]["id"], f"q{i}#0")
+            v = fs[1]
+            path = v["path"]
+            with open(os.path.join(rdir, path), "rb") as rf:
+                body = rf.read()
+            self.assertEqual(v["type"], "artifact_version")
+            self.assertEqual(v["source"], "worktree")
+            self.assertEqual(v["repo_id"], repo_id)
+            self.assertEqual(v["content_hash"], yakka.ContentHash(body))
+            self.assertEqual(v["content"], body.decode())
+            self.assertTrue(path.startswith("docs/plans/example/"))
+            all_facts.extend(out.Facts)
+        _assert_ingest(all_facts)
+
+
+class TestWritesCoalesceAndMissing(unittest.TestCase):
+    def test_writes_coalesce_and_missing(self) -> None:
+        rdir, _, _ = _new_repo()
+        _put(rdir, "docs/plans/example/DESIGN.md", "# D\n")
+        p1 = {
+            "hook_event_name": "postToolUse",
+            "tool_name": "write",
+            "conversation_id": "c",
+            "cwd": rdir,
+            "tool_input": {"file_path": "docs/plans/example/DESIGN.md"},
+        }
+        p2 = {
+            "hook_event_name": "afterFileEdit",
+            "conversation_id": "c",
+            "cwd": rdir,
+            "file_path": "docs/plans/example/DESIGN.md",
+        }
+        outs = yakka.Build(
+            None,
+            [
+                _queue_file("a", "cursor", p1),
+                _queue_file("b", "cursor", p2),
+            ],
+        )
+        self.assertEqual(len(outs[0].Facts), 1)
+        self.assertEqual(len(outs[1].Facts), 2)
+        p3 = {
+            "hook_event_name": "afterFileEdit",
+            "conversation_id": "d",
+            "cwd": rdir,
+            "file_path": "docs/plans/example/DESIGN.md",
+        }
+        outs = yakka.Build(
+            None,
+            [
+                _queue_file("a", "cursor", p1),
+                _queue_file("b", "cursor", p3),
+            ],
+        )
+        self.assertEqual(len(outs[0].Facts), 2)
+        self.assertEqual(len(outs[1].Facts), 2)
+        os.remove(os.path.join(rdir, "docs/plans/example/DESIGN.md"))
+        outs = yakka.Build(None, [_queue_file("a", "cursor", p1)])
+        self.assertEqual(len(outs[0].Facts), 1)
+        self.assertEqual(len(outs[0].Reasons), 0)
+
+
+class TestBadFiles(unittest.TestCase):
+    def test_bad_files(self) -> None:
+        outs = yakka.Build(
+            None,
+            [
+                yakka.File(Name="a", Data=b"nope\n{}"),
+                yakka.File(Name="b", Data=b'{"ts":1,"harness":"claude"}\n[1]'),
+                yakka.File(
+                    Name="c",
+                    Data=b'{"ts":1,"harness":"claude"}\n{"tool_name":"x"}',
+                ),
+                yakka.File(Name="d", Data=b'{"ts":1,"harness":"claude"}\n{not json'),
+            ],
+        )
+        want = [
+            "unparseable: envelope is not JSON",
+            "unparseable: payload is not an object",
+            "invalid: no conversation id",
+            "unparseable: payload is not JSON",
+        ]
+        for i, o in enumerate(outs):
+            self.assertEqual(len(o.Facts), 0)
+            self.assertEqual(len(o.Reasons), 1)
+            self.assertEqual(o.Reasons[0], want[i])
+
+
+class TestCommitFixtures(unittest.TestCase):
+    def test_commit_fixtures(self) -> None:
+        rdir, sha, repo_id = _new_repo()
+        fx = _load_fixtures(
+            "commit_calls.json", "{{DIR}}", rdir, "{{SHA7}}", sha[:7]
+        )
+        self.assertEqual(len(fx), 7)
+        all_facts: list = []
+        for i, f in enumerate(fx):
+            out = yakka.Build(
+                None, [_queue_file(f"c{i}", f["harness"], f["payload"])]
+            )[0]
+            fs = _decode(out)
+            if not f["expect_commit"]:
+                self.assertEqual(len(fs), 1)
+                self.assertEqual(fs[0]["type"], "hook_event")
+                continue
+            self.assertEqual(len(fs), 4)
+            c = fs[1]
+            self.assertEqual(c["type"], "commit")
+            self.assertEqual(c["sha"], sha)
+            self.assertEqual(c["repo_id"], repo_id)
+            self.assertEqual(
+                "[" + " ".join(c["paths"]) + "]",
+                "[docs/plans/x/DESIGN.md docs/plans/x/briefs/a.md notes/new.txt other.txt]",
+            )
+            rn = c["renames"]
+            self.assertEqual(len(rn), 1)
+            self.assertEqual(rn[0]["from"], "notes/old.txt")
+            self.assertEqual(rn[0]["to"], "notes/new.txt")
+            got2: dict[str, bool] = {}
+            for v in fs[2:]:
+                self.assertEqual(v["type"], "artifact_version")
+                self.assertEqual(v["source"], "commit")
+                self.assertEqual(v["sha"], sha)
+                body = _run_git(rdir, "show", f"{sha}:{v['path']}")
+                self.assertEqual(v["content"].strip(), body.strip())
+                self.assertEqual(
+                    v["content_hash"], yakka.ContentHash(v["content"].encode())
+                )
+                got2[v["path"]] = True
+            self.assertTrue(got2.get("docs/plans/x/DESIGN.md"))
+            self.assertTrue(got2.get("docs/plans/x/briefs/a.md"))
+            self.assertEqual(len(got2), 2)
+            all_facts.extend(out.Facts)
+        _assert_ingest(all_facts)
+
+
+class TestCommitDedupeInBatch(unittest.TestCase):
+    def test_commit_dedupe_in_batch(self) -> None:
+        rdir, sha, _ = _new_repo()
+        fx = _load_fixtures(
+            "commit_calls.json", "{{DIR}}", rdir, "{{SHA7}}", sha[:7]
+        )
+        a = _queue_file("a", fx[1]["harness"], fx[1]["payload"])
+        b = _queue_file("b", fx[1]["harness"], fx[1]["payload"])
+        outs = yakka.Build(None, [a, b])
+        self.assertEqual(len(outs[0].Facts), 4)
+        self.assertEqual(len(outs[1].Facts), 1)
+
+
+def _fake_secret() -> str:
+    return "gh" + "p_" + "a1B2" * 9
+
+
+class TestSecretScrub(unittest.TestCase):
+    def test_secret_scrub(self) -> None:
+        rdir, _, _ = _new_repo()
+        sec = _fake_secret()
+        _put(rdir, "docs/plans/example/DESIGN.md", "# D\nok\ntoken: " + sec + "\n")
+        p = {
+            "hook_event_name": "PostToolUse",
+            "tool_name": "Write",
+            "session_id": "s",
+            "cwd": rdir,
+            "tool_input": {
+                "file_path": "docs/plans/example/DESIGN.md",
+                "content": "token: " + sec,
+            },
+        }
+        out = yakka.Build(None, [_queue_file("q", "claude", p)])[0]
+        self.assertEqual(len(out.Facts), 1)
+        self.assertEqual(len(out.Reasons), 1)
+        self.assertIn("secret: ", out.Reasons[0])
+        self.assertIn(
+            "at line 3 in docs/plans/example/DESIGN.md", out.Reasons[0]
+        )
+        raw = out.Facts[0]
+        hv = json.loads(raw)
+        self.assertEqual(hv["type"], "hook_event")
+        self.assertNotIn(sec.encode(), raw)
+        self.assertIn(b"[REDACTED", raw)
+        self.assertNotIn(sec, str(out.Reasons))
+
+
+class TestSecretInCommittedBlob(unittest.TestCase):
+    def test_secret_in_committed_blob(self) -> None:
+        rdir, _, _ = _new_repo()
+        sec = _fake_secret()
+        _put(rdir, "docs/plans/x/briefs/s.md", "key " + sec + "\n")
+        _run_git(rdir, "add", ".")
+        _run_git(rdir, "commit", "-q", "-m", "secret")
+        sha = _run_git(rdir, "rev-parse", "HEAD")
+        p = {
+            "hook_event_name": "PostToolUse",
+            "tool_name": "Bash",
+            "session_id": "s",
+            "cwd": rdir,
+            "tool_input": {"command": "git commit -m secret"},
+            "tool_response": {"stdout": f"[main {sha[:8]}] secret\n"},
+        }
+        out = yakka.Build(None, [_queue_file("q", "claude", p)])[0]
+        self.assertEqual(len(out.Facts), 2)
+        self.assertEqual(len(out.Reasons), 1)
+        self.assertIn("in docs/plans/x/briefs/s.md", out.Reasons[0])
+        for f in out.Facts:
+            s = f if isinstance(f, (bytes, bytearray)) else json.dumps(f).encode()
+            self.assertNotIn(sec.encode(), s)
+
+
+class TestWritePaths(unittest.TestCase):
+    def test_write_paths(self) -> None:
+        rdir, _, _ = _new_repo()
+        p = {
+            "hook_event_name": "postToolUse",
+            "tool_name": "write",
+            "conversation_id": "c",
+            "cwd": rdir,
+            "tool_input": {"file_path": "docs/plans/x/DESIGN.md"},
+        }
+        f = _queue_file("a", "cursor", p)
+        got = yakka.WritePaths(f.Data)
+        want = os.path.join(rdir, "docs/plans/x/DESIGN.md")
+        self.assertEqual(len(got), 1)
+        self.assertEqual(got[0], want)
+        self.assertIsNone(yakka.WritePaths(b"not json\n{}"))
+        self.assertIsNone(yakka.WritePaths(None))
+        bash = _queue_file(
+            "b",
+            "cursor",
+            {
+                "hook_event_name": "postToolUse",
+                "tool_name": "shell",
+                "conversation_id": "c",
+                "cwd": rdir,
+            },
+        )
+        self.assertIsNone(yakka.WritePaths(bash.Data))
+
+
+if __name__ == "__main__":
+    unittest.main()

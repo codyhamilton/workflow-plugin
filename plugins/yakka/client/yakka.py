@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional, Tuple
 
 # --- clientconfig ---
@@ -430,6 +431,556 @@ def Patterns() -> List[str]:
         if not names or names[-1] != name:
             names.append(name)
     return names
+
+
+# --- facts ---
+
+
+@dataclass
+class File:
+    Name: str = ""
+    Data: bytes = b""
+
+
+@dataclass
+class Output:
+    Name: str = ""
+    Facts: List[bytes] = field(default_factory=list)
+    Reasons: List[str] = field(default_factory=list)
+
+
+@dataclass
+class _Parsed:
+    name: str
+    payload: dict[str, Any]
+    conv: str = ""
+    harness: str = ""
+    event: str = ""
+    ts: Any = 0
+    base: str = ""
+    refs: List["_Ref"] = field(default_factory=list)
+    reasons: List[str] = field(default_factory=list)
+    bad: bool = True
+
+
+@dataclass
+class _Ref:
+    key: str
+    abs: str
+    rel: str
+    repo: str
+
+
+@dataclass
+class _ReadResult:
+    content: str = ""
+    raw: bytes = b""
+    ok: bool = False
+
+
+def _fact_json(v: dict[str, Any]) -> bytes:
+    def _default(o: Any) -> Any:
+        if isinstance(o, _Number):
+            if any(c in o.s for c in ".eE"):
+                return float(o.s)
+            try:
+                return int(o.s)
+            except ValueError:
+                return float(o.s)
+        raise TypeError(type(o))
+
+    return (
+        json.dumps(v, ensure_ascii=False, sort_keys=True, default=_default).encode(
+            "utf-8"
+        )
+    )
+
+
+def Build(ctx: Any, files: List[File]) -> List[Output]:
+    ps = [_parse_file(f) for f in files]
+    reads: dict[str, _ReadResult] = {}
+    last: dict[str, int] = {}
+    for i, p in enumerate(ps):
+        if p.bad:
+            continue
+        for abs_path in _write_paths(p):
+            r = reads.get(abs_path)
+            if r is None:
+                r = _read_file(abs_path)
+                reads[abs_path] = r
+            if not r.ok:
+                continue
+            top, rel, in_repo, err = RepoPath(abs_path)
+            if err is not None or not in_repo or Kind(rel) == "":
+                continue
+            repo_id, err = RepoID(top)
+            if err is not None:
+                continue
+            k = p.conv + "\x00" + repo_id + "\x00" + rel
+            p.refs.append(_Ref(key=k, abs=abs_path, rel=rel, repo=repo_id))
+            last[k] = i
+    out: List[Output] = []
+    commits: dict[str, bool] = {}
+    for i, p in enumerate(ps):
+        o = Output(Name=p.name)
+        if p.bad:
+            o.Reasons = list(p.reasons)
+            out.append(o)
+            continue
+
+        def add(v: dict[str, Any]) -> None:
+            v["id"] = f"{p.name}#{len(o.Facts)}"
+            o.Facts.append(_fact_json(v))
+
+        def common(typ: str) -> dict[str, Any]:
+            return {
+                "type": typ,
+                "conversation_id": p.conv,
+                "harness": p.harness,
+                "event": p.event,
+                "ts": p.ts,
+            }
+
+        hv = common("hook_event")
+        hv["payload"] = _redact_payload(p.payload)
+        add(hv)
+        seen: dict[str, bool] = {}
+        for r in p.refs:
+            if last[r.key] != i or seen.get(r.key):
+                continue
+            seen[r.key] = True
+            rd = reads[r.abs]
+            hits = Scan(rd.content)
+            if hits:
+                o.Reasons.append(
+                    f"secret: {hits[0].Pattern} at line {hits[0].Line} in {r.rel}"
+                )
+                continue
+            v = common("artifact_version")
+            v["repo_id"] = r.repo
+            v["path"] = r.rel
+            v["content_hash"] = ContentHash(rd.raw)
+            v["content"] = rd.content
+            v["source"] = "worktree"
+            add(v)
+        _build_commits(ctx, p, commits, common, add, o)
+        out.append(o)
+    return out
+
+
+def _parse_file(f: File) -> _Parsed:
+    p = _Parsed(name=f.Name, payload={})
+    if not f.Data:
+        p.reasons = ["unparseable: envelope is not JSON"]
+        return p
+    line, rest = f.Data.split(b"\n", 1) if b"\n" in f.Data else (f.Data, b"")
+    try:
+        env = json.loads(
+            line.decode("utf-8"),
+            parse_float=lambda s: _Number(s),
+        )
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        p.reasons = ["unparseable: envelope is not JSON"]
+        return p
+    if not isinstance(env, dict):
+        p.reasons = ["unparseable: envelope is not JSON"]
+        return p
+    try:
+        payload = json.loads(
+            rest.decode("utf-8"),
+            parse_float=lambda s: _Number(s),
+        )
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        p.reasons = ["unparseable: payload is not JSON"]
+        return p
+    if not isinstance(payload, dict):
+        p.reasons = ["unparseable: payload is not an object"]
+        return p
+    p.payload = payload
+    p.harness = env.get("harness", "")
+    p.ts = env.get("ts", 0)
+    if p.ts == "":
+        p.ts = 0
+    for key in ("session_id", "conversation_id", "sessionID"):
+        s = payload.get(key)
+        if isinstance(s, str) and s:
+            p.conv = s
+            break
+    if not p.conv:
+        p.reasons = ["invalid: no conversation id"]
+        return p
+    p.event = env.get("event", "")
+    if not p.event:
+        hen = payload.get("hook_event_name")
+        if isinstance(hen, str):
+            p.event = hen
+    cwd = payload.get("cwd")
+    if isinstance(cwd, str) and cwd:
+        p.base = cwd
+    else:
+        roots = payload.get("workspace_roots")
+        if isinstance(roots, list) and roots:
+            first = roots[0]
+            if isinstance(first, str):
+                p.base = first
+    p.bad = False
+    return p
+
+
+def _redact_payload(v: Any) -> Any:
+    if isinstance(v, str):
+        return Redact(v)
+    if isinstance(v, dict):
+        return {k: _redact_payload(e) for k, e in v.items()}
+    if isinstance(v, list):
+        return [_redact_payload(e) for e in v]
+    return v
+
+
+def _read_file(abs_path: str) -> _ReadResult:
+    try:
+        with open(abs_path, "rb") as rf:
+            b = rf.read()
+    except OSError:
+        return _ReadResult()
+    try:
+        text = b.decode("utf-8")
+    except UnicodeDecodeError:
+        return _ReadResult()
+    return _ReadResult(content=text, raw=b, ok=True)
+
+
+_write_tools = {
+    "write": True,
+    "edit": True,
+    "multiedit": True,
+    "write_file": True,
+    "edit_file": True,
+    "create_file": True,
+    "str_replace_editor": True,
+    "apply_patch": True,
+    "applypatch": True,
+}
+
+_patch_re = re.compile(r"(?m)^\*\*\* (?:Add File|Update File|Move to): (.+)$")
+
+_expected_event = {
+    "claude": "PostToolUse",
+    "codex": "PostToolUse",
+    "cursor": "postToolUse",
+    "opencode": "tool.execute.after",
+}
+
+
+def _write_paths(p: _Parsed) -> List[str]:
+    raw: List[str] = []
+    payload = p.payload
+    event = p.event
+    hen = payload.get("hook_event_name")
+    if isinstance(hen, str) and hen:
+        event = hen
+    else:
+        ev = payload.get("event")
+        if isinstance(ev, str) and ev:
+            event = ev
+    if p.harness == "cursor" and event == "afterFileEdit":
+        fp = payload.get("file_path")
+        if isinstance(fp, str):
+            raw = [fp]
+    else:
+        exp = _expected_event.get(p.harness, "")
+        if event != exp or payload.get("source") == "bus":
+            return []
+        tn = payload.get("tool_name", "")
+        if not isinstance(tn, str):
+            tn = ""
+        name = tn[tn.rfind(".") + 1 :].lower()
+        if not _write_tools.get(name):
+            return []
+        is_patch = name in ("apply_patch", "applypatch")
+        args: dict[str, Any] = {}
+        ti = payload.get("tool_input")
+        if isinstance(ti, dict):
+            args = ti
+        elif isinstance(ti, str):
+            if ti:
+                try:
+                    v = json.loads(ti, parse_float=lambda s: _Number(s))
+                except json.JSONDecodeError:
+                    if is_patch:
+                        args = {"patch": ti}
+                    else:
+                        return []
+                else:
+                    if not isinstance(v, dict):
+                        return []
+                    args = v
+        elif ti is not None:
+            return []
+        for k in ("file_path", "path", "filePath", "target_file"):
+            s = args.get(k)
+            if isinstance(s, str):
+                raw.append(s)
+        edits = args.get("edits")
+        if isinstance(edits, list):
+            for e in edits:
+                if isinstance(e, dict):
+                    for k in ("file_path", "path", "filePath"):
+                        s = e.get(k)
+                        if isinstance(s, str):
+                            raw.append(s)
+        if is_patch:
+            patch = args.get("patch", "")
+            if not isinstance(patch, str) or not patch:
+                patch = args.get("input", "")
+            if isinstance(patch, str):
+                for m in _patch_re.finditer(patch):
+                    raw.append(m.group(1))
+    out: List[str] = []
+    seen: dict[str, bool] = {}
+    for r in raw:
+        abs_path = r
+        if not os.path.isabs(r):
+            if not p.base:
+                continue
+            abs_path = os.path.join(p.base, r)
+        abs_path = os.path.normpath(abs_path)
+        if not seen.get(abs_path):
+            seen[abs_path] = True
+            out.append(abs_path)
+    return out
+
+
+_git_commit_re = re.compile(
+    r"(?:^|[\s;&|(])git((?:\s+(?:-C\s+(?:\"[^\"]*\"|'[^']*'|\S+)|-c\s+\S+|--[\w-]+(?:=\S+)?))*)\s+commit(?:[\s;&|)]|$)"
+)
+_dir_re = re.compile(r'-C\s+("[^"]*"|\'[^\']*\'|\S+)')
+_sha_re = re.compile(r"(?m)^\[(?:[^\]]*\s)?([0-9a-f]{7,40})\]")
+_post_events = {
+    "PostToolUse": True,
+    "postToolUse": True,
+    "afterShellExecution": True,
+    "tool.execute.after": True,
+}
+
+
+def _as_object(v: Any) -> Optional[dict[str, Any]]:
+    if isinstance(v, dict):
+        return v
+    if isinstance(v, str):
+        try:
+            m = json.loads(v, parse_float=lambda s: _Number(s))
+        except json.JSONDecodeError:
+            return None
+        if isinstance(m, dict):
+            return m
+    return None
+
+
+def _command_text(payload: dict[str, Any]) -> str:
+    c: Any = None
+    ti = _as_object(payload.get("tool_input"))
+    if ti is not None:
+        c = ti.get("command")
+    if c is None:
+        c = payload.get("command")
+    if isinstance(c, str):
+        return c
+    if isinstance(c, list):
+        parts = [e for e in c if isinstance(e, str)]
+        return " ".join(parts)
+    return ""
+
+
+def _non_zero(v: Any) -> bool:
+    if isinstance(v, _Number):
+        try:
+            return float(v.s) != 0
+        except ValueError:
+            return False
+    if isinstance(v, (int, float)):
+        return v != 0
+    return False
+
+
+def _output_and_failed(payload: dict[str, Any]) -> tuple[str, bool]:
+    failed = _non_zero(payload.get("exit_code")) or _non_zero(payload.get("exitCode"))
+    texts: List[str] = []
+    for k in ("tool_response", "tool_output", "output"):
+        v = payload.get(k)
+        if isinstance(v, str):
+            m = _as_object(v)
+            if m is not None:
+                v = m
+            else:
+                texts.append(v)
+                continue
+        if isinstance(v, dict):
+            failed = failed or _non_zero(v.get("exit_code")) or _non_zero(
+                v.get("exitCode")
+            )
+            for f in ("stdout", "output", "stderr"):
+                s = v.get(f)
+                if isinstance(s, str):
+                    texts.append(s)
+    return "\n".join(texts), failed
+
+
+def _unquote(s: str) -> str:
+    if len(s) >= 2 and s[0] in ('"', "'") and s[-1] == s[0]:
+        return s[1:-1]
+    return s
+
+
+def _facts_git(ctx: Any, dir_path: str, *args: str) -> bytes:
+    cmd = ["git", "-C", dir_path, *args]
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+    try:
+        out = subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            timeout=10,
+            env=env,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        raise OSError("git failed")
+    return out.stdout
+
+
+def _build_commits(
+    ctx: Any,
+    p: _Parsed,
+    done: dict[str, bool],
+    common: Callable[[str], dict[str, Any]],
+    add: Callable[[dict[str, Any]], None],
+    o: Output,
+) -> None:
+    event = p.payload.get("hook_event_name", "")
+    if not isinstance(event, str) or not event:
+        event = p.event
+    if not _post_events.get(event):
+        return
+    cmd_text = _command_text(p.payload)
+    matches = list(_git_commit_re.finditer(cmd_text))
+    if not matches:
+        return
+    text, failed = _output_and_failed(p.payload)
+    if failed:
+        return
+    sm = _sha_re.search(text)
+    if not sm:
+        return
+    for m in matches:
+        dir_path = p.base
+        for d in _dir_re.finditer(m.group(1)):
+            c = _unquote(d.group(1))
+            if os.path.isabs(c):
+                dir_path = c
+            elif dir_path:
+                dir_path = os.path.join(dir_path, c)
+            else:
+                dir_path = ""
+        if not dir_path:
+            continue
+        try:
+            b = _facts_git(ctx, dir_path, "rev-parse", "--verify", sm.group(1) + "^{commit}")
+        except OSError:
+            continue
+        sha = b.decode().strip()
+        repo_id, err = RepoID(dir_path)
+        if err is not None:
+            continue
+        dk = p.conv + "\x00" + repo_id + "\x00" + sha
+        if done.get(dk):
+            return
+        try:
+            b = _facts_git(
+                ctx,
+                dir_path,
+                "diff-tree",
+                "-M",
+                "--name-status",
+                "-r",
+                "--root",
+                "--no-commit-id",
+                "-z",
+                sha,
+            )
+        except OSError:
+            continue
+        done[dk] = True
+        paths: List[str] = []
+        renames: List[dict[str, str]] = []
+        catchup: List[str] = []
+        toks = b.decode("latin-1").split("\x00")
+        i = 0
+        while i < len(toks):
+            st = toks[i]
+            if not st:
+                i += 1
+                continue
+            if st[0] in ("R", "C"):
+                if i + 2 >= len(toks):
+                    break
+                from_p, to_p = toks[i + 1], toks[i + 2]
+                i += 3
+                paths.append(to_p)
+                if st[0] == "R":
+                    renames.append({"from": from_p, "to": to_p})
+                    catchup.append(to_p)
+            else:
+                if i + 1 >= len(toks):
+                    break
+                path = toks[i + 1]
+                i += 2
+                paths.append(path)
+                if st[0] in ("A", "M", "T"):
+                    catchup.append(path)
+        c = common("commit")
+        c["repo_id"] = repo_id
+        c["sha"] = sha
+        c["paths"] = paths
+        c["renames"] = renames
+        add(c)
+        for path in catchup:
+            if Kind(path) == "":
+                continue
+            try:
+                blob = _facts_git(ctx, dir_path, "show", f"{sha}:{path}")
+            except OSError:
+                continue
+            try:
+                blob_text = blob.decode("utf-8")
+            except UnicodeDecodeError:
+                continue
+            hits = Scan(blob_text)
+            if hits:
+                o.Reasons.append(
+                    f"secret: {hits[0].Pattern} at line {hits[0].Line} in {path}"
+                )
+                continue
+            v = common("artifact_version")
+            v["repo_id"] = repo_id
+            v["path"] = path
+            v["content_hash"] = ContentHash(blob)
+            v["content"] = blob_text
+            v["source"] = "commit"
+            v["sha"] = sha
+            add(v)
+        return
+
+
+def WritePaths(raw: Optional[bytes]) -> Optional[List[str]]:
+    if raw is None:
+        return None
+    p = _parse_file(File(Data=raw))
+    if p.bad:
+        return None
+    paths = _write_paths(p)
+    if not paths:
+        return None
+    return paths
 
 
 # --- command dispatch ---
