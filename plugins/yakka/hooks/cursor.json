@@ -5,10 +5,6 @@
       {
         "command": "./script/spool.sh --harness cursor --event sessionStart",
         "timeout": 5
-      },
-      {
-        "command": "./script/prefetch-version.sh",
-        "timeout": 5
       }
     ],
     "sessionEnd": [

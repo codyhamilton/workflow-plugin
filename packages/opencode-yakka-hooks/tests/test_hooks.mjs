@@ -136,21 +136,21 @@ test('message.part.delta queues nothing while message.part.updated still queues'
   } finally { await sb.done() }
 })
 
-test('kick runs YAKKA_BIN drain at most once per 10 s; load prefetches --version', async () => {
+test('kick runs YAKKA_BIN drain at most once per 10 s', async () => {
   const sb = await sandbox({ YAKKA_HOOKLOG_KICK: '1' })
   try {
     const hooks = await plugin({ directory: '/tmp/project' })
     const ev = { sessionID: 'k', tool: 'write', callID: 'c', args: {} }
     await hooks['tool.execute.after'](ev, { output: 'a' })
     await hooks['tool.execute.after'](ev, { output: 'b' })
-    for (let i = 0; i < 50 && (await sb.calls()).length < 2; i++) await sleep(100)
+    for (let i = 0; i < 50 && (await sb.calls()).length < 1; i++) await sleep(100)
     const calls = await sb.calls()
     assert.equal(calls.filter(c => c === 'drain').length, 1, calls.join('|'))
-    assert.equal(calls.filter(c => c === '--version').length, 1, calls.join('|'))
+    assert.equal(calls.filter(c => c === '--version').length, 0, calls.join('|'))
   } finally { await sb.done() }
 })
 
-test('KICK=0 disables kick and prefetch', async () => {
+test('KICK=0 disables kick', async () => {
   const sb = await sandbox()
   try {
     const hooks = await plugin({ directory: '/tmp/project' })

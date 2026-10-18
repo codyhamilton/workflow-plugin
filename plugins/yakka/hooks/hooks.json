@@ -7,11 +7,6 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/script/spool.sh\" --harness claude --event SessionStart",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "nohup bash \"${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}/bin/yakka\" --version </dev/null >/dev/null 2>&1 & exit 0",
-            "timeout": 5
           }
         ]
       }

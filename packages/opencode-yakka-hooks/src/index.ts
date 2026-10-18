@@ -171,7 +171,6 @@ function sessionId(value: unknown, seen = new WeakSet<object>()): string | undef
 export const YakkaSignalsPlugin: Plugin = async (ctx) => {
   const enabled = process.env.YAKKA_OPENCODE_SIGNALS !== "0"
   const ctxDir = ctx.directory
-  if (kickEnabled()) spawnBin(["--version"]) // warm the binary cache; never awaited
   const pendingBySession = new Map<string, PendingCall[]>()
   const callsThisStep = new Map<string, string[]>()
   // Serial writes retain callback/marker order even when the bus dispatches concurrently.
