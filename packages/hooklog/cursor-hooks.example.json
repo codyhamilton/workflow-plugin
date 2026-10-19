@@ -5,10 +5,6 @@
       {
         "command": "bash \"/ABS/PATH/yakka/packages/hooklog/spool.sh\" --harness cursor --event sessionStart",
         "timeout": 5
-      },
-      {
-        "command": "nohup bash \"/ABS/PATH/yakka/plugins/yakka/bin/yakka\" --version </dev/null >/dev/null 2>&1 & exit 0",
-        "timeout": 5
       }
     ],
     "sessionEnd": [

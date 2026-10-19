@@ -29,7 +29,7 @@ function flushHelperPath(): string {
 }
 
 // Queue capture: one file per event in the shared queue, same name and envelope as packages/hooklog/spool.sh's queue branch
-// (<conversation>-<ts>-<pid>-<rand>.evt, written under tmp/ then renamed); `bin/yakka drain` ingests it.
+// (<conversation>-<ts>-<pid>-<rand>.evt, written under tmp/ then renamed); `python3 plugins/yakka/client/yakka.py drain` ingests it.
 function queueDir(): string {
   return process.env.YAKKA_QUEUE || path.join(os.homedir(), ".local", "share", "yakka", "queue")
 }
@@ -44,7 +44,9 @@ function spawnBin(args: string[]): void {
     const bin = process.env.YAKKA_BIN
     const child = bin
       ? spawn(bin, args, { detached: true, stdio: "ignore" })
-      : spawn("bash", [path.join(repoRoot(), "plugins", "yakka", "bin", "yakka"), ...args], { detached: true, stdio: "ignore" })
+      : args.length === 1 && args[0] === "drain"
+        ? spawn("python3", [path.join(repoRoot(), "plugins", "yakka", "client", "yakka.py"), "drain"], { detached: true, stdio: "ignore" })
+        : spawn("bash", [path.join(repoRoot(), "plugins", "yakka", "bin", "yakka"), ...args], { detached: true, stdio: "ignore" })
     child.on("error", () => {})
     child.unref()
   } catch {
@@ -169,7 +171,6 @@ function sessionId(value: unknown, seen = new WeakSet<object>()): string | undef
 export const YakkaSignalsPlugin: Plugin = async (ctx) => {
   const enabled = process.env.YAKKA_OPENCODE_SIGNALS !== "0"
   const ctxDir = ctx.directory
-  if (kickEnabled()) spawnBin(["--version"]) // warm the binary cache; never awaited
   const pendingBySession = new Map<string, PendingCall[]>()
   const callsThisStep = new Map<string, string[]>()
   // Serial writes retain callback/marker order even when the bus dispatches concurrently.

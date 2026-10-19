@@ -40,13 +40,16 @@ The queue is transit, not storage: a file is deleted once the remote accepts it.
 
 ## Drain
 
-`yakka drain`, part of the `yakka` binary ([design 3](03-remote-service.md#runtime)). One
-instance per user, holding an exclusive flock on `queue/.drain.lock` for its lifetime. In local mode
-the lock may instead be held by `yakka serve`, which hosts the same drain module
-([design 3](03-remote-service.md#local-serve-hosts-the-drain)).
+The plugin drain is `python3 plugins/yakka/client/yakka.py drain`. One instance per user, holding
+an exclusive flock on `queue/.drain.lock` for its lifetime. In local mode the lock may instead be
+held by `yakka serve`, which hosts the Go drain module
+([design 3](03-remote-service.md#local-serve-hosts-the-drain)); the two drains exclude each other
+with the same lock.
 
 **Start.** After its rename, a hook probes the lock non-blocking. Held means a drain is running and
-the hook returns. Free means it starts `setsid plugins/yakka/bin/yakka drain` in the background. The probe takes
+the hook returns. Free means it starts `python3 plugins/yakka/client/yakka.py drain` in the
+background (with `setsid` when available). `YAKKA_BIN` set and executable starts that program with
+`drain` instead. The probe takes
 the lock for an instant, so the drain acquires with a short blocking wait (about 1 s), not `-n`. A
 burst that beats the first drain to the lock starts a few extra processes that fail to acquire and
 exit; this is accepted, and measured (see Tests).
@@ -224,9 +227,9 @@ but until updated they keep running the old hooks.
 
 ## Changes from what exists
 
-`spool.sh` and the Python `drain.py` already do one file per event, the tmp-then-rename write, the
-flock probe and kick, and a `bad/` folder. The drain is rewritten as `yakka drain` in Go
-(design 3); `drain.py` is removed once it lands. Remaining:
+`spool.sh` and `plugins/yakka/client/yakka.py` already do one file per event, the tmp-then-rename
+write, the flock probe and kick, and a `bad/` folder. The plugin path runs that Python drain;
+`yakka serve` still hosts the Go drain behind the same `.drain.lock`. Remaining:
 
 - File names lead with the conversation ID; payloads without one are not spooled.
 - `--harness auto` removed.

@@ -15,9 +15,9 @@ similar work exists.
 
 ## Shape
 
-`yakka mcp` is a stdio MCP server, spawned by each harness, reading the client config
-(design 2). It forwards to the service's advisory reads and adds local queue state. Every tool is
-read-only.
+`python3 plugins/yakka/client/yakka.py mcp` is a stdio MCP server, spawned by each harness,
+reading the client config (design 2). It forwards to the service's advisory reads and adds local
+queue state. Every tool is read-only.
 
 | Tool | Answers | Changes the agent's decision by |
 |---|---|---|
@@ -93,8 +93,9 @@ file.
 
 ## Registration
 
-Every harness registers the shim as a stdio command through the wrapper (design 5):
-`plugins/yakka/bin/yakka mcp`. The HTTP registration of `127.0.0.1:8765/mcp` is removed.
+Every harness registers the shim as a stdio command: `python3 plugins/yakka/client/yakka.py mcp`.
+`plugins/yakka/bin/yakka mcp` execs that same script. The HTTP registration of `127.0.0.1:8765/mcp` is
+removed.
 
 ## Tests
 

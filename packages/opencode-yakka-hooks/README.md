@@ -21,8 +21,8 @@ OpenCode plugin that captures **18 named Hooks callbacks + all 28 catalog bus ty
 
 Every hook and bus event except five is written as one file in the queue (`YAKKA_QUEUE`), named and wrapped
 as `packages/hooklog/spool.sh --harness opencode` does; an event with no session ID is dropped. After a
-write the plugin kicks `bin/yakka drain` (detached, at most once per 10 s) and warms the binary
-with `bin/yakka --version` once at load. Capture never waits on the binary or the network, and
+write the plugin kicks `python3 plugins/yakka/client/yakka.py drain` (detached, at most once per 10 s)
+when `YAKKA_BIN` is unset. Capture never waits on the drain or the network, and
 failures never reach OpenCode.
 
 Not forwarded: `experimental.chat.system.transform`, `chat.params`, `chat.headers`, `shell.env` and
@@ -82,8 +82,8 @@ git pull origin master
 |----------|---------|------|
 | `YAKKA_HOOKLOG` | on | Set `off` / `0` / `false` to disable capture |
 | `YAKKA_QUEUE` | `~/.local/share/yakka/queue` | Queue directory; one `<session>-<ts>-<pid>-<rand>.evt` file per event, as `packages/hooklog/spool.sh` writes it |
-| `YAKKA_BIN` | `bash <repo>/plugins/yakka/bin/yakka` | Binary the plugin kicks as `drain` after a write, and runs as `--version` once at load to warm its cache |
-| `YAKKA_HOOKLOG_KICK` | on | Set `0` to disable the drain kick (at most one per 10 s) and the load prefetch |
+| `YAKKA_BIN` | unset: `python3 plugins/yakka/client/yakka.py drain` | When set and executable, the program the plugin kicks as `drain` after a write |
+| `YAKKA_HOOKLOG_KICK` | on | Set `0` to disable the drain kick (at most one per 10 s) |
 | `YAKKA_OPENCODE_SIGNALS` | on | Set `0` to disable soft signals (hooklog remains independent) |
 | `YAKKA_REPO_ROOT` | auto (package → repo root) | Python gate imports |
 | `YAKKA_JEV_SIGNAL_LOG` | `~/.local/state/yakka/jev-signal-log.jsonl` | Signal JSONL path (`$XDG_STATE_HOME/yakka/...` when set) |

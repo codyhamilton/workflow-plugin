@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "yakka": {
-      "command": "./bin/yakka",
-      "args": ["mcp"],
+      "command": "python3",
+      "args": ["./client/yakka.py", "mcp"],
       "cwd": "."
     }
   }

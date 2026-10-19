@@ -1,8 +1,8 @@
 # yakka (Go binary)
 
-**Consumers** — harnesses via `plugins/yakka/bin/yakka`, `tools/release`, and `tools/quality` (catalogue).
+**Consumers** — `tools/release` and `tools/quality` (catalogue). The plugin client is `plugins/yakka/client/yakka.py`, not this binary.
 
-**Build** — `go build` in this module, or the wrapper's step-4 source build from `plugins/yakka/bin/yakka`.
+**Build** — `go build` in this module.
 
 **Test** — `go test ./...` in `packages/yakka`.
 

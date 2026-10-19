@@ -8,7 +8,7 @@
 # Name = <conversation_id>-<ts>-<pid>-<rand>.evt; the ID is a bounded text match (first 64 KiB, bash builtins only) on
 # "session_id", "conversation_id", "sessionID" in that order, with characters outside [A-Za-z0-9._-] turned into _.
 # File = one JSON envelope line {"ts","harness","event"} followed by the raw payload.
-# Kick: `$YAKKA_BIN drain` when YAKKA_BIN is set, else `bash <plugin>/bin/yakka drain`, detached, one at a time
+# Kick: `$YAKKA_BIN drain` when YAKKA_BIN is set and executable, else `python3 <plugin>/client/yakka.py drain`, detached, one at a time
 # (flock probe, or a mkdir+pid lock under <queue>/.kick.d without flock(1); YAKKA_SPOOL_NOFLOCK=1 forces that).
 # YAKKA_HOOKLOG=off disables capture. YAKKA_HOOKLOG_KICK=0 stops hooks starting a background drain.
 # Runs under bash 3.2 (macOS): bash builtins plus head, date, find; no flock(1) needed.
@@ -61,7 +61,7 @@ start_drain() {  # $1 = optional prefix (setsid); detached, so $! is the drain's
     YAKKA_QUEUE="$dir" ${1:+"$1"} nohup "$YAKKA_BIN" drain </dev/null >/dev/null 2>&1 &
   else
     root=$(cd "$(dirname "$0")/.." 2>/dev/null && pwd -P) || return 1
-    YAKKA_QUEUE="$dir" ${1:+"$1"} nohup bash "$root/bin/yakka" drain </dev/null >/dev/null 2>&1 &
+    YAKKA_QUEUE="$dir" ${1:+"$1"} nohup python3 "$root/client/yakka.py" drain </dev/null >/dev/null 2>&1 &
   fi
 }
 

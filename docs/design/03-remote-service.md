@@ -14,22 +14,33 @@ idle, and take a write-heavy, bursty stream without the hooks ever waiting on it
 
 ## Runtime
 
-One Go binary, `yakka`, with subcommands:
+The **collector** is one Go binary, `yakka`, with subcommands:
 
 | Subcommand | Role | Design |
 |---|---|---|
 | `yakka serve` | this service, local or remote | 3 |
-| `yakka drain` | the drain | 2 |
-| `yakka mcp` | the stdio advisory shim | 2, 4 |
-| `yakka status` | queue and drain state | 2 |
+| `yakka ledger` | ledger routes on the collector | 3 |
 
-- Targets: linux and darwin, amd64 and arm64. WSL is linux. No Windows-native build.
-- No cgo. SQLite is the pure-Go `modernc.org/sqlite`, so all four targets cross-compile from one
+In local mode `yakka serve` also hosts the drain in-process ([Local serve hosts the drain](#local-serve-hosts-the-drain)).
+
+The **plugin client** is `python3 plugins/yakka/client/yakka.py` (via [design 5](05-distribution.md)'s wrapper):
+
+| Invocation | Role | Design |
+|---|---|---|
+| `python3 plugins/yakka/client/yakka.py drain` | the drain | 2 |
+| `python3 plugins/yakka/client/yakka.py mcp` | the stdio advisory shim | 2, 4 |
+| `python3 plugins/yakka/client/yakka.py login` | device login | 5 |
+| `python3 plugins/yakka/client/yakka.py status` | queue and drain state | 2 |
+
+- Collector targets: linux and darwin, amd64 and arm64. WSL is linux. No Windows-native build.
+- No cgo. SQLite is the pure-Go `modernc.org/sqlite`, so all four collector targets cross-compile from one
   machine and the binary is static.
 - HTTP is `net/http` from the standard library. No framework, no ORM.
-- Go was chosen over Python, Node and Rust for idle footprint, a static binary with nothing to
-  install on the host, and one implementation for client and server. The cost is a build and
-  release step, owned by [design 5](05-distribution.md).
+- Go was chosen over Python, Node and Rust for the collector's idle footprint, a static binary with nothing to
+  install on the host for `serve`, and one implementation for the collector service (API, hosted drain, ledger)—not
+  the plugin tree. The plugin client is Python ([design 2](02-edge-capture.md), [design 4](04-advisory-surface.md),
+  [design 5](05-distribution.md)). The cost is a build and release step for the collector binary, owned by
+  [design 5](05-distribution.md).
 
 Only `spool.sh` stays bash, because a hook must not pay a process start beyond `bash`.
 
@@ -260,13 +271,13 @@ In local mode `yakka serve` also drains the user's queue, as a long-lived drain.
   nothing.
 - No hook kicks it, so it watches the queue directory (inotify on Linux, kqueue on macOS) with a
   slow poll as a fallback. The design 2 batch window still applies.
-- It runs the same drain module as `yakka drain`, with an in-process sink in place of HTTP. The
-  sink calls the same ingest function as the handler, so the precheck and screening apply. In
-  process never means unchecked.
+- It runs the Go drain module with an in-process sink in place of HTTP. The sink calls the same
+  ingest function as the handler, so the precheck and screening apply. In process never means
+  unchecked. Standalone drains on the plugin path use the Python client ([design 2](02-edge-capture.md)).
 - It drains only when the client config's endpoint is this server (same host and port). Otherwise
   the queue is addressed elsewhere and it leaves it alone. Its tenant is always `local`.
-- If it stops, the lock is released, the next hook starts a standalone drain, and that drain posts
-  to the endpoint with backoff until `serve` returns.
+- If it stops, the lock is released, the next hook starts a standalone Python drain, and that drain
+  posts to the endpoint with backoff until `serve` returns.
 
 This amends principle 8: the drain never starts or manages the service; the drain and ingest are
 separated by a module boundary, not a process boundary, and a local service may host the drain.
@@ -294,4 +305,4 @@ Cheap, in temp directories, never the live queue or data.
 6. Compaction: a legacy-shaped fixture compacts to no payloads, no `remove` rows and an archive whose
    distinct row hashes equal the kept hook facts; an interrupted run resumes to the same state; serve
    refuses to start while compaction holds the lock.
-7. Idle footprint: RSS and cold start of `yakka serve` and `yakka mcp`.
+7. Idle footprint: RSS and cold start of `yakka serve`; cold start of `python3 plugins/yakka/client/yakka.py mcp`.

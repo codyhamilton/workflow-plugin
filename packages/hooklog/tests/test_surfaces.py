@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
-import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -70,12 +69,7 @@ class SurfaceTests(unittest.TestCase):
                     if harness != 'codex':
                         self.assertEqual(envelope['event'], event)
                     self.assertEqual(envelope['harness'], harness)
-                self.assertEqual(prefetch_seen, 1)
-                if file.startswith('plugins/yakka'):
-                    deadline = time.time() + 5
-                    while not (Path(tmp) / 'stub.calls').exists() and time.time() < deadline:
-                        time.sleep(0.05)
-                    self.assertEqual((Path(tmp) / 'stub.calls').read_text().strip(), '--version')
+                self.assertEqual(prefetch_seen, 0)
 
     def test_cursor_manifest_selects_native_registration(self):
         manifest = json.loads((PLUGIN / '.cursor-plugin/plugin.json').read_text())
