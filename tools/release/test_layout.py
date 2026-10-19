@@ -20,6 +20,13 @@ MARKETPLACES = (
 )
 
 README_FIELDS = ("Consumers", "Build", "Test", "Release")
+CLAUDE_PLUGIN_SOURCE = "plugins/yakka"
+CURSOR_PLUGIN_SOURCE = {
+    "source": "git-subdir",
+    "url": "https://github.com/codyhamilton/yakka",
+    "path": "plugins/yakka",
+    "ref": "master",
+}
 
 TOOLS_SLASH = re.compile(r"tools/")
 
@@ -177,7 +184,12 @@ def _scan_marketplaces(repo: Path) -> list[Violation]:
             out.append(Violation(_rel(mp, repo), f"plugins count {len(plugins)}"))
             continue
         src = plugins[0].get("source")
-        if src != "plugins/yakka":
+        expected = (
+            CURSOR_PLUGIN_SOURCE
+            if mp.parent.name == ".cursor-plugin"
+            else CLAUDE_PLUGIN_SOURCE
+        )
+        if src != expected:
             out.append(Violation(_rel(mp, repo), f"source={src!r}"))
     return out
 

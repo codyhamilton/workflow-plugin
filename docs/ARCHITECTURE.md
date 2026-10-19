@@ -9,7 +9,8 @@ The seams: what each skill owns, what passes between them, and the invariants th
 ├── plugins/yakka/             → yakka plugin install root (skills, hooks, script/, bin/)
 ├── packages/                  → yakka, hooklog, yakka-analytics, opencode-yakka-hooks
 ├── tools/                     → driver, release, quality, transcript, … (maintainer/automation)
-├── .claude-plugin/marketplace.json, .cursor-plugin/marketplace.json  → source: plugins/yakka
+├── .claude-plugin/marketplace.json  → source: plugins/yakka
+├── .cursor-plugin/marketplace.json  → git-subdir https://github.com/codyhamilton/yakka, path plugins/yakka, ref master
 ├── .claude/skills/            → maintainer project skills (not installed by install.sh)
 │   └── {setup,iterate,jev-variants,transcript-parser,white-paper,yakka-tuning}/
 ├── docs/{OVERVIEW,ARCHITECTURE}.md, docs/automation/, docs/plans/, docs/analysis/

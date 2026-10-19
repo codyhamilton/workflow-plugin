@@ -104,7 +104,7 @@ The legacy `workflow-quality.service` keeps running for the lab until the mainta
 
 ## Layout rules
 
-`plugins/yakka` may depend on packages. Packages may depend on packages. Tools may depend on either. A package's runtime code and config do not resolve a path into `tools/`. `tools/release/test_layout.py` fails the build when that direction breaks, when a marketplace lists anything but the one plugin at `plugins/yakka`, or when a Cursor hook command is not `./script/...`. Each package README states Consumers, Build, Test, and Release. A change to the plugin itself bumps its version in the same change.
+`plugins/yakka` may depend on packages. Packages may depend on packages. Tools may depend on either. A package's runtime code and config do not resolve a path into `tools/`. `tools/release/test_layout.py` fails the build when that direction breaks, when a marketplace lists anything but the one yakka plugin (Claude `source` stays the relative path `plugins/yakka`; the Cursor entry may be the git-subdir object for `https://github.com/codyhamilton/yakka` at path `plugins/yakka` on ref `master`), or when a Cursor hook command is not `./script/...`. Each package README states Consumers, Build, Test, and Release. A change to the plugin itself bumps its version in the same change.
 
 Shipped environment variables use the `YAKKA_` prefix with the same suffix as before. The legacy quality service keeps its original prefix; the 3.0.0 changelog lists that exception. Phase-trailer readers accept the pre-rename trailer and `Yakka-Phase`, and both report fences, through `tools/driver/trailer_keys.py`. Writers emit the `Yakka-*` forms. The dual-read rule is stated in `docs/design/system-architecture.md`.
 
