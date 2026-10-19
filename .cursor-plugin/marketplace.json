@@ -16,7 +16,12 @@
         "email": "codyh@ctzns.net"
       },
       "category": "development",
-      "source": "plugins/yakka"
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/codyhamilton/yakka",
+        "path": "plugins/yakka",
+        "ref": "master"
+      }
     }
   ]
 }
