@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import hashlib
+import http.client
 import json
 import os
 import random
@@ -21,7 +22,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from dataclasses import dataclass, field
 from queue import Empty, Queue
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple
 
 # --- clientconfig ---
 
@@ -53,14 +54,15 @@ _line_re = re.compile(
 )
 
 
+def _home() -> str:
+    return os.environ.get("HOME", "") or os.path.expanduser("~")
+
+
 def Path() -> str:
     p = os.environ.get("YAKKA_CLIENT_CONFIG", "")
     if p:
         return p
-    home = os.environ.get("HOME", "")
-    if not home:
-        home = os.path.expanduser("~")
-    return os.path.join(home, ".config", "yakka", "client.toml")
+    return os.path.join(_home(), ".config", "yakka", "client.toml")
 
 
 def Load() -> Config:
@@ -149,7 +151,7 @@ def _serialize_json_value(v: Any) -> str:
 
 
 def Canonical(raw: bytes) -> bytes:
-    text = raw.decode("utf-8") if isinstance(raw, bytes) else raw
+    text = raw.decode("utf-8")
     dec = json.JSONDecoder(parse_float=lambda s: _Number(s))
     try:
         obj, end = dec.raw_decode(text)
@@ -516,7 +518,7 @@ def Build(ctx: Any, files: List[File]) -> List[Output]:
             p.refs.append(_Ref(key=k, abs=abs_path, rel=rel, repo=repo_id))
             last[k] = i
     out: List[Output] = []
-    commits: dict[str, bool] = {}
+    commits: set[str] = set()
     for i, p in enumerate(ps):
         o = Output(Name=p.name)
         if p.bad:
@@ -540,11 +542,11 @@ def Build(ctx: Any, files: List[File]) -> List[Output]:
         hv = common("hook_event")
         hv["payload"] = _redact_payload(p.payload)
         add(hv)
-        seen: dict[str, bool] = {}
+        seen: set[str] = set()
         for r in p.refs:
-            if last[r.key] != i or seen.get(r.key):
+            if last[r.key] != i or r.key in seen:
                 continue
-            seen[r.key] = True
+            seen.add(r.key)
             rd = reads[r.abs]
             hits = Scan(rd.content)
             if hits:
@@ -646,17 +648,19 @@ def _read_file(abs_path: str) -> _ReadResult:
     return _ReadResult(content=text, raw=b, ok=True)
 
 
-_write_tools = {
-    "write": True,
-    "edit": True,
-    "multiedit": True,
-    "write_file": True,
-    "edit_file": True,
-    "create_file": True,
-    "str_replace_editor": True,
-    "apply_patch": True,
-    "applypatch": True,
-}
+_write_tools = frozenset(
+    {
+        "write",
+        "edit",
+        "multiedit",
+        "write_file",
+        "edit_file",
+        "create_file",
+        "str_replace_editor",
+        "apply_patch",
+        "applypatch",
+    }
+)
 
 _patch_re = re.compile(r"(?m)^\*\*\* (?:Add File|Update File|Move to): (.+)$")
 
@@ -691,7 +695,7 @@ def _write_paths(p: _Parsed) -> List[str]:
         if not isinstance(tn, str):
             tn = ""
         name = tn[tn.rfind(".") + 1 :].lower()
-        if not _write_tools.get(name):
+        if name not in _write_tools:
             return []
         is_patch = name in ("apply_patch", "applypatch")
         args: dict[str, Any] = {}
@@ -733,7 +737,7 @@ def _write_paths(p: _Parsed) -> List[str]:
                 for m in _patch_re.finditer(patch):
                     raw.append(m.group(1))
     out: List[str] = []
-    seen: dict[str, bool] = {}
+    seen: set[str] = set()
     for r in raw:
         abs_path = r
         if not os.path.isabs(r):
@@ -741,8 +745,8 @@ def _write_paths(p: _Parsed) -> List[str]:
                 continue
             abs_path = os.path.join(p.base, r)
         abs_path = os.path.normpath(abs_path)
-        if not seen.get(abs_path):
-            seen[abs_path] = True
+        if abs_path not in seen:
+            seen.add(abs_path)
             out.append(abs_path)
     return out
 
@@ -752,12 +756,14 @@ _git_commit_re = re.compile(
 )
 _dir_re = re.compile(r'-C\s+("[^"]*"|\'[^\']*\'|\S+)')
 _sha_re = re.compile(r"(?m)^\[(?:[^\]]*\s)?([0-9a-f]{7,40})\]")
-_post_events = {
-    "PostToolUse": True,
-    "postToolUse": True,
-    "afterShellExecution": True,
-    "tool.execute.after": True,
-}
+_post_events = frozenset(
+    {
+        "PostToolUse",
+        "postToolUse",
+        "afterShellExecution",
+        "tool.execute.after",
+    }
+)
 
 
 def _as_object(v: Any) -> Optional[dict[str, Any]]:
@@ -847,7 +853,7 @@ def _facts_git(ctx: Any, dir_path: str, *args: str) -> bytes:
 def _build_commits(
     ctx: Any,
     p: _Parsed,
-    done: dict[str, bool],
+    done: set[str],
     common: Callable[[str], dict[str, Any]],
     add: Callable[[dict[str, Any]], None],
     o: Output,
@@ -855,7 +861,7 @@ def _build_commits(
     event = p.payload.get("hook_event_name", "")
     if not isinstance(event, str) or not event:
         event = p.event
-    if not _post_events.get(event):
+    if event not in _post_events:
         return
     cmd_text = _command_text(p.payload)
     matches = list(_git_commit_re.finditer(cmd_text))
@@ -888,7 +894,7 @@ def _build_commits(
         if err is not None:
             continue
         dk = p.conv + "\x00" + repo_id + "\x00" + sha
-        if done.get(dk):
+        if dk in done:
             return
         try:
             b = _facts_git(
@@ -905,7 +911,7 @@ def _build_commits(
             )
         except OSError:
             continue
-        done[dk] = True
+        done.add(dk)
         paths: List[str] = []
         renames: List[dict[str, str]] = []
         catchup: List[str] = []
@@ -1029,14 +1035,12 @@ class HTTPSink:
     def Send(
         self, ctx: "DrainContext", facts: List[bytes]
     ) -> Tuple[DrainResponse, Optional[BaseException]]:
-        raw_facts: List[bytes] = []
         for f in facts:
             try:
                 json.loads(f)
             except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
                 return DrainResponse(), _ERR_NETWORK
-            raw_facts.append(f)
-        body = b'{"facts":[' + b",".join(raw_facts) + b"]}"
+        body = b'{"facts":[' + b",".join(facts) + b"]}"
         url = self.Endpoint.rstrip("/") + "/v1/ingest"
         req = urllib.request.Request(url, data=body, method="POST")
         req.add_header("Content-Type", "application/json")
@@ -1165,8 +1169,7 @@ def QueueDir() -> str:
     d = os.environ.get("YAKKA_QUEUE", "")
     if d:
         return d
-    home = os.environ.get("HOME", "") or os.path.expanduser("~")
-    return os.path.join(home, ".local", "share", "yakka", "queue")
+    return os.path.join(_home(), ".local", "share", "yakka", "queue")
 
 
 def EnsureDirs(dir_path: str) -> Optional[OSError]:
@@ -1322,10 +1325,21 @@ def QueueStatus(dir_path: str) -> QueueStatusData:
     return st
 
 
+@dataclass
+class _BatchItem:
+    name: str
+    facts: List[bytes]
+    reasons: List[str]
+
+
+def _prefix(name: str, reasons: List[str]) -> List[str]:
+    return [name + ": " + s for s in reasons]
+
+
 class _Runner:
     def __init__(self, o: Options) -> None:
         self.o = o
-        self.seen: dict[str, bool] = {}
+        self.seen: set[str] = set()
         self.last_new = time.monotonic()
 
     def logf(self, fmt: str, *args: Any) -> None:
@@ -1334,10 +1348,10 @@ class _Runner:
 
     def scan(self) -> List[_QueueEntry]:
         es = _list_queue(self.o.Dir)
-        cur = {e.name: True for e in es}
+        cur = {e.name for e in es}
         now = time.monotonic()
         for e in es:
-            if not self.seen.get(e.name):
+            if e.name not in self.seen:
                 self.last_new = now
         self.seen = cur
         return es
@@ -1352,109 +1366,13 @@ class _Runner:
             if linger_end is not None and time.monotonic() >= linger_end:
                 return False
             if self.o.Wake is not None:
-                try:
-                    self.o.Wake.acquire(block=False)
-                except Exception:
-                    pass
+                self.o.Wake.acquire(block=False)
             if len(self.scan()) > 0:
                 return True
             if not _drain_sleep(ctx, self.o.Poll):
                 return False
 
 
-def Run(ctx: DrainContext, o: Options) -> Tuple[str, Optional[BaseException]]:
-    o.defaults()
-    if o.Sink is None:
-        return "", OSError("drain: no sink")
-    err = EnsureDirs(o.Dir)
-    if err is not None:
-        return "", err
-    r = _Runner(o)
-    lock, err = _acquire(ctx, o.Dir, o.LockWait, o.Poll, o.Hosted)
-    if err is not None:
-        if ctx.cancelled():
-            return ReasonStopped, None
-        if isinstance(err, BlockingIOError):
-            return ReasonLockHeld, None
-        return "", err
-    r.logf("acquired lock pid=%d", os.getpid())
-    fresh = True
-    backoff = 0.0
-    try:
-        while True:
-            if ctx.cancelled():
-                return ReasonStopped, None
-            files = r.scan()
-            if not files:
-                fresh = True
-                backoff = 0.0
-                if not r.wait_for_work(ctx):
-                    if ctx.cancelled():
-                        return ReasonStopped, None
-                    _release_lock(lock)
-                    lock = None
-                    if o.afterRelease is not None:
-                        o.afterRelease()
-                    if len(r.scan()) == 0:
-                        return ReasonIdle, None
-                    lock, err = _acquire(ctx, o.Dir, o.LockWait, o.Poll, False)
-                    if err is not None:
-                        if ctx.cancelled():
-                            return ReasonStopped, None
-                        return ReasonLockHeld, None
-                    r.logf("acquired lock pid=%d", os.getpid())
-                continue
-            if fresh:
-                fresh = False
-                if not _drain_sleep(ctx, o.Window):
-                    return ReasonStopped, None
-                files = r.scan()
-            sink, err = o.Sink()
-            if err is not None:
-                r.logf("config unavailable; retrying")
-                if not o.Hosted and (time.monotonic() - r.last_new) >= o.GiveUp:
-                    return ReasonGaveUp, None
-                if not _drain_sleep(ctx, max(o.Poll, 1.0)):
-                    return ReasonStopped, None
-                continue
-            if len(files) > _MAX_DRAIN_FILES:
-                files = files[:_MAX_DRAIN_FILES]
-            res = r.batch(ctx, sink, files)
-            if not res[0]:
-                backoff = 0.0
-                continue
-            wait = res[1]
-            if wait <= 0:
-                if backoff == 0:
-                    backoff = o.BackoffMin
-                else:
-                    backoff = min(backoff * 2, o.BackoffMax)
-                wait = backoff / 2 + random.random() * (backoff / 2)
-            r.scan()
-            if (
-                not o.Hosted
-                and backoff >= o.BackoffMax
-                and (time.monotonic() - r.last_new) >= o.GiveUp
-            ):
-                return ReasonGaveUp, None
-            if not _drain_sleep(ctx, wait):
-                return ReasonStopped, None
-    finally:
-        _release_lock(lock)
-
-
-@dataclass
-class _BatchItem:
-    name: str
-    facts: List[bytes]
-    reasons: List[str]
-
-
-def _prefix(name: str, reasons: List[str]) -> List[str]:
-    return [name + ": " + s for s in reasons]
-
-
-class _RunnerBatch(_Runner):
     def batch(
         self, ctx: DrainContext, sink: HTTPSink, files: List[_QueueEntry]
     ) -> Tuple[bool, float]:
@@ -1603,35 +1521,108 @@ class _RunnerBatch(_Runner):
             self.logf("reject move failed: %s", err)
 
 
-_Runner.batch = _RunnerBatch.batch  # type: ignore[method-assign]
-_Runner.send = _RunnerBatch.send  # type: ignore[method-assign]
-_Runner.apply = _RunnerBatch.apply  # type: ignore[method-assign]
-_Runner.remove = _RunnerBatch.remove  # type: ignore[method-assign]
-_Runner.reject = _RunnerBatch.reject  # type: ignore[method-assign]
+def Run(ctx: DrainContext, o: Options) -> Tuple[str, Optional[BaseException]]:
+    o.defaults()
+    if o.Sink is None:
+        return "", OSError("drain: no sink")
+    err = EnsureDirs(o.Dir)
+    if err is not None:
+        return "", err
+    r = _Runner(o)
+    lock, err = _acquire(ctx, o.Dir, o.LockWait, o.Poll, o.Hosted)
+    if err is not None:
+        if ctx.cancelled():
+            return ReasonStopped, None
+        if isinstance(err, BlockingIOError):
+            return ReasonLockHeld, None
+        return "", err
+    r.logf("acquired lock pid=%d", os.getpid())
+    fresh = True
+    backoff = 0.0
+    try:
+        while True:
+            if ctx.cancelled():
+                return ReasonStopped, None
+            files = r.scan()
+            if not files:
+                fresh = True
+                backoff = 0.0
+                if not r.wait_for_work(ctx):
+                    if ctx.cancelled():
+                        return ReasonStopped, None
+                    _release_lock(lock)
+                    lock = None
+                    if o.afterRelease is not None:
+                        o.afterRelease()
+                    if len(r.scan()) == 0:
+                        return ReasonIdle, None
+                    lock, err = _acquire(ctx, o.Dir, o.LockWait, o.Poll, False)
+                    if err is not None:
+                        if ctx.cancelled():
+                            return ReasonStopped, None
+                        return ReasonLockHeld, None
+                    r.logf("acquired lock pid=%d", os.getpid())
+                continue
+            if fresh:
+                fresh = False
+                if not _drain_sleep(ctx, o.Window):
+                    return ReasonStopped, None
+                files = r.scan()
+            sink, err = o.Sink()
+            if err is not None:
+                r.logf("config unavailable; retrying")
+                if not o.Hosted and (time.monotonic() - r.last_new) >= o.GiveUp:
+                    return ReasonGaveUp, None
+                if not _drain_sleep(ctx, max(o.Poll, 1.0)):
+                    return ReasonStopped, None
+                continue
+            if len(files) > _MAX_DRAIN_FILES:
+                files = files[:_MAX_DRAIN_FILES]
+            res = r.batch(ctx, sink, files)
+            if not res[0]:
+                backoff = 0.0
+                continue
+            wait = res[1]
+            if wait <= 0:
+                if backoff == 0:
+                    backoff = o.BackoffMin
+                else:
+                    backoff = min(backoff * 2, o.BackoffMax)
+                wait = backoff / 2 + random.random() * (backoff / 2)
+            r.scan()
+            if (
+                not o.Hosted
+                and backoff >= o.BackoffMax
+                and (time.monotonic() - r.last_new) >= o.GiveUp
+            ):
+                return ReasonGaveUp, None
+            if not _drain_sleep(ctx, wait):
+                return ReasonStopped, None
+    finally:
+        _release_lock(lock)
+
+
+_go_duration_re = re.compile(r"([0-9]+(?:\.[0-9]*)?)(ns|us|µs|ms|s|m|h)")
+_go_duration_units = {
+    "ns": 1e-9,
+    "us": 1e-6,
+    "µs": 1e-6,
+    "ms": 1e-3,
+    "s": 1.0,
+    "m": 60.0,
+    "h": 3600.0,
+}
 
 
 def _parse_go_duration(s: str) -> float:
-    import re
-
-    units = {
-        "ns": 1e-9,
-        "us": 1e-6,
-        "µs": 1e-6,
-        "ms": 1e-3,
-        "s": 1.0,
-        "m": 60.0,
-        "h": 3600.0,
-    }
     pos = 0
     total = 0.0
     while pos < len(s):
-        m = re.match(r"([0-9]+(?:\.[0-9]*)?)(ns|us|µs|ms|s|m|h)", s[pos:])
+        m = _go_duration_re.match(s, pos)
         if not m:
             raise ValueError(f"invalid duration {s!r}")
-        total += float(m.group(1)) * units[m.group(2)]
-        pos += m.end()
-    if pos != len(s):
-        raise ValueError(f"invalid duration {s!r}")
+        total += float(m.group(1)) * _go_duration_units[m.group(2)]
+        pos = m.end()
     return total
 
 
@@ -1730,7 +1721,7 @@ def _mcp_start_drain() -> Optional[BaseException]:
     return None
 
 
-def _mcp_script_version() -> str:
+def _plugin_version_text() -> str:
     path = os.path.join(os.path.dirname(__file__), "..", "bin", "VERSION")
     with open(path, encoding="utf-8") as f:
         return f.read().strip()
@@ -1761,7 +1752,7 @@ class _McpServer:
         except urllib.error.HTTPError as err:
             body = err.read(8 << 20) if err.fp else b""
             return err.code, body, None
-        except Exception:
+        except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError):
             return 0, b"", OSError("request failed")
 
     def _fetch(
@@ -1769,7 +1760,7 @@ class _McpServer:
     ) -> str:
         try:
             cfg = Load()
-        except Exception as err:
+        except (ErrPartialEnv, OSError, ValueError) as err:
             return _mcp_bad_config_text(err)
         code, body, err = self._get(cfg, path, q, 3.0)
         if err is not None or code >= 500:
@@ -1793,10 +1784,7 @@ class _McpServer:
             return "path must be a non-empty string", True
         abs_path = p
         if not os.path.isabs(p):
-            try:
-                wd, err = self.o.Getwd()
-            except OSError as exc:
-                return "cannot resolve the working directory", True
+            wd, err = self.o.Getwd()
             if err is not None:
                 return "cannot resolve the working directory", True
             abs_path = os.path.join(wd, p)
@@ -1845,7 +1833,7 @@ class _McpServer:
         cfg_err: Optional[Exception] = None
         try:
             cfg = Load()
-        except Exception as exc:
+        except (ErrPartialEnv, OSError, ValueError) as exc:
             cfg_err = exc
         if queued and cfg_err is None:
             if not Running(qdir):
@@ -1894,7 +1882,6 @@ class _McpServer:
             note = ["note: earlier rejection superseded by a later write"]
         if cfg_err is not None:
             return state("bad config", _mcp_bad_config_text(cfg_err), *note)
-        assert cfg is not None
         code, body, herr = self._get(
             cfg,
             "/v1/artifacts",
@@ -1944,12 +1931,13 @@ class _McpServer:
         lines: List[str] = []
         screen = latest.get("screen")
         rejection = latest.get("rejection")
-        if isinstance(screen, dict) and screen.get("verdict") == "unscreened":
+        verdict = screen.get("verdict") if isinstance(screen, dict) else None
+        if verdict == "unscreened":
             lines.append("screen: unscreened (no scorer on the service)")
-        elif isinstance(screen, dict) and screen.get("verdict") == "pass":
+        elif verdict == "pass":
             lines.append("screen: pass by " + str(screen.get("scorer", "")))
-        elif isinstance(screen, dict) and screen.get("verdict"):
-            lines.append("screen: " + str(screen["verdict"]))
+        elif verdict:
+            lines.append("screen: " + str(verdict))
         elif isinstance(rejection, dict) and rejection.get("stage") == "screen":
             lines.append("screen: flagged: " + str(rejection.get("reason", "")))
             lines.append(_MCP_FIX_LINE)
@@ -2052,12 +2040,6 @@ class _McpServer:
         return "\n".join(parts).rstrip("\n"), False
 
 
-@dataclass
-class _McpQFile:
-    name: str
-    mod: float
-
-
 class _McpMatcher:
     def __init__(self, abs_path: str, rel: str, repo: str) -> None:
         self.abs = abs_path
@@ -2077,12 +2059,12 @@ class _McpMatcher:
         self.cache[p] = k
         return k
 
-    def scan(self, dir_path: str) -> List[_McpQFile]:
+    def scan(self, dir_path: str) -> List[_QueueEntry]:
         try:
             names = os.listdir(dir_path)
         except OSError:
             return []
-        out: List[_McpQFile] = []
+        out: List[_QueueEntry] = []
         for n in names:
             if n.startswith(".") or not n.endswith(".evt"):
                 continue
@@ -2111,7 +2093,7 @@ class _McpMatcher:
                     matched = True
                     break
             if matched:
-                out.append(_McpQFile(name=n, mod=st.st_mtime))
+                out.append(_QueueEntry(n, st.st_mtime))
         out.sort(key=lambda x: x.mod)
         return out
 
@@ -2199,11 +2181,7 @@ _MCP_TOOL_LIST = [
 ]
 
 
-def _mcp_fail(
-    id_raw: Any, code: int, msg: str
-) -> dict[str, Any]:
-    if id_raw is None:
-        id_raw = None
+def _mcp_fail(id_raw: Any, code: int, msg: str) -> dict[str, Any]:
     return {
         "jsonrpc": "2.0",
         "id": id_raw,
@@ -2211,7 +2189,7 @@ def _mcp_fail(
     }
 
 
-def _mcp_handle(server: _McpServer, line: bytes, raw_id: Any) -> Optional[dict[str, Any]]:
+def _mcp_handle(server: _McpServer, line: bytes) -> Optional[dict[str, Any]]:
     try:
         v = json.loads(line)
     except json.JSONDecodeError:
@@ -2254,7 +2232,7 @@ def _mcp_handle(server: _McpServer, line: bytes, raw_id: Any) -> Optional[dict[s
         args_raw = params.get("arguments")
         args: dict[str, Any] = {}
         arg_err = ""
-        if args_raw is not None and args_raw != "null":
+        if args_raw is not None:
             if not isinstance(args_raw, dict):
                 arg_err = "arguments must be an object"
             else:
@@ -2288,11 +2266,10 @@ def Serve(
     def reader() -> None:
         while True:
             line = r.readline()
-            if line:
-                if line.strip():
-                    lines.put(line)
             if not line:
                 break
+            if line.strip():
+                lines.put(line)
 
     t = threading.Thread(target=reader, daemon=True)
     t.start()
@@ -2305,7 +2282,7 @@ def Serve(
             if not t.is_alive() and lines.empty():
                 return None
             continue
-        resp = _mcp_handle(server, line, None)
+        resp = _mcp_handle(server, line)
         if resp is not None:
             out = json.dumps(resp, separators=(",", ":")).encode() + b"\n"
             try:
@@ -2313,14 +2290,13 @@ def Serve(
                 w.flush()
             except OSError as err:
                 return err
-    return None
 
 
 def cmd_mcp(argv: List[str]) -> int:
     if len(argv) > 2:
         print("usage: yakka mcp (no arguments)\n", file=sys.stderr)
         return 2
-    version = _mcp_script_version()
+    version = _plugin_version_text()
     err = Serve(sys.stdin.buffer, sys.stdout.buffer, McpOptions(Version=version))
     if err is not None and not isinstance(err, InterruptedError):
         print("yakka mcp:", err, file=sys.stderr)
@@ -2330,8 +2306,8 @@ def cmd_mcp(argv: List[str]) -> int:
 
 # --- login ---
 
-_login_endpoint_line_re = re.compile(
-    r'^endpoint\s*=\s*("(?:[^"\\]|\\.)*")\s*(?:#.*)?$'
+_MISSING_COLLECTOR = (
+    "no collector endpoint (use --endpoint or set endpoint in client config)"
 )
 
 
@@ -2346,11 +2322,11 @@ class LoginOptions:
 def normalize_origin(raw: str) -> Tuple[str, Optional[BaseException]]:
     raw = raw.strip().rstrip("/")
     u = urllib.parse.urlparse(raw)
-    if u.scheme not in ("http", "https") or not u.netloc:
-        return "", ValueError(
-            "endpoint must be a collector origin (scheme and host, no path)"
-        )
-    if u.path not in ("", "/"):
+    if (
+        u.scheme not in ("http", "https")
+        or not u.netloc
+        or u.path not in ("", "/")
+    ):
         return "", ValueError(
             "endpoint must be a collector origin (scheme and host, no path)"
         )
@@ -2366,26 +2342,22 @@ def resolve_endpoint(flag: str) -> Tuple[str, Optional[BaseException]]:
         with open(path, encoding="utf-8") as f:
             data = f.read()
     except FileNotFoundError:
-        return "", OSError(
-            "no collector endpoint (use --endpoint or set endpoint in client config)"
-        )
+        return "", OSError(_MISSING_COLLECTOR)
     except OSError as err:
         return "", OSError(f"read config: {err}")
     for line in data.split("\n"):
         line = line.strip()
-        m = _login_endpoint_line_re.match(line)
-        if not m:
+        m = _line_re.match(line)
+        if not m or m.group(1) != "endpoint":
             continue
         try:
-            v = json.loads(m.group(1))
+            v = json.loads(m.group(2))
         except json.JSONDecodeError:
             continue
         if not v:
             continue
         return normalize_origin(v)
-    return "", OSError(
-        "no collector endpoint (use --endpoint or set endpoint in client config)"
-    )
+    return "", OSError(_MISSING_COLLECTOR)
 
 
 def _login_random_state() -> Tuple[str, Optional[BaseException]]:
@@ -2456,23 +2428,15 @@ def write_client_config(path: str, endpoint: str, key: str) -> Optional[BaseExce
 def default_open_browser(url: str) -> Optional[BaseException]:
     cmd = os.environ.get("YAKKA_LOGIN_BROWSER", "").strip()
     if cmd:
-        try:
-            subprocess.Popen([cmd, url], close_fds=True)
-        except OSError as err:
-            return err
-        return None
-    if sys.platform == "darwin":
-        prog = "open"
+        argv = [cmd, url]
+    elif sys.platform == "darwin":
+        argv = ["open", url]
     elif sys.platform == "win32":
-        try:
-            subprocess.Popen(["cmd", "/c", "start", url], close_fds=True)
-        except OSError as err:
-            return err
-        return None
+        argv = ["cmd", "/c", "start", url]
     else:
-        prog = "xdg-open"
+        argv = ["xdg-open", url]
     try:
-        subprocess.Popen([prog, url], close_fds=True)
+        subprocess.Popen(argv, close_fds=True)
     except OSError as err:
         return err
     return None
@@ -2618,18 +2582,12 @@ def run_status(w: Any) -> int:
         with urllib.request.urlopen(req, timeout=2.0) as resp:
             if 200 <= resp.status < 300:
                 reach = "reachable"
-    except (urllib.error.URLError, OSError, urllib.error.HTTPError):
+    except (urllib.error.URLError, OSError):
         pass
     print(f"endpoint: {cfg.Endpoint} {reach}", file=w)
     if reach == "unreachable" and st.Queued > 0:
         return 1
     return 0
-
-
-def _plugin_version_text() -> str:
-    path = os.path.join(os.path.dirname(__file__), "..", "bin", "VERSION")
-    with open(path, encoding="utf-8") as f:
-        return f.read().strip()
 
 
 # --- command dispatch ---
