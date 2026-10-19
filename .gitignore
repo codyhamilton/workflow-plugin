@@ -1,2 +1,5 @@
 # Installed by yakka install.sh in cloud agent / headless environments.
 .cursor/skills/yakka/
+__pycache__/
+.scratch/
+output/

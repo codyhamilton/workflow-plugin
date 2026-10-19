@@ -20,7 +20,7 @@ MARKETPLACES = (
 )
 
 README_FIELDS = ("Consumers", "Build", "Test", "Release")
-CLAUDE_PLUGIN_SOURCE = "plugins/yakka"
+CLAUDE_PLUGIN_SOURCE = "./plugins/yakka"
 CURSOR_PLUGIN_SOURCE = {
     "source": "git-subdir",
     "url": "https://github.com/codyhamilton/yakka",
