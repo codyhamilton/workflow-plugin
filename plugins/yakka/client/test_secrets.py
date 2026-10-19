@@ -204,5 +204,20 @@ class TestEnvAssignmentCorpus(unittest.TestCase):
         self.assertEqual(bad, [])
 
 
+class TestUnicodePrefixDoesNotHideSecret(unittest.TestCase):
+    def test_unicode_prefix_does_not_hide_secret(self) -> None:
+        token = "sk-" + "a1" * 12
+        text = "clé" + token
+        hits = yakka.Scan(text)
+        self.assertEqual([h.Pattern for h in hits], ["sk_key"])
+        self.assertNotIn(token, yakka.Redact(text))
+        aws = "AKIA" + "A1" * 8
+        glued = "密钥" + aws + "尾"
+        self.assertEqual(
+            [h.Pattern for h in yakka.Scan(glued)], ["aws_access_key"]
+        )
+        self.assertNotIn(aws, yakka.Redact(glued))
+
+
 if __name__ == "__main__":
     unittest.main()

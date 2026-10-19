@@ -333,7 +333,12 @@ def _secret_like(v: str) -> bool:
     return len(v) >= 16 and any(c in v for c in "0123456789")
 
 
-_x_run = re.compile(r"^[xX*.\-_]{3,}$")
+_x_run = re.compile(r"^[xX*.\-_]{3,}$", re.ASCII)
+
+# ASCII word edges. Python's \b is Unicode, so a token glued to a
+# non-ASCII letter would miss the scrubber and be uploaded.
+_LB = r"(?<![A-Za-z0-9_])"
+_RB = r"(?![A-Za-z0-9_])"
 
 _patterns: List[Tuple[str, re.Pattern[str], int, Optional[Callable[[str], bool]]]] = [
     (
@@ -344,31 +349,31 @@ _patterns: List[Tuple[str, re.Pattern[str], int, Optional[Callable[[str], bool]]
         0,
         None,
     ),
-    ("sk_key", re.compile(r"\bsk-[A-Za-z0-9_\-]{16,}"), 0, None),
-    ("github_token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}"), 0, None),
-    ("github_pat", re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}"), 0, None),
-    ("aws_access_key", re.compile(r"\bAKIA[0-9A-Z]{16}\b"), 0, None),
-    ("slack_token", re.compile(r"\bxox[abprs]-[A-Za-z0-9\-]{10,}"), 0, None),
-    ("google_api_key", re.compile(r"\bAIza[0-9A-Za-z_\-]{35}"), 0, None),
-    ("stripe_key", re.compile(r"\b[sr]k_live_[0-9A-Za-z]{16,}"), 0, None),
-    ("workflow_api_token", re.compile(r"\bwk_[A-Za-z0-9_-]{32,}"), 0, None),
+    ("sk_key", re.compile(_LB + r"sk-[A-Za-z0-9_\-]{16,}"), 0, None),
+    ("github_token", re.compile(_LB + r"gh[pousr]_[A-Za-z0-9]{20,}"), 0, None),
+    ("github_pat", re.compile(_LB + r"github_pat_[A-Za-z0-9_]{20,}"), 0, None),
+    ("aws_access_key", re.compile(_LB + r"AKIA[0-9A-Z]{16}" + _RB), 0, None),
+    ("slack_token", re.compile(_LB + r"xox[abprs]-[A-Za-z0-9\-]{10,}"), 0, None),
+    ("google_api_key", re.compile(_LB + r"AIza[0-9A-Za-z_\-]{35}"), 0, None),
+    ("stripe_key", re.compile(_LB + r"[sr]k_live_[0-9A-Za-z]{16,}"), 0, None),
+    ("workflow_api_token", re.compile(_LB + r"wk_[A-Za-z0-9_-]{32,}"), 0, None),
     (
         "jwt",
         re.compile(
-            r"\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}"
+            _LB + r"eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}"
         ),
         0,
         None,
     ),
     (
         "bearer_token",
-        re.compile(r"(?i)\bbearer[ \t]+[A-Za-z0-9._~+/\-]{20,}=*"),
+        re.compile("(?i)" + _LB + r"bearer[ \t]+[A-Za-z0-9._~+/\-]{20,}=*"),
         0,
         None,
     ),
     (
         "connection_string",
-        re.compile(r"\b[A-Za-z][A-Za-z0-9+.\-]*://[^\s:/@]+:([^\s@/]+)@[^\s/]+"),
+        re.compile(_LB + r"[A-Za-z][A-Za-z0-9+.\-]*://[^\s:/@]+:([^\s@/]+)@[^\s/]+"),
         1,
         lambda v: not _placeholder(v, False),
     ),
@@ -388,6 +393,12 @@ _patterns: List[Tuple[str, re.Pattern[str], int, Optional[Callable[[str], bool]]
         1,
         lambda v: not _placeholder(v, True) and _secret_like(v),
     ),
+]
+# RE2 \b and \s are ASCII. Python's default \b is Unicode, so a token after
+# a non-ASCII letter would be posted instead of scrubbed.
+_patterns = [
+    (name, re.compile(pat.pattern, re.ASCII), group, ok)
+    for name, pat, group, ok in _patterns
 ]
 
 
@@ -1021,6 +1032,128 @@ class DrainResponse:
     Results: List[dict[str, Any]] = field(default_factory=list)
 
 
+# A bearer value with CR/LF becomes a header-injection error whose message
+# quotes the value. Refuse it before it is placed on a request.
+_ILLEGAL_HEADER = re.compile(rb"\n(?![ \t])|\r(?![ \t\n])")
+
+
+def _bearer_header(key: str) -> Optional[str]:
+    if key == "":
+        return ""
+    try:
+        raw = ("Bearer " + key).encode("latin-1")
+    except UnicodeEncodeError:
+        return None
+    if _ILLEGAL_HEADER.search(raw):
+        return None
+    return "Bearer " + key
+
+
+def _request_base(endpoint: str) -> Optional[str]:
+    """http(s) base with userinfo, query, and fragment removed.
+
+    None means the value must not be requested or shown: a non-http scheme
+    (file, ftp) or a URL with no host.
+    """
+    raw = endpoint.strip()
+    if not raw:
+        return None
+    try:
+        u = urllib.parse.urlsplit(raw)
+    except ValueError:
+        return None
+    if u.scheme not in ("http", "https") or not u.hostname:
+        return None
+    host = u.hostname
+    if ":" in host:
+        host = "[" + host + "]"
+    if u.port is not None:
+        host = f"{host}:{u.port}"
+    path = u.path or ""
+    if path != "/":
+        path = path.rstrip("/")
+    try:
+        return urllib.parse.urlunsplit((u.scheme, host, path, "", ""))
+    except ValueError:
+        return None
+
+
+def _shown_endpoint(endpoint: str) -> str:
+    base = _request_base(endpoint)
+    if base is None:
+        return "(invalid)"
+    return base
+
+
+def _host_ascii(url: str) -> str:
+    try:
+        host = urllib.parse.urlparse(url).hostname or ""
+    except ValueError:
+        return ""
+    try:
+        return host.encode("idna").decode("ascii").rstrip(".")
+    except UnicodeError:
+        return host.lower().rstrip(".")
+
+
+def _auth_may_follow(origin: str, dest: str) -> bool:
+    """Go's rule: keep Authorization on the same host or a subdomain of it."""
+    origin_host = _host_ascii(origin)
+    dest_host = _host_ascii(dest)
+    if not origin_host or not dest_host:
+        return False
+    if dest_host == origin_host:
+        return True
+    # A zone or IPv6 literal is not a subdomain of a name in its suffix.
+    if ":" in dest_host or "%" in dest_host:
+        return False
+    return dest_host.endswith("." + origin_host)
+
+
+class _BearerRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        parts = urllib.parse.urlparse(newurl)
+        if parts.scheme not in ("http", "https", ""):
+            raise urllib.error.HTTPError(
+                req.full_url, code, "redirect refused", headers, fp
+            )
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is None:
+            return None
+        if not _auth_may_follow(req.full_url, new.full_url):
+            new.remove_header("Authorization")
+        return new
+
+
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(
+            req.full_url, code, "redirect refused", headers, fp
+        )
+
+
+_OPENER = urllib.request.build_opener(_BearerRedirectHandler)
+_NO_REDIRECT = urllib.request.build_opener(_NoRedirectHandler)
+
+
+def _urlopen(req: urllib.request.Request, timeout: float = 30.0):
+    return _OPENER.open(req, timeout=timeout)
+
+
+def _urlopen_noredir(req: urllib.request.Request, timeout: float = 30.0):
+    return _NO_REDIRECT.open(req, timeout=timeout)
+
+
+def _close_resp(resp: Any) -> None:
+    closer = getattr(resp, "close", None)
+    if closer is None:
+        return
+    try:
+        closer()
+    except Exception:
+        pass
+
+
 class HTTPSink:
     def __init__(
         self,
@@ -1040,27 +1173,40 @@ class HTTPSink:
                 json.loads(f)
             except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
                 return DrainResponse(), _ERR_NETWORK
+        base = _request_base(self.Endpoint)
+        auth = _bearer_header(self.Key)
+        if base is None or auth is None:
+            return DrainResponse(), _ERR_NETWORK
         body = b'{"facts":[' + b",".join(facts) + b"]}"
-        url = self.Endpoint.rstrip("/") + "/v1/ingest"
+        url = base.rstrip("/") + "/v1/ingest"
         req = urllib.request.Request(url, data=body, method="POST")
         req.add_header("Content-Type", "application/json")
-        if self.Key:
-            req.add_header("Authorization", "Bearer " + self.Key)
+        if auth:
+            req.add_header("Authorization", auth)
         timeout = 30.0
         if self.Client is not None and hasattr(self.Client, "timeout"):
             timeout = self.Client.timeout
+        resp = None
         try:
             try:
-                resp = urllib.request.urlopen(req, timeout=timeout)
+                resp = _urlopen(req, timeout=timeout)
                 status = resp.status
                 headers = resp.headers
                 data = resp.read(64 << 20)
             except urllib.error.HTTPError as e:
                 status = e.code
                 headers = e.headers
-                data = e.read(64 << 20)
-        except (urllib.error.URLError, OSError):
+                try:
+                    data = e.read(64 << 20) if e.fp is not None else b""
+                finally:
+                    e.close()
+            finally:
+                if resp is not None:
+                    _close_resp(resp)
+        except Exception:
             return DrainResponse(), _ERR_NETWORK
+        if headers is None:
+            headers = {}
         out = DrainResponse(Status=status)
         ra = headers.get("Retry-After", "").strip()
         if ra.isdigit():
@@ -1508,8 +1654,17 @@ class _Runner:
             lines.append(s.replace("\r", " ").replace("\n", " ") + "\n")
         reason_path = dst + ".reason"
         try:
-            with open(reason_path, "w", encoding="utf-8") as f:
-                f.writelines(lines)
+            fd = os.open(
+                reason_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600
+            )
+            try:
+                try:
+                    os.fchmod(fd, 0o600)
+                except (AttributeError, NotImplementedError):
+                    pass
+                os.write(fd, "".join(lines).encode("utf-8"))
+            finally:
+                os.close(fd)
         except OSError as err:
             self.logf("reason write failed: %s", err)
         src = os.path.join(self.o.Dir, name)
@@ -1738,19 +1893,31 @@ class _McpServer:
         q: dict[str, str],
         timeout: float,
     ) -> Tuple[int, bytes, Optional[BaseException]]:
+        base = _request_base(cfg.Endpoint)
+        if base is None:
+            return 0, b"", OSError("request failed")
         params = urllib.parse.urlencode({k: v for k, v in q.items() if v})
-        u = cfg.Endpoint.rstrip("/") + path
+        u = base + path
         if params:
             u += "?" + params
         req = urllib.request.Request(u, method="GET")
         if cfg.Key:
-            req.add_header("Authorization", "Bearer " + cfg.Key)
+            header = _bearer_header(cfg.Key)
+            if header is None:
+                return 0, b"", OSError("request failed")
+            req.add_header("Authorization", header)
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
+            resp = _urlopen(req, timeout=timeout)
+            try:
                 body = resp.read(8 << 20)
                 return resp.status, body, None
+            finally:
+                resp.close()
         except urllib.error.HTTPError as err:
-            body = err.read(8 << 20) if err.fp else b""
+            try:
+                body = err.read(8 << 20) if err.fp else b""
+            finally:
+                err.close()
             return err.code, body, None
         except (urllib.error.URLError, OSError, http.client.HTTPException, ValueError):
             return 0, b"", OSError("request failed")
@@ -1764,17 +1931,17 @@ class _McpServer:
             return _mcp_bad_config_text(err)
         code, body, err = self._get(cfg, path, q, 3.0)
         if err is not None or code >= 500:
-            return "service unreachable at " + cfg.Endpoint
+            return "service unreachable at " + _shown_endpoint(cfg.Endpoint)
         if code != 200:
             return (
-                f"service refused the request (HTTP {code}) at {cfg.Endpoint}"
+                f"service refused the request (HTTP {code}) at {_shown_endpoint(cfg.Endpoint)}"
             )
         try:
             parsed = json.loads(body.decode())
         except (json.JSONDecodeError, UnicodeDecodeError):
-            return "service at " + cfg.Endpoint + " returned an unreadable answer"
+            return "service at " + _shown_endpoint(cfg.Endpoint) + " returned an unreadable answer"
         if not isinstance(parsed, dict):
-            return "service at " + cfg.Endpoint + " returned an unreadable answer"
+            return "service at " + _shown_endpoint(cfg.Endpoint) + " returned an unreadable answer"
         out.update(parsed)
         return ""
 
@@ -1860,7 +2027,7 @@ class _McpServer:
                 code, _, herr = self._get(cfg, "/v1/health", {}, 3.0)
                 if herr is not None or code >= 500:
                     why = "remote unreachable"
-                    extra = ["service unreachable at " + cfg.Endpoint]
+                    extra = ["service unreachable at " + _shown_endpoint(cfg.Endpoint)]
             age_s = f"{int(round(time.time() - queued[0].mod))}s"
             lines = [
                 f"{len(queued)} events for this file still queued, oldest {age_s}, {why}"
@@ -1892,13 +2059,12 @@ class _McpServer:
             return state(
                 "not delivered",
                 "nothing queued or rejected locally",
-                "service unreachable at " + cfg.Endpoint,
+                "service unreachable at " + _shown_endpoint(cfg.Endpoint),
                 *note,
             )
         if code == 404:
             return state(
                 "not delivered",
-                "nothing queued or rejected locally",
                 "the service has no version of this file and nothing is queued; "
                 "if it was just written, wait for the hook or rewrite the file",
                 *note,
@@ -1906,7 +2072,7 @@ class _McpServer:
         if code != 200:
             return state(
                 "not delivered",
-                f"service refused the request (HTTP {code}) at {cfg.Endpoint}",
+                f"service refused the request (HTTP {code}) at {_shown_endpoint(cfg.Endpoint)}",
                 *note,
             )
         try:
@@ -1914,9 +2080,21 @@ class _McpServer:
         except (json.JSONDecodeError, UnicodeDecodeError):
             return state(
                 "not delivered",
-                "service at " + cfg.Endpoint + " returned an unreadable answer",
+                "service at " + _shown_endpoint(cfg.Endpoint) + " returned an unreadable answer",
             )
-        latest = artifact.get("latest") or {}
+        if not isinstance(artifact, dict):
+            return state(
+                "not delivered",
+                "service at " + _shown_endpoint(cfg.Endpoint) + " returned an unreadable answer",
+            )
+        latest = artifact.get("latest")
+        if latest is None:
+            latest = {}
+        elif not isinstance(latest, dict):
+            return state(
+                "not delivered",
+                "service at " + _shown_endpoint(cfg.Endpoint) + " returned an unreadable answer",
+            )
         if latest.get("content_hash") != content_hash:
             short = latest.get("content_hash", "")
             if len(short) > 12:
@@ -1969,20 +2147,31 @@ class _McpServer:
                 continue
             check = sc.get("check", "")
             score = sc.get("score", 0.0)
+            if isinstance(score, bool) or not isinstance(score, (int, float)):
+                return state(
+                    "not delivered",
+                    "service at " + _shown_endpoint(cfg.Endpoint) + " returned an unreadable answer",
+                )
             b = checks_bl.get(check)
             if not isinstance(b, dict):
                 lines.append(f"{check} {score:.2f} (no baseline)")
-            elif b.get("n", 0) < 4:
+                continue
+            try:
+                n = int(b.get("n", 0))
+                p25 = float(b.get("p25", 0))
+                median = float(b.get("median", 0))
+            except (TypeError, ValueError):
+                lines.append(f"{check} {score:.2f} (no baseline)")
+                continue
+            if n < 4:
                 lines.append(
-                    f"{check} {score:.2f} (baseline n={int(b['n'])}, too few to flag)"
+                    f"{check} {score:.2f} (baseline n={n}, too few to flag)"
                 )
             else:
-                tag = ""
-                if score < b.get("p25", 0):
-                    tag = " BELOW p25"
+                tag = " BELOW p25" if score < p25 else ""
                 lines.append(
-                    f"{check} {score:.2f} (baseline p25 {b['p25']:.2f}, "
-                    f"median {b['median']:.2f}, n {int(b['n'])}){tag}"
+                    f"{check} {score:.2f} (baseline p25 {p25:.2f}, "
+                    f"median {median:.2f}, n {n}){tag}"
                 )
         versions = artifact.get("versions", 0)
         lines.append(f"versions: {versions}")
@@ -2192,7 +2381,7 @@ def _mcp_fail(id_raw: Any, code: int, msg: str) -> dict[str, Any]:
 def _mcp_handle(server: _McpServer, line: bytes) -> Optional[dict[str, Any]]:
     try:
         v = json.loads(line)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return _mcp_fail(None, -32700, "parse error")
     if not isinstance(v, dict):
         return _mcp_fail(None, -32600, "invalid request: expected a single JSON object")
@@ -2320,17 +2509,18 @@ class LoginOptions:
 
 
 def normalize_origin(raw: str) -> Tuple[str, Optional[BaseException]]:
-    raw = raw.strip().rstrip("/")
-    u = urllib.parse.urlparse(raw)
-    if (
-        u.scheme not in ("http", "https")
-        or not u.netloc
-        or u.path not in ("", "/")
-    ):
-        return "", ValueError(
-            "endpoint must be a collector origin (scheme and host, no path)"
-        )
-    return f"{u.scheme}://{u.netloc}", None
+    msg = "endpoint must be a collector origin (scheme and host, no path)"
+    raw = raw.strip()
+    try:
+        u = urllib.parse.urlsplit(raw)
+    except ValueError:
+        return "", ValueError(msg)
+    if u.scheme not in ("http", "https") or not u.hostname or u.path not in ("", "/"):
+        return "", ValueError(msg)
+    base = _request_base(raw)
+    if base is None or urllib.parse.urlsplit(base).path not in ("",):
+        return "", ValueError(msg)
+    return base, None
 
 
 def resolve_endpoint(flag: str) -> Tuple[str, Optional[BaseException]]:
@@ -2382,17 +2572,23 @@ def _login_exchange(
     body = json.dumps(
         {"code": code, "state": state, "redirect_uri": redirect_uri}
     ).encode("utf-8")
-    url = collector.rstrip("/") + "/v1/device/exchange"
+    base = _request_base(collector)
+    if base is None:
+        return "", "", OSError("exchange request failed")
+    url = base + "/v1/device/exchange"
     req = urllib.request.Request(url, data=body, method="POST")
     req.add_header("Content-Type", "application/json")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with _urlopen_noredir(req, timeout=timeout) as resp:
             status = resp.status
-            data = resp.read()
+            data = resp.read(65536)
+            if resp.read(1):
+                return "", "", OSError("invalid exchange response")
     except urllib.error.HTTPError as e:
+        _close_resp(e)
         return "", "", OSError(f"exchange failed ({e.code})")
-    except (urllib.error.URLError, OSError) as err:
-        return "", "", OSError(f"exchange request: {err}")
+    except Exception:
+        return "", "", OSError("exchange request failed")
     if status != 200:
         return "", "", OSError(f"exchange failed ({status})")
     try:
@@ -2402,11 +2598,17 @@ def _login_exchange(
     if not isinstance(out, dict):
         return "", "", OSError("invalid exchange response")
     token = out.get("token", "")
-    if not token:
+    if not isinstance(token, str) or not token or _bearer_header(token) is None:
+        return "", "", OSError("invalid exchange response")
+    if len(token) > 4096:
         return "", "", OSError("invalid exchange response")
     ep = out.get("endpoint", "")
     if not isinstance(ep, str):
         ep = ""
+    if ep:
+        ep, nerr = normalize_origin(ep)
+        if nerr is not None:
+            return "", "", OSError("invalid exchange response")
     return token, ep, None
 
 
@@ -2418,10 +2620,18 @@ def write_client_config(path: str, endpoint: str, key: str) -> Optional[BaseExce
     content = f'endpoint = {json.dumps(endpoint)}\nkey = {json.dumps(key)}\n'
     try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(content)
     except OSError as err:
         return err
+    try:
+        try:
+            os.fchmod(fd, 0o600)
+        except (AttributeError, NotImplementedError):
+            pass
+        os.write(fd, content.encode("utf-8"))
+    except OSError as err:
+        return err
+    finally:
+        os.close(fd)
     return None
 
 
@@ -2464,10 +2674,21 @@ def run_login(opts: LoginOptions) -> int:
     done: Queue[Optional[BaseException]] = Queue(maxsize=1)
 
     class _CallbackHandler(BaseHTTPRequestHandler):
+        server_version = "yakka"
+        sys_version = ""
+
         def log_message(self, fmt: str, *args: Any) -> None:
             pass
 
+        def setup(self) -> None:
+            super().setup()
+            self.connection.settimeout(10)
+
         def do_GET(self) -> None:
+            peer = self.client_address[0]
+            if peer not in ("127.0.0.1", "::1"):
+                self.send_error(403)
+                return
             if self.path.split("?", 1)[0] != "/callback":
                 self.send_error(404)
                 return
@@ -2478,7 +2699,7 @@ def run_login(opts: LoginOptions) -> int:
                 self.send_error(400, "invalid state")
                 return
             code = (q.get("code") or [""])[0]
-            if not code:
+            if not code or len(code) > 256:
                 self.send_error(400, "missing code")
                 return
             token, ep, ex_err = _login_exchange(
@@ -2576,15 +2797,16 @@ def run_status(w: Any) -> int:
     else:
         print(f"config: {Path()} (remote mode)", file=w)
     reach = "unreachable"
-    url = cfg.Endpoint.rstrip("/") + "/v1/health"
-    req = urllib.request.Request(url, method="GET")
-    try:
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
-            if 200 <= resp.status < 300:
-                reach = "reachable"
-    except (urllib.error.URLError, OSError):
-        pass
-    print(f"endpoint: {cfg.Endpoint} {reach}", file=w)
+    base = _request_base(cfg.Endpoint)
+    if base is not None:
+        req = urllib.request.Request(base.rstrip("/") + "/v1/health", method="GET")
+        try:
+            with _urlopen(req, timeout=2.0) as resp:
+                if 200 <= resp.status < 300:
+                    reach = "reachable"
+        except Exception:
+            pass
+    print(f"endpoint: {_shown_endpoint(cfg.Endpoint)} {reach}", file=w)
     if reach == "unreachable" and st.Queued > 0:
         return 1
     return 0

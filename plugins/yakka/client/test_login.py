@@ -150,6 +150,124 @@ class TestEndpointFromExistingConfig(LoginEnv):
         self.assertEqual(ep, "https://old.example")
 
 
+class TestNormalizeStripsUserinfo(unittest.TestCase):
+    def test_normalize_strips_userinfo(self) -> None:
+        ep, err = yakka.normalize_origin("https://user:s3cret@collector.example")
+        self.assertIsNone(err)
+        self.assertEqual(ep, "https://collector.example")
+        self.assertNotIn("s3cret", ep)
+        _, bad = yakka.normalize_origin("https://collector.example/v1/ingest")
+        self.assertIsNotNone(bad)
+        ep6, err6 = yakka.normalize_origin("http://[::1]:8770")
+        self.assertIsNone(err6)
+        self.assertEqual(ep6, "http://[::1]:8770")
+
+
+class TestReloginTightensMode(LoginEnv):
+    def test_relogin_tightens_mode(self) -> None:
+        with open(self._cfg, "w", encoding="utf-8") as f:
+            f.write("old\n")
+        os.chmod(self._cfg, 0o644)
+        err = yakka.write_client_config(
+            self._cfg, "http://127.0.0.1:9", "wk_plain_token"
+        )
+        self.assertIsNone(err)
+        self.assertEqual(os.stat(self._cfg).st_mode & 0o777, 0o600)
+
+
+class TestExchangeRejectsRedirectAndBadEndpoint(LoginEnv):
+    def test_exchange_does_not_follow_redirect(self) -> None:
+        seen: dict[str, bool] = {}
+
+        class Attacker(BaseHTTPRequestHandler):
+            def log_message(self, fmt: str, *args: object) -> None:
+                pass
+
+            def do_POST(self) -> None:
+                seen["hit"] = True
+                body = json.dumps(
+                    {
+                        "token": "wk_attacker_token_should_not_stick_0123456789",
+                        "endpoint": "https://attacker.example",
+                    }
+                ).encode()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        attacker = HTTPServer(("127.0.0.1", 0), Attacker)
+
+        class Collector(BaseHTTPRequestHandler):
+            def log_message(self, fmt: str, *args: object) -> None:
+                pass
+
+            def do_POST(self) -> None:
+                loc = (
+                    f"http://127.0.0.1:{attacker.server_address[1]}"
+                    "/v1/device/exchange"
+                )
+                self.send_response(302)
+                self.send_header("Location", loc)
+                self.end_headers()
+
+        collector = HTTPServer(("127.0.0.1", 0), Collector)
+        collector_url = f"http://127.0.0.1:{collector.server_address[1]}"
+        Thread(target=attacker.serve_forever, daemon=True).start()
+        Thread(target=collector.serve_forever, daemon=True).start()
+        try:
+            token, _ep, err = yakka._login_exchange(
+                collector_url,
+                "devcode",
+                "state",
+                "http://127.0.0.1:9/callback",
+                5.0,
+            )
+        finally:
+            collector.shutdown()
+            attacker.shutdown()
+        self.assertIsNotNone(err)
+        self.assertEqual(token, "")
+        self.assertNotIn("wk_attacker", str(err))
+        self.assertFalse(seen.get("hit", False))
+
+    def test_exchange_rejects_endpoint_with_path(self) -> None:
+        class Collector(BaseHTTPRequestHandler):
+            def log_message(self, fmt: str, *args: object) -> None:
+                pass
+
+            def do_POST(self) -> None:
+                body = json.dumps(
+                    {
+                        "token": "wk_login_test_plain_token_0123456789ab",
+                        "endpoint": "http://169.254.169.254/latest/meta-data",
+                    }
+                ).encode()
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        collector = HTTPServer(("127.0.0.1", 0), Collector)
+        collector_url = f"http://127.0.0.1:{collector.server_address[1]}"
+        Thread(target=collector.serve_forever, daemon=True).start()
+        try:
+            token, ep, err = yakka._login_exchange(
+                collector_url,
+                "devcode",
+                "state",
+                "http://127.0.0.1:9/callback",
+                5.0,
+            )
+        finally:
+            collector.shutdown()
+        self.assertIsNotNone(err)
+        self.assertEqual(token, "")
+        self.assertEqual(ep, "")
+        self.assertNotIn("169.254.169.254", str(err))
+        self.assertFalse(os.path.exists(self._cfg))
+
+
 class TestLoginCommandMissingEndpoint(LoginEnv):
     def test_login_command_missing_endpoint(self) -> None:
         proc = subprocess.run(

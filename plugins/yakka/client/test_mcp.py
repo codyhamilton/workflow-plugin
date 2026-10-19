@@ -513,7 +513,13 @@ class McpShimTests(unittest.TestCase):
             e = _McpEnv(self, texts)
             c = e.serve()
             a = c.feedback(e.design)
-            _want(self, a, "state: not delivered")
+            _want(
+                self,
+                a,
+                "state: not delivered",
+                "the service has no version of this file",
+            )
+            self.assertNotIn("nothing queued or rejected locally", a)
             with e.state_lock:
                 e.artifact = lambda: (
                     200,
@@ -535,6 +541,10 @@ class McpShimTests(unittest.TestCase):
                 "abababababab",
                 "2026-01-01T00:00:00Z",
             )
+            with e.state_lock:
+                e.artifact = lambda: (200, {"versions": 1, "latest": []})
+            a = c.feedback(e.design)
+            _want(self, a, "unreadable answer")
 
         with self.subTest("9 bad config and unreachable"):
             e = _McpEnv(self, texts)
@@ -612,6 +622,13 @@ class McpShimTests(unittest.TestCase):
             self.assertGreaterEqual(len(texts), 10)
             for x in texts:
                 self.assertNotIn(_SECRET_KEY, x)
+
+    def test_bad_utf8_is_parse_error(self) -> None:
+        resp = yakka._mcp_handle(None, b"\xff")
+        self.assertIsNotNone(resp)
+        assert resp is not None
+        self.assertEqual(resp["error"]["code"], -32700)
+        self.assertEqual(resp["error"]["message"], "parse error")
 
 
 if __name__ == "__main__":

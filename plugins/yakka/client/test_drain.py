@@ -355,8 +355,10 @@ class DrainTests(unittest.TestCase):
             rej = os.path.join(dir_path, "rejected")
             self.assertEqual(_count(dir_path, ".evt"), 0)
             self.assertEqual(_count(rej, ".evt"), 1)
-            with open(os.path.join(rej, "b-2.evt.reason"), encoding="utf-8") as f:
+            reason = os.path.join(rej, "b-2.evt.reason")
+            with open(reason, encoding="utf-8") as f:
                 self.assertEqual(f.read(), "b-2.evt: 413\n")
+            self.assertEqual(os.stat(reason).st_mode & 0o777, 0o600)
         finally:
             srv.shutdown()
             srv.server_close()
@@ -478,6 +480,121 @@ class DrainTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         out = proc.stdout + proc.stderr
         self.assertIn("YAKKA_ENDPOINT", out)
+
+    def test_bad_status_line_retries(self) -> None:
+        import socket
+
+        sock = socket.socket()
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(("127.0.0.1", 0))
+        sock.listen(1)
+        port = sock.getsockname()[1]
+
+        def serve() -> None:
+            conn, _ = sock.accept()
+            try:
+                conn.recv(4096)
+                conn.sendall(b"NOTHTTP\r\n")
+            finally:
+                conn.close()
+                sock.close()
+
+        threading.Thread(target=serve, daemon=True).start()
+        sink = yakka.HTTPSink(Endpoint=f"http://127.0.0.1:{port}", Key="k")
+        _resp, err = sink.Send(yakka.DrainContext(), [b'{"a":1}'])
+        self.assertIsNotNone(err)
+        self.assertNotIn("k", str(err))
+
+    def test_illegal_bearer_is_network_error(self) -> None:
+        sink = yakka.HTTPSink(Endpoint="http://127.0.0.1:9", Key="sekrit\nX")
+        _resp, err = sink.Send(yakka.DrainContext(), [b'{"a":1}'])
+        self.assertIsNotNone(err)
+        self.assertNotIn("sekrit", str(err))
+
+    def test_redirect_drops_bearer_on_other_host(self) -> None:
+        seen: dict[str, str] = {}
+
+        class Same(BaseHTTPRequestHandler):
+            def log_message(self, format: str, *args: Any) -> None:
+                pass
+
+            def do_POST(self) -> None:
+                if self.path == "/v1/ingest":
+                    self.send_response(302)
+                    self.send_header(
+                        "Location",
+                        f"http://localhost:{evil.server_address[1]}/landed",
+                    )
+                    self.end_headers()
+                    return
+                seen["same"] = self.headers.get("Authorization", "")
+                body = b'{"results":[]}'
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        class Other(BaseHTTPRequestHandler):
+            def log_message(self, format: str, *args: Any) -> None:
+                pass
+
+            def do_GET(self) -> None:
+                seen["other"] = self.headers.get("Authorization", "")
+                body = b'{"results":[]}'
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_POST(self) -> None:
+                self.do_GET()
+
+        evil = HTTPServer(("127.0.0.1", 0), Other)
+        good = HTTPServer(("127.0.0.1", 0), Same)
+        threading.Thread(target=evil.serve_forever, daemon=True).start()
+        threading.Thread(target=good.serve_forever, daemon=True).start()
+        self.addCleanup(evil.shutdown)
+        self.addCleanup(good.shutdown)
+        self.addCleanup(evil.server_close)
+        self.addCleanup(good.server_close)
+        host, port = good.server_address
+        sink = yakka.HTTPSink(Endpoint=f"http://{host}:{port}", Key="supersecretkey")
+        resp, err = sink.Send(yakka.DrainContext(), [b'{"a":1}'])
+        self.assertIsNone(err)
+        self.assertEqual(resp.Status, 200)
+        self.assertEqual(seen.get("other", ""), "")
+
+        seen.clear()
+
+        class Keep(BaseHTTPRequestHandler):
+            def log_message(self, format: str, *args: Any) -> None:
+                pass
+
+            def do_POST(self) -> None:
+                if self.path == "/v1/ingest":
+                    self.send_response(302)
+                    self.send_header("Location", "/landed")
+                    self.end_headers()
+                    return
+                seen["kept"] = self.headers.get("Authorization", "")
+                body = b'{"results":[{"id":"a","status":"accepted"}]}'
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def do_GET(self) -> None:
+                self.do_POST()
+
+        keep = HTTPServer(("127.0.0.1", 0), Keep)
+        threading.Thread(target=keep.serve_forever, daemon=True).start()
+        self.addCleanup(keep.shutdown)
+        self.addCleanup(keep.server_close)
+        kh, kp = keep.server_address
+        sink = yakka.HTTPSink(Endpoint=f"http://{kh}:{kp}", Key="supersecretkey")
+        resp, err = sink.Send(yakka.DrainContext(), [b'{"a":1}'])
+        self.assertIsNone(err)
+        self.assertEqual(seen.get("kept"), "Bearer supersecretkey")
 
 
 if __name__ == "__main__":

@@ -463,7 +463,7 @@ class TestNumberLiteralRoundTrip(unittest.TestCase):
 
         sink = yakka.HTTPSink(Endpoint="http://127.0.0.1:9", Key="k")
         ctx = yakka.DrainContext.with_timeout(30.0)
-        with mock.patch("urllib.request.urlopen", fake_urlopen):
+        with mock.patch("yakka._urlopen", fake_urlopen):
             resp, err = sink.Send(ctx, [bytes(fact)])
         self.assertIsNone(err)
         self.assertEqual(resp.Status, 200)
