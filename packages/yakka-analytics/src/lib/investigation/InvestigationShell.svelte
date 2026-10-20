@@ -7,6 +7,10 @@
 		type AggregateRequest,
 		type AggregateResult,
 		type BreakdownResult,
+		type ConversationResult,
+		type ConversationsResult,
+		type DistributionResult,
+		type QualityResult,
 		type TrendResult
 	} from '$lib/aggregate';
 	import {
@@ -20,7 +24,7 @@
 	import { PRESETS } from '$lib/presets';
 	import { tenantNameFromMe } from '$lib/session-gate';
 	import { sessionGate } from '$lib/session-gate.svelte';
-	import { Superseded } from '$lib/query';
+	import { getJSON, Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { PresetId } from '$lib/urlstate';
 	import { explorationDims, isDimKey } from './dims';
@@ -34,6 +38,16 @@
 		investigationRequestToSearch,
 		parseInvestigationRequest
 	} from './request-url';
+	import ConversationsTool from './tools/ConversationsTool.svelte';
+	import QualityTool from './tools/QualityTool.svelte';
+	import SavedAnalysisTool from './tools/SavedAnalysisTool.svelte';
+	import {
+		TOOL_OPTIONS,
+		switchTool,
+		toolForAsk,
+		type ExplorationToolId
+	} from './tools/registry';
+	import UsageTool from './tools/UsageTool.svelte';
 
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	const sessionTenant = $derived(isCollectorMode() ? tenantNameFromMe(sessionGate.me) : null);
@@ -42,6 +56,7 @@
 	let primary = $state<AggregateResult | null>(null);
 	let companionCost = $state<TrendFrameData | null>(null);
 	let chartKeys = $state<string[]>([]);
+	let toolOverride = $state<ExplorationToolId | null>(null);
 
 	const queryString = $derived(page.url.search);
 
@@ -57,15 +72,35 @@
 	});
 
 	const urlState = $derived(request ? requestToUrlState(request, new Date()) : null);
+	const activeTool = $derived(
+		toolOverride ?? (request ? toolForAsk(request.ask) : 'explore')
+	);
 
 	const ignored = $derived(ignoredFilters(primary));
 
 	function commit(next: AggregateRequest, replace = false) {
+		toolOverride = null;
 		const qs = investigationRequestToSearch(next, new Date()).toString();
 		const suffix = qs ? `?${qs}` : '';
 		const target = `/${suffix}`;
 		if (target === `${page.url.pathname}${page.url.search}`) return;
 		goto(target, { replaceState: replace, noScroll: true, keepFocus: true });
+	}
+
+	function selectTool(tool: ExplorationToolId) {
+		if (!request) return;
+		if (tool === 'saved') {
+			toolOverride = 'saved';
+			return;
+		}
+		toolOverride = null;
+		commit(switchTool(request, tool));
+	}
+
+	function openSavedSpec(spec: AggregateRequest) {
+		const next = sessionTenant ? { ...spec, tenant: sessionTenant } : spec;
+		toolOverride = null;
+		commit(next);
 	}
 
 	function setPreset(id: PresetId) {
@@ -152,15 +187,29 @@
 		};
 		const req = request;
 		const wantCompanionCost =
+			activeTool === 'explore' &&
 			req.ask.ask === 'trend' &&
 			req.ask.measure === 'hook_events' &&
 			req.ask.bucket === 'day' &&
 			!req.ask.dim;
 
+		const qualityFetcher =
+			req.ask.ask === 'quality'
+				? ((_slot: string, path: string, params: URLSearchParams) => {
+						const slot =
+							path === 'baselines'
+								? 'investigation-quality-baseline'
+								: path.includes('score-series')
+									? 'investigation-quality-series'
+									: 'investigation-quality-scores';
+						return getJSON(slot, path, params);
+					})
+				: undefined;
+
 		(async () => {
 			const now = new Date();
 			try {
-				const result = await aggregate(req, { now });
+				const result = await aggregate(req, { now, ...(qualityFetcher ? { fetcher: qualityFetcher } : {}) });
 				if (!live) return;
 				clearError();
 				primary = result;
@@ -194,7 +243,18 @@
 
 <div class="investigation" data-testid="investigation-shell">
 	<h1>Analysis</h1>
-	<p class="tools-hint">Usage, quality, conversations, and saved views — coming soon.</p>
+
+	<div class="tool-strip" role="tablist" aria-label="Investigation tools">
+		{#each TOOL_OPTIONS as t (t.id)}
+			<button
+				type="button"
+				role="tab"
+				data-testid="investigation-tool-{t.id}"
+				aria-selected={activeTool === t.id}
+				onclick={() => selectTool(t.id)}>{t.label}</button
+			>
+		{/each}
+	</div>
 
 	{#if urlState}
 		<div class="presets" role="group" aria-label="Date range">
@@ -211,7 +271,7 @@
 		</div>
 	{/if}
 
-	{#if request}
+	{#if activeTool === 'explore' && request}
 		<label class="dim">
 			View
 			<select
@@ -235,40 +295,74 @@
 		</p>
 	{/each}
 
-	{#if trendData}
-		<section class="chart">
-			<TrendChart
-				data={trendData}
-				testid="investigation-trend-hook_events"
-				onbrushend={onBrushEnd}
-				ondrill={onDrill}
-			/>
-		</section>
-	{/if}
+	{#if activeTool === 'explore'}
+		{#if trendData}
+			<section class="chart">
+				<TrendChart
+					data={trendData}
+					testid="investigation-trend-hook_events"
+					onbrushend={onBrushEnd}
+					ondrill={onDrill}
+				/>
+			</section>
+		{/if}
 
-	{#if breakdownData}
-		<section class="chart">
-			<BreakdownChart data={breakdownData} testid="investigation-chart" ondrill={onDrill} />
-			{#if chartKeys.length}
-				<ol data-testid="investigation-chart-keys" class="keys">
-					{#each chartKeys as key (key)}<li>{key}</li>{/each}
-				</ol>
-			{/if}
-		</section>
-	{/if}
+		{#if breakdownData}
+			<section class="chart">
+				<BreakdownChart data={breakdownData} testid="investigation-chart" ondrill={onDrill} />
+				{#if chartKeys.length}
+					<ol data-testid="investigation-chart-keys" class="keys">
+						{#each chartKeys as key (key)}<li>{key}</li>{/each}
+					</ol>
+				{/if}
+			</section>
+		{/if}
 
-	{#if companionCost}
-		<section class="chart">
-			<span class="label">{companionCost.measure}</span>
-			<TrendChart data={companionCost} testid="investigation-trend-cost_usd" />
-		</section>
+		{#if companionCost}
+			<section class="chart">
+				<span class="label">{companionCost.measure}</span>
+				<TrendChart data={companionCost} testid="investigation-trend-cost_usd" />
+			</section>
+		{/if}
+	{:else if activeTool === 'usage' && request}
+		<UsageTool
+			{request}
+			primary={primary?.ask === 'trend' || primary?.ask === 'distribution' ? primary : null}
+			{commit}
+			onBrushEnd={onBrushEnd}
+			onDrill={onDrill}
+		/>
+	{:else if activeTool === 'quality' && request}
+		<QualityTool
+			{request}
+			primary={primary?.ask === 'quality' ? (primary as QualityResult) : null}
+			{commit}
+			{tz}
+			onBrushEnd={onBrushEnd}
+		/>
+	{:else if activeTool === 'conversations' && request}
+		<ConversationsTool
+			{request}
+			primary={
+				primary?.ask === 'conversations' || primary?.ask === 'conversation' ? primary : null
+			}
+			{commit}
+			{tz}
+		/>
+	{:else if activeTool === 'saved' && request}
+		<SavedAnalysisTool {request} onOpen={openSavedSpec} />
 	{/if}
 </div>
 
 <style>
-	.tools-hint {
-		color: var(--muted);
-		font-size: 0.9rem;
+	.tool-strip {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin: 0.5rem 0 0.75rem;
+	}
+	.tool-strip button[aria-selected='true'] {
+		font-weight: bold;
 	}
 	.presets {
 		display: flex;

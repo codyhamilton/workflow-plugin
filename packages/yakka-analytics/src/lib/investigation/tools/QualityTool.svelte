@@ -1,0 +1,187 @@
+<script lang="ts">
+	import type { AggregateRequest, QualityResult } from '$lib/aggregate';
+	import { QualityChart, type QualityFrameData } from '$lib/analysis/chart-frame';
+	import { bucketCount, pickBucket, type Bucket } from '$lib/buckets';
+	import { requestToUrlState } from '../request-mutate';
+
+	const KINDS = ['design', 'brief', 'report'] as const;
+	const ORDER: Bucket[] = ['day', 'week', 'month'];
+	const CAP = 400;
+	const W = ['n', 'min', 'p25', 'median', 'p75', 'max'] as const;
+	const B = ['n', 'p25', 'median', 'p75'] as const;
+
+	let {
+		request,
+		primary,
+		commit,
+		tz,
+		onBrushEnd
+	}: {
+		request: AggregateRequest;
+		primary: QualityResult | null;
+		commit: (next: AggregateRequest, replace?: boolean) => void;
+		tz: string;
+		onBrushEnd: (detail: { from?: string; to?: string }) => void;
+	} = $props();
+
+	const ask = $derived(request.ask.ask === 'quality' ? request.ask : null);
+	const scores = $derived(primary?.scores ?? null);
+	const baselines = $derived(primary?.baseline ?? null);
+	const scoreSeries = $derived(primary?.scoreSeries ?? null);
+
+	const urlState = $derived(requestToUrlState(request, new Date()));
+	const window = $derived.by(() => {
+		if (urlState.range === 'all') return null;
+		const from = urlState.from ? new Date(urlState.from) : undefined;
+		const to = urlState.to ? new Date(urlState.to) : undefined;
+		if (!from || !to) return null;
+		return { from, to };
+	});
+
+	const offered = $derived.by(() =>
+		window ? ORDER.filter((b) => bucketCount(b, window.from, window.to, tz) <= CAP) : ORDER
+	);
+
+	const bucket = $derived.by(() => {
+		if (!ask) return 'day' as Bucket;
+		if (window) {
+			const want = ask.bucket;
+			if (offered.includes(want)) return want;
+			return pickBucket(window.from, window.to, tz, ORDER) ?? offered[0] ?? 'month';
+		}
+		return ask.bucket;
+	});
+
+	const bandChecks = $derived((scoreSeries?.checks ?? []).filter((c) => c.points.length > 0));
+	const selectedCheck = $derived(bandChecks[0]?.name ?? scores?.checks[0]?.name ?? '');
+
+	const qualityFrame = $derived.by((): QualityFrameData | null => {
+		if (!ask || !window || !selectedCheck) return null;
+		const check = scoreSeries?.checks.find((c) => c.name === selectedCheck);
+		if (!check) return null;
+		return {
+			kind: ask.kind,
+			bucket: ask.bucket,
+			points: check.points.map((p) => ({
+				t: p.t,
+				n: p.n,
+				p25: p.p25,
+				median: p.median,
+				p75: p.p75
+			})),
+			baselineMedian: baselines?.checks?.[selectedCheck]?.median,
+			from: window.from,
+			to: window.to,
+			tz
+		};
+	});
+
+	function setKind(kind: (typeof KINDS)[number]) {
+		if (!ask) return;
+		commit({ ...request, ask: { ...ask, kind } });
+	}
+
+	function setBucket(b: Bucket) {
+		if (!ask) return;
+		commit({ ...request, ask: { ...ask, bucket: b } });
+	}
+</script>
+
+<div class="quality-tool" data-testid="investigation-quality-tool">
+	<p class="kinds">
+		Kind:
+		{#each KINDS as k (k)}
+			<button
+				type="button"
+				aria-pressed={ask?.kind === k}
+				data-testid="investigation-quality-kind-{k}"
+				onclick={() => setKind(k)}>{k}</button
+			>
+		{/each}
+	</p>
+
+	{#if window && bandChecks.length > 0}
+		<label class="bucket">
+			bucket
+			<select
+				data-testid="investigation-quality-bucket"
+				value={bucket}
+				onchange={(e) => setBucket((e.currentTarget as HTMLSelectElement).value as Bucket)}
+			>
+				{#each offered as b (b)}<option value={b}>{b}</option>{/each}
+			</select>
+		</label>
+	{/if}
+
+	{#if scores}
+		<table data-testid="investigation-quality-table">
+			<thead>
+				<tr>
+					<th rowspan="2">check</th>
+					<th colspan={W.length}>window</th>
+					<th colspan={B.length}>all-time baseline</th>
+				</tr>
+				<tr>
+					{#each W as f (f)}<th>{f}</th>{/each}
+					{#each B as f (f)}<th class="b">{f}</th>{/each}
+				</tr>
+			</thead>
+			<tbody>
+				{#each scores.checks as c (c.name)}
+					{@const b = baselines?.checks?.[c.name]}
+					<tr data-testid="investigation-quality-row">
+						<th>{c.name}</th>
+						{#each W as f (f)}<td data-testid="investigation-quality-{c.name}-w-{f}">{c[f]}</td>{/each}
+						{#each B as f (f)}<td class="b" data-testid="investigation-quality-{c.name}-b-{f}">{b ? b[f] : ''}</td>{/each}
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{/if}
+
+	{#if qualityFrame}
+		<section class="chart">
+			<QualityChart
+				data={qualityFrame}
+				testid="investigation-quality-series"
+				onbrushend={onBrushEnd}
+			/>
+		</section>
+	{/if}
+</div>
+
+<style>
+	button[aria-pressed='true'] {
+		font-weight: bold;
+	}
+	.kinds {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+	.bucket {
+		display: block;
+		margin: 0.5rem 0;
+	}
+	table {
+		margin-top: 0.75rem;
+		border-collapse: collapse;
+	}
+	th,
+	td {
+		padding: 0.2rem 0.75rem;
+		text-align: right;
+		border-bottom: 1px solid var(--border);
+		font-variant-numeric: tabular-nums;
+	}
+	th:first-child {
+		text-align: left;
+	}
+	.b {
+		background: var(--surface);
+	}
+	.chart {
+		margin-top: 1rem;
+	}
+</style>
