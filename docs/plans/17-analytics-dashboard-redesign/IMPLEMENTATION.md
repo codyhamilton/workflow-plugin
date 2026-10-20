@@ -90,3 +90,15 @@ Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the Them
 ### Carried
 
 1. `tests/e2e/shell.spec.ts` "dashboards shares filter chrome" does not find `trends-chart`, and "an ignored-filter notice" does not find `notice-ignored`. Both fail on `af0b6d2`, before this phase, and on this phase's tree. No brief amendment.
+
+## Phase 3 — Aggregation boundary
+
+Tool: Cursor (Grok 4.7 orchestrator, Composer workers).
+Run: https://cursor.com/agents/bc-ad411c4d-fde0-5ee0-9581-8daae98ee890
+Started: 2026-10-20T16:55:14.686Z
+
+Approach: known. One unit: one request, one result, and every ask shares that module. Refine skipped; the brief is authored inline. Slug from the plan folder `17-analytics-dashboard-redesign`: `analytics-dashboard-redesign`.
+
+Phase 2 carried item is not absorbed here. The two `shell.spec.ts` failures predate this phase and do not touch the aggregation contract, the package boundary, or this phase's outcome. They stay carried.
+
+Package boundary stays `packages/yakka-analytics`. This phase adds no analytics route under `packages/yakka/internal/serve` and no table under `packages/yakka/internal/store`.
