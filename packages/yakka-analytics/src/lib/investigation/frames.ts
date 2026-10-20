@@ -5,13 +5,24 @@ export function trendFrame(
 	measure: string,
 	bucket: TrendFrameData['bucket'],
 	result: TrendResult,
-	dim?: string
+	dim?: string,
+	tz?: string
 ): TrendFrameData {
+	const w = result.window;
+	const span =
+		w && 'from' in w && w.from && w.to
+			? {
+					from: new Date(w.from),
+					to: new Date(w.to),
+					...(tz ? { tz } : {})
+				}
+			: {};
 	return {
 		measure,
 		bucket,
 		series: (result.series ?? []).map((s) => ({ name: s.key, points: s.points })),
-		...(dim ? { breakdownDim: dim } : {})
+		...(dim ? { breakdownDim: dim } : {}),
+		...span
 	};
 }
 

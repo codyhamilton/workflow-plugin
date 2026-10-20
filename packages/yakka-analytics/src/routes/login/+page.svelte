@@ -1,15 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { oauthLoginPath } from '$lib/api';
+	import { oauthLoginPath, safeReturnPath } from '$lib/api';
 	import { IdentityPanel } from '$lib/analysis';
 
 	const denied = $derived(page.url.searchParams.get('error') === 'denied');
-	const returnTo = $derived(page.url.searchParams.get('return') ?? '');
-	const loginHref = $derived(
-		returnTo.startsWith('/') && !returnTo.startsWith('//')
-			? oauthLoginPath(page.url.hostname, returnTo)
-			: oauthLoginPath(page.url.hostname)
-	);
+	const returnTo = $derived(safeReturnPath(page.url.searchParams.get('return') ?? '') ?? '');
+	const loginHref = $derived(oauthLoginPath(page.url.hostname, returnTo));
 </script>
 
 <IdentityPanel>

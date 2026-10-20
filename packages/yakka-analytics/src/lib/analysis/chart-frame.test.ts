@@ -48,6 +48,64 @@ describe('chart-frame options use analysis tokens', () => {
 		expectAnalysisSeriesColors(option);
 	});
 
+	it('zero-fills count gaps and leaves cost sparse', () => {
+		const span = {
+			bucket: 'day' as const,
+			tz: 'UTC',
+			from: new Date('2024-01-01T00:00:00Z'),
+			to: new Date('2024-01-03T00:00:00Z'),
+			series: [
+				{
+					name: 'all',
+					points: [
+						{ t: '2024-01-01T00:00:00Z', v: 2 },
+						{ t: '2024-01-03T00:00:00Z', v: 4 }
+					]
+				}
+			]
+		};
+		const filled = trendOption({ ...span, measure: 'hook_events' }, TOKENS);
+		expect((filled.series as { data: unknown[] }[])[0].data).toEqual([
+			['2024-01-01T00:00:00Z', 2],
+			['2024-01-02T00:00:00Z', 0],
+			['2024-01-03T00:00:00Z', 4]
+		]);
+		const cost = trendOption({ ...span, measure: 'cost_usd' }, TOKENS);
+		expect((cost.series as { data: unknown[] }[])[0].data).toEqual([
+			['2024-01-01T00:00:00Z', 2],
+			['2024-01-03T00:00:00Z', 4]
+		]);
+	});
+
+	it('makes breakdown trend series drillable and skips __other__', () => {
+		const option = trendOption(
+			{
+				measure: 'hook_events',
+				bucket: 'day',
+				breakdownDim: 'harness',
+				series: [
+					{ name: 'cursor', points: [{ t: '2024-01-01T00:00:00Z', v: 3 }] },
+					{ name: '__other__', points: [{ t: '2024-01-01T00:00:00Z', v: 1 }] }
+				]
+			},
+			TOKENS
+		);
+		const series = option.series as {
+			triggerEvent?: string | boolean;
+			data: { key: string; dim: string; clickable: boolean; value: [string, number] }[];
+		}[];
+		expect(series[0].triggerEvent).toBe('line');
+		expect(option.legend).toMatchObject({ selectedMode: false });
+		expect(series[0].data[0]).toEqual({
+			value: ['2024-01-01T00:00:00Z', 3],
+			key: 'cursor',
+			dim: 'harness',
+			clickable: true
+		});
+		expect(series[1].data[0].clickable).toBe(false);
+		expect(series[1].data[0].key).toBe('__other__');
+	});
+
 	it('breakdown', () => {
 		const option = breakdownOption(
 			{

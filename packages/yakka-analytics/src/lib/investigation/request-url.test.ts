@@ -31,6 +31,15 @@ describe('parseInvestigationRequest', () => {
 		expect(() => parseInvestigationRequest(new URLSearchParams(''))).toThrow(InvestigationUrlError);
 	});
 
+	it('missing range is the 30d preset', () => {
+		const req = parseInvestigationRequest(
+			new URLSearchParams('ask=trend&measure=hook_events&bucket=day'),
+			NOW
+		);
+		expect(req.window?.preset).toBe('30d');
+		expect(req.window?.from).toBeUndefined();
+	});
+
 	it('rejects unknown ask', () => {
 		expect(() => parseInvestigationRequest(new URLSearchParams('ask=overview'))).toThrow(
 			InvestigationUrlError
@@ -136,6 +145,20 @@ describe('investigation round-trip', () => {
 		const params = investigationRequestToSearch(req, NOW);
 		expect(params.get('range')).toBe('7d');
 		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('drops a tz that is not an IANA zone', () => {
+		const req = parseInvestigationRequest(
+			new URLSearchParams('ask=trend&measure=hook_events&bucket=day&range=7d&tz=Not/AZone'),
+			NOW
+		);
+		expect(req.window?.preset).toBe('7d');
+		expect(req.window?.tz).toBeUndefined();
+		const injected = parseInvestigationRequest(
+			new URLSearchParams('ask=trend&measure=hook_events&bucket=day&range=7d&tz=UTC%0d%0aX'),
+			NOW
+		);
+		expect(injected.window?.tz).toBeUndefined();
 	});
 
 	it('custom from/to window', () => {

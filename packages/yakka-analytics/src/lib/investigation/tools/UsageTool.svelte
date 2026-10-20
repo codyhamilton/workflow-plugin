@@ -144,7 +144,7 @@
 		if (!primary || primary.ask !== 'trend') return null;
 		const a = request.ask;
 		if (a.ask !== 'trend') return null;
-		return trendFrame(a.measure, a.bucket, primary as TrendResult, 'model');
+		return trendFrame(a.measure, a.bucket, primary as TrendResult, 'model', request.window?.tz);
 	});
 
 	const DIST_MEASURES = [
@@ -222,7 +222,12 @@
 		</thead>
 		<tbody>
 			{#each models as m (m)}
-				<tr data-testid="investigation-usage-row-{m}">
+				<tr
+					class="drill"
+					data-testid="investigation-usage-row-{m}"
+					onclick={(e) =>
+						onDrill({ dim: 'model', value: m, modifiers: { shiftKey: e.shiftKey } })}
+				>
 					<th scope="row">{label(m)}</th>
 					<td>{cell(callsBy, m)}</td>
 					<td>{cell(unpricedBy, m)}</td>
@@ -288,6 +293,9 @@
 	}
 	th:first-child {
 		text-align: left;
+	}
+	tr.drill {
+		cursor: pointer;
 	}
 	.chart {
 		margin-top: 1rem;

@@ -4,23 +4,29 @@
 
 	let {
 		request,
-		onOpen
+		onOpen,
+		owner = ''
 	}: {
 		request: AggregateRequest;
 		onOpen: (spec: AggregateRequest) => void;
+		owner?: string;
 	} = $props();
 
 	let name = $state('');
-	let items = $state<SavedAnalysis[]>(list());
+	let items = $state<SavedAnalysis[]>([]);
 
 	function refresh() {
-		items = list();
+		items = list(localStorage, owner);
 	}
+
+	$effect(() => {
+		items = list(localStorage, owner);
+	});
 
 	function doSave() {
 		const trimmed = name.trim();
 		if (!trimmed) return;
-		save(trimmed, request);
+		save(trimmed, request, localStorage, owner);
 		name = '';
 		refresh();
 	}
@@ -30,7 +36,7 @@
 	}
 
 	function doRemove(id: string) {
-		remove(id);
+		remove(id, localStorage, owner);
 		refresh();
 	}
 </script>

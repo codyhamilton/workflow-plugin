@@ -22,6 +22,7 @@
 	} from '$lib/analysis/chart-frame';
 	import { isCollectorMode } from '$lib/api';
 	import { PRESETS } from '$lib/presets';
+	import { savedAnalysisOwner } from '$lib/saved-analysis';
 	import { tenantNameFromMe } from '$lib/session-gate';
 	import { sessionGate } from '$lib/session-gate.svelte';
 	import { getJSON, Superseded } from '$lib/query';
@@ -51,29 +52,46 @@
 
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	const sessionTenant = $derived(isCollectorMode() ? tenantNameFromMe(sessionGate.me) : null);
+	const savedOwner = $derived(
+		sessionGate.me?.kind === 'ok' ? savedAnalysisOwner(sessionGate.me.body.github_id) : ''
+	);
 	const sessionReady = $derived(sessionGate.ready);
 
 	let primary = $state<AggregateResult | null>(null);
 	let companionCost = $state<TrendFrameData | null>(null);
 	let chartKeys = $state<string[]>([]);
 	let toolOverride = $state<ExplorationToolId | null>(null);
+	let toolOverrideQuery = $state<string | null>(null);
 
 	const queryString = $derived(page.url.search);
 
-	const request = $derived.by(() => {
+	const parsed = $derived.by(() => {
 		try {
 			const params = new URLSearchParams(queryString.replace(/^\?/, ''));
-			const parsed = parseInvestigationRequest(params, new Date());
-			return sessionTenant ? { ...parsed, tenant: sessionTenant } : parsed;
+			const body = parseInvestigationRequest(params, new Date());
+			const withZone = { ...body, window: { ...body.window, tz: body.window?.tz ?? tz } };
+			return {
+				request: sessionTenant ? { ...withZone, tenant: sessionTenant } : withZone,
+				error: null as unknown
+			};
 		} catch (e) {
-			setError(e);
-			return null;
+			return { request: null, error: e as unknown };
 		}
+	});
+
+	const request = $derived(parsed.request);
+
+	$effect(() => {
+		if (parsed.error) setError(parsed.error);
 	});
 
 	const urlState = $derived(request ? requestToUrlState(request, new Date()) : null);
 	const activeTool = $derived(
-		toolOverride ?? (request ? toolForAsk(request.ask) : 'explore')
+		toolOverride && toolOverrideQuery === queryString
+			? toolOverride
+			: request
+				? toolForAsk(request.ask)
+				: 'explore'
 	);
 
 	const ignored = $derived(ignoredFilters(primary));
@@ -91,9 +109,11 @@
 		if (!request) return;
 		if (tool === 'saved') {
 			toolOverride = 'saved';
+			toolOverrideQuery = queryString;
 			return;
 		}
 		toolOverride = null;
+		toolOverrideQuery = null;
 		commit(switchTool(request, tool));
 	}
 
@@ -160,7 +180,7 @@
 		if (!primary || primary.ask !== 'trend') return null;
 		const ask = request?.ask;
 		if (!ask || ask.ask !== 'trend') return null;
-		return trendFrame(ask.measure, ask.bucket, primary as TrendResult, ask.dim);
+		return trendFrame(ask.measure, ask.bucket, primary as TrendResult, ask.dim, tz);
 	});
 
 	const breakdownData = $derived.by((): BreakdownFrameData | null => {
@@ -222,7 +242,7 @@
 						{ now }
 					);
 					if (!live) return;
-					companionCost = trendFrame('cost_usd', 'day', cost as TrendResult);
+					companionCost = trendFrame('cost_usd', 'day', cost as TrendResult, undefined, tz);
 				} else {
 					companionCost = null;
 				}
@@ -321,7 +341,7 @@
 		{#if companionCost}
 			<section class="chart">
 				<span class="label">{companionCost.measure}</span>
-				<TrendChart data={companionCost} testid="investigation-trend-cost_usd" />
+				<TrendChart data={companionCost} testid="investigation-trend-cost_usd" onbrushend={onBrushEnd} />
 			</section>
 		{/if}
 	{:else if activeTool === 'usage' && request}
@@ -350,7 +370,7 @@
 			{tz}
 		/>
 	{:else if activeTool === 'saved' && request}
-		<SavedAnalysisTool {request} onOpen={openSavedSpec} />
+		<SavedAnalysisTool {request} owner={savedOwner} onOpen={openSavedSpec} />
 	{/if}
 </div>
 

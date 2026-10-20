@@ -52,6 +52,10 @@ export interface TrendFrameData {
 	series: TrendSeries[];
 	/** When set, breakdown series keys are drillable on this filter dim. */
 	breakdownDim?: string;
+	/** Resolved window. Count series zero-fill gaps inside it; other units stay sparse. */
+	from?: Date;
+	to?: Date;
+	tz?: string;
 }
 
 export interface BreakdownRow {

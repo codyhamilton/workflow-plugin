@@ -11,15 +11,17 @@
 		type ThemePreference
 	} from '$lib/charts/theme';
 	import Notices from '$lib/components/Notices.svelte';
-	import { ApiError, fetchMe, isCollectorMode } from '$lib/api';
+	import { ApiError, fetchMe, isCollectorMode, safeReturnPath } from '$lib/api';
 	import {
 		decideAfterMeFetch,
 		readBearer,
 		readConfiguredBase,
+		routeAllowsChildren,
 		shouldNavigateToProfile,
 		type MeFetchResult
 	} from '$lib/session-gate';
 	import { beginSessionGate, finishSessionGate, sessionGate } from '$lib/session-gate.svelte';
+	import { isInvestigationQuery } from '$lib/investigation/request-url';
 	import { clearError, fetchError, pruneNotices, setNoticeView } from '$lib/state.svelte';
 
 	let { children } = $props();
@@ -42,7 +44,13 @@
 	const noTenant = $derived(collector && fetchError.status === 403 && fetchError.message === 'no such tenant');
 
 	function navHref(path: string): string {
-		return path === '/settings' || path === '/profile' ? path : path + page.url.search;
+		return path;
+	}
+
+	function navCurrent(path: string): 'page' | undefined {
+		if (page.url.pathname !== path) return undefined;
+		if (path === '/' && isInvestigationQuery(page.url.searchParams)) return undefined;
+		return 'page';
 	}
 
 	const viewKey = $derived(page.url.pathname + page.url.search);
@@ -67,8 +75,9 @@
 	}
 
 	const sessionAllowsChildren = $derived.by(() => {
-		if (!sessionGate.ready || sessionGate.me === null) return false;
-		return gateDecisionForCurrentUrl(sessionGate.me) === 'stay';
+		const ready = sessionGate.ready && sessionGate.me !== null;
+		const decision = ready ? gateDecisionForCurrentUrl(sessionGate.me as MeFetchResult) : null;
+		return routeAllowsChildren(page.url.pathname, ready, decision);
 	});
 
 	$effect(() => {
@@ -102,7 +111,7 @@
 
 		const decision = gateDecisionForCurrentUrl(sessionGate.me);
 		if (decision !== 'stay') {
-			const ret = encodeURIComponent(decision.login);
+			const ret = encodeURIComponent(safeReturnPath(decision.login) ?? '/');
 			void goto(`/login?return=${ret}`);
 		}
 	});
@@ -175,7 +184,7 @@
 		</div>
 		<nav>
 			{#each nav as [href, text] (href)}
-				<a href={navHref(href)} aria-current={page.url.pathname === href ? 'page' : undefined}>{text}</a>
+				<a href={navHref(href)} aria-current={navCurrent(href)}>{text}</a>
 			{/each}
 		</nav>
 	</header>

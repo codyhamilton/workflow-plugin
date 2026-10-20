@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { aggregate, type TrendResult } from '$lib/aggregate';
-	import { TrendChart, type TrendFrameData } from '$lib/analysis/chart-frame';
+	import { TrendChart } from '$lib/analysis/chart-frame';
 	import { isCollectorMode } from '$lib/api';
 	import { tenantNameFromMe } from '$lib/session-gate';
 	import { sessionGate } from '$lib/session-gate.svelte';
 	import { Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
+	import { trendFrame } from './frames';
 	import { investigationRequestToSearch } from './request-url';
 
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -14,21 +15,13 @@
 	const sessionTenant = $derived(isCollectorMode() ? tenantNameFromMe(sessionGate.me) : null);
 	const sessionReady = $derived(sessionGate.ready);
 
-	let hookEvents = $state<TrendFrameData | null>(null);
-	let costUsd = $state<TrendFrameData | null>(null);
-
-	function trendFrame(measure: string, result: TrendResult): TrendFrameData {
-		return {
-			measure,
-			bucket: 'day',
-			series: (result.series ?? []).map((s) => ({ name: s.key, points: s.points }))
-		};
-	}
+	let hookEvents = $state<ReturnType<typeof trendFrame> | null>(null);
+	let costUsd = $state<ReturnType<typeof trendFrame> | null>(null);
 
 	function openInvestigation() {
 		const req = {
 			...(sessionTenant ? { tenant: sessionTenant } : {}),
-			window: { tz },
+			window: { preset: '30d', tz },
 			ask: { ask: 'trend' as const, measure: 'hook_events', bucket: 'day' as const }
 		};
 		const qs = investigationRequestToSearch(req).toString();
@@ -45,7 +38,7 @@
 		};
 
 		const tenant = sessionTenant;
-		const base = tenant ? { tenant, window: { tz } } : { window: { tz } };
+		const base = tenant ? { tenant, window: { preset: '30d' as const, tz } } : { window: { preset: '30d' as const, tz } };
 
 		(async () => {
 			const now = new Date();
@@ -59,7 +52,7 @@
 				);
 				if (!live) return;
 				clearError();
-				hookEvents = trendFrame('hook_events', hook as TrendResult);
+				hookEvents = trendFrame('hook_events', 'day', hook as TrendResult, undefined, tz);
 
 				const cost = await aggregate(
 					{
@@ -70,7 +63,7 @@
 				);
 				if (!live) return;
 				clearError();
-				costUsd = trendFrame('cost_usd', cost as TrendResult);
+				costUsd = trendFrame('cost_usd', 'day', cost as TrendResult, undefined, tz);
 			} catch (e) {
 				fail(e);
 			}
