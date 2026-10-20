@@ -156,13 +156,15 @@ export function qualityOption(data: QualityFrameData, t: AnalysisTokens) {
 		return { time, p: byT.get(time) };
 	});
 	const medianData = slots.map(({ time, p }) => [time, p?.median ?? null] as [string, number | null]);
+	// Stack a transparent p25 baseline under a (p75 − p25) span so the band sits on the scores,
+	// not on the axis.
 	const p25Data = slots.map(({ time, p }) => {
-		if (!p || p.p25 === undefined || p.median === undefined) return [time, null] as [string, number | null];
-		return [time, p.median - p.p25] as [string, number];
+		if (!p || p.p25 === undefined) return [time, null] as [string, number | null];
+		return [time, p.p25] as [string, number];
 	});
-	const p75Data = slots.map(({ time, p }) => {
-		if (!p || p.p75 === undefined || p.median === undefined) return [time, null] as [string, number | null];
-		return [time, p.p75 - p.median] as [string, number];
+	const bandData = slots.map(({ time, p }) => {
+		if (!p || p.p25 === undefined || p.p75 === undefined) return [time, null] as [string, number | null];
+		return [time, p.p75 - p.p25] as [string, number];
 	});
 	const medianSeries: Record<string, unknown> = {
 		name: 'median',
@@ -207,6 +209,16 @@ export function qualityOption(data: QualityFrameData, t: AnalysisTokens) {
 		},
 		series: [
 			{
+				name: 'p25',
+				type: 'line',
+				stack: 'band',
+				showSymbol: false,
+				connectNulls: false,
+				lineStyle: { width: 0, opacity: 0 },
+				itemStyle: { color: seriesColor(t, 1) },
+				data: p25Data
+			},
+			{
 				name: 'p25–p75',
 				type: 'line',
 				stack: 'band',
@@ -215,18 +227,7 @@ export function qualityOption(data: QualityFrameData, t: AnalysisTokens) {
 				lineStyle: { width: 0 },
 				areaStyle: { color: seriesColor(t, 1), opacity: 0.35 },
 				itemStyle: { color: seriesColor(t, 1) },
-				data: p25Data
-			},
-			{
-				name: 'p75 span',
-				type: 'line',
-				stack: 'band',
-				showSymbol: false,
-				connectNulls: false,
-				lineStyle: { width: 0 },
-				areaStyle: { color: seriesColor(t, 1), opacity: 0.35 },
-				itemStyle: { color: seriesColor(t, 1) },
-				data: p75Data
+				data: bandData
 			},
 			medianSeries
 		]

@@ -2,7 +2,6 @@
 	import type { AggregateRequest, QualityResult } from '$lib/aggregate';
 	import { QualityChart, type QualityFrameData } from '$lib/analysis/chart-frame';
 	import { bucketCount, pickBucket, type Bucket } from '$lib/buckets';
-	import { requestToUrlState } from '../request-mutate';
 
 	const KINDS = ['design', 'brief', 'report'] as const;
 	const ORDER: Bucket[] = ['day', 'week', 'month'];
@@ -29,25 +28,27 @@
 	const baselines = $derived(primary?.baseline ?? null);
 	const scoreSeries = $derived(primary?.scoreSeries ?? null);
 
-	const urlState = $derived(requestToUrlState(request, new Date()));
-	const window = $derived.by(() => {
-		if (urlState.range === 'all') return null;
-		const from = urlState.from ? new Date(urlState.from) : undefined;
-		const to = urlState.to ? new Date(urlState.to) : undefined;
-		if (!from || !to) return null;
+	const chartWindow = $derived.by(() => {
+		const w = primary?.window;
+		if (!w || !('from' in w) || !w.from || !w.to) return null;
+		const from = new Date(w.from);
+		const to = new Date(w.to);
+		if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return null;
 		return { from, to };
 	});
 
 	const offered = $derived.by(() =>
-		window ? ORDER.filter((b) => bucketCount(b, window.from, window.to, tz) <= CAP) : ORDER
+		chartWindow
+			? ORDER.filter((b) => bucketCount(b, chartWindow.from, chartWindow.to, tz) <= CAP)
+			: ORDER
 	);
 
 	const bucket = $derived.by(() => {
 		if (!ask) return 'day' as Bucket;
-		if (window) {
+		if (chartWindow) {
 			const want = ask.bucket;
 			if (offered.includes(want)) return want;
-			return pickBucket(window.from, window.to, tz, ORDER) ?? offered[0] ?? 'month';
+			return pickBucket(chartWindow.from, chartWindow.to, tz, ORDER) ?? offered[0] ?? 'month';
 		}
 		return ask.bucket;
 	});
@@ -56,7 +57,7 @@
 	const selectedCheck = $derived(bandChecks[0]?.name ?? scores?.checks[0]?.name ?? '');
 
 	const qualityFrame = $derived.by((): QualityFrameData | null => {
-		if (!ask || !window || !selectedCheck) return null;
+		if (!ask || !chartWindow || !selectedCheck) return null;
 		const check = scoreSeries?.checks.find((c) => c.name === selectedCheck);
 		if (!check) return null;
 		return {
@@ -70,8 +71,8 @@
 				p75: p.p75
 			})),
 			baselineMedian: baselines?.checks?.[selectedCheck]?.median,
-			from: window.from,
-			to: window.to,
+			from: chartWindow.from,
+			to: chartWindow.to,
 			tz
 		};
 	});
@@ -100,7 +101,7 @@
 		{/each}
 	</p>
 
-	{#if window && bandChecks.length > 0}
+	{#if chartWindow && bandChecks.length > 0}
 		<label class="bucket">
 			bucket
 			<select

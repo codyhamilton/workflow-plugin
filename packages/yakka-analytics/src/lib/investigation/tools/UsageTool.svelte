@@ -8,7 +8,13 @@
 		type TrendResult
 	} from '$lib/aggregate';
 	import { getJSON } from '$lib/query';
-	import { DistributionChart, TrendChart, type DistributionFrameData, type TrendFrameData } from '$lib/analysis/chart-frame';
+	import {
+		DistributionChart,
+		TrendChart,
+		type DistributionFrameData,
+		type DistributionMeasure,
+		type TrendFrameData
+	} from '$lib/analysis/chart-frame';
 	import { costLabel, label, num } from '$lib/format';
 	import { Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
@@ -141,17 +147,35 @@
 		return trendFrame(a.measure, a.bucket, primary as TrendResult, 'model');
 	});
 
-	const distData = $derived.by((): DistributionFrameData | null => {
-		if (!primary || primary.ask !== 'distribution') return null;
+	const DIST_MEASURES = [
+		'cost_usd',
+		'tokens_in',
+		'tokens_out',
+		'tokens_cache_read',
+		'tokens_cache_write',
+		'tokens_reasoning'
+	] as const satisfies readonly DistributionMeasure[];
+
+	function isDistributionMeasure(measure: string): measure is DistributionMeasure {
+		return (DIST_MEASURES as readonly string[]).includes(measure);
+	}
+
+	const distPanels = $derived.by((): { key: string; data: DistributionFrameData }[] => {
+		if (!primary || primary.ask !== 'distribution') return [];
 		const a = request.ask;
-		if (a.ask !== 'distribution') return null;
-		const rows = (primary as DistributionResult).rows;
-		const allBins = rows.find((r) => r.k === 'all')?.bins;
-		const bins =
-			allBins && allBins.length > 0
-				? allBins
-				: (rows.find((r) => r.bins.length > 0)?.bins ?? []);
-		return { measure: a.measure, bins, drillDim: 'model' };
+		if (a.ask !== 'distribution' || !isDistributionMeasure(a.measure)) return [];
+		const measure = a.measure;
+		const dim = a.dim;
+		return (primary as DistributionResult).rows
+			.filter((r) => r.bins.length > 0)
+			.map((r) => ({
+				key: r.k,
+				data: {
+					measure,
+					bins: r.bins,
+					...(dim ? { drillDim: dim } : {})
+				}
+			}));
 	});
 </script>
 
@@ -221,10 +245,15 @@
 		</section>
 	{/if}
 
-	{#if distData && distData.bins.length > 0}
-		<section class="chart">
-			<DistributionChart data={distData} testid="investigation-usage-distribution" ondrill={onDrill} />
-		</section>
+	{#if distPanels.length > 0}
+		<div data-testid="investigation-usage-distribution">
+			{#each distPanels as panel (panel.key)}
+				<section class="chart" data-testid="investigation-usage-distribution-row">
+					<span class="label">{label(panel.key)}</span>
+					<DistributionChart data={panel.data} ondrill={onDrill} />
+				</section>
+			{/each}
+		</div>
 	{/if}
 </div>
 

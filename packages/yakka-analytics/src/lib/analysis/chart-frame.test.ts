@@ -97,6 +97,22 @@ describe('chart-frame options use analysis tokens', () => {
 			['2024-01-02T00:00:00Z', null],
 			['2024-01-03T00:00:00Z', 0.6]
 		]);
+		const series = option.series as { name?: string; stack?: string; data?: unknown[] }[];
+		const baseline = series.find((s) => s.name === 'p25');
+		const band = series.find((s) => s.name === 'p25–p75');
+		expect(baseline?.stack).toBe('band');
+		expect(band?.stack).toBe('band');
+		expect(baseline?.data).toEqual([
+			['2024-01-01T00:00:00Z', 0.3],
+			['2024-01-02T00:00:00Z', null],
+			['2024-01-03T00:00:00Z', 0.5]
+		]);
+		const bandData = band?.data as [string, number | null][];
+		expect(bandData[0]?.[0]).toBe('2024-01-01T00:00:00Z');
+		expect(bandData[0]?.[1]).toBeCloseTo(0.2);
+		expect(bandData[1]).toEqual(['2024-01-02T00:00:00Z', null]);
+		expect(bandData[2]?.[0]).toBe('2024-01-03T00:00:00Z');
+		expect(bandData[2]?.[1]).toBeCloseTo(0.2);
 	});
 });
 
