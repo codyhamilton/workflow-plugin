@@ -57,10 +57,35 @@ Called on both reports and both briefs at closing. Result for all four: "not del
 
 ## Phase 2 — User-code approval page
 
-Status: in progress. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 2`, so this phase only).
+Status: closed, 2026-10-21 (closing commit carries `Yakka-Phase: 19-device-login:2`). Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 2`, so this phase only).
 
 The phase is one unit, so one brief was authored inline from the design's contracts: `briefs/phase2-approval-page.md`, committed before dispatch. Worker: Sonnet.
 
 ### Unit `phase2-approval-page`
 
-Dispatched after the brief commit. Outcome: pending.
+Dispatched 2026-10-21T00:52+10:00 after the brief commit (`ddd8922`). Outcome: landed at 9408618. Worker report: `reports/phase2-approval-page.md`.
+
+- Built: `/device` rewritten as a user-code page. `?user_code=` prefills; no parameter shows an entry field; signed out shows the sign-in link with `user_code` in its return URL; signed in shows the code in large type with the "check this matches" text, tenant/scope/expiry choices, Approve and Deny through a credentialed `fetch` (`approveDevice`, `denyDevice` via `apiPost`). `state` and `redirect_uri` are ignored. `isValidLoopbackRedirectUri` and `deviceAuthorizeAction` removed.
+- Surfaces: `src/routes/device/+page.svelte`, `src/lib/api.ts`, `src/lib/api.test.ts`, `tests/e2e/device.spec.ts`.
+- Deviations, from the worker report: `sessionRoute` in `api.ts` now includes `device/`, otherwise a stored bearer key would replace the cookie and the call would not send credentials. No separate `deviceAuthorizeUrl` helper; `apiPost` already resolves the host and base. Deny renders outside the tenant form when the user has no tenant.
+- Known: Playwright cannot read the fetch `credentials` mode, so the e2e test seeds a cookie and checks the mocked request carries it.
+- Agent: sonnet worker, turns and context not reported by the harness.
+
+### Verification (Phase 2)
+
+- Entry point: the `/device` page in the built dev server with a mocked API. `npx playwright test tests/e2e/device.spec.ts`: 8 passed (code shown and Approve gated; one credentialed authorize fetch and "Approved"; Deny; 404 error; entry field; sign-in return URL keeps `user_code`; `state`/`redirect_uri` ignored; no `wk_`). Run by the runner, not only the worker.
+- `npm test` (vitest): 196 passed.
+- `grep` for `redirect_uri`, `isValidLoopback`, `deviceAuthorizeAction` in `src`: no matches.
+- Result: the phase outcomes hold against the mocked API. Not checked: the page against the real Phase 1 server.
+
+### artifact_feedback (Phase 2)
+
+- Report `phase2-approval-page`: "not delivered" (the service has no version of the file).
+- Brief `phase2-approval-page`: delivered, screen pass. Below the baseline 25th percentile: `b.keep_untouched` 0.39, `b.goal_is_outcome` 0.42, `b.ac_why` 0.23. The brief was authored inline; the unit finished without trouble.
+
+### Phase 2 — Carried
+
+1. The page is only verified against a mocked API. Phase 4's outcome (a real `/yakka:login` against the deployed service) is the first check against the real server. Run one authorize call against a local `yakka serve` before the Phase 3 deploy if a cheaper early check is wanted.
+2. `api.test.ts` has one `svelte-check` error (`err` is of type `unknown`) that exists on the unchanged tree. Not this plan's.
+3. The deploy order in the design puts Pages after the Fly server; this phase only changes source. Carry the Pages deploy to Phase 4.
+4. From Phase 1, still open: the `serve.go (sweep)` Surfaces line, and the check against a production `registry.json`.
