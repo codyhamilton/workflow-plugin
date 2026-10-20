@@ -17,7 +17,7 @@ VERSION = open(os.path.join(PLUGIN_ROOT, "bin", "VERSION")).read().strip()
 SYS_PATH = "/usr/bin:/bin"
 LINE = re.compile(r"^yakka %s [0-9a-f]{12}$" % re.escape(VERSION))
 USAGE = (
-    "usage: yakka serve | drain | login [--endpoint URL] | ledger compact --tenant-dir <dir> "
+    "usage: yakka serve | drain | login [start|wait] [--endpoint URL] | ledger compact --tenant-dir <dir> "
     "| ledger purge-deltas --tenant-dir <dir> | mcp | status | version"
 )
 

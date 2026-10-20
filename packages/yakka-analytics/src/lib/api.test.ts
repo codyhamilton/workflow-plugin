@@ -5,7 +5,8 @@ import {
 	apiPost,
 	createToken,
 	fetchMe,
-	isValidLoopbackRedirectUri,
+	approveDevice,
+	denyDevice,
 	oauthApiBase,
 	oauthLoginPath,
 	revokeToken
@@ -143,11 +144,24 @@ describe('apiGet', () => {
 		expect(oauthLoginPath('localhost')).toBe('/oauth/login');
 	});
 
-	it('isValidLoopbackRedirectUri accepts loopback http(s) only', () => {
-		expect(isValidLoopbackRedirectUri('http://127.0.0.1:8765/callback')).toBe(true);
-		expect(isValidLoopbackRedirectUri('https://localhost:9/')).toBe(true);
-		expect(isValidLoopbackRedirectUri('https://example.com/cb')).toBe(false);
-		expect(isValidLoopbackRedirectUri('')).toBe(false);
+	it('approveDevice posts the four fields with credentials and no bearer', async () => {
+		fetchMock.mockImplementation(() => ok({ approved: true }));
+		const body = { user_code: 'WDJB-MJHT', tenant: 'acme', scope: 'read', expires_at: '2099-01-01T00:00:00Z' };
+		await expect(approveDevice(body)).resolves.toEqual({ approved: true });
+		const [url, init] = fetchMock.mock.calls[0];
+		expect(url).toBe('/v1/device/authorize');
+		expect(init?.method).toBe('POST');
+		expect(init?.credentials).toBe('include');
+		expect(new Headers(init?.headers).has('authorization')).toBe(false);
+		expect(JSON.parse(init?.body as string)).toEqual(body);
+	});
+
+	it('denyDevice posts user_code and action deny; a 404 is an ApiError', async () => {
+		fetchMock.mockImplementation(() => ok({ error: 'unknown_code' }, 404));
+		const err = (await denyDevice('X-1').catch((e) => e)) as ApiError;
+		expect(err).toBeInstanceOf(ApiError);
+		expect(err.status).toBe(404);
+		expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({ user_code: 'X-1', action: 'deny' });
 	});
 
 	it('names a non-JSON 200 (a static host without the API) as a connection problem', async () => {

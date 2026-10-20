@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "yakka",
-      "description": "Cloud-safe core workflow skills for Cursor: design, refine, execute, comprehensive-review, close-out, post-build",
+      "description": "Cloud-safe core workflow skills for Cursor: design, refine, execute, comprehensive-review, close-out, post-build. Also login (interactive)",
       "author": {
         "name": "William Hamilton",
         "email": "codyh@ctzns.net"

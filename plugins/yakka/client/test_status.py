@@ -144,6 +144,19 @@ class TestStatus(StatusEnv):
         self.assertNotIn(_API_KEY, out)
 
 
+class TestEnvOverrideStatus(StatusEnv):
+    def test_env_remote_mode(self) -> None:
+        self._write_config(_free_port())
+        env = dict(self._base)
+        env["YAKKA_ENDPOINT"] = "http://127.0.0.1:1"
+        env["YAKKA_KEY"] = _API_KEY
+        out, _ = self._status(env)
+        self.assertIn("config: env (remote mode)\n", out, msg=out)
+        self.assertNotIn(_API_KEY, out)
+        out, _ = self._status()
+        self.assertIn(f"config: {self._cfg} (remote mode)\n", out, msg=out)
+
+
 class TestHalfSetEnvRefusalStatus(StatusEnv):
     def test_half_set_env_refusal_status(self) -> None:
         if os.path.exists(self._cfg):
