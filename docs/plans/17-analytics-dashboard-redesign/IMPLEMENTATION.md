@@ -282,3 +282,31 @@ Orchestrator re-run after `79f7584`, report not the check:
 A fixer follows. Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/5-05-outcome-gaps.md`.
 
 `artifact_feedback` on that brief: unreachable. Yakka and Workflow MCP failed live tool discovery (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged because the service did not answer.
+
+### 5-05-outcome-gaps
+
+- Built: a drag across the investigation trend chart commits a custom window and refetches. The usage distribution chart is visible when the boundary rows are not keyed `all`. A missing day in the quality window is a null median, and `connectNulls` stays false. `interactions.spec.ts` is gone.
+- Surfaces: `packages/yakka-analytics/src/lib/analysis/chart-frame/ChartHost.svelte`, `src/lib/analysis/chart-frame/options.ts`, `src/lib/analysis/chart-frame.test.ts`, `src/lib/investigation/tools/UsageTool.svelte`, `tests/e2e/investigation-shell.spec.ts`, `tests/e2e/investigation-tools.spec.ts`. Deleted `tests/e2e/interactions.spec.ts`.
+- Deviations: the worker reported none that change the contract. The new assertions live in the owned spec files. Commit `62f8701`.
+- Agent: Composer (`composer-2.5`), subagent `bc-c88377a0-5486-5ab1-8067-7336c004a327`. The harness did not report tool turns or final context. Status reported: done.
+
+`artifact_feedback` on `briefs/5-01-investigation-url.md`, `briefs/5-02-investigation-shell.md`, `briefs/5-03-exploration-tools.md`, `briefs/5-04-legacy-retirement.md`, `briefs/5-05-outcome-gaps.md`, `reports/5-01-investigation-url.md`, `reports/5-02-investigation-shell.md`, `reports/5-03-exploration-tools.md`, `reports/5-04-legacy-retirement.md`, and `reports/5-05-outcome-gaps.md`, before close: unreachable. Yakka and Workflow MCP failed live tool discovery again (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged.
+
+### Phase 5 verification
+
+Re-ran the outcome checks on `62f8701`. Reports were not the check.
+
+- `npm test -- src/lib/analysis/chart-frame.test.ts`: 8 passed. The quality case expects a null median at `2024-01-02T00:00:00Z` between 1 Jan and 3 Jan.
+- `npx playwright test tests/e2e/investigation-shell.spec.ts tests/e2e/investigation-tools.spec.ts`: 11 passed. Empty-query landing still opens the investigation on `ask=trend`, `hook_events`, `bucket=day`, with both charts. `brush` on `investigation-trend-hook_events` sets `from`/`to` or `range=custom` and sends `analytics/query`. A preset refetch updates the window. Drill adds a filter. Shift-click exclude adds `x.<dim>`, and `conversation_id` shows `notice-ignored`. A pasted URL reproduces `ask` and filters. The distribution chart is visible for `ask=distribution`, `cost_usd`, `grain=call`, `dim=model`. Unpriced usage cost is not `$0.00`. Quality shows the design window beside the baseline. Conversation `c5` opens with an in-window marker. Saved analysis restores `ask` and window.
+- `npx playwright test tests/e2e/overview.spec.ts tests/e2e/session.spec.ts tests/e2e/shell.spec.ts`: 20 passed. Empty `/` is the two landing trends. The header has no Trends, Dashboards, or Builder link, and `saveview-save` is absent. `/trends`, `/builder`, and `/dashboards` show `legacy-route-stub` and not `trends-chart`, `builder-chart`, or `dash-tile`.
+- Earlier on `79f7584`, before this fixer and still true of the route modules it did not edit: `/usage`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/conversation`, and `/explore` also show `legacy-route-stub`. A breakdown change to `repo_id` refetches and stays on `/`. Saved analysis restores `harness=cursor` with `ask` and `range`. Conversation detail shows run totals and `investigation-conv-window-totals`. `isDrillableMark` rejects `__other__`, the empty key, `hour_of_day`, and `weekday`.
+- `npm test`: 248 passed.
+- `git diff --name-only c6162af..62f8701` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the route table, Drill-down, Chart builder, and Saved views and dashboards sections of `docs/design/07-analytics-site.md`. Assumption 2 stands: repos, hooks, and execution shape are breakdowns inside the investigation. Explore and the twelve-tile grid are not tools.
+
+### Carried
+
+1. `npx playwright test` is not green. `tests/e2e/area.spec.ts`, `builder.spec.ts`, `executions.spec.ts`, `filter-bar.spec.ts`, and `hooks.spec.ts` still expect the retired reports. They are outside `5-04`'s owned paths. On `79f7584` the full suite was 43 passed and 46 failed.
+2. `tests/e2e/settings.spec.ts` waits for `GET /v1/analytics/summary` and the summary tiles on `/`. Landing stopped requesting summary in phase 4. The test timed out on that wait on `79f7584`. It is not a phase 5 owned path.
+3. `npx tsc --noEmit` still reports errors in `api.test.ts`, `src/lib/charts/`, `presets.test.ts`, `query.test.ts`, and the e2e `node:` imports. The phase 4 carried TS2559 and TS2353 on `aggregate.ts` and `aggregate.test.ts` are gone. `npm test` does not typecheck. Design 7 records that `svelte-check` is not installed.
