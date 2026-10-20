@@ -11,7 +11,8 @@ import {
 	oauthCallbackTarget,
 	oauthLoginPath,
 	revokeToken,
-	safeReturnPath
+	safeReturnPath,
+	isValidLoopbackRedirectUri
 } from './api';
 
 let store: Record<string, string>;
