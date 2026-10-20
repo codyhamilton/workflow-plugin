@@ -237,6 +237,7 @@ type Server struct {
 	opts     Options
 	screen   ScreenFunc
 	registry *Registry
+	grants   *deviceGrants
 
 	mu      sync.Mutex
 	tenants map[string]*tenantState
@@ -262,7 +263,7 @@ func New(cfg Config, opts Options) *Server {
 	if err != nil {
 		panic("serve: registry: " + err.Error())
 	}
-	s := &Server{cfg: cfg, opts: opts, registry: reg, tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
+	s := &Server{cfg: cfg, opts: opts, registry: reg, grants: newDeviceGrants(), tenants: map[string]*tenantState{}, stop: make(chan struct{}), screen: opts.ScreenStep}
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	if s.screen == nil {
 		s.screen = unscreened
@@ -507,8 +508,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/admin/tokens", s.method(http.MethodGet, s.sessionOnly(s.handleAdminListTokens)))
 	mux.HandleFunc("/v1/admin/policy", s.method(http.MethodPut, s.originGuard(s.sessionOnly(s.handleAdminPolicy))))
 	if s.cfg.Remote() {
+		mux.HandleFunc("/v1/device/code", s.handleDeviceCodeRoute)
 		mux.HandleFunc("/v1/device/authorize", s.handleDeviceAuthorizeRoute)
-		mux.HandleFunc("/v1/device/exchange", s.handleDeviceExchangeRoute)
+		mux.HandleFunc("/v1/device/token", s.handleDeviceTokenRoute)
 	}
 	mux.HandleFunc("/oauth/login", s.method(http.MethodGet, s.oauthLogin))
 	mux.HandleFunc("/oauth/callback", s.method(http.MethodGet, s.oauthCallback))
