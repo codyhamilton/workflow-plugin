@@ -120,7 +120,7 @@ test('no tenant: summary 403 no such tenant sends to /profile', async ({ page })
 			json: { github_id: 1, github_login: 'u', admin: false, tenants: [] }
 		})
 	);
-	await page.route('**/v1/analytics/summary*', (route) =>
+	await page.route('**/v1/analytics/**', (route) =>
 		route.fulfill({ status: 403, json: { error: 'no such tenant' } })
 	);
 	await page.goto('/');
@@ -128,14 +128,17 @@ test('no tenant: summary 403 no such tenant sends to /profile', async ({ page })
 });
 
 test('tenant present: summary 403 no such tenant does not send to /profile', async ({ page }) => {
+	const analytics = trackRequests(page, '/v1/analytics/');
 	await page.route('**/v1/me', (route) =>
 		route.fulfill({
 			json: { github_id: 1, github_login: 'u', admin: false, tenants: [{ name: 'acme' }] }
 		})
 	);
-	await page.route('**/v1/analytics/summary*', (route) =>
+	await page.route('**/v1/analytics/**', (route) =>
 		route.fulfill({ status: 403, json: { error: 'no such tenant' } })
 	);
 	await page.goto('/');
+	await expect.poll(() => analytics.count()).toBeGreaterThan(0);
+	await expect(page).toHaveURL(/\/$/);
 	await expect(page).not.toHaveURL(/\/profile$/);
 });
