@@ -1,10 +1,8 @@
 /*
- * Analytics theme tokens. The dashboard layout imports this file once (a global
- * stylesheet or `src/routes/+layout.svelte`) so every chart can read these values
- * with getComputedStyle and no chart hard-codes a colour.
+ * Legacy solarized tokens for report routes. Scoped to `[data-legacy-theme]` so analysis
+ * surfaces on the document root keep the non-solarized palette in `analysis/tokens.css`.
  */
-:root,
-[data-theme='light'] {
+:root[data-theme='light'] [data-legacy-theme] {
 	--bg: #fdf6e3;
 	--surface: #eee8d5;
 	--text: #657b83;
@@ -20,14 +18,9 @@
 	--series-6: #d33682;
 	--series-7: #6c71c4;
 	--series-8: #2aa198;
-	--space-1: 4px;
-	--space-2: 8px;
-	--space-3: 16px;
-	--space-4: 24px;
-	--space-5: 32px;
 }
 
-[data-theme='dark'] {
+:root[data-theme='dark'] [data-legacy-theme] {
 	--bg: #002b36;
 	--surface: #073642;
 	--text: #839496;

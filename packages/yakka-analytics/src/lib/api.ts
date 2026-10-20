@@ -91,10 +91,66 @@ export function oauthApiBase(hostname?: string): string {
 	return isPagesHost(host) ? API_ORIGIN : '';
 }
 
+const RETURN_BASE = 'https://return.invalid';
+
+/**
+ * A same-origin path safe to store as an OAuth return and to pass to `location.assign`.
+ * Rejects protocol-relative URLs, backslashes (the URL parser turns those into a new
+ * origin), and ASCII controls. Null means the caller must not navigate there.
+ */
+export function safeReturnPath(raw: string): string | null {
+	if (typeof raw !== 'string' || raw.length === 0 || raw.length > 4096) return null;
+	if (!raw.startsWith('/') || raw.startsWith('//')) return null;
+	if (raw.includes('\\') || raw.includes('\u2028') || raw.includes('\u2029')) return null;
+	for (let i = 0; i < raw.length; i++) {
+		const c = raw.charCodeAt(i);
+		if (c < 0x20 || c === 0x7f) return null;
+	}
+	let url: URL;
+	try {
+		url = new URL(raw, RETURN_BASE);
+	} catch {
+		return null;
+	}
+	if (url.origin !== RETURN_BASE) return null;
+	if (!url.pathname.startsWith('/') || url.pathname.startsWith('//') || url.username || url.password) {
+		return null;
+	}
+	return url.pathname + url.search + url.hash;
+}
+
+/** Where the OAuth callback page may navigate after the API answers, or why it must not. */
+export function oauthCallbackTarget(input: {
+	requestUrl: string;
+	responseUrl: string;
+	responseOk: boolean;
+	body: { ok?: boolean; error?: string; return?: unknown };
+	pageOrigin: string;
+}): { kind: 'navigate'; path: string } | { kind: 'denied' } | { kind: 'failed' } {
+	let expected: URL;
+	let finalUrl: URL;
+	try {
+		expected = new URL(input.requestUrl, input.pageOrigin);
+		finalUrl = new URL(input.responseUrl, input.pageOrigin);
+	} catch {
+		return { kind: 'failed' };
+	}
+	if (!input.responseOk || finalUrl.origin !== expected.origin || finalUrl.pathname !== expected.pathname) {
+		return input.body.error === 'denied' ? { kind: 'denied' } : { kind: 'failed' };
+	}
+	if (input.body.ok === true) {
+		const path = typeof input.body.return === 'string' ? safeReturnPath(input.body.return) : null;
+		return { kind: 'navigate', path: path ?? '/' };
+	}
+	if (input.body.error === 'denied') return { kind: 'denied' };
+	return { kind: 'failed' };
+}
+
 /** GitHub login navigation. On Pages this hits the API so the state cookie is host-only there. */
 export function oauthLoginPath(hostname: string, returnTo = ''): string {
 	const base = oauthApiBase(hostname);
-	const q = returnTo ? `?return=${encodeURIComponent(returnTo)}` : '';
+	const safe = returnTo ? safeReturnPath(returnTo) : null;
+	const q = safe ? `?return=${encodeURIComponent(safe)}` : '';
 	return `${base}/oauth/login${q}`;
 }
 
@@ -190,6 +246,57 @@ export async function revokeToken(id: string, signal?: AbortSignal): Promise<voi
 /** Session identity and owned tenants (`GET /v1/me`). Collector mode only; same transport as `apiGet`. */
 export async function fetchMe(signal?: AbortSignal): Promise<MeResponse> {
 	return apiGet<MeResponse>('me', undefined, signal);
+}
+
+function rawRedirectHost(raw: string): string | null {
+	if (/[\u0000-\u0020\u007f\\]/.test(raw)) return null;
+	const m = /^(https?):\/\/([^/?#]*)/i.exec(raw);
+	if (!m) return null;
+	const authority = m[2];
+	if (authority.includes('@') || authority.includes('\\')) return null;
+	if (authority.startsWith('[')) {
+		const end = authority.indexOf(']');
+		if (end < 0) return null;
+		const rest = authority.slice(end + 1);
+		if (rest !== '' && !/^:\d+$/.test(rest)) return null;
+		return authority.slice(0, end + 1);
+	}
+	const colon = authority.lastIndexOf(':');
+	if (colon !== -1) {
+		if (!/^\d+$/.test(authority.slice(colon + 1))) return null;
+		return authority.slice(0, colon);
+	}
+	return authority;
+}
+
+function isLoopbackHostname(host: string): boolean {
+	const h = host.toLowerCase();
+	if (h === 'localhost' || h === '::1' || h === '[::1]') return true;
+	const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
+	if (!m) return false;
+	const parts = m.slice(1).map(Number);
+	return parts[0] === 127 && parts.every((n) => n <= 255);
+}
+
+/**
+ * Loopback http(s) redirect URIs for device authorization.
+ * The raw host must already be a loopback name: values that only become loopback
+ * after URL normalization (decimal IPs, unicode digits, userinfo) are rejected,
+ * and that raw value is what the authorize form posts.
+ */
+export function isValidLoopbackRedirectUri(raw: string): boolean {
+	if (!raw) return false;
+	const hostRaw = rawRedirectHost(raw);
+	if (hostRaw === null) return false;
+	try {
+		const u = new URL(raw);
+		if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+		if (u.username || u.password) return false;
+		if (hostRaw.toLowerCase() !== u.hostname.toLowerCase()) return false;
+		return isLoopbackHostname(u.hostname);
+	} catch {
+		return false;
+	}
 }
 
 export type DeviceDecision = { approved: true } | { denied: true };

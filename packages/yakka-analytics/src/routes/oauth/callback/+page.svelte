@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { oauthApiBase } from '$lib/api';
+	import { oauthApiBase, oauthCallbackTarget } from '$lib/api';
+	import { IdentityPanel } from '$lib/analysis';
 
 	let status = $state<'working' | 'ok' | 'denied' | 'failed'>('working');
 	let detail = $state('Signing in…');
@@ -18,16 +19,20 @@
 					headers: { accept: 'application/json' }
 				});
 				const body = (await res.json()) as { ok?: boolean; error?: string; return?: string };
-				if (body.ok) {
+				const target = oauthCallbackTarget({
+					requestUrl: url,
+					responseUrl: res.url,
+					responseOk: res.ok,
+					body,
+					pageOrigin: location.origin
+				});
+				if (target.kind === 'navigate') {
 					status = 'ok';
 					detail = 'Signed in.';
-					const ret = typeof body.return === 'string' && body.return.startsWith('/') && !body.return.startsWith('//')
-						? body.return
-						: '/';
-					location.assign(ret);
+					location.assign(target.path);
 					return;
 				}
-				if (body.error === 'denied') {
+				if (target.kind === 'denied') {
 					status = 'denied';
 					detail = 'Your GitHub account is not allowed to use this dashboard.';
 					return;
@@ -42,8 +47,10 @@
 	});
 </script>
 
-<h1>Sign in</h1>
-<p data-testid="oauth-callback-status" data-status={status}>{detail}</p>
-{#if status === 'failed' || status === 'denied'}
-	<p><a href="/login">Back to login</a></p>
-{/if}
+<IdentityPanel>
+	<h1>Sign in</h1>
+	<p data-testid="oauth-callback-status" data-status={status}>{detail}</p>
+	{#if status === 'failed' || status === 'denied'}
+		<p><a href="/login">Back to login</a></p>
+	{/if}
+</IdentityPanel>

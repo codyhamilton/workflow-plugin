@@ -1,5 +1,8 @@
 <script lang="ts">
+	import '$lib/analysis/tokens.css';
 	import '$lib/theme.css';
+	import RouteSurface from '$lib/analysis/RouteSurface.svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		getThemePreference,
@@ -7,33 +10,28 @@
 		setThemePreference,
 		type ThemePreference
 	} from '$lib/charts/theme';
-	import FilterBar from '$lib/components/FilterBar.svelte';
-	import FilterChips from '$lib/components/FilterChips.svelte';
 	import Notices from '$lib/components/Notices.svelte';
-	import SaveView from '$lib/components/SaveView.svelte';
-	import { isCollectorMode } from '$lib/api';
+	import { ApiError, fetchMe, isCollectorMode, safeReturnPath } from '$lib/api';
+	import {
+		decideAfterMeFetch,
+		readBearer,
+		readConfiguredBase,
+		routeAllowsChildren,
+		shouldNavigateToProfile,
+		type MeFetchResult
+	} from '$lib/session-gate';
+	import { beginSessionGate, finishSessionGate, sessionGate } from '$lib/session-gate.svelte';
+	import { isInvestigationQuery } from '$lib/investigation/request-url';
 	import { clearError, fetchError, pruneNotices, setNoticeView } from '$lib/state.svelte';
 
 	let { children } = $props();
 
 	const nav = [
 		['/', 'Overview'],
-		['/trends', 'Trends'],
-		['/builder', 'Builder'],
-		['/usage', 'Usage & cost'],
-		['/repos', 'Repos'],
-		['/hooks', 'Hooks'],
-		['/quality', 'Quality'],
-		['/executions', 'Executions'],
-		['/conversations', 'Conversations'],
-		['/explore', 'Explore'],
-		['/dashboards', 'Dashboards'],
 		['/profile', 'Profile'],
 		['/settings', 'Settings']
 	];
 
-	// Filters, chips, notices and the save control show everywhere except settings, login, and profile.
-	// embed=1 does not hide the shell.
 	const chrome = $derived(
 		page.url.pathname !== '/settings' &&
 			page.url.pathname !== '/login' &&
@@ -45,23 +43,91 @@
 	const collector = $derived(isCollectorMode());
 	const noTenant = $derived(collector && fetchError.status === 403 && fetchError.message === 'no such tenant');
 
-	// Every link but Settings keeps the current filters in the query string.
 	function navHref(path: string): string {
-		return path === '/settings' || path === '/profile' ? path : path + page.url.search;
+		return path;
 	}
 
-	// Register the view before any child effect runs (`$effect.pre` flushes first), so a notice a
-	// request sets for this view is kept rather than cleared a frame later.
+	function navCurrent(path: string): 'page' | undefined {
+		if (page.url.pathname !== path) return undefined;
+		if (path === '/' && isInvestigationQuery(page.url.searchParams)) return undefined;
+		return 'page';
+	}
+
 	const viewKey = $derived(page.url.pathname + page.url.search);
 	$effect.pre(() => setNoticeView(viewKey));
 
-	// A new route or filter starts with a clean error panel and drops notices left by another view;
-	// the notice for the current view is kept (a request for it may set one in the same flush).
 	$effect(() => {
 		page.url.pathname;
 		page.url.search;
 		clearError();
 		pruneNotices();
+	});
+
+	function gateDecisionForCurrentUrl(me: MeFetchResult): ReturnType<typeof decideAfterMeFetch> {
+		return decideAfterMeFetch({
+			hostname: location.hostname,
+			pathname: page.url.pathname,
+			search: page.url.search,
+			configuredBase: readConfiguredBase(),
+			bearer: readBearer(),
+			me
+		});
+	}
+
+	const sessionAllowsChildren = $derived.by(() => {
+		const ready = sessionGate.ready && sessionGate.me !== null;
+		const decision = ready ? gateDecisionForCurrentUrl(sessionGate.me as MeFetchResult) : null;
+		return routeAllowsChildren(page.url.pathname, ready, decision);
+	});
+
+	$effect(() => {
+		let live = true;
+		beginSessionGate();
+
+		void (async () => {
+			let me: MeFetchResult;
+			try {
+				const body = await fetchMe();
+				me = { kind: 'ok', body };
+			} catch (e) {
+				if (e instanceof ApiError) {
+					me = { kind: 'http', status: e.status, message: e.message };
+				} else {
+					me = { kind: 'other' };
+				}
+			}
+			if (!live) return;
+			finishSessionGate(me);
+		})();
+
+		return () => {
+			live = false;
+		};
+	});
+
+	$effect(() => {
+		page.url.pathname;
+		if (!sessionGate.ready || sessionGate.me === null) return;
+
+		const decision = gateDecisionForCurrentUrl(sessionGate.me);
+		if (decision !== 'stay') {
+			const ret = encodeURIComponent(safeReturnPath(decision.login) ?? '/');
+			void goto(`/login?return=${ret}`);
+		}
+	});
+
+	$effect(() => {
+		if (!sessionGate.ready || !sessionGate.me) return;
+		if (
+			shouldNavigateToProfile({
+				pathname: page.url.pathname,
+				me: sessionGate.me,
+				fetchErrorStatus: fetchError.status,
+				fetchErrorMessage: fetchError.message
+			})
+		) {
+			void goto('/profile');
+		}
 	});
 
 	let themePref = $state<ThemePreference>('system');
@@ -118,31 +184,44 @@
 		</div>
 		<nav>
 			{#each nav as [href, text] (href)}
-				<a href={navHref(href)} aria-current={page.url.pathname === href ? 'page' : undefined}>{text}</a>
+				<a href={navHref(href)} aria-current={navCurrent(href)}>{text}</a>
 			{/each}
 		</nav>
 	</header>
 
 	<main>
 		{#if chrome}
-			<FilterBar />
-			<FilterChips />
-			<Notices />
-			<SaveView />
-		{/if}
-		{#if fetchError.message}
-			<div class="error" role="alert" data-testid="error-panel">
-				<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
-				{#if noTenant}
-					<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
-				{:else if collector && fetchError.status === 401}
-					<p><a href="/login">Sign in</a> to load data from this collector.</p>
-				{:else if fetchError.status === 401 || fetchError.network}
-					<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
+			<RouteSurface>
+				<Notices />
+				{#if fetchError.message}
+					<div class="error" role="alert" data-testid="error-panel">
+						<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
+						{#if noTenant}
+							<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
+						{:else if fetchError.status === 401 || fetchError.network}
+							<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
+						{/if}
+					</div>
 				{/if}
-			</div>
+				{#if sessionAllowsChildren}
+					{@render children()}
+				{/if}
+			</RouteSurface>
+		{:else}
+			{#if fetchError.message}
+				<div class="error" role="alert" data-testid="error-panel">
+					<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
+					{#if noTenant}
+						<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
+					{:else if fetchError.status === 401 || fetchError.network}
+						<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
+					{/if}
+				</div>
+			{/if}
+			{#if sessionAllowsChildren}
+				{@render children()}
+			{/if}
 		{/if}
-		{@render children()}
 	</main>
 
 <style>

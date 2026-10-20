@@ -23,31 +23,22 @@ pasted bearer from `/settings`. Aggregation stays in SQLite; the browser receive
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
 
-| Route | Report | Lens |
+| Route | Surface | Lens |
 |---|---|---|
-| `/` | Overview | KPI tiles with sparklines (conversations, hooks, artifacts, commits, cost, tokens), an hour-of-day × weekday heatmap |
-| `/trends` | Time series | volumes by bucket, split by one dimension; brush to zoom |
-| `/usage` | Usage and cost | tokens and cost by model, harness and repo, plus the cost trend |
-| `/repos` | Repo comparison | the same volumes per `repo_id` |
-| `/hooks` | Hook usage | harness → `norm_event` and `norm_event` → tool treemaps |
-| `/quality` | Score distributions | per check, for one artifact kind, as box plots beside the all-time baseline |
-| `/executions` | Design → brief → commit → report | derived execution shape, per brief, as a sankey and a table |
-| `/conversations` | Agent runs | one row per `conversation_id`, virtualised |
-| `/conversation` | One run | timeline of its events with token and cost totals |
-| `/explore` | Pivot | the capped fact table in Perspective |
-| `/builder` | Chart builder | any measure, up to two dimensions and a bucket |
-| `/dashboards` | Dashboards | ordered grids of saved views |
+| `/` | Landing and investigation | With an empty query string, two `ask: trend` charts for `hook_events` and `cost_usd`, same window and bucket. With investigation query params (`ask`, measures, dimensions, bucket, window, shared filters), the interactive analysis shell: trend and breakdown charts, usage, quality, conversations, and saved analyses as tools — not the nine KPI tiles or a twelve-tile dashboard grid. |
+| `/trends`, `/usage`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/conversation`, `/explore`, `/builder`, `/dashboards` | Retired report URLs | Paths remain routable but render a short retirement notice; they do not mount the pre-redesign report UIs. The jobs those pages covered are reached from investigation on `/` (breakdowns, tools, pasted URLs). There is no dedicated `/explore` pivot or multi-tile dashboard. |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
 | `/device` | Device approval | Shows the `user_code` large with "check this matches your terminal"; the signed-in user picks tenant, scope and expiry and approves or denies; entry field when no code is given; signed out, it links to sign-in and returns with the code |
 | `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
-Every report except `/settings` and `/login` shares one filter set held in the page URL: window,
+Investigation on `/` holds one filter set and analysis spec in the page URL: window presets or
+`from`/`to`, `ask` and chart fields (`measure`, `dim`, `bucket`, `kind`, …), and shared dimensions
 `repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`,
-`conversation_id`. The URL is the view: filters, window, active view and every chart configuration
-(measure, dimensions, bucket, chart type, top) serialise into the query string, so pasting it
-reproduces the view, and filters survive navigation between views. Saved views and dashboards stay in
-`localStorage`; the collector knows the signed-in GitHub user via the session, not via a server-side
-view store.
+`conversation_id` (including exclude keys `x.<dim>`). Pasting the query string reproduces the
+analysis. **Saved analyses** live in `localStorage` under `yakka-analytics-saved-analysis` as
+`{"id","name","spec"}` where `spec` is the same aggregate request shape the URL encodes (not a
+`{report, params}` dashboard tile). The collector knows the signed-in GitHub user via the session,
+not via a server-side view store.
 
 What the request's words mean on the ledger: an **agent** is a `conversation_id`; a **hook** is a
 `hook_event` split by `event` and `payload.tool_name` (no cross-harness tool taxonomy); **build /
@@ -241,10 +232,18 @@ on a compacted copy of the real ledger.
 
 ## The site
 
-- On the collector, an unauthenticated analytics `GET` is 401 and the layout sends the browser to
-  `/login`. After GitHub admission, the cookie backs same-origin reads; a 403 `no such tenant` means
-  the session owns no matching `?tenant=` yet (not a logged-out 401). `POST /logout` clears the
-  session.
+- After the document loads, the layout calls `GET /v1/me` once. Loopback with an empty configured
+  base stays on the opened route even when `/v1/me` is 401. A 200 stays and analytics requests send
+  `?tenant=` from the first `tenants[].name` when present. A 401 with a stored bearer and non-empty
+  base stays. A 401 with no bearer on any other host navigates to `/login?return=` the opened path
+  and query; `/login`, `/oauth/callback`, and `/settings` stay, and the GitHub link on `/login`
+  passes `return` through when it is a same-origin path. Route children render only when that
+  decision for the current pathname is stay, so a redirect does not also start analytics. A later
+  client navigation re-evaluates the remembered `/v1/me` result and does not call it again. A
+  query-string change on the same path does not refetch `/v1/me`. A 403 `no such tenant` sends the
+  browser to `/profile` only when `/v1/me` returned no tenant. After GitHub admission, the cookie
+  backs same-origin reads; a 403 `no such tenant` means the session owns no matching `?tenant=` yet
+  (not a logged-out 401). `POST /logout` clears the session.
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
   `yakka-analytics-base` and `yakka-analytics-key`. An empty base on an embedded serve is
   same-origin `/v1`. An empty base on `yakka.build` or `www.yakka.build` is
@@ -256,53 +255,43 @@ on a compacted copy of the real ledger.
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
 - Charts render with Apache ECharts, tree-shaken, reading computed theme tokens (no hard-coded
-  colours). **Theme.** `localStorage` key `yakka-analytics-theme` holds `system`, `light`, or
-  `dark`; an absent key means `system`. The document root carries `data-theme="light"` or
-  `data-theme="dark"`. `system` follows `prefers-color-scheme` and later OS changes; `light` and
-  `dark` do not. Light surfaces: background `#fdf6e3`, surface `#eee8d5`, text `#657b83`, muted
-  `#586e75`, border `#93a1a1`. Dark surfaces: background `#002b36`, surface `#073642`, text
-  `#839496`, muted `#93a1a1`, border `#586e75`. Both modes: accent `#268bd2`, danger `#dc322f`.
-  Series order, both modes: `#268bd2`, `#859900`, `#b58900`, `#cb4b16`, `#dc322f`, `#d33682`,
-  `#6c71c4`, `#2aa198`. Body type stays `system-ui`. The space scale is 4, 8, 16, 24, 32 for shell
-  padding and control gaps. Each chart has a data-table toggle, and the site works down to 1024 px
-  wide. `/explore` alone loads Perspective (client, viewer, server WASM) and says when the slice is
-  capped. No second chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill,
-  Grafana, Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a
-  second always-on service).
+  colours). **Theme.** The analysis frame (`src/lib/analysis/tokens.css`) defines non-solarized
+  `--bg`, `--surface`, `--text`, `--muted`, `--border`, `--accent`, `--danger`, an eight-colour
+  `--series-*` scale, and space tokens 4/8/16/24/32 px on the document root. `localStorage` key
+  `yakka-analytics-theme` holds `system`, `light`, or `dark`; an absent key means `system`. The
+  document root carries `data-theme="light"` or `data-theme="dark"`. `system` follows
+  `prefers-color-scheme` and later OS changes; `light` and `dark` pin the analysis palette. Body
+  type stays `system-ui`. The shell, main, landing, investigation, identity routes, and the retired
+  report stubs all use these analysis tokens on the document root. The analysis chart frame does not
+  offer a data-table toggle. The site works down to 1024 px wide. Perspective and the old `/explore` pivot are retired. No second
+  chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill, Grafana,
+  Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a second
+  always-on service).
 - **Window.** Presets Today, 24h, 7d, 30d, 90d, This month, YTD and All time, a custom range, and
   brush-to-zoom on any time-axis chart. Presets stay relative in a shared URL. Times display in the
   browser's zone, which is sent as `tz`. Each chart uses the finest bucket within the cap unless one
   is set.
-- **Data layer.** One client module issues every request. It debounces filter changes, aborts
-  superseded requests and caches responses for the session by normalised query, so the UI never
-  renders a superseded result. It shows `partial` and `ignored_filters` as notices. The server has
-  no exclude parameter, so an exclude chip is sent as the complement of the facet values; an
-  exclude on `conversation_id` is unsupported and marked so.
+- **Data layer.** Landing and investigation read through `aggregate` in `packages/yakka-analytics`:
+  one request in and one result out. Those callers do not name `/v1/analytics/*` or
+  `GET /v1/baselines`; the boundary may compose those reads. The server has no exclude parameter, so
+  an exclude is the complement of the facet values; an exclude on `conversation_id` is unsupported
+  and the investigation shell lists it in `ignored_filters`. The shell does not show `clamp`,
+  `partial`, or `truncated`.
 - **Drill-down.** Every chart mark and table row for a shared-filter dimension value applies it as a
   filter (shift-click excludes it). `__other__`, the empty key, `hour_of_day`, `weekday`, and check
   names are not clickable. Active filters show as removable chips. Any conversation ID opens its
-  timeline. Each overview KPI links to the report that owns the measure, keeping the current query
-  string; the link sets `measure` only when the target is `/trends` (`artifact_versions`,
-  `distinct_content`, or `commits`, one per tile). Conversations → `/conversations`. Hook events →
-  `/hooks`. Model calls, tokens, cost, and unpriced calls → `/usage`. Overview counts do not link to
-  `/explore`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
+  timeline. `/` does not show those KPI tiles and does not link them to `/conversations`, `/hooks`,
+  `/trends`, or `/usage`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
   count, and the executions shape series); a score series leaves the gap.
-- **Chart builder.** `/builder` is driven only by `/v1/analytics/schema`: any measure, up to two
-  dimensions and a bucket. Chart types are line, stacked area, bar, stacked bar, heatmap, treemap
-  and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
-  No dimension and bucket `none` renders the scalar.
-- **Saved views and dashboards.** Both live in `localStorage` under the prefix
-  `yakka-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
-  `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
-  `explore`, `builder`; `params` holds that report's chart controls only (`measure`, `dim`, `bucket`,
-  `chart`, `top`, `kind`, `metric`, `group`, `grain`), not the window or shared filters. A dashboard
-  is `{"id","name","tiles":[{"viewId","w"}]}` on a two-column grid (`w` is column span `1` or `2`).
-  At most 12 tiles; add refuses past 12; import keeps the first 12 tiles per dashboard, drops the
-  rest, and states how many were dropped. The dashboard page renders each tile in-document as a
-  component (no iframe); every tile uses the dashboard URL's window and shared
-  filters. Export and import are JSON of these objects. A stored URL whose path is a known report
-  becomes a view (chart keys copied into `params`; window and filter keys are not). Entries whose
-  path is not a known report are dropped, with a count in the notice.
+- **Investigation charts.** Trend and breakdown asks on `/` choose measure, dimension, and bucket
+  from the aggregate boundary; chart kinds follow the analysis frame (line, bar, and related types
+  where the ask fits). Usage, quality, and conversation tools are separate panels in the same shell,
+  not standalone report routes.
+- **Saved analyses.** Named snapshots live in `localStorage` at `yakka-analytics-saved-analysis` as
+  `{"id","name","spec"}` with `spec` an `AggregateRequest` (window, filters, and `ask`). Opening one
+  replaces the investigation URL with that spec. There is no twelve-tile dashboard grid and no
+  `{report, params}` saved-view record for the new tool; legacy `yakka-analytics-views` entries may
+  remain in the browser but are not surfaced in the shell.
 - A response that is not JSON (a static host answering `/v1` with HTML) is a connection error
   pointing at `/settings`.
 
@@ -367,9 +356,13 @@ on a compacted copy of the real ledger.
 13. Builder: `data-ready` is true while the previous chart is still shown. Dashboards: the saved-view store does not validate stored entries on read.
 14. Closed: an executions sankey edge sets `shape` on the URL. `counts` stay the window totals, and the next page of rows uses that `shape`.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
-16. The layout header and main use the 4/8/16/24/32 space scale. The filter bar, filter chips, and save-view control still use rem gaps. Pick scale steps and restyle those controls.
-17. Overview links to `/trends` set `metric` (`artifact_versions`, `distinct_content`, `commits`), which is the key that page reads. The drill-down sentence says those links set `measure`. Pick one query key and make the sentence and the page agree.
-18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser.
+16. Closed: the shell no longer mounts the filter bar, chips, or save-view control.
+17. Closed: `/` no longer links KPI tiles to the old report routes.
+18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser; a device code keeps the token plaintext in `registry.json` until exchange.
+19. Choosing executions in the investigation runs `aggregate`, and the shell draws only trend and breakdown charts, so that ask fetches and shows nothing.
+20. `tests/e2e/area.spec.ts`, `builder.spec.ts`, `executions.spec.ts`, `filter-bar.spec.ts`, and `hooks.spec.ts` still drive retired reports. `settings.spec.ts` still waits for `GET /v1/analytics/summary` and the old summary tiles on `/`.
+21. The investigation shell shows `ignored_filters` and does not show `clamp`, `partial`, or `truncated`, so a clamped window looks complete.
+22. Trend and quality options set an ECharts toolbox, and the chart host does not register `ToolboxComponent`. Drag-to-brush still works.
 
 ## Live cutover record (2026-10-11)
 

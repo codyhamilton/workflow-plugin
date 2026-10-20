@@ -30,7 +30,6 @@ test('settings stores base and key; the keyed serve sees a bearer header; cleari
 	await page.getByTestId('settings-save').click();
 	expect(await page.evaluate(() => localStorage.getItem('yakka-analytics-key'))).toBe('');
 	await page.goto('/');
-	await expect(page.getByTestId('error-panel')).toBeVisible();
-	await expect(page.getByTestId('error-panel')).toContainText('unauthorized');
-	await expect(page.getByTestId('error-panel')).toContainText('/settings');
+	await expect(page).toHaveURL(/\/login\?/);
+	expect(decodeURIComponent(new URL(page.url()).searchParams.get('return') ?? '')).toBe('/');
 });

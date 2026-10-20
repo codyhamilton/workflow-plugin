@@ -9,11 +9,13 @@
 		fetchMe,
 		isCollectorMode,
 		oauthLoginPath,
+		safeReturnPath,
 		type MeResponse
 	} from '$lib/api';
+	import { IdentityPanel } from '$lib/analysis';
 
 	const userCode = $derived((page.url.searchParams.get('user_code') ?? '').trim().toUpperCase());
-	const oauthReturn = $derived(page.url.pathname + page.url.search);
+	const oauthReturn = $derived(safeReturnPath(page.url.pathname + page.url.search) ?? '');
 	const loginHref = $derived(oauthLoginPath(page.url.hostname, oauthReturn));
 
 	let me = $state<MeResponse | null>(null);
@@ -142,9 +144,10 @@
 	}
 </script>
 
-<h1>Authorize yakka CLI</h1>
+<IdentityPanel>
+	<h1>Authorize yakka CLI</h1>
 
-{#if !isCollectorMode()}
+	{#if !isCollectorMode()}
 	<p>This page needs the collector (this site, or API base <code>https://api.yakka.build</code>).</p>
 {:else if loading}
 	<p>Loading…</p>
@@ -241,6 +244,7 @@
 		{/if}
 	{/if}
 {/if}
+</IdentityPanel>
 
 <style>
 	section {
@@ -268,9 +272,9 @@
 		font-family: monospace;
 	}
 	.warn {
-		padding: 0.5rem 1rem;
-		border: 1px solid #b54708;
-		background: #fffaeb;
-		color: #7a2e0e;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--danger);
+		background: var(--surface);
+		color: var(--text);
 	}
 </style>

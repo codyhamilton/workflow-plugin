@@ -1,53 +1,14 @@
 import { expect, test } from '@playwright/test';
-import { FILTER_REPO } from './fixture';
 import { trackRequests, useServe } from './helpers';
 
 test.beforeEach(async ({ page }) => {
 	await useServe(page, 'local');
 });
 
-test('a preset survives navigating to another route and a reload', async ({ page }) => {
-	await page.goto('/');
-	await page.getByTestId('preset-7d').click();
-	await expect(page).toHaveURL(/range=7d/);
-	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
-
-	await page.getByRole('link', { name: 'Hooks' }).click();
-	await expect(page).toHaveURL(/\/hooks\?.*range=7d/);
-	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
-
-	await page.reload();
-	await expect(page).toHaveURL(/\/hooks\?.*range=7d/);
-	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
-});
-
-test('the custom range inputs set from and to', async ({ page }) => {
-	await page.goto('/');
-	const from = page.getByTestId('filter-from');
-	const to = page.getByTestId('filter-to');
-
-	await from.fill('2026-01-01');
-	await from.dispatchEvent('change');
-	await expect(page).toHaveURL(/from=2026-01-01/);
-
-	await to.fill('2026-01-31');
-	await to.dispatchEvent('change');
-	await expect(page).toHaveURL(/to=2026-01-31/);
-	await expect(page.getByTestId('preset-30d')).toHaveAttribute('aria-pressed', 'false');
-});
-
-test('removing a chip drops it from the URL', async ({ page }) => {
-	await page.goto(`/?repo_id=${FILTER_REPO}`);
-	await expect(page.getByTestId(`chip-repo_id-${FILTER_REPO}`)).toBeVisible();
-	await page.getByTestId(`chip-remove-repo_id-${FILTER_REPO}`).click();
-	await expect(page.getByTestId(`chip-repo_id-${FILTER_REPO}`)).toHaveCount(0);
-	await expect(page).not.toHaveURL(/repo_id/);
-});
-
 test('the layout fits 1024x768 without a horizontal scrollbar', async ({ page }) => {
 	await page.setViewportSize({ width: 1024, height: 768 });
-	await page.goto('/?range=7d');
-	await expect(page.getByTestId('preset-7d')).toBeVisible();
+	await page.goto('/');
+	await expect(page.getByTestId('landing-trend-hook_events')).toBeVisible();
 	const { scroll, inner } = await page.evaluate(() => ({
 		scroll: document.documentElement.scrollWidth,
 		inner: window.innerWidth
@@ -55,27 +16,16 @@ test('the layout fits 1024x768 without a horizontal scrollbar', async ({ page })
 	expect(scroll).toBeLessThanOrEqual(inner);
 });
 
-const SERIES = [
-	'#268bd2',
-	'#859900',
-	'#b58900',
-	'#cb4b16',
-	'#dc322f',
-	'#d33682',
-	'#6c71c4',
-	'#2aa198'
-];
+const ANALYSIS_LIGHT = { bg: '#f4f6fa', text: '#1a2332' };
+const ANALYSIS_DARK = { bg: '#12151c', text: '#d8dee9' };
+const SOLARIZED_BG = new Set(['#002b36', '#fdf6e3']);
 
-async function readThemeVars(page: import('@playwright/test').Page) {
-	return page.evaluate((series) => {
+async function readRootThemeVars(page: import('@playwright/test').Page) {
+	return page.evaluate(() => {
 		const cs = getComputedStyle(document.documentElement);
 		const token = (name: string) => cs.getPropertyValue(name).trim();
-		return {
-			bg: token('--bg'),
-			text: token('--text'),
-			series: series.map((_, i) => token(`--series-${i + 1}`))
-		};
-	}, SERIES);
+		return { bg: token('--bg'), text: token('--text') };
+	});
 }
 
 test('the dark scheme swaps the background token', async ({ page }) => {
@@ -89,48 +39,45 @@ test('the dark scheme swaps the background token', async ({ page }) => {
 		.not.toBe(light);
 });
 
-test('system dark mode uses solarized tokens on overview and settings', async ({ page }) => {
+test('system dark mode uses analysis tokens on overview and settings', async ({ page }) => {
 	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
 	await page.emulateMedia({ colorScheme: 'dark' });
 	for (const path of ['/', '/settings']) {
 		await page.goto(path);
-		await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
-		const vars = await readThemeVars(page);
-		expect(vars.text).toBe('#839496');
-		expect(vars.series).toEqual(SERIES);
+		await expect.poll(async () => (await readRootThemeVars(page)).bg).toBe(ANALYSIS_DARK.bg);
+		const vars = await readRootThemeVars(page);
+		expect(vars.text).toBe(ANALYSIS_DARK.text);
+		expect(SOLARIZED_BG.has(vars.bg)).toBe(false);
 	}
 });
 
-test('choosing Light updates tokens without reload and survives reload', async ({ page }) => {
+test('choosing Light updates analysis tokens without reload and survives reload', async ({ page }) => {
 	await page.goto('/');
 	await page.getByTestId('theme-light').click();
-	await expect
-		.poll(async () => (await readThemeVars(page)).bg)
-		.toBe('#fdf6e3');
-	expect((await readThemeVars(page)).text).toBe('#657b83');
+	await expect.poll(async () => (await readRootThemeVars(page)).bg).toBe(ANALYSIS_LIGHT.bg);
+	expect((await readRootThemeVars(page)).text).toBe(ANALYSIS_LIGHT.text);
 	await page.reload();
-	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
-	expect((await readThemeVars(page)).text).toBe('#657b83');
+	expect((await readRootThemeVars(page)).bg).toBe(ANALYSIS_LIGHT.bg);
+	expect((await readRootThemeVars(page)).text).toBe(ANALYSIS_LIGHT.text);
 });
 
 test('system mode follows a later OS colour-scheme change', async ({ page }) => {
 	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
 	await page.emulateMedia({ colorScheme: 'light' });
 	await page.goto('/');
-	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
+	expect((await readRootThemeVars(page)).bg).toBe(ANALYSIS_LIGHT.bg);
 	await page.getByTestId('theme-system').click();
 	await page.emulateMedia({ colorScheme: 'dark' });
-	await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
+	await expect.poll(async () => (await readRootThemeVars(page)).bg).toBe(ANALYSIS_DARK.bg);
 });
 
 test('a burst of preset clicks reaches the facets endpoint at most twice', async ({ page }) => {
 	const facets = trackRequests(page, '/v1/analytics/facets');
-	await page.goto('/');
+	await page.goto('/?ask=trend&measure=hook_events&bucket=day');
 	await expect(page.getByTestId('preset-7d')).toBeVisible();
-	await page.waitForTimeout(400); // let the initial facets request settle
+	await page.waitForTimeout(400);
 	facets.reset();
 
-	// Five clicks in one task: the client debounces the burst into at most a couple of requests.
 	await page.evaluate(() => {
 		for (const id of ['today', '24h', '7d', '30d', '90d']) {
 			(document.querySelector(`[data-testid="preset-${id}"]`) as HTMLButtonElement).click();
@@ -141,67 +88,21 @@ test('a burst of preset clicks reaches the facets endpoint at most twice', async
 	expect(facets.count()).toBeLessThanOrEqual(2);
 });
 
-test('a saved view is listed and survives a reload', async ({ page }) => {
-	await page.goto('/?range=7d');
-	await page.getByTestId('saveview-name').fill('weekly');
-	await page.getByTestId('saveview-save').click();
-	await page.getByTestId('saveview-menu-toggle').click();
-
-	const item = page.getByTestId('saveview-item').filter({ hasText: 'weekly' });
-	await expect(item).toBeVisible();
-	await expect(item).toHaveAttribute('href', '/');
-
-	await page.reload();
-	await page.getByTestId('saveview-menu-toggle').click();
-	await expect(page.getByTestId('saveview-item').filter({ hasText: 'weekly' })).toBeVisible();
-});
-
-test('save view stores chart params only', async ({ page }) => {
-	await page.goto('/trends?range=7d&repo_id=r1&metric=commits&group=harness&bucket=day');
-	await page.getByTestId('saveview-name').fill('trends-view');
-	await page.getByTestId('saveview-save').click();
-
-	const raw = await page.evaluate(() => localStorage.getItem('yakka-analytics-views:views'));
-	expect(raw).toBeTruthy();
-	const views = JSON.parse(raw!) as Record<string, unknown>[];
-	const entry = views.find((v) => v.name === 'trends-view');
-	expect(entry).toBeTruthy();
-	expect(entry!.report).toBe('trends');
-	const params = entry!.params as Record<string, string>;
-	expect(params.metric).toBe('commits');
-	expect(params.group).toBe('harness');
-	expect(params.bucket).toBe('day');
-	expect(entry).not.toHaveProperty('range');
-	expect(entry).not.toHaveProperty('repo_id');
-	expect(entry).not.toHaveProperty('url');
-	expect(params).not.toHaveProperty('range');
-	expect(params).not.toHaveProperty('repo_id');
-});
-
-test('dashboards shares filter chrome; embed=1 no longer hides the shell', async ({ page }) => {
-	await page.goto('/dashboards?range=7d');
-	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
-	await expect(page.getByTestId('saveview-save')).toBeVisible();
-
-	await page.goto('/trends?range=7d&embed=1');
-	await expect(page.locator('header')).toHaveCount(1);
-	await expect(page.getByTestId('preset-7d')).toHaveAttribute('aria-pressed', 'true');
-	await expect(page.getByTestId('saveview-save')).toBeVisible();
-	await expect(page.getByTestId('trends-chart')).toBeVisible();
-});
-
-test('the nav links to Builder and Dashboards', async ({ page }) => {
+test('the header has no report nav links and save view is absent on overview', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByRole('link', { name: 'Builder' })).toHaveAttribute('href', /\/builder/);
-	await expect(page.getByRole('link', { name: 'Dashboards' })).toHaveAttribute('href', /\/dashboards/);
+	await expect(page.getByRole('link', { name: 'Trends' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: 'Dashboards' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: 'Builder' })).toHaveCount(0);
+	await expect(page.getByTestId('saveview-save')).toHaveCount(0);
 });
 
-test('an ignored-filter notice survives a view change that re-requests it', async ({ page }) => {
-	await page.goto('/trends?kind=brief');
-	await expect(page.getByTestId('notice-ignored')).toBeVisible();
-
-	// Preset 30d is the default window, so this is a cache hit: the shell must not erase the notice.
-	await page.getByTestId('preset-30d').click();
-	await page.waitForTimeout(500);
-	await expect(page.getByTestId('notice-ignored')).toBeVisible();
+test('legacy report URLs show the retirement stub, not the old chart chrome', async ({ page }) => {
+	for (const path of ['/trends', '/builder', '/dashboards']) {
+		await page.goto(path);
+		await expect(page.getByTestId('legacy-route-stub')).toBeVisible();
+		await expect(page.getByTestId('trends-chart')).toHaveCount(0);
+		await expect(page.getByTestId('builder-chart')).toHaveCount(0);
+		await expect(page.getByTestId('dash-tile')).toHaveCount(0);
+		await expect(page.getByTestId('saveview-save')).toHaveCount(0);
+	}
 });
