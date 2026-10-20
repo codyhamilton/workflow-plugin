@@ -1,11 +1,10 @@
 <script lang="ts">
 	import type { AggregateRequest, QualityResult } from '$lib/aggregate';
 	import { QualityChart, type QualityFrameData } from '$lib/analysis/chart-frame';
-	import { bucketCount, pickBucket, type Bucket } from '$lib/buckets';
+	import { BUCKET_CAP, bucketCount, pickBucket, type Bucket } from '$lib/buckets';
 
 	const KINDS = ['design', 'brief', 'report'] as const;
-	const ORDER: Bucket[] = ['day', 'week', 'month'];
-	const CAP = 400;
+	const ORDER = ['day', 'week', 'month'] as const;
 	const W = ['n', 'min', 'p25', 'median', 'p75', 'max'] as const;
 	const B = ['n', 'p25', 'median', 'p75'] as const;
 
@@ -39,7 +38,7 @@
 
 	const offered = $derived.by(() =>
 		chartWindow
-			? ORDER.filter((b) => bucketCount(b, chartWindow.from, chartWindow.to, tz) <= CAP)
+			? ORDER.filter((b) => bucketCount(b, chartWindow.from, chartWindow.to, tz) <= BUCKET_CAP)
 			: ORDER
 	);
 
@@ -48,7 +47,7 @@
 		if (chartWindow) {
 			const want = ask.bucket;
 			if (offered.includes(want)) return want;
-			return pickBucket(chartWindow.from, chartWindow.to, tz, ORDER) ?? offered[0] ?? 'month';
+			return pickBucket(chartWindow.from, chartWindow.to, tz, [...ORDER]) ?? offered[0] ?? 'month';
 		}
 		return ask.bucket;
 	});
@@ -82,7 +81,7 @@
 		commit({ ...request, ask: { ...ask, kind } });
 	}
 
-	function setBucket(b: Bucket) {
+	function setBucket(b: (typeof ORDER)[number]) {
 		if (!ask) return;
 		commit({ ...request, ask: { ...ask, bucket: b } });
 	}
@@ -107,7 +106,7 @@
 			<select
 				data-testid="investigation-quality-bucket"
 				value={bucket}
-				onchange={(e) => setBucket((e.currentTarget as HTMLSelectElement).value as Bucket)}
+				onchange={(e) => setBucket((e.currentTarget as HTMLSelectElement).value as (typeof ORDER)[number])}
 			>
 				{#each offered as b (b)}<option value={b}>{b}</option>{/each}
 			</select>

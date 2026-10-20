@@ -10,6 +10,17 @@ import type {
 } from './types';
 import { type AnalysisTokens, seriesColor } from './tokens';
 
+const TIME_BRUSH = {
+	brush: {
+		brushType: 'lineX' as const,
+		brushMode: 'single' as const,
+		xAxisIndex: 0,
+		throttleType: 'debounce' as const,
+		throttleDelay: 100
+	},
+	toolbox: { show: true, right: 8, feature: { brush: { type: ['lineX', 'clear'] } } }
+};
+
 function trimZeros(s: string): string {
 	return s.replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
 }
@@ -38,14 +49,17 @@ export function distributionBinLabel(measure: DistributionMeasure, lo: number, h
 }
 
 export function trendOption(data: TrendFrameData, t: AnalysisTokens) {
-	const series = (data.series ?? []).map((s, i) => ({
-		name: s.name,
-		type: 'line' as const,
-		showSymbol: false,
-		lineStyle: { width: 2, color: seriesColor(t, i) },
-		itemStyle: { color: seriesColor(t, i) },
-		data: (s.points ?? []).map((pt) => [pt.t, pt.v] as [string, number])
-	}));
+	const series = (data.series ?? []).map((s, i) => {
+		const color = seriesColor(t, i);
+		return {
+			name: s.name,
+			type: 'line' as const,
+			showSymbol: false,
+			lineStyle: { width: 2, color },
+			itemStyle: { color },
+			data: (s.points ?? []).map((pt) => [pt.t, pt.v] as [string, number])
+		};
+	});
 	const showLegend = series.length > 1;
 	return {
 		animation: false,
@@ -53,14 +67,7 @@ export function trendOption(data: TrendFrameData, t: AnalysisTokens) {
 		grid: { left: 48, right: 24, top: showLegend ? 48 : 24, bottom: 32, containLabel: false },
 		legend: { show: showLegend, top: 0, textStyle: { color: t.text } },
 		tooltip: { trigger: 'axis' },
-		brush: {
-			brushType: 'lineX',
-			brushMode: 'single',
-			xAxisIndex: 0,
-			throttleType: 'debounce',
-			throttleDelay: 100
-		},
-		toolbox: { show: true, right: 8, feature: { brush: { type: ['lineX', 'clear'] } } },
+		...TIME_BRUSH,
 		xAxis: {
 			type: 'time',
 			axisLabel: { color: t.muted },
@@ -187,14 +194,7 @@ export function qualityOption(data: QualityFrameData, t: AnalysisTokens) {
 		backgroundColor: 'transparent',
 		grid: { left: 48, right: 24, top: 24, bottom: 32, containLabel: false },
 		tooltip: { trigger: 'axis' },
-		brush: {
-			brushType: 'lineX',
-			brushMode: 'single',
-			xAxisIndex: 0,
-			throttleType: 'debounce',
-			throttleDelay: 100
-		},
-		toolbox: { show: true, right: 8, feature: { brush: { type: ['lineX', 'clear'] } } },
+		...TIME_BRUSH,
 		xAxis: {
 			type: 'time',
 			axisLabel: { color: t.muted },

@@ -11,7 +11,8 @@ export interface ChartPointerModifiers {
 export interface ChartHoverDetail {
 	seriesName?: string;
 	category?: string;
-	value?: number | string | null;
+	/** ECharts point value: a number, a `[time, value]` tuple, or a mark object. */
+	value?: unknown;
 	raw?: unknown;
 }
 

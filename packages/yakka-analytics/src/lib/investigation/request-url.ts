@@ -40,24 +40,32 @@ function parseWindow(params: URLSearchParams): AggregateWindow | undefined {
 	const from = params.get('from');
 	const to = params.get('to');
 	const window: AggregateWindow = {};
-	let hasWindow = false;
+	if (tz) window.tz = tz;
 
-	if (tz) {
-		window.tz = tz;
-		hasWindow = true;
-	}
 	if (range !== null && (PRESET_IDS as readonly string[]).includes(range)) {
 		window.preset = range;
-		hasWindow = true;
 		return window;
 	}
 	if (from !== null || to !== null) {
 		if (from) window.from = from;
 		if (to) window.to = to;
-		hasWindow = true;
 		return window;
 	}
-	return hasWindow ? window : undefined;
+	return tz ? window : undefined;
+}
+
+/** Omit empty include/exclude so a request round-trips without blank filter objects. */
+export function filtersIfSet(
+	include?: AggregateFilters['include'],
+	exclude?: AggregateFilters['exclude']
+): AggregateFilters | undefined {
+	const hasInclude = !!include && Object.keys(include).length > 0;
+	const hasExclude = !!exclude && Object.keys(exclude).length > 0;
+	if (!hasInclude && !hasExclude) return undefined;
+	return {
+		...(hasInclude ? { include } : {}),
+		...(hasExclude ? { exclude } : {})
+	};
 }
 
 function parseFilters(params: URLSearchParams, qualityKind?: string): AggregateFilters | undefined {
@@ -66,15 +74,7 @@ function parseFilters(params: URLSearchParams, qualityKind?: string): AggregateF
 		delete state.include.kind;
 		delete state.exclude.kind;
 	}
-	const include = state.include;
-	const exclude = state.exclude;
-	const hasInclude = Object.keys(include).length > 0;
-	const hasExclude = Object.keys(exclude).length > 0;
-	if (!hasInclude && !hasExclude) return undefined;
-	return {
-		...(hasInclude ? { include } : {}),
-		...(hasExclude ? { exclude } : {})
-	};
+	return filtersIfSet(state.include, state.exclude);
 }
 
 function requireParam(params: URLSearchParams, name: string, ask: string): string {
@@ -173,10 +173,7 @@ function parseAsk(params: URLSearchParams): AggregateAsk {
 	}
 }
 
-export function parseInvestigationRequest(
-	params: URLSearchParams,
-	_now?: Date
-): AggregateRequest {
+export function parseInvestigationRequest(params: URLSearchParams): AggregateRequest {
 	const ask = parseAsk(params);
 	const qualityKind = ask.ask === 'quality' ? ask.kind : undefined;
 	return {
@@ -237,10 +234,7 @@ function writeAsk(out: URLSearchParams, ask: AggregateAsk): void {
 	}
 }
 
-export function investigationRequestToSearch(
-	request: AggregateRequest,
-	_now?: Date
-): URLSearchParams {
+export function investigationRequestToSearch(request: AggregateRequest): URLSearchParams {
 	const out = new URLSearchParams();
 	writeWindow(out, request.window);
 	writeFilters(out, request.filters);

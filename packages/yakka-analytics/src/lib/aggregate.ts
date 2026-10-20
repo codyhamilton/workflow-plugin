@@ -1,5 +1,5 @@
 // One request, one result: landing and analysis read through here instead of naming analytics paths.
-import { bucketCount, type Bucket } from './buckets';
+import { BUCKET_CAP, bucketCount, type Bucket } from './buckets';
 import { getJSON, type Slot } from './query';
 import {
 	apiParams,
@@ -183,6 +183,11 @@ export type Fetcher = (slot: Slot, path: string, params: URLSearchParams) => Pro
 export interface AggregateOptions {
 	fetcher?: Fetcher;
 	now?: Date;
+	/**
+	 * In-flight slot. Sequential reads share it so a later call supersedes them.
+	 * Parallel reads inside one call take a suffix and do not cancel each other.
+	 */
+	slot?: string;
 }
 
 const PRESET_IDS: PresetId[] = ['today', '24h', '7d', '30d', '90d', 'month', 'ytd', 'all'];
@@ -307,17 +312,15 @@ function queryToSeries(resp: QueryResponse): Series[] {
 	return [...by.entries()].map(([key, points]) => ({ key, points }));
 }
 
-function bucketOverCap(
-	ask: AggregateAsk,
-	win: Window,
-	tz: string
-): { over: boolean; bucket?: Bucket | 'day' | 'week' | 'month' } {
-	let bucket: Bucket | 'day' | 'week' | 'month' | undefined;
-	if (ask.ask === 'trend') bucket = ask.bucket;
-	else if (ask.ask === 'quality') bucket = ask.bucket;
-	else if (ask.ask === 'executions') bucket = ask.bucket;
-	if (!bucket || win.all || win.from === undefined || win.to === undefined) return { over: false, bucket };
-	return { over: bucketCount(bucket as Bucket, win.from, win.to, tz) > 400, bucket };
+function askBucket(ask: AggregateAsk): Bucket | undefined {
+	if (ask.ask === 'trend' || ask.ask === 'quality' || ask.ask === 'executions') return ask.bucket;
+	return undefined;
+}
+
+function bucketOverCap(ask: AggregateAsk, win: Window, tz: string): boolean {
+	const bucket = askBucket(ask);
+	if (!bucket || win.all || win.from === undefined || win.to === undefined) return false;
+	return bucketCount(bucket, win.from, win.to, tz) > BUCKET_CAP;
 }
 
 function buildClamp(win: Window, bucketCap: boolean): AggregateClamp | undefined {
@@ -328,16 +331,6 @@ function buildClamp(win: Window, bucketCap: boolean): AggregateClamp | undefined
 	return { reasons };
 }
 
-async function loadFacets(
-	fetcher: Fetcher,
-	facetWin: Window,
-	tz: string,
-	tenant?: string
-): Promise<Facets> {
-	const params = withTenant(facetParams(facetWin, tz), tenant);
-	return fetcher(SLOT, 'analytics/facets', params) as Promise<Facets>;
-}
-
 function dataParams(
 	state: UrlState,
 	win: Window,
@@ -346,9 +339,12 @@ function dataParams(
 	tenant?: string
 ): URLSearchParams | 'empty' {
 	const result = apiParams(state, win, facets, tz);
-	if ('empty' in result) return 'empty';
 	if (!('params' in result)) return 'empty';
 	return withTenant(result.params, tenant);
+}
+
+function withMeta<T extends object>(body: T, meta: MetaFields, clamp?: AggregateClamp): T & MetaFields {
+	return { ...body, ...meta, ...(clamp ? { clamp } : {}) };
 }
 
 export async function aggregate(
@@ -356,6 +352,9 @@ export async function aggregate(
 	options: AggregateOptions = {}
 ): Promise<AggregateResult> {
 	const fetcher = options.fetcher ?? ((slot, path, params) => getJSON(slot, path, params));
+	const slot = options.slot ?? SLOT;
+	const read = <T>(path: string, params: URLSearchParams, leaf?: string): Promise<T> =>
+		fetcher(leaf ? `${slot}:${leaf}` : slot, path, params) as Promise<T>;
 	const now = options.now ?? new Date();
 	const tz = tzOf(request);
 	const state = toUrlState(request, now);
@@ -364,59 +363,50 @@ export async function aggregate(
 	const facetWin = resolveWindow(state, now, tz, 'rest');
 	const extraIgnored = excludeIgnoredKeys(request.filters?.exclude);
 
-	const facetsResp = await loadFacets(fetcher, facetWin, tz, request.tenant);
-	const facetMap = mapFacets(facetsResp);
-	const controls = facetsResp;
+	const controls = await read<Facets>(
+		'analytics/facets',
+		withTenant(facetParams(facetWin, tz), request.tenant)
+	);
+	const facetMap = mapFacets(controls);
 
-	const { over: bucketCap } = bucketOverCap(request.ask, win, tz);
+	const bucketCap = bucketOverCap(request.ask, win, tz);
 	const clamp = buildClamp(win, bucketCap);
 	const windowField = resolvedWindowField(win);
-	const baseMeta = () => unionMeta([], extraIgnored);
+	const idleMeta = unionMeta([], extraIgnored);
 
 	const ask = request.ask;
 
 	if (ask.ask === 'conversation') {
 		const ignored = [...filterKeysSet(request.filters), ...extraIgnored];
 		const convState = { ...state, include: {}, exclude: {} };
-		const params = conversationParams(ask.id, convState, tz, now);
-		if (request.tenant) params.set('tenant', request.tenant);
-		const detail = (await fetcher(SLOT, 'analytics/conversation', params)) as ConversationDetail;
-		const meta = unionMeta([detail], ignored);
-		return {
-			ask: 'conversation',
-			window: windowField,
-			controls,
-			detail,
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
+		const params = withTenant(conversationParams(ask.id, convState, tz, now), request.tenant);
+		const detail = await read<ConversationDetail>('analytics/conversation', params);
+		return withMeta(
+			{ ask: 'conversation' as const, window: windowField, controls, detail },
+			unionMeta([metaFieldsFrom(detail)], ignored),
+			clamp
+		);
 	}
 
 	const params = dataParams(state, win, facetMap, tz, request.tenant);
 	if (params === 'empty') {
-		const meta = baseMeta();
-		return emptyResult(ask, windowField, controls, meta, clamp);
+		return emptyResult(ask, windowField, controls, idleMeta, clamp);
 	}
 
 	if (ask.ask === 'trend') {
 		if (bucketCap) {
-			const meta = baseMeta();
-			return { ask: 'trend', window: windowField, controls, ...meta, ...(clamp ? { clamp } : {}) };
+			return withMeta({ ask: 'trend' as const, window: windowField, controls }, idleMeta, clamp);
 		}
 		const p = new URLSearchParams(params);
 		p.set('measure', ask.measure);
 		p.set('bucket', ask.bucket);
 		if (ask.dim) p.set('dim', ask.dim);
-		const resp = (await fetcher(SLOT, 'analytics/query', p)) as QueryResponse;
-		const meta = unionMeta([resp], extraIgnored);
-		return {
-			ask: 'trend',
-			window: windowField,
-			controls,
-			series: queryToSeries(resp),
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
+		const resp = await read<QueryResponse>('analytics/query', p);
+		return withMeta(
+			{ ask: 'trend' as const, window: windowField, controls, series: queryToSeries(resp) },
+			unionMeta([metaFieldsFrom(resp)], extraIgnored),
+			clamp
+		);
 	}
 
 	if (ask.ask === 'breakdown') {
@@ -424,16 +414,12 @@ export async function aggregate(
 		p.set('measure', ask.measure);
 		p.set('dim', ask.dim);
 		p.set('bucket', 'none');
-		const resp = (await fetcher(SLOT, 'analytics/query', p)) as QueryResponse;
-		const meta = unionMeta([resp], extraIgnored);
-		return {
-			ask: 'breakdown',
-			window: windowField,
-			controls,
-			series: queryToSeries(resp),
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
+		const resp = await read<QueryResponse>('analytics/query', p);
+		return withMeta(
+			{ ask: 'breakdown' as const, window: windowField, controls, series: queryToSeries(resp) },
+			unionMeta([metaFieldsFrom(resp)], extraIgnored),
+			clamp
+		);
 	}
 
 	if (ask.ask === 'distribution') {
@@ -441,87 +427,85 @@ export async function aggregate(
 		p.set('measure', ask.measure);
 		p.set('grain', ask.grain);
 		if (ask.dim) p.set('dim', ask.dim);
-		const resp = (await fetcher(SLOT, 'analytics/distribution', p)) as DistributionResponse;
-		const meta = unionMeta([resp], extraIgnored);
-		return {
-			ask: 'distribution',
-			window: windowField,
-			controls,
-			measure: resp.measure,
-			grain: resp.grain,
-			dim: resp.dim,
-			rows: resp.rows,
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
+		const resp = await read<DistributionResponse>('analytics/distribution', p);
+		return withMeta(
+			{
+				ask: 'distribution' as const,
+				window: windowField,
+				controls,
+				measure: resp.measure,
+				grain: resp.grain,
+				dim: resp.dim,
+				rows: resp.rows
+			},
+			unionMeta([metaFieldsFrom(resp)], extraIgnored),
+			clamp
+		);
 	}
 
 	if (ask.ask === 'quality') {
 		const base = new URLSearchParams(params);
 		const scoresP = scoresParams(base, ask.kind);
 		const baselineP = withTenant(new URLSearchParams({ kind: ask.kind }), request.tenant);
-		const reads: [Promise<Scores>, Promise<Baselines>, Promise<ScoreSeries> | null] = [
-			fetcher(SLOT, 'analytics/scores', scoresP) as Promise<Scores>,
-			fetcher(SLOT, 'baselines', baselineP) as Promise<Baselines>,
-			bucketCap
-				? null
-				: (fetcher(
-						SLOT,
-						'analytics/score-series',
-						scoreSeriesParams(base, ask.kind, ask.bucket)
-					) as Promise<ScoreSeries>)
-		];
 		const [scores, baseline, scoreSeries] = await Promise.all([
-			reads[0],
-			reads[1],
-			reads[2] ?? Promise.resolve(undefined)
+			read<Scores>('analytics/scores', scoresP, 'scores'),
+			read<Baselines>('baselines', baselineP, 'baselines'),
+			bucketCap
+				? Promise.resolve(undefined)
+				: read<ScoreSeries>(
+						'analytics/score-series',
+						scoreSeriesParams(base, ask.kind, ask.bucket),
+						'series'
+					)
 		]);
-		const meta = unionMeta(
-			[scores, scoreSeries].filter(Boolean) as MetaFields[],
-			extraIgnored
+		const parts = [metaFieldsFrom(scores)];
+		if (scoreSeries) parts.push(metaFieldsFrom(scoreSeries));
+		return withMeta(
+			{
+				ask: 'quality' as const,
+				window: windowField,
+				controls,
+				scores,
+				baseline,
+				...(scoreSeries ? { scoreSeries } : {})
+			},
+			unionMeta(parts, extraIgnored),
+			clamp
 		);
-		return {
-			ask: 'quality',
-			window: windowField,
-			controls,
-			scores,
-			baseline,
-			...(scoreSeries ? { scoreSeries } : {}),
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
 	}
 
 	if (ask.ask === 'conversations') {
-		const resp = (await fetcher(SLOT, 'analytics/conversations', params)) as Conversations;
-		const meta = unionMeta([metaFieldsFrom(resp)], extraIgnored);
-		return {
-			ask: 'conversations',
-			window: windowField,
-			controls,
-			rows: resp.rows,
-			...(resp.next !== undefined ? { next: resp.next } : {}),
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
+		const resp = await read<Conversations>('analytics/conversations', params);
+		return withMeta(
+			{
+				ask: 'conversations' as const,
+				window: windowField,
+				controls,
+				rows: resp.rows,
+				...(resp.next !== undefined ? { next: resp.next } : {})
+			},
+			unionMeta([metaFieldsFrom(resp)], extraIgnored),
+			clamp
+		);
 	}
 
 	if (ask.ask === 'executions') {
 		const p = new URLSearchParams(params);
 		if (ask.bucket && !bucketCap) p.set('bucket', ask.bucket);
-		const resp = (await fetcher(SLOT, 'analytics/executions', p)) as Executions;
-		const meta = unionMeta([metaFieldsFrom(resp)], extraIgnored);
-		return {
-			ask: 'executions',
-			window: windowField,
-			controls,
-			counts: resp.counts,
-			rows: resp.rows,
-			...(resp.next !== undefined ? { next: resp.next } : {}),
-			...(ask.bucket && !bucketCap && resp.series ? { series: resp.series } : {}),
-			...meta,
-			...(clamp ? { clamp } : {})
-		};
+		const resp = await read<Executions>('analytics/executions', p);
+		return withMeta(
+			{
+				ask: 'executions' as const,
+				window: windowField,
+				controls,
+				counts: resp.counts,
+				rows: resp.rows,
+				...(resp.next !== undefined ? { next: resp.next } : {}),
+				...(ask.bucket && !bucketCap && resp.series ? { series: resp.series } : {})
+			},
+			unionMeta([metaFieldsFrom(resp)], extraIgnored),
+			clamp
+		);
 	}
 
 	throw new Error('unreachable ask');
@@ -534,30 +518,43 @@ function emptyResult(
 	meta: MetaFields,
 	clamp?: AggregateClamp
 ): AggregateResult {
-	const base = { window, controls, ...meta, ...(clamp ? { clamp } : {}) };
 	switch (ask.ask) {
 		case 'trend':
-			return { ask: 'trend', series: [], ...base };
+			return withMeta({ ask: 'trend', window, controls, series: [] }, meta, clamp);
 		case 'breakdown':
-			return { ask: 'breakdown', series: [], ...base };
+			return withMeta({ ask: 'breakdown', window, controls, series: [] }, meta, clamp);
 		case 'distribution':
-			return { ask: 'distribution', measure: ask.measure, grain: ask.grain, rows: [], ...base };
+			return withMeta(
+				{ ask: 'distribution', window, controls, measure: ask.measure, grain: ask.grain, rows: [] },
+				meta,
+				clamp
+			);
 		case 'quality':
-			return {
-				ask: 'quality',
-				scores: { kind: ask.kind, checks: [] },
-				baseline: { kind: ask.kind, checks: {} },
-				...base
-			};
+			return withMeta(
+				{
+					ask: 'quality',
+					window,
+					controls,
+					scores: { kind: ask.kind, checks: [] },
+					baseline: { kind: ask.kind, checks: {} }
+				},
+				meta,
+				clamp
+			);
 		case 'conversations':
-			return { ask: 'conversations', rows: [], ...base };
+			return withMeta({ ask: 'conversations', window, controls, rows: [] }, meta, clamp);
 		case 'executions':
-			return {
-				ask: 'executions',
-				counts: { complete: 0, unreported: 0, started: 0 },
-				rows: [],
-				...base
-			};
+			return withMeta(
+				{
+					ask: 'executions',
+					window,
+					controls,
+					counts: { complete: 0, unreported: 0, started: 0 },
+					rows: []
+				},
+				meta,
+				clamp
+			);
 		default:
 			throw new Error('empty slice not defined for ask');
 	}

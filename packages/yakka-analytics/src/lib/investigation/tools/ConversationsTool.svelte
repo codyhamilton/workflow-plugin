@@ -5,8 +5,6 @@
 	import { requestToUrlState } from '../request-mutate';
 	import { resolveWindow } from '$lib/params';
 
-	const ROW_H = 28;
-
 	let {
 		request,
 		primary,
@@ -19,11 +17,11 @@
 		tz: string;
 	} = $props();
 
-	const list = $derived(primary?.ask === 'conversations' ? (primary as ConversationsResult).rows : []);
-	const detail = $derived(primary?.ask === 'conversation' ? (primary as ConversationResult).detail : null);
+	const list = $derived(primary?.ask === 'conversations' ? primary.rows : []);
+	const detail = $derived(primary?.ask === 'conversation' ? primary.detail : null);
 
 	const eventWindow = $derived.by(() => {
-		const state = requestToUrlState(request, new Date());
+		const state = requestToUrlState(request);
 		if (state.range === 'all') return null;
 		const w = resolveWindow(state, new Date(), tz, 'rest');
 		if (w.from === undefined || w.to === undefined) return null;

@@ -8,7 +8,7 @@ describe('applyDrillToRequest', () => {
 			window: { tz: 'UTC', preset: '30d' },
 			ask: { ask: 'breakdown', measure: 'hook_events', dim: 'harness' }
 		};
-		const next = applyDrillToRequest(req, 'harness', '__other__', false, new Date());
+		const next = applyDrillToRequest(req, 'harness', '__other__', false);
 		expect(next.filters).toEqual(req.filters);
 		expect(next.ask).toEqual(req.ask);
 	});

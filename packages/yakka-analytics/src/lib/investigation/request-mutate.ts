@@ -1,19 +1,9 @@
-import type { AggregateFilters, AggregateRequest, AggregateWindow } from '../aggregate';
+import type { AggregateRequest, AggregateWindow } from '../aggregate';
 import { applyDrill, parseUrlState, type DimKey, type UrlState } from '../urlstate';
-import { investigationRequestToSearch } from './request-url';
+import { filtersIfSet, investigationRequestToSearch } from './request-url';
 
-export function requestToUrlState(request: AggregateRequest, now: Date): UrlState {
-	return parseUrlState(investigationRequestToSearch(request, now));
-}
-
-function filtersFromState(state: UrlState): AggregateFilters | undefined {
-	const hasInclude = Object.keys(state.include).length > 0;
-	const hasExclude = Object.keys(state.exclude).length > 0;
-	if (!hasInclude && !hasExclude) return undefined;
-	return {
-		...(hasInclude ? { include: state.include } : {}),
-		...(hasExclude ? { exclude: state.exclude } : {})
-	};
+export function requestToUrlState(request: AggregateRequest): UrlState {
+	return parseUrlState(investigationRequestToSearch(request));
 }
 
 function windowFromState(state: UrlState, tz: string): AggregateWindow {
@@ -30,24 +20,19 @@ export function applyDrillToRequest(
 	request: AggregateRequest,
 	key: DimKey,
 	value: string,
-	exclude: boolean,
-	now: Date
+	exclude: boolean
 ): AggregateRequest {
-	const state = requestToUrlState(request, now);
+	const state = requestToUrlState(request);
 	const next = applyDrill(state, key, value, exclude);
 	return {
 		...request,
 		window: windowFromState(next, request.window?.tz ?? 'UTC'),
-		filters: filtersFromState(next)
+		filters: filtersIfSet(next.include, next.exclude)
 	};
 }
 
-export function applyWindowState(
-	request: AggregateRequest,
-	patch: Partial<UrlState>,
-	now: Date
-): AggregateRequest {
-	const state = { ...requestToUrlState(request, now), ...patch };
+export function applyWindowState(request: AggregateRequest, patch: Partial<UrlState>): AggregateRequest {
+	const state = { ...requestToUrlState(request), ...patch };
 	if (patch.range && patch.range !== 'custom') {
 		delete state.from;
 		delete state.to;
@@ -55,6 +40,6 @@ export function applyWindowState(
 	return {
 		...request,
 		window: windowFromState(state, request.window?.tz ?? 'UTC'),
-		filters: filtersFromState(state)
+		filters: filtersIfSet(state.include, state.exclude)
 	};
 }

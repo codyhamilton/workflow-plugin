@@ -5,13 +5,7 @@
 		aggregate,
 		type AggregateAsk,
 		type AggregateRequest,
-		type AggregateResult,
-		type BreakdownResult,
-		type ConversationResult,
-		type ConversationsResult,
-		type DistributionResult,
-		type QualityResult,
-		type TrendResult
+		type AggregateResult
 	} from '$lib/aggregate';
 	import {
 		BreakdownChart,
@@ -24,7 +18,7 @@
 	import { PRESETS } from '$lib/presets';
 	import { tenantNameFromMe } from '$lib/session-gate';
 	import { sessionGate } from '$lib/session-gate.svelte';
-	import { getJSON, Superseded } from '$lib/query';
+	import { Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
 	import type { PresetId } from '$lib/urlstate';
 	import { explorationDims, isDimKey } from './dims';
@@ -55,7 +49,6 @@
 
 	let primary = $state<AggregateResult | null>(null);
 	let companionCost = $state<TrendFrameData | null>(null);
-	let chartKeys = $state<string[]>([]);
 	let toolOverride = $state<ExplorationToolId | null>(null);
 
 	const queryString = $derived(page.url.search);
@@ -63,7 +56,7 @@
 	const request = $derived.by(() => {
 		try {
 			const params = new URLSearchParams(queryString.replace(/^\?/, ''));
-			const parsed = parseInvestigationRequest(params, new Date());
+			const parsed = parseInvestigationRequest(params);
 			return sessionTenant ? { ...parsed, tenant: sessionTenant } : parsed;
 		} catch (e) {
 			setError(e);
@@ -71,7 +64,7 @@
 		}
 	});
 
-	const urlState = $derived(request ? requestToUrlState(request, new Date()) : null);
+	const urlState = $derived(request ? requestToUrlState(request) : null);
 	const activeTool = $derived(
 		toolOverride ?? (request ? toolForAsk(request.ask) : 'explore')
 	);
@@ -80,7 +73,7 @@
 
 	function commit(next: AggregateRequest, replace = false) {
 		toolOverride = null;
-		const qs = investigationRequestToSearch(next, new Date()).toString();
+		const qs = investigationRequestToSearch(next).toString();
 		const suffix = qs ? `?${qs}` : '';
 		const target = `/${suffix}`;
 		if (target === `${page.url.pathname}${page.url.search}`) return;
@@ -105,24 +98,18 @@
 
 	function setPreset(id: PresetId) {
 		if (!request) return;
-		commit(applyWindowState(request, { range: id }, new Date()));
+		commit(applyWindowState(request, { range: id }));
 	}
 
 	function onBrushEnd(detail: { from?: string; to?: string }) {
 		if (!request || !detail.from || !detail.to) return;
-		commit(
-			applyWindowState(
-				request,
-				{ range: 'custom', from: detail.from, to: detail.to },
-				new Date()
-			)
-		);
+		commit(applyWindowState(request, { range: 'custom', from: detail.from, to: detail.to }));
 	}
 
 	function onDrill(detail: { dim: string; value: string; modifiers: { shiftKey: boolean } }) {
 		if (!request || !isDrillableMark(detail.dim, detail.value) || !isDimKey(detail.dim)) return;
 		commit(
-			applyDrillToRequest(request, detail.dim, detail.value, detail.modifiers.shiftKey, new Date())
+			applyDrillToRequest(request, detail.dim, detail.value, detail.modifiers.shiftKey)
 		);
 	}
 
@@ -160,23 +147,17 @@
 		if (!primary || primary.ask !== 'trend') return null;
 		const ask = request?.ask;
 		if (!ask || ask.ask !== 'trend') return null;
-		return trendFrame(ask.measure, ask.bucket, primary as TrendResult, ask.dim);
+		return trendFrame(ask.measure, ask.bucket, primary, ask.dim);
 	});
 
 	const breakdownData = $derived.by((): BreakdownFrameData | null => {
 		if (!primary || primary.ask !== 'breakdown') return null;
 		const ask = request?.ask;
 		if (!ask || ask.ask !== 'breakdown') return null;
-		return breakdownFrame(ask.measure, ask.dim, primary as BreakdownResult);
+		return breakdownFrame(ask.measure, ask.dim, primary);
 	});
 
-	$effect(() => {
-		if (!breakdownData) {
-			chartKeys = [];
-			return;
-		}
-		chartKeys = breakdownData.rows.map((r) => r.key);
-	});
+	const chartKeys = $derived(breakdownData?.rows.map((r) => r.key) ?? []);
 
 	$effect(() => {
 		if (!sessionReady || !request) return;
@@ -193,23 +174,10 @@
 			req.ask.bucket === 'day' &&
 			!req.ask.dim;
 
-		const qualityFetcher =
-			req.ask.ask === 'quality'
-				? ((_slot: string, path: string, params: URLSearchParams) => {
-						const slot =
-							path === 'baselines'
-								? 'investigation-quality-baseline'
-								: path.includes('score-series')
-									? 'investigation-quality-series'
-									: 'investigation-quality-scores';
-						return getJSON(slot, path, params);
-					})
-				: undefined;
-
 		(async () => {
 			const now = new Date();
 			try {
-				const result = await aggregate(req, { now, ...(qualityFetcher ? { fetcher: qualityFetcher } : {}) });
+				const result = await aggregate(req, { now });
 				if (!live) return;
 				clearError();
 				primary = result;
@@ -222,7 +190,7 @@
 						{ now }
 					);
 					if (!live) return;
-					companionCost = trendFrame('cost_usd', 'day', cost as TrendResult);
+					companionCost = cost.ask === 'trend' ? trendFrame('cost_usd', 'day', cost) : null;
 				} else {
 					companionCost = null;
 				}
@@ -335,7 +303,7 @@
 	{:else if activeTool === 'quality' && request}
 		<QualityTool
 			{request}
-			primary={primary?.ask === 'quality' ? (primary as QualityResult) : null}
+			primary={primary?.ask === 'quality' ? primary : null}
 			{commit}
 			{tz}
 			onBrushEnd={onBrushEnd}

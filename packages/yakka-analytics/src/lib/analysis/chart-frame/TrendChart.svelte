@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChartFrame from './ChartFrame.svelte';
-	import type { ChartFrameCallbacks, TrendFrameData } from './types';
+	import type { ChartFrameCommonProps, TrendFrameData } from './types';
 
 	let {
 		data,
@@ -9,11 +9,7 @@
 		onhover,
 		onbrushend,
 		ondrill
-	}: {
-		data: TrendFrameData;
-		height?: number;
-		testid?: string;
-	} & ChartFrameCallbacks = $props();
+	}: { data: TrendFrameData } & ChartFrameCommonProps = $props();
 </script>
 
 <ChartFrame kind="trend" {data} {height} {testid} {onhover} {onbrushend} {ondrill} />

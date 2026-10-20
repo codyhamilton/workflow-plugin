@@ -2,6 +2,9 @@
 // is an upper bound (one partial edge bucket each side plus one DST day). Pure; tz via Intl only.
 export type Bucket = 'hour' | 'day' | 'week' | 'month';
 
+/** Series reads wider than this are not requested. */
+export const BUCKET_CAP = 400;
+
 const ORDER: Bucket[] = ['hour', 'day', 'week', 'month'];
 const HOUR = 3600000;
 const DAY = 86400000;
@@ -35,7 +38,7 @@ export function pickBucket(
 	to: Date,
 	tz: string,
 	allowed: Bucket[] = ['hour', 'day', 'week', 'month'],
-	cap = 400
+	cap = BUCKET_CAP
 ): Bucket | null {
 	for (const bucket of ORDER) {
 		if (!allowed.includes(bucket)) continue;

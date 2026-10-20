@@ -4,7 +4,7 @@
 	import type { AnalysisTokens } from './tokens';
 	import type {
 		BreakdownFrameData,
-		ChartFrameCallbacks,
+		ChartFrameCommonProps,
 		ChartFrameKind,
 		DistributionFrameData,
 		QualityFrameData,
@@ -24,12 +24,7 @@
 	}: {
 		kind: ChartFrameKind;
 		data: FrameData;
-		height?: number;
-		testid?: string;
-		onhover?: ChartFrameCallbacks['onhover'];
-		onbrushend?: ChartFrameCallbacks['onbrushend'];
-		ondrill?: ChartFrameCallbacks['ondrill'];
-	} = $props();
+	} & ChartFrameCommonProps = $props();
 
 	const build = (t: AnalysisTokens) => optionForKind(kind, data, t);
 </script>

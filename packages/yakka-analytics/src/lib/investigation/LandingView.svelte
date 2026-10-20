@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { aggregate, type TrendResult } from '$lib/aggregate';
+	import { aggregate } from '$lib/aggregate';
 	import { TrendChart, type TrendFrameData } from '$lib/analysis/chart-frame';
 	import { isCollectorMode } from '$lib/api';
 	import { tenantNameFromMe } from '$lib/session-gate';
 	import { sessionGate } from '$lib/session-gate.svelte';
 	import { Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
+	import { trendFrame } from './frames';
 	import { investigationRequestToSearch } from './request-url';
 
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -16,14 +17,6 @@
 
 	let hookEvents = $state<TrendFrameData | null>(null);
 	let costUsd = $state<TrendFrameData | null>(null);
-
-	function trendFrame(measure: string, result: TrendResult): TrendFrameData {
-		return {
-			measure,
-			bucket: 'day',
-			series: (result.series ?? []).map((s) => ({ name: s.key, points: s.points }))
-		};
-	}
 
 	function openInvestigation() {
 		const req = {
@@ -59,7 +52,7 @@
 				);
 				if (!live) return;
 				clearError();
-				hookEvents = trendFrame('hook_events', hook as TrendResult);
+				hookEvents = hook.ask === 'trend' ? trendFrame('hook_events', 'day', hook) : null;
 
 				const cost = await aggregate(
 					{
@@ -70,7 +63,7 @@
 				);
 				if (!live) return;
 				clearError();
-				costUsd = trendFrame('cost_usd', cost as TrendResult);
+				costUsd = cost.ask === 'trend' ? trendFrame('cost_usd', 'day', cost) : null;
 			} catch (e) {
 				fail(e);
 			}

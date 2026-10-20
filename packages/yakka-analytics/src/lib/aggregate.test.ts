@@ -292,6 +292,38 @@ describe('aggregate', () => {
 		for (const { params } of log) expect(params.get('tenant')).toBe('acme');
 	});
 
+	it('sequential reads share one slot and parallel quality reads do not', async () => {
+		const seen: { slot: string; path: string }[] = [];
+		const fetcher: Fetcher = (slot, path) => {
+			seen.push({ slot, path });
+			if (path === 'analytics/facets') return Promise.resolve(FACETS);
+			if (path === 'analytics/scores') return Promise.resolve({ kind: 'design', checks: [] });
+			if (path === 'baselines') return Promise.resolve({ kind: 'design', checks: {} });
+			if (path === 'analytics/score-series')
+				return Promise.resolve({ kind: 'design', bucket: 'day', checks: [] });
+			if (path === 'analytics/conversations') return Promise.resolve({ rows: [] });
+			return Promise.resolve({});
+		};
+		await aggregate({ ask: { ask: 'conversations' } }, { fetcher, now: NOW, slot: 'page' });
+		const conv = seen.filter((s) => s.path === 'analytics/facets' || s.path === 'analytics/conversations');
+		expect(new Set(conv.map((s) => s.slot))).toEqual(new Set(['page']));
+
+		seen.length = 0;
+		await aggregate(
+			{ window: { preset: '7d' }, ask: { ask: 'quality', kind: 'design', bucket: 'day' } },
+			{ fetcher, now: NOW }
+		);
+		const parallel = seen.filter((s) =>
+			['analytics/scores', 'baselines', 'analytics/score-series'].includes(s.path)
+		);
+		expect(parallel.map((s) => s.slot).sort()).toEqual([
+			'aggregate:baselines',
+			'aggregate:scores',
+			'aggregate:series'
+		]);
+		expect(seen.find((s) => s.path === 'analytics/facets')?.slot).toBe('aggregate');
+	});
+
 	it('aggregate request strings do not name analytics paths or baselines', async () => {
 		const req = JSON.stringify({
 			ask: { ask: 'quality', kind: 'design', bucket: 'day' }

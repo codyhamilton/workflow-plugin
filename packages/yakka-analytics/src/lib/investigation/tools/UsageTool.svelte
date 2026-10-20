@@ -4,10 +4,8 @@
 		type AggregateRequest,
 		type BreakdownResult,
 		type DistributionResult,
-		type Fetcher,
 		type TrendResult
 	} from '$lib/aggregate';
-	import { getJSON } from '$lib/query';
 	import {
 		DistributionChart,
 		TrendChart,
@@ -18,7 +16,7 @@
 	import { costLabel, label, num } from '$lib/format';
 	import { Superseded } from '$lib/query';
 	import { clearError, setError } from '$lib/state.svelte';
-	import { trendFrame } from '../frames';
+	import { seriesValues, trendFrame } from '../frames';
 	import type { UsageTrendMeasure } from './registry';
 	import { USAGE_TREND_MEASURES } from './registry';
 
@@ -54,10 +52,6 @@
 		}
 	});
 
-	function breakdownFetcher(measure: string): Fetcher {
-		return (_slot, path, params) => getJSON(`investigation-usage-${measure}`, path, params);
-	}
-
 	$effect(() => {
 		const req = request;
 		let live = true;
@@ -68,10 +62,10 @@
 				for (const measure of measures) {
 					const result = await aggregate(
 						{ ...req, ask: { ask: 'breakdown', measure, dim: 'model' } },
-						{ now: new Date(), fetcher: breakdownFetcher(measure) }
+						{ now: new Date(), slot: `investigation-usage-${measure}` }
 					);
 					if (!live) return;
-					out[measure] = result as BreakdownResult;
+					out[measure] = result.ask === 'breakdown' ? result : null;
 				}
 				clearError();
 				tableBreakdowns = out;
@@ -85,19 +79,11 @@
 		};
 	});
 
-	function values(result: BreakdownResult | null): Record<string, number> {
-		const out: Record<string, number> = {};
-		for (const s of result?.series ?? []) {
-			out[s.key] = s.points.reduce((a, p) => a + p.v, 0);
-		}
-		return out;
-	}
-
-	const callsBy = $derived(values(tableBreakdowns.model_calls ?? null));
-	const unpricedBy = $derived(values(tableBreakdowns.unpriced_calls ?? null));
-	const tinBy = $derived(values(tableBreakdowns.tokens_in ?? null));
-	const toutBy = $derived(values(tableBreakdowns.tokens_out ?? null));
-	const costBy = $derived(values(tableBreakdowns.cost_usd ?? null));
+	const callsBy = $derived(seriesValues(tableBreakdowns.model_calls?.series));
+	const unpricedBy = $derived(seriesValues(tableBreakdowns.unpriced_calls?.series));
+	const tinBy = $derived(seriesValues(tableBreakdowns.tokens_in?.series));
+	const toutBy = $derived(seriesValues(tableBreakdowns.tokens_out?.series));
+	const costBy = $derived(seriesValues(tableBreakdowns.cost_usd?.series));
 
 	const models = $derived.by(() => {
 		const seen = new Set<string>();
@@ -144,7 +130,7 @@
 		if (!primary || primary.ask !== 'trend') return null;
 		const a = request.ask;
 		if (a.ask !== 'trend') return null;
-		return trendFrame(a.measure, a.bucket, primary as TrendResult, 'model');
+		return trendFrame(a.measure, a.bucket, primary, 'model');
 	});
 
 	const DIST_MEASURES = [
@@ -166,7 +152,7 @@
 		if (a.ask !== 'distribution' || !isDistributionMeasure(a.measure)) return [];
 		const measure = a.measure;
 		const dim = a.dim;
-		return (primary as DistributionResult).rows
+		return primary.rows
 			.filter((r) => r.bins.length > 0)
 			.map((r) => ({
 				key: r.k,

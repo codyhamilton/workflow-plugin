@@ -7,11 +7,9 @@ import {
 	parseInvestigationRequest
 } from './request-url';
 
-const NOW = new Date('2025-06-15T12:00:00.000Z');
-
-function roundTrip(request: AggregateRequest, now = NOW): AggregateRequest {
-	const params = investigationRequestToSearch(request, now);
-	return parseInvestigationRequest(params, now);
+function roundTrip(request: AggregateRequest): AggregateRequest {
+	const params = investigationRequestToSearch(request);
+	return parseInvestigationRequest(params);
 }
 
 describe('isInvestigationQuery', () => {
@@ -133,7 +131,7 @@ describe('investigation round-trip', () => {
 			window: { preset: '7d' },
 			ask: { ask: 'breakdown', measure: 'hook_events', dim: 'harness' }
 		};
-		const params = investigationRequestToSearch(req, NOW);
+		const params = investigationRequestToSearch(req);
 		expect(params.get('range')).toBe('7d');
 		expect(roundTrip(req)).toEqual(req);
 	});
@@ -147,7 +145,7 @@ describe('investigation round-trip', () => {
 			},
 			ask: { ask: 'trend', measure: 'hook_events', bucket: 'day' }
 		};
-		const params = investigationRequestToSearch(req, NOW);
+		const params = investigationRequestToSearch(req);
 		expect(params.get('from')).toBe(req.window?.from);
 		expect(params.get('to')).toBe(req.window?.to);
 		expect(params.get('tz')).toBe('America/New_York');
@@ -158,9 +156,9 @@ describe('investigation round-trip', () => {
 		const q = new URLSearchParams(
 			'ask=trend&measure=hook_events&bucket=day&metric=commits&m=cost_usd&group=harness&report=usage'
 		);
-		const req = parseInvestigationRequest(q, NOW);
+		const req = parseInvestigationRequest(q);
 		expect(req.ask).toEqual({ ask: 'trend', measure: 'hook_events', bucket: 'day' });
-		const out = investigationRequestToSearch(req, NOW);
+		const out = investigationRequestToSearch(req);
 		expect(out.has('metric')).toBe(false);
 		expect(out.has('m')).toBe(false);
 		expect(out.has('group')).toBe(false);

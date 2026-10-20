@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChartFrame from './ChartFrame.svelte';
-	import type { ChartFrameCallbacks, QualityFrameData } from './types';
+	import type { ChartFrameCommonProps, QualityFrameData } from './types';
 
 	let {
 		data,
@@ -9,11 +9,7 @@
 		onhover,
 		onbrushend,
 		ondrill
-	}: {
-		data: QualityFrameData;
-		height?: number;
-		testid?: string;
-	} & ChartFrameCallbacks = $props();
+	}: { data: QualityFrameData } & ChartFrameCommonProps = $props();
 </script>
 
 <ChartFrame kind="quality" {data} {height} {testid} {onhover} {onbrushend} {ondrill} />

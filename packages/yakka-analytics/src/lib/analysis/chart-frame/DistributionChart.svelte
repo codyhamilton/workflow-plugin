@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChartFrame from './ChartFrame.svelte';
-	import type { ChartFrameCallbacks, DistributionFrameData } from './types';
+	import type { ChartFrameCommonProps, DistributionFrameData } from './types';
 
 	let {
 		data,
@@ -9,11 +9,7 @@
 		onhover,
 		onbrushend,
 		ondrill
-	}: {
-		data: DistributionFrameData;
-		height?: number;
-		testid?: string;
-	} & ChartFrameCallbacks = $props();
+	}: { data: DistributionFrameData } & ChartFrameCommonProps = $props();
 </script>
 
 <ChartFrame kind="distribution" {data} {height} {testid} {onhover} {onbrushend} {ondrill} />

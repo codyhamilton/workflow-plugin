@@ -24,6 +24,7 @@ export type {
 	ChartHoverDetail,
 	ChartPointerModifiers,
 	DistributionFrameData,
+	DistributionMeasure,
 	QualityFrameData,
 	QualityScorePoint,
 	TrendBucket,
