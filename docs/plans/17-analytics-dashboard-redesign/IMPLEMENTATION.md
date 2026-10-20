@@ -102,3 +102,7 @@ Approach: known. One unit: one request, one result, and every ask shares that mo
 Phase 2 carried item is not absorbed here. The two `shell.spec.ts` failures predate this phase and do not touch the aggregation contract, the package boundary, or this phase's outcome. They stay carried.
 
 Package boundary stays `packages/yakka-analytics`. This phase adds no analytics route under `packages/yakka/internal/serve` and no table under `packages/yakka/internal/store`.
+
+Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/3-01-aggregation-boundary.md`
+
+`artifact_feedback` on that brief: unreachable. The Yakka MCP namespace failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). No check was flagged because the service did not answer.
