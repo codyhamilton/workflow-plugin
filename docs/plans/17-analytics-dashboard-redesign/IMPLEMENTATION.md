@@ -191,3 +191,15 @@ Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the `/` 
 1. `tests/e2e/shell.spec.ts` "dashboards shares filter chrome" does not find `trends-chart`, and "an ignored-filter notice" does not find `notice-ignored`. Both fail on `af0b6d2`, before phase 2, and on this phase's tree. No brief amendment.
 2. `src/lib/aggregate.ts` calls `unionMeta` with a `Conversations` value and an `Executions` value. `tsc --noEmit` reports TS2559: those types share no properties with `MetaFields`. `aggregate.test.ts` builds a `ConversationDetail` whose `totals` includes `hook_events` (TS2353). `npm test` does not typecheck, and those tests pass. Design 7 records that `svelte-check` is not installed. No brief amendment.
 3. `tests/e2e/helpers.ts` `useServe` passes a nested array into `addInitScript`, so the local base is stored as `http://127.0.0.1:<port>,,e2e-local-stay`. The file is unchanged since `8967d43`. Four `explore.spec.ts` cases fail on that URL. `overview.spec.ts` and `the overview does not load Perspective` set the base again in a second init script. No brief amendment.
+
+## Phase 5 — Interactive analysis
+
+Tool: Cursor (Grok 4.7 orchestrator, Composer workers).
+Run: https://cursor.com/agents/bc-049ba4b3-b0be-5f30-abcb-1c19ee983f58
+Started: 2026-10-20T17:38:12Z
+
+Approach: open. The invoker declared the normal execute path. The phase outcome in `DESIGN.md` is the fixed yardstick. No iterate lab and no new plan folder. Assumption 2 stands: repos, hooks, and execution shape stay as breakdowns inside the investigation; explore and the twelve-tile grid do not return as tools. Package boundary stays `packages/yakka-analytics`.
+
+Slug from the plan folder `17-analytics-dashboard-redesign`: `analytics-dashboard-redesign`.
+
+No Units list. The phase is more than one worker's work: the investigation path, the four tools (usage and cost, quality, conversation grain, saved analysis), and the removal of the old report routes and nav are separate contracts on a surface one worker cannot hold. Refine is dispatched. Phase 4's Carried section is for that refinement to place.
