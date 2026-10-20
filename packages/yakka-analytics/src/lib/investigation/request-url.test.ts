@@ -1,0 +1,169 @@
+import { describe, expect, it } from 'vitest';
+import type { AggregateRequest } from '../aggregate';
+import {
+	investigationRequestToSearch,
+	isInvestigationQuery,
+	InvestigationUrlError,
+	parseInvestigationRequest
+} from './request-url';
+
+const NOW = new Date('2025-06-15T12:00:00.000Z');
+
+function roundTrip(request: AggregateRequest, now = NOW): AggregateRequest {
+	const params = investigationRequestToSearch(request, now);
+	return parseInvestigationRequest(params, now);
+}
+
+describe('isInvestigationQuery', () => {
+	it('is false for empty query', () => {
+		expect(isInvestigationQuery(new URLSearchParams(''))).toBe(false);
+	});
+
+	it('is true when ask is set', () => {
+		expect(isInvestigationQuery(new URLSearchParams('ask=trend&measure=hook_events&bucket=day'))).toBe(
+			true
+		);
+	});
+});
+
+describe('parseInvestigationRequest', () => {
+	it('rejects missing ask', () => {
+		expect(() => parseInvestigationRequest(new URLSearchParams(''))).toThrow(InvestigationUrlError);
+	});
+
+	it('rejects unknown ask', () => {
+		expect(() => parseInvestigationRequest(new URLSearchParams('ask=overview'))).toThrow(
+			InvestigationUrlError
+		);
+	});
+});
+
+describe('investigation round-trip', () => {
+	it('trend hook_events', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'trend', measure: 'hook_events', bucket: 'day' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('trend cost_usd', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'trend', measure: 'cost_usd', bucket: 'week' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('trend with breakdown dim model', () => {
+		const req: AggregateRequest = {
+			window: { preset: '30d' },
+			ask: { ask: 'trend', measure: 'cost_usd', bucket: 'day', dim: 'model' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('breakdown on repo_id', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'breakdown', measure: 'cost_usd', dim: 'repo_id' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('distribution cost_usd grain call', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'distribution', measure: 'cost_usd', grain: 'call' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('quality kind design', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'quality', kind: 'design', bucket: 'day' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('conversations', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'conversations' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('conversation with id', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'conversation', id: 'conv-1' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('executions with optional bucket', () => {
+		const withBucket: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'executions', bucket: 'week' }
+		};
+		expect(roundTrip(withBucket)).toEqual(withBucket);
+		const bare: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'executions' }
+		};
+		expect(roundTrip(bare)).toEqual(bare);
+	});
+
+	it('include and exclude filters', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			filters: {
+				include: { harness: ['claude'], repo_id: ['r1'] },
+				exclude: { model: ['gpt-4o'] }
+			},
+			ask: { ask: 'trend', measure: 'hook_events', bucket: 'day' }
+		};
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('preset 7d window', () => {
+		const req: AggregateRequest = {
+			window: { preset: '7d' },
+			ask: { ask: 'breakdown', measure: 'hook_events', dim: 'harness' }
+		};
+		const params = investigationRequestToSearch(req, NOW);
+		expect(params.get('range')).toBe('7d');
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('custom from/to window', () => {
+		const req: AggregateRequest = {
+			window: {
+				from: '2025-01-01T00:00:00.000Z',
+				to: '2025-02-01T00:00:00.000Z',
+				tz: 'America/New_York'
+			},
+			ask: { ask: 'trend', measure: 'hook_events', bucket: 'day' }
+		};
+		const params = investigationRequestToSearch(req, NOW);
+		expect(params.get('from')).toBe(req.window?.from);
+		expect(params.get('to')).toBe(req.window?.to);
+		expect(params.get('tz')).toBe('America/New_York');
+		expect(roundTrip(req)).toEqual(req);
+	});
+
+	it('does not read legacy report keys', () => {
+		const q = new URLSearchParams(
+			'ask=trend&measure=hook_events&bucket=day&metric=commits&m=cost_usd&group=harness&report=usage'
+		);
+		const req = parseInvestigationRequest(q, NOW);
+		expect(req.ask).toEqual({ ask: 'trend', measure: 'hook_events', bucket: 'day' });
+		const out = investigationRequestToSearch(req, NOW);
+		expect(out.has('metric')).toBe(false);
+		expect(out.has('m')).toBe(false);
+		expect(out.has('group')).toBe(false);
+		expect(out.has('report')).toBe(false);
+	});
+});

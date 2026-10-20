@@ -254,6 +254,15 @@ function withTenant(params: URLSearchParams, tenant?: string): URLSearchParams {
 	return params;
 }
 
+function metaFieldsFrom(source: object): MetaFields {
+	const s = source as Partial<MetaFields>;
+	const out: MetaFields = {};
+	if (s.partial) out.partial = true;
+	if (s.truncated) out.truncated = true;
+	if (s.ignored_filters) out.ignored_filters = s.ignored_filters;
+	return out;
+}
+
 function unionMeta(parts: MetaFields[], extraIgnored: string[] = []): MetaFields {
 	const ignored = new Set(extraIgnored);
 	let partial: boolean | undefined;
@@ -485,7 +494,7 @@ export async function aggregate(
 
 	if (ask.ask === 'conversations') {
 		const resp = (await fetcher(SLOT, 'analytics/conversations', params)) as Conversations;
-		const meta = unionMeta([resp], extraIgnored);
+		const meta = unionMeta([metaFieldsFrom(resp)], extraIgnored);
 		return {
 			ask: 'conversations',
 			window: windowField,
@@ -501,7 +510,7 @@ export async function aggregate(
 		const p = new URLSearchParams(params);
 		if (ask.bucket && !bucketCap) p.set('bucket', ask.bucket);
 		const resp = (await fetcher(SLOT, 'analytics/executions', p)) as Executions;
-		const meta = unionMeta([resp], extraIgnored);
+		const meta = unionMeta([metaFieldsFrom(resp)], extraIgnored);
 		return {
 			ask: 'executions',
 			window: windowField,

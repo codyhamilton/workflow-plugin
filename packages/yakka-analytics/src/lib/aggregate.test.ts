@@ -152,7 +152,16 @@ describe('aggregate', () => {
 			models: [],
 			first_ts: '',
 			last_ts: '',
-			totals: { hook_events: 0, artifact_versions: 0, commits: 0, model_calls: 0, unpriced_calls: 0, cost_usd: 0, tokens_in: 0, tokens_out: 0 },
+			totals: {
+				model_calls: 0,
+				unpriced_calls: 0,
+				cost_usd: 0,
+				tokens_in: 0,
+				tokens_out: 0,
+				tokens_cache_read: 0,
+				tokens_cache_write: 0,
+				tokens_reasoning: 0
+			},
 			events: [],
 			truncated: true
 		};
