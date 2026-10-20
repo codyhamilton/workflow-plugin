@@ -127,7 +127,7 @@ Dispatched 2026-10-21 after the brief commit (`44cfecd`). Outcome: landed at 484
 
 ## Phase 4 — Login skill, docs and release
 
-Status: in progress. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (`/yakka:execute phase 4 and complete`: this phase, then wrap-up).
+Status: closed, 2026-10-21 (closing commit carries `Yakka-Phase: 19-device-login:4`), with the live check carried to after merge by the user's decision. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (`/yakka:execute phase 4 and complete`: this phase, then wrap-up).
 
 One code unit, authored inline: `briefs/phase4-skill-docs-release.md`. Worker: Sonnet. The Fly deploy, the Pages deploy and the live `/yakka:login` check are outward-facing and are the runner's, after the user confirms.
 
@@ -142,3 +142,29 @@ Outcome: landed at 03b85a8. Worker report: `reports/phase4-skill-docs-release.md
 
 - Run by the runner: `test_status` + `test_login` 20 OK; the three `plugin.json` at 3.1.0, `VERSION` 0.3.0; the skill exists. `test_layout.py` 6 of 7: the failure lists `packages/yakka-analytics/node_modules/**` (git-ignored, local), not checked on master.
 - Not done: the Fly deploy, the Pages deploy and the live `/yakka:login` outcome. These publish to production and wait for the user's go-ahead. The phase is therefore not closed and carries no trailer.
+
+### Fly deploy (Phase 4)
+
+Deployed by the runner on the user's instruction ("deploy the service"). One machine rolled and passed health checks. Against `https://api.yakka.build`: `/v1/health` 200; `POST /v1/device/code` returned a user code, `verification_uri` and timings; `POST /v1/device/exchange` 404. Startup logs show no error. The legacy `device_codes` revoke path was not exercised by a log line, so the production `registry.json` check stays carried.
+
+### artifact_feedback (Phase 4)
+
+- Report `phase4-skill-docs-release`: "not delivered" (the service has no version of the file).
+- Brief `phase4-skill-docs-release`: delivered, screen pass. Below the baseline 25th percentile: `b.done_covers_goal` 0.30, `b.ac_why` 0.31, `b.ac_judgement_labelled` 0.32.
+
+### Phase 4 — Carried
+
+1. Pages deploys on merge to master (user's decision). Until then the live `/device` page is the old loopback form, and no login can finish end to end.
+2. The live outcome is unverified: in Claude Code, `/yakka:login` against `api.yakka.build` after merge and the plugin update, with `config: …/client.toml (remote mode)`, `endpoint: https://api.yakka.build reachable` and no `wk_` in the transcript. The user chose to verify after merge; the plan folder is collapsed by `close-out` after that.
+3. `test_layout.py::test_repo_passes_layout_check` fails on git-ignored `packages/yakka-analytics/node_modules/**`; not checked on master.
+4. `test_7_build_sh` needs Go >= 1.27.1; `TestHalfSetEnvRefusal` needs port 8770.
+5. The production `registry.json` check for legacy `device_codes`.
+6. Plan 18 must be revised to the Python `start`/`wait` client before it is built.
+
+## Pre-flight (pipeline posture)
+
+Posture: pipeline, by the user's decision (PR now, verification and close-out after merge). No `REVIEW.md`.
+
+- Builds: Go build and vet pass (Phase 3), Playwright 8 and vitest 196 pass (Phase 2), Python client tests pass (Phases 3 and 4).
+- Phase outcomes 1 to 4 hold as recorded above; Phase 4's live outcome is carried.
+- Folder: `DESIGN.md`, `IMPLEMENTATION.md`, `PROVENANCE.md`, briefs and reports for every phase are present.
