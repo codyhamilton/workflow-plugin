@@ -203,3 +203,22 @@ Approach: open. The invoker declared the normal execute path. The phase outcome 
 Slug from the plan folder `17-analytics-dashboard-redesign`: `analytics-dashboard-redesign`.
 
 No Units list. The phase is more than one worker's work: the investigation path, the four tools (usage and cost, quality, conversation grain, saved analysis), and the removal of the old report routes and nav are separate contracts on a surface one worker cannot hold. Refine is dispatched. Phase 4's Carried section is for that refinement to place.
+
+### Refine
+
+Proceed. Four units, sequential. `5-02` depends on `5-01`, `5-03` on `5-02`, `5-04` on `5-03`. Nothing runs alongside: they share `+page.svelte` and the shell wiring. No bounce. Commit `004b2f0`.
+
+- `5-01` Investigation URL codec — `briefs/5-01-investigation-url.md`
+- `5-02` Investigation shell and landing handoff — `briefs/5-02-investigation-shell.md`
+- `5-03` Exploration tools — `briefs/5-03-exploration-tools.md`
+- `5-04` Legacy routes and shell retirement — `briefs/5-04-legacy-retirement.md`
+
+Phase 4 carried items placed by that refinement:
+
+1. `shell.spec.ts` "dashboards shares filter chrome" and "an ignored-filter notice" — absorbed into `5-04`.
+2. `aggregate.ts` / `aggregate.test.ts` `tsc` issues — absorbed into `5-01` as type-only, no behaviour change.
+3. `helpers.ts` `useServe` nested-array URL — absorbed into `5-04`.
+
+`artifact_feedback` on the four briefs: unreachable. Yakka and Workflow MCP failed live tool discovery (`artifact_feedback` not callable; `python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). The refine worker reported the same. No check was flagged because the service did not answer.
+
+Agent: Composer (`composer-2.5`), subagent `bc-1ecdd64c-9ef8-557a-aedd-e2a8d62e6229`. The harness did not report tool turns or final context.
