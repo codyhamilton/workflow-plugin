@@ -146,3 +146,22 @@ Package boundary stays `packages/yakka-analytics`. Assumption 1 stands: two `ask
 Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/4-01-landing-trend.md`
 
 `artifact_feedback` on that brief: unreachable. The Yakka MCP namespace failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). The server closed during discovery (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged because the service did not answer.
+
+### 4-01-landing-trend
+
+- Built: `/` with an empty query loads two sequential `aggregate` `ask: trend` results, measures `hook_events` and `cost_usd`, bucket `day`, window `{ tz }` only, and draws them with `TrendChart`. The nine KPI tiles, grouped counts, and weekday-by-hour heatmap are gone. The route row and the overview KPI link sentences in design 7 match that picture.
+- Surfaces: `packages/yakka-analytics/src/routes/+page.svelte`, `tests/e2e/overview.spec.ts`, `tests/e2e/session.spec.ts`, `tests/e2e/explore.spec.ts`, `tests/hosted/hosted.spec.ts`, `docs/design/07-analytics-site.md`.
+- Deviations: `overview.spec.ts` and the Perspective test in `explore.spec.ts` set the local serve base in a second `addInitScript`, because `useServe` stringifies its argument into `http://127.0.0.1:<port>,,e2e-local-stay`. `helpers.ts` was left untouched. The collector session test fulfills `analytics/facets` and `analytics/query` so the charts can render. Commit `c4d8a94`.
+- Agent: Composer (`composer-2.5`), subagent `bc-75ed486e-12a4-5d7a-911f-c65391f908ff`. The harness did not report tool turns or final context. Status reported: done with concerns.
+
+Orchestrator re-run after `c4d8a94`, reports not the check:
+
+- `npm test`: 226 passed.
+- `npx playwright test tests/e2e/overview.spec.ts tests/e2e/session.spec.ts tests/e2e/explore.spec.ts`: overview 2 passed. The two landing charts are visible and `data-ready`, the old overview test ids are absent, and the two `analytics/query` requests are `hook_events` and `cost_usd`, `bucket=day`, the same `from` and `to`, 30 days apart, with no `repo_id`. Session: 8 passed, 1 failed. `no tenant: summary 403 no such tenant sends to /profile` stayed on `/`. That test still fulfills only `analytics/summary`. `/` now calls `analytics/facets` (the log is `404 GET /v1/analytics/facets`). `explore.spec.ts`: the Perspective test passed; the other four failed. The page fetch URL was `http://127.0.0.1:39721,,e2e-local-stay/v1/analytics/explore`. `helpers.ts` is unchanged since `8967d43`.
+- `src/routes/+page.svelte` does not import `$lib/charts/` or `EChart.svelte` and does not call `getJSON`. `git diff --name-only c61f1a9..c4d8a94` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+The session 403 test is this phase's break. A fixer follows. The explore failures stay carried: `useServe` predates this phase.
+
+Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/4-02-session-403.md`
+
+`artifact_feedback` on that brief: unreachable. Same Yakka MCP discovery failure (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged.
