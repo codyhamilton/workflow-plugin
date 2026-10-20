@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { FILTER_REPO, SUMMARY_ALL, SUMMARY_R1 } from './fixture';
-import { useServe } from './helpers';
+import { serveState, useServe } from './helpers';
 
 // Every in-window fact plus every in-window rejection is one explore row.
 const total = (s: typeof SUMMARY_ALL) => s.hook_events + s.artifact_versions + s.commits + s['rejections-precheck'] + s['rejections-screen'];
@@ -75,9 +75,14 @@ test('a capped slice says so', async ({ page }) => {
 });
 
 test('the overview does not load Perspective', async ({ page }) => {
+	const { local } = serveState();
+	await page.addInitScript((base) => {
+		localStorage.setItem('yakka-analytics-base', base);
+		localStorage.setItem('yakka-analytics-key', 'e2e-local-stay');
+	}, local);
 	const urls: string[] = [];
 	page.on('request', (r) => urls.push(r.url()));
 	await page.goto('/');
-	await expect(page.getByTestId('summary-conversations')).toBeVisible();
+	await expect(page.getByTestId('landing-trend-hook_events')).toBeVisible();
 	expect(urls.filter((u) => u.includes('perspective') || u.split('?')[0].endsWith('.wasm'))).toEqual([]);
 });

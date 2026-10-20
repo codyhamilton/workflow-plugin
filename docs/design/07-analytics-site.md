@@ -25,7 +25,7 @@ change what the agent does in a run (principle 2).
 
 | Route | Report | Lens |
 |---|---|---|
-| `/` | Overview | KPI tiles with sparklines (conversations, hooks, artifacts, commits, cost, tokens), an hour-of-day × weekday heatmap |
+| `/` | Landing | Two `ask: trend` charts, measures `hook_events` and `cost_usd`, same window and bucket, over the preselected window. Not the nine KPI tiles, grouped counts, or weekday-by-hour heatmap. |
 | `/trends` | Time series | volumes by bucket, split by one dimension; brush to zoom |
 | `/usage` | Usage and cost | tokens and cost by model, harness and repo, plus the cost trend |
 | `/repos` | Repo comparison | the same volumes per `repo_id` |
@@ -290,11 +290,8 @@ on a compacted copy of the real ledger.
 - **Drill-down.** Every chart mark and table row for a shared-filter dimension value applies it as a
   filter (shift-click excludes it). `__other__`, the empty key, `hour_of_day`, `weekday`, and check
   names are not clickable. Active filters show as removable chips. Any conversation ID opens its
-  timeline. Each overview KPI links to the report that owns the measure, keeping the current query
-  string; the link sets `measure` only when the target is `/trends` (`artifact_versions`,
-  `distinct_content`, or `commits`, one per tile). Conversations → `/conversations`. Hook events →
-  `/hooks`. Model calls, tokens, cost, and unpriced calls → `/usage`. Overview counts do not link to
-  `/explore`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
+  timeline. `/` does not show those KPI tiles and does not link them to `/conversations`, `/hooks`,
+  `/trends`, or `/usage`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
   count, and the executions shape series); a score series leaves the gap.
 - **Chart builder.** `/builder` is driven only by `/v1/analytics/schema`: any measure, up to two
   dimensions and a bucket. Chart types are line, stacked area, bar, stacked bar, heatmap, treemap

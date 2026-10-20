@@ -30,9 +30,8 @@ test('overview loads same-origin with no token', async ({ page, baseURL }) => {
 		if (new URL(r.url()).pathname.startsWith('/v1/')) v1.push({ url: r.url(), auth: r.headers()['authorization'] });
 	});
 	await page.goto('/');
-	for (const [k, v] of Object.entries(SUMMARY_ALL)) {
-		await expect(page.getByTestId(`summary-${k}`), k).toHaveText(String(v));
-	}
+	await expect(page.getByTestId('landing-trend-hook_events')).toBeVisible();
+	await expect(page.getByTestId('landing-trend-cost_usd')).toBeVisible();
 	expect(v1.length).toBeGreaterThan(0);
 	for (const q of v1) {
 		expect(new URL(q.url).origin).toBe(baseURL);
@@ -54,7 +53,7 @@ test('immutable assets are cached for a year', async ({ page }) => {
 		if (new URL(r.url()).pathname.startsWith('/_app/immutable/')) cc.push(r.headers()['cache-control'] ?? '');
 	});
 	await page.goto('/');
-	await expect(page.getByTestId('summary-conversations')).toBeVisible();
+	await expect(page.getByTestId('landing-trend-hook_events')).toBeVisible();
 	expect(cc.length).toBeGreaterThan(0);
 	for (const c of cc) expect(c).toBe('public, max-age=31536000, immutable');
 });
