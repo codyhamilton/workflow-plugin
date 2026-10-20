@@ -263,3 +263,22 @@ Orchestrator re-run after `4bb0033`, report not the check:
 - `npx playwright test tests/e2e/investigation-tools.spec.ts tests/e2e/investigation-shell.spec.ts`: 9 passed. Unpriced usage cost is not `$0.00`. Quality shows design scores beside the baseline. A conversation row opens the run with an in-window marker. Saved analysis restores `ask` and window. The shell checks from `5-02` still pass.
 - `npm test`: 248 passed.
 - `git diff --name-only 17c8262..4bb0033` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+### 5-04-legacy-retirement
+
+- Built: the shell nav is Overview, Profile, and Settings. Filter chrome and `SaveView` are gone. The eleven legacy routes render a retirement stub and do not mount the old reports. `useServe` no longer writes `,,e2e-local-stay` into the base. Design 7's route table and saved-analysis copy match that.
+- Surfaces: `packages/yakka-analytics/src/routes/+layout.svelte`, `src/lib/analysis/routes.ts`, the eleven legacy `+page.svelte` files, `tests/e2e/helpers.ts`, the owned e2e files the worker rewrote, `docs/design/07-analytics-site.md`.
+- Deviations: stubs stay on the legacy URL instead of `goto('/')`, so `session.spec.ts` can still open those paths. The worker left `interactions.spec.ts` in place and called it outside the owned paths. The brief owns that file. Commit `79f7584`.
+- Agent: Composer (`composer-2.5`), subagent `bc-1b14c646-4a16-538d-b77b-ca702b1c6eee`. The harness did not report tool turns or final context (the worker estimated about 40 tool turns). Status reported: done.
+
+Orchestrator re-run after `79f7584`, report not the check:
+
+- `npm test`: 248 passed.
+- `npx playwright test`: 43 passed, 46 failed. The brief's named files passed: `investigation-shell` 5, `investigation-tools` 4, `overview` 2, `session` 10, `explore` 2, `shell` 8, and one passing retirement test each for `trends`, `usage`, `repos`, `quality`, `conversations`, `conversation`, `dashboards`.
+- A separate browser check, not committed: all eleven legacy paths show `legacy-route-stub` and no `trends-chart`, `builder-chart`, or `dash-tile`, and the header has no Trends or Dashboards link. A breakdown change to `repo_id` refetches `analytics/query` and updates the URL on `/`. Saved analysis restores `ask`, `range`, and `harness=cursor` on `/`. Conversation `c5` shows three timeline rows, `investigation-conv-total-model_calls`, and `investigation-conv-window-totals`. `isDrillableMark` rejects `__other__`, the empty key, `hour_of_day`, and `weekday`.
+- These outcome clauses do not hold. `qualityOption` with day points on 1 Jan and 3 Jan returns medians `[0.4, 0.6]` and no `null`. `/?ask=distribution&measure=cost_usd&grain=call&dim=model` presses Distribution and shows the model table, and `investigation-usage-distribution` is absent (`distData` keeps only `k === 'all'`). `brush(page, 'investigation-trend-hook_events', 0.25, 0.75)` leaves `range=30d`.
+- `git diff --name-only 13838d3..79f7584` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+A fixer follows. Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/5-05-outcome-gaps.md`.
+
+`artifact_feedback` on that brief: unreachable. Yakka and Workflow MCP failed live tool discovery (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged because the service did not answer.

@@ -202,6 +202,7 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
   - **5-02 Investigation shell and landing handoff** — `briefs/5-02-investigation-shell.md`. Depends on `5-01`. Runs alongside nothing.
   - **5-03 Exploration tools** — `briefs/5-03-exploration-tools.md`. Depends on `5-02`. Runs alongside nothing.
   - **5-04 Legacy routes and shell retirement** — `briefs/5-04-legacy-retirement.md`. Depends on `5-03`. Runs alongside nothing.
+  - **5-05 Outcome gaps** — `briefs/5-05-outcome-gaps.md`. Depends on `5-04`. Runs alongside nothing.
 
 ## Provenance Notes
 
