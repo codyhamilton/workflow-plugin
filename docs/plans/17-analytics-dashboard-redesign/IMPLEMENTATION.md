@@ -144,3 +144,5 @@ Phase 3 carried items are not absorbed here. The two `shell.spec.ts` failures pr
 Package boundary stays `packages/yakka-analytics`. Assumption 1 stands: two `ask: trend` results, measures `hook_events` and `cost_usd`, same window and bucket. The investigation control is phase 5.
 
 Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/4-01-landing-trend.md`
+
+`artifact_feedback` on that brief: unreachable. The Yakka MCP namespace failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). The server closed during discovery (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged because the service did not answer.
