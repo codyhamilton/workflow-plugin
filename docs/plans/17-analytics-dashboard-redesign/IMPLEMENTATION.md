@@ -249,3 +249,17 @@ Orchestrator re-run after `8feaf62`, report not the check:
 - `npx playwright test tests/e2e/overview.spec.ts tests/e2e/investigation-shell.spec.ts`: 7 passed. Empty `/` still shows the two landing trends. The landing control opens an investigation query with both measures. A preset refetch updates the URL window. Drill adds a filter. Shift-click exclude adds `x.<dim>`, and `conversation_id` shows the ignored notice. A pasted URL reproduces `ask` and filters.
 - `npm test`: 244 passed.
 - `git diff --name-only d2d4dd2..8feaf62` has no path under `packages/yakka/internal/serve`, `packages/yakka/internal/store`, or `src/routes/+layout.svelte`.
+
+### 5-03-exploration-tools
+
+- Built: usage and cost, quality, conversation grain, and saved analysis as tools inside the investigation. Usage shows an unpriced model cost as unpriced. Quality shows the design window beside the baseline. Conversations open one run with an in-window marker. Save, then open by name, restores `ask` and window and stays on `/`.
+- Surfaces: `packages/yakka-analytics/src/lib/investigation/InvestigationShell.svelte`, `src/lib/investigation/tools/` (`UsageTool.svelte`, `QualityTool.svelte`, `ConversationsTool.svelte`, `SavedAnalysisTool.svelte`, `registry.ts`), `src/lib/saved-analysis.ts`, `src/lib/saved-analysis.test.ts`, `tests/e2e/investigation-tools.spec.ts`.
+- Deviations: `UsageTool.svelte` calls `getJSON` to give each breakdown measure its own slot, because the shared `aggregate` slot supersedes a second in-flight read. The shell passes a quality fetcher that remaps `baselines`, `score-series`, and scores onto three slots for the same reason. Both still call `aggregate`; the fetcher does not build the request. Timeline markers use test ids `investigation-timeline-in` and `investigation-timeline-out`. Quality e2e stubs the API the way `quality.spec.ts` does. Commit `4bb0033`.
+- Agent: Composer (`composer-2.5`), subagent `bc-bb008dea-f925-5086-8294-611142bfd0e1`. The harness did not report tool turns or final context. Status reported: done.
+
+Orchestrator re-run after `4bb0033`, report not the check:
+
+- `npm test -- src/lib/saved-analysis.test.ts`: 4 passed.
+- `npx playwright test tests/e2e/investigation-tools.spec.ts tests/e2e/investigation-shell.spec.ts`: 9 passed. Unpriced usage cost is not `$0.00`. Quality shows design scores beside the baseline. A conversation row opens the run with an in-window marker. Saved analysis restores `ask` and window. The shell checks from `5-02` still pass.
+- `npm test`: 248 passed.
+- `git diff --name-only 17c8262..4bb0033` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
