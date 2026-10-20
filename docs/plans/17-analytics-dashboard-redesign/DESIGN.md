@@ -173,6 +173,9 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 - Surfaces: `src/lib/theme.css`, `src/routes/+layout.svelte`, `src/lib/components/` (`FilterBar`, `FilterChips`, `Notices`, `SaveView`, `DashboardTile`), `src/lib/charts/`, `src/routes/login/+page.svelte`, `src/routes/profile/+page.svelte`, `src/routes/settings/+page.svelte`, `src/routes/device/+page.svelte`, `src/routes/oauth/callback/+page.svelte`, and the component and style system the package adds. `docs/design/07-analytics-site.md` Theme.
 - Approach: open
 - Depends on: phase 1
+- Units:
+  - **2-01 Analysis shell and tokens** — `briefs/2-01-analysis-shell.md`. Depends on phase 1. Runs alongside nothing.
+  - **2-02 Chart frame** — `briefs/2-02-chart-frame.md`. Depends on 2-01. Runs alongside nothing.
 
 ### Phase 3 — Aggregation boundary
 
