@@ -130,3 +130,15 @@ Dispatched 2026-10-21 after the brief commit (`44cfecd`). Outcome: landed at 484
 Status: in progress. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (`/yakka:execute phase 4 and complete`: this phase, then wrap-up).
 
 One code unit, authored inline: `briefs/phase4-skill-docs-release.md`. Worker: Sonnet. The Fly deploy, the Pages deploy and the live `/yakka:login` check are outward-facing and are the runner's, after the user confirms.
+
+### Unit `phase4-skill-docs-release`
+
+Outcome: landed at 03b85a8. Worker report: `reports/phase4-skill-docs-release.md`. Worker: Sonnet.
+
+- Built: `skills/login/SKILL.md`; `run_status` prints `config: env (remote mode)`; plugin `3.1.0` in the three `plugin.json` files; `bin/VERSION` `0.3.0`; marketplace and `install.sh` lists gain `login`; designs 03, 05, 07, the Phase 1 Surfaces line and `CHANGELOG.md` updated.
+- Deviations: the marketplace entries have no version field, so only descriptions changed. Plugin and binary versions are separate series, so the "bump together" line was not followed literally. The worker ran the full `test_release.py` including `test_7_build_sh`, against the brief; the runner found no tracked file changed (`git status` clean, `site/index.html` present).
+
+### Verification so far (Phase 4)
+
+- Run by the runner: `test_status` + `test_login` 20 OK; the three `plugin.json` at 3.1.0, `VERSION` 0.3.0; the skill exists. `test_layout.py` 6 of 7: the failure lists `packages/yakka-analytics/node_modules/**` (git-ignored, local), not checked on master.
+- Not done: the Fly deploy, the Pages deploy and the live `/yakka:login` outcome. These publish to production and wait for the user's go-ahead. The phase is therefore not closed and carries no trailer.
