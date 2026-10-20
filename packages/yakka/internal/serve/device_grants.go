@@ -42,10 +42,11 @@ type deviceGrants struct {
 	now    func() time.Time
 	byHash map[string]*deviceGrant
 	byUser map[string]*deviceGrant
+	limits deviceLimits
 }
 
 func newDeviceGrants() *deviceGrants {
-	return &deviceGrants{now: time.Now, byHash: map[string]*deviceGrant{}, byUser: map[string]*deviceGrant{}}
+	return &deviceGrants{now: time.Now, byHash: map[string]*deviceGrant{}, byUser: map[string]*deviceGrant{}, limits: newDeviceLimits()}
 }
 
 // normaliseUserCode uppercases and strips hyphens and spaces.
@@ -80,6 +81,7 @@ func generateUserCode() (string, error) {
 
 // sweepLocked drops grants past expiry. Called at the start of every device route; there is no background loop.
 func (g *deviceGrants) sweepLocked(now time.Time) {
+	g.limits.pruneLocked(now)
 	for h, gr := range g.byHash {
 		if !now.Before(gr.expiry) {
 			delete(g.byHash, h)
@@ -99,6 +101,9 @@ func (g *deviceGrants) create(deviceCode, clientIP string) (string, error) {
 	defer g.mu.Unlock()
 	now := g.now()
 	g.sweepLocked(now)
+	if err := g.admitCodeLocked(clientIP, now); err != nil {
+		return "", err
+	}
 	var norm string
 	for {
 		c, err := generateUserCode()

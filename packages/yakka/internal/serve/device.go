@@ -2,8 +2,8 @@ package serve
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
-	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -16,15 +16,6 @@ func (s *Server) deviceSite() string {
 		return "https://yakka.build"
 	}
 	return o
-}
-
-// deviceClientIP is the requesting address, kept on the grant for the limiter.
-func deviceClientIP(r *http.Request) string {
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
-	}
-	return host
 }
 
 func deviceMethodPost(w http.ResponseWriter, r *http.Request) bool {
@@ -52,7 +43,7 @@ func (s *Server) handleDeviceCodeRoute(w http.ResponseWriter, r *http.Request) {
 	s.handleDeviceCode(w, r)
 }
 
-// handleDeviceCode issues a grant. The per-IP and global limits of the next unit gate here.
+// handleDeviceCode issues a grant, subject to the limits in device_limits.go.
 func (s *Server) handleDeviceCode(w http.ResponseWriter, r *http.Request) {
 	deviceCode, err := generateDeviceCode()
 	if err != nil {
@@ -60,6 +51,14 @@ func (s *Server) handleDeviceCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userCode, err := s.grants.create(deviceCode, deviceClientIP(r))
+	if errors.Is(err, errDeviceRateLimited) {
+		writeJSON(w, 429, map[string]string{"error": "rate_limited"})
+		return
+	}
+	if errors.Is(err, errDeviceBusy) {
+		writeJSON(w, 503, map[string]string{"error": "busy"})
+		return
+	}
 	if err != nil {
 		writeJSON(w, 500, map[string]string{"error": "internal error"})
 		return
@@ -147,6 +146,10 @@ func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, s
 			return
 		}
 	}
+	if s.grants.unknownBlocked(sess.ID) {
+		writeJSON(w, 429, map[string]string{"error": "rate_limited"})
+		return
+	}
 	var verr error
 	found, _ := s.grants.decide(body.UserCode, func(gr *deviceGrant) error {
 		if deny {
@@ -160,7 +163,7 @@ func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, s
 		return nil
 	})
 	if !found {
-		// Unknown, expired or already decided code: the per-session attempt limit of the next unit counts here.
+		s.grants.recordUnknown(sess.ID)
 		writeJSON(w, 404, map[string]string{"error": "unknown_code"})
 		return
 	}
