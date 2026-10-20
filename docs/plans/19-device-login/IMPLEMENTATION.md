@@ -89,3 +89,9 @@ Dispatched 2026-10-21T00:52+10:00 after the brief commit (`ddd8922`). Outcome: l
 2. `api.test.ts` has one `svelte-check` error (`err` is of type `unknown`) that exists on the unchanged tree. Not this plan's.
 3. The deploy order in the design puts Pages after the Fly server; this phase only changes source. Carry the Pages deploy to Phase 4.
 4. From Phase 1, still open: the `serve.go (sweep)` Surfaces line, and the check against a production `registry.json`.
+
+## Phase 3 — Two-step client login
+
+Status: open. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 3`, so this phase only).
+
+The phase has no Units list. Python client rewrite plus Go login deletion is one worker's work, so one brief was authored inline: `briefs/phase3-client-login.md`, committed before dispatch. Worker: Sonnet.
