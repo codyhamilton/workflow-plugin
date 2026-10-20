@@ -92,7 +92,7 @@ Dispatched 2026-10-21T00:52+10:00 after the brief commit (`ddd8922`). Outcome: l
 
 ## Phase 3 — Two-step client login
 
-Status: open. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 3`, so this phase only).
+Status: closed, 2026-10-21 (closing commit carries `Yakka-Phase: 19-device-login:3`). Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 3`, so this phase only).
 
 The phase has no Units list. Python client rewrite plus Go login deletion is one worker's work, so one brief was authored inline: `briefs/phase3-client-login.md`, committed before dispatch. Worker: Sonnet.
 
@@ -103,9 +103,24 @@ Dispatched 2026-10-21 after the brief commit (`44cfecd`). Outcome: landed at 484
 - Built: `login start`, `login wait` and a composed `login` in `yakka.py`; default endpoint `https://api.yakka.build`; loopback code removed; `internal/login` deleted; Go `login` exits 1 naming the plugin wrapper.
 - Deviations, from the worker report: the Go usage string drops `login`; `wait` sleeps one interval before the first poll; `resolve_endpoint` (login-only) now returns the default instead of an error; network errors, 429 and 5xx are retried until expiry.
 
-### Verification (Phase 3), in progress
+### Verification (Phase 3)
 
 - `test_login.py`: 17 passed (run by the runner, from `plugins/yakka/client`: `python3 -m unittest test_login`).
 - Go `build`, `vet` and `./internal/...` pass. `./cmd/...` fails only `TestHalfSetEnvRefusal` (port 8770 held by an unrelated process); it fails the same way on master `6576c04`.
 - grep for the loopback names finds nothing; `login wait` with an empty config exits 1 with one stderr line.
-- `tools/release/test_release.py`: 9 of 10 pass. `test_7_build_sh` fails; with the system `go` it failed on the Go version, and with `/home/codyh/.local/go/bin` first it still failed. The cause is not yet known and a re-run to read it was blocked by the permission classifier. The phase is not closed.
+- `tools/release/test_release.py`: 9 of 10 pass. `test_7_build_sh` fails with `go: go.mod requires go >= 1.27.1 (running go 1.24.2; GOTOOLCHAIN=local)`. Read by running the test in a throwaway git worktree (build.sh deletes the tracked `site/` directory, so it is not run in the main tree). The only Go on this machine, `~/.local/go/bin/go`, is 1.24.2, and the test pins `GOTOOLCHAIN=local`. `go.mod`, `go.sum` and `build.sh` are unchanged since `6576c04`, so the failure is environmental and not from this phase. (The worker's report says 10 of 10 passed; it ran with a Go the test could use, so that claim is not reproduced here.)
+- Result: the phase outcome holds. Client login is two commands against the fake server, the default endpoint is set, and the loopback login is gone from the client and the Go binary. Not checked: against the real Phase 1 server.
+
+### artifact_feedback (Phase 3)
+
+- Report `phase3-client-login`: "not delivered" (the service has no version of the file).
+- Brief `phase3-client-login`: delivered, screen pass. Below the baseline 25th percentile: `b.fail_first` 0.42, `b.done_covers_goal` 0.34, `b.ac_why` 0.15, `b.ac_proven_required` 0.60. The brief was authored inline; the unit finished without trouble.
+
+### Phase 3 — Carried
+
+1. `test_release.py::test_7_build_sh` needs Go >= 1.27.1 with `GOTOOLCHAIN=local`; this machine has 1.24.2. Run it where that Go exists before the Phase 4 release.
+2. `TestHalfSetEnvRefusal` needs port 8770 free; an unrelated process holds it here.
+3. The Go usage string and the wrapper's differ by design (Go drops `login`). Phase 4's docs should say the wrapper owns login.
+4. `wait` sleeps one interval before the first poll, so it needs a full interval after `start` even if the user approved at once. Accepted.
+5. Not checked against the real server: the `start`/`wait` pair, and the Phase 2 page. Phase 4's real `/yakka:login` is the first such check.
+6. From earlier phases, still open: the `serve.go (sweep)` Surfaces line, the check against a production `registry.json` for legacy `device_codes`, and the Pages deploy (Phase 4).
