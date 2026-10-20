@@ -106,3 +106,27 @@ Package boundary stays `packages/yakka-analytics`. This phase adds no analytics 
 Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/3-01-aggregation-boundary.md`
 
 `artifact_feedback` on that brief: unreachable. The Yakka MCP namespace failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). No check was flagged because the service did not answer.
+
+### 3-01-aggregation-boundary
+
+- Built: `aggregate(request, options?)`. One call returns one result for `trend`, `breakdown`, `distribution`, `quality`, `conversations`, `conversation`, and `executions`. The caller passes the request and does not name `/v1/analytics/*` or `baselines`. Window, exclude-as-complement, `clamp` (`rest-days`, `bucket-cap`), `controls`, and `partial` / `ignored_filters` / `truncated` when a read produced them are on that result. The Data layer bullet now says landing and analysis read through this boundary.
+- Surfaces: `packages/yakka-analytics/src/lib/aggregate.ts`, `src/lib/aggregate.test.ts`, `docs/design/07-analytics-site.md` Data layer.
+- Deviations: the worker reported none. Commit `2462715`.
+- Agent: Composer (`composer-2.5`), subagent `bc-16caa26d-1590-5dd5-a87e-8d0b23d46e38`. The harness did not report tool turns or final context. Status reported: done.
+
+`artifact_feedback` on `briefs/3-01-aggregation-boundary.md` and `reports/3-01-aggregation-boundary.md`, before close: unreachable. Yakka MCP failed live tool discovery again (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). No check was flagged.
+
+### Phase 3 verification
+
+Re-ran the outcome checks on `2462715`. Reports were not the check.
+
+- `npm test -- src/lib/aggregate.test.ts`: 13 passed. One call per ask (`trend`, `breakdown`, `distribution`, `quality`, `conversations`, `conversation`, `executions`) returned that ask's slice. `partial`, `ignored_filters`, and `truncated` were present when the fake read returned them. A `conversation_id` exclude was listed in `ignored_filters` and was not sent. A rest span wider than 399 days set `clamp` `rest-days` and a different window. An hour bucket over the 400 cap set `clamp` `bucket-cap` and did not call the query read. An omitted range was thirty days ending at the injected now. `tenant` was sent only when the request carried it. The `aggregate` arguments in those calls do not name `/v1/analytics/*` or `baselines`.
+- `npm test`: 226 passed.
+- `git diff --name-only e717a8d..2462715` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the Data layer bullet of `docs/design/07-analytics-site.md`.
+
+### Carried
+
+1. `tests/e2e/shell.spec.ts` "dashboards shares filter chrome" does not find `trends-chart`, and "an ignored-filter notice" does not find `notice-ignored`. Both fail on `af0b6d2`, before phase 2, and on this phase's tree. No brief amendment.
+2. `src/lib/aggregate.ts` calls `unionMeta` with a `Conversations` value and an `Executions` value. `tsc --noEmit` reports TS2559: those types share no properties with `MetaFields`. `aggregate.test.ts` builds a `ConversationDetail` whose `totals` includes `hook_events` (TS2353). `npm test` does not typecheck, and those tests pass. Design 7 records that `svelte-check` is not installed. No brief amendment.
