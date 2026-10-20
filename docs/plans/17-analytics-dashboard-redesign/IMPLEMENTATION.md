@@ -12,6 +12,8 @@ Approach: known. One unit: one predicate, and the layout, session client, login 
 
 Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/1-01-session-gate.md`
 
+`artifact_feedback` on that brief: unreachable. The Yakka MCP namespace failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). No check was flagged because the service did not answer.
+
 ### 1-01-session-gate
 
 Not recorded yet.
