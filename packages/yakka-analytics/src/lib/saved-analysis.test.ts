@@ -47,6 +47,29 @@ describe('saved-analysis', () => {
 		expect(raw).not.toContain('tenant');
 	});
 
+	it('strips a poisoned tenant and drops an unknown ask on read', () => {
+		const backing = fakeStorage({
+			[SAVED_ANALYSIS_KEY]: JSON.stringify([
+				{ id: '1', name: 'kept', spec: { ...sampleSpec, tenant: 'secret' } },
+				{ id: '2', name: 'drop', spec: { ask: { ask: 'admin' } } }
+			])
+		});
+		const rows = list(backing);
+		expect(rows).toHaveLength(1);
+		expect(rows[0].spec).not.toHaveProperty('tenant');
+		expect(rows[0].name).toBe('kept');
+	});
+
+	it('keeps each signed-in account in its own key', () => {
+		const backing = fakeStorage();
+		save('A', sampleSpec, backing, '11');
+		save('B', sampleSpec, backing, '22');
+		expect(list(backing, '11').map((s) => s.name)).toEqual(['A']);
+		expect(list(backing, '22').map((s) => s.name)).toEqual(['B']);
+		expect(list(backing)).toEqual([]);
+		expect(backing.getItem(SAVED_ANALYSIS_KEY)).toBeNull();
+	});
+
 	it('remove drops entry', () => {
 		const backing = fakeStorage();
 		const a = save('gone', sampleSpec, backing);

@@ -7,8 +7,10 @@ import {
 	fetchMe,
 	isValidLoopbackRedirectUri,
 	oauthApiBase,
+	oauthCallbackTarget,
 	oauthLoginPath,
-	revokeToken
+	revokeToken,
+	safeReturnPath
 } from './api';
 
 let store: Record<string, string>;
@@ -141,6 +143,62 @@ describe('apiGet', () => {
 			'https://api.yakka.build/oauth/login?return=' + encodeURIComponent('/device?state=abc')
 		);
 		expect(oauthLoginPath('localhost')).toBe('/oauth/login');
+		expect(oauthLoginPath('yakka.build', '/\\evil.com')).toBe('https://api.yakka.build/oauth/login');
+		expect(oauthLoginPath('yakka.build', '//evil.com')).toBe('https://api.yakka.build/oauth/login');
+	});
+
+	it('safeReturnPath stays on the page origin', () => {
+		expect(safeReturnPath('/usage?range=7d')).toBe('/usage?range=7d');
+		expect(safeReturnPath('/device?state=abc&redirect_uri=http://127.0.0.1:9/cb')).toBe(
+			'/device?state=abc&redirect_uri=http://127.0.0.1:9/cb'
+		);
+		expect(safeReturnPath('//evil.com')).toBeNull();
+		expect(safeReturnPath('/\\evil.com')).toBeNull();
+		expect(safeReturnPath('/\t/evil.com')).toBeNull();
+		expect(safeReturnPath('/\n/evil.com')).toBeNull();
+		expect(safeReturnPath('https://evil.com/')).toBeNull();
+		expect(safeReturnPath('')).toBeNull();
+	});
+
+	it('oauth callback ignores an off-origin return and a response from another URL', () => {
+		const pageOrigin = 'https://yakka.build';
+		const requestUrl = 'https://api.yakka.build/oauth/callback?code=c&state=s';
+		expect(
+			oauthCallbackTarget({
+				requestUrl,
+				responseUrl: requestUrl,
+				responseOk: true,
+				body: { ok: true, return: '/\\evil.com' },
+				pageOrigin
+			})
+		).toEqual({ kind: 'navigate', path: '/' });
+		expect(
+			oauthCallbackTarget({
+				requestUrl,
+				responseUrl: requestUrl,
+				responseOk: true,
+				body: { ok: true, return: '/usage?range=7d' },
+				pageOrigin
+			})
+		).toEqual({ kind: 'navigate', path: '/usage?range=7d' });
+		expect(
+			oauthCallbackTarget({
+				requestUrl,
+				responseUrl: 'https://evil.com/oauth/callback?code=c&state=s',
+				responseOk: true,
+				body: { ok: true, return: '/usage' },
+				pageOrigin
+			})
+		).toEqual({ kind: 'failed' });
+		expect(
+			oauthCallbackTarget({
+				requestUrl,
+				responseUrl: requestUrl,
+				responseOk: false,
+				body: { ok: true, return: '/usage' },
+				pageOrigin
+			})
+		).toEqual({ kind: 'failed' });
 	});
 
 	it('isValidLoopbackRedirectUri accepts loopback http(s) only', () => {
@@ -148,6 +206,9 @@ describe('apiGet', () => {
 		expect(isValidLoopbackRedirectUri('https://localhost:9/')).toBe(true);
 		expect(isValidLoopbackRedirectUri('https://example.com/cb')).toBe(false);
 		expect(isValidLoopbackRedirectUri('')).toBe(false);
+		expect(isValidLoopbackRedirectUri('http://2130706433/cb')).toBe(false);
+		expect(isValidLoopbackRedirectUri('http://evil.com%2f@127.0.0.1/cb')).toBe(false);
+		expect(isValidLoopbackRedirectUri('http://127.0.0.1\\@evil.com/cb')).toBe(false);
 	});
 
 	it('names a non-JSON 200 (a static host without the API) as a connection problem', async () => {

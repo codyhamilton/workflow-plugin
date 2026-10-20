@@ -34,8 +34,20 @@ export function isInvestigationQuery(params: URLSearchParams): boolean {
 	return ask !== null && ask !== '';
 }
 
+/** IANA zone names only. A query `tz` is attacker-controlled and is passed to `Intl`. */
+function safeTimeZone(tz: string): string | undefined {
+	if (tz.length === 0 || tz.length > 100 || !/^[\w+\-/]+$/.test(tz)) return undefined;
+	try {
+		Intl.DateTimeFormat(undefined, { timeZone: tz });
+		return tz;
+	} catch {
+		return undefined;
+	}
+}
+
 function parseWindow(params: URLSearchParams): AggregateWindow | undefined {
-	const tz = params.get('tz');
+	const tzRaw = params.get('tz');
+	const tz = tzRaw ? safeTimeZone(tzRaw) : undefined;
 	const range = params.get('range');
 	const from = params.get('from');
 	const to = params.get('to');
@@ -51,7 +63,9 @@ function parseWindow(params: URLSearchParams): AggregateWindow | undefined {
 		if (to) window.to = to;
 		return window;
 	}
-	return tz ? window : undefined;
+	// A missing range is the same default as the page URL codec: the relative 30d preset.
+	window.preset = '30d';
+	return window;
 }
 
 /** Omit empty include/exclude so a request round-trips without blank filter objects. */

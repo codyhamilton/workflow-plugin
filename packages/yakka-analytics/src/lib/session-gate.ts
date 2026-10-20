@@ -1,4 +1,4 @@
-import { BASE_KEY, TOKEN_KEY, type MeResponse } from './api';
+import { BASE_KEY, safeReturnPath, TOKEN_KEY, type MeResponse } from './api';
 
 function readStorage(key: string): string {
 	try {
@@ -26,6 +26,23 @@ const STAY_PATHS = new Set(['/login', '/oauth/callback', '/settings']);
 
 export function isAuthStayPath(pathname: string): boolean {
 	return STAY_PATHS.has(pathname);
+}
+
+/**
+ * Whether the layout may mount route children.
+ * `/login`, `/oauth/callback`, and `/settings` do not wait on `GET /v1/me`: those
+ * pages are how a person signs in or replaces a base URL that never answers.
+ * Every other route waits until the remembered result says stay, so a redirect
+ * does not also start analytics.
+ */
+export function routeAllowsChildren(
+	pathname: string,
+	ready: boolean,
+	decision: GateAfterMe | null
+): boolean {
+	if (isAuthStayPath(pathname)) return true;
+	if (!ready || decision === null) return false;
+	return decision === 'stay';
 }
 
 export type MeFetchResult =
@@ -62,7 +79,7 @@ export function decideAfterMeFetch(params: {
 		if (bearer !== '' && configuredBase !== '') {
 			return 'stay';
 		}
-		return { login: pathname + search };
+		return { login: safeReturnPath(pathname + search) ?? '/' };
 	}
 
 	return 'stay';

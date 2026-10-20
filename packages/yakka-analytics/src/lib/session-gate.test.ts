@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	decideAfterMeFetch,
+	routeAllowsChildren,
 	shouldNavigateToProfile,
 	type MeFetchResult
 } from './session-gate';
@@ -95,6 +96,28 @@ describe('decideAfterMeFetch', () => {
 	it('non-401 fetchMe failure stays', () => {
 		expect(decide({ me: { kind: 'other' } })).toBe('stay');
 		expect(decide({ me: { kind: 'http', status: 500, message: 'err' } })).toBe('stay');
+	});
+
+	it('401 login return drops a path the URL parser would send off-origin', () => {
+		expect(decide({ pathname: '/\\evil.com', search: '', me: me401, bearer: '' })).toEqual({ login: '/' });
+		expect(decide({ pathname: '/usage', search: '?range=7d', me: me401, bearer: '' })).toEqual({
+			login: '/usage?range=7d'
+		});
+	});
+});
+
+describe('routeAllowsChildren', () => {
+	it('sign-in, callback, and settings render before /v1/me settles', () => {
+		expect(routeAllowsChildren('/login', false, null)).toBe(true);
+		expect(routeAllowsChildren('/oauth/callback', false, null)).toBe(true);
+		expect(routeAllowsChildren('/settings', false, null)).toBe(true);
+	});
+
+	it('other routes wait for a stay decision', () => {
+		expect(routeAllowsChildren('/', false, null)).toBe(false);
+		expect(routeAllowsChildren('/profile', false, null)).toBe(false);
+		expect(routeAllowsChildren('/', true, 'stay')).toBe(true);
+		expect(routeAllowsChildren('/', true, { login: '/' })).toBe(false);
 	});
 });
 

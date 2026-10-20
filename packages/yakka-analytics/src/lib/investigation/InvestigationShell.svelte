@@ -16,6 +16,7 @@
 	} from '$lib/analysis/chart-frame';
 	import { isCollectorMode } from '$lib/api';
 	import { PRESETS } from '$lib/presets';
+	import { savedAnalysisOwner } from '$lib/saved-analysis';
 	import { tenantNameFromMe } from '$lib/session-gate';
 	import { sessionGate } from '$lib/session-gate.svelte';
 	import { Superseded } from '$lib/query';
@@ -45,6 +46,9 @@
 
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	const sessionTenant = $derived(isCollectorMode() ? tenantNameFromMe(sessionGate.me) : null);
+	const savedOwner = $derived(
+		sessionGate.me?.kind === 'ok' ? savedAnalysisOwner(sessionGate.me.body.github_id) : ''
+	);
 	const sessionReady = $derived(sessionGate.ready);
 
 	let primary = $state<AggregateResult | null>(null);
@@ -318,7 +322,7 @@
 			{tz}
 		/>
 	{:else if activeTool === 'saved' && request}
-		<SavedAnalysisTool {request} onOpen={openSavedSpec} />
+		<SavedAnalysisTool {request} owner={savedOwner} onOpen={openSavedSpec} />
 	{/if}
 </div>
 

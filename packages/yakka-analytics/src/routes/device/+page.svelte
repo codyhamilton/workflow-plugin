@@ -8,13 +8,15 @@
 		isCollectorMode,
 		isValidLoopbackRedirectUri,
 		oauthLoginPath,
+		safeReturnPath,
 		type MeResponse
 	} from '$lib/api';
 	import { IdentityPanel } from '$lib/analysis';
 
 	const deviceState = $derived(page.url.searchParams.get('state') ?? '');
-	const redirectUri = $derived(page.url.searchParams.get('redirect_uri') ?? '');
-	const oauthReturn = $derived(page.url.pathname + page.url.search);
+	const redirectParam = $derived(page.url.searchParams.get('redirect_uri') ?? '');
+	const redirectUri = $derived(isValidLoopbackRedirectUri(redirectParam) ? redirectParam : '');
+	const oauthReturn = $derived(safeReturnPath(page.url.pathname + page.url.search) ?? '');
 	const loginHref = $derived(oauthLoginPath(page.url.hostname, oauthReturn));
 	const authorizeAction = $derived(deviceAuthorizeAction(page.url.hostname));
 
