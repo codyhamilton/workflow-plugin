@@ -130,3 +130,17 @@ Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the Data
 
 1. `tests/e2e/shell.spec.ts` "dashboards shares filter chrome" does not find `trends-chart`, and "an ignored-filter notice" does not find `notice-ignored`. Both fail on `af0b6d2`, before phase 2, and on this phase's tree. No brief amendment.
 2. `src/lib/aggregate.ts` calls `unionMeta` with a `Conversations` value and an `Executions` value. `tsc --noEmit` reports TS2559: those types share no properties with `MetaFields`. `aggregate.test.ts` builds a `ConversationDetail` whose `totals` includes `hook_events` (TS2353). `npm test` does not typecheck, and those tests pass. Design 7 records that `svelte-check` is not installed. No brief amendment.
+
+## Phase 4 — Landing trend view
+
+Tool: Cursor (Grok 4.7 orchestrator, Composer workers).
+Run: https://cursor.com/agents/bc-acee832e-e24a-5847-9bc4-bee3e19a322f
+Started: 2026-10-20T17:10:42Z
+
+Approach: known. One unit: one route and one picture. The chart frame and the aggregation boundary already exist. Refine skipped; the brief is authored inline. Slug from the plan folder `17-analytics-dashboard-redesign`: `analytics-dashboard-redesign`.
+
+Phase 3 carried items are not absorbed here. The two `shell.spec.ts` failures predate phase 2 and do not touch this phase's outcome. The `aggregate.ts` type errors are in a module this phase calls and does not edit. They stay carried. No brief amendment. No bounce.
+
+Package boundary stays `packages/yakka-analytics`. Assumption 1 stands: two `ask: trend` results, measures `hook_events` and `cost_usd`, same window and bucket. The investigation control is phase 5.
+
+Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/4-01-landing-trend.md`
