@@ -96,23 +96,6 @@ func (g *deviceGrants) admitCodeLocked(ip string, now time.Time) error {
 	return nil
 }
 
-// unknownBlocked reports whether the session has used up its unknown-code attempts. Checked before the lookup.
-func (g *deviceGrants) unknownBlocked(sessionID string) bool {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	now := g.now()
-	hits := recent(g.limits.unknownHits[sessionID], now, g.limits.unknownWindow)
-	return len(hits) >= g.limits.unknownMax
-}
-
-// recordUnknown counts one unknown-code attempt for the session.
-func (g *deviceGrants) recordUnknown(sessionID string) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	now := g.now()
-	g.limits.unknownHits[sessionID] = append(recent(g.limits.unknownHits[sessionID], now, g.limits.unknownWindow), now)
-}
-
 // deviceClientIP is Fly-Client-IP only when FLY_APP_NAME is set and the header parses, else the connection's remote address.
 // X-Forwarded-For is never trusted.
 func deviceClientIP(r *http.Request) string {

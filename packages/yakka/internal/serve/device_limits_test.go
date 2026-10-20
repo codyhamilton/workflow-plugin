@@ -3,6 +3,7 @@ package serve
 import (
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -139,6 +140,37 @@ func TestDeviceAuthorizeUnknownCodeLimit(t *testing.T) {
 	cr = e.requestCode()
 	if c, b := e.authorize(`{"user_code":"` + cr.UserCode + `","action":"deny"}`); c != 200 {
 		t.Fatalf("valid after window: %d %s", c, b)
+	}
+}
+
+func TestDeviceAuthorizeUnknownCodeBurst(t *testing.T) {
+	e := newDeviceEnv(t)
+	const n = 40
+	bad := `{"user_code":"BBBB-BBBB","action":"deny"}`
+	codes := make([]int, n)
+	var wg sync.WaitGroup
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			defer wg.Done()
+			c, _, _ := doWithCookies(t, e.h, "POST", "/v1/device/authorize", e.origin, bad, e.sess)
+			codes[i] = c
+		}(i)
+	}
+	wg.Wait()
+	n404, n429 := 0, 0
+	for _, c := range codes {
+		switch c {
+		case 404:
+			n404++
+		case 429:
+			n429++
+		default:
+			t.Fatalf("status %d", c)
+		}
+	}
+	if n404 != deviceUnknownPerSession || n429 != n-deviceUnknownPerSession {
+		t.Fatalf("burst: %d unknown and %d limited, want %d and %d", n404, n429, deviceUnknownPerSession, n-deviceUnknownPerSession)
 	}
 }
 

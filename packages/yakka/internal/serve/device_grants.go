@@ -121,17 +121,26 @@ func (g *deviceGrants) create(deviceCode, clientIP string) (string, error) {
 	return formatUserCode(norm), nil
 }
 
-// decide sweeps, then runs under the table lock with that grant; it is not called for an unknown, expired or decided code.
-func (g *deviceGrants) decide(userCode string, decide func(gr *deviceGrant) error) (found bool, err error) {
+// decide sweeps, applies the per-session unknown-code limit, then runs under the table lock.
+// The limit check, the lookup and recording an unknown attempt share one lock, so a burst of
+// requests cannot pass the cap. A session at the limit is blocked and that attempt is not
+// recorded. An unknown, expired or already decided code is one unknown attempt. The callback
+// runs only for a pending grant.
+func (g *deviceGrants) decide(sessionID, userCode string, decide func(gr *deviceGrant) error) (found, blocked bool, err error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	now := g.now()
 	g.sweepLocked(now)
+	hits := recent(g.limits.unknownHits[sessionID], now, g.limits.unknownWindow)
+	if len(hits) >= g.limits.unknownMax {
+		return false, true, nil
+	}
 	gr := g.byUser[normaliseUserCode(userCode)]
 	if gr == nil || gr.status != grantPending {
-		return false, nil
+		g.limits.unknownHits[sessionID] = append(hits, now)
+		return false, false, nil
 	}
-	return true, decide(gr)
+	return true, false, decide(gr)
 }
 
 type pollResult int

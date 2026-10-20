@@ -146,12 +146,8 @@ func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, s
 			return
 		}
 	}
-	if s.grants.unknownBlocked(sess.ID) {
-		writeJSON(w, 429, map[string]string{"error": "rate_limited"})
-		return
-	}
 	var verr error
-	found, _ := s.grants.decide(body.UserCode, func(gr *deviceGrant) error {
+	found, blocked, _ := s.grants.decide(sess.ID, body.UserCode, func(gr *deviceGrant) error {
 		if deny {
 			gr.status = grantDenied
 			return nil
@@ -162,8 +158,11 @@ func (s *Server) handleDeviceAuthorize(w http.ResponseWriter, r *http.Request, s
 		gr.status, gr.tenant, gr.scope, gr.expiresAt, gr.githubID = grantApproved, body.Tenant, body.Scope, exp.UTC(), sess.GitHubID
 		return nil
 	})
+	if blocked {
+		writeJSON(w, 429, map[string]string{"error": "rate_limited"})
+		return
+	}
 	if !found {
-		s.grants.recordUnknown(sess.ID)
 		writeJSON(w, 404, map[string]string{"error": "unknown_code"})
 		return
 	}
