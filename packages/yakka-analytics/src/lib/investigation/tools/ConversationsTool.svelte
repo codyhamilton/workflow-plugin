@@ -64,7 +64,8 @@
 		'tokens_cache_read',
 		'tokens_cache_write',
 		'tokens_reasoning',
-		'unpriced_calls'
+		'unpriced_calls',
+		'cost_usd'
 	] as const satisfies readonly (keyof Totals)[];
 
 	const windowTotal = (t: Totals, k: keyof Totals) => {

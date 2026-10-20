@@ -54,23 +54,37 @@
 	let primary = $state<AggregateResult | null>(null);
 	let companionCost = $state<TrendFrameData | null>(null);
 	let toolOverride = $state<ExplorationToolId | null>(null);
+	let toolOverrideQuery = $state<string | null>(null);
 
 	const queryString = $derived(page.url.search);
 
-	const request = $derived.by(() => {
+	const parsed = $derived.by(() => {
 		try {
 			const params = new URLSearchParams(queryString.replace(/^\?/, ''));
-			const parsed = parseInvestigationRequest(params);
-			return sessionTenant ? { ...parsed, tenant: sessionTenant } : parsed;
+			const body = parseInvestigationRequest(params);
+			const withZone = { ...body, window: { ...body.window, tz: body.window?.tz ?? tz } };
+			return {
+				request: sessionTenant ? { ...withZone, tenant: sessionTenant } : withZone,
+				error: null as unknown
+			};
 		} catch (e) {
-			setError(e);
-			return null;
+			return { request: null, error: e as unknown };
 		}
+	});
+
+	const request = $derived(parsed.request);
+
+	$effect(() => {
+		if (parsed.error) setError(parsed.error);
 	});
 
 	const urlState = $derived(request ? requestToUrlState(request) : null);
 	const activeTool = $derived(
-		toolOverride ?? (request ? toolForAsk(request.ask) : 'explore')
+		toolOverride && toolOverrideQuery === queryString
+			? toolOverride
+			: request
+				? toolForAsk(request.ask)
+				: 'explore'
 	);
 
 	const ignored = $derived(ignoredFilters(primary));
@@ -88,9 +102,11 @@
 		if (!request) return;
 		if (tool === 'saved') {
 			toolOverride = 'saved';
+			toolOverrideQuery = queryString;
 			return;
 		}
 		toolOverride = null;
+		toolOverrideQuery = null;
 		commit(switchTool(request, tool));
 	}
 
@@ -151,7 +167,7 @@
 		if (!primary || primary.ask !== 'trend') return null;
 		const ask = request?.ask;
 		if (!ask || ask.ask !== 'trend') return null;
-		return trendFrame(ask.measure, ask.bucket, primary, ask.dim);
+		return trendFrame(ask.measure, ask.bucket, primary, ask.dim, tz);
 	});
 
 	const breakdownData = $derived.by((): BreakdownFrameData | null => {
@@ -194,7 +210,7 @@
 						{ now }
 					);
 					if (!live) return;
-					companionCost = cost.ask === 'trend' ? trendFrame('cost_usd', 'day', cost) : null;
+					companionCost = cost.ask === 'trend' ? trendFrame('cost_usd', 'day', cost, undefined, tz) : null;
 				} else {
 					companionCost = null;
 				}
@@ -293,7 +309,11 @@
 		{#if companionCost}
 			<section class="chart">
 				<span class="label">{companionCost.measure}</span>
-				<TrendChart data={companionCost} testid="investigation-trend-cost_usd" />
+				<TrendChart
+					data={companionCost}
+					testid="investigation-trend-cost_usd"
+					onbrushend={onBrushEnd}
+				/>
 			</section>
 		{/if}
 	{:else if activeTool === 'usage' && request}

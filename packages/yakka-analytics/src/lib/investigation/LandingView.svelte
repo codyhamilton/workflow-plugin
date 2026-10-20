@@ -21,7 +21,7 @@
 	function openInvestigation() {
 		const req = {
 			...(sessionTenant ? { tenant: sessionTenant } : {}),
-			window: { tz },
+			window: { preset: '30d', tz },
 			ask: { ask: 'trend' as const, measure: 'hook_events', bucket: 'day' as const }
 		};
 		const qs = investigationRequestToSearch(req).toString();
@@ -38,7 +38,9 @@
 		};
 
 		const tenant = sessionTenant;
-		const base = tenant ? { tenant, window: { tz } } : { window: { tz } };
+		const base = tenant
+			? { tenant, window: { preset: '30d' as const, tz } }
+			: { window: { preset: '30d' as const, tz } };
 
 		(async () => {
 			const now = new Date();
@@ -52,7 +54,7 @@
 				);
 				if (!live) return;
 				clearError();
-				hookEvents = hook.ask === 'trend' ? trendFrame('hook_events', 'day', hook) : null;
+				hookEvents = hook.ask === 'trend' ? trendFrame('hook_events', 'day', hook, undefined, tz) : null;
 
 				const cost = await aggregate(
 					{
@@ -63,7 +65,7 @@
 				);
 				if (!live) return;
 				clearError();
-				costUsd = cost.ask === 'trend' ? trendFrame('cost_usd', 'day', cost) : null;
+				costUsd = cost.ask === 'trend' ? trendFrame('cost_usd', 'day', cost, undefined, tz) : null;
 			} catch (e) {
 				fail(e);
 			}

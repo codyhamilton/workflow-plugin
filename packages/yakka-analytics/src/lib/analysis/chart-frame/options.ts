@@ -6,9 +6,55 @@ import type {
 	DistributionFrameData,
 	DistributionMeasure,
 	QualityFrameData,
-	TrendFrameData
+	TrendFrameData,
+	TrendPoint,
+	TrendSeries
 } from './types';
 import { type AnalysisTokens, seriesColor } from './tokens';
+
+/** `/query` measures whose unit is `count`. Token and usd series stay sparse. */
+const COUNT_MEASURES = new Set([
+	'hook_events',
+	'conversations',
+	'artifact_versions',
+	'distinct_content',
+	'commits',
+	'rejections',
+	'model_calls',
+	'unpriced_calls'
+]);
+
+function zeroFillCount(data: TrendFrameData): TrendSeries[] {
+	const series = data.series ?? [];
+	if (!COUNT_MEASURES.has(data.measure) || !data.from || !data.to || !data.tz) return series;
+	if (Number.isNaN(data.from.getTime()) || Number.isNaN(data.to.getTime())) return series;
+	const slots = bucketStarts(data.tz, data.bucket, data.from, data.to).map((ms) => ({
+		ms,
+		t: instantKey(data.tz!, new Date(ms))
+	}));
+	if (slots.length === 0) return series;
+	const slotMs = new Set(slots.map((s) => s.ms));
+	return series.map((s) => {
+		const byT = new Map(s.points.map((p) => [p.t, p.v]));
+		const byMs = new Map<number, number>();
+		for (const p of s.points) {
+			const ms = Date.parse(p.t);
+			if (!Number.isNaN(ms)) byMs.set(ms, p.v);
+		}
+		const used = new Set<string>();
+		const points: TrendPoint[] = slots.map(({ ms, t }) => {
+			used.add(t);
+			if (byT.has(t)) return { t, v: byT.get(t)! };
+			if (byMs.has(ms)) return { t, v: byMs.get(ms)! };
+			return { t, v: 0 };
+		});
+		for (const p of s.points) {
+			const ms = Date.parse(p.t);
+			if (!used.has(p.t) && (Number.isNaN(ms) || !slotMs.has(ms))) points.push(p);
+		}
+		return { name: s.name, points };
+	});
+}
 
 const TIME_BRUSH = {
 	brush: {
@@ -49,15 +95,26 @@ export function distributionBinLabel(measure: DistributionMeasure, lo: number, h
 }
 
 export function trendOption(data: TrendFrameData, t: AnalysisTokens) {
-	const series = (data.series ?? []).map((s, i) => {
+	const series = zeroFillCount(data).map((s, i) => {
 		const color = seriesColor(t, i);
+		const drillable = (key: string) =>
+			data.breakdownDim ? isDrillableMark(data.breakdownDim, key) : false;
 		return {
 			name: s.name,
 			type: 'line' as const,
 			showSymbol: false,
+			triggerEvent: data.breakdownDim ? ('line' as const) : false,
 			lineStyle: { width: 2, color },
 			itemStyle: { color },
-			data: (s.points ?? []).map((pt) => [pt.t, pt.v] as [string, number])
+			data: (s.points ?? []).map((pt) => {
+				if (!data.breakdownDim) return [pt.t, pt.v] as [string, number];
+				return {
+					value: [pt.t, pt.v] as [string, number],
+					key: s.name,
+					dim: data.breakdownDim,
+					clickable: drillable(s.name)
+				};
+			})
 		};
 	});
 	const showLegend = series.length > 1;
@@ -65,7 +122,12 @@ export function trendOption(data: TrendFrameData, t: AnalysisTokens) {
 		animation: false,
 		backgroundColor: 'transparent',
 		grid: { left: 48, right: 24, top: showLegend ? 48 : 24, bottom: 32, containLabel: false },
-		legend: { show: showLegend, top: 0, textStyle: { color: t.text } },
+		legend: {
+			show: showLegend,
+			top: 0,
+			textStyle: { color: t.text },
+			...(data.breakdownDim ? { selectedMode: false as const } : {})
+		},
 		tooltip: { trigger: 'axis' },
 		...TIME_BRUSH,
 		xAxis: {

@@ -49,6 +49,7 @@
 
 	let el: HTMLDivElement;
 	let chart: echarts.ECharts | null = null;
+	let currentOption: unknown = null;
 
 	function modifiers(native: MouseEvent | undefined): ChartPointerModifiers {
 		return {
@@ -76,7 +77,28 @@
 		});
 	}
 
+	function drillMark(
+		mark: { key?: string; dim?: string; clickable?: boolean } | undefined,
+		native: MouseEvent | undefined,
+		raw: unknown
+	) {
+		if (!mark?.clickable || !mark.dim || mark.key === undefined) return;
+		ondrill?.({ dim: mark.dim, value: mark.key, modifiers: modifiers(native), raw });
+	}
+
+	function drillSeries(seriesName: string | undefined, native: MouseEvent | undefined, raw: unknown) {
+		if (!seriesName || !currentOption || typeof currentOption !== 'object') return;
+		const series = (currentOption as { series?: { name?: string; data?: unknown[] }[] }).series;
+		const match = series?.find((s) => s.name === seriesName);
+		const sample = match?.data?.find(
+			(d): d is { key?: string; dim?: string; clickable?: boolean } =>
+				!!d && typeof d === 'object' && !Array.isArray(d)
+		);
+		drillMark(sample, native, raw);
+	}
+
 	function applyOption(option: unknown) {
+		currentOption = option;
 		if (!chart) return;
 		ready = false;
 		chart.setOption(option as echarts.EChartsCoreOption, { notMerge: true, lazyUpdate: false });
@@ -118,13 +140,13 @@
 		chart.on('click', (params) => {
 			const data = params.data as { key?: string; dim?: string; clickable?: boolean } | undefined;
 			const native = (params?.event?.event ?? params?.event) as MouseEvent | undefined;
-			if (!data?.clickable || !data.dim || data.key === undefined) return;
-			ondrill?.({
-				dim: data.dim,
-				value: data.key,
-				modifiers: modifiers(native),
-				raw: params
-			});
+			if (data && !Array.isArray(data) && 'clickable' in data) {
+				drillMark(data, native, params);
+				return;
+			}
+			if (params.componentType === 'series' || params.componentType === 'legend') {
+				drillSeries(params.seriesName || params.name, native, params);
+			}
 		});
 		const ro = new ResizeObserver(() => chart?.resize());
 		ro.observe(el);
