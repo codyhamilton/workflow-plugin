@@ -95,3 +95,17 @@ Dispatched 2026-10-21T00:52+10:00 after the brief commit (`ddd8922`). Outcome: l
 Status: open. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 3`, so this phase only).
 
 The phase has no Units list. Python client rewrite plus Go login deletion is one worker's work, so one brief was authored inline: `briefs/phase3-client-login.md`, committed before dispatch. Worker: Sonnet.
+
+### Unit `phase3-client-login`
+
+Dispatched 2026-10-21 after the brief commit (`44cfecd`). Outcome: landed at 4842779. Worker report: `reports/phase3-client-login.md`.
+
+- Built: `login start`, `login wait` and a composed `login` in `yakka.py`; default endpoint `https://api.yakka.build`; loopback code removed; `internal/login` deleted; Go `login` exits 1 naming the plugin wrapper.
+- Deviations, from the worker report: the Go usage string drops `login`; `wait` sleeps one interval before the first poll; `resolve_endpoint` (login-only) now returns the default instead of an error; network errors, 429 and 5xx are retried until expiry.
+
+### Verification (Phase 3), in progress
+
+- `test_login.py`: 17 passed (run by the runner, from `plugins/yakka/client`: `python3 -m unittest test_login`).
+- Go `build`, `vet` and `./internal/...` pass. `./cmd/...` fails only `TestHalfSetEnvRefusal` (port 8770 held by an unrelated process); it fails the same way on master `6576c04`.
+- grep for the loopback names finds nothing; `login wait` with an empty config exits 1 with one stderr line.
+- `tools/release/test_release.py`: 9 of 10 pass. `test_7_build_sh` fails; with the system `go` it failed on the Go version, and with `/home/codyh/.local/go/bin` first it still failed. The cause is not yet known and a re-run to read it was blocked by the permission classifier. The phase is not closed.
