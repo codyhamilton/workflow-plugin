@@ -279,11 +279,14 @@ on a compacted copy of the real ledger.
   brush-to-zoom on any time-axis chart. Presets stay relative in a shared URL. Times display in the
   browser's zone, which is sent as `tz`. Each chart uses the finest bucket within the cap unless one
   is set.
-- **Data layer.** One client module issues every request. It debounces filter changes, aborts
+- **Data layer.** Report pages still use one client module that debounces filter changes, aborts
   superseded requests and caches responses for the session by normalised query, so the UI never
   renders a superseded result. It shows `partial` and `ignored_filters` as notices. The server has
   no exclude parameter, so an exclude chip is sent as the complement of the facet values; an
-  exclude on `conversation_id` is unsupported and marked so.
+  exclude on `conversation_id` is unsupported and marked so. The landing view and interactive
+  analysis read through `aggregate` in `packages/yakka-analytics`: one request in and one result
+  out. Those callers do not name `/v1/analytics/*` or `GET /v1/baselines`; the boundary may
+  compose those reads.
 - **Drill-down.** Every chart mark and table row for a shared-filter dimension value applies it as a
   filter (shift-click excludes it). `__other__`, the empty key, `hour_of_day`, `weekday`, and check
   names are not clickable. Active filters show as removable chips. Any conversation ID opens its
