@@ -57,3 +57,11 @@ Proceed. Two units, sequential. `2-02` depends on `2-01`. Nothing runs alongside
 - `2-02` Chart frame — `briefs/2-02-chart-frame.md`
 
 `artifact_feedback` on both briefs: unreachable. Yakka MCP failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). The refine worker also reported the `yakka.py` path missing. No check was flagged because the service did not answer.
+
+### 2-01-analysis-shell
+
+- Built: the analysis frame and non-solarized type, color, and space tokens. The document root uses them. Legacy report routes keep the solarized sheet inside a legacy wrapper. `/login`, `/profile`, `/settings`, `/device`, and `/oauth/callback` use the same frame. The report nav stays in the shell.
+- Surfaces: `packages/yakka-analytics/src/lib/analysis/`, `src/routes/+layout.svelte`, `src/lib/theme.css`, the identity and login routes, `tests/e2e/analysis-shell.spec.ts`, `tests/e2e/shell.spec.ts`, `docs/design/07-analytics-site.md` Theme.
+- Deviations: the worker reported none. Two `shell.spec.ts` cases fail here and on the parent commit `af0b6d2`: `dashboards shares filter chrome` never finds `trends-chart`, and `an ignored-filter notice` never finds `notice-ignored`. Not introduced by this unit.
+- Agent: Composer (`composer-2.5`), subagent `bc-10682fdb-8eab-571a-9f73-4246b7b5b6eb`. The harness did not report tool turns or final context. Commit `06ae01d`. Status reported: done with concerns.
+- Checked: `npm test` 205 passed. `analysis-shell.spec.ts` 2 passed. `session.spec.ts` passed. Logged-in `/`, `/login`, `/profile`, `/settings`, `/device`, and `/oauth/callback` share computed `--bg` and `--text`, and that background is neither `#002b36` nor `#fdf6e3`. The report nav (Trends, Builder, Dashboards) is in the shell.
