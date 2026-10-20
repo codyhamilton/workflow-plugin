@@ -22,7 +22,7 @@ export async function useServe(page: Page, which: 'local' | 'keyed') {
 			if (k) localStorage.setItem('yakka-analytics-key', k as string);
 			if (localStay) localStorage.setItem('yakka-analytics-key', localStay as string);
 		},
-		[which === 'local' ? [base, key, 'e2e-local-stay'] : [base, key, null]]
+		which === 'local' ? [base, key, 'e2e-local-stay'] : [base, key, null]
 	);
 }
 

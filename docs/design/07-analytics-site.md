@@ -23,30 +23,21 @@ pasted bearer from `/settings`. Aggregation stays in SQLite; the browser receive
 one capped tabular slice. The site never receives hook bodies. Analytics is HTTP for a person, not an MCP tool: a dashboard does not
 change what the agent does in a run (principle 2).
 
-| Route | Report | Lens |
+| Route | Surface | Lens |
 |---|---|---|
-| `/` | Landing | Two `ask: trend` charts, measures `hook_events` and `cost_usd`, same window and bucket, over the preselected window. Not the nine KPI tiles, grouped counts, or weekday-by-hour heatmap. |
-| `/trends` | Time series | volumes by bucket, split by one dimension; brush to zoom |
-| `/usage` | Usage and cost | tokens and cost by model, harness and repo, plus the cost trend |
-| `/repos` | Repo comparison | the same volumes per `repo_id` |
-| `/hooks` | Hook usage | harness → `norm_event` and `norm_event` → tool treemaps |
-| `/quality` | Score distributions | per check, for one artifact kind, as box plots beside the all-time baseline |
-| `/executions` | Design → brief → commit → report | derived execution shape, per brief, as a sankey and a table |
-| `/conversations` | Agent runs | one row per `conversation_id`, virtualised |
-| `/conversation` | One run | timeline of its events with token and cost totals |
-| `/explore` | Pivot | the capped fact table in Perspective |
-| `/builder` | Chart builder | any measure, up to two dimensions and a bucket |
-| `/dashboards` | Dashboards | ordered grids of saved views |
+| `/` | Landing and investigation | With an empty query string, two `ask: trend` charts for `hook_events` and `cost_usd`, same window and bucket. With investigation query params (`ask`, measures, dimensions, bucket, window, shared filters), the interactive analysis shell: trend and breakdown charts, usage, quality, conversations, and saved analyses as tools — not the nine KPI tiles or a twelve-tile dashboard grid. |
+| `/trends`, `/usage`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/conversation`, `/explore`, `/builder`, `/dashboards` | Retired report URLs | Paths remain routable but render a short retirement notice; they do not mount the pre-redesign report UIs. The jobs those pages covered are reached from investigation on `/` (breakdowns, tools, pasted URLs). There is no dedicated `/explore` pivot or multi-tile dashboard. |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
 | `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
-Every report except `/settings` and `/login` shares one filter set held in the page URL: window,
+Investigation on `/` holds one filter set and analysis spec in the page URL: window presets or
+`from`/`to`, `ask` and chart fields (`measure`, `dim`, `bucket`, `kind`, …), and shared dimensions
 `repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`,
-`conversation_id`. The URL is the view: filters, window, active view and every chart configuration
-(measure, dimensions, bucket, chart type, top) serialise into the query string, so pasting it
-reproduces the view, and filters survive navigation between views. Saved views and dashboards stay in
-`localStorage`; the collector knows the signed-in GitHub user via the session, not via a server-side
-view store.
+`conversation_id` (including exclude keys `x.<dim>`). Pasting the query string reproduces the
+analysis. **Saved analyses** live in `localStorage` under `yakka-analytics-saved-analysis` as
+`{"id","name","spec"}` where `spec` is the same aggregate request shape the URL encodes (not a
+`{report, params}` dashboard tile). The collector knows the signed-in GitHub user via the session,
+not via a server-side view store.
 
 What the request's words mean on the ledger: an **agent** is a `conversation_id`; a **hook** is a
 `hook_event` split by `event` and `payload.tool_name` (no cross-harness tool taxonomy); **build /
@@ -266,12 +257,9 @@ on a compacted copy of the real ledger.
   `yakka-analytics-theme` holds `system`, `light`, or `dark`; an absent key means `system`. The
   document root carries `data-theme="light"` or `data-theme="dark"`. `system` follows
   `prefers-color-scheme` and later OS changes; `light` and `dark` pin the analysis palette. Body
-  type stays `system-ui`. `/`, `/login`, `/profile`, `/settings`, `/device`, and `/oauth/*` use
-  these analysis tokens on the shell and main. Legacy report routes (`/trends`, `/builder`, and the
-  other pre-redesign report paths) still scope the prior solarized sheet (`src/lib/theme.css` under
-  `[data-legacy-theme]`) on filter chrome and page content until the investigation phase replaces
-  them. Each chart has a data-table toggle, and the site works down to 1024 px wide. `/explore`
-  alone loads Perspective (client, viewer, server WASM) and says when the slice is capped. No second
+  type stays `system-ui`. The shell, main, landing, investigation, identity routes, and the retired
+  report stubs all use these analysis tokens on the document root. Each chart has a data-table toggle,
+  and the site works down to 1024 px wide. Perspective and the old `/explore` pivot are retired. No second
   chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill, Grafana,
   Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a second
   always-on service).
@@ -293,22 +281,15 @@ on a compacted copy of the real ledger.
   timeline. `/` does not show those KPI tiles and does not link them to `/conversations`, `/hooks`,
   `/trends`, or `/usage`. The site zero-fills a gap only on count series (`/query` measures whose unit is a
   count, and the executions shape series); a score series leaves the gap.
-- **Chart builder.** `/builder` is driven only by `/v1/analytics/schema`: any measure, up to two
-  dimensions and a bucket. Chart types are line, stacked area, bar, stacked bar, heatmap, treemap
-  and small multiples, offered only where the shape fits; an unsupported pairing cannot be selected.
-  No dimension and bucket `none` renders the scalar.
-- **Saved views and dashboards.** Both live in `localStorage` under the prefix
-  `yakka-analytics-views`. A view is `{"id","name","report","params"}`: `report` is one of
-  `overview`, `trends`, `usage`, `repos`, `hooks`, `quality`, `executions`, `conversations`,
-  `explore`, `builder`; `params` holds that report's chart controls only (`measure`, `dim`, `bucket`,
-  `chart`, `top`, `kind`, `metric`, `group`, `grain`), not the window or shared filters. A dashboard
-  is `{"id","name","tiles":[{"viewId","w"}]}` on a two-column grid (`w` is column span `1` or `2`).
-  At most 12 tiles; add refuses past 12; import keeps the first 12 tiles per dashboard, drops the
-  rest, and states how many were dropped. The dashboard page renders each tile in-document as a
-  component (no iframe); every tile uses the dashboard URL's window and shared
-  filters. Export and import are JSON of these objects. A stored URL whose path is a known report
-  becomes a view (chart keys copied into `params`; window and filter keys are not). Entries whose
-  path is not a known report are dropped, with a count in the notice.
+- **Investigation charts.** Trend and breakdown asks on `/` choose measure, dimension, and bucket
+  from the aggregate boundary; chart kinds follow the analysis frame (line, bar, and related types
+  where the ask fits). Usage, quality, and conversation tools are separate panels in the same shell,
+  not standalone report routes.
+- **Saved analyses.** Named snapshots live in `localStorage` at `yakka-analytics-saved-analysis` as
+  `{"id","name","spec"}` with `spec` an `AggregateRequest` (window, filters, and `ask`). Opening one
+  replaces the investigation URL with that spec. There is no twelve-tile dashboard grid and no
+  `{report, params}` saved-view record for the new tool; legacy `yakka-analytics-views` entries may
+  remain in the browser but are not surfaced in the shell.
 - A response that is not JSON (a static host answering `/v1` with HTML) is a connection error
   pointing at `/settings`.
 

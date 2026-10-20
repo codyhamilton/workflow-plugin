@@ -1,20 +1,8 @@
-/** Report routes that keep solarized tokens on filter chrome and page content until later phases. */
-const LEGACY_REPORT_PREFIXES = [
-	'/trends',
-	'/builder',
-	'/usage',
-	'/repos',
-	'/hooks',
-	'/quality',
-	'/executions',
-	'/conversations',
-	'/conversation',
-	'/explore',
-	'/dashboards'
-] as const;
+/** Report routes retired in phase 5; investigation on `/` replaces them. */
+const LEGACY_REPORT_PREFIXES: readonly string[] = [];
 
-export function isLegacyReportPath(pathname: string): boolean {
-	return LEGACY_REPORT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+export function isLegacyReportPath(_pathname: string): boolean {
+	return LEGACY_REPORT_PREFIXES.some((p) => _pathname === p || _pathname.startsWith(`${p}/`));
 }
 
 /** Routes that use analysis tokens on the document root (shell + main). */

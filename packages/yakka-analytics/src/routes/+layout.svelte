@@ -2,7 +2,6 @@
 	import '$lib/analysis/tokens.css';
 	import '$lib/theme.css';
 	import RouteSurface from '$lib/analysis/RouteSurface.svelte';
-	import { isLegacyReportPath } from '$lib/analysis/routes';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
@@ -11,10 +10,7 @@
 		setThemePreference,
 		type ThemePreference
 	} from '$lib/charts/theme';
-	import FilterBar from '$lib/components/FilterBar.svelte';
-	import FilterChips from '$lib/components/FilterChips.svelte';
 	import Notices from '$lib/components/Notices.svelte';
-	import SaveView from '$lib/components/SaveView.svelte';
 	import { ApiError, fetchMe, isCollectorMode } from '$lib/api';
 	import {
 		decideAfterMeFetch,
@@ -30,22 +26,10 @@
 
 	const nav = [
 		['/', 'Overview'],
-		['/trends', 'Trends'],
-		['/builder', 'Builder'],
-		['/usage', 'Usage & cost'],
-		['/repos', 'Repos'],
-		['/hooks', 'Hooks'],
-		['/quality', 'Quality'],
-		['/executions', 'Executions'],
-		['/conversations', 'Conversations'],
-		['/explore', 'Explore'],
-		['/dashboards', 'Dashboards'],
 		['/profile', 'Profile'],
 		['/settings', 'Settings']
 	];
 
-	// Filters, chips, notices and the save control show everywhere except settings, login, and profile.
-	// embed=1 does not hide the shell.
 	const chrome = $derived(
 		page.url.pathname !== '/settings' &&
 			page.url.pathname !== '/login' &&
@@ -54,23 +38,16 @@
 			!page.url.pathname.startsWith('/oauth/')
 	);
 
-	const legacyReport = $derived(isLegacyReportPath(page.url.pathname));
-
 	const collector = $derived(isCollectorMode());
 	const noTenant = $derived(collector && fetchError.status === 403 && fetchError.message === 'no such tenant');
 
-	// Every link but Settings keeps the current filters in the query string.
 	function navHref(path: string): string {
 		return path === '/settings' || path === '/profile' ? path : path + page.url.search;
 	}
 
-	// Register the view before any child effect runs (`$effect.pre` flushes first), so a notice a
-	// request sets for this view is kept rather than cleared a frame later.
 	const viewKey = $derived(page.url.pathname + page.url.search);
 	$effect.pre(() => setNoticeView(viewKey));
 
-	// A new route or filter starts with a clean error panel and drops notices left by another view;
-	// the notice for the current view is kept (a request for it may set one in the same flush).
 	$effect(() => {
 		page.url.pathname;
 		page.url.search;
@@ -78,7 +55,6 @@
 		pruneNotices();
 	});
 
-	// Session gate: one `GET /v1/me` per document load; children mount after it settles.
 	$effect(() => {
 		let live = true;
 		beginSessionGate();
@@ -195,11 +171,8 @@
 
 	<main>
 		{#if chrome}
-			<RouteSurface legacy={legacyReport}>
-				<FilterBar />
-				<FilterChips />
+			<RouteSurface>
 				<Notices />
-				<SaveView />
 				{#if fetchError.message}
 					<div class="error" role="alert" data-testid="error-panel">
 						<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
