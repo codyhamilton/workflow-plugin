@@ -65,3 +65,28 @@ Proceed. Two units, sequential. `2-02` depends on `2-01`. Nothing runs alongside
 - Deviations: the worker reported none. Two `shell.spec.ts` cases fail here and on the parent commit `af0b6d2`: `dashboards shares filter chrome` never finds `trends-chart`, and `an ignored-filter notice` never finds `notice-ignored`. Not introduced by this unit.
 - Agent: Composer (`composer-2.5`), subagent `bc-10682fdb-8eab-571a-9f73-4246b7b5b6eb`. The harness did not report tool turns or final context. Commit `06ae01d`. Status reported: done with concerns.
 - Checked: `npm test` 205 passed. `analysis-shell.spec.ts` 2 passed. `session.spec.ts` passed. Logged-in `/`, `/login`, `/profile`, `/settings`, `/device`, and `/oauth/callback` share computed `--bg` and `--text`, and that background is neither `#002b36` nor `#fdf6e3`. The report nav (Trends, Builder, Dashboards) is in the shell.
+
+### 2-02-chart-frame
+
+- Built: a presentational chart frame under `src/lib/analysis/chart-frame/` for trend, breakdown, distribution, and quality. It reads analysis tokens, exposes hover, brush-end, and drill callbacks, and does not fetch. The worker chose Apache ECharts 6 (`echarts/core`) inside a new host. It does not import `src/lib/charts/` or mount `EChart.svelte`. The design names no library.
+- Surfaces: `packages/yakka-analytics/src/lib/analysis/chart-frame/`, `src/lib/analysis/chart-frame.test.ts`.
+- Deviations: the worker reported none.
+- Agent: Composer (`composer-2.5`), subagent `bc-046de867-8a40-56a1-9a72-49daf92cef94`. The harness did not report tool turns or final context. Commit `a72034e`. Status reported: done.
+
+`artifact_feedback` on `briefs/2-01-analysis-shell.md`, `briefs/2-02-chart-frame.md`, `reports/2-01-analysis-shell.md`, and `reports/2-02-chart-frame.md`, before close: unreachable. Yakka MCP failed live tool discovery again (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). No check was flagged.
+
+### Phase 2 verification
+
+Re-ran the outcome checks on `a72034e`. Reports were not the check.
+
+- `npm test -- src/lib/analysis/chart-frame`: 8 passed.
+- `npm test`: 213 passed.
+- No import of `src/lib/charts/`, `api.ts`, or `query.ts`, and no `#002b36`, `#fdf6e3`, `#839496`, or `#657b83`, under `src/lib/analysis/chart-frame/`.
+- `npx playwright test tests/e2e/analysis-shell.spec.ts`: 2 passed. Logged-in `/` and `/login` share `--bg` and `--text`. That background is neither `#002b36` nor `#fdf6e3`.
+- The same computed `--bg` and `--text` on `/profile`, `/settings`, `/device`, and `/oauth/callback`. The shell still shows the report nav (Trends, Builder, Dashboards).
+
+Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the Theme paragraph of `docs/design/07-analytics-site.md`.
+
+### Carried
+
+1. `tests/e2e/shell.spec.ts` "dashboards shares filter chrome" does not find `trends-chart`, and "an ignored-filter notice" does not find `notice-ignored`. Both fail on `af0b6d2`, before this phase, and on this phase's tree. No brief amendment.
