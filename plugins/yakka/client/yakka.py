@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import calendar
 import fcntl
 import hashlib
 import http.client
@@ -19,7 +20,6 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from http.server import BaseHTTPRequestHandler, HTTPServer
 from dataclasses import dataclass, field
 from queue import Empty, Queue
 from typing import Any, Callable, List, Optional, Tuple
@@ -2495,17 +2495,8 @@ def cmd_mcp(argv: List[str]) -> int:
 
 # --- login ---
 
-_MISSING_COLLECTOR = (
-    "no collector endpoint (use --endpoint or set endpoint in client config)"
-)
-
-
-@dataclass
-class LoginOptions:
-    Endpoint: str = ""
-    Stderr: Any = None
-    OpenBrowser: Optional[Callable[[str], Optional[BaseException]]] = None
-    Timeout: float = 600.0
+DefaultEndpoint = "https://api.yakka.build"
+_NO_DEVICE_LOGIN = "this endpoint has no device login"
 
 
 def normalize_origin(raw: str) -> Tuple[str, Optional[BaseException]]:
@@ -2524,15 +2515,15 @@ def normalize_origin(raw: str) -> Tuple[str, Optional[BaseException]]:
 
 
 def resolve_endpoint(flag: str) -> Tuple[str, Optional[BaseException]]:
+    """--endpoint, else endpoint in client.toml, else DefaultEndpoint (login only)."""
     flag = flag.strip()
     if flag:
         return normalize_origin(flag)
-    path = Path()
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(Path(), encoding="utf-8") as f:
             data = f.read()
     except FileNotFoundError:
-        return "", OSError(_MISSING_COLLECTOR)
+        return DefaultEndpoint, None
     except OSError as err:
         return "", OSError(f"read config: {err}")
     for line in data.split("\n"):
@@ -2547,69 +2538,7 @@ def resolve_endpoint(flag: str) -> Tuple[str, Optional[BaseException]]:
         if not v:
             continue
         return normalize_origin(v)
-    return "", OSError(_MISSING_COLLECTOR)
-
-
-def _login_random_state() -> Tuple[str, Optional[BaseException]]:
-    try:
-        return os.urandom(16).hex(), None
-    except OSError as err:
-        return "", err
-
-
-def device_page_url(collector: str, state: str, redirect_uri: str) -> str:
-    q = urllib.parse.urlencode({"state": state, "redirect_uri": redirect_uri})
-    base = collector
-    u = urllib.parse.urlparse(collector)
-    if u.scheme == "https" and u.netloc.lower() == "api.yakka.build":
-        base = "https://yakka.build"
-    return base.rstrip("/") + "/device?" + q
-
-
-def _login_exchange(
-    collector: str, code: str, state: str, redirect_uri: str, timeout: float
-) -> Tuple[str, str, Optional[BaseException]]:
-    body = json.dumps(
-        {"code": code, "state": state, "redirect_uri": redirect_uri}
-    ).encode("utf-8")
-    base = _request_base(collector)
-    if base is None:
-        return "", "", OSError("exchange request failed")
-    url = base + "/v1/device/exchange"
-    req = urllib.request.Request(url, data=body, method="POST")
-    req.add_header("Content-Type", "application/json")
-    try:
-        with _urlopen_noredir(req, timeout=timeout) as resp:
-            status = resp.status
-            data = resp.read(65536)
-            if resp.read(1):
-                return "", "", OSError("invalid exchange response")
-    except urllib.error.HTTPError as e:
-        _close_resp(e)
-        return "", "", OSError(f"exchange failed ({e.code})")
-    except Exception:
-        return "", "", OSError("exchange request failed")
-    if status != 200:
-        return "", "", OSError(f"exchange failed ({status})")
-    try:
-        out = json.loads(data.decode())
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return "", "", OSError("invalid exchange response")
-    if not isinstance(out, dict):
-        return "", "", OSError("invalid exchange response")
-    token = out.get("token", "")
-    if not isinstance(token, str) or not token or _bearer_header(token) is None:
-        return "", "", OSError("invalid exchange response")
-    if len(token) > 4096:
-        return "", "", OSError("invalid exchange response")
-    ep = out.get("endpoint", "")
-    if not isinstance(ep, str):
-        ep = ""
-    if ep:
-        ep, nerr = normalize_origin(ep)
-        if nerr is not None:
-            return "", "", OSError("invalid exchange response")
-    return token, ep, None
+    return DefaultEndpoint, None
 
 
 def write_client_config(path: str, endpoint: str, key: str) -> Optional[BaseException]:
@@ -2652,118 +2581,216 @@ def default_open_browser(url: str) -> Optional[BaseException]:
     return None
 
 
-def run_login(opts: LoginOptions) -> int:
-    stderr = opts.Stderr if opts.Stderr is not None else sys.stderr
-    timeout = opts.Timeout if opts.Timeout > 0 else 600.0
-    collector, err = resolve_endpoint(opts.Endpoint)
-    if err is not None:
-        print("yakka login:", err, file=stderr)
-        return 1
-    state, err = _login_random_state()
-    if err is not None:
-        print("yakka login:", err, file=stderr)
-        return 1
+def _pending_path() -> str:
+    return Path() + ".pending"
+
+
+def _rfc3339(ts: float) -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts))
+
+
+def _parse_rfc3339(s: str) -> float:
+    return calendar.timegm(time.strptime(s, "%Y-%m-%dT%H:%M:%SZ"))
+
+
+def _device_post(
+    base: str, path: str, body: dict, timeout: float = 30.0
+) -> Tuple[int, Optional[dict]]:
+    """POST JSON; returns (status, parsed object or None). Status 0 is a network error."""
+    req = urllib.request.Request(
+        base + path, data=json.dumps(body).encode("utf-8"), method="POST"
+    )
+    req.add_header("Content-Type", "application/json")
     try:
-        server = HTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler)
-    except OSError as err:
-        print("yakka login:", err, file=stderr)
-        return 1
-    host, port = server.server_address
-    redirect_uri = f"http://{host}:{port}/callback"
-    device_url = device_page_url(collector, state, redirect_uri)
-    done: Queue[Optional[BaseException]] = Queue(maxsize=1)
-
-    class _CallbackHandler(BaseHTTPRequestHandler):
-        server_version = "yakka"
-        sys_version = ""
-
-        def log_message(self, fmt: str, *args: Any) -> None:
-            pass
-
-        def setup(self) -> None:
-            super().setup()
-            self.connection.settimeout(10)
-
-        def do_GET(self) -> None:
-            peer = self.client_address[0]
-            if peer not in ("127.0.0.1", "::1"):
-                self.send_error(403)
-                return
-            if self.path.split("?", 1)[0] != "/callback":
-                self.send_error(404)
-                return
-            q = urllib.parse.parse_qs(
-                urllib.parse.urlparse(self.path).query, keep_blank_values=True
-            )
-            if (q.get("state") or [""])[0] != state:
-                self.send_error(400, "invalid state")
-                return
-            code = (q.get("code") or [""])[0]
-            if not code or len(code) > 256:
-                self.send_error(400, "missing code")
-                return
-            token, ep, ex_err = _login_exchange(
-                collector, code, state, redirect_uri, min(timeout, 30.0)
-            )
-            if ex_err is not None:
-                done.put(ex_err)
-                self.send_error(502, "exchange failed")
-                return
-            if not ep:
-                ep = collector
-            cfg_path = Path()
-            werr = write_client_config(cfg_path, ep, token)
-            if werr is not None:
-                done.put(werr)
-                self.send_error(500, "config write failed")
-                return
-            body = (
-                "<!DOCTYPE html><html><body><p>Login complete. "
-                "You can close this window.</p></body></html>"
-            )
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.end_headers()
-            self.wfile.write(body.encode("utf-8"))
-            done.put(None)
-
-    server.RequestHandlerClass = _CallbackHandler
-
-    def _serve() -> None:
-        server.serve_forever(poll_interval=0.1)
-
-    th = threading.Thread(target=_serve, daemon=True)
-    th.start()
-    open_fn = opts.OpenBrowser if opts.OpenBrowser is not None else default_open_browser
-    berr = open_fn(device_url)
-    if berr is not None:
-        print("yakka login: open browser:", berr, file=stderr)
-        server.shutdown()
-        return 1
-    deadline = time.monotonic() + timeout
-    exit_code = 1
+        with _urlopen_noredir(req, timeout=timeout) as resp:
+            status = resp.status
+            data = resp.read(65536)
+    except urllib.error.HTTPError as e:
+        status = e.code
+        try:
+            data = e.read(65536)
+        except Exception:
+            data = b""
+        _close_resp(e)
+    except Exception:
+        return 0, None
     try:
-        while time.monotonic() < deadline:
+        out = json.loads(data.decode())
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return status, None
+    return status, out if isinstance(out, dict) else None
+
+
+def _write_pending(info: dict) -> Optional[BaseException]:
+    path = _pending_path()
+    tmp = path + ".tmp"
+    try:
+        os.makedirs(os.path.dirname(path), mode=0o755, exist_ok=True)
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        try:
             try:
-                result = done.get(timeout=0.25)
-            except Empty:
-                continue
-            if result is not None:
-                print("yakka login:", result, file=stderr)
-                exit_code = 1
-            else:
-                print(f"yakka login: wrote {Path()}", file=stderr)
-                exit_code = 0
+                os.fchmod(fd, 0o600)
+            except (AttributeError, NotImplementedError):
+                pass
+            os.write(fd, json.dumps(info).encode("utf-8"))
+        finally:
+            os.close(fd)
+        os.replace(tmp, path)
+    except OSError as err:
+        return err
+    return None
+
+
+def _remove_pending() -> None:
+    try:
+        os.unlink(_pending_path())
+    except OSError:
+        pass
+
+
+def _start(
+    endpoint_flag: str, stdout: Any, stderr: Any, clock: Callable[[], float]
+) -> Tuple[Optional[dict], int]:
+    base, err = resolve_endpoint(endpoint_flag)
+    if err is not None:
+        print("yakka login:", err, file=stderr)
+        return None, 1
+    status, out = _device_post(base, "/v1/device/code", {})
+    if status == 404:
+        print(f"yakka login: {_NO_DEVICE_LOGIN}", file=stderr)
+        return None, 1
+    if status == 0:
+        print("yakka login: could not reach the endpoint", file=stderr)
+        return None, 1
+    if status != 200 or out is None:
+        print(f"yakka login: device code request failed ({status})", file=stderr)
+        return None, 1
+    dc, uc = out.get("device_code"), out.get("user_code")
+    url = out.get("verification_uri_complete")
+    exp, iv = out.get("expires_in"), out.get("interval")
+    if (
+        not all(isinstance(x, str) and x for x in (dc, uc, url))
+        or not isinstance(exp, int)
+        or isinstance(exp, bool)
+        or exp <= 0
+        or not isinstance(iv, int)
+        or isinstance(iv, bool)
+        or iv <= 0
+    ):
+        print("yakka login: invalid device code response", file=stderr)
+        return None, 1
+    expires_at = _rfc3339(clock() + exp)
+    werr = _write_pending(
+        {
+            "endpoint": base,
+            "device_code": dc,
+            "user_code": uc,
+            "interval": iv,
+            "expires_at": expires_at,
+        }
+    )
+    if werr is not None:
+        print(f"yakka login: write pending file: {werr}", file=stderr)
+        return None, 1
+    print(f"url: {url}", file=stdout)
+    print(f"code: {uc}", file=stdout)
+    print(f"expires: {expires_at}", file=stdout)
+    stdout.flush()
+    return {"url": url}, 0
+
+
+def login_start(
+    endpoint_flag: str = "",
+    stdout: Any = None,
+    stderr: Any = None,
+    clock: Callable[[], float] = time.time,
+) -> int:
+    stdout = stdout if stdout is not None else sys.stdout
+    stderr = stderr if stderr is not None else sys.stderr
+    _, rc = _start(endpoint_flag, stdout, stderr, clock)
+    return rc
+
+
+def login_wait(
+    stderr: Any = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.time,
+) -> int:
+    stderr = stderr if stderr is not None else sys.stderr
+    try:
+        with open(_pending_path(), encoding="utf-8") as f:
+            p = json.load(f)
+        base, dc = p["endpoint"], p["device_code"]
+        interval = int(p["interval"])
+        deadline = _parse_rfc3339(p["expires_at"])
+        if not isinstance(base, str) or not isinstance(dc, str) or interval <= 0:
+            raise ValueError("bad pending file")
+    except FileNotFoundError:
+        print("yakka login: no pending login (run yakka login start)", file=stderr)
+        return 1
+    except (OSError, ValueError, KeyError, TypeError):
+        print("yakka login: invalid pending login file; run yakka login start", file=stderr)
+        _remove_pending()
+        return 1
+    while True:
+        sleep(interval)
+        if clock() >= deadline:
             break
-        else:
-            print(
-                "yakka login: timed out waiting for authorization",
-                file=stderr,
-            )
-    finally:
-        server.shutdown()
-        server.server_close()
-    return exit_code
+        status, out = _device_post(base, "/v1/device/token", {"device_code": dc})
+        if status == 200 and out is not None:
+            token = out.get("token")
+            if not isinstance(token, str) or not token or _bearer_header(token) is None:
+                print("yakka login: invalid token response", file=stderr)
+                _remove_pending()
+                return 1
+            ep = out.get("endpoint")
+            ep = normalize_origin(ep)[0] if isinstance(ep, str) and ep else ""
+            tenant = out.get("tenant")
+            werr = write_client_config(Path(), ep or base, token)
+            if werr is not None:
+                print(f"yakka login: write config: {werr}", file=stderr)
+                _remove_pending()
+                return 1
+            _remove_pending()
+            print(f"wrote {Path()}", file=stderr)
+            print(f"tenant: {tenant if isinstance(tenant, str) else ''}", file=stderr)
+            return 0
+        code = out.get("error") if out is not None else None
+        if status == 400 and code == "slow_down":
+            interval += 5
+        elif status == 400 and code == "access_denied":
+            print("yakka login: login was denied", file=stderr)
+            _remove_pending()
+            return 1
+        elif status == 400 and code == "expired_token":
+            print("yakka login: login code expired; run yakka login start", file=stderr)
+            _remove_pending()
+            return 1
+        # authorization_pending, rate limits, 5xx and network errors: keep polling
+    print("yakka login: login code expired; run yakka login start", file=stderr)
+    _remove_pending()
+    return 1
+
+
+def run_login(
+    endpoint_flag: str = "",
+    stdout: Any = None,
+    stderr: Any = None,
+    open_browser: Optional[Callable[[str], Optional[BaseException]]] = None,
+    sleep: Callable[[float], None] = time.sleep,
+    clock: Callable[[], float] = time.time,
+) -> int:
+    stdout = stdout if stdout is not None else sys.stdout
+    stderr = stderr if stderr is not None else sys.stderr
+    info, rc = _start(endpoint_flag, stdout, stderr, clock)
+    if info is None:
+        return rc
+    open_fn = open_browser if open_browser is not None else default_open_browser
+    try:
+        open_fn(info["url"])
+    except Exception:
+        pass
+    return login_wait(stderr, sleep, clock)
 
 
 # --- status ---
@@ -2817,17 +2844,22 @@ def run_status(w: Any) -> int:
 
 def cmd_login(argv: List[str]) -> int:
     parser = argparse.ArgumentParser(prog="yakka login")
+    parser.add_argument("sub", nargs="?", choices=["start", "wait"])
     parser.add_argument(
         "--endpoint",
         default="",
-        help="collector origin (https URL, no path)",
+        help="collector origin (https URL, no path); default https://api.yakka.build",
     )
     try:
         args = parser.parse_args(argv[2:])
     except SystemExit as e:
         code = e.code
         return int(code) if isinstance(code, int) and code != 0 else 2
-    return run_login(LoginOptions(Endpoint=args.endpoint, Stderr=sys.stderr))
+    if args.sub == "start":
+        return login_start(args.endpoint)
+    if args.sub == "wait":
+        return login_wait()
+    return run_login(args.endpoint)
 
 
 def cmd_status(argv: List[str]) -> int:
