@@ -165,3 +165,29 @@ The session 403 test is this phase's break. A fixer follows. The explore failure
 Brief: `docs/plans/17-analytics-dashboard-redesign/briefs/4-02-session-403.md`
 
 `artifact_feedback` on that brief: unreachable. Same Yakka MCP discovery failure (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged.
+
+### 4-02-session-403
+
+- Built: the two `no such tenant` session tests fulfill `**/v1/analytics/**` with 403 `{ error: 'no such tenant' }`. No tenant ends on `/profile`. A tenant stays on `/` after an analytics request is seen. The landing source was not edited.
+- Surfaces: `packages/yakka-analytics/tests/e2e/session.spec.ts`.
+- Deviations: none. Commit `63effc0`.
+- Agent: Composer (`composer-2.5`), subagent `bc-38ee4899-c7c2-51ca-a98b-2f813d017021`. The harness did not report tool turns or final context. Status reported: done.
+
+`artifact_feedback` on `briefs/4-01-landing-trend.md`, `briefs/4-02-session-403.md`, `reports/4-01-landing-trend.md`, and `reports/4-02-session-403.md`, before close: unreachable. Yakka MCP failed live tool discovery again (`python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). No check was flagged.
+
+### Phase 4 verification
+
+Re-ran the outcome checks on `63effc0`. Reports were not the check.
+
+- `npx playwright test tests/e2e/overview.spec.ts tests/e2e/session.spec.ts`: 12 passed. Empty `/` shows `landing-trend-hook_events` and `landing-trend-cost_usd`, both `data-ready`. `overview-summary`, `overview-heatmap`, and `summary-conversations` are absent. The two `analytics/query` requests are measures `hook_events` and `cost_usd`, `bucket=day`, the same `from` and `to`, thirty days apart, with no `repo_id`. `/?repo_id=r1` still shows those charts and does not send `repo_id`. No tenant plus 403 `no such tenant` on the landing analytics read ends on `/profile`. A tenant stays on `/` after that read.
+- `npm test` on `c4d8a94`: 226 passed. The fixer did not change package source.
+- `src/routes/+page.svelte` imports `TrendChart` from `$lib/analysis/chart-frame`. It does not import `$lib/charts/` or `EChart.svelte` and does not call `getJSON`.
+- `git diff --name-only c61f1a9..63effc0` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+Outcome holds. Package boundary stayed `packages/yakka-analytics`, plus the `/` route row and the overview-link sentences of `docs/design/07-analytics-site.md`.
+
+### Carried
+
+1. `tests/e2e/shell.spec.ts` "dashboards shares filter chrome" does not find `trends-chart`, and "an ignored-filter notice" does not find `notice-ignored`. Both fail on `af0b6d2`, before phase 2, and on this phase's tree. No brief amendment.
+2. `src/lib/aggregate.ts` calls `unionMeta` with a `Conversations` value and an `Executions` value. `tsc --noEmit` reports TS2559: those types share no properties with `MetaFields`. `aggregate.test.ts` builds a `ConversationDetail` whose `totals` includes `hook_events` (TS2353). `npm test` does not typecheck, and those tests pass. Design 7 records that `svelte-check` is not installed. No brief amendment.
+3. `tests/e2e/helpers.ts` `useServe` passes a nested array into `addInitScript`, so the local base is stored as `http://127.0.0.1:<port>,,e2e-local-stay`. The file is unchanged since `8967d43`. Four `explore.spec.ts` cases fail on that URL. `overview.spec.ts` and `the overview does not load Perspective` set the base again in a second init script. No brief amendment.
