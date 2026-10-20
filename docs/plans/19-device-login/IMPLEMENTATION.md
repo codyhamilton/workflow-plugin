@@ -124,3 +124,9 @@ Dispatched 2026-10-21 after the brief commit (`44cfecd`). Outcome: landed at 484
 4. `wait` sleeps one interval before the first poll, so it needs a full interval after `start` even if the user approved at once. Accepted.
 5. Not checked against the real server: the `start`/`wait` pair, and the Phase 2 page. Phase 4's real `/yakka:login` is the first such check.
 6. From earlier phases, still open: the `serve.go (sweep)` Surfaces line, the check against a production `registry.json` for legacy `device_codes`, and the Pages deploy (Phase 4).
+
+## Phase 4 — Login skill, docs and release
+
+Status: in progress. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (`/yakka:execute phase 4 and complete`: this phase, then wrap-up).
+
+One code unit, authored inline: `briefs/phase4-skill-docs-release.md`. Worker: Sonnet. The Fly deploy, the Pages deploy and the live `/yakka:login` check are outward-facing and are the runner's, after the user confirms.
