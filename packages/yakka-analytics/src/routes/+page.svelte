@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
-	import { fetchMe, isCollectorMode } from '$lib/api';
+	import { isCollectorMode } from '$lib/api';
+	import { sessionGate } from '$lib/session-gate.svelte';
+	import { tenantNameFromMe } from '$lib/session-gate';
 	import Heatmap from '$lib/charts/Heatmap.svelte';
 	import Sparkline from '$lib/charts/Sparkline.svelte';
 	import type { HeatCell, TimePoint } from '$lib/charts/options';
@@ -54,34 +56,8 @@
 	let sparks = $state<Record<string, TimePoint[]>>({});
 	let heat = $state<HeatCell[]>([]);
 
-	let sessionTenant = $state<string | null>(null);
-	let sessionReady = $state(!isCollectorMode());
-
-	$effect(() => {
-		page.url.pathname;
-		page.url.search;
-		if (!isCollectorMode()) {
-			sessionTenant = null;
-			sessionReady = true;
-			return;
-		}
-		sessionReady = false;
-		let live = true;
-		fetchMe()
-			.then((me) => {
-				if (!live) return;
-				sessionTenant = me.tenants[0]?.name ?? null;
-				sessionReady = true;
-			})
-			.catch((e) => {
-				if (!live || e instanceof Superseded) return;
-				sessionReady = true;
-				setError(e);
-			});
-		return () => {
-			live = false;
-		};
-	});
+	const sessionTenant = $derived(isCollectorMode() ? tenantNameFromMe(sessionGate.me) : null);
+	const sessionReady = $derived(sessionGate.ready);
 
 	function withTenant(p: URLSearchParams | null): URLSearchParams | null {
 		if (p && sessionTenant) p.set('tenant', sessionTenant);

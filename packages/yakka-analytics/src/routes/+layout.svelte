@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '$lib/theme.css';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		getThemePreference,
@@ -11,7 +12,15 @@
 	import FilterChips from '$lib/components/FilterChips.svelte';
 	import Notices from '$lib/components/Notices.svelte';
 	import SaveView from '$lib/components/SaveView.svelte';
-	import { isCollectorMode } from '$lib/api';
+	import { ApiError, fetchMe, isCollectorMode } from '$lib/api';
+	import {
+		decideAfterMeFetch,
+		readBearer,
+		readConfiguredBase,
+		shouldNavigateToProfile,
+		type MeFetchResult
+	} from '$lib/session-gate';
+	import { beginSessionGate, finishSessionGate, sessionGate } from '$lib/session-gate.svelte';
 	import { clearError, fetchError, pruneNotices, setNoticeView } from '$lib/state.svelte';
 
 	let { children } = $props();
@@ -62,6 +71,62 @@
 		page.url.search;
 		clearError();
 		pruneNotices();
+	});
+
+	// Session gate: one `GET /v1/me` per document load; children mount after it settles.
+	$effect(() => {
+		let live = true;
+		beginSessionGate();
+
+		void (async () => {
+			let me: MeFetchResult;
+			try {
+				const body = await fetchMe();
+				me = { kind: 'ok', body };
+			} catch (e) {
+				if (e instanceof ApiError) {
+					me = { kind: 'http', status: e.status, message: e.message };
+				} else {
+					me = { kind: 'other' };
+				}
+			}
+			if (!live) return;
+
+			const hostname = location.hostname;
+			const pathname = page.url.pathname;
+			const search = page.url.search;
+			const decision = decideAfterMeFetch({
+				hostname,
+				pathname,
+				search,
+				configuredBase: readConfiguredBase(),
+				bearer: readBearer(),
+				me
+			});
+			if (decision !== 'stay') {
+				const ret = encodeURIComponent(decision.login);
+				void goto(`/login?return=${ret}`);
+			}
+			finishSessionGate(me);
+		})();
+
+		return () => {
+			live = false;
+		};
+	});
+
+	$effect(() => {
+		if (!sessionGate.ready || !sessionGate.me) return;
+		if (
+			shouldNavigateToProfile({
+				pathname: page.url.pathname,
+				me: sessionGate.me,
+				fetchErrorStatus: fetchError.status,
+				fetchErrorMessage: fetchError.message
+			})
+		) {
+			void goto('/profile');
+		}
 	});
 
 	let themePref = $state<ThemePreference>('system');
@@ -135,14 +200,14 @@
 				<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
 				{#if noTenant}
 					<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
-				{:else if collector && fetchError.status === 401}
-					<p><a href="/login">Sign in</a> to load data from this collector.</p>
 				{:else if fetchError.status === 401 || fetchError.network}
 					<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
 				{/if}
 			</div>
 		{/if}
-		{@render children()}
+		{#if sessionGate.ready}
+			{@render children()}
+		{/if}
 	</main>
 
 <style>

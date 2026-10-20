@@ -3,7 +3,12 @@
 	import { oauthLoginPath } from '$lib/api';
 
 	const denied = $derived(page.url.searchParams.get('error') === 'denied');
-	const loginHref = $derived(oauthLoginPath(page.url.hostname));
+	const returnTo = $derived(page.url.searchParams.get('return') ?? '');
+	const loginHref = $derived(
+		returnTo.startsWith('/') && !returnTo.startsWith('//')
+			? oauthLoginPath(page.url.hostname, returnTo)
+			: oauthLoginPath(page.url.hostname)
+	);
 </script>
 
 <h1>Sign in</h1>

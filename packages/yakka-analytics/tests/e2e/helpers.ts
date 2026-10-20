@@ -17,11 +17,12 @@ export async function useServe(page: Page, which: 'local' | 'keyed') {
 	const base = which === 'local' ? s.local : s.keyed;
 	const key = which === 'keyed' ? s.key : null;
 	await page.addInitScript(
-		([b, k]) => {
+		([b, k, localStay]) => {
 			localStorage.setItem('yakka-analytics-base', b as string);
 			if (k) localStorage.setItem('yakka-analytics-key', k as string);
+			if (localStay) localStorage.setItem('yakka-analytics-key', localStay as string);
 		},
-		[base, key]
+		[which === 'local' ? [base, key, 'e2e-local-stay'] : [base, key, null]]
 	);
 }
 

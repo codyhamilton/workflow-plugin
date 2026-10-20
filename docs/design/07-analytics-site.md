@@ -240,10 +240,15 @@ on a compacted copy of the real ledger.
 
 ## The site
 
-- On the collector, an unauthenticated analytics `GET` is 401 and the layout sends the browser to
-  `/login`. After GitHub admission, the cookie backs same-origin reads; a 403 `no such tenant` means
-  the session owns no matching `?tenant=` yet (not a logged-out 401). `POST /logout` clears the
-  session.
+- After the document loads, the layout calls `GET /v1/me` once. Loopback with an empty configured
+  base stays on the opened route even when `/v1/me` is 401. A 200 stays and analytics requests send
+  `?tenant=` from the first `tenants[].name` when present. A 401 with a stored bearer and non-empty
+  base stays. A 401 with no bearer on any other host navigates to `/login?return=` the opened path
+  and query; `/login`, `/oauth/callback`, and `/settings` stay, and the GitHub link on `/login`
+  passes `return` through when it is a same-origin path. A 403 `no such tenant` sends the browser to
+  `/profile` only when `/v1/me` returned no tenant. After GitHub admission, the cookie backs
+  same-origin reads; a 403 `no such tenant` means the session owns no matching `?tenant=` yet (not a
+  logged-out 401). `POST /logout` clears the session.
 - `/settings` stores an API base URL and a bearer token in `localStorage` under
   `yakka-analytics-base` and `yakka-analytics-key`. An empty base on an embedded serve is
   same-origin `/v1`. An empty base on `yakka.build` or `www.yakka.build` is
