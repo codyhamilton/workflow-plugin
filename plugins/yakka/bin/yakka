@@ -6,7 +6,7 @@ export YAKKA_ROOT="$ROOT"
 CLIENT="$ROOT/client/yakka.py"
 
 usage() {
-  echo "usage: yakka serve | drain | login [--endpoint URL] | ledger compact --tenant-dir <dir> | ledger purge-deltas --tenant-dir <dir> | mcp | status | version" >&2
+  echo "usage: yakka serve | drain | login [start|wait] [--endpoint URL] | ledger compact --tenant-dir <dir> | ledger purge-deltas --tenant-dir <dir> | mcp | status | version" >&2
 }
 
 # 1. development override

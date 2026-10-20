@@ -28,6 +28,7 @@ change what the agent does in a run (principle 2).
 | `/` | Landing and investigation | With an empty query string, two `ask: trend` charts for `hook_events` and `cost_usd`, same window and bucket. With investigation query params (`ask`, measures, dimensions, bucket, window, shared filters), the interactive analysis shell: trend and breakdown charts, usage, quality, conversations, and saved analyses as tools — not the nine KPI tiles or a twelve-tile dashboard grid. |
 | `/trends`, `/usage`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/conversation`, `/explore`, `/builder`, `/dashboards` | Retired report URLs | Paths remain routable but render a short retirement notice; they do not mount the pre-redesign report UIs. The jobs those pages covered are reached from investigation on `/` (breakdowns, tools, pasted URLs). There is no dedicated `/explore` pivot or multi-tile dashboard. |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
+| `/device` | Device approval | Shows the `user_code` large with "check this matches your terminal"; the signed-in user picks tenant, scope and expiry and approves or denies; entry field when no code is given; signed out, it links to sign-in and returns with the code |
 | `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
 Investigation on `/` holds one filter set and analysis spec in the page URL: window presets or
@@ -297,7 +298,7 @@ on a compacted copy of the real ledger.
 ## Hosting
 
 - **Fly.io remote collector:** `fly.toml` app `yakka`, `YAKKA_PUBLIC_URL` `https://api.yakka.build`.
-  That value is the device-exchange `endpoint`, the `Secure` cookie flag, and the 401 login hint.
+  That value is the device-token `endpoint`, the `Secure` cookie flag, and the 401 login hint.
   It is not the GitHub `redirect_uri`. GitHub's callback stays `https://yakka.build/oauth/callback`.
   One machine runs the image built from the repo `Dockerfile`, which does not embed the analytics
   site, and listens on internal port 8080. A fly volume `workflow_serve_data` mounts at `/data`;
@@ -305,7 +306,7 @@ on a compacted copy of the real ledger.
   `YAKKA_SERVE_KEYS` is unset. `YAKKA_SERVE_CORS_ORIGINS` is
   `https://yakka.build,https://www.yakka.build`. `GITHUB_OAUTH_CLIENT_ID` and
   `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. `yakka login` against
-  `https://api.yakka.build` opens the Pages `/device` page; the form posts to the API, and the CLI
+  `https://api.yakka.build` `start` prints the Pages `/device` URL and code; the page `fetch`es the API with credentials, and `wait`
   writes that API `endpoint` plus the minted token into `client.toml`.
 - The site's build output is copied into `packages/yakka/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
@@ -324,7 +325,7 @@ on a compacted copy of the real ledger.
   `404.html`, Pages serves unknown paths as `/` (`fallback: 'index.html'`). `/oauth/callback` is a
   Pages page: it shows status and `fetch`es the API callback with credentials. The API returns JSON
   and `Set-Cookie`; it does not redirect. `/device` is the same Pages page; its form posts to
-  `https://api.yakka.build/v1/device/authorize`.
+  `https://api.yakka.build/v1/device/authorize` by credentialed `fetch` and stays on the page.
 
 ## Open issues
 

@@ -29,7 +29,7 @@ The **plugin client** is `python3 plugins/yakka/client/yakka.py` (via [design 5]
 |---|---|---|
 | `python3 plugins/yakka/client/yakka.py drain` | the drain | 2 |
 | `python3 plugins/yakka/client/yakka.py mcp` | the stdio advisory shim | 2, 4 |
-| `python3 plugins/yakka/client/yakka.py login` | device login | 5 |
+| `python3 plugins/yakka/client/yakka.py login [start\|wait]` | device-code login | 5 |
 | `python3 plugins/yakka/client/yakka.py status` | queue and drain state | 2 |
 
 - Collector targets: linux and darwin, amd64 and arm64. WSL is linux. No Windows-native build.
@@ -107,6 +107,9 @@ endpoints. Unknown fields in a fact are kept in its raw payload, never rejected.
 | analytics reads (`/v1/analytics/*`) | same as advisory reads | defined by [design 7](07-analytics-site.md#analytics-reads) |
 | `GET /v1/me` | session | signed-in GitHub identity and owned tenants (collector dashboard) |
 | `POST /v1/tenants`, `POST /v1/tokens`, `GET /v1/tokens`, `POST /v1/tokens/<id>/revoke` | session (tenant owner) | create tenant; issue, list, or revoke tokens; plaintext `token` only in the `POST /v1/tokens` response |
+| `POST /v1/device/code` | none (rate limited per IP) | start a device grant; returns `device_code`, `user_code`, `verification_uri_complete`, `interval`, `expires_in` |
+| `POST /v1/device/authorize` | session (tenant owner), same-origin | approve or deny a `user_code` with tenant, scope and expiry; no token is minted here |
+| `POST /v1/device/token` | none (the `device_code` is the credential) | the client polls; `authorization_pending`, `slow_down`, `access_denied`, `expired_token`, or 200 with `token`, `tenant`, `endpoint`; the token is minted on the one successful poll |
 | `GET /v1/admin/tokens` | session (admin) | list every token without plaintext |
 
 Outside `/v1`, a binary with the site embedded serves it at `/`. The production Fly image does not

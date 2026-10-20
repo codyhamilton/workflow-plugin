@@ -580,7 +580,7 @@ case "$route" in
     echo ""
     ensure_opencode_skills
     echo "  Done. Core skills linked under: $OPENCODE_SKILLS_ROOT"
-    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
+    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build, login"
     echo ""
     echo "Installation complete."
     exit 0
@@ -591,7 +591,7 @@ case "$route" in
     echo ""
     ensure_claude_user_skills
     echo "  Done. Core skills available at: $HOME/.claude/skills/"
-    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
+    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build, login"
     echo ""
     echo "Installation complete."
     exit 0
@@ -606,7 +606,7 @@ case "$route" in
     workspace="$(find_workspace_root)"
     dest="$(workspace_skills_dest "$workspace")"
     echo "  Done. Core skills available at: $dest"
-    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build"
+    echo "  Skills: design, refine, execute, comprehensive-review, close-out, post-build, login"
     echo "  Add .cursor/skills/$YAKKA_WORKSPACE_SKILLS_NAME/ to .gitignore in your repo."
     echo ""
     echo "Installation complete."
@@ -616,7 +616,7 @@ esac
 
 # Claude Code — copy skills to ~/.claude/skills/
 if [[ -d "$HOME/.claude" ]]; then
-  if ask "Install yakka core skills (design, refine, execute, comprehensive-review, close-out, post-build) into Claude Code (~/.claude/skills/)?"; then
+  if ask "Install yakka core skills (design, refine, execute, comprehensive-review, close-out, post-build, login) into Claude Code (~/.claude/skills/)?"; then
     if src="$(resolve_plugin_source)"; then
       install_skills "$src/skills" "$HOME/.claude/skills"
     else

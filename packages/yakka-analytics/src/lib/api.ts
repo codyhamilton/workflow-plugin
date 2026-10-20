@@ -154,13 +154,6 @@ export function oauthLoginPath(hostname: string, returnTo = ''): string {
 	return `${base}/oauth/login${q}`;
 }
 
-/** Device form action. Pages posts to the API; an embedded serve posts same-origin. */
-export function deviceAuthorizeAction(hostname?: string): string {
-	const base = isPagesHost(hostname) ? API_ORIGIN : configuredBase();
-	if (!base) return '/v1/device/authorize';
-	return `${base}/v1/device/authorize`;
-}
-
 function apiUrl(path: string, params?: URLSearchParams | string): string {
 	const base = resolvedBase();
 	const qs = params ? params.toString() : '';
@@ -198,7 +191,7 @@ async function parseJsonResponse<T>(res: Response, url: string): Promise<T> {
 
 function sessionRoute(path: string): boolean {
 	const p = path.replace(/^\/+/, '');
-	return p === 'me' || p.startsWith('tenants') || p.startsWith('tokens') || p.startsWith('admin/');
+	return p === 'me' || p.startsWith('device/') || p.startsWith('tenants') || p.startsWith('tokens') || p.startsWith('admin/');
 }
 
 /** GET <base>/v1/<path>?<params>. `path` is relative to /v1, e.g. "analytics/summary". */
@@ -304,4 +297,19 @@ export function isValidLoopbackRedirectUri(raw: string): boolean {
 	} catch {
 		return false;
 	}
+}
+
+export type DeviceDecision = { approved: true } | { denied: true };
+
+/** Approve a device user code (`POST /v1/device/authorize`, session cookie). */
+export async function approveDevice(
+	body: { user_code: string; tenant: string; scope: string; expires_at: string },
+	signal?: AbortSignal
+): Promise<DeviceDecision> {
+	return apiPost('device/authorize', body, signal);
+}
+
+/** Deny a device user code. */
+export async function denyDevice(userCode: string, signal?: AbortSignal): Promise<DeviceDecision> {
+	return apiPost('device/authorize', { user_code: userCode, action: 'deny' }, signal);
 }
