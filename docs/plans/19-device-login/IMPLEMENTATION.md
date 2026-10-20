@@ -54,3 +54,13 @@ Called on both reports and both briefs at closing. Result for all four: "not del
 3. Persist failure after a grant is dropped returns 500, and the user has to log in again. Accepted; the design's restart cost already covers it. A later refine may choose to leave the grant in place on a failed persist.
 4. Authorize's session limit runs before the code lookup, so a valid code gets 429 while the session is limited. The design does not state the order. Accepted for now.
 5. `device_codes` revoke-on-load and the sweep are covered by tests, not by a real `registry.json` from the deployed service. Check against production state before the Phase 3 deploy.
+
+## Phase 2 — User-code approval page
+
+Status: in progress. Run: Claude Code (Sonnet 5.5 orchestrator), session https://claude.ai/code/session_01DNryxkjkbPeSkJztoo7ZHk, start 2026-10-21 (bare `/yakka:execute phase 2`, so this phase only).
+
+The phase is one unit, so one brief was authored inline from the design's contracts: `briefs/phase2-approval-page.md`, committed before dispatch. Worker: Sonnet.
+
+### Unit `phase2-approval-page`
+
+Dispatched after the brief commit. Outcome: pending.
