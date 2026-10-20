@@ -143,8 +143,15 @@
 
 	const distData = $derived.by((): DistributionFrameData | null => {
 		if (!primary || primary.ask !== 'distribution') return null;
-		const bins = (primary as DistributionResult).rows.find((r) => r.k === 'all')?.bins ?? [];
-		return { measure: 'cost_usd', bins, drillDim: 'model' };
+		const a = request.ask;
+		if (a.ask !== 'distribution') return null;
+		const rows = (primary as DistributionResult).rows;
+		const allBins = rows.find((r) => r.k === 'all')?.bins;
+		const bins =
+			allBins && allBins.length > 0
+				? allBins
+				: (rows.find((r) => r.bins.length > 0)?.bins ?? []);
+		return { measure: a.measure, bins, drillDim: 'model' };
 	});
 </script>
 

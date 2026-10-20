@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectSettled, trackRequests, useServe } from './helpers';
+import { brush, expectSettled, trackRequests, useServe } from './helpers';
 
 const BAR_GRID = { left: 120, right: 24, top: 8, bottom: 24 };
 
@@ -37,6 +37,20 @@ test('landing control opens investigation with both measures visible', async ({ 
 	await expectSettled(page);
 	await expect(page.getByTestId('investigation-trend-hook_events')).toBeVisible();
 	await expect(page.getByTestId('investigation-trend-cost_usd')).toBeVisible();
+});
+
+test('brush on trend commits the window and refetches', async ({ page }) => {
+	const query = trackRequests(page, /analytics\/query/);
+	await page.goto('/?ask=trend&measure=hook_events&bucket=day&range=30d');
+	await expectSettled(page);
+	query.reset();
+	const resp = page.waitForResponse((r) => r.url().includes('/v1/analytics/query'));
+	await brush(page, 'investigation-trend-hook_events', 0.25, 0.75);
+	await resp;
+	const u = new URL(page.url());
+	const custom = u.searchParams.get('range') === 'custom';
+	expect(custom || (u.searchParams.has('from') && u.searchParams.has('to'))).toBe(true);
+	expect(query.count()).toBeGreaterThan(0);
 });
 
 test('preset change refetches and updates the URL window', async ({ page }) => {

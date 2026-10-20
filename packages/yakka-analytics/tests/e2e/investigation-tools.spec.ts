@@ -21,6 +21,12 @@ async function openUsageTool(page: Page) {
 	await expect(page.getByTestId('investigation-usage-tool')).toBeVisible();
 }
 
+test('distribution chart is visible for cost by model', async ({ page }) => {
+	await page.goto('/?ask=distribution&measure=cost_usd&grain=call&dim=model');
+	await expectSettled(page);
+	await expect(page.getByTestId('investigation-usage-distribution')).toBeVisible();
+});
+
 test('usage tool shows unpriced model cost, not $0.00', async ({ page }) => {
 	await openUsageTool(page);
 	await expect(page.getByTestId('investigation-usage-table').locator('tr', { hasText: QWEN })).toBeVisible();

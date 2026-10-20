@@ -88,10 +88,15 @@ describe('chart-frame options use analysis tokens', () => {
 			TOKENS
 		);
 		expectAnalysisSeriesColors(option);
-		const median = (option.series as { name?: string; connectNulls?: boolean }[]).find(
+		const median = (option.series as { name?: string; connectNulls?: boolean; data?: unknown[] }[]).find(
 			(s) => s.name === 'median'
 		);
 		expect(median?.connectNulls).toBe(false);
+		expect(median?.data).toEqual([
+			['2024-01-01T00:00:00Z', 0.4],
+			['2024-01-02T00:00:00Z', null],
+			['2024-01-03T00:00:00Z', 0.6]
+		]);
 	});
 });
 

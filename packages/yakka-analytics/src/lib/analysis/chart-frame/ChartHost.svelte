@@ -59,10 +59,28 @@
 		};
 	}
 
+	function optionHasBrush(option: unknown): boolean {
+		return (
+			typeof option === 'object' &&
+			option !== null &&
+			'brush' in option &&
+			(option as { brush?: unknown }).brush != null
+		);
+	}
+
+	function armBrush() {
+		chart?.dispatchAction({
+			type: 'takeGlobalCursor',
+			key: 'brush',
+			brushOption: { brushType: 'lineX' }
+		});
+	}
+
 	function applyOption(option: unknown) {
 		if (!chart) return;
 		ready = false;
 		chart.setOption(option as echarts.EChartsCoreOption, { notMerge: true, lazyUpdate: false });
+		if (optionHasBrush(option)) armBrush();
 	}
 
 	function parseBrushRange(params: any): ChartBrushEndDetail {
@@ -84,7 +102,11 @@
 		chart.on('finished', () => {
 			ready = true;
 		});
-		chart.on('brushEnd', (params) => onbrushend?.(parseBrushRange(params)));
+		chart.on('brushEnd', (params) => {
+			onbrushend?.(parseBrushRange(params));
+			chart?.dispatchAction({ type: 'brush', command: 'clear' });
+			armBrush();
+		});
 		chart.on('mouseover', (params) => {
 			onhover?.({
 				seriesName: params.seriesName,

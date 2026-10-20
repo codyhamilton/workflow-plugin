@@ -1,4 +1,5 @@
 import type { DistributionBin } from '$lib/types';
+import { bucketStarts, instantKey } from '$lib/charts/score-series';
 import { isDrillableMark } from './drill';
 import type {
 	BreakdownFrameData,
@@ -150,18 +151,16 @@ export function distributionOption(data: DistributionFrameData, t: AnalysisToken
 /** Sparse quality score band + median line; gaps allowed (connectNulls false). */
 export function qualityOption(data: QualityFrameData, t: AnalysisTokens) {
 	const byT = new Map(data.points.map((p) => [p.t, p]));
-	const times = [...byT.keys()].sort();
-	const medianData = times.map((time) => {
-		const p = byT.get(time);
-		return [time, p?.median ?? null] as [string, number | null];
+	const slots = bucketStarts(data.tz, data.bucket, data.from, data.to).map((ms) => {
+		const time = instantKey(data.tz, new Date(ms));
+		return { time, p: byT.get(time) };
 	});
-	const p25Data = times.map((time) => {
-		const p = byT.get(time);
+	const medianData = slots.map(({ time, p }) => [time, p?.median ?? null] as [string, number | null]);
+	const p25Data = slots.map(({ time, p }) => {
 		if (!p || p.p25 === undefined || p.median === undefined) return [time, null] as [string, number | null];
 		return [time, p.median - p.p25] as [string, number];
 	});
-	const p75Data = times.map((time) => {
-		const p = byT.get(time);
+	const p75Data = slots.map(({ time, p }) => {
 		if (!p || p.p75 === undefined || p.median === undefined) return [time, null] as [string, number | null];
 		return [time, p.p75 - p.median] as [string, number];
 	});
