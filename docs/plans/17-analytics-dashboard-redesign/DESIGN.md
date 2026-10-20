@@ -197,6 +197,11 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 - Surfaces: the route modules and view storage named on the Interactive analysis domain, `src/routes/+layout.svelte`, the landing view, the aggregation boundary, the component and style system. `docs/design/07-analytics-site.md` route table, Drill-down, Chart builder, and Saved views and dashboards.
 - Approach: open
 - Depends on: phases 2, 3, and 4
+- Units:
+  - **5-01 Investigation URL codec** — `briefs/5-01-investigation-url.md`. Depends on phases 2 and 3. Runs alongside nothing.
+  - **5-02 Investigation shell and landing handoff** — `briefs/5-02-investigation-shell.md`. Depends on `5-01`. Runs alongside nothing.
+  - **5-03 Exploration tools** — `briefs/5-03-exploration-tools.md`. Depends on `5-02`. Runs alongside nothing.
+  - **5-04 Legacy routes and shell retirement** — `briefs/5-04-legacy-retirement.md`. Depends on `5-03`. Runs alongside nothing.
 
 ## Provenance Notes
 
