@@ -20,27 +20,26 @@ The package does not import another workspace package. JSON aggregates are serve
 
 ## Solution Shape
 
-`packages/yakka-analytics` becomes a different dashboard. After the document loads, a collector entry with no session is on `/login`. Screens are composed from a new analysis-first component and style system. Landing and investigation read through one aggregation boundary the package owns, which can express a trend window and the breakdowns those views need. A logged-in user opening `/` sees trending data for a window they did not configure. From that view they investigate with interactive graphs. Usage, cost, quality, conversation grain, and saved analysis return as exploration tools in that investigation, in a new information architecture.
+`packages/yakka-analytics` becomes a different dashboard. After the document loads, the session gate's one predicate on `GET /v1/me` either leaves the person on the dashboard or navigates to `/login`. Screens are composed from a new analysis-first component and style system. Landing and investigation read through one aggregation boundary the package owns, which can express a trend window and the breakdowns those views need. A logged-in user opening `/` sees trending data for a window they did not configure. From that view they investigate with interactive graphs. Usage, cost, quality, conversation grain, and saved analysis return as exploration tools in that investigation, in a new information architecture.
 
 Five domains, all inside the package. The package owns the code. Each domain owns the contract under its name.
 
 Handoffs a later brief can cite:
 
-- The session gate allows a dashboard screen to mount. It does not load aggregates and it does not draw charts.
+- The session gate allows a dashboard screen to mount. It does not call `/v1/analytics/*` and it does not draw charts.
 - The component and style system supplies frame, type, color, space, and the chart frame. Landing and analysis pass data and handlers in. They do not own color or chart styling.
 - The aggregation boundary answers a query. Landing and analysis do not call analytics HTTP themselves.
-- The landing view hands the investigation the window on screen and the trend it showed. The investigation is not the first screen.
+- A control on the landing trend opens the investigation at `/` with an `ask` query, on the window on screen and on `hook_events` and `cost_usd`. Empty query on `/` is the landing. The investigation is not the first screen.
 
 ### Domain: Session gate
 
 - Owns: whether a document load in the package may show the dashboard. Surfaces: `src/routes/+layout.svelte`, `src/routes/+layout.ts`, `src/lib/api.ts` (`fetchMe`, `isCollectorMode`, `oauthLoginPath`), `src/routes/login/+page.svelte`, `src/routes/oauth/callback/+page.svelte`, `src/routes/device/+page.svelte`. Identity and connection screens stay in the package and are not analysis: `src/routes/profile/+page.svelte`, `src/routes/settings/+page.svelte`.
-- Contract: after the document loads, a remote collector with no session navigates to `/login`, and a local serve whose analytics reads succeed stays on the dashboard.
-  - **Document load** means the static document has been served and the package script has started. `src/routes/+layout.ts` sets `ssr = false`. The gate runs after that. It is a client navigation to `/login`.
-  - **Sign-in flow** is `/login` and `/oauth/callback`. Those two routes stay put when there is no session.
-  - **Collector, no session.** On a remote collector, an analytics `GET` with no session is 401 (design 7, Site). Opening any package route other than the sign-in flow in that condition ends on `/login`. The person does not activate a link. Collector mode is the mode `isCollectorMode()` already names: stored base empty, or its origin `https://api.yakka.build`, or the page host a Pages host.
-  - **Local serve stays on the dashboard.** Local mode authorizes ledger reads for tenant `local` with no session (design 7, Analytics reads; design 3). `GET /v1/me` is 401 with no session even then. The gate must not treat that `/v1/me` 401, by itself, as the collector-unauthorized case. When analytics reads succeed, `/` stays the dashboard.
-  - **Other refusals stay on their current destination.** HTTP 403 `no such tenant` is the profile path. A 401 or network failure that is not the collector session refusal, and a non-JSON `/v1` response, is the settings path (design 7, Site).
-  - The `/login` URL carries `return` set to the path and query that were opened. The GitHub link on `/login` passes that `return` through `oauthLoginPath`. The login page today does not pass one.
+- Contract: after the document loads, the gate calls `GET /v1/me` only, and the cases below are the whole predicate. The navigation is in the package (`src/routes/+layout.ts` sets `ssr = false`).
+  - Loopback with an empty configured base stays on the opened route, even though `/v1/me` is 401 and `isCollectorMode()` is true.
+  - A 200 stays. The aggregation boundary sends `?tenant=` from that body.
+  - A 401 with a stored bearer and a non-empty base stays.
+  - A 401 with no bearer, on any host that is not the local case, navigates to `/login?return=` the opened path and query. `/login`, `/oauth/callback`, and `/settings` stay. `/settings` is how the bearer gets stored. The GitHub link on `/login` passes that `return` through `oauthLoginPath`.
+  - A 403 `no such tenant` goes to `/profile` only when `me` returned no tenant.
 - Non-goals: an HTTP redirect before the document is painted. That would be `packages/yakka/internal/serve/serve.go`, which is outside the package. A flash of the document before the client navigates is accepted. Reworking GitHub OAuth, the session cookie, or token issuance. Those stay in `packages/yakka`.
 
 ### Domain: Component and style system
@@ -48,7 +47,7 @@ Handoffs a later brief can cite:
 - Owns: the visual language every screen in the package is built from. The old language is `src/lib/theme.css` (solarized tokens, design 7 Theme), the report chrome in `src/routes/+layout.svelte` (`FilterBar`, `FilterChips`, `SaveView`, the report nav), and the ECharts frame in `src/lib/charts/` (`EChart.svelte` and the option builders).
 - Contract: a screen takes its layout, color, and chart frame from this system, and a library may implement the frame without being named here.
   - A screen is a composition of this system: a **frame** (regions for the view and for sign-in, identity, and connection), **type, color, and space** tokens, and a **chart frame**.
-  - The chart frame renders a series, a breakdown, a distribution, or a score band. The view supplies the data and the handlers for hover, brush, and drill. The frame does not fetch.
+  - The chart frame renders a series, a breakdown, a distribution, or a score band. The chart frame's input is the boundary result for `trend`, `breakdown`, `distribution`, and `quality`, and the view passes hover, brush, and drill. The frame does not fetch.
   - A screen this redesign adds takes its layout, color, and chart frame from this system. It does not take them from `src/lib/theme.css`, from `FilterBar` / `FilterChips` / `SaveView` / `DashboardTile`, or from `src/lib/charts/`.
   - Color tokens are not the solarized hexes design 7 lists (`#002b36`, `#fdf6e3`, `#839496`, `#657b83`, and that series palette). A light/dark/system preference may remain. If it does, it switches this system's color.
   - `/login`, `/profile`, `/settings`, `/device`, and `/oauth/callback` use the same system, so the package has one visual language. Their jobs stay: GitHub sign-in, identity and tenant and tokens, API base and bearer, device grant.
@@ -62,39 +61,39 @@ Handoffs a later brief can cite:
 
   Request:
 
+  - The request carries `tenant` for a session read, from the `GET /v1/me` body. A bearer read uses the token's tenant and does not invent one.
   - `window`: `{ from, to }` as RFC3339, and `tz` as an IANA name. A preset may be passed instead of `from`/`to`. Preset names are the ones the package already has: Today, 24h, 7d, 30d, 90d, This month, YTD, All time (`src/lib/presets.ts`). Omitted range resolves as design 7 Shared filter: `to` now, `from` thirty days earlier. That thirty-day span is design 7's labelled judgement.
-  - `filters.include` and `filters.exclude`: repeatable values of `repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`, `conversation_id`. The server has no exclude parameter. The boundary applies an exclude. An exclude on `conversation_id` stays unsupported and is reported on the result, which is the current client rule.
+  - `filters.include` and `filters.exclude`: repeatable values of `repo_id`, `harness`, `kind`, `plan`, `norm_event`, `event`, `tool`, `model`, `source`, `conversation_id`. The server has no exclude parameter. The boundary applies an exclude. An unsupported `conversation_id` exclude is listed in `ignored_filters`.
   - `ask`, one of:
     - `trend`: a measure, a bucket (`hour`, `day`, `week`, `month`), optional one breakdown dim
     - `breakdown`: a measure and one dim, no time bucket
     - `distribution`: a measure, grain `call` or `conversation`, optional dim `model`
-    - `quality`: artifact kind `design`, `brief`, or `report`, and bucket `day`, `week`, or `month`
+    - `quality`: artifact kind `design`, `brief`, or `report`, and bucket `day`, `week`, or `month`. The result is the window score band and the all-time baseline.
     - `conversations`: the conversation list for the window
     - `conversation`: one id
     - `executions`: the derived execution shape for the window (counts, and the shape series when a bucket is set)
 
   Measures and dims are the set design 7 already serves (`/v1/analytics/schema` for query measures; distribution measures `cost_usd` and the token measures; quality kinds as above). The boundary does not invent a measure the server cannot answer. It may call the existing reads, compose several of them, or aggregate in the client from data the package loaded. A library is allowed for that aggregation. No library is named here.
 
-  Result: the slice the `ask` needs (points, rows, bins, score band and baseline, conversation rows, or one run), the resolved `window`, and `partial`, `ignored_filters`, and `truncated` when the read produced them. A window the server clamps (the 399-day client clamp, the 400-bucket refusal) is visible on the result. The boundary does not present a clamped window as complete. Field meanings for those signals stay the ones design 7 gives the underlying read. A view does not branch on which URL answered.
+  Result: the slice the `ask` needs (points, rows, bins, score band and baseline, conversation rows, or one run), the resolved `window`, and `partial`, `ignored_filters`, and `truncated` when the read produced them. Every result includes the in-window values for the filter and breakdown controls. The result includes `clamp` when the resolved window is not the requested window (the 399-day client clamp, or the 400-bucket refusal). The boundary does not present a clamped window as complete. Field meanings for `partial`, `ignored_filters`, and `truncated` stay the ones design 7 gives the underlying read. A view does not branch on which URL answered.
 
 - Non-goals: new or changed routes in `packages/yakka/internal/serve`, new tables in `packages/yakka/internal/store`, ingest changes, and a server-side store of saved analyses.
 
 ### Domain: Landing trend view
 
 - Owns: the first screen a logged-in user sees, at `/` (`src/routes/+page.svelte`). It is the entry the package already uses. It is not the current overview on that route.
-- Contract: `/` with an empty query string shows a trend for the preselected window, read through the aggregation boundary and drawn in the chart frame.
-  - The gate has allowed the load. The query string is empty. A trend over the preselected window is on screen. The person does not choose a measure, a chart type, or a saved analysis first.
-  - The trend is values over time, read with `ask: trend` on the aggregation boundary, drawn in the chart frame.
-  - **Judgement:** the unconfigured trend shows hook-event volume (`hook_events`) and cost (`cost_usd`) on that window. Those two stand in for activity and spend. The set is a judgement, not a measured catalogue. Nine KPI tiles are not required.
-  - The picture is this trend. It is not the current `/` content: the nine KPI tiles, the grouped counts, and the weekday-by-hour heatmap.
-  - From this view the person can open an investigation. The handoff is the window on screen and the measures the trend showed.
+- Contract: `/` with an empty query string shows two trends for the preselected window, read through the aggregation boundary and drawn in the chart frame.
+  - The gate has allowed the load. The query string is empty. The person does not choose a measure, a chart type, or a saved analysis first.
+  - The picture is two `ask: trend` results, same window and bucket, measures `hook_events` and `cost_usd`. See Assumption 1.
+  - The picture is not the current `/` content: the nine KPI tiles, the grouped counts, and the weekday-by-hour heatmap.
+  - A control on that picture opens the investigation at `/` with an `ask` query, on that window and on those two measures.
 - Non-goals: a report the person must configure before any trend is visible. A grid of saved tiles as the landing page.
 
 ### Domain: Interactive analysis
 
 - Owns: the investigation opened from the landing view. The jobs that return are usage, cost, quality, conversation grain, and saved analysis. Old report modules this replaces: `src/routes/usage/+page.svelte`, `src/routes/quality/+page.svelte`, `src/routes/conversations/+page.svelte`, `src/routes/conversation/+page.svelte`, `src/routes/dashboards/+page.svelte`, `src/routes/builder/+page.svelte`, `src/routes/trends/+page.svelte`, `src/routes/repos/+page.svelte`, `src/routes/hooks/+page.svelte`, `src/routes/executions/+page.svelte`, `src/routes/explore/+page.svelte`, plus `src/lib/views.ts`, `SaveView`, and `DashboardTile`.
-- Contract: the investigation opened from the landing view updates its graph from the aggregation boundary, and usage, cost, quality, conversation grain, and saved analysis are tools inside it.
-  - The person reaches the investigation from the landing view. It opens on the landing's window and measures.
+- Contract: the investigation path is `/` with an `ask` query. It updates its graph from the aggregation boundary, and usage, cost, quality, conversation grain, and saved analysis are tools inside it.
+  - Empty query on `/` is the landing. The investigation path is `/` with an `ask` query: window, filters, and `ask` are the boundary request. A control on the landing trend opens it on the landing window and on `hook_events` and `cost_usd`.
   - The graph is interactive. Changing the window (a preset, or a brush on a time axis) and changing a breakdown dim ask the aggregation boundary again, and the graph updates from that result. Drill applies a real filter dim. `__other__`, the empty key, `hour_of_day`, and `weekday` are not filters (design 7, Drill-down). Shift-click excludes where the boundary can express an exclude.
   - The live investigation serialises into the query string: window, filters, and `ask`. Pasting that URL reproduces the investigation. The keys are the boundary request, not the old per-page keys (`metric`, `group`, `m`, `d`, `b`, `c`, and the report path).
   - **Usage and cost** are one tool. Model against model, tokens and `cost_usd`, over time (`ask: trend` with dim `model`) and as a distribution (`ask: distribution`, grain `call`). Unpriced cost is shown as unpriced, not as zero (design 7, Cost).
@@ -124,13 +123,34 @@ Answered in the session, in the requester's words (the turn record is `PROVENANC
 - No visual reference. The bar is rich analysis: interactive, exploratory, not a static report.
 - The package boundary stays `packages/yakka-analytics`. Unauthenticated users go straight to login from inside the package, a client redirect to `/login` after the document loads. An HTTP redirect before paint would require `packages/yakka/internal/serve/serve.go`. That question was asked and not answered. The original package-only constraint decides it, and that file stays out of scope.
 
-Derived so phase 1 stays checkable against the ledger the package already runs:
+Derived so phase 1 stays checkable against the ledger the package already runs. The if-wrong is Assumption 3:
 
-- Local serve, where analytics reads succeed with no session, is not an unauthenticated collector entry. `GET /v1/me` 401 alone does not send it to `/login`. Rationale: design 7 Analytics reads and the package ground. If wrong, local `/` would also end on `/login`.
+- Local serve stays on the opened route: loopback with an empty configured base, even when `GET /v1/me` is 401. If wrong, local `/` would also end on `/login`.
 
 ## Assumption Ledger
 
-None — see PROVENANCE.md.
+These three were not asked. Each changes a phase outcome or a non-goal. The answered turns stay in Decisions and in `PROVENANCE.md`.
+
+### Assumption 1
+
+- Question: Is the unconfigured landing picture only `hook_events` and `cost_usd`, with the nine KPI tiles not required?
+- Answer chosen: Yes. Two `ask: trend` results, same window and bucket, measures `hook_events` and `cost_usd`. Nine KPI tiles are not required.
+- Rationale: The request asks for a quick view of trending data and does not name the measures. Turn 2 did not pick them. Activity and spend are the two series a person can see without configuring a report.
+- If wrong: Phase 4's picture changes to the measures that are required, including the nine KPI tiles if those are required.
+
+### Assumption 2
+
+- Question: Do repos, hooks, executions, explore, and the multi-tile dashboard return as tools?
+- Answer chosen: No. They do not return as tools. Repo, hook, and execution shape stay available as breakdowns inside the investigation. Explore and the twelve-tile grid do not return.
+- Rationale: The request says rethink dashboards and data layouts. Turn 2 named five jobs (saved views, quality, cost, usage, conversation grain). Demoting the rest is this design's choice, not a sentence the requester used.
+- If wrong: Phase 5 gains those jobs as tools of their own, and the non-goals that drop them are removed.
+
+### Assumption 3
+
+- Question: Does "if the user isn't logged in just direct straight to login" send local serve to `/login`?
+- Answer chosen: No. Loopback with an empty configured base stays, even though `GET /v1/me` is 401.
+- Rationale: Local mode authorizes ledger reads for tenant `local` with no session (design 7, design 3). The verbatim sentence is narrowed so a local dashboard still opens.
+- If wrong: Local `/` also ends on `/login`.
 
 ## Open Questions
 
@@ -142,37 +162,37 @@ Ordered. The count is fixed at sign-off. A phase closes when its outcome is prov
 
 ### Phase 1 — Session gate
 
-- Outcome: On a remote collector with no session, opening `/` loads the document and ends on `/login`, with no click on a sign-in link. Opening any other package route that is not `/login` or `/oauth/callback` ends there too, and the URL carries `return` for the path that was opened. Opening `/login` stays on `/login`. On a local serve, where analytics reads succeed without a session, opening `/` stays on the dashboard. This guards against a logged-out person remaining in the shell, which is what the package does now (an error-panel link, no navigation). Required by the intent sentence "if the user isn't logged in just direct straight to login", and by design 7 Site, which already states the send the package does not perform.
+- Outcome: After the document loads, the gate calls `GET /v1/me` only. Loopback with an empty configured base stays on the opened route, even though `/v1/me` is 401 and `isCollectorMode()` is true. A 200 stays, and the aggregation boundary sends `?tenant=` from that body. A 401 with a stored bearer and a non-empty base stays. A 401 with no bearer, on any host that is not that local case, navigates to `/login?return=` the opened path and query, and `/login`, `/oauth/callback`, and `/settings` stay. A 403 `no such tenant` goes to `/profile` only when `me` returned no tenant. This guards against a logged-out person remaining in the shell, which is what the package does now (an error-panel link, no navigation), and against treating `/v1/me` 401 as the only signal. Required by the intent sentence "if the user isn't logged in just direct straight to login", and by design 7 Site, which already states the send the package does not perform.
 - Surfaces: `packages/yakka-analytics/src/routes/+layout.svelte`, `src/routes/+layout.ts`, `src/lib/api.ts`, `src/routes/login/+page.svelte`, `src/routes/oauth/callback/+page.svelte`, `src/routes/device/+page.svelte`, `src/routes/+page.svelte`. `docs/design/07-analytics-site.md` Site (the send, which the package will then actually do). Not `packages/yakka/internal/serve/serve.go`.
 - Approach: known
 - Depends on: nothing
 
 ### Phase 2 — Analysis component and style system
 
-- Outcome: While logged in, the dashboard shell's layout and color come from the new component and style system. The report nav is not in that shell, and the page background is not the solarized `#002b36` or `#fdf6e3`. `/login` uses the same system. A screen composed for this redesign takes its chart frame from the system, not from `src/lib/charts/`. This guards against another solarized report chrome, which is the plan 14 result the request calls too conservative. Required by the intent: "redesigning the style and component system" and "the layout and styling not usable."
-- Surfaces: `src/lib/theme.css`, `src/routes/+layout.svelte`, `src/lib/components/` (`FilterBar`, `FilterChips`, `Notices`, `SaveView`, `DashboardTile`), `src/lib/charts/`, `src/routes/login/+page.svelte`, `src/routes/profile/+page.svelte`, `src/routes/settings/+page.svelte`, `src/routes/device/+page.svelte`, `src/routes/oauth/callback/+page.svelte`, and the component and style system the package adds. `docs/design/07-analytics-site.md` Theme and the route-nav description.
-- Approach: known
+- Outcome: Logged-in `/` and `/login` show the same background and the same type color, and that background is neither `#002b36` nor `#fdf6e3`. `/profile`, `/settings`, `/device`, and `/oauth/callback` show that same frame. The report nav stays in the shell. This guards against a recolor that cannot be checked, and against removing the only navigation to the old reports before phase 5 replaces those jobs. Required by the intent: "redesigning the style and component system" and "the layout and styling not usable," with no visual reference.
+- Surfaces: `src/lib/theme.css`, `src/routes/+layout.svelte`, `src/lib/components/` (`FilterBar`, `FilterChips`, `Notices`, `SaveView`, `DashboardTile`), `src/lib/charts/`, `src/routes/login/+page.svelte`, `src/routes/profile/+page.svelte`, `src/routes/settings/+page.svelte`, `src/routes/device/+page.svelte`, `src/routes/oauth/callback/+page.svelte`, and the component and style system the package adds. `docs/design/07-analytics-site.md` Theme.
+- Approach: open
 - Depends on: phase 1
 
 ### Phase 3 — Aggregation boundary
 
-- Outcome: A caller asks the package's aggregation boundary for a trend window and a breakdown and receives points or rows, plus `partial`, `ignored_filters`, and `truncated` when the read produced them. The caller does not name an analytics HTTP path. `packages/yakka/internal/serve` gains no analytics route from this phase. This guards against each view keeping its own request fan-out, which is how the current pages load (overview, trends, usage, quality, and conversations each call their own reads). Required by the decision that the package may change how it aggregates and loads data, inside the package boundary.
+- Outcome: One caller receives the slice for each of `trend`, `breakdown`, `distribution`, `quality`, `conversations`, `conversation`, and `executions`, with `partial`, `ignored_filters`, and `truncated` when the read produced them, and does not name `/v1/analytics/*` or `GET /v1/baselines`. `packages/yakka/internal/serve` gains no analytics route from this phase. This guards against each view keeping its own request fan-out, which is how the current pages load, and against Phase 5 drawing those asks by calling the HTTP paths itself. Required by the decision that the package may change how it aggregates and loads data, inside the package boundary.
 - Surfaces: `src/lib/api.ts`, `src/lib/query.ts`, `src/lib/params.ts`, `src/lib/types.ts`, `src/lib/view.svelte.ts`, `src/lib/presets.ts`, and the aggregation boundary the package adds. `docs/design/07-analytics-site.md` Data layer. Not `packages/yakka/internal/serve` and not `packages/yakka/internal/store`.
 - Approach: known
 - Depends on: nothing
 
 ### Phase 4 — Landing trend view
 
-- Outcome: A logged-in user opening `/` with an empty query string sees hook-event volume and cost over the preselected window (design 7's thirty-day judgement when `from` is omitted), without choosing a measure, a chart, or a saved analysis. The primary picture is that trend, drawn with the new chart frame from the aggregation boundary. The nine KPI tiles and the weekday-by-hour heatmap are not that picture. Which two measures stand for volume and cost is the labelled judgement in the landing contract (`hook_events`, `cost_usd`). This guards against a first screen that is either the old overview or a chart the person must configure. Required by the intent: "landing dashboard with a good quick view into trending data."
+- Outcome: A logged-in user opening `/` with an empty query string sees two `ask: trend` results, measures `hook_events` and `cost_usd`, same window and bucket, over the preselected window (design 7's thirty-day judgement when `from` is omitted), without choosing a measure, a chart, or a saved analysis. The chart's module is not `src/lib/charts/EChart.svelte`. The nine KPI tiles and the weekday-by-hour heatmap are not that picture. Which two measures, and that nine KPI tiles are not required, is Assumption 1. This guards against a first screen that is either the old overview or a chart the person must configure. Required by the intent: "landing dashboard with a good quick view into trending data."
 - Surfaces: `src/routes/+page.svelte`, the landing view, the aggregation boundary, the component and style system. `docs/design/07-analytics-site.md` route `/` and the overview-link sentences.
 - Approach: known
 - Depends on: phases 1, 2, and 3
 
 ### Phase 5 — Interactive analysis
 
-- Outcome: From the landing view, the user opens an investigation on that window, changes the window and a breakdown, and the graph updates. Usage and cost (model against model, over time and as a distribution), quality (one artifact kind, against the baseline), conversation grain (the list and one run), and a saved analysis (save, then open again by name) are each available there and show their data. Repo, hook, and execution shape are breakdowns in that same investigation. The address is an investigation URL, not `/usage`, `/quality`, `/conversations`, `/dashboards`, or `/builder`. This guards against those jobs returning as a restyle of the old pages. Required by the intent ("graphs and visualisations to be rich and dynamic and interactive") and by the decision that those jobs return as exploration tools in a new information architecture.
-- Surfaces: the route modules and view storage named on the Interactive analysis domain, the landing view, the aggregation boundary, the component and style system. `docs/design/07-analytics-site.md` route table, Drill-down, Chart builder, and Saved views and dashboards.
-- Approach: known
+- Outcome: Empty query on `/` is the landing. A control on the landing trend opens the investigation at `/` with an `ask` query, on the landing window and on `hook_events` and `cost_usd`. Brush on the time axis, a breakdown change, and a drill on a real filter dim each call the boundary again and the same graph updates. `__other__`, the empty key, `hour_of_day`, and `weekday` do not become filters. Shift-click exclude updates the graph, and a `conversation_id` exclude is shown as ignored. Pasting the address reproduces the same window, filters, and ask, and the keys are the boundary request. Usage and cost draw model against model over time and as a distribution, and an unpriced cost is not a zero. Quality draws one kind against the baseline, and a bucket with no point is a gap. Conversation grain lists the window's runs and one run whose events are the whole run, with in-window events marked and both totals present when a window is set. Save, then open by name, restores that ask, window, and filters, and stays on the investigation path. Opening `/trends`, `/usage`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/conversation`, `/explore`, `/builder`, and `/dashboards` does not render those reports, and the report nav is not in the shell. This guards against a restyle of the old pages on one new URL. Required by the intent ("graphs and visualisations to be rich and dynamic and interactive") and by the decision that those jobs return as exploration tools in a new information architecture.
+- Surfaces: the route modules and view storage named on the Interactive analysis domain, `src/routes/+layout.svelte`, the landing view, the aggregation boundary, the component and style system. `docs/design/07-analytics-site.md` route table, Drill-down, Chart builder, and Saved views and dashboards.
+- Approach: open
 - Depends on: phases 2, 3, and 4
 
 ## Provenance Notes
@@ -181,7 +201,7 @@ Plan 14's provenance at `2bc26e0` is the decision this design reverses: "Routes:
 
 An HTTP redirect before paint was asked and not answered. It is rejected because the request keeps the change inside the analytics dashboard package, and the redirect lives in `packages/yakka/internal/serve/serve.go`. The client navigates after the document loads. The first paint can still be the document.
 
-No visual reference was given, and no chart library is chosen. The approach of every phase is known because the outcome does not depend on which library implements it. Choosing one is below the phase outcome. Staying on ECharts in order to avoid that choice is the plan 14 constraint, and it is not carried forward. Design 7's "no second chart grammar" sentence is part of the pivot phase 2 amends.
+No visual reference was given, and no chart library is chosen. Phases 1, 3, and 4 are known. Phases 2 and 5 are open: the visual system and the investigation have no reference to build straight through, and the bar for phase 5 is rich analysis. Choosing a library stays below the outcome. Staying on ECharts in order to avoid that choice is the plan 14 constraint, and it is not carried forward. Design 7's "no second chart grammar" sentence is part of the pivot phase 2 amends.
 
 The old pages for repos, hooks, executions, and explore are not ported. Their questions survive as breakdowns the boundary can already ask (`repo_id`, hook dims, `ask: executions`). A free-form pivot page is not a job the request kept. The twelve-tile grid and the `{report, params}` saved-view record are the old dashboard, and they are not the saved-analysis tool.
 
@@ -189,4 +209,4 @@ Identity, connection, and device grant stay. The request reinvented the analytic
 
 Server bugs stay server bugs. Conversation `window_totals` stored as whole seconds (`packages/yakka/internal/serve`) and conversation-grain unpriced accounting (`packages/yakka/internal/store`) are outside the package. A conversation view built on those reads still shows them. Presentation bugs on the old tiles and report pages go away with those surfaces. They are not a work list here.
 
-Phase 2 replaces the shell. Old report URLs may still resolve until phase 5. Phase 5 is when the investigation is the way those jobs are reached. Finishing at phase 2 would be the conservative restyle this design refuses.
+Phase 2 changes color and type. The report nav stays through that phase, so the old reports remain reachable until phase 5. Phase 5 removes the nav from the shell and stops `/trends`, `/usage`, `/repos`, `/hooks`, `/quality`, `/executions`, `/conversations`, `/conversation`, `/explore`, `/builder`, and `/dashboards` from rendering those reports. The investigation is then the way those jobs are reached. Finishing at phase 2 would leave the old reports in place.

@@ -48,9 +48,17 @@ Interactive posture only. Headless runs carry intent, the assumption ledger, and
 - Unauthenticated users go straight to login from inside the package: a client redirect to `/login` after the document loads.
 - `packages/yakka/internal/serve/serve.go` is out of scope.
 
+### Turn 4
+
+**User responded:** Apply the adversarial review. One session-gate predicate, and those entry conditions in the Phase 1 outcome. The aggregation contract gains tenant, the quality baseline, in-window filter values, a named clamp, and an ignored `conversation_id` exclude. Phase 2's outcome is the color and type observations, approach open, and the report nav stays. Phase 3's outcome covers every ask Phase 5 uses. Phase 5's outcome is the checkable investigation observations, including the old report paths not rendering those reports and the report nav leaving in this phase, approach open, and the investigation path named. Three assumption-ledger entries: landing measures, which jobs do not return, local serve stays. The landing picture is two `ask: trend` results, `hook_events` and `cost_usd`.
+
+**Agent decisions:**
+
+- Applied each of those as the review's smallest change. The investigation path is `/` with an `ask` query. Empty query on `/` stays the landing.
+
 ## Agent Decisions
 
-- **Local serve is not sent to login**: analytics reads succeed there with no session, and `GET /v1/me` is 401 even then. The gate keys off the collector refusal, not off `/v1/me` alone. Rationale: design 7 and design 3 already treat local as tenant `local` with no session. If wrong, local `/` would also end on `/login`.
+- **Local serve is not sent to login**: loopback with an empty configured base stays, even though `GET /v1/me` is 401 and `isCollectorMode()` is true. The gate calls `GET /v1/me` only. Rationale: design 7 and design 3 already treat local as tenant `local` with no session. If wrong, local `/` would also end on `/login`. Ledger: Assumption 3.
 - **Identity and connection stay**: profile, settings, and device grant remain, and they use the new visual system. Rationale: the request reinvented the analytical jobs. The package still signs a person in, holds a tenant, and stores a cross-origin base.
 - **Old report questions survive as breakdowns**: repo, hook, and execution shape are asks inside the investigation, not pages. Rationale: the jobs named in turn 2 are the ones that return as tools. Porting `/repos`, `/hooks`, `/executions`, and `/explore` would keep the information architecture turn 2 rejected.
 - **Saved analysis stores the investigation**: `{ id, name, spec }` with the boundary request, including window and filters, in `localStorage`. Rationale: there is no server view store inside the package boundary, and `{ report, params }` is the old page port.
