@@ -236,3 +236,16 @@ Orchestrator re-run after `b9dd0cb`, report not the check:
 - `npx tsc --noEmit`: no TS2559 and no TS2353. Other existing `tsc` errors remain outside this unit (`api.test.ts`, `charts/`, `presets.test.ts`, `query.test.ts`, e2e `node:` imports).
 - `npm test`: 243 passed.
 - `git diff --name-only c6162af..b9dd0cb` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
+
+### 5-02-investigation-shell
+
+- Built: empty `/` stays the landing. A control opens the investigation at `/` with an `ask` query on the landing window and on `hook_events` and `cost_usd`. Preset change, drill, shift-exclude, and a pasted URL update or reproduce the boundary request. `__other__` does not become a filter. A `conversation_id` exclude shows `notice-ignored`.
+- Surfaces: `packages/yakka-analytics/src/routes/+page.svelte`, `src/lib/investigation/InvestigationShell.svelte`, `LandingView.svelte`, `dims.ts`, `frames.ts`, `request-mutate.ts`, `request-mutate.test.ts`, `tests/e2e/investigation-shell.spec.ts`.
+- Deviations: `__other__` drill is asserted in `request-mutate.test.ts` because the worker found no reliable `__other__` bar in the harness. The e2e title `drill on harness adds a filter; __other__ does not` still passes. Preset clicks are scoped to `investigation-shell` because `preset-*` is also on the layout `FilterBar`. Commit `8feaf62`.
+- Agent: Composer (`composer-2.5`), subagent `bc-339da0b2-a075-5da1-a1f4-9d56d230d47f`. The harness did not report tool turns or final context. Status reported: done.
+
+Orchestrator re-run after `8feaf62`, report not the check:
+
+- `npx playwright test tests/e2e/overview.spec.ts tests/e2e/investigation-shell.spec.ts`: 7 passed. Empty `/` still shows the two landing trends. The landing control opens an investigation query with both measures. A preset refetch updates the URL window. Drill adds a filter. Shift-click exclude adds `x.<dim>`, and `conversation_id` shows the ignored notice. A pasted URL reproduces `ask` and filters.
+- `npm test`: 244 passed.
+- `git diff --name-only d2d4dd2..8feaf62` has no path under `packages/yakka/internal/serve`, `packages/yakka/internal/store`, or `src/routes/+layout.svelte`.
