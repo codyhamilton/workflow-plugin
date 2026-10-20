@@ -2821,6 +2821,8 @@ def run_status(w: Any) -> int:
         return 0
     if cfg.Local:
         print("config: none (local mode)", file=w)
+    elif os.environ.get(_ENV_ENDPOINT, "").strip() and os.environ.get(_ENV_KEY, "").strip():
+        print("config: env (remote mode)", file=w)
     else:
         print(f"config: {Path()} (remote mode)", file=w)
     reach = "unreachable"

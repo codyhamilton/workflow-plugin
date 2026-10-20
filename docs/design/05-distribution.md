@@ -59,12 +59,16 @@ for the plugin to presume one, and local mode needs no generated state:
   is the API. Production Pages (`https://yakka.build`) holds the site, including GitHub's callback
   `https://yakka.build/oauth/callback`, which asks the API to set a host-only `workflow_session`
   cookie and return JSON. Local and release binaries still embed the site on the same origin.
-  Clients and agents use issued bearer tokens (not the session cookie). **`yakka login`**
-  (`--endpoint` optional) opens the Pages `/device` page when the endpoint is
-  `https://api.yakka.build`, and that server's `/device` otherwise, then writes `endpoint` and
-  `key` into `client.toml`. Hand-edit the file,
-  or set **`YAKKA_ENDPOINT`** and **`YAKKA_KEY`** in the agent environment, when there is no
-  browser. There is no `yakka init`.
+  Clients and agents use issued bearer tokens (not the session cookie). **`yakka login`** is a two-step device-code login in the plugin's
+  Python client (`plugins/yakka/bin/yakka`; the Go binary refuses `login` and names the wrapper).
+  `yakka login start` (`--endpoint` optional; default `https://api.yakka.build`, else the endpoint in
+  `client.toml`) requests a device grant, prints the `url:` and `code:` lines and exits at once.
+  `yakka login wait` polls until the user approves on the `/device` page, then writes `endpoint` and
+  `key` into `client.toml` and exits. Bare `yakka login` runs both and opens the browser. The
+  `/yakka:login` skill (`plugins/yakka/skills/login/SKILL.md`, in every harness) drives the two
+  steps for an agent without exposing the token. Set **`YAKKA_ENDPOINT`** and **`YAKKA_KEY`** in the agent environment, when there is no
+  browser (remote sessions); the environment overrides `client.toml`, and `yakka status` then prints
+  `config: env (remote mode)`. There is no `yakka init`.
 
 With no `serve` running and no remote configured, the drain finds the endpoint unreachable and the
 queue grows; `yakka status` reports it as a failure, not as idle.

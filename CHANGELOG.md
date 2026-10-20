@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0 — 2026-10-21 — device-code login
+
+- Login is now a device-code flow. `yakka login start` prints a URL and code and exits; `yakka login wait` polls until you approve on the `/device` page and then writes `client.toml`. Bare `yakka login` runs both. The default endpoint is `https://api.yakka.build`.
+- New `/yakka:login` skill (every harness) drives `start` and `wait` for an agent without exposing the token. `yakka status` prints `config: env (remote mode)` when `YAKKA_ENDPOINT` and `YAKKA_KEY` override `client.toml`.
+- The loopback login route is removed from the server. **3.0.1 clients cannot log in until updated to 3.1.0**; their existing tokens keep working.
+- The Go binary no longer has `yakka login` (it exits 1 and names the plugin wrapper). Binary version `0.3.0`.
+- The registry no longer stores plaintext tokens for pending device codes.
+
 ## 3.0.0 — 2026-10-18 — rename to yakka
 
 Major rename: the product, plugin, Go binary, MCP server, environment variables, and

@@ -38,6 +38,7 @@ change what the agent does in a run (principle 2).
 | `/builder` | Chart builder | any measure, up to two dimensions and a bucket |
 | `/dashboards` | Dashboards | ordered grids of saved views |
 | `/settings` | Connection | API base URL and bearer token for a cross-origin deployment |
+| `/device` | Device approval | Shows the `user_code` large with "check this matches your terminal"; the signed-in user picks tenant, scope and expiry and approves or denies; entry field when no code is given; signed out, it links to sign-in and returns with the code |
 | `/login` | Sign-in | Collector only: GitHub OAuth entry and denied-admission message |
 
 Every report except `/settings` and `/login` shares one filter set held in the page URL: window,
@@ -308,7 +309,7 @@ on a compacted copy of the real ledger.
 ## Hosting
 
 - **Fly.io remote collector:** `fly.toml` app `yakka`, `YAKKA_PUBLIC_URL` `https://api.yakka.build`.
-  That value is the device-exchange `endpoint`, the `Secure` cookie flag, and the 401 login hint.
+  That value is the device-token `endpoint`, the `Secure` cookie flag, and the 401 login hint.
   It is not the GitHub `redirect_uri`. GitHub's callback stays `https://yakka.build/oauth/callback`.
   One machine runs the image built from the repo `Dockerfile`, which does not embed the analytics
   site, and listens on internal port 8080. A fly volume `workflow_serve_data` mounts at `/data`;
@@ -316,7 +317,7 @@ on a compacted copy of the real ledger.
   `YAKKA_SERVE_KEYS` is unset. `YAKKA_SERVE_CORS_ORIGINS` is
   `https://yakka.build,https://www.yakka.build`. `GITHUB_OAUTH_CLIENT_ID` and
   `GITHUB_OAUTH_CLIENT_SECRET` are fly secrets, not in the repo. `yakka login` against
-  `https://api.yakka.build` opens the Pages `/device` page; the form posts to the API, and the CLI
+  `https://api.yakka.build` `start` prints the Pages `/device` URL and code; the page `fetch`es the API with credentials, and `wait`
   writes that API `endpoint` plus the minted token into `client.toml`.
 - The site's build output is copied into `packages/yakka/internal/serve/site/` before `go build`
   embeds it (`//go:embed all:site`). `tools/release/build.sh` builds the site first and fails if
@@ -335,7 +336,7 @@ on a compacted copy of the real ledger.
   `404.html`, Pages serves unknown paths as `/` (`fallback: 'index.html'`). `/oauth/callback` is a
   Pages page: it shows status and `fetch`es the API callback with credentials. The API returns JSON
   and `Set-Cookie`; it does not redirect. `/device` is the same Pages page; its form posts to
-  `https://api.yakka.build/v1/device/authorize`.
+  `https://api.yakka.build/v1/device/authorize` by credentialed `fetch` and stays on the page.
 
 ## Open issues
 
@@ -368,7 +369,7 @@ on a compacted copy of the real ledger.
 15. Pricing: Claude and Codex rates were added on 2026-10-11 (15 models). Remaining unpriced calls are local and free OpenCode models, codex calls with an empty model, and `<synthetic>`. GPT long-context (>272K) surcharges are not modelled. A `serve` built without the site build first reports "analytics bundle not embedded".
 16. The layout header and main use the 4/8/16/24/32 space scale. The filter bar, filter chips, and save-view control still use rem gaps. Pick scale steps and restyle those controls.
 17. Overview links to `/trends` set `metric` (`artifact_versions`, `distinct_content`, `commits`), which is the key that page reads. The drill-down sentence says those links set `measure`. Pick one query key and make the sentence and the page agree.
-18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser; a device code keeps the token plaintext in `registry.json` until exchange.
+18. Client registration leftovers: collector-mode `?tenant=` is still only on the overview and `/profile`; `Server.New` panics if the registry cannot be opened or persisted; analytics e2e seeds `registry.json` instead of logging in and calling `POST /v1/tokens`; the profile expiry field is prefilled in the browser.
 
 ## Live cutover record (2026-10-11)
 
