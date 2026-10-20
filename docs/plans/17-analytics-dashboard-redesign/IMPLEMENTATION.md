@@ -222,3 +222,17 @@ Phase 4 carried items placed by that refinement:
 `artifact_feedback` on the four briefs: unreachable. Yakka and Workflow MCP failed live tool discovery (`artifact_feedback` not callable; `python3: can't open file '/workspace/${CLAUDE_PLUGIN_ROOT}/client/yakka.py': [Errno 2] No such file or directory`). The refine worker reported the same. No check was flagged because the service did not answer.
 
 Agent: Composer (`composer-2.5`), subagent `bc-1ecdd64c-9ef8-557a-aedd-e2a8d62e6229`. The harness did not report tool turns or final context.
+
+### 5-01-investigation-url
+
+- Built: `isInvestigationQuery`, `parseInvestigationRequest`, and `investigationRequestToSearch`. A non-empty `ask` is the investigation discriminator. Parse and search round-trip the boundary request. Type-only fixes: `unionMeta` for conversations and executions no longer reports TS2559, and the conversation `totals` fixture no longer reports TS2353.
+- Surfaces: `packages/yakka-analytics/src/lib/investigation/request-url.ts`, `src/lib/investigation/request-url.test.ts`, `src/lib/aggregate.ts`, `src/lib/aggregate.test.ts`.
+- Deviations: the worker reported none. They noted that for `ask=quality`, `kind` is the quality ask param and is not parsed into filters. Commit `b9dd0cb`.
+- Agent: Composer (`composer-2.5`), subagent `bc-39407598-cacf-5946-9232-86617ad2eaeb`. The harness did not report tool turns or final context. Status reported: done.
+
+Orchestrator re-run after `b9dd0cb`, report not the check:
+
+- `npm test -- src/lib/investigation/request-url.test.ts`: 17 passed.
+- `npx tsc --noEmit`: no TS2559 and no TS2353. Other existing `tsc` errors remain outside this unit (`api.test.ts`, `charts/`, `presets.test.ts`, `query.test.ts`, e2e `node:` imports).
+- `npm test`: 243 passed.
+- `git diff --name-only c6162af..b9dd0cb` has no path under `packages/yakka/internal/serve` or `packages/yakka/internal/store`.
