@@ -1,5 +1,8 @@
 <script lang="ts">
+	import '$lib/analysis/tokens.css';
 	import '$lib/theme.css';
+	import RouteSurface from '$lib/analysis/RouteSurface.svelte';
+	import { isLegacyReportPath } from '$lib/analysis/routes';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
@@ -50,6 +53,8 @@
 			page.url.pathname !== '/device' &&
 			!page.url.pathname.startsWith('/oauth/')
 	);
+
+	const legacyReport = $derived(isLegacyReportPath(page.url.pathname));
 
 	const collector = $derived(isCollectorMode());
 	const noTenant = $derived(collector && fetchError.status === 403 && fetchError.message === 'no such tenant');
@@ -190,23 +195,39 @@
 
 	<main>
 		{#if chrome}
-			<FilterBar />
-			<FilterChips />
-			<Notices />
-			<SaveView />
-		{/if}
-		{#if fetchError.message}
-			<div class="error" role="alert" data-testid="error-panel">
-				<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
-				{#if noTenant}
-					<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
-				{:else if fetchError.status === 401 || fetchError.network}
-					<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
+			<RouteSurface legacy={legacyReport}>
+				<FilterBar />
+				<FilterChips />
+				<Notices />
+				<SaveView />
+				{#if fetchError.message}
+					<div class="error" role="alert" data-testid="error-panel">
+						<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
+						{#if noTenant}
+							<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
+						{:else if fetchError.status === 401 || fetchError.network}
+							<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
+						{/if}
+					</div>
 				{/if}
-			</div>
-		{/if}
-		{#if sessionGate.ready}
-			{@render children()}
+				{#if sessionGate.ready}
+					{@render children()}
+				{/if}
+			</RouteSurface>
+		{:else}
+			{#if fetchError.message}
+				<div class="error" role="alert" data-testid="error-panel">
+					<p>{fetchError.message}{fetchError.status ? ` (HTTP ${fetchError.status})` : ''}</p>
+					{#if noTenant}
+						<p>You do not have a tenant yet. <a href="/profile">Create one on your profile</a>.</p>
+					{:else if fetchError.status === 401 || fetchError.network}
+						<p>Check the connection in <a href="/settings">/settings</a>: the API base URL and the token.</p>
+					{/if}
+				</div>
+			{/if}
+			{#if sessionGate.ready}
+				{@render children()}
+			{/if}
 		{/if}
 	</main>
 

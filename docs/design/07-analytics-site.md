@@ -260,19 +260,21 @@ on a compacted copy of the real ledger.
   origin can read it. A later design may issue a short-lived browser token; the routes keep
   accepting `Authorization: Bearer`.
 - Charts render with Apache ECharts, tree-shaken, reading computed theme tokens (no hard-coded
-  colours). **Theme.** `localStorage` key `yakka-analytics-theme` holds `system`, `light`, or
-  `dark`; an absent key means `system`. The document root carries `data-theme="light"` or
-  `data-theme="dark"`. `system` follows `prefers-color-scheme` and later OS changes; `light` and
-  `dark` do not. Light surfaces: background `#fdf6e3`, surface `#eee8d5`, text `#657b83`, muted
-  `#586e75`, border `#93a1a1`. Dark surfaces: background `#002b36`, surface `#073642`, text
-  `#839496`, muted `#93a1a1`, border `#586e75`. Both modes: accent `#268bd2`, danger `#dc322f`.
-  Series order, both modes: `#268bd2`, `#859900`, `#b58900`, `#cb4b16`, `#dc322f`, `#d33682`,
-  `#6c71c4`, `#2aa198`. Body type stays `system-ui`. The space scale is 4, 8, 16, 24, 32 for shell
-  padding and control gaps. Each chart has a data-table toggle, and the site works down to 1024 px
-  wide. `/explore` alone loads Perspective (client, viewer, server WASM) and says when the slice is
-  capped. No second chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill,
-  Grafana, Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a
-  second always-on service).
+  colours). **Theme.** The analysis frame (`src/lib/analysis/tokens.css`) defines non-solarized
+  `--bg`, `--surface`, `--text`, `--muted`, `--border`, `--accent`, `--danger`, an eight-colour
+  `--series-*` scale, and space tokens 4/8/16/24/32 px on the document root. `localStorage` key
+  `yakka-analytics-theme` holds `system`, `light`, or `dark`; an absent key means `system`. The
+  document root carries `data-theme="light"` or `data-theme="dark"`. `system` follows
+  `prefers-color-scheme` and later OS changes; `light` and `dark` pin the analysis palette. Body
+  type stays `system-ui`. `/`, `/login`, `/profile`, `/settings`, `/device`, and `/oauth/*` use
+  these analysis tokens on the shell and main. Legacy report routes (`/trends`, `/builder`, and the
+  other pre-redesign report paths) still scope the prior solarized sheet (`src/lib/theme.css` under
+  `[data-legacy-theme]`) on filter chrome and page content until the investigation phase replaces
+  them. Each chart has a data-table toggle, and the site works down to 1024 px wide. `/explore`
+  alone loads Perspective (client, viewer, server WASM) and says when the slice is capped. No second
+  chart grammar, no SQL editor, no BI shell (Evidence, Observable Framework, Rill, Grafana,
+  Metabase, Superset, Lightdash, Cube and Tinybird each need a build-time snapshot or a second
+  always-on service).
 - **Window.** Presets Today, 24h, 7d, 30d, 90d, This month, YTD and All time, a custom range, and
   brush-to-zoom on any time-axis chart. Presets stay relative in a shared URL. Times display in the
   browser's zone, which is sent as `tz`. Each chart uses the finest bucket within the cap unless one

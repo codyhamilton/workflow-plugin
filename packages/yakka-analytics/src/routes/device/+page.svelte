@@ -10,6 +10,7 @@
 		oauthLoginPath,
 		type MeResponse
 	} from '$lib/api';
+	import { IdentityPanel } from '$lib/analysis';
 
 	const deviceState = $derived(page.url.searchParams.get('state') ?? '');
 	const redirectUri = $derived(page.url.searchParams.get('redirect_uri') ?? '');
@@ -89,9 +90,10 @@
 	}
 </script>
 
-<h1>Authorize yakka CLI</h1>
+<IdentityPanel>
+	<h1>Authorize yakka CLI</h1>
 
-{#if !isCollectorMode()}
+	{#if !isCollectorMode()}
 	<p>This page needs the collector (this site, or API base <code>https://api.yakka.build</code>).</p>
 {:else if loading}
 	<p>Loading…</p>
@@ -173,6 +175,7 @@
 		{/if}
 	</section>
 {/if}
+</IdentityPanel>
 
 <style>
 	section {
@@ -190,9 +193,9 @@
 		gap: 0.25rem;
 	}
 	.warn {
-		padding: 0.5rem 1rem;
-		border: 1px solid #b54708;
-		background: #fffaeb;
-		color: #7a2e0e;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--danger);
+		background: var(--surface);
+		color: var(--text);
 	}
 </style>

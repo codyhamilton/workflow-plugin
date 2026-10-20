@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { BASE_KEY, TOKEN_KEY } from '$lib/api';
 	import { client } from '$lib/query';
+	import { IdentityPanel } from '$lib/analysis';
 
 	function read(k: string): string {
 		try {
@@ -27,8 +28,9 @@
 	}
 </script>
 
-<h1>Connection</h1>
-<p>
+<IdentityPanel>
+	<h1>Connection</h1>
+	<p>
 	An empty base URL means this site's own origin (<code>/v1</code>). The token is kept in this browser's
 	<code>localStorage</code> for this origin and is sent only as an <code>Authorization: Bearer</code> header.
 </p>
@@ -44,6 +46,7 @@
 	<button type="submit" data-testid="settings-save">Save</button>
 	<span role="status" data-testid="settings-status">{status}</span>
 </form>
+</IdentityPanel>
 
 <style>
 	form {

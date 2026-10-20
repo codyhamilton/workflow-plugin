@@ -14,6 +14,7 @@
 		type TokenListItem
 	} from '$lib/api';
 	import { setError } from '$lib/state.svelte';
+	import { IdentityPanel } from '$lib/analysis';
 
 	let me = $state<MeResponse | null>(null);
 	let tokens = $state<TokenListItem[]>([]);
@@ -110,9 +111,10 @@
 	}
 </script>
 
-<h1>Profile</h1>
+<IdentityPanel>
+	<h1>Profile</h1>
 
-{#if !isCollectorMode()}
+	{#if !isCollectorMode()}
 	<p>
 		This page needs a signed-in session on the collector (this site, or API base
 		<code>https://api.yakka.build</code> in <a href="/settings">/settings</a>).
@@ -246,6 +248,7 @@
 		</section>
 	{/if}
 {/if}
+</IdentityPanel>
 
 <style>
 	section {
@@ -269,15 +272,15 @@
 	}
 	th,
 	td {
-		border: 1px solid var(--border, #ccc);
+		border: 1px solid var(--border);
 		padding: 0.35rem 0.5rem;
 		text-align: left;
 	}
 	.plaintext {
 		margin-top: 0.75rem;
 		padding: 0.75rem;
-		border: 1px solid var(--border, #ccc);
-		background: var(--surface, #f8f8f8);
+		border: 1px solid var(--border);
+		background: var(--surface);
 	}
 	.plaintext code {
 		display: block;

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { oauthApiBase } from '$lib/api';
+	import { IdentityPanel } from '$lib/analysis';
 
 	let status = $state<'working' | 'ok' | 'denied' | 'failed'>('working');
 	let detail = $state('Signing in…');
@@ -42,8 +43,10 @@
 	});
 </script>
 
-<h1>Sign in</h1>
-<p data-testid="oauth-callback-status" data-status={status}>{detail}</p>
-{#if status === 'failed' || status === 'denied'}
-	<p><a href="/login">Back to login</a></p>
-{/if}
+<IdentityPanel>
+	<h1>Sign in</h1>
+	<p data-testid="oauth-callback-status" data-status={status}>{detail}</p>
+	{#if status === 'failed' || status === 'denied'}
+		<p><a href="/login">Back to login</a></p>
+	{/if}
+</IdentityPanel>

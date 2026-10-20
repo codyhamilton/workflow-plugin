@@ -55,7 +55,7 @@ test('the layout fits 1024x768 without a horizontal scrollbar', async ({ page })
 	expect(scroll).toBeLessThanOrEqual(inner);
 });
 
-const SERIES = [
+const LEGACY_SERIES = [
 	'#268bd2',
 	'#859900',
 	'#b58900',
@@ -66,16 +66,29 @@ const SERIES = [
 	'#2aa198'
 ];
 
-async function readThemeVars(page: import('@playwright/test').Page) {
-	return page.evaluate((series) => {
+const ANALYSIS_LIGHT = { bg: '#f4f6fa', text: '#1a2332' };
+const ANALYSIS_DARK = { bg: '#12151c', text: '#d8dee9' };
+const SOLARIZED_BG = new Set(['#002b36', '#fdf6e3']);
+
+async function readRootThemeVars(page: import('@playwright/test').Page) {
+	return page.evaluate(() => {
 		const cs = getComputedStyle(document.documentElement);
+		const token = (name: string) => cs.getPropertyValue(name).trim();
+		return { bg: token('--bg'), text: token('--text') };
+	});
+}
+
+async function readLegacyThemeVars(page: import('@playwright/test').Page) {
+	return page.evaluate((series) => {
+		const el = document.querySelector('[data-legacy-theme]');
+		const cs = el ? getComputedStyle(el) : getComputedStyle(document.documentElement);
 		const token = (name: string) => cs.getPropertyValue(name).trim();
 		return {
 			bg: token('--bg'),
 			text: token('--text'),
 			series: series.map((_, i) => token(`--series-${i + 1}`))
 		};
-	}, SERIES);
+	}, LEGACY_SERIES);
 }
 
 test('the dark scheme swaps the background token', async ({ page }) => {
@@ -89,38 +102,46 @@ test('the dark scheme swaps the background token', async ({ page }) => {
 		.not.toBe(light);
 });
 
-test('system dark mode uses solarized tokens on overview and settings', async ({ page }) => {
+test('system dark mode uses analysis tokens on overview and settings', async ({ page }) => {
 	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
 	await page.emulateMedia({ colorScheme: 'dark' });
 	for (const path of ['/', '/settings']) {
 		await page.goto(path);
-		await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
-		const vars = await readThemeVars(page);
-		expect(vars.text).toBe('#839496');
-		expect(vars.series).toEqual(SERIES);
+		await expect.poll(async () => (await readRootThemeVars(page)).bg).toBe(ANALYSIS_DARK.bg);
+		const vars = await readRootThemeVars(page);
+		expect(vars.text).toBe(ANALYSIS_DARK.text);
+		expect(SOLARIZED_BG.has(vars.bg)).toBe(false);
 	}
 });
 
-test('choosing Light updates tokens without reload and survives reload', async ({ page }) => {
+test('legacy report routes keep solarized tokens inside the legacy surface', async ({ page }) => {
+	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
+	await page.emulateMedia({ colorScheme: 'dark' });
+	await page.goto('/trends');
+	await expect.poll(async () => (await readLegacyThemeVars(page)).bg).toBe('#002b36');
+	const vars = await readLegacyThemeVars(page);
+	expect(vars.text).toBe('#839496');
+	expect(vars.series).toEqual(LEGACY_SERIES);
+});
+
+test('choosing Light updates analysis tokens without reload and survives reload', async ({ page }) => {
 	await page.goto('/');
 	await page.getByTestId('theme-light').click();
-	await expect
-		.poll(async () => (await readThemeVars(page)).bg)
-		.toBe('#fdf6e3');
-	expect((await readThemeVars(page)).text).toBe('#657b83');
+	await expect.poll(async () => (await readRootThemeVars(page)).bg).toBe(ANALYSIS_LIGHT.bg);
+	expect((await readRootThemeVars(page)).text).toBe(ANALYSIS_LIGHT.text);
 	await page.reload();
-	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
-	expect((await readThemeVars(page)).text).toBe('#657b83');
+	expect((await readRootThemeVars(page)).bg).toBe(ANALYSIS_LIGHT.bg);
+	expect((await readRootThemeVars(page)).text).toBe(ANALYSIS_LIGHT.text);
 });
 
 test('system mode follows a later OS colour-scheme change', async ({ page }) => {
 	await page.addInitScript(() => localStorage.removeItem('yakka-analytics-theme'));
 	await page.emulateMedia({ colorScheme: 'light' });
 	await page.goto('/');
-	expect((await readThemeVars(page)).bg).toBe('#fdf6e3');
+	expect((await readRootThemeVars(page)).bg).toBe(ANALYSIS_LIGHT.bg);
 	await page.getByTestId('theme-system').click();
 	await page.emulateMedia({ colorScheme: 'dark' });
-	await expect.poll(async () => (await readThemeVars(page)).bg).toBe('#002b36');
+	await expect.poll(async () => (await readRootThemeVars(page)).bg).toBe(ANALYSIS_DARK.bg);
 });
 
 test('a burst of preset clicks reaches the facets endpoint at most twice', async ({ page }) => {
