@@ -48,3 +48,12 @@ Approach: open. The invoker declared the normal execute path. The phase outcome 
 Slug from the plan folder `17-analytics-dashboard-redesign`: `analytics-dashboard-redesign`.
 
 No Units list. The phase is more than one worker's work: the shell frame and the chart frame are separate contracts, and `src/lib/charts/` is a few thousand lines the style pass must not absorb. Refine is dispatched. Phase 1 carried: none.
+
+### Refine
+
+Proceed. Two units, sequential. `2-02` depends on `2-01`. Nothing runs alongside. Coarse check of phases 3–5: surfaces and contracts are locatable, outcomes are testable, dependency order holds. No bounce. Commit `ae18144`.
+
+- `2-01` Analysis shell and tokens — `briefs/2-01-analysis-shell.md`
+- `2-02` Chart frame — `briefs/2-02-chart-frame.md`
+
+`artifact_feedback` on both briefs: unreachable. Yakka MCP failed live tool discovery (`This MCP server failed during live tool discovery. Its tools are unavailable until the connection is fixed.`). The refine worker also reported the `yakka.py` path missing. No check was flagged because the service did not answer.
