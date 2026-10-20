@@ -105,6 +105,35 @@ test('non-empty base, no key: /settings stays on /settings when /v1/me is 401', 
 	await expect(page).toHaveURL(/\/settings$/);
 });
 
+test('non-empty base, no key: from /login Overview link stays on login; no analytics requests', async ({
+	page
+}) => {
+	await page.addInitScript(() => {
+		localStorage.setItem('yakka-analytics-base', 'https://collector.example');
+		localStorage.removeItem('yakka-analytics-key');
+	});
+	const analytics = trackRequests(page, '/v1/analytics/');
+	await page.route('**/v1/me', (route) => route.fulfill({ status: 401, json: { error: 'unauthorized' } }));
+	await page.goto('/login');
+	await page.getByRole('link', { name: 'Overview' }).click();
+	await expect(page).toHaveURL(/\/login\?/);
+	expect(decodeURIComponent(new URL(page.url()).searchParams.get('return') ?? '')).toBe('/');
+	expect(analytics.count()).toBe(0);
+});
+
+test('non-empty base, no key: direct / with 401 ends on login; no analytics requests', async ({ page }) => {
+	await page.addInitScript(() => {
+		localStorage.setItem('yakka-analytics-base', 'https://collector.example');
+		localStorage.removeItem('yakka-analytics-key');
+	});
+	const analytics = trackRequests(page, '/v1/analytics/');
+	await page.route('**/v1/me', (route) => route.fulfill({ status: 401, json: { error: 'unauthorized' } }));
+	await page.goto('/');
+	await expect(page).toHaveURL(/\/login\?return=/);
+	expect(decodeURIComponent(new URL(page.url()).searchParams.get('return') ?? '')).toBe('/');
+	expect(analytics.count()).toBe(0);
+});
+
 test('login passes return through to oauth login href', async ({ page }) => {
 	const ret = '/trends?range=7d';
 	await page.goto(`/login?return=${encodeURIComponent(ret)}`);

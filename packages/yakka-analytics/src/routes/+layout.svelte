@@ -55,6 +55,22 @@
 		pruneNotices();
 	});
 
+	function gateDecisionForCurrentUrl(me: MeFetchResult): ReturnType<typeof decideAfterMeFetch> {
+		return decideAfterMeFetch({
+			hostname: location.hostname,
+			pathname: page.url.pathname,
+			search: page.url.search,
+			configuredBase: readConfiguredBase(),
+			bearer: readBearer(),
+			me
+		});
+	}
+
+	const sessionAllowsChildren = $derived.by(() => {
+		if (!sessionGate.ready || sessionGate.me === null) return false;
+		return gateDecisionForCurrentUrl(sessionGate.me) === 'stay';
+	});
+
 	$effect(() => {
 		let live = true;
 		beginSessionGate();
@@ -72,28 +88,23 @@
 				}
 			}
 			if (!live) return;
-
-			const hostname = location.hostname;
-			const pathname = page.url.pathname;
-			const search = page.url.search;
-			const decision = decideAfterMeFetch({
-				hostname,
-				pathname,
-				search,
-				configuredBase: readConfiguredBase(),
-				bearer: readBearer(),
-				me
-			});
-			if (decision !== 'stay') {
-				const ret = encodeURIComponent(decision.login);
-				void goto(`/login?return=${ret}`);
-			}
 			finishSessionGate(me);
 		})();
 
 		return () => {
 			live = false;
 		};
+	});
+
+	$effect(() => {
+		page.url.pathname;
+		if (!sessionGate.ready || sessionGate.me === null) return;
+
+		const decision = gateDecisionForCurrentUrl(sessionGate.me);
+		if (decision !== 'stay') {
+			const ret = encodeURIComponent(decision.login);
+			void goto(`/login?return=${ret}`);
+		}
 	});
 
 	$effect(() => {
@@ -183,7 +194,7 @@
 						{/if}
 					</div>
 				{/if}
-				{#if sessionGate.ready}
+				{#if sessionAllowsChildren}
 					{@render children()}
 				{/if}
 			</RouteSurface>
@@ -198,7 +209,7 @@
 					{/if}
 				</div>
 			{/if}
-			{#if sessionGate.ready}
+			{#if sessionAllowsChildren}
 				{@render children()}
 			{/if}
 		{/if}
